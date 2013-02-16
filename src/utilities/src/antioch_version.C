@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 // 
-// antioch - A Gas Dynamics Thermochemistry Library
+// Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
 //
@@ -28,7 +28,7 @@
 
 #include "antioch/antioch_version.h"
 
-namespace ANTIOCH
+namespace Antioch
 {
 
   void antioch_version_stdout()
@@ -83,4 +83,4 @@ namespace ANTIOCH
     return major_version*10000 + minor_version*100 + micro_version;
   }
 
-} // end namespace ANTIOCH
+} // end namespace Antioch
