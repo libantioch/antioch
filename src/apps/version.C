@@ -29,6 +29,6 @@
 
 int main()
 {
-  ANTIOCH::antioch_version_stdout();
+  Antioch::antioch_version_stdout();
   return 0;
 }
