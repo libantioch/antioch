@@ -32,6 +32,7 @@ include_HEADERS =
 
 # core
 include_HEADERS += core/include/antioch/chemical_species.h
+include_HEADERS += core/include/antioch/species_enum.h
 
 # parsing
 include_HEADERS += parsing/include/antioch/tinyxml2.h
