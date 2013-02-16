@@ -20,6 +20,9 @@ libantioch_la_SOURCES += core/src/chemical_mixture.C
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
 
+# thermo
+libantioch_la_SOURCES += thermo/src/cea_curve_fit.C
+
 # utilities
 libantioch_la_SOURCES += utilities/src/antioch_version.C
 libantioch_la_SOURCES += utilities/src/input_utils.C
@@ -38,6 +41,9 @@ include_HEADERS += core/include/antioch/species_enum.h
 
 # parsing
 include_HEADERS += parsing/include/antioch/tinyxml2.h
+
+# thermo
+include_HEADERS += thermo/include/antioch/cea_curve_fit.h
 
 # utilities
 include_HEADERS += utilities/include/antioch/antioch_exceptions.h
@@ -58,6 +64,7 @@ antioch_version_LDADD = libantioch.la
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 

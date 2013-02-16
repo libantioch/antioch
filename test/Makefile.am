@@ -3,10 +3,10 @@ BUILT_SOURCES   = .license.stamp
 check_PROGRAMS  =
 check_PROGRAMS += chem_mixture
 
-
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcddir)/src/parsing/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 
