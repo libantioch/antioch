@@ -29,6 +29,7 @@
 // C++
 #include <cmath>
 #include <sstream>
+#include <limits>
 
 // This class
 #include "antioch/cea_thermo.h"
@@ -43,7 +44,8 @@ namespace Antioch
 {
   template<class NumericType>
   CEAThermodynamics<NumericType>::CEAThermodynamics( const ChemicalMixture<NumericType>& chem_mixture )
-    : _chem_mixture(chem_mixture)
+    : _chem_mixture(chem_mixture),
+      _T(std::numeric_limits<NumericType>::max())
   {
     // Read in CEA coefficients. Note this assumes chem_mixture is fully constructed.
     /*! \todo Generalize this to optionally read in a file instead of using the default here.
@@ -136,12 +138,10 @@ namespace Antioch
     
     const NumericType *a = this->_species_curve_fits[species]->coefficients(interval);
     
-    const NumericType T2 = T*T;
-    const NumericType T3 = T2*T;
-    const NumericType T4 = T2*T2;
+    this->update_cache(T);
 
     /* cp/R =  a0*T^-2   + a1*T^-1     + a2     + a3*T   + a4*T^2   + a5*T^3  + a6*T^4 */
-    return a[0]/T2 + a[1]/T + a[2] + a[3]*T + a[4]*T2 + a[5]*T3 + a[6]*T4;
+    return a[0]/_T2 + a[1]/_T + a[2] + a[3]*_T + a[4]*_T2 + a[5]*_T3 + a[6]*_T4;
   }
 
   template<class NumericType>
@@ -155,13 +155,10 @@ namespace Antioch
     
     const NumericType *a = this->_species_curve_fits[species]->coefficients(interval);
     
-    const NumericType lnT = std::log(T);
-    const NumericType T2  = T*T;
-    const NumericType T3  = T2*T;
-    const NumericType T4  = T2*T2;
+    this->update_cache(T);
 
     /* h/RT = -a0*T^-2   + a1*T^-1*lnT + a2     + a3*T/2 + a4*T^2/3 + a5*T^3/4 + a6*T^4/5 + a8/T */
-    return -a[0]/T2 + a[1]*lnT/T + a[2] + a[3]*T/2.0 + a[4]*T2/3.0 + a[5]*T3/4.0 + a[6]*T4/5.0 + a[8]/T;
+    return -a[0]/_T2 + a[1]*_lnT/_T + a[2] + a[3]*_T/2.0 + a[4]*_T2/3.0 + a[5]*_T3/4.0 + a[6]*_T4/5.0 + a[8]/_T;
   }
 
   template<class NumericType>
@@ -175,13 +172,10 @@ namespace Antioch
     
     const NumericType *a = this->_species_curve_fits[species]->coefficients(interval);
     
-    const NumericType lnT = std::log(T);
-    const NumericType T2  = T*T;
-    const NumericType T3  = T2*T;
-    const NumericType T4  = T2*T2;
+    this->update_cache(T);
 
     /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a9 */
-    return -a[0]/T2/2.0 - a[1]/T + a[2]*lnT + a[3]*T + a[4]*T2/2.0 + a[5]*T3/3.0 + a[6]*T4/4.0 + a[9];
+    return -a[0]/_T2/2.0 - a[1]/_T + a[2]*_lnT + a[3]*_T + a[4]*_T2/2.0 + a[5]*_T3/3.0 + a[6]*_T4/4.0 + a[9];
   }
 
   template<class NumericType>
@@ -195,14 +189,11 @@ namespace Antioch
     
     const NumericType *a = this->_species_curve_fits[species]->coefficients(interval);
     
-    const NumericType lnT = std::log(T);
-    const NumericType T2  = T*T;
-    const NumericType T3  = T2*T;
-    const NumericType T4  = T2*T2;
+    this->update_cache(T);
 
     /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
        s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
-    return -a[0]/T2/2.0 + (a[1] + a[8])/T + a[1]*lnT/T - a[2]*lnT + (a[2] - a[9]) - a[3]*T/2.0 - a[4]*T2/6.0 - a[5]*T3/12.0 - a[6]*T4/20.0;
+    return -a[0]/_T2/2.0 + (a[1] + a[8])/_T + a[1]*_lnT/_T - a[2]*_lnT + (a[2] - a[9]) - a[3]*_T/2.0 - a[4]*_T2/6.0 - a[5]*_T3/12.0 - a[6]*_T4/20.0;
   }
 
   template<class NumericType>

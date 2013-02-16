@@ -32,6 +32,7 @@
 // C++
 #include <iomanip>
 #include <vector>
+#include <cmath>
 
 namespace Antioch
 {
@@ -93,6 +94,10 @@ namespace Antioch
     /*! Private to force to user to supply a ChemicalMixture object.*/
     CEAThermodynamics();
 
+    mutable NumericType _T, _T2, _T3, _T4, _lnT;
+    
+    /*! Logically constant cache function. */
+    void update_cache (const NumericType T) const;
   };
   
   /* ------------------------- Inline Functions -------------------------*/
@@ -110,6 +115,20 @@ namespace Antioch
 						  const std::vector<NumericType>& mass_fractions ) const
   {
     return this->cp(T,mass_fractions) - _chem_mixture.R(mass_fractions);
+  }
+
+  template<class NumericType>
+  inline
+  void CEAThermodynamics<NumericType>::update_cache (const NumericType T) const
+  {
+    // check for quick return 
+    if (T == _T) return;
+
+    _T   = T;
+    _T2  = T*T;
+    _T3  = _T2*T;
+    _T4  = _T2*_T2;
+    _lnT = std::log(T);
   }
 
 } // end namespace Antioch
