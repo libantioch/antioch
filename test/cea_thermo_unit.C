@@ -55,7 +55,7 @@ int main()
 
   Antioch::CEAThermodynamics<double> thermo( chem_mixture );
 
-  const double P = 100000.0;
+  //const double P = 100000.0;
   const std::vector<double> mass_fractions( 5, 0.2 );
   const double T1 = 190.0;
   const double T2 = 1500.0;
@@ -66,8 +66,10 @@ int main()
   const double R_N = Antioch::Constants::R_universal/14.008;
   const double R_O = Antioch::Constants::R_universal/16.0;
   const double R_NO = Antioch::Constants::R_universal/30.008;
-  const double R_exact = mass_fractions[0]*R_N2 + mass_fractions[1]*R_O2 + mass_fractions[2]*R_N +
+  /*
+    const double R_exact = mass_fractions[0]*R_N2 + mass_fractions[1]*R_O2 + mass_fractions[2]*R_N +
     mass_fractions[3]*R_O + mass_fractions[4]*R_NO;
+  */
 
   int return_flag = 0;
 
