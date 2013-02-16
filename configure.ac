@@ -70,18 +70,18 @@ dnl------------------------------------------
 dnl            Doxygen support
 dnl------------------------------------------
 
-dnl DX_HTML_FEATURE(ON)
-dnl DX_CHM_FEATURE(OFF)
-dnl DX_CHI_FEATURE(OFF)
-dnl DX_MAN_FEATURE(OFF)
-dnl DX_RTF_FEATURE(OFF)
-dnl DX_XML_FEATURE(OFF)
-dnl DX_PDF_FEATURE(ON)
-dnl DX_PS_FEATURE(OFF)
+DX_HTML_FEATURE(ON)
+DX_CHM_FEATURE(OFF)
+DX_CHI_FEATURE(OFF)
+DX_MAN_FEATURE(OFF)
+DX_RTF_FEATURE(OFF)
+DX_XML_FEATURE(OFF)
+DX_PDF_FEATURE(ON)
+DX_PS_FEATURE(OFF)
 
-dnl DX_INIT_DOXYGEN(ANTIOCH, doxygen/antioch.dox, docs/doxygen)
+DX_INIT_DOXYGEN(ANTIOCH, doxygen/antioch.dox, docs/doxygen)
 
-dnl AC_CONFIG_FILES(doxygen/txt_common/about.page)
+AC_CONFIG_FILES(doxygen/txt_common/about.page)
 
 dnl-----------------------------------------------
 dnl Generate files for unit and regression testing
@@ -96,7 +96,7 @@ AC_CONFIG_FILES(src/utilities/include/antioch/antioch_version.h)
 dnl-----------------------------------------------
 dnl Generate Makefiles
 dnl-----------------------------------------------
-AC_CONFIG_FILES([Makefile src/Makefile test/Makefile]) dnl  doxygen/Makefile examples/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile test/Makefile doxygen/Makefile])
 
 # Must still call AC_OUTPUT() after generating all the files
 AC_OUTPUT()

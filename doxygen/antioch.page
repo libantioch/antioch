@@ -1,0 +1,231 @@
+/*! \mainpage Antioch: A New Templated Implementation of Optimized Chemistry for Hydrodynamics
+
+<b>Version \version</b>, Build Date: \builddate
+<br><br>
+Built by: \builduser on \buildhost
+<hr>
+
+\section overview Overview
+
+PUT A DESCRIPTION HERE
+
+Thanks for your interest in Antioch. To aid in usage, this manual is
+further divided into the following subsections:
+
+<ul>
+<li> \subpage installation
+<li> \subpage inputFile
+<!-- <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/hpct/build/docs/html/lcov/build/src/index.html">Buildbot Coverage</a> -->
+</ul>
+
+\section bugs Reporting Bugs
+
+Bugs in the code and errors or omissions in the documentation can be
+reported to pbauman@ices.utexas.edu.  Requests and contributions are
+welcome at the same e-mail address.  All bug reports should include:
+<ul>
+
+<li>the version number of Antioch (versioning information can
+be obtained by running the <B><code>antioch_version</code></B> binary located in the
+bin/ directory of a local Antioch installation),
+<li>the hardware and operating system,
+<li>the local compiler version number,
+<li>a description of the bug behavior, and ideally, 
+<li>a short program which reproduces the bug.
+</ul>
+
+\section licence License
+Copyright (C) 2013 The PECOS Development Team
+\copydoc LicenseLGPL
+
+\section acknowledgements Acknowledgments
+\copydoc Acknowledgments
+
+\section pecos-center More Information About PECOS
+\copydoc About
+
+*/
+
+/*! \page inputFile Example Antioch Input File
+
+This is an example input file for use with the generic solver
+included with Antioch.
+Note that Antioch is using 
+the <a href="http://getpot.sourceforge.net/">GetPot</a> parsing tool
+shipped with <a href="http://libmesh.sourceforge.net">libMesh</a>.  Note
+that the default comment delimiter is defined as the \# sign and
+comments can begin at the beginning of a line or after a variable
+declaration to aid in documenting the input file.  The parsing
+mechansism is keyword driven and can be organized into multiple
+sections.  Consequently, you are allowed to have variables of the same
+name so long as they are within unique section definitions.  Note also
+that because the parsing mechanism is keyword driven, the input
+directives can be specified in \e arbitrary order.  There is no
+requirement to maintain a specific variable declaration pattern.
+
+<hr>
+
+\include input_2d.in
+
+*/
+
+/*! \page installation Installation/Linkage
+
+Antioch uses the GNU autotools suite (autoconf, automake, and libtool)
+for its development build system.  This system is popular among the
+Linux development community and provides a familiar build environment
+for end users.  
+
+To build Antioch starting from a release distribution, untar the distribution and
+enter the top-level directory.
+
+<div class="fragment"><pre class="fragment">
+ > tar xvfz grins-$(VERSION).tar.gz
+ > cd grins-$(VERSION)/            
+</pre></div>
+
+<h2>Configuration Requirements</h2>
+
+Antioch requires that the <a href="http://libmesh.sourceforge.net">libMesh</a>
+be available locally, along with the <a href="http://libmesh.sourceforge.net">libMesh</a>
+dependencies. Note that Antioch has been developed and tested on revision 4887 of 
+trunk. If <a href="http://libmesh.sourceforge.net">libMesh</a> is installed and available
+within your default login environment, then Antioch should automatically configure
+against the available installation.  If, however, your <a href="http://libmesh.sourceforge.net">libMesh</a>
+installation is in a non-standard location, use
+the <tt>--with-libmesh</tt> option to specify the location.
+
+To date, Antioch has been successfully built and tested with the gcc 4.4, 4.5, and 4.6 compilers
+and the Intel 11.1 compilers.
+
+<b>Installation Directory</b>: Use the <tt>--prefix</tt> option to
+specify your desired top-level installation directory for Antioch.  The
+examples below all configure Antioch to be installed in the user's ~/bin/grins
+directory.
+
+<em>Configure with libMesh from default login environment:</em> <br>
+
+\code > ./configure --prefix=$HOME/bin/grins \endcode
+
+<em>Or, configure with libMesh from a specific directory:</em>        <br>
+
+\code > ./configure --prefix=$HOME/bin/grins --with-libmesh=$MY_LIBMESH_DIR \endcode
+
+<em>Or, configure with specific compilers:</em>        <br>
+
+\code > ./configure CXX=g++ --prefix=$HOME/bin/grins \endcode
+
+<h2> Other Configuration Options </h2>
+
+Antioch can optionally be built with other libraries as well. In particular, Antioch leverages the 
+<a href="https://red.ices.utexas.edu/projects/software/wiki/GRVY">GRVY</a> library for
+some performance timing capabilities. 
+
+<em>Configure with libGRVY and enable grvy timers :</em> <br>
+
+\code > ./configure --with-grvy=$MY_GRVY_DIR --enable-grvy-timers \endcode
+
+To enable verification using the method of manufactured solutions, Antioch uses
+the <a href="https://red.ices.utexas.edu/projects/software/wiki/MASA">MASA</a> 
+library. Although Antioch can configure and build with 
+<a href="https://red.ices.utexas.edu/projects/software/wiki/MASA">MASA</a>, it is currently not
+using these capabilities. This is planned for the next release.
+
+<em>Configure with MASA:</em> <br>
+
+\code > ./configure --with-masa=$MY_MASA_DIR \endcode
+
+Configure help can also be accessed at the command line:
+
+\code> ./configure --help \endcode
+
+<h2> Library Build </h2>
+
+Once configured, issue a <tt>make</tt> to build the software. If successful, this
+will build Antioch (static and dynamic libraries and executables).
+
+\code > make \endcode
+
+If you have multiple cores at your disposal, a parallel buid can accelerate
+the build time. If there are 4 cores avaiable, then the following will build
+using 4 threads, thereby leveraging 4 processors.
+
+\code > make -j 4\endcode
+
+<b> Verifying the build:</b> To verify that the software is working
+properly, a test option is provided to run a short suite of
+functionality tests against the local build.  To run, issue a <tt>make
+check</tt> to run the tests. Note that these tests may take a few minutes
+depending upon optimization level and architecture.  
+If successfull, output similar to the
+following will be generated.
+
+\code
+ > make check
+-------------------------------------------------------
+ Initializing Incompressible Navier-Stokes tests.
+-------------------------------------------------------
+PASS: navier_stokes_tests.sh
+PASS: test_ns_couette_flow_2d_x.sh
+PASS: test_ns_couette_flow_2d_y.sh
+PASS: test_ns_poiseuille_flow.sh
+PASS: test_axi_ns_poiseuille_flow.sh
+PASS: test_axi_ns_con_cyl_flow.sh
+-------------------------------------------------------
+      Initializing Thermally Driven Flow tests.
+-------------------------------------------------------
+PASS: thermally_driven_flow_tests.sh
+PASS: test_thermally_driven_2d_flow.sh
+PASS: test_axi_thermally_driven_flow.sh
+PASS: test_thermally_driven_3d_flow.sh
+-------------------------------------------------------
+ Finalizing all regression tests. Don't worry be happy.
+-------------------------------------------------------
+PASS: finalize.sh
+===================
+All 11 tests passed
+===================
+\endcode
+
+<h2> Installation </h2>
+
+After the build is complete, issue a <tt>make install</tt> to install
+Antioch. This will install the header files, libraries, executables,
+and examples.  
+The installation will consist of four top-level
+directories housing the library, include files, executables, and
+example files.  An example of the top-level directories after
+installation is shown below:
+
+\code > make install \endcode
+
+Top-level Antioch installation directory:
+
+\code
+ > ls $HOME/bin/grins/
+ bin  examples  include  lib
+\endcode
+
+<h2>Library Linkage</h2>
+
+Although a generic solver is shipped with the code, you may wish to
+write your own application code. To link an external application with the library, the
+\c include directory must be added to the compilers include search
+path in order to access the necessary header files.  The \c lib directory should also be added
+to the linker search path along with a request to link against the
+Antioch library.  Several example link steps are provided below.  These
+examples assume that the Antioch library has been successfully built and
+installed previously in the users's ~/bin/grins directory:
+
+\code > $(CXX) -I$HOME/bin/grins/include app.c -L$HOME/bin/grins/lib -lgrins \endcode
+
+To embed the dynamic library search path for the Antioch library
+directly into the application executable, use an additional linker
+option as follows:
+
+\code > $(CXX) -I$HOME/bin/grins/include app.c -L$HOME/bin/grins/lib \
+         -Wl,-rpath,$HOME/bin/grins/lib -lgrins \endcode
+
+*/
+
+

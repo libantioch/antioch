@@ -1,5 +1,5 @@
 # Doxygen support
-#include $(top_srcdir)/doxygen/aminclude.am
+include $(top_srcdir)/doxygen/aminclude.am
 
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS  = -I m4 -I m4/common
@@ -38,8 +38,10 @@ AUX_DIST        += build-aux/ltmain.sh
 # Additional files to be deleted by 'make distclean'
 DISTCLEANFILES  = _configs.sed
 DISTCLEANFILES += antioch_config.h
-DISTCLEANFILES += $(DX_CLEANFILES)
-DISTCLEANFILES += docs/lcov
+
+MOSTLYCLEANFILES  =
+MOSTLYCLEANFILES += $(DX_CLEANFILES)
+MOSTLYCLEANFILES += docs/lcov
 
 # Files to be deleted by 'make maintainer-clean'
 MAINTAINERCLEANFILES  = aclocal.m4
