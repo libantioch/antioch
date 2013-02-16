@@ -6,8 +6,9 @@ check_PROGRAMS += chem_mixture
 
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
-AM_CPPFLAGS += -I$(top_builddir)/src/parsing/include
-AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include
+AM_CPPFLAGS += -I$(top_srcddir)/src/parsing/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
+AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 
 AM_LDFLAGS = $(top_builddir)/src/libantioch.la
 

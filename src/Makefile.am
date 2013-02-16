@@ -57,8 +57,9 @@ antioch_version_LDADD = libantioch.la
 #--------------------------------------
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
-AM_CPPFLAGS += -I$(top_builddir)/src/parsing/include
-AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
+AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 
 # Code coverage
 if CODE_COVERAGE_ENABLED
