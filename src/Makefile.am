@@ -65,6 +65,7 @@ antioch_version_LDADD = libantioch.la
 #--------------------------------------
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
@@ -82,6 +83,7 @@ endif
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE \
         $(top_srcdir)/src/core/include/antioch/*.h $(top_srcdir)/src/core/src/*.C \
+        $(top_srcdir)/src/kinetics/include/antioch/*.h $(top_srcdir)/src/kinetics/src/*.C \
         $(top_srcdir)/src/thermo/include/antioch/*.h $(top_srcdir)/src/thermo/src/*.C \
 	$(top_srcdir)/src/utilities/include/antioch/*.h \
         $(top_srcdir)/src/utilities/src/*.C \
