@@ -4,7 +4,7 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS  = -I m4 -I m4/common
 
-SUBDIRS          = src
+SUBDIRS          = src test
 EXTRA_DIST       = CHANGES LICENSE COPYING
 
 aclocaldir = $(prefix)/share/aclocal
