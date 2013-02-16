@@ -39,7 +39,7 @@ namespace Antioch
   class ReactionSet;
 
   template<class NumericType>
-  void read_reaction_set_data_xml( const std::string& chem_file,
+  void read_reaction_set_data_xml( const std::string& filename,
 				   const bool verbose,
 				   ReactionSet<NumericType>& reaction_set );
 

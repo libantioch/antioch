@@ -63,13 +63,13 @@ namespace Antioch
     //! Returns the number of species in this mixture.
     unsigned int n_species() const;
 
+    const std::vector<ChemicalSpecies<NumericType>*>& chemical_species() const;
+
     const std::vector<Species>& species_list() const;
 
     const std::map<Species,unsigned int>& species_list_map() const;
 
     const std::map<std::string,unsigned int>& active_species_name_map() const;
-
-    const std::vector<ChemicalSpecies<NumericType>*>& chemical_species() const;
 
     const std::map<std::string,Species>& species_name_map() const;
 
