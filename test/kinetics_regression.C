@@ -89,7 +89,8 @@ int main(int argc, char* argv[])
   for( unsigned int s = 0; s < n_species; s++)
     {
       std::cout << std::scientific << std::setprecision(16)
-		<< "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = " << omega_dot[s] << std::endl;
+		<< "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = "
+		<< omega_dot[s] << std::endl;
     }
 
   int return_flag = 0;
