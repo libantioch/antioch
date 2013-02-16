@@ -1,10 +1,10 @@
 # Doxygen support
-include $(top_srcdir)/doxygen/aminclude.am
+#include $(top_srcdir)/doxygen/aminclude.am
 
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS  = -I m4 -I m4/common
 
-SUBDIRS          = src test
+SUBDIRS          = src
 EXTRA_DIST       = CHANGES LICENSE COPYING
 
 aclocaldir = $(prefix)/share/aclocal
@@ -37,7 +37,7 @@ AUX_DIST        += build-aux/ltmain.sh
 
 # Additional files to be deleted by 'make distclean'
 DISTCLEANFILES  = _configs.sed
-DISTCLEANFILES += grins_config.h
+DISTCLEANFILES += antioch_config.h
 DISTCLEANFILES += $(DX_CLEANFILES)
 DISTCLEANFILES += docs/lcov
 
@@ -50,12 +50,17 @@ MAINTAINERCLEANFILES += config.log
 MAINTAINERCLEANFILES += config.status
 MAINTAINERCLEANFILES += config.sub
 MAINTAINERCLEANFILES += configure
-MAINTAINERCLEANFILES += grins_config.h.tmp.in
-MAINTAINERCLEANFILES += grins_config.h.tmp.in~
+MAINTAINERCLEANFILES += antioch_config.h.tmp.in
+MAINTAINERCLEANFILES += antioch_config.h.tmp.in~
 MAINTAINERCLEANFILES += Makefile.in
 MAINTAINERCLEANFILES += src/Makefile.in
 MAINTAINERCLEANFILES += test/Makefile.in
 MAINTAINERCLEANFILES += doxygen/Makefile.in
+MAINTAINERCLEANFILES += m4/libtool.m4
+MAINTAINERCLEANFILES += m4/ltoptions.m4
+MAINTAINERCLEANFILES += m4/ltsugar.m4
+MAINTAINERCLEANFILES += m4/ltversion.m4
+MAINTAINERCLEANFILES += m4/lt~obsolete.m4
 
 # -------------------------------------------
 # Optional support for code coverage analysis

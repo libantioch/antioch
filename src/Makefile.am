@@ -46,7 +46,8 @@ endif
 
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE \
-	$(top_srcdir)/src/utilities/src/*.C
+	$(top_srcdir)/src/utilities/src/*.C \
+        $(top_srcdir)/src/apps/*.C \
 	echo 'updated source license headers' >$@
 
 EXTRA_DIST = common

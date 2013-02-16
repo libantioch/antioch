@@ -96,7 +96,7 @@ AC_CONFIG_FILES(src/utilities/include/antioch/antioch_version.h)
 dnl-----------------------------------------------
 dnl Generate Makefiles
 dnl-----------------------------------------------
-AC_CONFIG_FILES([Makefile src/Makefile test/Makefile]) dnl  doxygen/Makefile examples/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile]) dnl  doxygen/Makefile examples/Makefile])
 
 # Must still call AC_OUTPUT() after generating all the files
 AC_OUTPUT()
