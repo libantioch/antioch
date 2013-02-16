@@ -40,6 +40,9 @@ include_HEADERS += core/include/antioch/chemical_species.h
 include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
+# kinetics
+include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
+
 # parsing
 include_HEADERS += parsing/include/antioch/tinyxml2.h
 
