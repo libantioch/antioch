@@ -39,7 +39,7 @@ namespace Antioch
   Kinetics<NumericType>::Kinetics( const ReactionSet<NumericType>& reaction_set )
     : _reaction_set( reaction_set ),
       _chem_mixture( reaction_set.chemical_mixture() ),
-      _net_reaction_rates( 0.0, reaction_set.n_reactions() )
+      _net_reaction_rates( reaction_set.n_reactions(), 0.0 )
   {
     return;
   }
