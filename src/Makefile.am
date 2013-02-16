@@ -17,6 +17,9 @@ libantioch_la_SOURCES =
 libantioch_la_SOURCES += core/src/chemical_species.C
 libantioch_la_SOURCES += core/src/chemical_mixture.C
 
+# kinetics
+libantioch_la_SOURCES += kinetics/src/reaction.C
+
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
 
@@ -30,7 +33,7 @@ libantioch_la_SOURCES += utilities/src/input_utils.C
 
 
 #----------------------------
-#INCLUDES we want distributed
+# INCLUDES we want distributed
 #----------------------------
 includedir = $(prefix)/include/antioch
 include_HEADERS =
@@ -42,6 +45,7 @@ include_HEADERS += core/include/antioch/species_enum.h
 
 # kinetics
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
+include_HEADERS += kinetics/include/antioch/reaction.h
 
 # parsing
 include_HEADERS += parsing/include/antioch/tinyxml2.h
