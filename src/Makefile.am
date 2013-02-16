@@ -15,6 +15,7 @@ libantioch_la_SOURCES =
 
 # core
 libantioch_la_SOURCES += core/src/chemical_species.C
+libantioch_la_SOURCES += core/src/chemical_mixture.C
 
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
@@ -32,6 +33,7 @@ include_HEADERS =
 
 # core
 include_HEADERS += core/include/antioch/chemical_species.h
+include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
 # parsing
