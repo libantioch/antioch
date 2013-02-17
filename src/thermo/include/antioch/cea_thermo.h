@@ -34,12 +34,12 @@
 #include <vector>
 #include <cmath>
 
+// Antioch
+#include "antioch/chemical_mixture.h"
+
 namespace Antioch
 {
   // Forward declarations
-  template<class NumericType>
-  class ChemicalMixture;
-
   template<class NumericType>
   class CEACurveFit;
 
@@ -53,6 +53,11 @@ namespace Antioch
     //! Destructor
     /*! virtual so this can be subclassed by the user. */
     virtual ~CEAThermodynamics();
+
+    void add_curve_fit( const std::string& species_name, const std::vector<NumericType>& coeffs );
+
+    //! Checks that curve fits have been specified for all species in the mixture.
+    bool check() const;
 
     NumericType cp( NumericType T, unsigned int species ) const;
 
@@ -76,11 +81,9 @@ namespace Antioch
 
     NumericType s_over_R( NumericType T, unsigned int species ) const;
 
+    const ChemicalMixture<NumericType>& chemical_mixture() const;
+
   protected:
-
-    void read_thermodynamic_table();
-
-    void read_thermodynamic_table( std::istream& in );
 
     const ChemicalMixture<NumericType>& _chem_mixture;
 
@@ -129,6 +132,13 @@ namespace Antioch
     _T3  = _T2*T;
     _T4  = _T2*_T2;
     _lnT = std::log(T);
+  }
+
+  template<class NumericType>
+  inline
+  const ChemicalMixture<NumericType>& CEAThermodynamics<NumericType>::chemical_mixture() const
+  {
+    return _chem_mixture;
   }
 
 } // end namespace Antioch
