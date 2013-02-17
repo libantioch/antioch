@@ -104,7 +104,7 @@ endif
         $(top_srcdir)/src/core/include/antioch/*.h $(top_srcdir)/src/core/src/*.C \
         $(top_srcdir)/src/kinetics/include/antioch/*.h $(top_srcdir)/src/kinetics/src/*.C \
         $(top_srcdir)/src/thermo/include/antioch/*.h $(top_srcdir)/src/thermo/src/*.C \
-        $(top_srcdir)/src/transport/include/antioch/*.h $(top_srcdir)/src/transport/src/*.C \
+        $(top_srcdir)/src/transport/include/antioch/*.h \
 	$(top_srcdir)/src/utilities/include/antioch/*.h \
         $(top_srcdir)/src/utilities/src/*.C \
         $(top_srcdir)/src/apps/*.C
