@@ -33,6 +33,8 @@
 // Antioch
 #include "antioch/blottner_viscosity.h"
 
+int test_viscosity( const double mu, const double mu_exact, const double tol );
+
 int main()
 {
   const double a = 3.14e-3;
@@ -52,12 +54,32 @@ int main()
 
   const double tol = 1.0e-14;
 
-  const double rel_error = std::fabs( (mu(T) - mu_exact)/mu_exact);
+  return_flag = test_viscosity( mu(T), mu_exact, tol );
+  
+  const double a2 = 1e-3;
+  const double b2 = 2e-2;
+  const double c2 = 3e-5;
+
+  mu.reset_coeffs( a2, b2, c2 );
+
+  // octave gives
+  const double mu_exact2 = 0.122172495548880;
+
+  return_flag = test_viscosity( mu(T), mu_exact2, tol );
+
+  return return_flag;
+}
+
+int test_viscosity( const double mu, const double mu_exact, const double tol )
+{
+  int return_flag = 0;
+
+  const double rel_error = std::fabs( (mu - mu_exact)/mu_exact);
 
   if( rel_error  > tol )
     {
       std::cerr << "Error: Mismatch in viscosity" << std::endl
-		<< "mu(T)    = " << mu(T) << std::endl
+		<< "mu(T)    = " << mu << std::endl
 		<< "mu_exact = " << mu_exact << std::endl
 		<< "rel_error = " << rel_error << std::endl
 		<< "tol = " << tol << std::endl;
