@@ -25,6 +25,8 @@ libantioch_la_SOURCES += kinetics/src/kinetics.C
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
 libantioch_la_SOURCES += parsing/src/read_reaction_set_data_xml.C
+libantioch_la_SOURCES += parsing/src/blottner_parsing.C
+libantioch_la_SOURCES += parsing/src/sutherland_parsing.C
 
 # thermo
 libantioch_la_SOURCES += thermo/src/cea_curve_fit.C
@@ -57,6 +59,8 @@ include_HEADERS += kinetics/include/antioch/kinetics.h
 # parsing
 include_HEADERS += parsing/include/antioch/tinyxml2.h
 include_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
+include_HEADERS += parsing/include/antioch/blottner_parsing.h
+include_HEADERS += parsing/include/antioch/sutherland_parsing.h
 
 # thermo
 include_HEADERS += thermo/include/antioch/cea_curve_fit.h
