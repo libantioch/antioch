@@ -12,6 +12,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 

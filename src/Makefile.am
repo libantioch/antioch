@@ -30,6 +30,8 @@ libantioch_la_SOURCES += parsing/src/read_reaction_set_data_xml.C
 libantioch_la_SOURCES += thermo/src/cea_curve_fit.C
 libantioch_la_SOURCES += thermo/src/cea_thermo.C
 
+# transport
+
 # utilities
 libantioch_la_SOURCES += utilities/src/antioch_version.C
 libantioch_la_SOURCES += utilities/src/input_utils.C
@@ -60,6 +62,8 @@ include_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
 include_HEADERS += thermo/include/antioch/cea_curve_fit.h
 include_HEADERS += thermo/include/antioch/cea_thermo.h
 
+# transport
+
 # utilities
 include_HEADERS += utilities/include/antioch/antioch_exceptions.h
 include_HEADERS += utilities/include/antioch/antioch_asserts.h
@@ -82,6 +86,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 
@@ -99,6 +104,7 @@ endif
         $(top_srcdir)/src/core/include/antioch/*.h $(top_srcdir)/src/core/src/*.C \
         $(top_srcdir)/src/kinetics/include/antioch/*.h $(top_srcdir)/src/kinetics/src/*.C \
         $(top_srcdir)/src/thermo/include/antioch/*.h $(top_srcdir)/src/thermo/src/*.C \
+        $(top_srcdir)/src/transport/include/antioch/*.h $(top_srcdir)/src/transport/src/*.C \
 	$(top_srcdir)/src/utilities/include/antioch/*.h \
         $(top_srcdir)/src/utilities/src/*.C \
         $(top_srcdir)/src/apps/*.C
