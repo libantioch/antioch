@@ -7,6 +7,7 @@ check_PROGRAMS += arrhenius_rate_unit
 check_PROGRAMS += kinetics_unit
 check_PROGRAMS += kinetics_regression
 check_PROGRAMS += blottner_viscosity_unit
+check_PROGRAMS += sutherland_viscosity_unit
 
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
@@ -26,6 +27,7 @@ arrhenius_rate_unit_SOURCES = arrhenius_rate_unit.C
 kinetics_unit_SOURCES = kinetics_unit.C
 kinetics_regression_SOURCES = kinetics_regression.C
 blottner_viscosity_unit_SOURCES = blottner_viscosity_unit.C
+sutherland_viscosity_unit_SOURCES = sutherland_viscosity_unit.C
 
 #Define tests to actually be run
 TESTS  =
@@ -35,6 +37,7 @@ TESTS += arrhenius_rate_unit
 TESTS += kinetics_unit_air_5sp.sh
 TESTS += kinetics_regression_air_5sp.sh
 TESTS += blottner_viscosity_unit
+TESTS += sutherland_viscosity_unit
 
 if CODE_COVERAGE_ENABLED
   CLEANFILES = *.gcda *.gcno
