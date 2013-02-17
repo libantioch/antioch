@@ -69,7 +69,7 @@ namespace Antioch
     //! Simultaneously evaluate the rate and its derivative at \p T.
     void rate_and_derivative(const NumericType T, NumericType& rate, NumericType& drate_dT) const;
 
-    //! Formatted print, by default to \p libMesh::out.
+    //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
 
     //! Formatted print.
