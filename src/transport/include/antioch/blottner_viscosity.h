@@ -58,9 +58,9 @@ namespace Antioch
 
   protected:
 
-    const NumericType _a;
-    const NumericType _b;
-    const NumericType _c;
+    NumericType _a;
+    NumericType _b;
+    NumericType _c;
     
   private:
     
