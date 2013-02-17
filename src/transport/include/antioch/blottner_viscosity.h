@@ -31,6 +31,11 @@
 
 // C++
 #include <cmath>
+#include <vector>
+#include <iostream>
+
+// Antioch
+#include "antioch/antioch_asserts.h"
 
 namespace Antioch
 {
@@ -40,6 +45,9 @@ namespace Antioch
   public:
 
     BlottnerViscosity( const NumericType a, const NumericType b, const NumericType c );
+
+    BlottnerViscosity( const std::vector<NumericType>& coeffs );
+
     ~BlottnerViscosity();
 
     NumericType operator()( NumericType T ) const;
@@ -50,9 +58,9 @@ namespace Antioch
     void print(std::ostream& os = std::cout) const;
 
     //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const BlottnerViscosity& rate)
+    friend std::ostream& operator<<(std::ostream& os, const BlottnerViscosity& mu)
     {
-      rate.print(os);
+      mu.print(os);
       return os;
     }
 
@@ -74,6 +82,17 @@ namespace Antioch
 						    const NumericType c)
     : _a(a), _b(b), _c(c)
   {
+    return;
+  }
+
+  template<class NumericType>
+  BlottnerViscosity<NumericType>::BlottnerViscosity( const std::vector<NumericType>& coeffs )
+    : _a(-1.0), _b(-1.0), _c(-1.0)
+  {
+    antioch_assert_equal_to( coeffs.size(), 3);
+    _a = coeffs[0];
+    _b = coeffs[1];
+    _c = coeffs[2];
     return;
   }
 

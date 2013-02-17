@@ -31,6 +31,11 @@
 
 // C++
 #include <cmath>
+#include <vector>
+#include <iostream>
+
+// Antioch
+#include "antioch/antioch_asserts.h"
 
 namespace Antioch
 {
@@ -40,6 +45,9 @@ namespace Antioch
   public:
 
     SutherlandViscosity( const NumericType mu_ref, const NumericType T_ref );
+
+    SutherlandViscosity( const std::vector<NumericType>& coeffs );
+
     ~SutherlandViscosity();
 
     NumericType operator()( NumericType T ) const;
@@ -50,9 +58,9 @@ namespace Antioch
     void print(std::ostream& os = std::cout) const;
 
     //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const SutherlandViscosity& rate)
+    friend std::ostream& operator<<(std::ostream& os, const SutherlandViscosity& mu)
     {
-      rate.print(os);
+      mu.print(os);
       return os;
     }
 
@@ -71,6 +79,16 @@ namespace Antioch
   SutherlandViscosity<NumericType>::SutherlandViscosity( const NumericType mu_ref, const NumericType T_ref )
     : _mu_ref(mu_ref), _T_ref(T_ref)
   {
+    return;
+  }
+
+  template<class NumericType>
+  SutherlandViscosity<NumericType>::SutherlandViscosity( const std::vector<NumericType>& coeffs )
+    : _mu_ref(-1.0), _T_ref(-1.0)
+  {
+    antioch_assert_equal_to( coeffs.size(), 2 );
+    _mu_ref = coeffs[0];
+    _T_ref  = coeffs[1];
     return;
   }
 
