@@ -37,7 +37,8 @@
 #include "antioch/blottner_parsing.h"
 #include "antioch/sutherland_parsing.h"
 
-int main()
+template <typename Scalar>
+int tester()
 {
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 2;
@@ -45,19 +46,19 @@ int main()
   species_str_list.push_back( "N2" );
   species_str_list.push_back( "Air" ); // Yes, I know this doesn't make sense, it's just a test.
 
-  Antioch::ChemicalMixture<double> chem_mixture( species_str_list );
+  Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<double>,double> s_mu_mixture(chem_mixture);
+  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar> s_mu_mixture(chem_mixture);
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<double>,double> b_mu_mixture(chem_mixture);
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> b_mu_mixture(chem_mixture);
 
-  Antioch::read_sutherland_data_ascii_default<double>( s_mu_mixture );
-  Antioch::read_blottner_data_ascii_default<double>( b_mu_mixture );
+  Antioch::read_sutherland_data_ascii_default<Scalar>( s_mu_mixture );
+  Antioch::read_blottner_data_ascii_default<Scalar>( b_mu_mixture );
 
   std::cout << s_mu_mixture << std::endl;
   std::cout << b_mu_mixture << std::endl;
 
-  const double T = 1500.1;
+  const Scalar T = 1500.1;
 
   std::cout << "Blottner:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
@@ -74,4 +75,9 @@ int main()
   int return_flag = 0;
 
   return return_flag;
+}
+
+int main()
+{
+  return tester<double>();
 }

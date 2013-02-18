@@ -33,44 +33,8 @@
 // Antioch
 #include "antioch/blottner_viscosity.h"
 
-int test_viscosity( const double mu, const double mu_exact, const double tol );
-
-int main()
-{
-  const double a = 3.14e-3;
-  const double b = 2.71e-2;
-  const double c = 42.0e-5;
-
-  Antioch::BlottnerViscosity<double> mu(a,b,c);
-
-  std::cout << mu << std::endl;
-
-  const double T = 1521.2;
-
-  // octave gives
-  const double mu_exact = 0.144422234167703;
-
-  int return_flag = 0;
-
-  const double tol = 1.0e-14;
-
-  return_flag = test_viscosity( mu(T), mu_exact, tol );
-  
-  const double a2 = 1e-3;
-  const double b2 = 2e-2;
-  const double c2 = 3e-5;
-
-  mu.reset_coeffs( a2, b2, c2 );
-
-  // octave gives
-  const double mu_exact2 = 0.122172495548880;
-
-  return_flag = test_viscosity( mu(T), mu_exact2, tol );
-
-  return return_flag;
-}
-
-int test_viscosity( const double mu, const double mu_exact, const double tol )
+template <typename Scalar>
+int test_viscosity( const Scalar mu, const Scalar mu_exact, const Scalar tol )
 {
   int return_flag = 0;
 
@@ -87,4 +51,45 @@ int test_viscosity( const double mu, const double mu_exact, const double tol )
     }
 
   return return_flag;
+}
+
+template <typename Scalar>
+int tester()
+{
+  const Scalar a = 3.14e-3;
+  const Scalar b = 2.71e-2;
+  const Scalar c = 42.0e-5;
+
+  Antioch::BlottnerViscosity<Scalar> mu(a,b,c);
+
+  std::cout << mu << std::endl;
+
+  const Scalar T = 1521.2;
+
+  // octave gives
+  const Scalar mu_exact = 0.144422234167703;
+
+  int return_flag = 0;
+
+  const Scalar tol = 1.0e-14;
+
+  return_flag = test_viscosity( mu(T), mu_exact, tol );
+  
+  const Scalar a2 = 1e-3;
+  const Scalar b2 = 2e-2;
+  const Scalar c2 = 3e-5;
+
+  mu.reset_coeffs( a2, b2, c2 );
+
+  // octave gives
+  const Scalar mu_exact2 = 0.122172495548880;
+
+  return_flag = test_viscosity( mu(T), mu_exact2, tol );
+
+  return return_flag;
+}
+
+int main()
+{
+  return tester<double>();
 }

@@ -39,16 +39,9 @@
 #include "antioch/cea_thermo.h"
 #include "antioch/kinetics.h"
 
-int main(int argc, char* argv[])
+template <typename Scalar>
+int tester(const std::string& input_name)
 {
-  // Check command line count.
-  if( argc < 2 )
-    {
-      // TODO: Need more consistent error handling.
-      std::cerr << "Error: Must specify reaction set XML input file." << std::endl;
-      antioch_error();
-    }
-
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -58,31 +51,30 @@ int main(int argc, char* argv[])
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
-  Antioch::ChemicalMixture<double> chem_mixture( species_str_list );
-  Antioch::ReactionSet<double> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<double> thermo( chem_mixture );
+  Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+  Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
+  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
 
-  std::string input(argv[1]);
-  Antioch::read_reaction_set_data_xml<double>( input, true, reaction_set );
+  Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  const double T = 1500.0;
-  const double P = 1.0e5;
+  const Scalar T = 1500.0;
+  const Scalar P = 1.0e5;
 
   // Mass fractions
-  std::vector<double> Y(n_species,0.2);
+  std::vector<Scalar> Y(n_species,0.2);
 
-  const double R_mix = chem_mixture.R(Y);
+  const Scalar R_mix = chem_mixture.R(Y);
 
-  const double rho = P/(R_mix*T);
+  const Scalar rho = P/(R_mix*T);
 
-  std::vector<double> molar_densities(n_species,0.0);
+  std::vector<Scalar> molar_densities(n_species,0.0);
   chem_mixture.molar_densities(rho,Y,molar_densities);
 
-  std::vector<double> h_RT_minus_s_R(n_species);
+  std::vector<Scalar> h_RT_minus_s_R(n_species);
   thermo.h_RT_minus_s_R(T,h_RT_minus_s_R);
 
-  Antioch::Kinetics<double> kinetics( reaction_set );
-  std::vector<double> omega_dot(n_species);
+  Antioch::Kinetics<Scalar> kinetics( reaction_set );
+  std::vector<Scalar> omega_dot(n_species);
   
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
@@ -95,17 +87,17 @@ int main(int argc, char* argv[])
 
   int return_flag = 0;
 
-  std::vector<double> omega_dot_reg(n_species);
+  std::vector<Scalar> omega_dot_reg(n_species);
   omega_dot_reg[0] =  7.9004530802650654e+04;
   omega_dot_reg[1] = -3.4113853617637843e+05;
   omega_dot_reg[2] = -1.8898881857838202e+05;
   omega_dot_reg[3] =  2.1551399274321867e+05;
   omega_dot_reg[4] =  2.3560883120889112e+05;
 
-  const double tol = 1.0e-14;
+  const Scalar tol = 1.0e-14;
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const double rel_error = std::fabs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = std::fabs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
 	{
 	  return_flag = 1;
@@ -125,4 +117,17 @@ int main(int argc, char* argv[])
     }
  
   return return_flag;
+}
+
+int main(int argc, char* argv[])
+{
+  // Check command line count.
+  if( argc < 2 )
+    {
+      // TODO: Need more consistent error handling.
+      std::cerr << "Error: Must specify reaction set XML input file." << std::endl;
+      antioch_error();
+    }
+
+  return tester<double>(std::string(argv[1]));
 }

@@ -28,23 +28,24 @@
 
 #include "antioch/arrhenius_rate.h"
 
-int main()
+template <typename Scalar>
+int tester()
 {
-  const double Cf = 1.4;
-  const double eta = 1.2;
-  const double Ea = 5.0;
+  const Scalar Cf = 1.4;
+  const Scalar eta = 1.2;
+  const Scalar Ea = 5.0;
 
-  Antioch::ArrheniusRate<double> arrhenius_rate(Cf,eta,Ea);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,eta,Ea);
 
-  const double T = 1500.1;
+  const Scalar T = 1500.1;
   
-  const double rate_exact = Cf*std::pow(T,eta)*std::exp(-Ea/T);
+  const Scalar rate_exact = Cf*std::pow(T,eta)*std::exp(-Ea/T);
 
   int return_flag = 0;
 
-  double rate = arrhenius_rate(T);
+  Scalar rate = arrhenius_rate(T);
 
-  const double tol = 1.0e-15;
+  const Scalar tol = 1.0e-15;
 
   if( std::fabs( (rate - rate_exact)/rate_exact ) > tol )
     {
@@ -58,4 +59,9 @@ int main()
   std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
 
   return return_flag;
+}
+
+int main()
+{
+  return tester<double>();
 }
