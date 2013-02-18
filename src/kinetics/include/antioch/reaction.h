@@ -48,7 +48,7 @@ namespace Antioch
     to be reversible. This class was originally taken from \p FIN-S.
     \todo{Do we want to template this class around the rate type?}
   */
-  template<typename CoeffType>
+  template<typename CoeffType=double>
   class Reaction
   {
   public:

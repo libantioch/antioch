@@ -38,10 +38,10 @@
 namespace Antioch
 {
   // Forward declarations
-  template<typename CoefType>
+  template<typename CoeffType>
   class ReactionSet;
 
-  template<typename CoefType>
+  template<typename CoeffType>
   class ChemicalMixture;
   
   //! Class to handle computing mass source terms for a given ReactionSet.
@@ -49,15 +49,15 @@ namespace Antioch
    *  thread, if running in a threaded environment. It takes a reference to an
    *  already created ReactionSet, so there's little construction penalty.
    */
-  template<typename CoefType>
+  template<typename CoeffType=double>
   class Kinetics
   {
   public:
 
-    Kinetics( const ReactionSet<CoefType>& reaction_set );
+    Kinetics( const ReactionSet<CoeffType>& reaction_set );
     ~Kinetics();
 
-    const ReactionSet<CoefType>& reaction_set() const;
+    const ReactionSet<CoeffType>& reaction_set() const;
 
     //! Compute species production/destruction rates per unit volume in \f$ \left(kg/sec/m^3\right)\f$
     template <typename StateType>
@@ -75,9 +75,9 @@ namespace Antioch
 
   protected:
 
-    const ReactionSet<CoefType>& _reaction_set;
+    const ReactionSet<CoeffType>& _reaction_set;
 
-    const ChemicalMixture<CoefType>& _chem_mixture;
+    const ChemicalMixture<CoeffType>& _chem_mixture;
   };
 
   /* ------------------------- Inline Functions -------------------------*/

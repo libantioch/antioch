@@ -43,7 +43,7 @@ namespace Antioch
    * This class encapsulates all the reaction mechanisms considered in a
    * chemical nonequilibrium simulation.
    */
-  template<typename CoeffType>
+  template<typename CoeffType=double>
   class ReactionSet
   {
 
