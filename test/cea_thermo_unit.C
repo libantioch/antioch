@@ -28,6 +28,7 @@
 
 // C++
 #include <cmath>
+#include <limits>
 
 // Antioch
 #include "antioch/physical_constants.h"
@@ -40,17 +41,19 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
 {
   int return_flag = 0;
 
-  const Scalar tol = 1.0e-15;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
 
   const Scalar cp = thermo.cp(T, species);
 
   if( std::fabs( (cp_exact - cp)/cp_exact ) > tol )
     {
-      std::cerr << "Error: Mismatch in species specific heat." << std::endl
-		<< "species = " << species_name << std::endl
-		<< "cp       = " << cp << std::endl
-		<< "cp_exact = " << cp_exact << std::endl
-		<< "T = " << T << std::endl;
+      std::cerr << "Error: Mismatch in species specific heat."
+		<< "\nspecies    = " << species_name
+		<< "\ncp         = " << cp
+		<< "\ncp_exact   = " << cp_exact
+		<< "\ndifference = " << (cp_exact - cp)
+		<< "\ntolerance  = " << tol
+		<< "\nT = " << T << std::endl;
       return_flag = 1;
     }
 
@@ -241,10 +244,8 @@ int tester()
 
 int main()
 {
-  return tester<double>();
-
-  // This doesn't link yet
-//  return (tester<double>() ||
+// We're not getting the full long double precision yet?
+  return (tester<double>() ||
 //          tester<long double>() ||
-//          tester<float>());
+          tester<float>());
 }

@@ -27,6 +27,7 @@
 //--------------------------------------------------------------------------
 
 // C++
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -91,11 +92,11 @@ int tester(const std::string& input_name)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = 1.0e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
       if( std::fabs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
-	  std::cerr << "Error: omega_dot did not sum to 1.0." << std::endl
+	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl
 		    << std::scientific << std::setprecision(16)
 		    << "T = " << T << std::endl
 		    << "sum = " << sum << ", sum_tol = " << sum_tol << std::endl;
@@ -123,11 +124,8 @@ int main(int argc, char* argv[])
       antioch_error();
     }
 
-  return tester<double>(std::string(argv[1]));
-
-  // This doesn't link yet
-//  return (tester<double>(std::string(argv[1])) ||
-//          tester<long double>(std::string(argv[1])) ||
-//          tester<float>(std::string(argv[1])));
+  return (tester<double>(std::string(argv[1])) ||
+          tester<long double>(std::string(argv[1])) ||
+          tester<float>(std::string(argv[1])));
 }
 

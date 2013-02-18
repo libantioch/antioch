@@ -27,6 +27,7 @@
 //--------------------------------------------------------------------------
 
 // C++
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -94,7 +95,7 @@ int tester(const std::string& input_name)
   omega_dot_reg[3] =  2.1551399274321867e+05;
   omega_dot_reg[4] =  2.3560883120889112e+05;
 
-  const Scalar tol = 1.0e-14;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
   for( unsigned int s = 0; s < n_species; s++)
     {
       const Scalar rel_error = std::fabs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
@@ -129,10 +130,7 @@ int main(int argc, char* argv[])
       antioch_error();
     }
 
-  return tester<double>(std::string(argv[1]));
-
-  // This doesn't link yet
-//  return (tester<double>(std::string(argv[1])) ||
+  return (tester<double>(std::string(argv[1])) ||
 //          tester<long double>(std::string(argv[1])) ||
-//          tester<float>(std::string(argv[1])));
+          tester<float>(std::string(argv[1])));
 }

@@ -27,8 +27,9 @@
 //--------------------------------------------------------------------------
 
 // C++
-#include <iomanip>
 #include <cmath>
+#include <iomanip>
+#include <limits>
 
 // Antioch
 #include "antioch/physical_constants.h"
@@ -142,7 +143,7 @@ int tester()
   // Check N2 properties
   {
     unsigned int index = 0;
-    Scalar molar_mass = 28.01600;
+    Scalar molar_mass = 28.01600L;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -157,7 +158,7 @@ int tester()
   // Check O2 properties
   {
     unsigned int index = 1;
-    Scalar molar_mass = 32.00000;
+    Scalar molar_mass = 32.00000L;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -172,7 +173,7 @@ int tester()
   // Check N properties
   {
     unsigned int index = 2;
-    Scalar molar_mass = 14.00800;
+    Scalar molar_mass = 14.00800L;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -187,7 +188,7 @@ int tester()
   // Check O properties
   {
     unsigned int index = 3;
-    Scalar molar_mass = 16.00000;
+    Scalar molar_mass = 16.00000L;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -202,7 +203,7 @@ int tester()
   // Check NO properties
   {
     unsigned int index = 4;
-    Scalar molar_mass = 30.00800;
+    Scalar molar_mass = 30.00800L;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -226,7 +227,7 @@ int tester()
   X_exact[3] = 0.2*M_exact/16.0;
   X_exact[4] = 0.2*M_exact/30.008;
 
-  Scalar tol = 1.0e-15;
+  Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
   if( std::fabs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
@@ -265,10 +266,7 @@ int tester()
 
 int main()
 {
-  return tester<double>();
-
-  // This is still a link-time failure:
-//  return (tester<double>() ||
+  return (tester<double>() ||
 //          tester<long double>() ||
-//          tester<float>());
+          tester<float>());
 }
