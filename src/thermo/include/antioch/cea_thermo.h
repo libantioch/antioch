@@ -54,32 +54,53 @@ namespace Antioch
     /*! virtual so this can be subclassed by the user. */
     virtual ~CEAThermodynamics();
 
+    class Cache 
+    {
+    public:
+      const NumericType &T;
+      NumericType T2;
+      NumericType T3;
+      NumericType T4;
+      NumericType lnT;
+      
+      Cache(const NumericType &T_in) 
+	: T(T_in)
+      {
+	T2  = T*T;
+	T3  = T2*T;
+	T4  = T2*T2;
+	lnT = std::log(T);	
+      }
+    private:
+      Cache();      
+    };
+    
     void add_curve_fit( const std::string& species_name, const std::vector<NumericType>& coeffs );
 
     //! Checks that curve fits have been specified for all species in the mixture.
     bool check() const;
 
-    NumericType cp( NumericType T, unsigned int species ) const;
+    NumericType cp( const Cache &cache, unsigned int species ) const;
 
-    NumericType cp( NumericType T, const std::vector<NumericType>& mass_fractions ) const;
+    NumericType cp( const Cache &cache, const std::vector<NumericType>& mass_fractions ) const;
 
-    NumericType cv( NumericType T, unsigned int species ) const;
+    NumericType cv( const Cache &cache, unsigned int species ) const;
 
-    NumericType cv( NumericType T, const std::vector<NumericType>& mass_fractions ) const;
+    NumericType cv( const Cache &cache, const std::vector<NumericType>& mass_fractions ) const;
 
-    NumericType h( NumericType T, unsigned int species ) const;
+    NumericType h( const Cache &cache, unsigned int species ) const;
 
-    void h( NumericType T, std::vector<NumericType>& h ) const;
+    void h( const Cache &cache, std::vector<NumericType>& h ) const;
 
-    NumericType h_RT_minus_s_R( NumericType T, unsigned int species ) const;
+    NumericType h_RT_minus_s_R( const Cache &cache, unsigned int species ) const;
 
-    void h_RT_minus_s_R( NumericType T, std::vector<NumericType>& h_RT_minus_s_R ) const;
+    void h_RT_minus_s_R( const Cache &cache, std::vector<NumericType>& h_RT_minus_s_R ) const;
 
-    NumericType cp_over_R( NumericType T, unsigned int species ) const;
+    NumericType cp_over_R( const Cache &cache, unsigned int species ) const;
 
-    NumericType h_over_RT( NumericType T, unsigned int species ) const;
+    NumericType h_over_RT( const Cache &cache, unsigned int species ) const;
 
-    NumericType s_over_R( NumericType T, unsigned int species ) const;
+    NumericType s_over_R( const Cache &cache, unsigned int species ) const;
 
     const ChemicalMixture<NumericType>& chemical_mixture() const;
 
@@ -96,42 +117,23 @@ namespace Antioch
     //! Default constructor
     /*! Private to force to user to supply a ChemicalMixture object.*/
     CEAThermodynamics();
-
-    mutable NumericType _T, _T2, _T3, _T4, _lnT;
-    
-    /*! Logically constant cache function. */
-    void update_cache (const NumericType T) const;
   };
   
   /* ------------------------- Inline Functions -------------------------*/
   
   template<class NumericType>
   inline
-  NumericType CEAThermodynamics<NumericType>::cv( NumericType T, unsigned int species ) const
+  NumericType CEAThermodynamics<NumericType>::cv( const Cache &cache, unsigned int species ) const
   {
-    return this->cp(T,species) - _chem_mixture.R(species);
+    return this->cp(cache,species) - _chem_mixture.R(species);
   }
 
   template<class NumericType>
   inline
-  NumericType CEAThermodynamics<NumericType>::cv( NumericType T,
+  NumericType CEAThermodynamics<NumericType>::cv( const Cache &cache,
 						  const std::vector<NumericType>& mass_fractions ) const
   {
-    return this->cp(T,mass_fractions) - _chem_mixture.R(mass_fractions);
-  }
-
-  template<class NumericType>
-  inline
-  void CEAThermodynamics<NumericType>::update_cache (const NumericType T) const
-  {
-    // check for quick return 
-    if (T == _T) return;
-
-    _T   = T;
-    _T2  = T*T;
-    _T3  = _T2*T;
-    _T4  = _T2*_T2;
-    _lnT = std::log(T);
+    return this->cp(cache,mass_fractions) - _chem_mixture.R(mass_fractions);
   }
 
   template<class NumericType>
