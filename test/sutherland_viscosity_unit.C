@@ -29,6 +29,7 @@
 // C++
 #include <iostream>
 #include <cmath>
+#include <limits>
 
 // Antioch
 #include "antioch/sutherland_viscosity.h"
@@ -72,7 +73,7 @@ int tester()
 
   int return_flag = 0;
 
-  const Scalar tol = 1.0e-14;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
 
   return_flag = test_viscosity( mu(T), mu_exact, tol );
   
@@ -92,5 +93,6 @@ int tester()
 
 int main()
 {
-  tester<double>();
+  return (tester<double>() ||
+          tester<float>());
 }

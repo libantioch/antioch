@@ -91,5 +91,6 @@ int tester()
 
 int main()
 {
-  return tester<double>();
+  return (tester<double>() ||
+          tester<float>());
 }

@@ -149,8 +149,9 @@ int tester()
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "N2",
-				molar_mass, Antioch::Constants::R_universal/molar_mass, 0.0, 2.5, 0);
+    return_flag = test_species( index, chemical_species, "N2", molar_mass, 
+                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(0.0), Scalar(2.5), Scalar(0));
   }
   
   // Check O2 properties
@@ -163,8 +164,9 @@ int tester()
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "O2",
-				molar_mass, Antioch::Constants::R_universal/molar_mass, 0.0, 2.5, 0);
+    return_flag = test_species( index, chemical_species, "O2", molar_mass, 
+                                Scalar(Antioch::Constants::R_universal/molar_mass),
+                                Scalar(0.0), Scalar(2.5), Scalar(0));
   }
 
   // Check N properties
@@ -177,8 +179,9 @@ int tester()
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "N",
-				molar_mass, Antioch::Constants::R_universal/molar_mass, 3.3621610000e7, 1.5, 0);
+    return_flag = test_species( index, chemical_species, "N", molar_mass,
+                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(3.3621610000e7), Scalar(1.5), Scalar(0));
   }
 
   // Check O properties
@@ -191,8 +194,9 @@ int tester()
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "O",
-				molar_mass, Antioch::Constants::R_universal/molar_mass, 1.5420000000e7, 1.5, 0);
+    return_flag = test_species( index, chemical_species, "O", molar_mass,
+                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(1.5420000000e7), Scalar(1.5), Scalar(0));
   }
 
   // Check NO properties
@@ -205,8 +209,9 @@ int tester()
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "NO",
-				molar_mass, Antioch::Constants::R_universal/molar_mass, 2.9961230000e6, 2.5, 0);
+    return_flag = test_species( index, chemical_species, "NO", molar_mass,
+                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(2.9961230000e6), Scalar(2.5), Scalar(0));
   }
 
   std::vector<Scalar> mass_fractions( 5, 0.2 );
@@ -261,4 +266,8 @@ int tester()
 int main()
 {
   return tester<double>();
+
+  // This is still a link-time failure:
+//  return (tester<double>() ||
+//          tester<float>());
 }
