@@ -35,6 +35,7 @@ libantioch_la_SOURCES += thermo/src/cea_curve_fit.C
 libantioch_la_SOURCES += thermo/src/cea_thermo.C
 
 # transport
+libantioch_la_SOURCES += transport/src/wilke_mixture.C
 
 # utilities
 libantioch_la_SOURCES += utilities/src/antioch_version.C
@@ -71,6 +72,9 @@ include_HEADERS += thermo/include/antioch/cea_curve_fit.h
 include_HEADERS += thermo/include/antioch/cea_thermo.h
 
 # transport
+include_HEADERS += transport/include/antioch/blottner_viscosity.h
+include_HEADERS += transport/include/antioch/sutherland_viscosity.h
+include_HEADERS += transport/include/antioch/mixture_viscosity.h
 
 # utilities
 include_HEADERS += utilities/include/antioch/antioch_exceptions.h

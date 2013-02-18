@@ -29,22 +29,33 @@
 #ifndef ANTIOCH_WILKE_MIXTURE_H
 #define ANTIOCH_WILKE_MIXTURE_H
 
+// C++
+#include <vector>
+
 namespace Antioch
 {
-  template<class NumericType, class MixtureViscosity, class MixtureConductivity>
+  // Forward declarations
+  template<class NumericType>
+  class ChemicalMixture;
+
+  template<class NumericType>
   class WilkeMixture
   {
   public:
 
-    WilkeMixture( const ChemicalMixture& chem_mixture );
+    WilkeMixture( const ChemicalMixture<NumericType>& chem_mixture );
     ~WilkeMixture();
 
   protected:
 
-    const ChemicalMixture& _chem_mixture;
+    const ChemicalMixture<NumericType>& _chem_mixture;
 
+    //! Cache for numerator term
+    /*! \todo We should use a more efficient data structure */
     std::vector<std::vector<NumericType> > _Mr_Ms_to_the_one_fourth;
     
+    //! Cache for denominator term
+    /*! \todo We should use a more efficient data structure */
     std::vector<std::vector<NumericType> > _denom;
 
   };
