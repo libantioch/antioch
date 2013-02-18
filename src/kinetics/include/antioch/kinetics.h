@@ -38,10 +38,10 @@
 namespace Antioch
 {
   // Forward declarations
-  template<class NumericType>
+  template<typename CoefType>
   class ReactionSet;
 
-  template<class NumericType>
+  template<typename CoefType>
   class ChemicalMixture;
   
   //! Class to handle computing mass source terms for a given ReactionSet.
@@ -49,24 +49,25 @@ namespace Antioch
    *  thread, if running in a threaded environment. It takes a reference to an
    *  already created ReactionSet, so there's little construction penalty.
    */
-  template<class NumericType>
+  template<typename CoefType>
   class Kinetics
   {
   public:
 
-    Kinetics( const ReactionSet<NumericType>& reaction_set );
+    Kinetics( const ReactionSet<CoefType>& reaction_set );
     ~Kinetics();
 
-    const ReactionSet<NumericType>& reaction_set() const;
+    const ReactionSet<CoefType>& reaction_set() const;
 
     //! Compute species production/destruction rates per unit volume in \f$ \left(kg/sec/m^3\right)\f$
-    void compute_mass_sources ( const NumericType T,
-				const NumericType rho,
-				const NumericType R_mix,
-				const std::vector<NumericType>& mass_fractions,
-				const std::vector<NumericType>& molar_densities,
-				const std::vector<NumericType>& h_RT_minus_s_R,
-				std::vector<NumericType>& mass_sources );
+    template <typename StateType>
+    void compute_mass_sources ( const StateType T,
+				const StateType rho,
+				const StateType R_mix,
+				const std::vector<StateType>& mass_fractions,
+				const std::vector<StateType>& molar_densities,
+				const std::vector<StateType>& h_RT_minus_s_R,
+				std::vector<StateType>& mass_sources );
 
     unsigned int n_species() const;
 
@@ -74,65 +75,62 @@ namespace Antioch
 
   protected:
 
-    const ReactionSet<NumericType>& _reaction_set;
+    const ReactionSet<CoefType>& _reaction_set;
 
-    const ChemicalMixture<NumericType>& _chem_mixture;
-
-    //! Work arrays for compute mass sources
-    std::vector<NumericType> _net_reaction_rates;
+    const ChemicalMixture<CoefType>& _chem_mixture;
   };
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  const ReactionSet<NumericType>& Kinetics<NumericType>::reaction_set() const
+  const ReactionSet<CoeffType>& Kinetics<CoeffType>::reaction_set() const
   {
     return _reaction_set;
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  unsigned int Kinetics<NumericType>::n_species() const
+  unsigned int Kinetics<CoeffType>::n_species() const
   {
     return _chem_mixture.n_species();
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  unsigned int Kinetics<NumericType>::n_reactions() const
+  unsigned int Kinetics<CoeffType>::n_reactions() const
   {
     return _reaction_set.n_reactions();
   }
 
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  Kinetics<NumericType>::Kinetics( const ReactionSet<NumericType>& reaction_set )
+  Kinetics<CoeffType>::Kinetics( const ReactionSet<CoeffType>& reaction_set )
     : _reaction_set( reaction_set ),
-      _chem_mixture( reaction_set.chemical_mixture() ),
-      _net_reaction_rates( reaction_set.n_reactions(), 0.0 )
+      _chem_mixture( reaction_set.chemical_mixture() )
   {
     return;
   }
 
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  Kinetics<NumericType>::~Kinetics()
+  Kinetics<CoeffType>::~Kinetics()
   {
     return;
   }
 
 
-  template<class NumericType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
-  void Kinetics<NumericType>::compute_mass_sources( const NumericType T,
-						    const NumericType rho,
-						    const NumericType R_mix,
-						    const std::vector<NumericType>& mass_fractions,
-						    const std::vector<NumericType>& molar_densities,
-						    const std::vector<NumericType>& h_RT_minus_s_R,
-						    std::vector<NumericType>& mass_sources )
+  void Kinetics<CoeffType>::compute_mass_sources( const StateType T,
+						  const StateType rho,
+						  const StateType R_mix,
+						  const std::vector<StateType>& mass_fractions,
+						  const std::vector<StateType>& molar_densities,
+						  const std::vector<StateType>& h_RT_minus_s_R,
+						  std::vector<StateType>& mass_sources )
   {
     antioch_assert_greater(T, 0.0);
     antioch_assert_greater(rho, 0.0);
@@ -141,19 +139,21 @@ namespace Antioch
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( mass_sources.size(), this->n_species() );
-    antioch_assert_equal_to( this->_net_reaction_rates.size(), this->n_reactions() );
+
+    //! Work arrays for compute mass sources
+    std::vector<StateType> net_reaction_rates(this->n_reactions(), 0);
 
     std::fill( mass_sources.begin(), mass_sources.end(), 0.0 );
     
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates( T, rho, R_mix, mass_fractions, molar_densities,
-						h_RT_minus_s_R, this->_net_reaction_rates );
+						h_RT_minus_s_R, net_reaction_rates );
 
     // compute the actual mass sources in kmol/sec/m^3
     for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-	const Reaction<NumericType>& reaction = this->_reaction_set.reaction(rxn);
-	const NumericType rate = this->_net_reaction_rates[rxn];
+	const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
+	const StateType rate = net_reaction_rates[rxn];
 	
 	// reactant contributions
 	for (unsigned int r = 0; r < reaction.n_reactants(); r++)
@@ -161,7 +161,7 @@ namespace Antioch
 	    const unsigned int r_id = reaction.reactant_id(r);
 	    const unsigned int r_stoich = reaction.reactant_stoichiometric_coefficient(r);
 	    
-	    mass_sources[r_id] -= (static_cast<NumericType>(r_stoich)*rate);
+	    mass_sources[r_id] -= (static_cast<CoeffType>(r_stoich)*rate);
 	  }
 	
 	// product contributions
@@ -170,7 +170,7 @@ namespace Antioch
 	    const unsigned int p_id = reaction.product_id(p);
 	    const unsigned int p_stoich = reaction.product_stoichiometric_coefficient(p);
 	    
-	    mass_sources[p_id] += (static_cast<NumericType>(p_stoich)*rate);
+	    mass_sources[p_id] += (static_cast<CoeffType>(p_stoich)*rate);
 	  }
       }
 

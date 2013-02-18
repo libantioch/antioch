@@ -43,14 +43,14 @@ namespace Antioch
    * This class encapsulates all the reaction mechanisms considered in a
    * chemical nonequilibrium simulation.
    */
-  template<class NumericType>
+  template<class CoeffType>
   class ReactionSet
   {
 
   public:
 
     //! Constructor.
-    ReactionSet( const ChemicalMixture<NumericType>& chem_mixture );
+    ReactionSet( const ChemicalMixture<CoeffType>& chem_mixture );
 
     ~ReactionSet();
 
@@ -61,27 +61,28 @@ namespace Antioch
     unsigned int n_reactions() const;
      
     //! Add a reaction to the system.
-    void add_reaction(const Reaction<NumericType>& reaction);
+    void add_reaction(const Reaction<CoeffType>& reaction);
 
     //! \returns a constant reference to reaction \p r.
-    const Reaction<NumericType>& reaction(const unsigned int r) const;
+    const Reaction<CoeffType>& reaction(const unsigned int r) const;
 
-    const ChemicalMixture<NumericType>& chemical_mixture() const;
+    const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
     //! Compute the rates of progress for each reaction
-    void compute_reaction_rates( const NumericType T,
-				 const NumericType rho,
-				 const NumericType R_mix,
-				 const std::vector<NumericType>& mass_fractions,
-				 const std::vector<NumericType>& molar_densities,
-				 const std::vector<NumericType>& h_RT_minus_s_R,
-				 std::vector<NumericType>& net_reaction_rates ) const;
+    template <typename StateType>
+    void compute_reaction_rates( const StateType T,
+				 const StateType rho,
+				 const StateType R_mix,
+				 const std::vector<StateType>& mass_fractions,
+				 const std::vector<StateType>& molar_densities,
+				 const std::vector<StateType>& h_RT_minus_s_R,
+				 std::vector<StateType>& net_reaction_rates ) const;
 
     //! Formatted print, by default to \p std::cout.
     void print( std::ostream& os = std::cout ) const;
      
     //! Formatted print.
-    friend std::ostream& operator<<( std::ostream& os, const ReactionSet<NumericType>& rset )
+    friend std::ostream& operator<<( std::ostream& os, const ReactionSet<CoeffType>& rset )
     {
       rset.print(os);
       return os;
@@ -91,30 +92,30 @@ namespace Antioch
      
     ReactionSet();
      
-    const ChemicalMixture<NumericType>& _chem_mixture;
+    const ChemicalMixture<CoeffType>& _chem_mixture;
 
-    std::vector<Reaction<NumericType> > _reactions;
+    std::vector<Reaction<CoeffType> > _reactions;
 
   };
   
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  unsigned int ReactionSet<NumericType>::n_species() const
+  unsigned int ReactionSet<CoeffType>::n_species() const
   {
     return _chem_mixture.n_species();
   }
 
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  unsigned int ReactionSet<NumericType>::n_reactions() const
+  unsigned int ReactionSet<CoeffType>::n_reactions() const
   {
     return _reactions.size();
   }
 
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  void ReactionSet<NumericType>::add_reaction(const Reaction<NumericType>& reaction)
+  void ReactionSet<CoeffType>::add_reaction(const Reaction<CoeffType>& reaction)
   {
     _reactions.push_back(reaction);
     
@@ -124,48 +125,49 @@ namespace Antioch
     return;
   }
   
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  const Reaction<NumericType>& ReactionSet<NumericType>::reaction(const unsigned int r) const      
+  const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const      
   {
     antioch_assert_less(r, this->n_reactions());
     return _reactions[r];
   }
 
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  const ChemicalMixture<NumericType>& ReactionSet<NumericType>::chemical_mixture() const
+  const ChemicalMixture<CoeffType>& ReactionSet<CoeffType>::chemical_mixture() const
   {
     return _chem_mixture;
   }
 
 
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  ReactionSet<NumericType>::ReactionSet( const ChemicalMixture<NumericType>& chem_mixture )
+  ReactionSet<CoeffType>::ReactionSet( const ChemicalMixture<CoeffType>& chem_mixture )
     : _chem_mixture(chem_mixture)
   {
     return;
   }
 
 
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  ReactionSet<NumericType>::~ReactionSet()
+  ReactionSet<CoeffType>::~ReactionSet()
   {
     return;
   }
   
 
-  template<class NumericType>
+  template<class CoeffType>
+  template<class StateType>
   inline
-  void ReactionSet<NumericType>::compute_reaction_rates ( const NumericType T,
-							  const NumericType rho,
-							  const NumericType R_mix,
-							  const std::vector<NumericType>& mass_fractions,
-							  const std::vector<NumericType>& molar_densities,
-							  const std::vector<NumericType>& h_RT_minus_s_R,
-							  std::vector<NumericType>& net_reaction_rates ) const
+  void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType T,
+							const StateType rho,
+							const StateType R_mix,
+							const std::vector<StateType>& mass_fractions,
+							const std::vector<StateType>& molar_densities,
+							const std::vector<StateType>& h_RT_minus_s_R,
+							std::vector<StateType>& net_reaction_rates ) const
   {
     antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
     antioch_assert_greater(T, 0.0);
@@ -176,20 +178,20 @@ namespace Antioch
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
     // useful constants
-    const NumericType P0    = 1.e5; // standard pressure
-    const NumericType RT    = R_mix*T;
-    const NumericType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
+    const CoeffType P0    = 1.e5; // standard pressure
+    const StateType RT    = R_mix*T;
+    const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-	const Reaction<NumericType>& reaction = this->reaction(rxn);
+	const Reaction<CoeffType>& reaction = this->reaction(rxn);
 
-	NumericType kfwd = (reaction.forward_rate())(T);
+	StateType kfwd = (reaction.forward_rate())(T);
 
-	NumericType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
+	StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-	const NumericType kbkwd = kfwd/keq;
+	const StateType kbkwd = kfwd/keq;
 
 	net_reaction_rates[rxn] = reaction.compute_rate_of_progress( molar_densities, kfwd, kbkwd );
       }
@@ -198,9 +200,9 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<class CoeffType>
   inline
-  void ReactionSet<NumericType>::print(std::ostream& os) const
+  void ReactionSet<CoeffType>::print(std::ostream& os) const
   {
     os << "# Number of reactions: " << this->n_reactions() << "\n";
 

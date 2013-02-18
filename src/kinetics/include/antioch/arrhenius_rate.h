@@ -41,33 +41,36 @@ namespace Antioch
    * \f$ C_f\times T^\eta\times \exp(-E_a/T) \f$. This class copied from
    * the \p FIN-S code and slightly reformatted for \p Antioch.
    */
-  template<class NumericType>
+  template<typename CoeffType=double>
   class ArrheniusRate
   {
   
   public:
 
-    ArrheniusRate (const NumericType Cf=0., const NumericType eta=0., const NumericType Ea=0.);
+    ArrheniusRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0.);
     ~ArrheniusRate();
     
-    void set_Cf( const NumericType Cf );
-    void set_eta( const NumericType eta );
-    void set_Ea( const NumericType Ea );
+    void set_Cf( const CoeffType Cf );
+    void set_eta( const CoeffType eta );
+    void set_Ea( const CoeffType Ea );
 
-    void scale_Ea( const NumericType scale );
+    void scale_Ea( const CoeffType scale );
 
-    NumericType Cf() const;
-    NumericType eta() const;
-    NumericType Ea() const;
+    CoeffType Cf() const;
+    CoeffType eta() const;
+    CoeffType Ea() const;
 
     //! \return the rate evaluated at \p T.
-    NumericType operator()(const NumericType T) const;
+    template <typename StateType>
+    StateType operator()(const StateType T) const;
 
     //! \return the derivative with respect to temperature evaluated at \p T.
-    NumericType derivative( const NumericType T ) const;
+    template <typename StateType>
+    StateType derivative( const StateType T ) const;
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
-    void rate_and_derivative(const NumericType T, NumericType& rate, NumericType& drate_dT) const;
+    template <typename StateType>
+    void rate_and_derivative(const StateType T, StateType& rate, StateType& drate_dT) const;
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -81,14 +84,14 @@ namespace Antioch
 
   private:
 
-    NumericType _Cf;
-    NumericType _eta;
-    NumericType _Ea;
+    CoeffType _Cf;
+    CoeffType _eta;
+    CoeffType _Ea;
     
   };
 
-  template<class NumericType>
-  ArrheniusRate<NumericType>::ArrheniusRate(const NumericType Cf, const NumericType eta, const NumericType Ea)
+  template<typename CoeffType>
+  ArrheniusRate<CoeffType>::ArrheniusRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea)
     : _Cf(Cf),
       _eta(eta),
       _Ea(Ea)
@@ -96,14 +99,14 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType>
-  ArrheniusRate<NumericType>::~ArrheniusRate()
+  template<typename CoeffType>
+  ArrheniusRate<CoeffType>::~ArrheniusRate()
   {
     return;
   }
 
-  template<class NumericType>
-  void ArrheniusRate<NumericType>::print(std::ostream& os) const
+  template<typename CoeffType>
+  void ArrheniusRate<CoeffType>::print(std::ostream& os) const
   {
     os << _Cf;
     if (_eta != 0.) os << "*T^" << _eta;
@@ -113,72 +116,75 @@ namespace Antioch
   }
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  void ArrheniusRate<NumericType>::set_Cf( const NumericType Cf )
+  void ArrheniusRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
     _Cf = Cf;
     return;
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  void ArrheniusRate<NumericType>::set_eta( const NumericType eta )
+  void ArrheniusRate<CoeffType>::set_eta( const CoeffType eta )
   {
     _eta = eta;
     return;
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  void ArrheniusRate<NumericType>::set_Ea( const NumericType Ea )
+  void ArrheniusRate<CoeffType>::set_Ea( const CoeffType Ea )
   {
     _Ea = Ea;
     return;
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  void ArrheniusRate<NumericType>::scale_Ea( const NumericType scale )
+  void ArrheniusRate<CoeffType>::scale_Ea( const CoeffType scale )
   {
     _Ea *= scale;
     return;
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  NumericType ArrheniusRate<NumericType>::Cf() const
+  CoeffType ArrheniusRate<CoeffType>::Cf() const
   { return _Cf; }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  NumericType ArrheniusRate<NumericType>::eta() const
+  CoeffType ArrheniusRate<CoeffType>::eta() const
   { return _eta; }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  NumericType ArrheniusRate<NumericType>::Ea() const
+  CoeffType ArrheniusRate<CoeffType>::Ea() const
   { return _Ea; }
 
-  template<class NumericType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
-  NumericType ArrheniusRate<NumericType>::operator()(const NumericType T) const
+  StateType ArrheniusRate<CoeffType>::operator()(const StateType T) const
   {
     return _Cf* (std::pow(T,_eta)*std::exp(-_Ea/T));
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
-  NumericType ArrheniusRate<NumericType>::derivative( const NumericType T ) const
+  StateType ArrheniusRate<CoeffType>::derivative( const StateType T ) const
   {
     return (*this)(T)/T*(_eta + _Ea/T);
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
-  void ArrheniusRate<NumericType>::rate_and_derivative( const NumericType T,
-							NumericType& rate,
-							NumericType& drate_dT) const
+  void ArrheniusRate<CoeffType>::rate_and_derivative( const StateType T,
+						      StateType& rate,
+						      StateType& drate_dT) const
   {
     rate     = (*this)(T);
     drate_dT = rate/T*(_eta + _Ea/T);
