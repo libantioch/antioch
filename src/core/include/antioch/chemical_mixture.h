@@ -50,7 +50,7 @@ namespace Antioch
     of species from input.
     \todo This should probably be a singleton class, but being lazy for now.
   */
-  template<class NumericType>
+  template<typename CoefType=double>
   class ChemicalMixture
   {
   public:
@@ -62,10 +62,10 @@ namespace Antioch
     unsigned int n_species() const;
 
     void add_species( const unsigned int index, const std::string& name,
-		      NumericType mol_wght, NumericType h_form,
-		      NumericType n_tr_dofs, int charge );
+		      CoefType mol_wght, CoefType h_form,
+		      CoefType n_tr_dofs, int charge );
 
-    const std::vector<ChemicalSpecies<NumericType>*>& chemical_species() const;
+    const std::vector<ChemicalSpecies<CoefType>*>& chemical_species() const;
 
     const std::vector<Species>& species_list() const;
 
@@ -78,13 +78,14 @@ namespace Antioch
     const std::map<Species,std::string>& species_inverse_name_map() const;
 
     //! Gas constant for species s in [J/kg-K]
-    NumericType R( const unsigned int s ) const;
+    CoefType R( const unsigned int s ) const;
 
     //! Gas constant for mixture in [J/kg-K]
-    NumericType R( const std::vector<NumericType>& mass_fractions ) const;
+    template<typename StateType>
+    StateType R( const std::vector<StateType>& mass_fractions ) const;
     
     //! Molecular weight (molar mass) for species s in [g/mol] or [kg/kmol]
-    NumericType M( const unsigned int s ) const;
+    CoefType M( const unsigned int s ) const;
 
     //! Molecular weight (molar mass) for mixture in [g/mol] or [kg/kmol]
     /*!
@@ -92,7 +93,8 @@ namespace Antioch
       \f$ w_s \f$ is the mass fraction of species \f$ s \f$ and
       \f$ M_s \f$ is the molecular weight (molar mass) of species \f$ s \f$
     */
-    NumericType M( const std::vector<NumericType>& mass_fractions ) const;
+    template<typename StateType>
+    StateType M( const std::vector<StateType>& mass_fractions ) const;
 
     //! Species mole fraction
     /*! 
@@ -100,20 +102,34 @@ namespace Antioch
       compute species mole fraction using the relationship
       \f$ w_i = x_i \frac{M_i}{M} \f$ 
     */
-    NumericType X( const unsigned int species, const NumericType M,
-		   const NumericType mass_fraction ) const;
+    template<typename StateType>
+    StateType X( const unsigned int species, const StateType M,
+		 const StateType mass_fraction ) const;
 
     //! All species mole fractions
-    void X( NumericType M, const std::vector<NumericType>& mass_fractions, 
-	    std::vector<NumericType>& mole_fractions ) const;
+    template<typename StateType>
+    void X( StateType M, const std::vector<StateType>& mass_fractions, 
+	    std::vector<StateType>& mole_fractions ) const;
 
-    NumericType molar_density( const unsigned int species,
-			       const NumericType rho,
-			       const NumericType mass_fraction ) const;
+    //! Species molar density
+    /*! 
+      Given total density rho and mass fraction for species,
+      compute species moles per unit volume
+    */
+    template<typename StateType>
+    StateType molar_density( const unsigned int species,
+			     const StateType rho,
+			     const StateType mass_fraction ) const;
 
-    void molar_densities( const NumericType rho,
-			  const std::vector<NumericType>& mass_fractions,
-			  std::vector<NumericType>& molar_densities ) const;
+    //! Species molar densities
+    /*! 
+      Given total density rho and mass fractions for all species,
+      compute moles per unit volume for all species
+    */
+    template<typename StateType>
+    void molar_densities( const StateType rho,
+			  const std::vector<StateType>& mass_fractions,
+			  std::vector<StateType>& molar_densities ) const;
 
   protected:
 
@@ -125,7 +141,7 @@ namespace Antioch
     std::vector<Species> _species_list;
     std::map<Species,unsigned int> _species_list_map;
     std::map<std::string,unsigned int> _active_species_name_map;
-    std::vector<ChemicalSpecies<NumericType>*> _chemical_species;
+    std::vector<ChemicalSpecies<CoefType>*> _chemical_species;
     std::map<std::string,Species> _species_name_map;
     std::map<Species,std::string> _species_inv_name_map;
     
@@ -136,93 +152,96 @@ namespace Antioch
 
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  unsigned int ChemicalMixture<NumericType>::n_species() const
+  unsigned int ChemicalMixture<CoefType>::n_species() const
   {
     return _species_list.size();
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  const std::vector<Species>& ChemicalMixture<NumericType>::species_list() const
+  const std::vector<Species>& ChemicalMixture<CoefType>::species_list() const
   { 
     return _species_list;
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  const std::map<Species,unsigned int>& ChemicalMixture<NumericType>::species_list_map() const
+  const std::map<Species,unsigned int>& ChemicalMixture<CoefType>::species_list_map() const
   {
     return _species_list_map;
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  const std::map<std::string,unsigned int>& ChemicalMixture<NumericType>::active_species_name_map() const
+  const std::map<std::string,unsigned int>& ChemicalMixture<CoefType>::active_species_name_map() const
   {
     return _active_species_name_map;
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  const std::vector<ChemicalSpecies<NumericType>*>& ChemicalMixture<NumericType>::chemical_species() const
+  const std::vector<ChemicalSpecies<CoefType>*>& ChemicalMixture<CoefType>::chemical_species() const
   {
     return _chemical_species;
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  const std::map<std::string,Species>& ChemicalMixture<NumericType>::species_name_map() const
+  const std::map<std::string,Species>& ChemicalMixture<CoefType>::species_name_map() const
   {
     return _species_name_map;
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  const std::map<Species,std::string>& ChemicalMixture<NumericType>::species_inverse_name_map() const
+  const std::map<Species,std::string>& ChemicalMixture<CoefType>::species_inverse_name_map() const
   {
     return _species_inv_name_map;
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  NumericType ChemicalMixture<NumericType>::R( const unsigned int s ) const
+  CoefType ChemicalMixture<CoefType>::R( const unsigned int s ) const
   {
     return (_chemical_species[s])->gas_constant();
   }
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  NumericType ChemicalMixture<NumericType>::M( const unsigned int s ) const
+  CoefType ChemicalMixture<CoefType>::M( const unsigned int s ) const
   {
     return (_chemical_species[s])->molar_mass();
   }
 
-  template<class NumericType>
+  template<typename CoefType>
+  template<typename StateType>
   inline
-  NumericType ChemicalMixture<NumericType>::X( const unsigned int species,
-					       const NumericType M,
-					       const NumericType mass_fraction ) const
+  StateType ChemicalMixture<CoefType>::X( const unsigned int species,
+					  const StateType M,
+					  const StateType mass_fraction ) const
   {
     return mass_fraction*M/this->M(species);
   }
 
-  template<class NumericType>
+  template<typename CoefType>
+  template<typename StateType>
   inline
-  NumericType ChemicalMixture<NumericType>::molar_density( const unsigned int species,
-							   const NumericType rho,
-							   const NumericType mass_fraction ) const
+  StateType ChemicalMixture<CoefType>::molar_density( const unsigned int species,
+						      const StateType rho,
+						      const StateType mass_fraction ) const
   {
     antioch_assert_greater( rho, 0.0 );
     return rho*mass_fraction/this->M(species);
   }
 
-  template<class NumericType>
+  template<typename CoefType>
+  template<typename StateType>
   inline
-  void ChemicalMixture<NumericType>::molar_densities( const NumericType rho,
-						      const std::vector<NumericType>& mass_fractions,
-						      std::vector<NumericType>& molar_densities ) const
+  void ChemicalMixture<CoefType>::molar_densities( const StateType rho,
+						   const std::vector<StateType>& mass_fractions,
+						   std::vector<StateType>& molar_densities ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
@@ -235,9 +254,9 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  ChemicalMixture<NumericType>::ChemicalMixture( const std::vector<std::string>& species_list )
+  ChemicalMixture<CoefType>::ChemicalMixture( const std::vector<std::string>& species_list )
     : _chemical_species( species_list.size(), NULL )
   {
     // Build up name map for all possible species
@@ -266,12 +285,12 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  ChemicalMixture<NumericType>::~ChemicalMixture()
+  ChemicalMixture<CoefType>::~ChemicalMixture()
   {
     // Clean up all the ChemicalSpecies we stored
-    for( typename std::vector<ChemicalSpecies<NumericType>* >::iterator it = _chemical_species.begin();
+    for( typename std::vector<ChemicalSpecies<CoefType>* >::iterator it = _chemical_species.begin();
 	 it < _chemical_species.end(); ++it )
       {
 	delete (*it);
@@ -281,13 +300,14 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
+  template<typename StateType>
   inline
-  NumericType ChemicalMixture<NumericType>::R( const std::vector<NumericType>& mass_fractions ) const
+  StateType ChemicalMixture<CoefType>::R( const std::vector<StateType>& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
     
-    NumericType R = 0.0;
+    StateType R = 0.0;
     for( unsigned int s = 0; s < mass_fractions.size(); s++ )
       {
 	R += mass_fractions[s]*this->R(s);
@@ -297,13 +317,14 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
+  template<typename StateType>
   inline
-  NumericType ChemicalMixture<NumericType>::M( const std::vector<NumericType>& mass_fractions ) const
+  StateType ChemicalMixture<CoefType>::M( const std::vector<StateType>& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
 
-    NumericType M = 0.0;
+    StateType M = 0.0;
     for( unsigned int s = 0; s < mass_fractions.size(); s++ )
       {
 	M += mass_fractions[s]/(this->M(s));
@@ -313,11 +334,12 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
+  template<typename StateType>
   inline
-  void ChemicalMixture<NumericType>::X( NumericType M,
-					const std::vector<NumericType>& mass_fractions, 
-					std::vector<NumericType>& mole_fractions ) const
+  void ChemicalMixture<CoefType>::X( StateType M,
+				     const std::vector<StateType>& mass_fractions, 
+				     std::vector<StateType>& mole_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
 
@@ -332,24 +354,24 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  void ChemicalMixture<NumericType>::add_species( const unsigned int index,
-						  const std::string& name,
-						  NumericType mol_wght,
-						  NumericType h_form,
-						  NumericType n_tr_dofs, int charge)
+  void ChemicalMixture<CoefType>::add_species( const unsigned int index,
+					       const std::string& name,
+					       CoefType mol_wght,
+					       CoefType h_form,
+					       CoefType n_tr_dofs, int charge)
   {
     _chemical_species[index] =
-      new ChemicalSpecies<NumericType>(name, mol_wght, h_form, n_tr_dofs, charge);
+      new ChemicalSpecies<CoefType>(name, mol_wght, h_form, n_tr_dofs, charge);
 
     return;
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  void ChemicalMixture<NumericType>::init_species_name_map()
+  void ChemicalMixture<CoefType>::init_species_name_map()
   {
     _species_name_map["Air"  ] = Air; 
     _species_name_map["CPAir"] = CPAir; 
@@ -416,9 +438,9 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoefType>
   inline
-  void ChemicalMixture<NumericType>::build_inverse_name_map()
+  void ChemicalMixture<CoefType>::build_inverse_name_map()
   {
     for( std::map<std::string,Species>::const_iterator it = _species_name_map.begin();
 	 it != _species_name_map.end(); ++it )
