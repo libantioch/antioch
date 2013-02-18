@@ -83,5 +83,6 @@ int main()
 
   // This doesn't link yet
 //  return (tester<double>() ||
+//          tester<long double>() ||
 //          tester<float>());
 }

@@ -127,6 +127,7 @@ int main(int argc, char* argv[])
 
   // This doesn't link yet
 //  return (tester<double>(std::string(argv[1])) ||
+//          tester<long double>(std::string(argv[1])) ||
 //          tester<float>(std::string(argv[1])));
 }
 

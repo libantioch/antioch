@@ -269,5 +269,6 @@ int main()
 
   // This is still a link-time failure:
 //  return (tester<double>() ||
+//          tester<long double>() ||
 //          tester<float>());
 }

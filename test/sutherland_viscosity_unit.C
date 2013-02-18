@@ -59,17 +59,17 @@ int test_viscosity( const Scalar mu, const Scalar mu_exact, const Scalar tol )
 template <typename Scalar>
 int tester()
 {
-  const Scalar mu_ref = 1.0e-3;
-  const Scalar T_ref = 300.0;
+  const Scalar mu_ref = 1.0e-3L;
+  const Scalar T_ref = 300.0L;
 
   Antioch::SutherlandViscosity<Scalar> mu(mu_ref,T_ref);
 
   std::cout << mu << std::endl;
 
-  const Scalar T = 1521.2;
+  const Scalar T = 1521.2L;
 
-  // octave gives
-  const Scalar mu_exact = 0.0325778060534850;
+  // bc with scale=40 gives
+  const Scalar mu_exact = .0325778060534850406481862157435995107036L;
 
   int return_flag = 0;
 
@@ -77,13 +77,13 @@ int tester()
 
   return_flag = test_viscosity( mu(T), mu_exact, tol );
   
-  const Scalar mu_ref2 = 3.14159e-3;
-  const Scalar T_ref2 = 420.42;
+  const Scalar mu_ref2 = 3.14159e-3L;
+  const Scalar T_ref2 = 420.42L;
 
   mu.reset_coeffs(mu_ref2,T_ref2);
 
-  // octave gives
-  const Scalar mu_exact2 = 0.0959985656417205;
+  // bc with scale=40 gives
+  const Scalar mu_exact2 = .0959985656417205050367745642313443587197L;
 
   return_flag = test_viscosity( mu(T), mu_exact2, tol );
 
@@ -94,5 +94,6 @@ int tester()
 int main()
 {
   return (tester<double>() ||
+          tester<long double>() ||
           tester<float>());
 }
