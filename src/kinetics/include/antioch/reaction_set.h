@@ -43,7 +43,7 @@ namespace Antioch
    * This class encapsulates all the reaction mechanisms considered in a
    * chemical nonequilibrium simulation.
    */
-  template<class CoeffType>
+  template<typename CoeffType>
   class ReactionSet
   {
 
@@ -99,21 +99,21 @@ namespace Antioch
   };
   
   /* ------------------------- Inline Functions -------------------------*/
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int ReactionSet<CoeffType>::n_species() const
   {
     return _chem_mixture.n_species();
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int ReactionSet<CoeffType>::n_reactions() const
   {
     return _reactions.size();
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void ReactionSet<CoeffType>::add_reaction(const Reaction<CoeffType>& reaction)
   {
@@ -125,7 +125,7 @@ namespace Antioch
     return;
   }
   
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const      
   {
@@ -133,7 +133,7 @@ namespace Antioch
     return _reactions[r];
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   const ChemicalMixture<CoeffType>& ReactionSet<CoeffType>::chemical_mixture() const
   {
@@ -141,7 +141,7 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   ReactionSet<CoeffType>::ReactionSet( const ChemicalMixture<CoeffType>& chem_mixture )
     : _chem_mixture(chem_mixture)
@@ -150,7 +150,7 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   ReactionSet<CoeffType>::~ReactionSet()
   {
@@ -158,8 +158,8 @@ namespace Antioch
   }
   
 
-  template<class CoeffType>
-  template<class StateType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType T,
 							const StateType rho,
@@ -200,7 +200,7 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void ReactionSet<CoeffType>::print(std::ostream& os) const
   {

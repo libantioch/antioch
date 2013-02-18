@@ -48,7 +48,7 @@ namespace Antioch
     to be reversible. This class was originally taken from \p FIN-S.
     \todo{Do we want to template this class around the rate type?}
   */
-  template<class CoeffType>
+  template<typename CoeffType>
   class Reaction
   {
   public:
@@ -200,28 +200,28 @@ namespace Antioch
   };
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int Reaction<CoeffType>::n_species() const
   {
     return _n_species;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   std::string Reaction<CoeffType>::equation() const
   {
     return _equation;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   ReactionType::ReactionType Reaction<CoeffType>::type() const
   {
     return _type;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void Reaction<CoeffType>::set_type( const ReactionType::ReactionType type)
   {
@@ -229,14 +229,14 @@ namespace Antioch
     return;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   bool Reaction<CoeffType>::initialized() const
   {
     return _initialized;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int Reaction<CoeffType>::n_reactants () const
   {
@@ -246,7 +246,7 @@ namespace Antioch
     return _reactant_ids.size();
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int Reaction<CoeffType>::n_products() const
   {
@@ -256,7 +256,7 @@ namespace Antioch
     return _product_ids.size();
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   const std::string& Reaction<CoeffType>::reactant_name(const unsigned int r) const
   {       
@@ -264,7 +264,7 @@ namespace Antioch
     return _reactant_names[r]; 
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   const std::string& Reaction<CoeffType>::product_name(const unsigned int p) const
   { 
@@ -272,7 +272,7 @@ namespace Antioch
     return _product_names[p]; 
   }
   
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int Reaction<CoeffType>::reactant_id(const unsigned int r) const
   { 
@@ -281,7 +281,7 @@ namespace Antioch
     return _reactant_ids[r]; 
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int Reaction<CoeffType>::product_id(const unsigned int p) const
   { 
@@ -290,7 +290,7 @@ namespace Antioch
     return _product_ids[p]; 
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int Reaction<CoeffType>::reactant_stoichiometric_coefficient(const unsigned int r) const
   {      
@@ -299,7 +299,7 @@ namespace Antioch
     return _reactant_stoichiometry[r];
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   unsigned int Reaction<CoeffType>::product_stoichiometric_coefficient(const unsigned int p) const
   {
@@ -308,7 +308,7 @@ namespace Antioch
     return _product_stoichiometry[p];
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void Reaction<CoeffType>::add_reactant (const std::string &name,
 			                  const unsigned int r_id,
@@ -321,7 +321,7 @@ namespace Antioch
     return;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void Reaction<CoeffType>::add_product (const std::string &name,
 			                 const unsigned int p_id,
@@ -334,7 +334,7 @@ namespace Antioch
     return;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void Reaction<CoeffType>::set_efficiency (const std::string &,
 				            const unsigned int s,
@@ -347,7 +347,7 @@ namespace Antioch
     return;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   CoeffType Reaction<CoeffType>::efficiency( const unsigned int s ) const
   {
@@ -356,21 +356,21 @@ namespace Antioch
     return _efficiencies[s];
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   int Reaction<CoeffType>::gamma () const
   {
     return _gamma;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   const ArrheniusRate<CoeffType>& Reaction<CoeffType>::forward_rate() const
   {
     return _forward_rate;
   }
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   ArrheniusRate<CoeffType>& Reaction<CoeffType>::forward_rate()
   {
@@ -378,7 +378,7 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   Reaction<CoeffType>::Reaction( const unsigned int n_species,
 				 const std::string &equation ) 
@@ -393,7 +393,7 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   Reaction<CoeffType>::~Reaction()
   {
@@ -401,7 +401,7 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void Reaction<CoeffType>::initialize()
   {
@@ -448,8 +448,8 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
-  template<class StateType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
   StateType Reaction<CoeffType>::equilibrium_constant( const StateType P0_RT,
 						       const std::vector<StateType>& h_RT_minus_s_R ) const
@@ -471,8 +471,8 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
-  template<class StateType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
   void Reaction<CoeffType>::equilibrium_constant_and_derivative( const StateType T,
 								 const StateType P0_RT,
@@ -504,8 +504,8 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
-  template<class StateType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
   StateType Reaction<CoeffType>::compute_rate_of_progress( const std::vector<StateType>& molar_densities,
 							   const StateType kfwd, 
@@ -572,8 +572,8 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
-  template<class StateType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
   void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const std::vector<StateType> &molar_densities,
 								      const std::vector<StateType> &molar_mass,
@@ -723,7 +723,7 @@ namespace Antioch
   }
 
 
-  template<class CoeffType>
+  template<typename CoeffType>
   inline
   void Reaction<CoeffType>::print( std::ostream& os ) const
   {
