@@ -69,13 +69,7 @@ namespace Antioch
       StateType lnT;
       
       explicit Cache(const StateType &T_in) 
-	: T(T_in)
-      {
-	T2  = T*T;
-	T3  = T2*T;
-	T4  = T2*T2;
-	lnT = std::log(T);	
-      }
+	: T(T_in), T2(T*T), T3(T2*T), T4(T2*T2), lnT(std::log(T)) {}
     private:
       Cache();      
     };
@@ -215,6 +209,7 @@ namespace Antioch
   inline
   StateType CEAThermodynamics<CoeffType>::cp( const Cache<StateType> &cache, unsigned int species ) const
   {
+    /*! \todo This needs to be vectorizable */
     StateType cp = 0.0;
 
     if( cache.T < 200.1 )
@@ -237,10 +232,11 @@ namespace Antioch
 					      const std::vector<StateType>& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _species_curve_fits.size() );
+    antioch_assert_greater( mass_fractions.size(), 0 );
 
-    StateType cp = 0.0;
+    StateType cp = mass_fractions[0]*this->cp(cache,0);
 
-    for( unsigned int s = 0; s < _species_curve_fits.size(); s++ )
+    for( unsigned int s = 1; s < _species_curve_fits.size(); s++ )
       {
 	cp += mass_fractions[s]*this->cp(cache,s);
       }

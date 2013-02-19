@@ -306,9 +306,10 @@ namespace Antioch
   StateType ChemicalMixture<CoeffType>::R( const std::vector<StateType>& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
+    antioch_assert_greater( mass_fractions.size(), 0);
     
-    StateType R = 0.0;
-    for( unsigned int s = 0; s < mass_fractions.size(); s++ )
+    StateType R = mass_fractions[0]*this->R(0);
+    for( unsigned int s = 1; s < mass_fractions.size(); s++ )
       {
 	R += mass_fractions[s]*this->R(s);
       }
@@ -324,8 +325,8 @@ namespace Antioch
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
 
-    StateType M = 0.0;
-    for( unsigned int s = 0; s < mass_fractions.size(); s++ )
+    StateType M = mass_fractions[0]/this->M(0);
+    for( unsigned int s = 1; s < mass_fractions.size(); s++ )
       {
 	M += mass_fractions[s]/(this->M(s));
       }

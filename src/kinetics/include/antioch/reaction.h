@@ -456,12 +456,14 @@ namespace Antioch
   {
     antioch_assert( this->initialized() );
     antioch_assert_greater( P0_RT, 0.0 );
+    antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
 
-    StateType exppower = 0.;
+    StateType exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
+		            h_RT_minus_s_R[0] );
 
-    for (unsigned int s=0; s < this->n_species(); s++)
+    for (unsigned int s=1; s < this->n_species(); s++)
       {
 	exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
 		       h_RT_minus_s_R[s] );
@@ -484,6 +486,7 @@ namespace Antioch
     antioch_assert(this->initialized());
     antioch_assert_greater( P0_RT, 0.0 );
     antioch_assert_greater( T, 0.0 );
+    antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( ddT_h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
@@ -491,9 +494,10 @@ namespace Antioch
     // get the equilibrium constant
     keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-    StateType ddT_exppower = 0.;
+    StateType ddT_exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
+			        ddT_h_RT_minus_s_R[0] );
 
-    for (unsigned int s=0; s<this->n_species(); s++)
+    for (unsigned int s=1; s<this->n_species(); s++)
       ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
 			 ddT_h_RT_minus_s_R[s] );
 
@@ -513,8 +517,6 @@ namespace Antioch
   {
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
 
-    StateType Rfwd = 0.0;
-    StateType Rbkwd = 0.0;
     StateType kfwd_times_reactants = kfwd;
     StateType kbkwd_times_products = kbkwd;
 
@@ -537,8 +539,7 @@ namespace Antioch
 	// the product of the reactants, products respectively.
       case(ReactionType::ELEMENTARY):
 	{
-	  Rfwd  = kfwd_times_reactants;
-	  Rbkwd = kbkwd_times_products;
+	  return kfwd_times_reactants - kbkwd_times_products;
 	}
 	break;
 	
@@ -546,7 +547,15 @@ namespace Antioch
 	// contrbution from each collision partner
       case(ReactionType::THREE_BODY):
 	{
-	  for (unsigned int s=0; s<this->n_species(); s++)
+	  StateType Rfwd = ( kfwd_times_reactants * 
+		             this->efficiency(0) *
+		             molar_densities[0] );
+
+	  StateType Rbkwd = ( kbkwd_times_products *
+		              this->efficiency(0) *
+		              molar_densities[0] );
+
+	  for (unsigned int s=1; s<this->n_species(); s++)
 	    {	     
 	      Rfwd += ( kfwd_times_reactants * 
 			this->efficiency(s) *
@@ -556,6 +565,8 @@ namespace Antioch
 			 this->efficiency(s) *
 			 molar_densities[s] );
 	    }
+
+	  return Rfwd - Rbkwd;
 	}
 	break;
 	
@@ -567,8 +578,9 @@ namespace Antioch
 	break;
       }
 
-    // Rnet = Rfwd - Rbkwd
-    return (Rfwd - Rbkwd);
+    // We should have returned by now
+    antioch_error();
+    return kfwd;
   }
 
 
@@ -590,16 +602,22 @@ namespace Antioch
     antioch_assert_equal_to (molar_densities.size(), this->n_species());
     antioch_assert_equal_to (molar_mass.size(),      this->n_species());
 
+    // If users want to use valarrays, then the output reference sizes
+    // had better already match the input value sizes...
     Rfwd = 0.0;
     dRfwd_dT = 0.0;
     Rbkwd = 0.0;
     dRbkwd_dT = 0.0;
-    dRfwd_drho.resize(this->n_species());
-    dRbkwd_drho.resize (this->n_species());
 
+    // We need to construct using an input StateType argument if we
+    // want StateType==valarray to have the right sizes
+    // valarray compatibility makes this a bit redundant, but not much
+    // worse than the previous version
+    dRfwd_drho.resize(this->n_species(), kfwd);
+    dRbkwd_drho.resize(this->n_species(), kfwd);
     std::fill( dRfwd_drho.begin(),  dRfwd_drho.end(),  0.);    
     std::fill( dRbkwd_drho.begin(), dRbkwd_drho.end(), 0.);
-    
+
     StateType kfwd_times_reactants = kfwd;
     StateType kbkwd_times_products = kbkwd;
     StateType ddT_kfwd_times_reactants = dkfwd_dT;
@@ -681,9 +699,9 @@ namespace Antioch
 	// contrbution from each collision partner
       case(ReactionType::THREE_BODY):
 	{
-	  StateType summed_value=0.0;
+	  StateType summed_value = this->efficiency(0) * molar_densities[0];
 
-	  for (unsigned int s=0; s < this->n_species(); s++)
+	  for (unsigned int s=1; s < this->n_species(); s++)
 	    {
 	      summed_value += this->efficiency(s) * molar_densities[s];
 	    }
