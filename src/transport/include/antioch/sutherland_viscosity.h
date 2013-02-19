@@ -39,20 +39,21 @@
 
 namespace Antioch
 {
-  template<class NumericType>
+  template<typename CoeffType=double>
   class SutherlandViscosity
   {
   public:
 
-    SutherlandViscosity( const NumericType mu_ref, const NumericType T_ref );
+    SutherlandViscosity( const CoeffType mu_ref, const CoeffType T_ref );
 
-    SutherlandViscosity( const std::vector<NumericType>& coeffs );
+    SutherlandViscosity( const std::vector<CoeffType>& coeffs );
 
     ~SutherlandViscosity();
 
-    NumericType operator()( NumericType T ) const;
+    template <typename StateType>
+    StateType operator()( StateType T ) const;
     
-    void reset_coeffs( const NumericType mu_ref, const NumericType T_ref );
+    void reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref );
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -66,8 +67,8 @@ namespace Antioch
 
   protected:
 
-    NumericType _mu_ref;
-    NumericType _T_ref;
+    CoeffType _mu_ref;
+    CoeffType _T_ref;
     
   private:
     
@@ -75,15 +76,15 @@ namespace Antioch
 
   };
 
-  template<class NumericType>
-  SutherlandViscosity<NumericType>::SutherlandViscosity( const NumericType mu_ref, const NumericType T_ref )
+  template<typename CoeffType>
+  SutherlandViscosity<CoeffType>::SutherlandViscosity( const CoeffType mu_ref, const CoeffType T_ref )
     : _mu_ref(mu_ref), _T_ref(T_ref)
   {
     return;
   }
 
-  template<class NumericType>
-  SutherlandViscosity<NumericType>::SutherlandViscosity( const std::vector<NumericType>& coeffs )
+  template<typename CoeffType>
+  SutherlandViscosity<CoeffType>::SutherlandViscosity( const std::vector<CoeffType>& coeffs )
     : _mu_ref(-1.0), _T_ref(-1.0)
   {
     antioch_assert_equal_to( coeffs.size(), 2 );
@@ -92,14 +93,14 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType>
-  SutherlandViscosity<NumericType>::~SutherlandViscosity()
+  template<typename CoeffType>
+  SutherlandViscosity<CoeffType>::~SutherlandViscosity()
   {
     return;
   }
 
-  template<class NumericType>
-  void SutherlandViscosity<NumericType>::print(std::ostream& os) const
+  template<typename CoeffType>
+  void SutherlandViscosity<CoeffType>::print(std::ostream& os) const
   {
     os << _mu_ref << "*T^(3/2)/(T + " << _T_ref << ")" << std::endl;
 
@@ -107,16 +108,17 @@ namespace Antioch
   }
 
   /* ------------------------- Inline Functions ------------------------- */
-  template<class NumericType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
-  NumericType SutherlandViscosity<NumericType>::operator()( NumericType T ) const
+  StateType SutherlandViscosity<CoeffType>::operator()( StateType T ) const
   {
     return _mu_ref*std::pow(T,1.5)/(T+_T_ref);
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  void SutherlandViscosity<NumericType>::reset_coeffs( const NumericType mu_ref, const NumericType T_ref )
+  void SutherlandViscosity<CoeffType>::reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref )
   {
     _mu_ref = mu_ref;
     _T_ref = T_ref;

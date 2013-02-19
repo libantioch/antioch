@@ -37,7 +37,7 @@
 
 namespace Antioch
 {
-  template<typename CoeffType>
+  template<typename CoeffType=double>
   class CEACurveFit
   {
   public:

@@ -39,20 +39,21 @@
 
 namespace Antioch
 {
-  template<class NumericType>
+  template<typename CoeffType=double>
   class BlottnerViscosity
   {
   public:
 
-    BlottnerViscosity( const NumericType a, const NumericType b, const NumericType c );
+    BlottnerViscosity( const CoeffType a, const CoeffType b, const CoeffType c );
 
-    BlottnerViscosity( const std::vector<NumericType>& coeffs );
+    BlottnerViscosity( const std::vector<CoeffType>& coeffs );
 
     ~BlottnerViscosity();
 
-    NumericType operator()( NumericType T ) const;
+    template <typename StateType>
+    StateType operator()( StateType T ) const;
     
-    void reset_coeffs( const NumericType a, const NumericType b, const NumericType c );
+    void reset_coeffs( const CoeffType a, const CoeffType b, const CoeffType c );
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -66,9 +67,9 @@ namespace Antioch
 
   protected:
 
-    NumericType _a;
-    NumericType _b;
-    NumericType _c;
+    CoeffType _a;
+    CoeffType _b;
+    CoeffType _c;
     
   private:
     
@@ -76,17 +77,17 @@ namespace Antioch
 
   };
 
-  template<class NumericType>
-  BlottnerViscosity<NumericType>::BlottnerViscosity(const NumericType a,
-						    const NumericType b,
-						    const NumericType c)
+  template<typename CoeffType>
+  BlottnerViscosity<CoeffType>::BlottnerViscosity(const CoeffType a,
+						  const CoeffType b,
+						  const CoeffType c)
     : _a(a), _b(b), _c(c)
   {
     return;
   }
 
-  template<class NumericType>
-  BlottnerViscosity<NumericType>::BlottnerViscosity( const std::vector<NumericType>& coeffs )
+  template<typename CoeffType>
+  BlottnerViscosity<CoeffType>::BlottnerViscosity( const std::vector<CoeffType>& coeffs )
     : _a(-1.0), _b(-1.0), _c(-1.0)
   {
     antioch_assert_equal_to( coeffs.size(), 3);
@@ -96,14 +97,14 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType>
-  BlottnerViscosity<NumericType>::~BlottnerViscosity()
+  template<typename CoeffType>
+  BlottnerViscosity<CoeffType>::~BlottnerViscosity()
   {
     return;
   }
 
-  template<class NumericType>
-  void BlottnerViscosity<NumericType>::print(std::ostream& os) const
+  template<typename CoeffType>
+  void BlottnerViscosity<CoeffType>::print(std::ostream& os) const
   {
     os << 0.1 << "*exp(" << _a << "*(logT)^2 + " << _b << "*logT + " << _c << ")" << std::endl;
 
@@ -111,19 +112,20 @@ namespace Antioch
   }
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
-  NumericType BlottnerViscosity<NumericType>::operator()( NumericType T ) const
+  StateType BlottnerViscosity<CoeffType>::operator()( StateType T ) const
   {
-    NumericType logT = std::log(T);
+    StateType logT = std::log(T);
     return 0.1*std::exp( (_a*logT + _b)*logT + _c );
   }
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  void BlottnerViscosity<NumericType>::reset_coeffs( const NumericType a,
-						     const NumericType b,
-						     const NumericType c )
+  void BlottnerViscosity<CoeffType>::reset_coeffs( const CoeffType a,
+						   const CoeffType b,
+						   const CoeffType c )
   {
     _a = a;
     _b = b;

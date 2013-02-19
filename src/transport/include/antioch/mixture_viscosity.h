@@ -38,20 +38,21 @@
 
 namespace Antioch
 {
-  template<class Viscosity, class NumericType>
+  template<typename Viscosity, class CoeffType=double>
   class MixtureViscosity
   {
   public:
 
-    MixtureViscosity( const ChemicalMixture<NumericType>& chem_mixture );
+    MixtureViscosity( const ChemicalMixture<CoeffType>& chem_mixture );
     ~MixtureViscosity();
 
-    NumericType operator()( const unsigned int s, const NumericType T ) const;
+    template <typename StateType>
+    StateType operator()( const unsigned int s, const StateType T ) const;
 
     void add( const std::string& species_name,
-	      const std::vector<NumericType>& coeffs );
+	      const std::vector<CoeffType>& coeffs );
 
-    const ChemicalMixture<NumericType>& chemical_mixture() const;
+    const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -65,22 +66,22 @@ namespace Antioch
 
   protected:
 
-    const ChemicalMixture<NumericType>& _chem_mixture;
+    const ChemicalMixture<CoeffType>& _chem_mixture;
 
     std::vector<Viscosity*> _species_viscosities;
 
   };
 
-  template<class Viscosity, class NumericType>
-  MixtureViscosity<Viscosity,NumericType>::MixtureViscosity( const ChemicalMixture<NumericType>& chem_mixture )
+  template<typename Viscosity, class CoeffType>
+  MixtureViscosity<Viscosity,CoeffType>::MixtureViscosity( const ChemicalMixture<CoeffType>& chem_mixture )
     :  _chem_mixture(chem_mixture),
        _species_viscosities( chem_mixture.n_species(), NULL )
   {
     return;
   }
 
-  template<class Viscosity, class NumericType>
-  MixtureViscosity<Viscosity,NumericType>::~MixtureViscosity()
+  template<typename Viscosity, class CoeffType>
+  MixtureViscosity<Viscosity,CoeffType>::~MixtureViscosity()
   {
     // Need to delete all the species viscosities we allocated
     for( typename std::vector<Viscosity*>::iterator it = _species_viscosities.begin();
@@ -91,9 +92,9 @@ namespace Antioch
     return;
   }
 
-  template<class Viscosity, class NumericType>
-  void MixtureViscosity<Viscosity,NumericType>::add( const std::string& species_name,
-						     const std::vector<NumericType>& coeffs )
+  template<typename Viscosity, class CoeffType>
+  void MixtureViscosity<Viscosity,CoeffType>::add( const std::string& species_name,
+						   const std::vector<CoeffType>& coeffs )
   {
     antioch_assert( _chem_mixture.active_species_name_map().find(species_name) !=
 		    _chem_mixture.active_species_name_map().end() );
@@ -107,10 +108,11 @@ namespace Antioch
     return;
   }
 
-  template<class Viscosity, class NumericType>
+  template<typename Viscosity, class CoeffType>
+  template<typename StateType>
   inline
-  NumericType MixtureViscosity<Viscosity,NumericType>::operator()( const unsigned int s,
-								   const NumericType T ) const
+  StateType MixtureViscosity<Viscosity,CoeffType>::operator()( const unsigned int s,
+							       const StateType T ) const
   {
     antioch_assert_less_equal( s, _species_viscosities.size() );
     antioch_assert( _species_viscosities[s] );
@@ -118,15 +120,15 @@ namespace Antioch
     return (*_species_viscosities[s])(T);
   }
 
-  template<class Viscosity, class NumericType>
+  template<typename Viscosity, class CoeffType>
   inline
-  const ChemicalMixture<NumericType>& MixtureViscosity<Viscosity,NumericType>::chemical_mixture() const
+  const ChemicalMixture<CoeffType>& MixtureViscosity<Viscosity,CoeffType>::chemical_mixture() const
   {
     return _chem_mixture;
   }
 
-  template<class Viscosity, class NumericType>
-  void MixtureViscosity<Viscosity,NumericType>::print(std::ostream& os) const
+  template<typename Viscosity, class CoeffType>
+  void MixtureViscosity<Viscosity,CoeffType>::print(std::ostream& os) const
   {
     antioch_assert_equal_to( _species_viscosities.size(), _chem_mixture.n_species() );
 
