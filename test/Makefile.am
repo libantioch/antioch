@@ -8,6 +8,7 @@ check_PROGRAMS += arrhenius_rate_vec_unit
 check_PROGRAMS += kinetics_unit
 check_PROGRAMS += kinetics_regression
 check_PROGRAMS += blottner_viscosity_unit
+check_PROGRAMS += blottner_viscosity_vec_unit
 check_PROGRAMS += sutherland_viscosity_unit
 check_PROGRAMS += mixture_viscosity_unit
 
@@ -30,6 +31,7 @@ arrhenius_rate_vec_unit_SOURCES = arrhenius_rate_vec_unit.C
 kinetics_unit_SOURCES = kinetics_unit.C
 kinetics_regression_SOURCES = kinetics_regression.C
 blottner_viscosity_unit_SOURCES = blottner_viscosity_unit.C
+blottner_viscosity_vec_unit_SOURCES = blottner_viscosity_vec_unit.C
 sutherland_viscosity_unit_SOURCES = sutherland_viscosity_unit.C
 mixture_viscosity_unit_SOURCES = mixture_viscosity_unit.C
 
@@ -42,6 +44,7 @@ TESTS += arrhenius_rate_vec_unit
 TESTS += kinetics_unit_air_5sp.sh
 TESTS += kinetics_regression_air_5sp.sh
 TESTS += blottner_viscosity_unit
+TESTS += blottner_viscosity_vec_unit
 TESTS += sutherland_viscosity_unit
 TESTS += mixture_viscosity_unit
 
