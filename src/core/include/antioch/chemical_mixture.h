@@ -232,7 +232,8 @@ namespace Antioch
 						       const StateType rho,
 						       const StateType mass_fraction ) const
   {
-    antioch_assert_greater( rho, 0.0 );
+    // !\todo Figure out how to make this assert vector-compatible
+    // antioch_assert_greater( rho, 0.0 );
     return rho*mass_fraction/this->M(species);
   }
 
@@ -245,7 +246,10 @@ namespace Antioch
   {
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
-    antioch_assert_greater( rho, 0.0 );
+
+    // !\todo Figure out how to make this assert vector-compatible
+    // antioch_assert_greater( rho, 0.0 );
+
     for( unsigned int s = 0; s < this->n_species(); s++ )
       {
 	molar_densities[s] = rho*mass_fractions[s]/this->M(s);

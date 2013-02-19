@@ -132,16 +132,18 @@ namespace Antioch
 						  const std::vector<StateType>& h_RT_minus_s_R,
 						  std::vector<StateType>& mass_sources )
   {
-    antioch_assert_greater(T, 0.0);
-    antioch_assert_greater(rho, 0.0);
-    antioch_assert_greater(R_mix, 0.0);
+    //! \todo Make these assertions vector-compatible
+    // antioch_assert_greater(T, 0.0);
+    // antioch_assert_greater(rho, 0.0);
+    // antioch_assert_greater(R_mix, 0.0);
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( mass_sources.size(), this->n_species() );
 
     //! Work arrays for compute mass sources
-    std::vector<StateType> net_reaction_rates(this->n_reactions(), 0);
+    // Use a copy constructor here to handle vector StateType sizing
+    std::vector<StateType> net_reaction_rates(this->n_reactions(), T);
 
     std::fill( mass_sources.begin(), mass_sources.end(), 0.0 );
     

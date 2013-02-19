@@ -40,32 +40,13 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
 #include "antioch/input_utils.h"
+#include "antioch/metaprogramming.h"
 
 namespace Antioch
 {
   // Forward declarations
   template<typename CoeffType>
   class CEACurveFit;
-
-  // Helper metafunctions
-  template <bool B, class T = void>
-  struct enable_if_c {
-    typedef T type;
-  };
-
-  template <class T>
-  struct enable_if_c<false, T> {};
-
-  template <typename T>
-  class has_size
-  {
-    typedef char no;
-    typedef char yes[2];
-    template <class C> static yes& test(char (*)[sizeof(&C::size)]);
-    template <class C> static no& test(...);
-  public:
-    const static bool value = (sizeof(test<T>(0)) == sizeof(yes&));
-  };
 
   template<typename CoeffType=double>
   class CEAThermodynamics
@@ -136,8 +117,18 @@ namespace Antioch
     template<typename StateType>
     void h( const Cache<StateType> &cache, std::vector<StateType>& h ) const;
 
+    //! We currently need different specializations for scalar vs vector inputs here
     template<typename StateType>
-    StateType h_RT_minus_s_R( const Cache<StateType> &cache, unsigned int species ) const;
+    typename enable_if_c<
+      !has_size<StateType>::value, StateType
+    >::type 
+    h_RT_minus_s_R( const Cache<StateType> &cache, unsigned int species ) const;
+
+    template<typename StateType>
+    typename enable_if_c<
+      has_size<StateType>::value, StateType
+    >::type 
+    h_RT_minus_s_R( const Cache<StateType> &cache, unsigned int species ) const;
 
     template<typename StateType>
     void h_RT_minus_s_R( const Cache<StateType> &cache, std::vector<StateType>& h_RT_minus_s_R ) const;
@@ -394,7 +385,10 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEAThermodynamics<CoeffType>::h_RT_minus_s_R( const Cache<StateType> &cache, unsigned int species ) const
+  typename enable_if_c<
+    !has_size<StateType>::value, StateType
+  >::type 
+  CEAThermodynamics<CoeffType>::h_RT_minus_s_R( const Cache<StateType> &cache, unsigned int species ) const
   {
     antioch_assert_less( species, _species_curve_fits.size() );
     antioch_assert_less( _species_curve_fits[species]->interval(cache.T),
@@ -407,6 +401,33 @@ namespace Antioch
     /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
        s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
     return -a[0]/cache.T2/2.0 + (a[1] + a[8])/cache.T + a[1]*cache.lnT/cache.T - a[2]*cache.lnT + (a[2] - a[9]) - a[3]*cache.T/2.0 - a[4]*cache.T2/6.0 - a[5]*cache.T3/12.0 - a[6]*cache.T4/20.0;
+  }
+
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  typename enable_if_c<
+    has_size<StateType>::value, StateType
+  >::type 
+  CEAThermodynamics<CoeffType>::h_RT_minus_s_R( const Cache<StateType> &cache, unsigned int species ) const
+  {
+    antioch_assert_less( species, _species_curve_fits.size() );
+
+    const std::size_t size = cache.T.size();
+
+    // copy constructor to handle sizing
+    StateType returnval = cache.T;
+
+    for (std::size_t i = 0; i != size; ++i)
+      {
+        typedef typename 
+          CEAThermodynamics<CoeffType>::
+            template Cache<typename StateType::value_type> SubCache;
+        returnval[i] = this->h_RT_minus_s_R
+	  (SubCache(cache.T[i],cache.T2[i],cache.T3[i],cache.T4[i],cache.lnT[i]),
+	   species);
+      }
   }
 
 

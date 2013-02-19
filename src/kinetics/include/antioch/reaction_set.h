@@ -170,9 +170,12 @@ namespace Antioch
 							std::vector<StateType>& net_reaction_rates ) const
   {
     antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
-    antioch_assert_greater(T, 0.0);
-    antioch_assert_greater(rho, 0.0);
-    antioch_assert_greater(R_mix, 0.0);
+
+    //!\todo Make these assertions vector-compatible
+    // antioch_assert_greater(T, 0.0);
+    // antioch_assert_greater(rho, 0.0);
+    // antioch_assert_greater(R_mix, 0.0);
+
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );

@@ -455,7 +455,8 @@ namespace Antioch
 						       const std::vector<StateType>& h_RT_minus_s_R ) const
   {
     antioch_assert( this->initialized() );
-    antioch_assert_greater( P0_RT, 0.0 );
+    //!\todo Make this assertion vector-compatible
+    // antioch_assert_greater( P0_RT, 0.0 );
     antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
@@ -469,7 +470,7 @@ namespace Antioch
 		       h_RT_minus_s_R[s] );
       }
 
-    return std::pow( P0_RT, this->gamma() )*std::exp(exppower);
+    return std::pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*std::exp(exppower);
   }
 
 
