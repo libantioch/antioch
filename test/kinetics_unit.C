@@ -82,7 +82,10 @@ int tester(const std::string& input_name)
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
       const Scalar rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
-      thermo.h_RT_minus_s_R(T,h_RT_minus_s_R);
+
+      typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
+
+      thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
       kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 

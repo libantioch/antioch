@@ -37,12 +37,12 @@
 
 namespace Antioch
 {
-  template<class NumericType>
+  template<typename CoeffType>
   class CEACurveFit
   {
   public:
     
-    CEACurveFit( const std::vector<NumericType>& coeffs );
+    CEACurveFit( const std::vector<CoeffType>& coeffs );
     ~CEACurveFit();
 
     //! The number of intervals for this CEA curve fit
@@ -54,7 +54,8 @@ namespace Antioch
       lies in.  The CEA thermodynamic intervals are 
       [200-1,000], [1,000-6,000], [6,000-20,000] K
      */
-    unsigned int interval(const NumericType T) const;
+    template <typename StateType>
+    unsigned int interval(const StateType T) const;
 
     
     //! @returns a pointer to the coefficients in the interval specified.
@@ -62,7 +63,7 @@ namespace Antioch
       The CEA-style equilibrium curve fits are defined in terms of
       _n_coeffs coefficients for each range fit.
     */
-    const NumericType* coefficients(const unsigned int interval) const;
+    const CoeffType* coefficients(const unsigned int interval) const;
 
   protected:
 
@@ -75,15 +76,15 @@ namespace Antioch
       a0-a9 for the first interval, a0-a9 for the second interval,
       and so on.
      */
-    const std::vector<NumericType> _coefficients;
+    const std::vector<CoeffType> _coefficients;
   };
 
 
   /* ------------------------- Inline Functions -------------------------*/
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  CEACurveFit<NumericType>::CEACurveFit( const std::vector<NumericType>& coeffs )
+  CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs )
     : _n_coeffs(10),
       _coefficients(coeffs)
   {
@@ -91,23 +92,25 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  CEACurveFit<NumericType>::~CEACurveFit()
+  CEACurveFit<CoeffType>::~CEACurveFit()
   {
     return;
   }
 
 
-  template<class NumericType>
+  template<typename CoeffType>
+  template<typename StateType>
   inline
-  unsigned int CEACurveFit<NumericType>::interval(const NumericType T) const
+  unsigned int CEACurveFit<CoeffType>::interval(const StateType T) const
   {
     unsigned int interval = -1;
 
     /* CEA thermodynamic intervals are:
        [200-1,000], [1,000-6,000], [6,000-20,000] K */
     /*! \todo This could be generalized */
+    /*! \todo This needs to be vectorizable */
     if (T > 6000.)	  
       {
 	interval = 2;
@@ -125,15 +128,15 @@ namespace Antioch
   }
 
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  unsigned int CEACurveFit<NumericType>::n_intervals() const 
+  unsigned int CEACurveFit<CoeffType>::n_intervals() const 
   { return _coefficients.size() / _n_coeffs; }
 
 
-  template<class NumericType>
+  template<typename CoeffType>
   inline
-  const NumericType* CEACurveFit<NumericType>::coefficients(const unsigned int interval) const
+  const CoeffType* CEACurveFit<CoeffType>::coefficients(const unsigned int interval) const
   {
     antioch_assert_less( interval, this->n_intervals() );
     antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );

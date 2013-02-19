@@ -72,7 +72,8 @@ int tester(const std::string& input_name)
   chem_mixture.molar_densities(rho,Y,molar_densities);
 
   std::vector<Scalar> h_RT_minus_s_R(n_species);
-  thermo.h_RT_minus_s_R(T,h_RT_minus_s_R);
+  typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
+  thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
   Antioch::Kinetics<Scalar> kinetics( reaction_set );
   std::vector<Scalar> omega_dot(n_species);

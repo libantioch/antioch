@@ -43,7 +43,9 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
 
-  const Scalar cp = thermo.cp(T, species);
+  typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
+
+  const Scalar cp = thermo.cp(Cache(T), species);
 
   if( std::fabs( (cp_exact - cp)/cp_exact ) > tol )
     {
