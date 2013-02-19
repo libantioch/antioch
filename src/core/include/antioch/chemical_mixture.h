@@ -331,7 +331,7 @@ namespace Antioch
 	M += mass_fractions[s]/(this->M(s));
       }
 
-    return 1.0/M;
+    return CoeffType(1)/M;
   }
 
 
