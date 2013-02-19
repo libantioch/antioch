@@ -35,22 +35,7 @@
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_thermo.h"
-
-template <typename T>
-inline
-std::ostream&
-operator<< (std::ostream& output, const std::valarray<T>& a)
-{
-  output << '{';
-  const std::size_t size = a.size();
-  if (size)
-    output << a[0];
-  for (std::size_t i=1; i<size; ++i)
-    output << ',' << a[i];
-  output << '}';
-  return output;
-}
-
+#include "antioch/valarray_utils.h"
 
 template <typename Scalar, typename TrioScalars>
 int test_cp( const std::string& species_name, unsigned int species,
