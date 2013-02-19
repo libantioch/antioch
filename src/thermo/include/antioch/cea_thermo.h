@@ -47,6 +47,26 @@ namespace Antioch
   template<typename CoeffType>
   class CEACurveFit;
 
+  // Helper metafunctions
+  template <bool B, class T = void>
+  struct enable_if_c {
+    typedef T type;
+  };
+
+  template <class T>
+  struct enable_if_c<false, T> {};
+
+  template <typename T>
+  class has_size
+  {
+    typedef char no;
+    typedef char yes[2];
+    template <class C> static yes& test(char (*)[sizeof(&C::size)]);
+    template <class C> static no& test(...);
+  public:
+    const static bool value = (sizeof(test<T>(0)) == sizeof(yes&));
+  };
+
   template<typename CoeffType=double>
   class CEAThermodynamics
   {
@@ -70,6 +90,15 @@ namespace Antioch
       
       explicit Cache(const StateType &T_in) 
 	: T(T_in), T2(T*T), T3(T2*T), T4(T2*T2), lnT(std::log(T)) {}
+
+      Cache(const StateType &T_in, 
+            const StateType &T2_in, 
+            const StateType &T3_in, 
+            const StateType &T4_in, 
+            const StateType &lnT_in) 
+	: T(T_in), T2(T2_in), T3(T3_in), T4(T4_in), lnT(lnT_in) {
+        //! \todo - correctness assertions?
+      }
     private:
       Cache();      
     };
@@ -79,8 +108,18 @@ namespace Antioch
     //! Checks that curve fits have been specified for all species in the mixture.
     bool check() const;
 
+    //! We currently need different specializations for scalar vs vector inputs here
     template<typename StateType>
-    StateType cp( const Cache<StateType> &cache, unsigned int species ) const;
+    typename enable_if_c<
+      !has_size<StateType>::value, StateType
+    >::type 
+    cp( const Cache<StateType> &cache, unsigned int species ) const;
+
+    template<typename StateType>
+    typename enable_if_c<
+      has_size<StateType>::value, StateType
+    >::type 
+    cp( const Cache<StateType> &cache, unsigned int species ) const;
 
     template<typename StateType>
     StateType cp( const Cache<StateType> &cache, const std::vector<StateType>& mass_fractions ) const;
@@ -207,9 +246,11 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEAThermodynamics<CoeffType>::cp( const Cache<StateType> &cache, unsigned int species ) const
+  typename enable_if_c<
+    !has_size<StateType>::value, StateType
+  >::type 
+  CEAThermodynamics<CoeffType>::cp( const Cache<StateType> &cache, unsigned int species ) const
   {
-    /*! \todo This needs to be vectorizable */
     StateType cp = 0.0;
 
     if( cache.T < 200.1 )
@@ -219,6 +260,32 @@ namespace Antioch
     else
       {
 	cp = this->_chem_mixture.R(species)*this->cp_over_R(cache, species);
+      }
+    
+    return cp;
+  }
+
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  typename enable_if_c<
+    has_size<StateType>::value, StateType
+  >::type 
+  CEAThermodynamics<CoeffType>::cp( const Cache<StateType> &cache, unsigned int species ) const
+  {
+    // Use a copy constructor to make sure we get the size right
+    StateType cp = cache.T;
+
+    const std::size_t size = cache.T.size();
+    for (std::size_t i = 0; i != size; ++i)
+      {
+        typedef typename 
+          CEAThermodynamics<CoeffType>::
+            template Cache<typename StateType::value_type> SubCache;
+	cp[i] = this->cp
+	  (SubCache(cache.T[i],cache.T2[i],cache.T3[i],cache.T4[i],cache.lnT[i]),
+           species);
       }
     
     return cp;
