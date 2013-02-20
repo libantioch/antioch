@@ -117,8 +117,10 @@ namespace Antioch
   inline
   StateType BlottnerViscosity<CoeffType>::operator()( StateType T ) const
   {
-    StateType logT = std::log(T);
-    return 0.1*std::exp( (_a*logT + _b)*logT + _c );
+    using std::log;
+    using std::exp;
+    StateType logT = log(T);
+    return 0.1*exp( (_a*logT + _b)*logT + _c );
   }
 
   template<typename CoeffType>

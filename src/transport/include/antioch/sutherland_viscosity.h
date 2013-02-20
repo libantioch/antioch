@@ -114,7 +114,8 @@ namespace Antioch
   inline
   StateType SutherlandViscosity<CoeffType>::operator()( StateType T ) const
   {
-    return _mu_ref*std::pow(T,1.5)/(T+_T_ref);
+    using std::pow;
+    return _mu_ref*pow(T,1.5)/(T+_T_ref);
   }
 
   template<typename CoeffType>

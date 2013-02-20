@@ -168,7 +168,9 @@ namespace Antioch
   inline
   StateType ArrheniusRate<CoeffType>::operator()(const StateType T) const
   {
-    return _Cf* (std::pow(T,_eta)*std::exp(-_Ea/T));
+    using std::pow;
+    using std::exp;
+    return _Cf* (pow(T,_eta)*exp(-_Ea/T));
   }
 
   template<typename CoeffType>

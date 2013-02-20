@@ -516,6 +516,8 @@ namespace Antioch
 							   const StateType kfwd, 
 							   const StateType kbkwd ) const
   {
+    using std::pow;
+
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
 
     StateType kfwd_times_reactants = kfwd;
@@ -523,14 +525,14 @@ namespace Antioch
 
     for (unsigned int r=0; r<this->n_reactants(); r++)
       {
-	kfwd_times_reactants *= std::pow( molar_densities[this->reactant_id(r)],
-					  static_cast<int>(this->reactant_stoichiometric_coefficient(r)) );
+	kfwd_times_reactants *= pow( molar_densities[this->reactant_id(r)],
+				     static_cast<int>(this->reactant_stoichiometric_coefficient(r)) );
       }
       
     for (unsigned int p=0; p<this->n_products(); p++)
       {
-	kbkwd_times_products *= std::pow( molar_densities[this->product_id(p)],
-					  static_cast<int>(this->product_stoichiometric_coefficient(p)) );
+	kbkwd_times_products *= pow( molar_densities[this->product_id(p)],
+				     static_cast<int>(this->product_stoichiometric_coefficient(p)) );
       }
       
     switch (this->type())
@@ -600,6 +602,8 @@ namespace Antioch
 								      StateType& Rbkwd,
 								      StateType& dRbkwd_dT, std::vector<StateType> &dRbkwd_drho) const
   {
+    using std::pow;
+
     antioch_assert_equal_to (molar_densities.size(), this->n_species());
     antioch_assert_equal_to (molar_mass.size(),      this->n_species());
 
@@ -639,13 +643,13 @@ namespace Antioch
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
 	const StateType val = 
-	  std::pow( molar_densities[this->reactant_id(ro)],
-		    static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+	  pow( molar_densities[this->reactant_id(ro)],
+	       static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
 	  
 	const StateType dval = 
 	  ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
-	    std::pow( molar_densities[this->reactant_id(ro)],
-		      static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
+	    pow( molar_densities[this->reactant_id(ro)],
+		 static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
 	    / molar_mass[this->reactant_id(ro)] );
 	  	  
 	kfwd_times_reactants     *= val;
@@ -661,13 +665,13 @@ namespace Antioch
     for (unsigned int po=0; po< this->n_products(); po++)
       {
 	const StateType val = 
-	  std::pow( molar_densities[this->product_id(po)],
-		    static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+	  pow( molar_densities[this->product_id(po)],
+	       static_cast<int>(this->product_stoichiometric_coefficient(po)) );
 	  
 	const StateType dval = 
 	  ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
-	    std::pow( molar_densities[this->product_id(po)],
-		      static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
+	    pow( molar_densities[this->product_id(po)],
+		 static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
 	    / molar_mass[this->product_id(po)] );
 	
 	kbkwd_times_products     *= val;
