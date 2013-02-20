@@ -26,67 +26,84 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#include "antioch/valarray_utils.h"
-
 // C++
-#include <cmath>
 #include <iostream>
+#include <cmath>
+#include <limits>
+#include <valarray>
+
+#include "antioch/valarray_utils.h"
 
 // Antioch
 #include "antioch/sutherland_viscosity.h"
-#include "antioch/blottner_viscosity.h"
-#include "antioch/mixture_viscosity.h"
-#include "antioch/blottner_parsing.h"
-#include "antioch/sutherland_parsing.h"
+
 
 template <typename Scalar, typename PairScalars>
-int vectester(const PairScalars& example)
+int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scalar tol )
 {
-  std::vector<std::string> species_str_list;
-  const unsigned int n_species = 2;
-  species_str_list.reserve(n_species);
-  species_str_list.push_back( "N2" );
-  species_str_list.push_back( "Air" ); // Yes, I know this doesn't make sense, it's just a test.
-
-  Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
-
-  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar> s_mu_mixture(chem_mixture);
-
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> b_mu_mixture(chem_mixture);
-
-  Antioch::read_sutherland_data_ascii_default<Scalar>( s_mu_mixture );
-  Antioch::read_blottner_data_ascii_default<Scalar>( b_mu_mixture );
-
-  std::cout << s_mu_mixture << std::endl;
-  std::cout << b_mu_mixture << std::endl;
-
-  PairScalars T = example;
-  T[0] = 1500.1;
-  T[1] = 1600.1;
-
-  std::cout << "Blottner:" << std::endl;
-  for( unsigned int s = 0; s < n_species; s++ )
-    {
-      std::cout << "mu(" << species_str_list[s] << ") = " << b_mu_mixture(s, T) << std::endl;
-    }
-
-  std::cout << "Sutherland:" << std::endl;
-  for( unsigned int s = 0; s < n_species; s++ )
-    {
-      std::cout << "mu(" << species_str_list[s] << ") = " << s_mu_mixture(s, T) << std::endl;
-    }
-
   int return_flag = 0;
+
+  const PairScalars rel_error = std::abs( (mu - mu_exact)/mu_exact);
+
+  if( rel_error.max() > tol )
+    {
+      std::cerr << "Error: Mismatch in viscosity" << std::endl
+		<< "mu(T)    = " << mu << std::endl
+		<< "mu_exact = " << mu_exact << std::endl
+		<< "rel_error = " << rel_error << std::endl
+		<< "tol = " << tol << std::endl;
+      return_flag = 1;
+    }
 
   return return_flag;
 }
 
+
+template <typename Scalar, typename PairScalars>
+int vectester(const PairScalars& example)
+{
+  const Scalar mu_ref = 1.0e-3L;
+  const Scalar T_ref = 300.0L;
+
+  Antioch::SutherlandViscosity<Scalar> mu(mu_ref,T_ref);
+
+  std::cout << mu << std::endl;
+
+  PairScalars T = example;
+  T[0] = 1521.2L;
+  T[1] = 1721.2L;
+
+  // bc with scale=40 gives
+  PairScalars mu_exact = example;
+  mu_exact[0] = .0325778060534850406481862157435995107036L;
+  mu_exact[1] = .0353295183373055195000058747316029365368L;
+
+  int return_flag = 0;
+
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+
+  return_flag = test_viscosity( mu(T), mu_exact, tol );
+  
+  const Scalar mu_ref2 = 3.14159e-3L;
+  const Scalar T_ref2 = 420.42L;
+
+  mu.reset_coeffs(mu_ref2,T_ref2);
+
+  // bc with scale=40 gives
+  PairScalars mu_exact2 = example;
+  mu_exact2[0] = .0959985656417205050367745642313443587197L;
+  mu_exact2[1] = .1047500160115581483776648561664869285592L;
+
+  return_flag = test_viscosity( mu(T), mu_exact2, tol );
+
+  return return_flag;
+}
+
+
 int main()
 {
-//  return (vectester<double, std::valarray<double> >
-//	    (std::valarray<double>(2)));
-  return (vectester<float, std::valarray<float> >
-	    (std::valarray<float>(2)));
+  return (vectester<double, std::valarray<double> >
+	    (std::valarray<double>(2)));
   /*
   return (vectester<double, std::valarray<double> >
 	    (std::valarray<double>(2)) ||
