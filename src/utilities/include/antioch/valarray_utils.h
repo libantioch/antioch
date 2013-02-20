@@ -35,6 +35,9 @@
 
 // Add some overloads that are blatantly missing from the std:: namespace
 
+namespace std
+{
+
 template <typename T>
 inline
 std::ostream&
@@ -50,18 +53,16 @@ operator<< (std::ostream& output, const std::valarray<T>& a)
   return output;
 }
 
-namespace std
-{
-
-template <typename T>
+template <typename T, typename T2>
 inline
 valarray<T>
-pow (valarray<T> in, int n)
+pow (const valarray<T>& in, const T2& n)
 {
+  valarray<T> out=in;
   const size_t size = in.size();
-  for (unsigned int i=0; i != size; ++i)
-    in[i] = pow(in[i], n);
-  return in;
+  for (size_t i=0; i != size; ++i)
+    out[i] = pow(in[i], n);
+  return out;
 }
 
 } // end namespace std
