@@ -83,16 +83,10 @@ int vectester(const PairScalars& example)
 
 int main()
 {
-//  return (vectester<double, std::valarray<double> >
-//	    (std::valarray<double>(2)));
-  return (vectester<float, std::valarray<float> >
-	    (std::valarray<float>(2)));
-  /*
   return (vectester<double, std::valarray<double> >
 	    (std::valarray<double>(2)) ||
           vectester<long double, std::valarray<long double> >
 	    (std::valarray<long double>(2)) ||
           vectester<float, std::valarray<float> >
 	    (std::valarray<float>(2)));
-  */
 }
