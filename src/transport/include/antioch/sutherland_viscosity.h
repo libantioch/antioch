@@ -80,31 +80,32 @@ namespace Antioch
   SutherlandViscosity<CoeffType>::SutherlandViscosity( const CoeffType mu_ref, const CoeffType T_ref )
     : _mu_ref(mu_ref), _T_ref(T_ref)
   {
-    return;
   }
 
   template<typename CoeffType>
   SutherlandViscosity<CoeffType>::SutherlandViscosity( const std::vector<CoeffType>& coeffs )
-    : _mu_ref(-1.0), _T_ref(-1.0)
+#ifndef NDEBUG
+    : _mu_ref(-1), _T_ref(-1)
+#else
+    : _mu_ref(coeffs[0]), _T_ref(coeffs[1])
+#endif
   {
+#ifndef NDEBUG
     antioch_assert_equal_to( coeffs.size(), 2 );
     _mu_ref = coeffs[0];
     _T_ref  = coeffs[1];
-    return;
+#endif
   }
 
   template<typename CoeffType>
   SutherlandViscosity<CoeffType>::~SutherlandViscosity()
   {
-    return;
   }
 
   template<typename CoeffType>
   void SutherlandViscosity<CoeffType>::print(std::ostream& os) const
   {
     os << _mu_ref << "*T^(3/2)/(T + " << _T_ref << ")" << std::endl;
-
-    return;
   }
 
   /* ------------------------- Inline Functions ------------------------- */
@@ -122,7 +123,6 @@ namespace Antioch
   {
     _mu_ref = mu_ref;
     _T_ref = T_ref;
-    return;
   }
 
 } // end namespace Antioch
