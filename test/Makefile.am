@@ -15,6 +15,7 @@ check_PROGRAMS += blottner_viscosity_unit
 check_PROGRAMS += blottner_viscosity_vec_unit
 check_PROGRAMS += sutherland_viscosity_unit
 check_PROGRAMS += mixture_viscosity_unit
+check_PROGRAMS += mixture_viscosity_vec_unit
 
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
@@ -42,6 +43,7 @@ blottner_viscosity_unit_SOURCES = blottner_viscosity_unit.C
 blottner_viscosity_vec_unit_SOURCES = blottner_viscosity_vec_unit.C
 sutherland_viscosity_unit_SOURCES = sutherland_viscosity_unit.C
 mixture_viscosity_unit_SOURCES = mixture_viscosity_unit.C
+mixture_viscosity_vec_unit_SOURCES = mixture_viscosity_vec_unit.C
 
 #Define tests to actually be run
 TESTS  =
@@ -59,6 +61,7 @@ TESTS += blottner_viscosity_unit
 TESTS += blottner_viscosity_vec_unit
 TESTS += sutherland_viscosity_unit
 TESTS += mixture_viscosity_unit
+TESTS += mixture_viscosity_vec_unit
 
 if CODE_COVERAGE_ENABLED
   CLEANFILES = *.gcda *.gcno
