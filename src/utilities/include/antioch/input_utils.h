@@ -36,7 +36,7 @@ namespace Antioch
   /*!
     Skip comment lines in the header of an ASCII
     text file prefixed with the comment character
-    'comment_start'. This is put in GRINS namespace so we
+    'comment_start'. This is put in Antioch namespace so we
     can reuse in a few classes where we are reading in text
     tables.
     Originally taken from FIN-S.

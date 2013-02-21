@@ -80,40 +80,27 @@ To build Antioch starting from a release distribution, untar the distribution an
 enter the top-level directory.
 
 <div class="fragment"><pre class="fragment">
- > tar xvfz grins-$(VERSION).tar.gz
- > cd grins-$(VERSION)/            
+ > tar xvfz antioch-$(VERSION).tar.gz
+ > cd antioch-$(VERSION)/            
 </pre></div>
 
 <h2>Configuration Requirements</h2>
-
-Antioch requires that the <a href="http://libmesh.sourceforge.net">libMesh</a>
-be available locally, along with the <a href="http://libmesh.sourceforge.net">libMesh</a>
-dependencies. Note that Antioch has been developed and tested on revision 4887 of 
-trunk. If <a href="http://libmesh.sourceforge.net">libMesh</a> is installed and available
-within your default login environment, then Antioch should automatically configure
-against the available installation.  If, however, your <a href="http://libmesh.sourceforge.net">libMesh</a>
-installation is in a non-standard location, use
-the <tt>--with-libmesh</tt> option to specify the location.
 
 To date, Antioch has been successfully built and tested with the gcc 4.4, 4.5, and 4.6 compilers
 and the Intel 11.1 compilers.
 
 <b>Installation Directory</b>: Use the <tt>--prefix</tt> option to
 specify your desired top-level installation directory for Antioch.  The
-examples below all configure Antioch to be installed in the user's ~/bin/grins
-directory.
+examples below all configure Antioch to be installed in the user's
+~/bin/antioch directory.
 
-<em>Configure with libMesh from default login environment:</em> <br>
+<em>Configure with default login environment:</em> <br>
 
-\code > ./configure --prefix=$HOME/bin/grins \endcode
-
-<em>Or, configure with libMesh from a specific directory:</em>        <br>
-
-\code > ./configure --prefix=$HOME/bin/grins --with-libmesh=$MY_LIBMESH_DIR \endcode
+\code > ./configure --prefix=$HOME/bin/antioch \endcode
 
 <em>Or, configure with specific compilers:</em>        <br>
 
-\code > ./configure CXX=g++ --prefix=$HOME/bin/grins \endcode
+\code > ./configure CXX=g++ --prefix=$HOME/bin/antioch \endcode
 
 <h2> Other Configuration Options </h2>
 
@@ -202,29 +189,28 @@ installation is shown below:
 Top-level Antioch installation directory:
 
 \code
- > ls $HOME/bin/grins/
+ > ls $HOME/bin/antioch/
  bin  examples  include  lib
 \endcode
 
 <h2>Library Linkage</h2>
 
-Although a generic solver is shipped with the code, you may wish to
-write your own application code. To link an external application with the library, the
+To link an external application with the library, the
 \c include directory must be added to the compilers include search
 path in order to access the necessary header files.  The \c lib directory should also be added
 to the linker search path along with a request to link against the
 Antioch library.  Several example link steps are provided below.  These
 examples assume that the Antioch library has been successfully built and
-installed previously in the users's ~/bin/grins directory:
+installed previously in the users's ~/bin/antioch directory:
 
-\code > $(CXX) -I$HOME/bin/grins/include app.c -L$HOME/bin/grins/lib -lgrins \endcode
+\code > $(CXX) -I$HOME/bin/antioch/include app.c -L$HOME/bin/antioch/lib -lantioch \endcode
 
 To embed the dynamic library search path for the Antioch library
 directly into the application executable, use an additional linker
 option as follows:
 
-\code > $(CXX) -I$HOME/bin/grins/include app.c -L$HOME/bin/grins/lib \
-         -Wl,-rpath,$HOME/bin/grins/lib -lgrins \endcode
+\code > $(CXX) -I$HOME/bin/antioch/include app.c -L$HOME/bin/antioch/lib \
+         -Wl,-rpath,$HOME/bin/antioch/lib -lantioch \endcode
 
 */
 
