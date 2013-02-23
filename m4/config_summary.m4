@@ -30,6 +30,9 @@ echo Configure date................ : $BUILD_DATE
 echo Build architecture............ : $BUILD_ARCH
 echo SVN revision number........... : $BUILD_VERSION
 echo
+echo Optional Packages for Testing:
+echo '  'eigen....................... : $enableeigen
+echo
 echo '-------------------------------------------------------------------------------'
 
 echo
