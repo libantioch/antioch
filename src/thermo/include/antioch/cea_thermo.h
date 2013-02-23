@@ -273,7 +273,7 @@ namespace Antioch
       {
         typedef typename 
           CEAThermodynamics<CoeffType>::
-            template Cache<typename StateType::value_type> SubCache;
+            template Cache<typename Antioch::value_type<StateType>::type> SubCache;
 	cp[i] = this->cp
 	  (SubCache(cache.T[i],cache.T2[i],cache.T3[i],cache.T4[i],cache.lnT[i]),
            species);
@@ -423,7 +423,7 @@ namespace Antioch
       {
         typedef typename 
           CEAThermodynamics<CoeffType>::
-            template Cache<typename StateType::value_type> SubCache;
+            template Cache<typename Antioch::value_type<StateType>::type> SubCache;
         returnval[i] = this->h_RT_minus_s_R
 	  (SubCache(cache.T[i],cache.T2[i],cache.T3[i],cache.T4[i],cache.lnT[i]),
 	   species);

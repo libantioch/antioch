@@ -33,6 +33,8 @@
 #include <vector>
 
 // Antioch
+#include "antioch/metaprogramming.h"
+
 #include "antioch/reaction.h"
 
 namespace Antioch
@@ -145,7 +147,12 @@ namespace Antioch
     // Use a copy constructor here to handle vector StateType sizing
     std::vector<StateType> net_reaction_rates(this->n_reactions(), T);
 
-    std::fill( mass_sources.begin(), mass_sources.end(), 0.0 );
+    StateType test1;
+
+    test1 = Antioch::value_type<StateType>::constant(2);
+   
+    std::fill( mass_sources.begin(), mass_sources.end(),
+	       Antioch::value_type<StateType>::constant(0) );
     
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates( T, rho, R_mix, mass_fractions, molar_densities,

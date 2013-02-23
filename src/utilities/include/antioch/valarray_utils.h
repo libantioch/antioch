@@ -29,6 +29,8 @@
 #ifndef ANTIOCH_VALARRAY_UTILS_H
 #define ANTIOCH_VALARRAY_UTILS_H
 
+#include "antioch/metaprogramming.h"
+
 #include <cmath>
 #include <iostream>
 #include <valarray>
@@ -66,5 +68,30 @@ pow (const valarray<T>& in, const T2& n)
 }
 
 } // end namespace std
+
+namespace Antioch
+{
+
+template <typename T>
+inline
+T
+max (const std::valarray<T>& in)
+{
+  return in.max();
+}
+
+template <typename T>
+struct value_type<std::valarray<T> >
+{
+  typedef std::valarray<T> container_type;
+  typedef T type;
+
+  static inline
+  type
+  constant(const type& in) { return in; }
+};
+
+} // end namespace Antioch
+
 
 #endif //ANTIOCH_VALARRAY_UTILS_H

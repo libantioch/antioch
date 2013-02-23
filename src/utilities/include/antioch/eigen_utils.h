@@ -21,56 +21,49 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id: metaprogramming.h 37170 2013-02-19 21:40:39Z roystgnr $
+// $Id: eigen_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_METAPROGRAMMING_H
-#define ANTIOCH_METAPROGRAMMING_H
+#ifndef ANTIOCH_EIGEN_UTILS_H
+#define ANTIOCH_EIGEN_UTILS_H
+
+#include "antioch_config.h"
+
+#ifdef ANTIOCH_HAVE_EIGEN
+
+#include <Eigen/Dense>
+
+#include "antioch/metaprogramming.h"
 
 namespace Antioch
 {
-  // Helper metafunctions
-  template <bool B, class T = void>
-  struct enable_if_c {
-    typedef T type;
-  };
 
-  template <class T>
-  struct enable_if_c<false, T> {};
+template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+inline
+_Scalar
+max (const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in)
+{
+  return in.maxCoeff();
+}
 
-  template <typename T>
-  class has_size
-  {
-    typedef char no;
-    typedef char yes[2];
-    template <class C> static yes& test(char (*)[sizeof(&C::size)]);
-    template <class C> static no& test(...);
-  public:
-    const static bool value = (sizeof(test<T>(0)) == sizeof(yes&));
-  };
+template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+struct value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+{
+  typedef Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> 
+    container_type;
+  typedef _Scalar type;
 
-  // A class for uniformly initializing third-party vectorized numeric
-  // types from scalar numeric types.  First-party vectorized numeric
-  // types will just correctly implement operator=(scalar) instead.
-  template <typename T>
-  struct value_type
-  {
-    typedef T type;
+  static inline
+  container_type
+  constant(const type& in) { return container_type::Constant(in); }
+};
 
-    static inline
-    T constant(const type& in) { return in; }
-  };
 
-  template <typename T>
-  struct value_type<const T>
-  {
-    typedef const typename value_type<T>::type type;
 
-    static inline
-    T constant(const type& in) { return in; }
-  };
 } // end namespace Antioch
 
-#endif //ANTIOCH_METAPROGRAMMING_H
+#endif // ANTIOCH_HAVE_EIGEN
+
+#endif //ANTIOCH_EIGEN_UTILS_H
