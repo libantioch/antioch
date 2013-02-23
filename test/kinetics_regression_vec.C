@@ -26,13 +26,21 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+#include <valarray>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
 // C++
 #include <limits>
 #include <string>
-#include <valarray>
 #include <vector>
 
-// This needs to precede any headers that might use pow<valarray,int>
+// This needs to precede any headers that might use their overloads
+#include "antioch/eigen_utils.h"
 #include "antioch/valarray_utils.h"
 
 // Antioch
@@ -46,7 +54,7 @@
 
 
 template <typename Scalar, typename PairScalars>
-int vec_tester(const std::string& input_name, const PairScalars& example)
+int vectester(const std::string& input_name, const PairScalars& example)
 {
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
@@ -117,9 +125,13 @@ int vec_tester(const std::string& input_name, const PairScalars& example)
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error =
-        (std::abs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s])).max();
-      if( rel_error > tol )
+      // Break this expression up to workaround bugs in my Eigen
+      // version - RHS
+      const PairScalars rel_error =
+        (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s];
+      const PairScalars abs_rel_error = std::abs(rel_error);
+
+      if( Antioch::max(abs_rel_error) > tol )
 	{
 	  return_flag = 1;
 	}
@@ -150,8 +162,30 @@ int main(int argc, char* argv[])
       antioch_error();
     }
 
-  return (vec_tester<double,std::valarray<double> >
-	    (std::string(argv[1]), std::valarray<double>(2)) ||
-          vec_tester<float,std::valarray<float> >
-	    (std::string(argv[1]), std::valarray<float>(2)));
+  int returnval = 0;
+
+  returnval = returnval ||
+    vectester<float, std::valarray<float> >
+      (argv[1], std::valarray<float>(2));
+  returnval = returnval ||
+    vectester<double, std::valarray<double> >
+      (argv[1], std::valarray<double>(2));
+// We're not getting the full long double precision yet?
+//  returnval = returnval ||
+//    vectester<long double, std::valarray<long double> >
+//      (argv[1], std::valarray<long double>(2));
+#ifdef ANTIOCH_HAVE_EIGEN
+  returnval = returnval ||
+    vectester<float, Eigen::Array2f>
+      (argv[1], Eigen::Array2f());
+  returnval = returnval ||
+    vectester<double, Eigen::Array2d>
+      (argv[1], Eigen::Array2d());
+// We're not getting the full long double precision yet?
+//  returnval = returnval ||
+//    vectester<long double, Eigen::Array<long double, 2, 1> >
+//      (argv[1], Eigen::Array<long double, 2, 1>());
+#endif
+
+  return returnval;
 }

@@ -26,15 +26,23 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+#include <valarray>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
 // C++
 #include <cmath>
 #include <iomanip>
 #include <limits>
-#include <valarray>
 
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
+#include "antioch/eigen_utils.h"
 #include "antioch/physical_constants.h"
 #include "antioch/valarray_utils.h"
 
@@ -98,7 +106,7 @@ int test_species( const unsigned int species,
 
 
 template <typename Scalar, typename PairScalars>
-int vec_tester(const PairScalars& example)
+int vectester(const PairScalars& example)
 {
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
@@ -249,7 +257,9 @@ int vec_tester(const PairScalars& example)
   X_exact[4][1] = 0.2*M_exact[1]/30.008;
 
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
-  if( (std::abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact)).max() > tol )
+  const PairScalars rel_R_error = 
+    std::abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact);
+  if( Antioch::max(rel_R_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
 		<< std::setprecision(16) << std::scientific
@@ -258,7 +268,9 @@ int vec_tester(const PairScalars& example)
       return_flag = 1;
     }
 
-  if( (std::abs( (chem_mixture.M(mass_fractions) - M_exact)/M_exact)).max() > tol )
+  const PairScalars rel_M_error = 
+    std::abs( (chem_mixture.M(mass_fractions) - M_exact)/M_exact);
+  if( Antioch::max(rel_M_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
 		<< std::setprecision(16) << std::scientific
@@ -271,7 +283,9 @@ int vec_tester(const PairScalars& example)
   chem_mixture.X( chem_mixture.M(mass_fractions), mass_fractions, X );
   for( unsigned int s = 0; s < 5; s++ )
     {
-      if( std::abs( (X[s] - X_exact[s])/X_exact[s]).max() > tol )
+      const PairScalars rel_X_error = 
+        std::abs( (X[s] - X_exact[s])/X_exact[s]);
+      if( Antioch::max(rel_X_error) > tol )
 	{
 	  std::cerr << "Error: Mismatch in mole fraction for species " << s << std::endl
 		    << std::setprecision(16) << std::scientific
@@ -287,8 +301,30 @@ int vec_tester(const PairScalars& example)
 
 int main()
 {
-  return (vec_tester<double,std::valarray<double> >
-            (std::valarray<double>(2)) ||
-          vec_tester<float,std::valarray<float> >
-            (std::valarray<float>(2)));
+  int returnval = 0;
+
+  returnval = returnval ||
+    vectester<float, std::valarray<float> >
+      (std::valarray<float>(2));
+  returnval = returnval ||
+    vectester<double, std::valarray<double> >
+      (std::valarray<double>(2));
+// We're not getting the full long double precision yet?
+//  returnval = returnval ||
+//    vectester<long double, std::valarray<long double> >
+//      (std::valarray<long double>(2));
+#ifdef ANTIOCH_HAVE_EIGEN
+  returnval = returnval ||
+    vectester<float, Eigen::Array2f>
+      (Eigen::Array2f());
+  returnval = returnval ||
+    vectester<double, Eigen::Array2d>
+      (Eigen::Array2d());
+// We're not getting the full long double precision yet?
+//  returnval = returnval ||
+//    vectester<long double, Eigen::Array<long double, 2, 1> >
+//      (Eigen::Array<long double, 2, 1>());
+#endif
+
+  return returnval;
 }

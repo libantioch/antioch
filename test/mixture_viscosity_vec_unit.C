@@ -26,6 +26,14 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+#include <valarray>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
 #include "antioch/valarray_utils.h"
 
 // C++
@@ -83,10 +91,28 @@ int vectester(const PairScalars& example)
 
 int main()
 {
-  return (vectester<double, std::valarray<double> >
-	    (std::valarray<double>(2)) ||
-          vectester<long double, std::valarray<long double> >
-	    (std::valarray<long double>(2)) ||
-          vectester<float, std::valarray<float> >
-	    (std::valarray<float>(2)));
+  int returnval = 0;
+
+  returnval = returnval ||
+    vectester<float, std::valarray<float> >
+      (std::valarray<float>(2));
+  returnval = returnval ||
+    vectester<double, std::valarray<double> >
+      (std::valarray<double>(2));
+  returnval = returnval ||
+    vectester<long double, std::valarray<long double> >
+      (std::valarray<long double>(2));
+#ifdef ANTIOCH_HAVE_EIGEN
+  returnval = returnval ||
+    vectester<float, Eigen::Array2f>
+      (Eigen::Array2f());
+  returnval = returnval ||
+    vectester<double, Eigen::Array2d>
+      (Eigen::Array2d());
+  returnval = returnval ||
+    vectester<long double, Eigen::Array<long double, 2, 1> >
+      (Eigen::Array<long double, 2, 1>());
+#endif
+
+  return returnval;
 }

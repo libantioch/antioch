@@ -26,12 +26,20 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+#include <valarray>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
 // C++
 #include <limits>
 #include <string>
 #include <vector>
-#include <valarray>
 
+#include "antioch/eigen_utils.h"
 #include "antioch/valarray_utils.h"
 
 // Antioch
@@ -44,7 +52,7 @@
 #include "antioch/kinetics.h"
 
 template <typename Scalar, typename PairScalars>
-int vec_tester(const std::string& input_name, const PairScalars& example)
+int vectester(const std::string& input_name, const PairScalars& example)
 {
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
@@ -109,7 +117,8 @@ int vec_tester(const std::string& input_name, const PairScalars& example)
 	  sum += omega_dot[s];
 	}
       const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
-      if( (std::abs( sum )).max() > sum_tol )
+      const PairScalars abs_sum = std::abs(sum);
+      if( Antioch::max(abs_sum) > sum_tol )
 	{
 	  return_flag = 1;
 	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl
@@ -140,11 +149,28 @@ int main(int argc, char* argv[])
       antioch_error();
     }
 
-  return (vec_tester<double, std::valarray<double> >
-	    (std::string(argv[1]), std::valarray<double>(2)) ||
-          vec_tester<long double, std::valarray<long double> >
-	    (std::string(argv[1]), std::valarray<long double>(2)) ||
-          vec_tester<float, std::valarray<float> >
-	    (std::string(argv[1]), std::valarray<float>(2)));
-}
+  int returnval = 0;
 
+  returnval = returnval ||
+    vectester<float, std::valarray<float> >
+      (argv[1], std::valarray<float>(2));
+  returnval = returnval ||
+    vectester<double, std::valarray<double> >
+      (argv[1], std::valarray<double>(2));
+  returnval = returnval ||
+    vectester<long double, std::valarray<long double> >
+      (argv[1], std::valarray<long double>(2));
+#ifdef ANTIOCH_HAVE_EIGEN
+  returnval = returnval ||
+    vectester<float, Eigen::Array2f>
+      (argv[1], Eigen::Array2f());
+  returnval = returnval ||
+    vectester<double, Eigen::Array2d>
+      (argv[1], Eigen::Array2d());
+  returnval = returnval ||
+    vectester<long double, Eigen::Array<long double, 2, 1> >
+      (argv[1], Eigen::Array<long double, 2, 1>());
+#endif
+
+  return returnval;
+}

@@ -26,11 +26,22 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+#include <valarray>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
+// These must precede headers which would use their template overloads
+#include "antioch/eigen_utils.h"
+#include "antioch/valarray_utils.h"
+
 // C++
 #include <cmath>
 #include <iostream>
 #include <limits>
-#include <valarray>
 
 // Antioch
 #include "antioch/blottner_viscosity.h"
@@ -42,7 +53,7 @@ int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scal
 
   const PairScalars rel_error = std::abs( (mu - mu_exact)/mu_exact);
 
-  if( rel_error.max() > tol )
+  if( Antioch::max(rel_error) > tol )
     {
       std::cerr << "Error: Mismatch in viscosity" << std::endl
 		<< "mu(T)    = (" << mu[0] << ',' << mu[1] << ')' << std::endl
@@ -56,7 +67,7 @@ int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scal
 }
 
 template <typename Scalar, typename PairScalars>
-int vec_tester(const PairScalars& example)
+int vectester(const PairScalars& example)
 {
   const Scalar a = 3.14e-3;
   const Scalar b = 2.71e-2;
@@ -100,10 +111,28 @@ int vec_tester(const PairScalars& example)
 
 int main()
 {
-  return (vec_tester<double, std::valarray<double> >
-	    (std::valarray<double>(2)) ||
-          vec_tester<long double, std::valarray<long double> >
-	    (std::valarray<long double>(2)) ||
-          vec_tester<float, std::valarray<float> >
-	    (std::valarray<float>(2)));
+  int returnval = 0;
+
+  returnval = returnval ||
+    vectester<float, std::valarray<float> >
+      (std::valarray<float>(2));
+  returnval = returnval ||
+    vectester<double, std::valarray<double> >
+      (std::valarray<double>(2));
+  returnval = returnval ||
+    vectester<long double, std::valarray<long double> >
+      (std::valarray<long double>(2));
+#ifdef ANTIOCH_HAVE_EIGEN
+  returnval = returnval ||
+    vectester<float, Eigen::Array2f>
+      (Eigen::Array2f());
+  returnval = returnval ||
+    vectester<double, Eigen::Array2d>
+      (Eigen::Array2d());
+  returnval = returnval ||
+    vectester<long double, Eigen::Array<long double, 2, 1> >
+      (Eigen::Array<long double, 2, 1>());
+#endif
+
+  return returnval;
 }

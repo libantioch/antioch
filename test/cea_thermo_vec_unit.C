@@ -26,15 +26,23 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+#include <valarray>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
 // C++
 #include <cmath>
-#include <valarray>
 #include <limits>
 
 // Antioch
-#include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_thermo.h"
+#include "antioch/eigen_utils.h"
+#include "antioch/physical_constants.h"
 #include "antioch/valarray_utils.h"
 
 template <typename Scalar, typename TrioScalars>
@@ -53,8 +61,9 @@ int test_cp( const std::string& species_name, unsigned int species,
 
   // Workaround for a non-standard gcc definition of valarray binary operator-
   const TrioScalars diff = cp_exact - cp; 
+  const TrioScalars rel_cp_error = std::abs(diff/cp_exact);
 
-  if( std::abs( (diff)/cp_exact ).max() > tol )
+  if( Antioch::max(rel_cp_error) > tol )
     {
       std::cerr << "Error: Mismatch in species specific heat."
 		<< "\nspecies    = " << species_name
@@ -82,7 +91,7 @@ Scalar cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
 
 
 template <typename Scalar, typename TrioScalars>
-int vec_tester(const TrioScalars& example)
+int vectester(const TrioScalars& example)
 {
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
@@ -225,9 +234,30 @@ int vec_tester(const TrioScalars& example)
 
 int main()
 {
+  int returnval = 0;
+
+  returnval = returnval ||
+    vectester<float, std::valarray<float> >
+      (std::valarray<float>(3));
+  returnval = returnval ||
+    vectester<double, std::valarray<double> >
+      (std::valarray<double>(3));
 // We're not getting the full long double precision yet?
-  return (vec_tester<double,std::valarray<double> >
-            (std::valarray<double>(3)) ||
-          vec_tester<float,std::valarray<float> >
-            (std::valarray<float>(3)));
+//  returnval = returnval ||
+//    vectester<long double, std::valarray<long double> >
+//      (std::valarray<long double>(3));
+#ifdef ANTIOCH_HAVE_EIGEN
+  returnval = returnval ||
+    vectester<float, Eigen::Array3f>
+      (Eigen::Array3f());
+  returnval = returnval ||
+    vectester<double, Eigen::Array3d>
+      (Eigen::Array3d());
+// We're not getting the full long double precision yet?
+//  returnval = returnval ||
+//    vectester<long double, Eigen::Array<long double, 3, 1> >
+//      (Eigen::Array<long double, 3, 1>());
+#endif
+
+  return returnval;
 }
