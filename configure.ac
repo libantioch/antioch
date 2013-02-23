@@ -54,6 +54,23 @@ AC_PROG_CXX
 dnl Added for AX_CODE_COVERAGE macro to work correctly, even though there's no Fortran here.
 AC_PROG_FC
 
+
+dnl--------------------------
+dnl Checks for third-party libraries
+dnl--------------------------
+antioch_optional_INCLUDES=""
+antioch_optional_test_INCLUDES=""
+
+CONFIGURE_EIGEN
+if (test x$enableeigen = xyes); then
+  antioch_optional_test_INCLUDES="$EIGEN_INCLUDE $antioch_optional_INCLUDES"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_EIGEN, test x$enableeigen = xyes)
+
+AC_SUBST(antioch_optional_INCLUDES)
+AC_SUBST(antioch_optional_test_INCLUDES)
+
+
 dnl--------------------------
 dnl Checks for code coverage
 dnl--------------------------

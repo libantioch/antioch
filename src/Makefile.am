@@ -79,6 +79,7 @@ include_HEADERS += transport/include/antioch/mixture_viscosity.h
 # utilities
 include_HEADERS += utilities/include/antioch/antioch_exceptions.h
 include_HEADERS += utilities/include/antioch/antioch_asserts.h
+include_HEADERS += utilities/include/antioch/eigen_utils.h
 include_HEADERS += utilities/include/antioch/input_utils.h
 include_HEADERS += utilities/include/antioch/metaprogramming.h
 include_HEADERS += utilities/include/antioch/physical_constants.h
@@ -95,7 +96,7 @@ antioch_version_LDADD = libantioch.la
 #--------------------------------------
 #Local Directories to include for build
 #--------------------------------------
-AM_CPPFLAGS  = 
+AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
@@ -103,6 +104,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
+AM_CPPFLAGS +=  $(antioch_optional_INCLUDES)
 
 # Code coverage
 if CODE_COVERAGE_ENABLED
