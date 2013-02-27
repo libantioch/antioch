@@ -83,6 +83,7 @@ include_HEADERS += utilities/include/antioch/antioch_asserts.h
 include_HEADERS += utilities/include/antioch/eigen_utils.h
 include_HEADERS += utilities/include/antioch/input_utils.h
 include_HEADERS += utilities/include/antioch/metaprogramming.h
+include_HEADERS += utilities/include/antioch/metaphysicl_utils.h
 include_HEADERS += utilities/include/antioch/physical_constants.h
 include_HEADERS += utilities/include/antioch/string_utils.h
 include_HEADERS += utilities/include/antioch/valarray_utils.h

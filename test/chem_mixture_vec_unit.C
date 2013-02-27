@@ -34,6 +34,10 @@
 #include "Eigen/Dense"
 #endif
 
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+#include "metaphysicl/numberarray.h"
+#endif
+
 // C++
 #include <cmath>
 #include <iomanip>
@@ -42,8 +46,10 @@
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
-#include "antioch/eigen_utils.h"
 #include "antioch/physical_constants.h"
+
+#include "antioch/eigen_utils.h"
+#include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 
 
@@ -324,6 +330,14 @@ int main()
 //  returnval = returnval ||
 //    vectester<long double, Eigen::Array<long double, 2, 1> >
 //      (Eigen::Array<long double, 2, 1>());
+#endif
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+  returnval = returnval ||
+    vectester<float, MetaPhysicL::NumberArray<2, float> > (0);
+  returnval = returnval ||
+    vectester<double, MetaPhysicL::NumberArray<2, double> > (0);
+//  returnval = returnval ||
+//    vectester<long double, MetaPhysicL::NumberArray<2, long double> > (0);
 #endif
 
   return returnval;

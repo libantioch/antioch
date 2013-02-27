@@ -29,9 +29,15 @@
 #include "antioch_config.h"
 
 #include <valarray>
+#include "antioch/valarray_utils.h"
 
 #ifdef ANTIOCH_HAVE_EIGEN
 #include "Eigen/Dense"
+#endif
+
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+#include "metaphysicl/numberarray.h"
+#include "antioch/metaphysicl_utils.h"
 #endif
 
 // C++
@@ -43,7 +49,6 @@
 #include "antioch/cea_thermo.h"
 #include "antioch/eigen_utils.h"
 #include "antioch/physical_constants.h"
-#include "antioch/valarray_utils.h"
 
 template <typename Scalar, typename TrioScalars>
 int test_cp( const std::string& species_name, unsigned int species,
@@ -257,6 +262,14 @@ int main()
 //  returnval = returnval ||
 //    vectester<long double, Eigen::Array<long double, 3, 1> >
 //      (Eigen::Array<long double, 3, 1>());
+#endif
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+  returnval = returnval ||
+    vectester<float, MetaPhysicL::NumberArray<3, float> > (0);
+  returnval = returnval ||
+    vectester<double, MetaPhysicL::NumberArray<3, double> > (0);
+//  returnval = returnval ||
+//    vectester<long double, MetaPhysicL::NumberArray<3, long double> > (0);
 #endif
 
   return returnval;
