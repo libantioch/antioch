@@ -63,13 +63,13 @@ antioch_optional_test_INCLUDES=""
 
 CONFIGURE_EIGEN
 if (test x$enableeigen = xyes); then
-  antioch_optional_test_INCLUDES="$EIGEN_INCLUDE $antioch_optional_INCLUDES"
+  antioch_optional_test_INCLUDES="$EIGEN_INCLUDE $antioch_optional_test_INCLUDES"
 fi
 AM_CONDITIONAL(ANTIOCH_ENABLE_EIGEN, test x$enableeigen = xyes)
 
 AX_PATH_METAPHYSICL(0.0.0, no)
-if (test x$HAVE_METAPHYSICL = xyes); then
-  antioch_optional_test_INCLUDES="$METAPHYSICL_CPPFLAGS $antioch_optional_INCLUDES"
+if (test x$HAVE_METAPHYSICL = x1); then
+  antioch_optional_test_INCLUDES="$METAPHYSICL_CPPFLAGS $antioch_optional_test_INCLUDES"
 fi
 
 AC_SUBST(antioch_optional_INCLUDES)
