@@ -106,7 +106,9 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_INCLUDES)
 
+#--------------
 # Code coverage
+#--------------
 if CODE_COVERAGE_ENABLED
   CLEANFILES = *.gcda *.gcno
 endif
