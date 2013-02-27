@@ -38,38 +38,4 @@
 
 namespace Antioch
 {
-  template<class NumericType>
-  WilkeMixture<NumericType>::WilkeMixture( const ChemicalMixture<NumericType>& chem_mixture )
-    : _chem_mixture(chem_mixture),
-      _Mr_Ms_to_the_one_fourth(chem_mixture.n_species()),
-      _denom(chem_mixture.n_species())
-  {
-
-    for( unsigned int r = 0; r < chem_mixture.n_species(); r++ )
-      {
-	_Mr_Ms_to_the_one_fourth[r].resize(chem_mixture.n_species());
-	_denom[r].resize(chem_mixture.n_species());
-
-	for( unsigned int s = 0; s < chem_mixture.n_species(); s++ )
-	  {
-	    const NumericType Mr = chem_mixture.M(r);
-	    const NumericType Ms = chem_mixture.M(s);
-
-	    _Mr_Ms_to_the_one_fourth[r][s] = std::pow( Mr/Ms, 0.25 );
-	    _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
-	  }
-      }
-
-    return;
-  }
-
-  template<class NumericType>
-  WilkeMixture<NumericType>::~WilkeMixture()
-  {
-    return;
-  }
-
-  /* ------------------------- Instantiate ------------------------- */
-  template class WilkeMixture<double>;
-
 } // end namespace Antioch

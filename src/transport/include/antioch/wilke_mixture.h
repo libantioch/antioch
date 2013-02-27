@@ -35,30 +35,61 @@
 namespace Antioch
 {
   // Forward declarations
-  template<class NumericType>
+  template<class CoeffType>
   class ChemicalMixture;
 
-  template<class NumericType>
+  template<class CoeffType=double>
   class WilkeMixture
   {
   public:
 
-    WilkeMixture( const ChemicalMixture<NumericType>& chem_mixture );
+    WilkeMixture( const ChemicalMixture<CoeffType>& chem_mixture );
     ~WilkeMixture();
 
   protected:
 
-    const ChemicalMixture<NumericType>& _chem_mixture;
+    const ChemicalMixture<CoeffType>& _chem_mixture;
 
     //! Cache for numerator term
     /*! \todo We should use a more efficient data structure */
-    std::vector<std::vector<NumericType> > _Mr_Ms_to_the_one_fourth;
+    std::vector<std::vector<CoeffType> > _Mr_Ms_to_the_one_fourth;
     
     //! Cache for denominator term
     /*! \todo We should use a more efficient data structure */
-    std::vector<std::vector<NumericType> > _denom;
+    std::vector<std::vector<CoeffType> > _denom;
 
   };
+
+  template<class CoeffType>
+  WilkeMixture<CoeffType>::WilkeMixture( const ChemicalMixture<CoeffType>& chem_mixture )
+    : _chem_mixture(chem_mixture),
+      _Mr_Ms_to_the_one_fourth(chem_mixture.n_species()),
+      _denom(chem_mixture.n_species())
+  {
+
+    for( unsigned int r = 0; r < chem_mixture.n_species(); r++ )
+      {
+	_Mr_Ms_to_the_one_fourth[r].resize(chem_mixture.n_species());
+	_denom[r].resize(chem_mixture.n_species());
+
+	for( unsigned int s = 0; s < chem_mixture.n_species(); s++ )
+	  {
+	    const CoeffType Mr = chem_mixture.M(r);
+	    const CoeffType Ms = chem_mixture.M(s);
+
+	    _Mr_Ms_to_the_one_fourth[r][s] = std::pow( Mr/Ms, 0.25 );
+	    _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
+	  }
+      }
+
+    return;
+  }
+
+  template<class CoeffType>
+  WilkeMixture<CoeffType>::~WilkeMixture()
+  {
+    return;
+  }
 
 } // end namespace Antioch
 
