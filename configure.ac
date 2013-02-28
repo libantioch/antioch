@@ -2,7 +2,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(antioch, 0.0.0, pbauman@ices.utexas.edu)
+AC_INIT([Antioch], [0.0.0], [pbauman@ices.utexas.edu], [antioch])
+PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
+AC_SUBST([PACKAGE_DESCRIPTION])
+PACKAGE_URL="http://red.ices.utexas.edu/projects/antioch/"
+AC_SUBST([PACKAGE_URL])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_HEADER(antioch_config.h.tmp)
@@ -117,11 +121,17 @@ dnl-----------------------------------------------
 dnl Generate header files
 dnl-----------------------------------------------
 AC_CONFIG_FILES(src/utilities/include/antioch/antioch_version.h)
-            
+
 dnl-----------------------------------------------
-dnl Generate Makefiles
+dnl Generate Makefiles and other templated things
 dnl-----------------------------------------------
-AC_CONFIG_FILES([Makefile src/Makefile test/Makefile doxygen/Makefile])
+AC_CONFIG_FILES([
+  antioch.pc
+  doxygen/Makefile
+  Makefile
+  src/Makefile
+  test/Makefile
+])
 
 # Must still call AC_OUTPUT() after generating all the files
 AC_OUTPUT()

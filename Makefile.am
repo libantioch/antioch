@@ -27,13 +27,16 @@ dist-hook:
 #endif
 
 # Tools in the auxiliary directory
-
 AUX_DIST         = build-aux/install-sh
 AUX_DIST        += build-aux/missing
 AUX_DIST        += build-aux/config.guess
 AUX_DIST        += build-aux/config.sub
 AUX_DIST        += build-aux/depcomp
 AUX_DIST        += build-aux/ltmain.sh
+
+# Support for pkgconfig
+pkgconfigdir   = $(libdir)/pkgconfig
+pkgconfig_DATA = antioch.pc
 
 # Additional files to be deleted by 'make distclean'
 DISTCLEANFILES  = _configs.sed
