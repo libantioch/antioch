@@ -147,10 +147,6 @@ namespace Antioch
     // Use a copy constructor here to handle vector StateType sizing
     std::vector<StateType> net_reaction_rates(this->n_reactions(), T);
 
-    StateType test1;
-
-    test1 = Antioch::value_type<StateType>::constant(2);
-   
     std::fill( mass_sources.begin(), mass_sources.end(),
 	       Antioch::value_type<StateType>::constant(0) );
     
