@@ -26,8 +26,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_KINETICS_H
-#define ANTIOCH_KINETICS_H
+#ifndef ANTIOCH_KINETICS_EVALUATOR_H
+#define ANTIOCH_KINETICS_EVALUATOR_H
 
 // C++
 #include <vector>
@@ -52,12 +52,12 @@ namespace Antioch
    *  already created ReactionSet, so there's little construction penalty.
    */
   template<typename CoeffType=double>
-  class Kinetics
+  class KineticsEvaluator
   {
   public:
 
-    Kinetics( const ReactionSet<CoeffType>& reaction_set );
-    ~Kinetics();
+    KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set );
+    ~KineticsEvaluator();
 
     const ReactionSet<CoeffType>& reaction_set() const;
 
@@ -85,21 +85,21 @@ namespace Antioch
   /* ------------------------- Inline Functions -------------------------*/
   template<typename CoeffType>
   inline
-  const ReactionSet<CoeffType>& Kinetics<CoeffType>::reaction_set() const
+  const ReactionSet<CoeffType>& KineticsEvaluator<CoeffType>::reaction_set() const
   {
     return _reaction_set;
   }
 
   template<typename CoeffType>
   inline
-  unsigned int Kinetics<CoeffType>::n_species() const
+  unsigned int KineticsEvaluator<CoeffType>::n_species() const
   {
     return _chem_mixture.n_species();
   }
 
   template<typename CoeffType>
   inline
-  unsigned int Kinetics<CoeffType>::n_reactions() const
+  unsigned int KineticsEvaluator<CoeffType>::n_reactions() const
   {
     return _reaction_set.n_reactions();
   }
@@ -107,7 +107,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  Kinetics<CoeffType>::Kinetics( const ReactionSet<CoeffType>& reaction_set )
+  KineticsEvaluator<CoeffType>::KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set )
     : _reaction_set( reaction_set ),
       _chem_mixture( reaction_set.chemical_mixture() )
   {
@@ -117,7 +117,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  Kinetics<CoeffType>::~Kinetics()
+  KineticsEvaluator<CoeffType>::~KineticsEvaluator()
   {
     return;
   }
@@ -126,13 +126,13 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  void Kinetics<CoeffType>::compute_mass_sources( const StateType T,
-						  const StateType rho,
-						  const StateType R_mix,
-						  const std::vector<StateType>& mass_fractions,
-						  const std::vector<StateType>& molar_densities,
-						  const std::vector<StateType>& h_RT_minus_s_R,
-						  std::vector<StateType>& mass_sources )
+  void KineticsEvaluator<CoeffType>::compute_mass_sources( const StateType T,
+							   const StateType rho,
+							   const StateType R_mix,
+							   const std::vector<StateType>& mass_fractions,
+							   const std::vector<StateType>& molar_densities,
+							   const std::vector<StateType>& h_RT_minus_s_R,
+							   std::vector<StateType>& mass_sources )
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
@@ -191,4 +191,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_KINETICS_H
+#endif // ANTIOCH_KINETICS_EVALUATOR_H

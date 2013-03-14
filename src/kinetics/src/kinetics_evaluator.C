@@ -27,7 +27,7 @@
 //--------------------------------------------------------------------------
 
 // This class
-#include "antioch/kinetics.h"
+#include "antioch/kinetics_evaluator.h"
 
 // Antioch
 #include "antioch/reaction_set.h"

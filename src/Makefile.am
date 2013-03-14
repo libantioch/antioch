@@ -20,7 +20,7 @@ libantioch_la_SOURCES += core/src/chemical_mixture.C
 # kinetics
 libantioch_la_SOURCES += kinetics/src/reaction.C
 libantioch_la_SOURCES += kinetics/src/reaction_set.C
-libantioch_la_SOURCES += kinetics/src/kinetics.C
+libantioch_la_SOURCES += kinetics/src/kinetics_evaluator.C
 
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
@@ -57,7 +57,7 @@ include_HEADERS += core/include/antioch/species_enum.h
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
 include_HEADERS += kinetics/include/antioch/reaction.h
 include_HEADERS += kinetics/include/antioch/reaction_set.h
-include_HEADERS += kinetics/include/antioch/kinetics.h
+include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
 # parsing
 include_HEADERS += parsing/include/antioch/tinyxml2.h

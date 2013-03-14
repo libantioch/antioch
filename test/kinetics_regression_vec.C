@@ -55,7 +55,7 @@
 #include "antioch/reaction_set.h"
 #include "antioch/read_reaction_set_data_xml.h"
 #include "antioch/cea_thermo.h"
-#include "antioch/kinetics.h"
+#include "antioch/kinetics_evaluator.h"
 
 
 template <typename Scalar, typename PairScalars>
@@ -101,7 +101,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
     template Cache<PairScalars> Cache;
   thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-  Antioch::Kinetics<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
   std::vector<PairScalars> omega_dot(n_species, example);
   
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
