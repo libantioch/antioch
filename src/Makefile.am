@@ -56,6 +56,7 @@ include_HEADERS += core/include/antioch/species_enum.h
 # kinetics
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
 include_HEADERS += kinetics/include/antioch/reaction.h
+include_HEADERS += kinetics/include/antioch/reaction_enum.h
 include_HEADERS += kinetics/include/antioch/reaction_set.h
 include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
