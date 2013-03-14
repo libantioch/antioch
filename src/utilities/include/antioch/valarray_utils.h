@@ -91,6 +91,14 @@ struct value_type<std::valarray<T> >
   constant(const type& in) { return in; }
 };
 
+template <typename T>
+inline
+std::valarray<T>
+zero_clone(const std::valarray<T>& example)
+{
+  return std::valarray<T>(T(0),example.size());
+}
+
 } // end namespace Antioch
 
 

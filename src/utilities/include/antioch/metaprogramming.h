@@ -51,9 +51,9 @@ namespace Antioch
     const static bool value = (sizeof(test<T>(0)) == sizeof(yes&));
   };
 
-  // A class for uniformly initializing third-party vectorized numeric
+  // A class for uniformly assigning third-party vectorized numeric
   // types from scalar numeric types.  First-party vectorized numeric
-  // types will just correctly implement operator=(scalar) instead.
+  // types should correctly implement operator=(scalar)...
   template <typename T>
   struct value_type
   {
@@ -71,6 +71,12 @@ namespace Antioch
     static inline
     T constant(const type& in) { return in; }
   };
+
+  // A function for zero-initializing vectorized numeric types
+  template <typename T>
+  inline
+  T zero_clone(const T& example) { return 0; }
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_H

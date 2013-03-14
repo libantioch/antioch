@@ -143,13 +143,15 @@ namespace Antioch
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( mass_sources.size(), this->n_species() );
 
-    //! Work arrays for compute mass sources
-    // Use a copy constructor here to handle vector StateType sizing
-    std::vector<StateType> net_reaction_rates(this->n_reactions(), T);
+    //! Work arrays for compute mass sources; initialize to zero
+    // Use T as an example to get the right sizing when vectorizing.
+    // This could be left uninitialized here for efficiency...
+    std::vector<StateType> net_reaction_rates(this->n_reactions(),
+					      Antioch::zero_clone(T));
 
     std::fill( mass_sources.begin(), mass_sources.end(),
 	       Antioch::value_type<StateType>::constant(0) );
-    
+
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates( T, rho, R_mix, mass_fractions, molar_densities,
 						h_RT_minus_s_R, net_reaction_rates );

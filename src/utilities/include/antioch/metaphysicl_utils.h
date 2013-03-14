@@ -64,6 +64,14 @@ struct value_type<MetaPhysicL::NumberArray<size,T> >
   constant(const type& in) { return in; }
 };
 
+template <std::size_t size, typename T>
+inline
+MetaPhysicL::NumberArray<size,T>
+zero_clone(const MetaPhysicL::NumberArray<size,T>& example)
+{
+  return 0;
+}
+
 } // end namespace Antioch
 
 #endif // ANTIOCH_HAVE_METAPHYSICL

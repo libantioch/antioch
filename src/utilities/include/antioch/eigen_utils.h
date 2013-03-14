@@ -60,7 +60,15 @@ struct value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCo
   constant(const type& in) { return container_type::Constant(in); }
 };
 
-
+template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+inline
+Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+zero_clone(const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example)
+{
+  return 
+  Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+  (example.rows(), example.cols()).setZero();
+}
 
 } // end namespace Antioch
 

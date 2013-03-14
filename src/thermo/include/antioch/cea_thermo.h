@@ -265,8 +265,8 @@ namespace Antioch
   >::type 
   CEAThermodynamics<CoeffType>::cp( const Cache<StateType> &cache, unsigned int species ) const
   {
-    // Use a copy constructor to make sure we get the size right
-    StateType cp = cache.T;
+    // Use an input datum to make sure we get the size right
+    StateType cp = Antioch::zero_clone(cache.T);
 
     const std::size_t size = cache.T.size();
     for (std::size_t i = 0; i != size; ++i)
@@ -416,8 +416,8 @@ namespace Antioch
 
     const std::size_t size = cache.T.size();
 
-    // copy constructor to handle sizing
-    StateType returnval = cache.T;
+    // Use an input variable to determine sizing
+    StateType returnval = Antioch::zero_clone(cache.T);
 
     for (std::size_t i = 0; i != size; ++i)
       {
