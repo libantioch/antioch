@@ -31,19 +31,69 @@
 
 namespace Antioch
 {
-
-  template<class CoeffType=double>
+  template<class ThermoEvaluator>
   class EuckenThermalConductivity
   {
   public:
 
-    EuckenThermalConductivity();
+    EuckenThermalConductivity( const ThermoEvaluator& thermo );
     ~EuckenThermalConductivity();
 
+    template <typename StateType>
+    StateType k_trans( const StateType mu ) const;
+
+    template <typename StateType>
+    StateType k_rot( const StateType mu ) const;
+
+    template <typename StateType>
+    StateType k_vib( const StateType mu ) const;
+
+    template <typename StateType>
+    StateType k_elec( const StateType mu ) const;
 
   protected:
 
-  } 
+    const ThermoEvaluator& _thermo;
+
+  };
+
+  EuckenThermalConductivity::EuckenThermalConductivity( const ThermoEvaluator& thermo )
+    : _thermo(thermo)
+  {
+    return;
+  }
+
+  EuckenThermalConductivity::~EuckenThermalConductivity()
+  {
+    return;
+  }
+
+  template <typename StateType>
+  StateType EuckenThermalConductivity::k_trans( const unsigned int s, const StateType mu ) const
+  {
+    return 2.5*mu*_thermo.cv_trans(s);
+  }
+
+  template <typename StateType>
+  StateType EuckenThermalConductivity::k_rot( const unsigned int s, const StateType mu ) const
+  {
+    return mu*_thermo.cv_rot(s);
+  }
+
+  template <typename StateType>
+  StateType EuckenThermalConductivity::k_vib( const unsigned int s, const StateType mu ) const
+  {
+    /* Note: Cander, "High-temperature effects in hypersonic flight",
+             Encyclopedia of Aerospace Engineering, 2010 suggests that
+             there should be a factor of 1.2 here. */
+    return mu*_thermo.cv_vib(s);
+  }
+
+  template <typename StateType>
+  StateType EuckenThermalConductivity::k_elec( const unsigned int s, const StateType mu ) const
+  {
+    return mu*_thermo.cv_elec(s);
+  }
 
 } // end namespace Antioch
 
