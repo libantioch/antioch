@@ -30,8 +30,11 @@
 #include <cmath>
 #include <iomanip>
 #include <limits>
+#include <vector>
 
 // Antioch
+#include "antioch/vector_utils.h"
+
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
@@ -228,6 +231,7 @@ int tester()
   X_exact[4] = 0.2*M_exact/30.008;
 
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+  Scalar testing = chem_mixture.R(mass_fractions);
   if( std::fabs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl

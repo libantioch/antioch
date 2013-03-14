@@ -44,17 +44,17 @@ namespace Antioch
 
     ~WilkeEvaluator();
 
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     StateType mu( const StateType T,
-		  const std::vector<StateType>& mass_fractions );
+		  const VectorStateType& mass_fractions );
 
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     StateType k( const StateType T,
-		 const std::vector<StateType>& mass_fractions );
+		 const VectorStateType& mass_fractions );
 
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     void mu_and_k( const StateType T,
-		   const std::vector<StateType>& mass_fractions,
+		   const VectorStateType& mass_fractions,
 		   StateType& mu, StateType& k );
 
   protected:
@@ -85,14 +85,14 @@ namespace Antioch
   }
 
   template<class V, class T, class CoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   StateType WilkeEvaluator<CoeffType,V,T>::mu( const StateType T,
-					       const std::vector<StateType>& mass_fractions )
+					       const VectorStateType& mass_fractions )
   {
     StateType mu = StateType(0.0);
     
-    std::vector<StateType> mu(this->n_species,0.0);
-    std::vector<StateType> chi(this->n_species,0.0);
+    VectorStateType mu  = zero_clone(mass_fractions);
+    VectorStateType chi = zero_clone(mass_fractions);
     
     const StateType M = _viscosity.chemical_mixture().M(mass_fractions);
 

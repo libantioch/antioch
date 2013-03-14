@@ -126,39 +126,39 @@ namespace Antioch
     int gamma() const;
     
     //!
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     StateType equilibrium_constant( const StateType P0_RT,
-				    const std::vector<StateType>& h_RT_minus_s_R ) const;
+				    const VectorStateType& h_RT_minus_s_R ) const;
 
     //!
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     void equilibrium_constant_and_derivative( const StateType T,
 					      const StateType P0_RT,
-					      const std::vector<StateType>& h_RT_minus_s_R,
-					      const std::vector<StateType>& ddT_h_RT_minus_s_R,
+					      const VectorStateType& h_RT_minus_s_R,
+					      const VectorStateType& ddT_h_RT_minus_s_R,
 					      StateType& keq,
 					      StateType& dkeq_dT) const;
 
     //!
-    template <typename StateType>
-    StateType compute_rate_of_progress( const std::vector<StateType>& molar_densities,
+    template <typename StateType, typename VectorStateType>
+    StateType compute_rate_of_progress( const VectorStateType& molar_densities,
 					const StateType kfwd, 
 					const StateType kbkwd ) const;
     
     //!
-    template <typename StateType>
-    void compute_rate_of_progress_and_derivatives( const std::vector<StateType>& molar_densities,
-						   const std::vector<StateType>& molar_mass,
+    template <typename StateType, typename VectorStateType>
+    void compute_rate_of_progress_and_derivatives( const VectorStateType& molar_densities,
+						   const VectorStateType& molar_mass,
 						   const StateType kfwd,  
 						   const StateType dkfwd_dT, 
 						   const StateType kbkwd,
 						   const StateType dkbkwd_dT,
 						   StateType& Rfwd,
 						   StateType& dRfwd_dT,
-						   std::vector<StateType>& dRfwd_drho, 
+						   VectorStateType& dRfwd_drho, 
 						   StateType& Rbkwd,
 						   StateType& dRbkwd_dT,
-						   std::vector<StateType>& dRbkwd_drho) const;
+						   VectorStateType& dRbkwd_drho) const;
 
     //! Return const reference to the forward rate object
     const ArrheniusRate<CoeffType>& forward_rate() const;
@@ -449,10 +449,10 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType>::equilibrium_constant( const StateType P0_RT,
-						       const std::vector<StateType>& h_RT_minus_s_R ) const
+						       const VectorStateType& h_RT_minus_s_R ) const
   {
     antioch_assert( this->initialized() );
     //!\todo Make this assertion vector-compatible
@@ -475,12 +475,12 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
   void Reaction<CoeffType>::equilibrium_constant_and_derivative( const StateType T,
 								 const StateType P0_RT,
-								 const std::vector<StateType>& h_RT_minus_s_R,
-								 const std::vector<StateType>& ddT_h_RT_minus_s_R,
+								 const VectorStateType& h_RT_minus_s_R,
+								 const VectorStateType& ddT_h_RT_minus_s_R,
 								 StateType& keq,
 								 StateType& dkeq_dT) const
   {
@@ -510,9 +510,9 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
-  StateType Reaction<CoeffType>::compute_rate_of_progress( const std::vector<StateType>& molar_densities,
+  StateType Reaction<CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
 							   const StateType kfwd, 
 							   const StateType kbkwd ) const
   {
@@ -588,19 +588,20 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
-  void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const std::vector<StateType> &molar_densities,
-								      const std::vector<StateType> &molar_mass,
+  void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
+								      const VectorStateType &molar_mass,
 								      const StateType kfwd, 
 								      const StateType dkfwd_dT,
 								      const StateType kbkwd,
 								      const StateType dkbkwd_dT,
 								      StateType& Rfwd,
 								      StateType& dRfwd_dT,
-								      std::vector<StateType>& dRfwd_drho, 
+								      VectorStateType& dRfwd_drho, 
 								      StateType& Rbkwd,
-								      StateType& dRbkwd_dT, std::vector<StateType> &dRbkwd_drho) const
+								      StateType& dRbkwd_dT,
+								      VectorStateType &dRbkwd_drho) const
   {
     using std::pow;
 

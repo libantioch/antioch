@@ -32,6 +32,8 @@
 #include <vector>
 
 // Antioch
+#include "antioch/vector_utils.h"
+
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"

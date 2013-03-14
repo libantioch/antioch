@@ -62,14 +62,14 @@ namespace Antioch
     const ReactionSet<CoeffType>& reaction_set() const;
 
     //! Compute species production/destruction rates per unit volume in \f$ \left(kg/sec/m^3\right)\f$
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     void compute_mass_sources ( const StateType T,
 				const StateType rho,
 				const StateType R_mix,
-				const std::vector<StateType>& mass_fractions,
-				const std::vector<StateType>& molar_densities,
-				const std::vector<StateType>& h_RT_minus_s_R,
-				std::vector<StateType>& mass_sources );
+				const VectorStateType& mass_fractions,
+				const VectorStateType& molar_densities,
+				const VectorStateType& h_RT_minus_s_R,
+				VectorStateType& mass_sources );
 
     unsigned int n_species() const;
 
@@ -124,15 +124,15 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
   void KineticsEvaluator<CoeffType>::compute_mass_sources( const StateType T,
 							   const StateType rho,
 							   const StateType R_mix,
-							   const std::vector<StateType>& mass_fractions,
-							   const std::vector<StateType>& molar_densities,
-							   const std::vector<StateType>& h_RT_minus_s_R,
-							   std::vector<StateType>& mass_sources )
+							   const VectorStateType& mass_fractions,
+							   const VectorStateType& molar_densities,
+							   const VectorStateType& h_RT_minus_s_R,
+							   VectorStateType& mass_sources )
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
@@ -146,8 +146,7 @@ namespace Antioch
     //! Work arrays for compute mass sources; initialize to zero
     // Use T as an example to get the right sizing when vectorizing.
     // This could be left uninitialized here for efficiency...
-    std::vector<StateType> net_reaction_rates(this->n_reactions(),
-					      Antioch::zero_clone(T));
+    VectorStateType net_reaction_rates = zero_clone(mass_fractions);
 
     std::fill( mass_sources.begin(), mass_sources.end(),
 	       Antioch::value_type<StateType>::constant(0) );

@@ -69,14 +69,14 @@ namespace Antioch
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
     //! Compute the rates of progress for each reaction
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     void compute_reaction_rates( const StateType T,
 				 const StateType rho,
 				 const StateType R_mix,
-				 const std::vector<StateType>& mass_fractions,
-				 const std::vector<StateType>& molar_densities,
-				 const std::vector<StateType>& h_RT_minus_s_R,
-				 std::vector<StateType>& net_reaction_rates ) const;
+				 const VectorStateType& mass_fractions,
+				 const VectorStateType& molar_densities,
+				 const VectorStateType& h_RT_minus_s_R,
+				 VectorStateType& net_reaction_rates ) const;
 
     //! Formatted print, by default to \p std::cout.
     void print( std::ostream& os = std::cout ) const;
@@ -159,15 +159,15 @@ namespace Antioch
   
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType T,
 							const StateType rho,
 							const StateType R_mix,
-							const std::vector<StateType>& mass_fractions,
-							const std::vector<StateType>& molar_densities,
-							const std::vector<StateType>& h_RT_minus_s_R,
-							std::vector<StateType>& net_reaction_rates ) const
+							const VectorStateType& mass_fractions,
+							const VectorStateType& molar_densities,
+							const VectorStateType& h_RT_minus_s_R,
+							VectorStateType& net_reaction_rates ) const
   {
     antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
 

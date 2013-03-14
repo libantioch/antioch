@@ -102,20 +102,20 @@ namespace Antioch
     >::type 
     cp( const Cache<StateType> &cache, unsigned int species ) const;
 
-    template<typename StateType>
-    StateType cp( const Cache<StateType> &cache, const std::vector<StateType>& mass_fractions ) const;
+    template<typename StateType, typename VectorStateType>
+    StateType cp( const Cache<StateType> &cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
     StateType cv( const Cache<StateType> &cache, unsigned int species ) const;
 
-    template<typename StateType>
-    StateType cv( const Cache<StateType> &cache, const std::vector<StateType>& mass_fractions ) const;
+    template<typename StateType, typename VectorStateType>
+    StateType cv( const Cache<StateType> &cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
     StateType h( const Cache<StateType> &cache, unsigned int species ) const;
 
-    template<typename StateType>
-    void h( const Cache<StateType> &cache, std::vector<StateType>& h ) const;
+    template<typename StateType, typename VectorStateType>
+    void h( const Cache<StateType> &cache, VectorStateType& h ) const;
 
     //! We currently need different specializations for scalar vs vector inputs here
     template<typename StateType>
@@ -130,8 +130,8 @@ namespace Antioch
     >::type 
     h_RT_minus_s_R( const Cache<StateType> &cache, unsigned int species ) const;
 
-    template<typename StateType>
-    void h_RT_minus_s_R( const Cache<StateType> &cache, std::vector<StateType>& h_RT_minus_s_R ) const;
+    template<typename StateType, typename VectorStateType>
+    void h_RT_minus_s_R( const Cache<StateType> &cache, VectorStateType& h_RT_minus_s_R ) const;
 
     template<typename StateType>
     StateType cp_over_R( const Cache<StateType> &cache, unsigned int species ) const;
@@ -284,10 +284,10 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
   StateType CEAThermodynamics<CoeffType>::cp( const Cache<StateType> &cache,
-					      const std::vector<StateType>& mass_fractions ) const
+					      const VectorStateType& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _species_curve_fits.size() );
     antioch_assert_greater( mass_fractions.size(), 0 );
@@ -313,9 +313,9 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
-  void CEAThermodynamics<CoeffType>::h( const Cache<StateType> &cache, std::vector<StateType>& h ) const
+  void CEAThermodynamics<CoeffType>::h( const Cache<StateType> &cache, VectorStateType& h ) const
   {
     antioch_assert_equal_to( h.size(), _species_curve_fits.size() );
 
@@ -432,10 +432,10 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
   void CEAThermodynamics<CoeffType>::h_RT_minus_s_R( const Cache<StateType> &cache,
-						     std::vector<StateType>& h_RT_minus_s_R ) const
+						     VectorStateType& h_RT_minus_s_R ) const
   {
     antioch_assert_equal_to( h_RT_minus_s_R.size(), _species_curve_fits.size() );
 
@@ -457,10 +457,10 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
   StateType CEAThermodynamics<CoeffType>::cv( const Cache<StateType> &cache,
-					      const std::vector<StateType>& mass_fractions ) const
+					      const VectorStateType& mass_fractions ) const
   {
     return this->cp(cache,mass_fractions) - _chem_mixture.R(mass_fractions);
   }

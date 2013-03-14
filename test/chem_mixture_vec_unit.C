@@ -44,13 +44,14 @@
 #include <limits>
 
 // Antioch
-#include "antioch/chemical_mixture.h"
-#include "antioch/chemical_species.h"
-#include "antioch/physical_constants.h"
-
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vector_utils.h"
+
+#include "antioch/chemical_mixture.h"
+#include "antioch/chemical_species.h"
+#include "antioch/physical_constants.h"
 
 
 template <typename Scalar>

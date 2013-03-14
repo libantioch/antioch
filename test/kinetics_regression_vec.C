@@ -47,6 +47,7 @@
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vector_utils.h"
 
 // Antioch
 #include "antioch/antioch_asserts.h"
