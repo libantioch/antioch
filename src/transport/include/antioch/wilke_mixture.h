@@ -46,6 +46,12 @@ namespace Antioch
     WilkeMixture( const ChemicalMixture<CoeffType>& chem_mixture );
     ~WilkeMixture();
 
+    CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
+				       const unsigned int s ) const;
+    
+    CoeffType denominator( const unsigned int r,
+			   const unsigned int s ) const;
+
   protected:
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
@@ -89,6 +95,24 @@ namespace Antioch
   WilkeMixture<CoeffType>::~WilkeMixture()
   {
     return;
+  }
+
+  
+  template<class CoeffType>
+  inline
+  CoeffType WilkeMixture<CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
+							      const unsigned int s ) const
+  {
+    return _Mr_Ms_to_the_one_fourth[r][s];
+  }
+    
+  
+  template<class CoeffType>
+  inline
+  CoeffType WilkeMixture<CoeffType>::denominator( const unsigned int r,
+						  const unsigned int s ) const
+  {
+    return _denom[r][s];
   }
 
 } // end namespace Antioch
