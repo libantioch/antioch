@@ -66,6 +66,10 @@ namespace Antioch
 		      CoeffType mol_wght, CoeffType h_form,
 		      CoeffType n_tr_dofs, int charge );
 
+    void add_species_vibrational_data( const unsigned int index,
+                                       const CoeffType theta_v,
+                                       const unsigned int ndg_v );
+
     const std::vector<ChemicalSpecies<CoeffType>*>& chemical_species() const;
 
     const std::vector<Species>& species_list() const;
@@ -295,6 +299,9 @@ namespace Antioch
 	 
     // Now read in chemical properties for the requested species and stash
     read_species_data_ascii_default(*this);
+
+    //... and any vibrational data
+    read_species_vibrational_data_ascii_default(*this);
   }
 
 
@@ -392,7 +399,15 @@ namespace Antioch
     return;
   }
 
-
+  template<typename CoeffType>
+  inline
+  void ChemicalMixture<CoeffType>::add_species_vibrational_data( const unsigned int index,
+                                                                 const CoeffType theta_v,
+                                                                 const unsigned int ndg_v )
+  {
+    (_chemical_species[index])->add_vibrational_data(theta_v, ndg_v);
+  }
+  
   template<typename CoeffType>
   inline
   void ChemicalMixture<CoeffType>::init_species_name_map()

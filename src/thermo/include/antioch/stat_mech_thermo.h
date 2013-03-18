@@ -64,7 +64,8 @@ namespace Antioch
      * @returns mixture translational/rotational specific heat at
      * constant volume.
      */
-    CoeffType cv_tr () const;
+    template<typename StateType>
+    StateType cv_tr (const std::vector<StateType>& mass_fractions) const;
       
     /**
      * @returns species vibrational specific heat
@@ -78,7 +79,7 @@ namespace Antioch
      * constant volume.
      */
     template<typename StateType>
-    StateType cv_vib (const StateType Tv) const;
+    StateType cv_vib (const StateType Tv, const std::vector<StateType>& mass_fractions) const;
       
     /**
      * @returns species vibrational/electronic specific heat
@@ -314,10 +315,18 @@ namespace Antioch
   }
 
   template<typename CoeffType>
+  template<typename StateType>
   inline
-  CoeffType StatMechThermodynamics<CoeffType>::cv_tr () const
+  StateType StatMechThermodynamics<CoeffType>::cv_tr (const std::vector<StateType>& mass_fractions) const
   {
-    antioch_not_implemented();
+    StateType cv_tr = mass_fractions[0]*this->cv_tr(0);
+
+    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    {
+      cv_tr += mass_fractions[s]*this->cv_tr(s);
+    }
+    
+    return cv_tr;
   }
       
   template<typename CoeffType>
@@ -326,15 +335,44 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_vib (const unsigned int species, 
                                                        const StateType Tv) const
   {
-    antioch_not_implemented();
+    // convenience
+    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const std::vector<CoeffType>& theta_v  = chem_species.theta_v();
+    const std::vector<unsigned int>& ndg_v = chem_species.ndg_v();
+    
+    antioch_assert_equal_to(ndg_v.size(), theta_v.size());
+    
+    // Use an input datum to make sure we get the size right
+    StateType cv_vib = Antioch::zero_clone(Tv);
+	
+    if (theta_v.empty())
+      return cv_vib;
+
+    for (unsigned int level=0; level<ndg_v.size(); level++)
+    {
+      const StateType expval = std::exp(theta_v[level]/Tv);
+      
+      cv_vib += (static_cast<CoeffType>(ndg_v[level])*
+                 chem_species.gas_constant()*theta_v[level]*theta_v[level]*expval/(expval - 1.)/(expval - 1.)/Tv/Tv);
+    }
+    
+    return cv_vib;
   }
       
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::cv_vib (const StateType Tv) const
+  StateType StatMechThermodynamics<CoeffType>::cv_vib (const StateType Tv,
+                                                       const std::vector<StateType>& mass_fractions) const
   {
-    antioch_not_implemented();
+    StateType cv_vib = mass_fractions[0]*this->cv_vib(0, Tv);
+
+    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    {
+      cv_vib += mass_fractions[s]*this->cv_vib(s, Tv);
+    }
+    
+    return cv_vib;
   }
       
   template<typename CoeffType>

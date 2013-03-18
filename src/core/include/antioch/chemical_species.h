@@ -112,6 +112,10 @@ namespace Antioch
     //! Degeneracies for each electronic modes.
     const std::vector<unsigned int>& ndg_e() const;
 
+    //! Supply vibrational data
+    void add_vibrational_data(const CoeffType theta_v,
+                              const CoeffType ndg_v);
+
     //! Formatted print
     /*!
      * Defaults to \p std::cout.
@@ -233,6 +237,15 @@ namespace Antioch
   const std::vector<unsigned int>& ChemicalSpecies<CoeffType>::ndg_e() const
   { return _ndg_e; }
 
+
+  template<typename CoeffType>
+  inline
+  void ChemicalSpecies<CoeffType>::add_vibrational_data(const CoeffType theta_v,
+                                                        const CoeffType ndg_v)
+  {
+    _theta_v.push_back(theta_v);
+    _ndg_v.push_back(ndg_v);
+  }
 
   template<typename CoeffType>
   inline
