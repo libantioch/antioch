@@ -33,6 +33,7 @@ libantioch_la_SOURCES += parsing/src/species_ascii_parsing.C
 # thermo
 libantioch_la_SOURCES += thermo/src/cea_curve_fit.C
 libantioch_la_SOURCES += thermo/src/cea_thermo.C
+libantioch_la_SOURCES += thermo/src/stat_mech_thermo.C
 
 # transport
 libantioch_la_SOURCES += transport/src/wilke_mixture.C
@@ -71,6 +72,7 @@ include_HEADERS += parsing/include/antioch/species_ascii_parsing.h
 # thermo
 include_HEADERS += thermo/include/antioch/cea_curve_fit.h
 include_HEADERS += thermo/include/antioch/cea_thermo.h
+include_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 
 # transport
 include_HEADERS += transport/include/antioch/blottner_viscosity.h
