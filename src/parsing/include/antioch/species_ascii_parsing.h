@@ -213,42 +213,43 @@ namespace Antioch
     unsigned int n_degeneracies;
 
     while (in.good())
-    {
-      in >> name;           // Species Name
-      in >> theta_v;        // characteristic vibrational temperature (K)
-      in >> n_degeneracies; // degeneracy of the mode
-      
-      // If we are still good, we have a valid set of thermodynamic
-      // data for this species. Otherwise, we read past end-of-file 
-      // in the section above
-      if (in.good())
       {
-        // If we do not have an enum for this species, that is going to cause
-        // problems down the line.
-        if (!chem_mixture.species_name_map().count(name))
-        {
-          std::cerr << "ERROR: Unexpected species " << name 
-                    << " encountered while parsing thermodynamic table!"
-                    << std::endl;
-          antioch_error();
-        }
-	
-        // If this species is not part of the existing mixture, we
-        // don't care about it, so just continue silently
-        if( !chem_mixture.active_species_name_map().count(name) )
-        {
-          continue;
-        }
-        
-        // ... otherwise we add the data
-        const unsigned int s = chem_mixture.active_species_name_map().find(name)->second;
-
-        antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
-        
-        chem_mixture.add_species_vibrational_data(s, theta_v, n_degeneracies);
-      }
+        in >> name;           // Species Name
+        in >> theta_v;        // characteristic vibrational temperature (K)
+        in >> n_degeneracies; // degeneracy of the mode
       
-    }
+        // If we are still good, we have a valid set of thermodynamic
+        // data for this species. Otherwise, we read past end-of-file 
+        // in the section above
+        if (in.good())
+          {
+            // If we do not have an enum for this species, that is going to cause
+            // problems down the line.
+            if (!chem_mixture.species_name_map().count(name))
+              {
+                std::cerr << "ERROR: Unexpected species " << name 
+                          << " encountered while parsing thermodynamic table!"
+                          << std::endl;
+                antioch_error();
+              }
+	
+            // If this species is not part of the existing mixture, we
+            // don't care about it, so just continue silently
+            if( !chem_mixture.active_species_name_map().count(name) )
+              {
+                continue;
+              }
+        
+            // ... otherwise we add the data
+            const unsigned int s = 
+              chem_mixture.active_species_name_map().find(name)->second;
+
+            antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
+        
+            chem_mixture.add_species_vibrational_data(s, theta_v, n_degeneracies);
+          }
+      
+      }
   }
 
   
@@ -382,6 +383,309 @@ namespace Antioch
     read_species_vibrational_data_ascii(chem_mixture,buf);       
   }
 
+
+  template<class NumericType>
+  inline
+  void read_species_electronic_data_ascii (ChemicalMixture<NumericType>& chem_mixture,
+                                           std::istream &in)
+  {
+    // skip the header
+    skip_comment_lines(in, '#');
+    
+    std::string name;
+    NumericType theta_e;
+    unsigned int n_degeneracies;
+    
+    while (in.good())
+      {
+        in >> name;           // Species Name
+        in >> theta_e;        // characteristic electronic temperature (K)
+        in >> n_degeneracies; // number of degeneracies for this level
+        
+        // If we are still good, we have a valid set of thermodynamic
+        // data for this species. Otherwise, we read past end-of-file 
+        // in the section above
+        if (in.good())
+          {
+            // If we do not have an enum for this species, that is going to cause
+            // problems down the line.
+            if (!chem_mixture.species_name_map().count(name))
+              {
+                std::cerr << "ERROR: Unexpected species " << name 
+                          << " encountered while parsing thermodynamic table!"
+                          << std::endl;
+                antioch_error();
+              }
+            
+            // If this species is not part of the existing mixture, we
+            // don't care about it, so just continue silently.
+            if (!chem_mixture.active_species_name_map().count(name))
+              {
+                continue;
+              }
+
+            // ... otherwise we add the data
+            const unsigned int s = 
+              chem_mixture.active_species_name_map().find(name)->second;
+
+            antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
+            
+            chem_mixture.add_species_electronic_data(s, theta_e, n_degeneracies);
+          }
+        
+      }
+  }
+  
+
+  template<class NumericType>
+  inline
+  void read_species_electronic_data_ascii_default (ChemicalMixture<NumericType>& chem_mixture)
+  {
+    static const std::string
+      default_species_elec_data
+      ("#===========================================================================\n"
+       "# LEGEND\n"
+       "#===========================================================================\n"
+       "# Thetae	-- Characteristic electronic temperature (K)\n"
+       "# edg		-- Degeneracy of the electronic mode\n"
+       "# #elevels	-- Total number of electronic levels\n"
+       "#\n"
+       "# Species     ThetaE     edg  #elevels\n"
+       "\n"
+       "Ar	  0.00000e+00   1\n"
+       "Ar	  1.61114e+05   9\n"
+       "Ar	  1.62583e+05  21\n"
+       "Ar	  1.63613e+05   7\n"
+       "Ar	  1.64233e+05   3\n"
+       "Ar	  1.64943e+05   5\n"
+       "Ar	  1.65352e+05  15\n"
+       "\n"
+       "Ar+	  0.00000e+00   4\n"
+       "Ar+	  2.05980e+03   2\n"
+       "\n"
+       "C        0.00000e+00   1\n"
+       "C        2.35959e+01   3\n"
+       "C        6.24428e+01   5\n"
+       "C        1.46649e+04   5\n"
+       "C        3.11466e+04   1\n"
+       "C        4.85374e+04   5\n"
+       "C        9.22094e+04  15\n"
+       "C        1.08275e+05   9\n"
+       "C        1.40824e+05   5\n"
+       "C        1.52221e+05   3\n"
+       "C        1.72477e+05   3\n"
+       "\n"
+       "C+       0.00000e+00   2\n"
+       "C+       9.12471e+01   4\n"
+       "C+       6.19188e+04  12\n"
+       "C+       1.07809e+05  10\n"
+       "C+       1.38833e+05   2\n"
+       "C+       1.59203e+05   6\n"
+       "\n"
+       "C2       0.00000e+00   1\n"
+       "C2       1.03045e+03   6\n"
+       "C2       9.25747e+03   1\n"
+       "C2       1.20732e+04   2\n"
+       "C2       1.32762e+04   3\n"
+       "C2       2.18406e+04   2\n"
+       "C2       2.69626e+04   1\n"
+       "C2       2.88079e+04   6\n"
+       "C2       3.23724e+04  10\n"
+       "C2       4.38467e+04   5\n"
+       "C2       4.92952e+04   2\n"
+       "C2       5.01773e+04   6\n"
+       "C2       5.06089e+04   1\n"
+       "C2       5.51051e+04   6\n"
+       "C2       5.66374e+04   2\n"
+       "C2       5.86972e+04   6\n"
+       "C2       5.89898e+04   6\n"
+       "C2       6.12918e+04   6\n"
+       "C2       6.20112e+04   2\n"
+       "C2       6.22123e+04   1\n"
+       "C2       6.25148e+04   1\n"
+       "C2       6.43852e+04   3\n"
+       "C2       7.46005e+04   6\n"
+       "C2       7.60393e+04   1\n"
+       "C2       7.91828e+04   1\n"
+       "C2       7.97081e+04   2\n"
+       "C2       9.07867e+04   2\n"
+       "\n"
+       "CH	  0.00000e+00   4\n"
+       "CH	  7.62590e+03   4\n"
+       "CH	  3.48250e+04   6\n"
+       "\n"
+       "Cl       0.00000e+00   4\n"
+       "Cl       1.26952e+03   2\n"
+       "Cl2      0.00000e+00   1\n"
+       "Cl2      2.56574e+04   6\n"
+       "\n"
+       "CN       0.00000e+00   2\n"
+       "CN       1.32943e+04   4\n"
+       "CN       3.70513e+04   2\n"
+       "CN       4.66163e+04   4\n"
+       "CN       6.18673e+04   8\n"
+       "CN       6.86296e+04   8\n"
+       "CN       7.74061e+04   4\n"
+       "CN       7.83931e+04   4\n"
+       "CN       8.51053e+04   2\n"
+       "CN       8.64639e+04   4\n"
+       "CN       8.79882e+04   4\n"
+       "CN       8.97796e+04   4\n"
+       "CN       9.16500e+04   4\n"
+       "CN       9.24039e+04   4\n"
+       "CN       9.26571e+04   2\n"
+       "CN       9.99949e+04   8\n"
+       "CN       1.01002e+05   2\n"
+       "CN       1.01721e+05   4\n"
+       "\n"
+       "CN+	  0.00000e+00   1\n"
+       "CN+	  2.87770e+03   6\n"
+       "CN+	  1.19620e+04   2\n"
+       "CN+	  1.72660e+04   6\n"
+       "\n"
+       "CO       0.00000e+00   1\n"
+       "CO       7.00493e+04   6\n"
+       "CO       8.03206e+04   3\n"
+       "CO       8.79436e+04   6\n"
+       "CO       9.24129e+04   3\n"
+       "CO       9.36438e+04   2\n"
+       "CO       9.36418e+04   1\n"
+       "CO       9.48556e+04   2\n"
+       "\n"
+       "CO+      0.00000e+00   2\n"
+       "CO+      2.98303e+04   4\n"
+       "CO+      6.60063e+04   2\n"
+       "\n"
+       "F	  0.00000e+00   4\n"
+       "F	  5.81430e+02   2\n"
+       "\n"
+       "N	  0.00000e+00   4\n"
+       "N	  2.76647e+04  10\n"
+       "N	  4.14931e+04   6\n"
+       "\n"
+       "N+	  0.00000e+00   1\n"
+       "N+	  7.00684e+01   3\n"
+       "N+	  1.88192e+02   5\n"
+       "N+	  2.20366e+04   5\n"
+       "N+	  4.70318e+04   1\n"
+       "N+	  6.73125e+04   5\n"
+       "N+	  1.32719e+05  15\n"
+       "\n"
+       "N2       0.00000e+00   1\n"
+       "N2       7.22316e+04   3\n"
+       "N2       8.57786e+04   6\n"
+       "N2       8.60503e+04   6\n"
+       "N2       9.53512e+04   3\n"
+       "N2       9.80564e+04   1\n"
+       "N2       9.96827e+04   2\n"
+       "N2       1.04898e+05   2\n"
+       "N2       1.11649e+05   5\n"
+       "N2       1.22584e+05   1\n"
+       "N2       1.24886e+05   6\n"
+       "N2       1.28248e+05   6\n"
+       "N2       1.33806e+05  10\n"
+       "N2       1.40430e+05   6\n"
+       "N2       1.50496e+05   6\n"
+       "\n"
+       "N2+      0.00000e+00   2\n"
+       "N2+      1.31900e+04   4\n"
+       "N2+      3.66332e+04   2\n"
+       "N2+      3.66888e+04   4\n"
+       "N2+      5.98530e+04   8\n"
+       "N2+      6.61837e+04   8\n"
+       "N2+      7.59899e+04   4\n"
+       "N2+      7.62551e+04   4\n"
+       "N2+      8.20102e+04   4\n"
+       "N2+      8.41683e+04   4\n"
+       "N2+      8.63265e+04   8\n"
+       "N2+      8.92041e+04   8\n"
+       "N2+      9.20816e+04   4\n"
+       "N2+      9.22255e+04   4\n"
+       "N2+      9.29377e+04   2\n"
+       "N2+      9.63979e+04   2\n"
+       "N2+      1.03592e+05   4\n"
+       "\n"
+       "NH	  0.00000e+00   3\n"
+       "NH	  1.80950e+04   2\n"
+       "NH	  3.04990e+04   1\n"
+       "NH	  4.28870e+04   6\n"
+       "\n"
+       "NH+	  0.00000e+00   4\n"
+       "NH+	  8.02880e+02   4\n"
+       "NH+	  3.30360e+04   6\n"
+       "\n"
+       "NO       0.00000e+00   4\n"
+       "NO       5.46735e+04   8\n"
+       "NO       6.31714e+04   2\n"
+       "NO       6.59945e+04   4\n"
+       "NO       6.90612e+04   4\n"
+       "NO       7.05000e+04   4\n"
+       "NO       7.49106e+04   4\n"
+       "NO       7.62888e+04   2\n"
+       "NO       8.67619e+04   4\n"
+       "NO       8.71443e+04   2\n"
+       "NO       8.88608e+04   4\n"
+       "NO       8.98176e+04   4\n"
+       "NO       8.98845e+04   2\n"
+       "NO       9.04270e+04   2\n"
+       "NO       9.06428e+04   2\n"
+       "NO       9.11176e+04   4\n"
+       "\n"
+       "NO+      0.00000e+00   1\n"
+       "NO+      7.50897e+04   3\n"	
+       "NO+      8.52546e+04   6\n"	
+       "NO+      8.90357e+04   6\n"	
+       "NO+      9.74698e+04   3\n"	
+       "NO+      1.00055e+05   1\n"	
+       "NO+      1.02803e+05   2\n"	
+       "NO+      1.05714e+05   2\n"	
+       "\n"
+       "O	  0.00000e+00   5\n"
+       "O	  2.27708e+02   3\n"
+       "O	  3.26569e+02   1\n"
+       "O	  2.28303e+04   5\n"
+       "O	  4.86199e+04   1\n"
+       "\n"
+       "O+	  0.00000e+00   4\n"
+       "O+	  3.85833e+04  10\n"
+       "O+	  5.82235e+04   6\n"
+       "\n"
+       "O2	  0.00000e+00   3\n"
+       "O2	  1.13916e+04   2\n"
+       "O2	  1.89847e+04   1\n"
+       "O2	  4.75597e+04   1\n"
+       "O2	  4.99124e+04   6\n"
+       "O2	  5.09227e+04   3\n"
+       "O2	  7.18986e+04   3\n"
+       "\n"
+       "O2+	  0.00000e+00   4\n"
+       "O2+	  4.73544e+04   8\n"
+       "O2+	  5.83740e+04   4\n"
+       "O2+	  5.84143e+04   6\n"
+       "O2+	  6.22990e+04   4\n"
+       "O2+	  6.73347e+04   2\n"
+       "O2+	  7.12194e+04   4\n"
+       "O2+	  7.65428e+04   4\n"
+       "O2+	  8.81969e+04   4\n"
+       "O2+	  8.89163e+04   4\n"
+       "O2+	  9.42398e+04   8\n"
+       "O2+	  9.49592e+04   4\n"
+       "O2+	  9.59203e+04   2\n"
+       "O2+	  9.98510e+04   2\n"
+       "O2+	  1.03592e+05   4\n"
+       "\n"
+       "OH	  0.00000e+00   4\n"
+       "OH	  4.70280e+04   2\n"
+       "\n"
+       "Si	  0.00000e+00   1\n"
+       "Si	  1.10940e+02   3\n"
+       "Si	  3.21090e+02   5\n"
+       "Si	  9.06300e+03   5\n"
+       "Si	  2.21500e+04   1\n");
+
+    std::istringstream buf(default_species_elec_data);
+    read_species_electronic_data_ascii(chem_mixture,buf);
+  }
 
 
 

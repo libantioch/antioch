@@ -70,6 +70,10 @@ namespace Antioch
                                        const CoeffType theta_v,
                                        const unsigned int ndg_v );
 
+    void add_species_electronic_data( const unsigned int index,
+                                      const CoeffType theta_e,
+                                      const unsigned int ndg_e );
+
     const std::vector<ChemicalSpecies<CoeffType>*>& chemical_species() const;
 
     const std::vector<Species>& species_list() const;
@@ -302,6 +306,9 @@ namespace Antioch
 
     //... and any vibrational data
     read_species_vibrational_data_ascii_default(*this);
+
+    //... and any electronic data
+    read_species_electronic_data_ascii_default(*this);
   }
 
 
@@ -406,6 +413,15 @@ namespace Antioch
                                                                  const unsigned int ndg_v )
   {
     (_chemical_species[index])->add_vibrational_data(theta_v, ndg_v);
+  }
+
+  template<typename CoeffType>
+  inline
+  void ChemicalMixture<CoeffType>::add_species_electronic_data( const unsigned int index,
+                                                                const CoeffType theta_e,
+                                                                const unsigned int ndg_e )
+  {
+    (_chemical_species[index])->add_electronic_data(theta_e, ndg_e);
   }
   
   template<typename CoeffType>

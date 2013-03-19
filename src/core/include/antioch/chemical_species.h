@@ -116,6 +116,10 @@ namespace Antioch
     void add_vibrational_data(const CoeffType theta_v,
                               const CoeffType ndg_v);
 
+    //! Supply electronic data
+    void add_electronic_data(const CoeffType theta_e,
+                             const CoeffType ndg_e);
+
     //! Formatted print
     /*!
      * Defaults to \p std::cout.
@@ -245,6 +249,15 @@ namespace Antioch
   {
     _theta_v.push_back(theta_v);
     _ndg_v.push_back(ndg_v);
+  }
+
+  template<typename CoeffType>
+  inline
+  void ChemicalSpecies<CoeffType>::add_electronic_data(const CoeffType theta_e,
+                                                       const CoeffType ndg_e)
+  {
+    _theta_e.push_back(theta_e);
+    _ndg_e.push_back(ndg_e);
   }
 
   template<typename CoeffType>
