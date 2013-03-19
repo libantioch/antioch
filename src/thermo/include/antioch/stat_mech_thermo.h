@@ -80,6 +80,18 @@ namespace Antioch
      */
     template<typename StateType>
     StateType cv_vib (const StateType Tv, const std::vector<StateType>& mass_fractions) const;
+
+    /**
+     * @returns species electronic specific heat at constant volume.
+     */
+    template<typename StateType>
+    StateType cv_el (const unsigned int species, const StateType Te) const;
+      
+    /**
+     * @returns mixture electronic specific heat at constant volume.
+     */
+    template<typename StateType>
+    StateType cv_el (const StateType Te, const std::vector<StateType>& mass_fractions) const;
       
     /**
      * @returns species vibrational/electronic specific heat
@@ -380,6 +392,71 @@ namespace Antioch
       }
     
     return cv_vib;
+  }
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  StateType StatMechThermodynamics<CoeffType>::cv_el (const unsigned int species, 
+                                                      const StateType Te) const
+  {
+    // convenience
+    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const std::vector<CoeffType>& theta_e  = chem_species.theta_e();
+    const std::vector<unsigned int>& ndg_e = chem_species.ndg_e();
+    
+    antioch_assert_equal_to(ndg_e.size(), theta_e.size());
+    
+    StateType cv_el = 0.0;
+    
+    // Really < 2?  Yes, b/c theta_e[0] = 0.0 always.  See
+    // read_species_electronic_data_ascii_default in
+    // species_ascii_parsing.h
+    if (theta_e.size() < 2) return cv_el;
+    
+    const StateType Teinv = 1./Te;
+    const StateType Te2inv = Teinv*Teinv;
+    
+    StateType
+      num = 0., dnum = 0.,
+      den = 0., dden = 0.;
+    
+    for (unsigned int level=0; level<theta_e.size(); level++)
+      {
+        const StateType 
+          expval = std::exp (-theta_e[level] * Teinv),
+          den_l  = static_cast<StateType>(ndg_e[level])*expval,
+          num_l  = den_l*theta_e[level],
+          dden_l = num_l*Te2inv,
+          dnum_l = dden_l*theta_e[level];
+        
+        num  += num_l;
+        den  += den_l;
+	
+        dden += dden_l;
+        dnum += dnum_l;
+      }
+    
+    const StateType invden = 1./den;
+    
+    cv_el = chem_species.gas_constant()*(dnum - num*dden*invden) * invden;
+
+    return cv_el;
+  }
+  
+  template<typename CoeffType>
+  template<typename StateType>
+  StateType StatMechThermodynamics<CoeffType>::cv_el (const StateType Te, 
+                                                      const std::vector<StateType>& mass_fractions) const
+  {
+    StateType cv_el = mass_fractions[0]*this->cv_el(0, Te);
+
+    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+      {
+        cv_el += mass_fractions[s]*this->cv_el(s, Te);
+      }
+    
+    return cv_el;
   }
       
   template<typename CoeffType>

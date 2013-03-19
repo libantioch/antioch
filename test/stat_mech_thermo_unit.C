@@ -199,7 +199,6 @@ int test_cv_tr()
   return return_flag;
 }
 
-
 template <typename Scalar>
 int test_cv_vib()
 {
@@ -368,16 +367,79 @@ int test_cv_vib()
   return return_flag;
 }
 
+template <typename Scalar>
+int test_cv_el()
+{
+  using std::exp;
+
+  std::vector<std::string> species_str_list;
+  const unsigned int n_species = 5;
+  species_str_list.reserve(n_species);
+  species_str_list.push_back( "N2" );
+  species_str_list.push_back( "O2" );
+  species_str_list.push_back( "N" );
+  species_str_list.push_back( "O" );
+  species_str_list.push_back( "NO" );
+
+  Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+  // Can we instantiate it?
+  Antioch::StatMechThermodynamics<Scalar> sm_thermo( chem_mixture );
+
+  // Mass fractions
+  std::vector<Scalar> mass_fractions( 5, 0.2 );
+  mass_fractions[0] = 0.5;
+  mass_fractions[1] = 0.2;
+  mass_fractions[2] = 0.1;
+  mass_fractions[3] = 0.1;
+  mass_fractions[4] = 0.1;
+
+  const Scalar R_N2 = Antioch::Constants::R_universal/28.016;
+  const Scalar R_O2 = Antioch::Constants::R_universal/32.0;
+  const Scalar R_N = Antioch::Constants::R_universal/14.008;
+  const Scalar R_O = Antioch::Constants::R_universal/16.0;
+  const Scalar R_NO = Antioch::Constants::R_universal/30.008;
+
+  // Te
+  const Scalar Te = 1000.0;
+
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+  const Scalar ztol = std::numeric_limits<Scalar>::epsilon();
+
+  int return_flag = 0;
+
+  // N2
+  {
+    Scalar cv_el_N2 = sm_thermo.cv_el (0, Te);
+  }
+
+  // Mixture
+  {
+    Scalar cv_el = sm_thermo.cv_el (Te, mass_fractions);
+  }
+
+  // TODO: Add some non-trivial checks
+
+  return return_flag;
+}
 
 int main()
 {
+
+  // Translational/rotational specific heat at constant volume
   int ierr = (test_cv_tr<double>() ||
 //            test_cv_tr<long double>() ||
               test_cv_tr<float>());
 
+  // Vibrational specific heat at constant volume
   ierr += (test_cv_vib<double>() ||
 //         test_cv_vib<long double>() ||
            test_cv_vib<float>());
+
+  // Electronic specific heat at constant volume
+  ierr += (test_cv_el<double>() ||
+//         test_cv_el<long double>() ||
+           test_cv_el<float>());
 
   return ierr;
 }
