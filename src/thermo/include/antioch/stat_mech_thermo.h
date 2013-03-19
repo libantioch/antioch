@@ -33,11 +33,13 @@
 #include <iomanip>
 #include <vector>
 #include <cmath>
+#include <limits>
 
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/input_utils.h"
 #include "antioch/metaprogramming.h"
+#include "antioch/antioch_exceptions.h"
 
 namespace Antioch
 {
@@ -789,7 +791,57 @@ namespace Antioch
                                                              const std::vector<StateType>& mass_fractions,
                                                              StateType T ) const
   {
-    antioch_not_implemented();
+    // Cache the translational/rotational specific heat - this will be used repeatedly 
+    // and involves (2*NS-1) flops to compute, and since this has no functional 
+    // dependence on temperature it will not change throughout the Newton iteration.
+    const StateType Cv_tr = this->cv_tr(mass_fractions);
+
+    // Similarly for mixture formation energy
+    const StateType E_0 = this->e_0(mass_fractions);
+    
+    // if the user does not provide an initial guess for the temperature
+    // assume it is all in translation/rotation to compute a starting value.
+    if (T < 0.)
+      {
+	T = (e_tot - E_0) / Cv_tr;
+	T = std::min(std::max(T,10.),20000.);
+	
+        // FIXME: Use Antioch::Limits or similar? (i.e., don't
+        // hardcode min and max T)
+
+	// make sure the initial guess is valid
+	//T = std::max(T, Limits::CompNSLimits::T_min());
+        T = std::max(T, 10.);
+	T = std::min(T, 2.e4);
+      }
+    
+    // compute the translational/rotational temperature of the mixture using Newton-Rhapson iteration
+    StateType delta_T = std::numeric_limits<StateType>::max();
+    const unsigned int max_iterations = 100;
+    
+    // TODO: Shouldn't convergence test be a relative check (e.g.,
+    // std::abs(delta_T/T) > std::numeric_limits<CoeffType>::epsilon() * 10
+    // or similar)
+    for (unsigned int iter = 0;
+         std::abs(delta_T) > 1.e-8 && 
+         T >= 0.;
+         ++iter)
+      {
+	if (iter == max_iterations)
+	  throw FailedNewtonTTvInversion ("ERROR: failed to converge T_from_e_tot!");
+	
+	// compute the residual, defined as the mismatch between the input e_tot and
+	// the value corresponding to the current T iterate
+        StateType Re = 0., dRevdT = 0.;
+        this->e_and_cv_ve(T, mass_fractions, Re, dRevdT);
+        Re += this->e_tr(T, mass_fractions) + E_0 - e_tot;
+        dRevdT += Cv_tr;
+
+	delta_T = -Re / dRevdT;
+	T += delta_T;
+      }
+
+    return T;
   }
       
   template<typename CoeffType>

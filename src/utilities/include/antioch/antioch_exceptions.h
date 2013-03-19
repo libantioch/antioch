@@ -69,6 +69,17 @@ namespace Antioch
     FileError(const std::string& filename) : std::runtime_error( "Error accessing file: " + filename ) {}
   };
 
+  /*!
+   * A class representing failed Newton convergence in T/Tv inversion.
+   */
+  class FailedNewtonTTvInversion : public std::runtime_error
+  {
+  public:
+    FailedNewtonTTvInversion (const std::string &description) 
+      : std::runtime_error (description)
+    {}
+  };
+
 } // end namespace Antioch
 
 #define ANTIOCH_THROW(e) do { throw e; } while (0)
