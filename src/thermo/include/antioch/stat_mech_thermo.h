@@ -526,7 +526,8 @@ namespace Antioch
                                                       const StateType T, 
                                                       const StateType Tv) const
   {
-    antioch_not_implemented();
+    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    return (this->e_tot(species, T, Tv) + chem_species.gas_constant()*T);
   }
 
 
@@ -536,7 +537,7 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::h_tot (const unsigned int species, 
                                                       const StateType T) const
   {
-    antioch_not_implemented();
+    return this->h_tot(species, T, T);
   }
 
   template<typename CoeffType>
@@ -546,7 +547,14 @@ namespace Antioch
                                                       const StateType Tv,
                                                       const std::vector<StateType>& mass_fractions) const
   {
-    antioch_not_implemented();
+    StateType h_tot = mass_fractions[0]*this->h_tot(0, T, Tv);
+
+    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+      {
+        h_tot += mass_fractions[s]*this->h_tot(s, T, Tv);
+      }
+    
+    return h_tot;
   }
 
   template<typename CoeffType>
@@ -555,7 +563,7 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::h_tot (const StateType T,
                                                       const std::vector<StateType>& mass_fractions) const
   {
-    antioch_not_implemented();
+    return this->h_tot(T, T, mass_fractions);
   }
       
   template<typename CoeffType>
