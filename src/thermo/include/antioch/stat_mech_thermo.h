@@ -465,7 +465,7 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_ve (const unsigned int species, 
                                                       const StateType Tv) const
   {
-    antioch_not_implemented();
+    return (this->cv_vib(species, Tv) + this->cv_el(species, Tv));
   }
       
   template<typename CoeffType>
@@ -474,27 +474,27 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_ve (const StateType Tv,
                                                       const std::vector<StateType>& mass_fractions) const
   {
-    antioch_not_implemented();
+    return (this->cv_vib(Tv, mass_fractions) + this->cv_el(Tv, mass_fractions));
   }
       
   template<typename CoeffType>
   template<typename StateType>
   inline
   StateType StatMechThermodynamics<CoeffType>::cv (const unsigned int species, 
-                                                   const StateType T, 
+                                                   const StateType /* T */, 
                                                    const StateType Tv) const
   {
-    antioch_not_implemented();
+    return (this->cv_tr(species) + this->cv_ve(species, Tv));
   }
       
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::cv (const StateType T, 
+  StateType StatMechThermodynamics<CoeffType>::cv (const StateType /* T */, 
                                                    const StateType Tv,
                                                    const std::vector<StateType>& mass_fractions) const
   {
-    antioch_not_implemented();
+    return (this->cv_tr(mass_fractions) + this->cv_ve(Tv, mass_fractions));
   }
 
   template<typename CoeffType>
@@ -504,7 +504,7 @@ namespace Antioch
                                                    const StateType Tv,
                                                    const std::vector<StateType>& mass_fractions) const
   {
-    antioch_not_implemented();
+    return (this->cv(T,Tv,mass_fractions) + this->_chem_mixture.R(mass_fractions));
   }
 
   template<typename CoeffType>
