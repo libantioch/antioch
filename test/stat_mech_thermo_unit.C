@@ -368,18 +368,39 @@ int test_cv_vib()
 }
 
 template <typename Scalar>
+Scalar cv_el_compare( const unsigned int g[], const Scalar theta[], 
+                      const Scalar Rs, const Scalar Te, unsigned int N )
+{
+  using std::exp;
+
+  Scalar cv=0.0;
+
+  Scalar num=0.0, den=0.0, dnum=0.0, dden=0.0;
+
+  for (unsigned int i=0; i<N; ++i)
+    {
+      num  += theta[i]*static_cast<Scalar>(g[i])*exp(-theta[i]/Te);
+      dnum += theta[i]*static_cast<Scalar>(g[i])*exp(-theta[i]/Te)*(theta[i]/Te/Te);
+
+      den  += static_cast<Scalar>(g[i])*exp(-theta[i]/Te);
+      dden += static_cast<Scalar>(g[i])*exp(-theta[i]/Te)*(theta[i]/Te/Te);
+    }
+
+  cv = Rs*(dnum/den - num*dden/den/den);
+  
+  return cv;
+}
+
+template <typename Scalar>
 int test_cv_el()
 {
   using std::exp;
 
   std::vector<std::string> species_str_list;
-  const unsigned int n_species = 5;
+  const unsigned int n_species = 2;
   species_str_list.reserve(n_species);
-  species_str_list.push_back( "N2" );
   species_str_list.push_back( "O2" );
-  species_str_list.push_back( "N" );
   species_str_list.push_back( "O" );
-  species_str_list.push_back( "NO" );
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
@@ -387,38 +408,95 @@ int test_cv_el()
   Antioch::StatMechThermodynamics<Scalar> sm_thermo( chem_mixture );
 
   // Mass fractions
-  std::vector<Scalar> mass_fractions( 5, 0.2 );
-  mass_fractions[0] = 0.5;
-  mass_fractions[1] = 0.2;
-  mass_fractions[2] = 0.1;
-  mass_fractions[3] = 0.1;
-  mass_fractions[4] = 0.1;
+  std::vector<Scalar> mass_fractions( n_species, 0.2 );
+  mass_fractions[0] = 0.9;
+  mass_fractions[1] = 0.1;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal/28.016;
   const Scalar R_O2 = Antioch::Constants::R_universal/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal/14.008;
   const Scalar R_O = Antioch::Constants::R_universal/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal/30.008;
 
+  // Data taken from read_species_electronic_data_ascii_default
+  unsigned int g_O[5] = {5, 3, 1, 5, 1};
+  Scalar theta_O[5] = {0.00000e+00, 
+                       2.27708e+02,
+                       3.26569e+02,
+                       2.28303e+04,
+                       4.86199e+04};
+
+  unsigned int g_O2[7] = {3, 2, 1, 1, 6, 3, 3};
+  Scalar theta_O2[7] = {0.00000e+00,
+                        1.13916e+04,
+                        1.89847e+04,
+                        4.75597e+04,
+                        4.99124e+04,
+                        5.09227e+04,
+                        7.18986e+04};
   // Te
   const Scalar Te = 1000.0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 7;
   const Scalar ztol = std::numeric_limits<Scalar>::epsilon();
+
+  Scalar cv_el_mix_true = 0.0;
 
   int return_flag = 0;
 
-  // N2
+  // O2
   {
-    Scalar cv_el_N2 = sm_thermo.cv_el (0, Te);
+    Scalar cv_el_O2 = sm_thermo.cv_el (0, Te);
+    Scalar cv_el_O2_true = cv_el_compare(g_O2, theta_O2, R_O2, Te, 7);
+
+    if( !test_relative(cv_el_O2, cv_el_O2_true, tol) )
+    {
+      std::cerr << std::scientific << std::setprecision(20);
+      std::cerr << "Error: Mismatch in cv_el for O2."
+                << "\n Expected = " << cv_el_O2_true
+                << "\n Computed = " << cv_el_O2
+                << "\n Diff     = " << cv_el_O2_true - cv_el_O2
+                << "\n Tol      = " << tol
+                << std::endl;
+      return_flag += 1;
+    }
+
+    cv_el_mix_true += mass_fractions[0]*cv_el_O2_true;
+  }
+
+  // O
+  {
+    Scalar cv_el_O = sm_thermo.cv_el (1, Te);
+    Scalar cv_el_O_true = cv_el_compare(g_O, theta_O, R_O, Te, 5);
+
+    if( !test_relative(cv_el_O, cv_el_O_true, tol) )
+    {
+      std::cerr << std::scientific << std::setprecision(20);
+      std::cerr << "Error: Mismatch in cv_el for O."
+                << "\n Expected = " << cv_el_O_true
+                << "\n Computed = " << cv_el_O
+                << "\n Diff     = " << cv_el_O_true - cv_el_O
+                << "\n Tol      = " << tol
+                << std::endl;
+      return_flag += 1;
+    }
+
+    cv_el_mix_true += mass_fractions[1]*cv_el_O_true;
   }
 
   // Mixture
   {
     Scalar cv_el = sm_thermo.cv_el (Te, mass_fractions);
-  }
 
-  // TODO: Add some non-trivial checks
+    if( !test_relative(cv_el, cv_el_mix_true, tol) )
+    {
+      std::cerr << std::scientific << std::setprecision(20);
+      std::cerr << "Error: Mismatch in cv_el for mixture."
+                << "\n Expected = " << cv_el_mix_true
+                << "\n Computed = " << cv_el
+                << "\n Diff     = " << cv_el_mix_true - cv_el
+                << "\n Tol      = " << tol
+                << std::endl;
+      return_flag += 1;
+    }
+  }
 
   return return_flag;
 }
