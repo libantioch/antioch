@@ -501,6 +501,110 @@ int test_cv_el()
   return return_flag;
 }
 
+
+template <typename Scalar>
+int test_T_from_e_tot()
+{
+  std::vector<std::string> species_str_list;
+  const unsigned int n_species = 5;
+  species_str_list.reserve(n_species);
+  species_str_list.push_back( "N2" );
+  species_str_list.push_back( "O2" );
+  species_str_list.push_back( "N" );
+  species_str_list.push_back( "O" );
+  species_str_list.push_back( "NO" );
+
+  Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+  // Can we instantiate it?
+  Antioch::StatMechThermodynamics<Scalar> sm_thermo( chem_mixture );
+
+  // Mass fractions
+  std::vector<Scalar> mass_fractions( 5, 0.2 );
+  mass_fractions[0] = 0.5;
+  mass_fractions[1] = 0.2;
+  mass_fractions[2] = 0.1;
+  mass_fractions[3] = 0.1;
+  mass_fractions[4] = 0.1;
+
+  int return_flag = 0;
+
+  // NOTE: Relatively larger tolerance here due to tolerance on Newton
+  // iteration for T.
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    
+  // low T
+  {
+    const Scalar Texact = 300.0;
+    
+    // compute e_tot
+    const Scalar e_tot = sm_thermo.e_tot(Texact, mass_fractions);
+
+    // compute T from e_tot (not providing initial guess)
+    const Scalar T = sm_thermo.T_from_e_tot(e_tot, mass_fractions);
+
+    if( !test_relative(T, Texact, tol) )
+      {
+        std::cerr << std::scientific << std::setprecision(20);
+        std::cerr << "Error: Mismatch in T_from_e_tot."
+                  << "\n Expected = " << Texact
+                  << "\n Computed = " << T
+                  << "\n Diff     = " << Texact - T
+                  << "\n Tol      = " << tol
+                  << std::endl;
+        return_flag += 1;
+      }
+  }
+
+  // mid T
+  {
+    const Scalar Texact = 1000.0;
+    
+    // compute e_tot
+    const Scalar e_tot = sm_thermo.e_tot(Texact, mass_fractions);
+
+    // compute T from e_tot (not providing initial guess)
+    const Scalar T = sm_thermo.T_from_e_tot(e_tot, mass_fractions);
+
+    if( !test_relative(T, Texact, tol) )
+      {
+        std::cerr << std::scientific << std::setprecision(20);
+        std::cerr << "Error: Mismatch in T_from_e_tot."
+                  << "\n Expected = " << Texact
+                  << "\n Computed = " << T
+                  << "\n Diff     = " << Texact - T
+                  << "\n Tol      = " << tol
+                  << std::endl;
+        return_flag += 1;
+      }
+  }
+
+  // high T
+  {
+    const Scalar Texact = 5010.0;
+    
+    // compute e_tot
+    const Scalar e_tot = sm_thermo.e_tot(Texact, mass_fractions);
+
+    // compute T from e_tot (not providing initial guess)
+    const Scalar T = sm_thermo.T_from_e_tot(e_tot, mass_fractions);
+
+    if( !test_relative(T, Texact, tol) )
+      {
+        std::cerr << std::scientific << std::setprecision(20);
+        std::cerr << "Error: Mismatch in T_from_e_tot."
+                  << "\n Expected = " << Texact
+                  << "\n Computed = " << T
+                  << "\n Diff     = " << Texact - T
+                  << "\n Tol      = " << tol
+                  << std::endl;
+        return_flag += 1;
+      }
+  }
+
+  return return_flag; 
+}
+
 int main()
 {
 
@@ -518,6 +622,11 @@ int main()
   ierr += (test_cv_el<double>() ||
 //         test_cv_el<long double>() ||
            test_cv_el<float>());
+
+  // Consistency of T_from_e_tot
+  ierr += (test_T_from_e_tot<double>() ||
+//         test_T_from_e_tot<long double>() ||
+           test_T_from_e_tot<float>());
 
   return ierr;
 }

@@ -595,7 +595,7 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::e_tot (const unsigned int species, 
                                                       const StateType T) const
   {
-    this->e_tot(species, T, T);
+    return this->e_tot(species, T, T);
   }
 
   template<typename CoeffType>
@@ -604,7 +604,7 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::e_tot (const StateType T,
                                                       const std::vector<StateType>& mass_fractions) const
   {
-    this->e_tot(T, T, mass_fractions);
+    return this->e_tot(T, T, mass_fractions);
   }
       
   template<typename CoeffType>
@@ -798,32 +798,33 @@ namespace Antioch
 
     // Similarly for mixture formation energy
     const StateType E_0 = this->e_0(mass_fractions);
-    
+
     // if the user does not provide an initial guess for the temperature
     // assume it is all in translation/rotation to compute a starting value.
     if (T < 0.)
       {
 	T = (e_tot - E_0) / Cv_tr;
-	T = std::min(std::max(T,10.),20000.);
+	T = std::min(std::max(T,StateType(10.)),StateType(20000.));
 	
         // FIXME: Use Antioch::Limits or similar? (i.e., don't
         // hardcode min and max T)
 
 	// make sure the initial guess is valid
 	//T = std::max(T, Limits::CompNSLimits::T_min());
-        T = std::max(T, 10.);
-	T = std::min(T, 2.e4);
+        T = std::max(T, StateType(10.));
+	T = std::min(T, StateType(2.e4));
       }
     
     // compute the translational/rotational temperature of the mixture using Newton-Rhapson iteration
     StateType delta_T = std::numeric_limits<StateType>::max();
     const unsigned int max_iterations = 100;
+
+    const CoeffType dT_reltol= std::numeric_limits<CoeffType>::epsilon() * 100;
     
-    // TODO: Shouldn't convergence test be a relative check (e.g.,
-    // std::abs(delta_T/T) > std::numeric_limits<CoeffType>::epsilon() * 10
-    // or similar)
+    // NOTE: FIN-S uses a hardcoded, absolute tolerance on delta_T of
+    // 1e-8.  Using a relative tolerance here of 100*epsilon.
     for (unsigned int iter = 0;
-         std::abs(delta_T) > 1.e-8 && 
+         std::abs(delta_T/T) > dT_reltol &&
          T >= 0.;
          ++iter)
       {
