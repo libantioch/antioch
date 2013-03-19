@@ -329,9 +329,9 @@ namespace Antioch
     StateType cv_tr = mass_fractions[0]*this->cv_tr(0);
 
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
-    {
-      cv_tr += mass_fractions[s]*this->cv_tr(s);
-    }
+      {
+        cv_tr += mass_fractions[s]*this->cv_tr(s);
+      }
     
     return cv_tr;
   }
@@ -356,12 +356,12 @@ namespace Antioch
       return cv_vib;
 
     for (unsigned int level=0; level<ndg_v.size(); level++)
-    {
-      const StateType expval = std::exp(theta_v[level]/Tv);
+      {
+        const StateType expval = std::exp(theta_v[level]/Tv);
       
-      cv_vib += (static_cast<CoeffType>(ndg_v[level])*
-                 chem_species.gas_constant()*theta_v[level]*theta_v[level]*expval/(expval - 1.)/(expval - 1.)/Tv/Tv);
-    }
+        cv_vib += (static_cast<CoeffType>(ndg_v[level])*
+                   chem_species.gas_constant()*theta_v[level]*theta_v[level]*expval/(expval - 1.)/(expval - 1.)/Tv/Tv);
+      }
     
     return cv_vib;
   }
@@ -375,9 +375,9 @@ namespace Antioch
     StateType cv_vib = mass_fractions[0]*this->cv_vib(0, Tv);
 
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
-    {
-      cv_vib += mass_fractions[s]*this->cv_vib(s, Tv);
-    }
+      {
+        cv_vib += mass_fractions[s]*this->cv_vib(s, Tv);
+      }
     
     return cv_vib;
   }
