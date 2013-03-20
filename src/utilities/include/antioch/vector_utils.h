@@ -72,7 +72,10 @@ inline
 std::vector<T>
 zero_clone(const std::vector<T>& example)
 {
-  return std::vector<T>(example.size(),T(0));
+  if (example.size())
+    return std::vector<T>(example.size(),zero_clone(example[0]));
+
+  return std::vector<T>();
 }
 
 } // end namespace Antioch

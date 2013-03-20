@@ -67,7 +67,22 @@ pow (const valarray<T>& in, const T2& n)
   return out;
 }
 
+template <typename T>
+inline
+std::valarray<T>
+max (const std::valarray<T>& a, const std::valarray<T>& b)
+{
+  using std::max;
+
+  std::valarray<T> out=a;
+  const size_t size = a.size();
+  for (size_t i=0; i != size; ++i)
+    out[i] = max(a[i], b[i]);
+  return out;
+}
+
 } // end namespace std
+
 
 namespace Antioch
 {
@@ -96,7 +111,10 @@ inline
 std::valarray<T>
 zero_clone(const std::valarray<T>& example)
 {
-  return std::valarray<T>(T(0),example.size());
+  if (example.size())
+    return std::valarray<T>(zero_clone(example[0]),example.size());
+  else
+    return std::valarray<T>();
 }
 
 } // end namespace Antioch

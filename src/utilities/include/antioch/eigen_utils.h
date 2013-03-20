@@ -37,6 +37,26 @@
 
 #include "antioch/metaprogramming.h"
 
+namespace std {
+
+template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+inline
+Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+max (const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
+     const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b)
+{
+  using std::max;
+
+  Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> out = a;
+  const size_t size = a.size();
+  for (size_t i=0; i != size; ++i)
+    out[i] = max(a[i], b[i]);
+  return out;
+}
+
+}
+
+
 namespace Antioch
 {
 
