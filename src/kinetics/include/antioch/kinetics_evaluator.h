@@ -148,8 +148,7 @@ namespace Antioch
     // This could be left uninitialized here for efficiency...
     VectorStateType net_reaction_rates = zero_clone(mass_fractions);
 
-    std::fill( mass_sources.begin(), mass_sources.end(),
-	       Antioch::value_type<StateType>::constant(0) );
+    Antioch::set_zero(mass_sources);
 
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates( T, rho, R_mix, mass_fractions, molar_densities,
