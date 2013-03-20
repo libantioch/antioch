@@ -33,6 +33,7 @@
 
 #ifdef ANTIOCH_HAVE_EIGEN
 #include "Eigen/Dense"
+#include "antioch/eigen_utils.h"
 #endif
 
 #ifdef ANTIOCH_HAVE_METAPHYSICL
@@ -47,7 +48,6 @@
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_thermo.h"
-#include "antioch/eigen_utils.h"
 #include "antioch/physical_constants.h"
 
 template <typename Scalar, typename TrioScalars>
