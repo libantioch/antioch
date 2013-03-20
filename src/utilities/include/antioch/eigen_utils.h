@@ -85,10 +85,27 @@ inline
 Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
 zero_clone(const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example)
 {
+  if (example.size())
+    return 
+      Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+      (example.rows(), example.cols()).setConstant(zero_clone(example[0]));
+
   return 
-  Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-  (example.rows(), example.cols()).setZero();
+    Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+    (example.rows(), example.cols());
 }
+
+// A function for zero-setting vectorized numeric types
+template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+inline
+void set_zero(Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
+{
+  if (a.size())
+    a = 
+      value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >::constant
+        (zero_clone(a[0]));
+}
+
 
 } // end namespace Antioch
 

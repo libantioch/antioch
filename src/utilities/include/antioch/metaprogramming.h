@@ -85,6 +85,10 @@ namespace Antioch
   inline
   T zero_clone(const T& example) { return 0; }
 
+  // A function for zero-setting vectorized numeric types
+  template <typename T>
+  inline
+  void set_zero(T& a) { a = 0; }
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_H

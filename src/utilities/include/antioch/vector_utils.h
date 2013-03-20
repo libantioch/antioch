@@ -78,6 +78,15 @@ zero_clone(const std::vector<T>& example)
   return std::vector<T>();
 }
 
+// A function for zero-setting vectorized numeric types
+template <typename T>
+inline
+void set_zero(std::vector<T>& a)
+{
+  if (a.size())
+    std::fill(a.begin(), a.end(), zero_clone(a[0]));
+}
+
 } // end namespace Antioch
 
 
