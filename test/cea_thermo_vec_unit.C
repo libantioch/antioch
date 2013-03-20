@@ -101,9 +101,11 @@ Scalar cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
 }
 
 
-template <typename Scalar, typename TrioScalars>
+template <typename TrioScalars>
 int vectester(const TrioScalars& example)
 {
+  typedef typename Antioch::value_type<TrioScalars>::type Scalar;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -248,34 +250,28 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester<float, std::valarray<float> >
-      (std::valarray<float>(3));
+    vectester (std::valarray<float>(3));
   returnval = returnval ||
-    vectester<double, std::valarray<double> >
-      (std::valarray<double>(3));
+    vectester (std::valarray<double>(3));
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
 //    vectester<long double, std::valarray<long double> >
 //      (std::valarray<long double>(3));
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester<float, Eigen::Array3f>
-      (Eigen::Array3f());
+    vectester (Eigen::Array3f());
   returnval = returnval ||
-    vectester<double, Eigen::Array3d>
-      (Eigen::Array3d());
-// We're not getting the full long double precision yet?
+    vectester (Eigen::Array3d());
 //  returnval = returnval ||
-//    vectester<long double, Eigen::Array<long double, 3, 1> >
-//      (Eigen::Array<long double, 3, 1>());
+//    vectester (Eigen::Array<long double, 3, 1>());
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester<float, MetaPhysicL::NumberArray<3, float> > (0);
+    vectester (MetaPhysicL::NumberArray<3, float> (0));
   returnval = returnval ||
-    vectester<double, MetaPhysicL::NumberArray<3, double> > (0);
+    vectester (MetaPhysicL::NumberArray<3, double> (0));
 //  returnval = returnval ||
-//    vectester<long double, MetaPhysicL::NumberArray<3, long double> > (0);
+//    vectester (MetaPhysicL::NumberArray<3, long double> (0));
 #endif
 
   return returnval;

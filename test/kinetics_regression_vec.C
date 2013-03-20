@@ -108,9 +108,11 @@ int species_vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const
   return found_errors;
 }
 
-template <typename Scalar, typename PairScalars>
+template <typename PairScalars>
 int vectester(const std::string& input_name, const PairScalars& example)
 {
+  typedef typename Antioch::value_type<PairScalars>::type Scalar;
+
   std::vector<std::string> species_str_list;
   species_str_list.reserve(n_species);
   species_str_list.push_back( "N2" );
@@ -229,34 +231,28 @@ int main(int argc, char* argv[])
   int returnval = 0;
 
   returnval +=
-    vectester<float, std::valarray<float> >
-      (argv[1], std::valarray<float>(2));
+    vectester (argv[1], std::valarray<float>(2));
   returnval +=
-    vectester<double, std::valarray<double> >
-      (argv[1], std::valarray<double>(2));
+    vectester (argv[1], std::valarray<double>(2));
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
-//    vectester<long double, std::valarray<long double> >
-//      (argv[1], std::valarray<long double>(2));
+//    vectester (argv[1], std::valarray<long double>(2));
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval +=
-    vectester<float, Eigen::Array2f>
-      (argv[1], Eigen::Array2f());
+    vectester (argv[1], Eigen::Array2f());
   returnval +=
-    vectester<double, Eigen::Array2d>
-      (argv[1], Eigen::Array2d());
+    vectester (argv[1], Eigen::Array2d());
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
-//    vectester<long double, Eigen::Array<long double, 2, 1> >
-//      (argv[1], Eigen::Array<long double, 2, 1>());
+//    vectester (argv[1], Eigen::Array<long double, 2, 1>());
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval +=
-    vectester<float, MetaPhysicL::NumberArray<2, float> > (argv[1], 0);
+    vectester (argv[1], MetaPhysicL::NumberArray<2, float> (0));
   returnval +=
-    vectester<double, MetaPhysicL::NumberArray<2, double> > (argv[1], 0);
+    vectester (argv[1], MetaPhysicL::NumberArray<2, double> (0));
 //  returnval = returnval ||
-//    vectester<long double, MetaPhysicL::NumberArray<2, long double> > (argv[1], 0);
+//    vectester (argv[1], MetaPhysicL::NumberArray<2, long double> (0));
 #endif
 
   std::cout << "Found " << returnval << " errors" << std::endl;

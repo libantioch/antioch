@@ -45,6 +45,8 @@
 // Antioch
 
 // Declare metaprogramming overloads before they're used
+#include "antioch/eigen_utils.h"
+#include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 
 #include "antioch/sutherland_viscosity.h"
@@ -53,9 +55,11 @@
 #include "antioch/blottner_parsing.h"
 #include "antioch/sutherland_parsing.h"
 
-template <typename Scalar, typename PairScalars>
+template <typename PairScalars>
 int vectester(const PairScalars& example)
 {
+  typedef typename Antioch::value_type<PairScalars>::type Scalar;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 2;
   species_str_list.reserve(n_species);
@@ -100,32 +104,26 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester<float, std::valarray<float> >
-      (std::valarray<float>(2));
+    vectester (std::valarray<float>(2));
   returnval = returnval ||
-    vectester<double, std::valarray<double> >
-      (std::valarray<double>(2));
+    vectester (std::valarray<double>(2));
   returnval = returnval ||
-    vectester<long double, std::valarray<long double> >
-      (std::valarray<long double>(2));
+    vectester (std::valarray<long double>(2));
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester<float, Eigen::Array2f>
-      (Eigen::Array2f());
+    vectester (Eigen::Array2f());
   returnval = returnval ||
-    vectester<double, Eigen::Array2d>
-      (Eigen::Array2d());
+    vectester (Eigen::Array2d());
   returnval = returnval ||
-    vectester<long double, Eigen::Array<long double, 2, 1> >
-      (Eigen::Array<long double, 2, 1>());
+    vectester (Eigen::Array<long double, 2, 1>());
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester<float, MetaPhysicL::NumberArray<2, float> > (0);
+    vectester (MetaPhysicL::NumberArray<2, float> (0));
   returnval = returnval ||
-    vectester<double, MetaPhysicL::NumberArray<2, double> > (0);
+    vectester (MetaPhysicL::NumberArray<2, double> (0));
   returnval = returnval ||
-    vectester<long double, MetaPhysicL::NumberArray<2, long double> > (0);
+    vectester (MetaPhysicL::NumberArray<2, long double> (0));
 #endif
 
   return returnval;
