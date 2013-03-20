@@ -31,7 +31,11 @@ echo Build architecture............ : $BUILD_ARCH
 echo SVN revision number........... : $BUILD_VERSION
 echo
 echo Optional Packages for Testing:
-echo '  'Eigen....................... : $enableeigen
+if test "x$HAVE_EIGEN" = "x1"; then
+  echo '  'Eigen....................... : yes
+else
+  echo '  'Eigen....................... : no
+fi
 if test "x$HAVE_METAPHYSICL" = "x1"; then
   echo '  'MetaPhysicL................. : yes
   echo '  'METAPHYSICL_CPPFLAGS ....... : $METAPHYSICL_CPPFLAGS
