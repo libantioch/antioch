@@ -47,6 +47,10 @@
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+
+// We don't use std::vector as a numeric vector, but we still need
+// vector_utils to use it as a container in our container-templated
+// functions
 #include "antioch/vector_utils.h"
 
 // Antioch
@@ -58,12 +62,54 @@
 #include "antioch/cea_thermo.h"
 #include "antioch/kinetics_evaluator.h"
 
+static const unsigned int n_species = 5;
+
+template <typename SpeciesVector1, typename SpeciesVector2>
+int species_vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::string &name)
+{
+  int found_errors = 0;
+
+  typedef typename Antioch::value_type<SpeciesVector1>::type StateType;
+  typedef typename Antioch::value_type<StateType>::type Scalar;
+
+  for (unsigned int s=0; s != n_species; s++)
+    {
+      using std::abs;
+      using std::max;
+
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+
+      // Break this expression up to workaround bugs in my Eigen
+      // version - RHS
+      const StateType rel_error = (a[s] - b[s])/max(a[s],b[s]);
+      const StateType abs_rel_error = abs(rel_error);
+
+      if( Antioch::max(abs_rel_error) > tol )
+	{
+	  found_errors++;
+	}
+    }
+
+  if (found_errors)
+    {
+      std::cerr << "Error: Mismatch in vectors " << name << std::endl;
+      for( unsigned int s = 0; s < n_species; s++)
+	{
+	  std::cout << std::scientific << std::setprecision(16)
+		    << "a(" << s << ") = " << a[s]
+		    << ", b(" << s << ") = " << b[s]
+		    << ", a-b(" << s << ") = " << StateType(a[s]-b[s])
+		    << std::endl;
+	}
+    }
+
+  return found_errors;
+}
 
 template <typename Scalar, typename PairScalars>
 int vectester(const std::string& input_name, const PairScalars& example)
 {
   std::vector<std::string> species_str_list;
-  const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
   species_str_list.push_back( "N2" );
   species_str_list.push_back( "O2" );
@@ -88,7 +134,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
   PairScalars massfrac = example;
   massfrac[0] = 0.2;
   massfrac[1] = 0.2;
-  std::vector<PairScalars> Y(n_species,massfrac);
+  const std::vector<PairScalars> Y(n_species,massfrac);
 
   const PairScalars R_mix = chem_mixture.R(Y);
 
@@ -107,14 +153,40 @@ int vectester(const std::string& input_name, const PairScalars& example)
   
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
+  int return_flag = 0;
+
+#ifdef ANTIOCH_HAVE_EIGEN
+  typedef Eigen::Array<PairScalars,n_species,1> SpeciesVecEigenType;
+  SpeciesVecEigenType eigen_Y = SpeciesVecEigenType::Constant(massfrac);
+
+  const PairScalars eigen_R = chem_mixture.R(eigen_Y);
+
+  return_flag +=
+    species_vec_compare(eigen_R,R_mix,"eigen_R");
+
+  SpeciesVecEigenType eigen_molar_densities;
+
+  chem_mixture.molar_densities(rho,eigen_Y,eigen_molar_densities);
+
+  return_flag +=
+    species_vec_compare(eigen_molar_densities, molar_densities,
+                        "eigen_molar_densities");
+
+  SpeciesVecEigenType eigen_h_RT_minus_s_R;
+
+  thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
+
+  return_flag +=
+    species_vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
+                        "eigen_h_RT_minus_s_R");
+#endif // ANTIOCH_HAVE_EIGEN
+
   for( unsigned int s = 0; s < n_species; s++)
     {
       std::cout << std::scientific << std::setprecision(16)
 		<< "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = "
 		<< omega_dot[s] << std::endl;
     }
-
-  int return_flag = 0;
 
   std::vector<PairScalars> omega_dot_reg(n_species,example);
   omega_dot_reg[0][0] =  7.9004530802650654e+04;
@@ -128,33 +200,9 @@ int vectester(const std::string& input_name, const PairScalars& example)
   omega_dot_reg[3][1] = omega_dot_reg[3][0];
   omega_dot_reg[4][1] = omega_dot_reg[4][0];
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-  for( unsigned int s = 0; s < n_species; s++)
-    {
-      // Break this expression up to workaround bugs in my Eigen
-      // version - RHS
-      const PairScalars rel_error =
-        (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s];
-      const PairScalars abs_rel_error = std::abs(rel_error);
+  return_flag +=
+    species_vec_compare(omega_dot, omega_dot_reg, "omega_dot");
 
-      if( Antioch::max(abs_rel_error) > tol )
-	{
-	  return_flag = 1;
-	}
-    }
-
-  if( return_flag == 1 )
-    {
-      std::cerr << "Error: Mismatch between compute mass source terms and regression values." << std::endl;
-      for( unsigned int s = 0; s < n_species; s++)
-	{
-	  std::cout << std::scientific << std::setprecision(16)
-		    << "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = " << omega_dot[s]
-		    << ", omega_dot_reg(" << chem_mixture.chemical_species()[s]->species() << ") = " << omega_dot_reg[s]
-		    << std::endl;
-	}
-    }
- 
   return return_flag;
 }
 
@@ -170,10 +218,10 @@ int main(int argc, char* argv[])
 
   int returnval = 0;
 
-  returnval = returnval ||
+  returnval +=
     vectester<float, std::valarray<float> >
       (argv[1], std::valarray<float>(2));
-  returnval = returnval ||
+  returnval +=
     vectester<double, std::valarray<double> >
       (argv[1], std::valarray<double>(2));
 // We're not getting the full long double precision yet?
@@ -181,10 +229,10 @@ int main(int argc, char* argv[])
 //    vectester<long double, std::valarray<long double> >
 //      (argv[1], std::valarray<long double>(2));
 #ifdef ANTIOCH_HAVE_EIGEN
-  returnval = returnval ||
+  returnval +=
     vectester<float, Eigen::Array2f>
       (argv[1], Eigen::Array2f());
-  returnval = returnval ||
+  returnval +=
     vectester<double, Eigen::Array2d>
       (argv[1], Eigen::Array2d());
 // We're not getting the full long double precision yet?
@@ -193,13 +241,15 @@ int main(int argc, char* argv[])
 //      (argv[1], Eigen::Array<long double, 2, 1>());
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
-  returnval = returnval ||
+  returnval +=
     vectester<float, MetaPhysicL::NumberArray<2, float> > (argv[1], 0);
-  returnval = returnval ||
+  returnval +=
     vectester<double, MetaPhysicL::NumberArray<2, double> > (argv[1], 0);
 //  returnval = returnval ||
 //    vectester<long double, MetaPhysicL::NumberArray<2, long double> > (argv[1], 0);
 #endif
 
-  return returnval;
+  std::cout << "Found " << returnval << " errors" << std::endl;
+
+  return (returnval != 0) ? 1 : 0;
 }
