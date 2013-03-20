@@ -26,8 +26,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_METAPHYSICL_UTILS_H
-#define ANTIOCH_METAPHYSICL_UTILS_H
+#ifndef ANTIOCH_METAPHYSICL_UTILS_DECL_H
+#define ANTIOCH_METAPHYSICL_UTILS_DECL_H
 
 #include "antioch_config.h"
 
@@ -44,38 +44,18 @@ namespace Antioch
 template <std::size_t size, typename T>
 inline
 T
-max (const MetaPhysicL::NumberArray<size,T>& in)
-{
-  using std::max;
-
-  T maxval = in[0];
-  for (std::size_t i = 1; i < size; ++i)
-    maxval = max(maxval, in[i]);
-
-  return maxval;
-}
+max (const MetaPhysicL::NumberArray<size,T>& in);
 
 template <std::size_t size, typename T>
-struct value_type<MetaPhysicL::NumberArray<size,T> >
-{
-  typedef MetaPhysicL::NumberArray<size,T> container_type;
-  typedef T type;
-
-  static inline
-  type
-  constant(const type& in) { return in; }
-};
+struct value_type<MetaPhysicL::NumberArray<size,T> >;
 
 template <std::size_t size, typename T>
 inline
 MetaPhysicL::NumberArray<size,T>
-zero_clone(const MetaPhysicL::NumberArray<size,T>& example)
-{
-  return 0;
-}
+zero_clone(const MetaPhysicL::NumberArray<size,T>& example);
 
 } // end namespace Antioch
 
 #endif // ANTIOCH_HAVE_METAPHYSICL
 
-#endif // ANTIOCH_METAPHYSICL_UTILS_H
+#endif // ANTIOCH_METAPHYSICL_UTILS_DECL_H

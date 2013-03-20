@@ -26,56 +26,43 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_METAPHYSICL_UTILS_H
-#define ANTIOCH_METAPHYSICL_UTILS_H
+#ifndef ANTIOCH_VECTOR_UTILS_DECL_H
+#define ANTIOCH_VECTOR_UTILS_DECL_H
 
-#include "antioch_config.h"
-
-#ifdef ANTIOCH_HAVE_METAPHYSICL
-#include "metaphysicl/numberarray.h"
+#include <iostream>
+#include <vector>
 
 #include "antioch/metaprogramming.h"
 
-// Specializations to match other Antioch workarounds
+// Add some overloads
+
+namespace std
+{
+
+template <typename T>
+inline
+std::ostream&
+operator<< (std::ostream& output, const std::vector<T>& a);
+
+} // end namespace std
 
 namespace Antioch
 {
 
-template <std::size_t size, typename T>
+template <typename T>
+struct value_type<std::vector<T> >;
+
+template <typename T>
 inline
-T
-max (const MetaPhysicL::NumberArray<size,T>& in)
-{
-  using std::max;
+std::vector<T>
+zero_clone(const std::vector<T>& example);
 
-  T maxval = in[0];
-  for (std::size_t i = 1; i < size; ++i)
-    maxval = max(maxval, in[i]);
-
-  return maxval;
-}
-
-template <std::size_t size, typename T>
-struct value_type<MetaPhysicL::NumberArray<size,T> >
-{
-  typedef MetaPhysicL::NumberArray<size,T> container_type;
-  typedef T type;
-
-  static inline
-  type
-  constant(const type& in) { return in; }
-};
-
-template <std::size_t size, typename T>
+// A function for zero-setting vectorized numeric types
+template <typename T>
 inline
-MetaPhysicL::NumberArray<size,T>
-zero_clone(const MetaPhysicL::NumberArray<size,T>& example)
-{
-  return 0;
-}
+void set_zero(std::vector<T>& a);
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_HAVE_METAPHYSICL
 
-#endif // ANTIOCH_METAPHYSICL_UTILS_H
+#endif //ANTIOCH_VECTOR_UTILS_DECL_H

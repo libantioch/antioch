@@ -26,56 +26,54 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_METAPHYSICL_UTILS_H
-#define ANTIOCH_METAPHYSICL_UTILS_H
+#ifndef ANTIOCH_VALARRAY_UTILS_DECL_H
+#define ANTIOCH_VALARRAY_UTILS_DECL_H
 
-#include "antioch_config.h"
-
-#ifdef ANTIOCH_HAVE_METAPHYSICL
-#include "metaphysicl/numberarray.h"
+#include <iostream>
+#include <valarray>
 
 #include "antioch/metaprogramming.h"
 
-// Specializations to match other Antioch workarounds
+// Add some overloads that are blatantly missing from the std:: namespace
+
+namespace std
+{
+
+template <typename T>
+inline
+std::ostream&
+operator<< (std::ostream& output, const std::valarray<T>& a);
+
+template <typename T, typename T2>
+inline
+valarray<T>
+pow (const valarray<T>& in, const T2& n);
+
+template <typename T>
+inline
+std::valarray<T>
+max (const std::valarray<T>& a, const std::valarray<T>& b);
+
+} // end namespace std
+
 
 namespace Antioch
 {
 
-template <std::size_t size, typename T>
+template <typename T>
 inline
 T
-max (const MetaPhysicL::NumberArray<size,T>& in)
-{
-  using std::max;
+max (const std::valarray<T>& in);
 
-  T maxval = in[0];
-  for (std::size_t i = 1; i < size; ++i)
-    maxval = max(maxval, in[i]);
+template <typename T>
+struct value_type<std::valarray<T> >;
 
-  return maxval;
-}
-
-template <std::size_t size, typename T>
-struct value_type<MetaPhysicL::NumberArray<size,T> >
-{
-  typedef MetaPhysicL::NumberArray<size,T> container_type;
-  typedef T type;
-
-  static inline
-  type
-  constant(const type& in) { return in; }
-};
-
-template <std::size_t size, typename T>
+template <typename T>
 inline
-MetaPhysicL::NumberArray<size,T>
-zero_clone(const MetaPhysicL::NumberArray<size,T>& example)
-{
-  return 0;
-}
+std::valarray<T>
+zero_clone(const std::valarray<T>& example);
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_HAVE_METAPHYSICL
 
-#endif // ANTIOCH_METAPHYSICL_UTILS_H
+#endif //ANTIOCH_VALARRAY_UTILS_DECL_H
