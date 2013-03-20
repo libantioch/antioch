@@ -64,6 +64,14 @@ namespace Antioch
   };
 
   template <typename T>
+  inline
+  T
+  max (const T& in)
+  {
+    return in;
+  }
+
+  template <typename T>
   struct value_type<const T>
   {
     typedef const typename value_type<T>::type type;
