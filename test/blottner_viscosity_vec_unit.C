@@ -38,10 +38,10 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
-// These must precede headers which would use their template overloads
-#include "antioch/eigen_utils.h"
-#include "antioch/metaphysicl_utils.h"
-#include "antioch/valarray_utils.h"
+// Declare metaprogramming overloads before they're used
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
 
 // C++
 #include <cmath>
@@ -50,6 +50,10 @@
 
 // Antioch
 #include "antioch/blottner_viscosity.h"
+
+#include "antioch/eigen_utils.h"
+#include "antioch/metaphysicl_utils.h"
+#include "antioch/valarray_utils.h"
 
 template <typename Scalar, typename PairScalars>
 int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scalar tol )

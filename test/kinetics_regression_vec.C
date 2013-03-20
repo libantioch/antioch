@@ -43,17 +43,14 @@
 #include <string>
 #include <vector>
 
-// This needs to precede any headers that might use their overloads
-#include "antioch/eigen_utils.h"
-#include "antioch/metaphysicl_utils.h"
-#include "antioch/valarray_utils.h"
-
-// We don't use std::vector as a numeric vector, but we still need
-// vector_utils to use it as a container in our container-templated
-// functions
-#include "antioch/vector_utils.h"
-
 // Antioch
+
+// Declare metaprogramming overloads before they're used
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
@@ -61,6 +58,11 @@
 #include "antioch/read_reaction_set_data_xml.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/kinetics_evaluator.h"
+
+#include "antioch/eigen_utils.h"
+#include "antioch/metaphysicl_utils.h"
+#include "antioch/valarray_utils.h"
+#include "antioch/vector_utils.h"
 
 static const unsigned int n_species = 5;
 
@@ -179,6 +181,14 @@ int vectester(const std::string& input_name, const PairScalars& example)
   return_flag +=
     species_vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
                         "eigen_h_RT_minus_s_R");
+
+  SpeciesVecEigenType eigen_omega_dot;
+  
+  kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
+
+  return_flag +=
+    species_vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
+
 #endif // ANTIOCH_HAVE_EIGEN
 
   for( unsigned int s = 0; s < n_species; s++)

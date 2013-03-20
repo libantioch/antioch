@@ -43,12 +43,14 @@
 #include <string>
 #include <vector>
 
-#include "antioch/eigen_utils.h"
-#include "antioch/metaphysicl_utils.h"
-#include "antioch/valarray_utils.h"
-#include "antioch/vector_utils.h"
-
 // Antioch
+
+// Declare metaprogramming overloads before they're used
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
@@ -56,6 +58,11 @@
 #include "antioch/read_reaction_set_data_xml.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/kinetics_evaluator.h"
+
+#include "antioch/eigen_utils.h"
+#include "antioch/metaphysicl_utils.h"
+#include "antioch/valarray_utils.h"
+#include "antioch/vector_utils.h"
 
 template <typename Scalar, typename PairScalars>
 int vectester(const std::string& input_name, const PairScalars& example)

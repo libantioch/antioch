@@ -38,13 +38,15 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
-#include "antioch/valarray_utils.h"
-
 // C++
 #include <cmath>
 #include <iostream>
 
 // Antioch
+
+// Declare metaprogramming overloads before they're used
+#include "antioch/valarray_utils.h"
+
 #include "antioch/sutherland_viscosity.h"
 #include "antioch/blottner_viscosity.h"
 #include "antioch/mixture_viscosity.h"

@@ -43,13 +43,18 @@
 #include <cmath>
 #include <limits>
 
+// Antioch
+
+// Declare metaprogramming overloads before they're used
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
-#include "antioch/valarray_utils.h"
-
-// Antioch
 #include "antioch/sutherland_viscosity.h"
-
+#include "antioch/valarray_utils.h"
 
 template <typename Scalar, typename PairScalars>
 int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scalar tol )

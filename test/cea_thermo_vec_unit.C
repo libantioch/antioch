@@ -29,17 +29,19 @@
 #include "antioch_config.h"
 
 #include <valarray>
-#include "antioch/valarray_utils.h"
 
 #ifdef ANTIOCH_HAVE_EIGEN
 #include "Eigen/Dense"
-#include "antioch/eigen_utils.h"
 #endif
 
 #ifdef ANTIOCH_HAVE_METAPHYSICL
 #include "metaphysicl/numberarray.h"
-#include "antioch/metaphysicl_utils.h"
 #endif
+
+// Declare metaprogramming overloads before they're used
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
 
 // C++
 #include <cmath>
@@ -49,6 +51,10 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/physical_constants.h"
+
+#include "antioch/eigen_utils.h"
+#include "antioch/metaphysicl_utils.h"
+#include "antioch/valarray_utils.h"
 
 template <typename Scalar, typename TrioScalars>
 int test_cp( const std::string& species_name, unsigned int species,
