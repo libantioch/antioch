@@ -60,10 +60,6 @@ struct value_type<MetaPhysicL::NumberArray<size,T> >
 {
   typedef MetaPhysicL::NumberArray<size,T> container_type;
   typedef T type;
-
-  static inline
-  type
-  constant(const type& in) { return in; }
 };
 
 template <std::size_t size, typename T>

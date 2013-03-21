@@ -100,10 +100,6 @@ struct value_type<std::valarray<T> >
 {
   typedef std::valarray<T> container_type;
   typedef T type;
-
-  static inline
-  type
-  constant(const type& in) { return in; }
 };
 
 template <typename T>

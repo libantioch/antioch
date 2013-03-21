@@ -92,10 +92,6 @@ struct value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCo
   typedef Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> 
     container_type;
   typedef _Scalar type;
-
-  static inline
-  container_type
-  constant(const type& in) { return container_type::Constant(in); }
 };
 
 template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
@@ -103,6 +99,7 @@ inline
 Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
 zero_clone(const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example)
 {
+  // We can't just use setZero here with arbitrary Scalar types
   if (example.size())
     return 
       Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
@@ -118,10 +115,9 @@ template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, in
 inline
 void set_zero(Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
 {
+  // We can't just use setZero here with arbitrary Scalar types
   if (a.size())
-    a = 
-      value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >::constant
-        (zero_clone(a[0]));
+    a.setConstant (zero_clone(a[0]));
 }
 
 
@@ -139,10 +135,6 @@ struct value_type<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxC
   typedef Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> 
     container_type;
   typedef _Scalar type;
-
-  static inline
-  container_type
-  constant(const type& in) { return container_type::Constant(in); }
 };
 
 template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
@@ -150,6 +142,7 @@ inline
 Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
 zero_clone(const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example)
 {
+  // We can't just use setZero here with arbitrary Scalar types
   if (example.size())
     return 
       Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
@@ -165,10 +158,9 @@ template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, in
 inline
 void set_zero(Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
 {
+  // We can't just use setZero here with arbitrary Scalar types
   if (a.size())
-    a = 
-      value_type<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >::constant
-        (zero_clone(a[0]));
+    a.setConstant (zero_clone(a[0]));
 }
 
 

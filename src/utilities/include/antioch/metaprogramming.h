@@ -58,9 +58,6 @@ namespace Antioch
   struct value_type
   {
     typedef T type;
-
-    static inline
-    T constant(const type& in) { return in; }
   };
 
   template <typename T>
@@ -75,9 +72,6 @@ namespace Antioch
   struct value_type<const T>
   {
     typedef const typename value_type<T>::type type;
-
-    static inline
-    T constant(const type& in) { return in; }
   };
 
   // A function for zero-initializing vectorized numeric types
