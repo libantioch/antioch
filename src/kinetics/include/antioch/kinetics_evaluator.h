@@ -146,7 +146,7 @@ namespace Antioch
     //! Work arrays for compute mass sources; initialize to zero
     // Use T as an example to get the right sizing when vectorizing.
     // This could be left uninitialized here for efficiency...
-    VectorStateType net_reaction_rates = zero_clone(mass_fractions);
+    std::vector<StateType> net_reaction_rates(this->n_reactions(), Antioch::zero_clone(T));
 
     Antioch::set_zero(mass_sources);
 
