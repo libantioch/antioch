@@ -36,12 +36,22 @@ namespace Antioch
     /*!
      * Universal Gas Constant, R, expressed in J/(kmol-K)
      */
-    const double R_universal = 8314.472;
+    template<typename CoeffType>
+    inline
+    CoeffType R_universal()
+    {
+      return 8314.472L;
+    }
 
     /*!
      * Avogadro's number, particles per mole.
      */
-    const double Avogadro = 6.02214179e23;
+    template<typename CoeffType>
+    inline
+    CoeffType Avogadro()
+    {
+      return 6.02214179e23L;
+    }
 
   } // end namespace Constants
 } // end namespace Antioch

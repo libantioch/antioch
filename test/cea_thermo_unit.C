@@ -96,11 +96,11 @@ int tester()
   const Scalar T2 = 1500.0;
   const Scalar T3 = 10000.0;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
   /*
     const Scalar R_exact = mass_fractions[0]*R_N2 + mass_fractions[1]*R_O2 + mass_fractions[2]*R_N +
     mass_fractions[3]*R_O + mass_fractions[4]*R_NO;

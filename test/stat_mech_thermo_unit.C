@@ -80,11 +80,11 @@ int test_cv_tr()
 
   Scalar cv_tr_mix = 0.0;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
 
   int return_flag = 0;
 
@@ -226,11 +226,11 @@ int test_cv_vib()
   mass_fractions[3] = 0.1;
   mass_fractions[4] = 0.1;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
 
   const Scalar th0_N2 = 3.39500e+03; // degeneracy = 1
   const Scalar th0_O2 = 2.23900e+03; // degeneracy = 1
@@ -412,8 +412,8 @@ int test_cv_el()
   mass_fractions[0] = 0.9;
   mass_fractions[1] = 0.1;
 
-  const Scalar R_O2 = Antioch::Constants::R_universal/32.0;
-  const Scalar R_O = Antioch::Constants::R_universal/16.0;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
 
   // Data taken from read_species_electronic_data_ascii_default
   unsigned int g_O[5] = {5, 3, 1, 5, 1};

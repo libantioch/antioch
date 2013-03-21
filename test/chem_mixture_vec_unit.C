@@ -177,7 +177,7 @@ int vectester(const PairScalars& example)
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "N2", molar_mass, 
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(0.0), Scalar(2.5), Scalar(0));
   }
   
@@ -192,7 +192,7 @@ int vectester(const PairScalars& example)
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "O2", molar_mass, 
-                                Scalar(Antioch::Constants::R_universal/molar_mass),
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass),
                                 Scalar(0.0), Scalar(2.5), Scalar(0));
   }
 
@@ -207,7 +207,7 @@ int vectester(const PairScalars& example)
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "N", molar_mass,
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(3.3621610000e7), Scalar(1.5), Scalar(0));
   }
 
@@ -222,7 +222,7 @@ int vectester(const PairScalars& example)
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "O", molar_mass,
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(1.5420000000e7), Scalar(1.5), Scalar(0));
   }
 
@@ -237,7 +237,7 @@ int vectester(const PairScalars& example)
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "NO", molar_mass,
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(2.9961230000e6), Scalar(2.5), Scalar(0));
   }
 
@@ -255,8 +255,8 @@ int vectester(const PairScalars& example)
 
   PairScalars R_exact = example;
   PairScalars M_exact = example;
-  R_exact[0] = Antioch::Constants::R_universal*( 0.25/28.016 + 0.25/32.0 + 0.25/14.008 + 0.25/16.0);
-  R_exact[1] = Antioch::Constants::R_universal*( 0.2/28.016 + 0.2/32.0 + 0.2/14.008 + 0.2/16.0 + 0.2/30.008 );
+  R_exact[0] = Antioch::Constants::R_universal<Scalar>()*( 0.25/28.016 + 0.25/32.0 + 0.25/14.008 + 0.25/16.0);
+  R_exact[1] = Antioch::Constants::R_universal<Scalar>()*( 0.2/28.016 + 0.2/32.0 + 0.2/14.008 + 0.2/16.0 + 0.2/30.008 );
   M_exact[0] = 1.0/( 0.25*( 1.0/28.016 + 1.0/32.0 + 1.0/14.008 + 1.0/16.0) );
   M_exact[1] = 1.0/( 0.2*( 1.0/28.016 + 1.0/32.0 + 1.0/14.008 + 1.0/16.0 + 1.0/30.008) );
   

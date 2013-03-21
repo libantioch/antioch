@@ -126,11 +126,11 @@ int vectester(const TrioScalars& example)
   T[1] = 1500.0;
   T[2] = 10000.0;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
 
   int return_flag = 0;
 

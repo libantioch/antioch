@@ -154,7 +154,7 @@ int tester()
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "N2", molar_mass, 
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(0.0), Scalar(2.5), Scalar(0));
   }
   
@@ -169,7 +169,7 @@ int tester()
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "O2", molar_mass, 
-                                Scalar(Antioch::Constants::R_universal/molar_mass),
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass),
                                 Scalar(0.0), Scalar(2.5), Scalar(0));
   }
 
@@ -184,7 +184,7 @@ int tester()
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "N", molar_mass,
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(3.3621610000e7), Scalar(1.5), Scalar(0));
   }
 
@@ -199,7 +199,7 @@ int tester()
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "O", molar_mass,
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(1.5420000000e7), Scalar(1.5), Scalar(0));
   }
 
@@ -214,21 +214,21 @@ int tester()
 	return_flag = 1;
       }
     return_flag = test_species( index, chemical_species, "NO", molar_mass,
-                                Scalar(Antioch::Constants::R_universal/molar_mass), 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
                                 Scalar(2.9961230000e6), Scalar(2.5), Scalar(0));
   }
 
-  std::vector<Scalar> mass_fractions( 5, 0.2 );
+  std::vector<Scalar> mass_fractions( 5, 0.2L );
 
-  Scalar R_exact = Antioch::Constants::R_universal*( 0.2/28.016 + 0.2/32.0 + 0.2/14.008 + 0.2/16.0 + 0.2/30.008 );
-  Scalar M_exact = 1.0/( 0.2*( 1.0/28.016 + 1.0/32.0 + 1.0/14.008 + 1.0/16.0 + 1.0/30.008) );
+  Scalar R_exact = Antioch::Constants::R_universal<Scalar>()*( 0.2L/28.016L + 0.2L/32.0L + 0.2L/14.008L + 0.2L/16.0L + 0.2L/30.008L );
+  Scalar M_exact = 1.0L/( 0.2L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L + 1.0L/30.008L) );
   
-  std::vector<Scalar> X_exact(5, 0.0);
-  X_exact[0] = 0.2*M_exact/28.016;
-  X_exact[1] = 0.2*M_exact/32.0;
-  X_exact[2] = 0.2*M_exact/14.008;
-  X_exact[3] = 0.2*M_exact/16.0;
-  X_exact[4] = 0.2*M_exact/30.008;
+  std::vector<Scalar> X_exact(5, 0.0L);
+  X_exact[0] = 0.2L*M_exact/28.016L;
+  X_exact[1] = 0.2L*M_exact/32.0L;
+  X_exact[2] = 0.2L*M_exact/14.008L;
+  X_exact[3] = 0.2L*M_exact/16.0L;
+  X_exact[4] = 0.2L*M_exact/30.008L;
 
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
   if( std::fabs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact) > tol )

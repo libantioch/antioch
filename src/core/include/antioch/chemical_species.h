@@ -269,7 +269,7 @@ namespace Antioch
 					       const int charge )
     : _name      (name),
       _mol_wght  (mol_wght),
-      _R         (Constants::R_universal/mol_wght),
+      _R         (Constants::R_universal<CoeffType>()/mol_wght),
       _h_form    (h_form),
       _n_tr_dofs (n_tr_dofs),
       _charge    (charge)
