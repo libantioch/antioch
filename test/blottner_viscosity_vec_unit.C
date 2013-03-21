@@ -80,17 +80,17 @@ int vectester(const PairScalars& example)
 {
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
-  const Scalar a = 3.14e-3;
-  const Scalar b = 2.71e-2;
-  const Scalar c = 42.0e-5;
+  const Scalar a = 3.14e-3L;
+  const Scalar b = 2.71e-2L;
+  const Scalar c = 42.0e-5L;
 
   Antioch::BlottnerViscosity<Scalar> mu(a,b,c);
 
   std::cout << mu << std::endl;
 
   PairScalars T = example;
-  T[0] = 1521.2;
-  T[1] = 1621.2;
+  T[0] = 1521.2L;
+  T[1] = 1621.2L;
 
   // bc gives
   PairScalars mu_exact = example;
@@ -100,13 +100,13 @@ int vectester(const PairScalars& example)
   int return_flag = 0;
 
   // How are we getting such high error in the long double case?
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 600;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
 
   return_flag = test_viscosity( mu(T), mu_exact, tol );
   
-  const Scalar a2 = 1e-3;
-  const Scalar b2 = 2e-2;
-  const Scalar c2 = 3e-5;
+  const Scalar a2 = 1e-3L;
+  const Scalar b2 = 2e-2L;
+  const Scalar c2 = 3e-5L;
 
   mu.reset_coeffs( a2, b2, c2 );
 

@@ -120,7 +120,9 @@ namespace Antioch
     using std::log;
     using std::exp;
     StateType logT = log(T);
-    return 0.1*exp( (_a*logT + _b)*logT + _c );
+    const CoeffType zero_point_one = 0.1L;
+
+    return zero_point_one*exp( (_a*logT + _b)*logT + _c );
   }
 
   template<typename CoeffType>
