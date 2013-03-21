@@ -99,7 +99,6 @@ int vectester(const PairScalars& example)
 
   int return_flag = 0;
 
-  // How are we getting such high error in the long double case?
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
 
   return_flag = test_viscosity( mu(T), mu_exact, tol );
