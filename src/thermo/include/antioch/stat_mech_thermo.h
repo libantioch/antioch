@@ -56,6 +56,29 @@ namespace Antioch
     virtual ~StatMechThermodynamics();
 
     /**
+     * @returns species translational specific heat at constant volume.
+     * Since the translational modes are assumed to be fully polulated
+     * this is simply 
+     * \f[
+     *   C^{trans}_{v,s} \equiv \frac{\partial e^{trans}_s}{\partial T} = \frac{3}{2} R_s
+     * \f]
+     */
+    CoeffType cv_trans( const unsigned int species ) const;
+
+    /**
+     * @returns species rotational specific heat at constant volume.
+     * By convention, we lump the translational/rotational components
+     * \f[
+     *   C^{tr}_{v,s} \equiv C^{trans}_{v,s} + C^{rot}_{v,s}
+     * \f]
+     * so then
+     * \f[
+     *   C^{rot}_{v,s} \equiv C^{tr}_{v,s} - C^{trans}_{v,s}
+     * \f]
+     */
+    CoeffType cv_rot( const unsigned int species ) const;
+
+    /**
      * @returns species translational/rotational specific heat at
      * constant volume.
      */
@@ -338,6 +361,21 @@ namespace Antioch
   StatMechThermodynamics<CoeffType>::~StatMechThermodynamics ()
   {
     // NOP
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_trans( const unsigned int species ) const
+  {
+    return 1.5*_chem_mixture.R(species);
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_rot( const unsigned int species ) const
+  {
+    /* avoid floating point error, should be >= 0. */ 
+    return std::max(this->cv_tr(species) - this->cv_trans(species), 0.); 
   }
 
   template<typename CoeffType>
