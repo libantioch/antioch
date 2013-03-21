@@ -242,35 +242,35 @@ int vectester(const PairScalars& example)
   }
 
   std::vector<PairScalars> mass_fractions( 5, example );
-  mass_fractions[0][0] = 0.25;
-  mass_fractions[1][0] = 0.25;
-  mass_fractions[2][0] = 0.25;
-  mass_fractions[3][0] = 0.25;
-  mass_fractions[4][0] = 0;
-  mass_fractions[0][1] = 0.2;
-  mass_fractions[1][1] = 0.2;
-  mass_fractions[2][1] = 0.2;
-  mass_fractions[3][1] = 0.2;
-  mass_fractions[4][1] = 0.2;
+  mass_fractions[0][0] = 0.25L;
+  mass_fractions[1][0] = 0.25L;
+  mass_fractions[2][0] = 0.25L;
+  mass_fractions[3][0] = 0.25L;
+  mass_fractions[4][0] = 0L;
+  mass_fractions[0][1] = 0.2L;
+  mass_fractions[1][1] = 0.2L;
+  mass_fractions[2][1] = 0.2L;
+  mass_fractions[3][1] = 0.2L;
+  mass_fractions[4][1] = 0.2L;
 
   PairScalars R_exact = example;
   PairScalars M_exact = example;
-  R_exact[0] = Antioch::Constants::R_universal<Scalar>()*( 0.25/28.016 + 0.25/32.0 + 0.25/14.008 + 0.25/16.0);
-  R_exact[1] = Antioch::Constants::R_universal<Scalar>()*( 0.2/28.016 + 0.2/32.0 + 0.2/14.008 + 0.2/16.0 + 0.2/30.008 );
-  M_exact[0] = 1.0/( 0.25*( 1.0/28.016 + 1.0/32.0 + 1.0/14.008 + 1.0/16.0) );
-  M_exact[1] = 1.0/( 0.2*( 1.0/28.016 + 1.0/32.0 + 1.0/14.008 + 1.0/16.0 + 1.0/30.008) );
+  R_exact[0] = Antioch::Constants::R_universal<Scalar>()*( 0.25L/28.016L + 0.25L/32.0L + 0.25L/14.008L + 0.25L/16.0L);
+  R_exact[1] = Antioch::Constants::R_universal<Scalar>()*( 0.2L/28.016L + 0.2L/32.0L + 0.2L/14.008L + 0.2L/16.0L + 0.2L/30.008L );
+  M_exact[0] = 1.0L/( 0.25L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L) );
+  M_exact[1] = 1.0L/( 0.2L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L + 1.0L/30.008L) );
   
   std::vector<PairScalars> X_exact(5, example);
-  X_exact[0][0] = 0.25*M_exact[0]/28.016;
-  X_exact[1][0] = 0.25*M_exact[0]/32.0;
-  X_exact[2][0] = 0.25*M_exact[0]/14.008;
-  X_exact[3][0] = 0.25*M_exact[0]/16.0;
-  X_exact[4][0] = 0;
-  X_exact[0][1] = 0.2*M_exact[1]/28.016;
-  X_exact[1][1] = 0.2*M_exact[1]/32.0;
-  X_exact[2][1] = 0.2*M_exact[1]/14.008;
-  X_exact[3][1] = 0.2*M_exact[1]/16.0;
-  X_exact[4][1] = 0.2*M_exact[1]/30.008;
+  X_exact[0][0] = 0.25L*M_exact[0]/28.016L;
+  X_exact[1][0] = 0.25L*M_exact[0]/32.0L;
+  X_exact[2][0] = 0.25L*M_exact[0]/14.008L;
+  X_exact[3][0] = 0.25L*M_exact[0]/16.0L;
+  X_exact[4][0] = 0L;
+  X_exact[0][1] = 0.2L*M_exact[1]/28.016L;
+  X_exact[1][1] = 0.2L*M_exact[1]/32.0L;
+  X_exact[2][1] = 0.2L*M_exact[1]/14.008L;
+  X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
+  X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
 
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
   const PairScalars rel_R_error = 
@@ -323,24 +323,23 @@ int main()
     vectester (std::valarray<float>(2));
   returnval = returnval ||
     vectester (std::valarray<double>(2));
-// We're not getting the full long double precision yet?
-//  returnval = returnval ||
-//    vectester (std::valarray<long double>(2));
+  returnval = returnval ||
+    vectester (std::valarray<long double>(2));
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
     vectester (Eigen::Array2f());
   returnval = returnval ||
     vectester (Eigen::Array2d());
-//  returnval = returnval ||
-//    vectester (Eigen::Array<long double, 2, 1>());
+  returnval = returnval ||
+    vectester (Eigen::Array<long double, 2, 1>());
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
     vectester (MetaPhysicL::NumberArray<2, float> (0));
   returnval = returnval ||
     vectester (MetaPhysicL::NumberArray<2, double> (0));
-//  returnval = returnval ||
-//    vectester (MetaPhysicL::NumberArray<2, long double> (0));
+  returnval = returnval ||
+    vectester (MetaPhysicL::NumberArray<2, long double> (0));
 #endif
 
   return returnval;
