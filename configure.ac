@@ -65,12 +65,15 @@ dnl--------------------------
 antioch_optional_INCLUDES=""
 antioch_optional_test_INCLUDES=""
 
-CONFIGURE_EIGEN
+dnl Enable Eigen if a new enough version is found
+enableoptional=yes
+CONFIGURE_EIGEN(3.1.2, no)
 if (test x$enableeigen = xyes); then
   antioch_optional_test_INCLUDES="$EIGEN_INCLUDE $antioch_optional_test_INCLUDES"
 fi
 AM_CONDITIONAL(ANTIOCH_ENABLE_EIGEN, test x$enableeigen = xyes)
 
+dnl Enable MetaPhysicL if a new enough version is found
 AX_PATH_METAPHYSICL(0.0.0, no)
 if (test x$HAVE_METAPHYSICL = x1); then
   antioch_optional_test_INCLUDES="$METAPHYSICL_CPPFLAGS $antioch_optional_test_INCLUDES"
