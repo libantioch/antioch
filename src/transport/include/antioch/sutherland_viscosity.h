@@ -54,6 +54,7 @@ namespace Antioch
     StateType operator()( StateType T ) const;
     
     void reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref );
+    void reset_coeffs( const std::vector<CoeffType> coeffs );
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -124,6 +125,15 @@ namespace Antioch
   {
     _mu_ref = mu_ref;
     _T_ref = T_ref;
+  }
+
+  template<typename CoeffType>
+  inline
+  void SutherlandViscosity<CoeffType>::reset_coeffs( const std::vector<CoeffType> coeffs )
+  {
+    antioch_assert_equal_to(coeffs.size(), 2);
+    _mu_ref = coeffs[0];
+    _T_ref = coeffs[1];
   }
 
 } // end namespace Antioch

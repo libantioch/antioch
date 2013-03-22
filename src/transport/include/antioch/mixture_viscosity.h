@@ -52,6 +52,9 @@ namespace Antioch
     void add( const std::string& species_name,
 	      const std::vector<CoeffType>& coeffs );
 
+    void reset_coeffs( const unsigned int s, 
+                       const std::vector<CoeffType> coeffs );
+
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
     //! Formatted print, by default to \p std::cout
@@ -106,6 +109,13 @@ namespace Antioch
 
     _species_viscosities[s] = new Viscosity(coeffs);
     return;
+  }
+
+  template<typename Viscosity, class CoeffType>
+  void MixtureViscosity<Viscosity,CoeffType>::reset_coeffs( const unsigned int s, 
+                                                            const std::vector<CoeffType> coeffs )
+  {
+    _species_viscosities[s]->reset_coeffs(coeffs);
   }
 
   template<typename Viscosity, class CoeffType>

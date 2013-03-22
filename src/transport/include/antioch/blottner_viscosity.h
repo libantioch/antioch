@@ -54,6 +54,7 @@ namespace Antioch
     StateType operator()( StateType T ) const;
     
     void reset_coeffs( const CoeffType a, const CoeffType b, const CoeffType c );
+    void reset_coeffs( const std::vector<CoeffType> coeffs );
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -134,6 +135,17 @@ namespace Antioch
     _a = a;
     _b = b;
     _c = c;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void BlottnerViscosity<CoeffType>::reset_coeffs( const std::vector<CoeffType> coeffs )
+  {
+    antioch_assert_equal_to(coeffs.size(), 3);
+    _a = coeffs[0];
+    _b = coeffs[1];
+    _c = coeffs[2];
     return;
   }
 
