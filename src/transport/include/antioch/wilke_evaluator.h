@@ -128,7 +128,6 @@ namespace Antioch
       {
 	StateType phi_s = this->compute_phi( mu, chi, s );
 	
-	// Now compute phi_s, chi_s
 	mu_mix += mu[s]*chi[s]/phi_s;
       }
 
@@ -140,23 +139,55 @@ namespace Antioch
   StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::k( const StateType T,
 									const VectorStateType& mass_fractions ) const
   {
-    antioch_not_implemented();
+    StateType k_mix = zero_clone(T);
 
-    StateType k = zero_clone(T);
+    VectorStateType mu  = zero_clone(mass_fractions);
+    VectorStateType chi = zero_clone(mass_fractions);
 
-    return k;
+    this->compute_mu_chi( T, mass_fractions, mu, chi );
+
+    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
+      {
+	StateType phi_s = this->compute_phi( mu, chi, s );
+	
+        StateType k_s = _conductivity.trans( s, mu[s] )
+                      + _conductivity.rot( s, mu[s] )
+                      + _conductivity.vib( s, mu[s], T )
+                      + _conductivity.elec( s, mu[s], T );
+
+	k_mix += k_s*chi[s]/phi_s;
+      }
+
+    return k_mix;
   }
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   template <typename StateType, typename VectorStateType>
   void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu_and_k( const StateType T,
 									  const VectorStateType& mass_fractions,
-									  StateType& mu, StateType& k ) const
+									  StateType& mu_mix,
+                                                                          StateType& k_mix ) const
   {
-    antioch_not_implemented();
+    mu_mix = zero_clone(T);
+    k_mix  = zero_clone(T);
 
-    mu = zero_clone(T);
-    k  = zero_clone(T);
+    VectorStateType mu  = zero_clone(mass_fractions);
+    VectorStateType chi = zero_clone(mass_fractions);
+
+    this->compute_mu_chi( T, mass_fractions, mu, chi );
+
+    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
+      {
+	StateType phi_s = this->compute_phi( mu, chi, s );
+	
+        StateType k_s = _conductivity.trans( s, mu[s] )
+                      + _conductivity.rot( s, mu[s] )
+                      + _conductivity.vib( s, mu[s] )
+                      + _conductivity.elec( s, mu[s] );
+
+        mu_mix += mu[s]*chi[s]/phi_s;
+	k_mix += k_s*chi[s]/phi_s;
+      }
 
     return;
   }
