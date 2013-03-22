@@ -19,6 +19,7 @@ check_PROGRAMS += mixture_viscosity_unit
 check_PROGRAMS += mixture_viscosity_vec_unit
 check_PROGRAMS += stat_mech_thermo_unit
 check_PROGRAMS += eucken_thermal_cond_unit
+check_PROGRAMS += wilke_transport_unit
 
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
@@ -51,6 +52,7 @@ mixture_viscosity_unit_SOURCES = mixture_viscosity_unit.C
 mixture_viscosity_vec_unit_SOURCES = mixture_viscosity_vec_unit.C
 stat_mech_thermo_unit_SOURCES = stat_mech_thermo_unit.C
 eucken_thermal_cond_unit_SOURCES = eucken_thermal_cond_unit.C
+wilke_transport_unit_SOURCES = wilke_transport_unit.C
 
 #Define tests to actually be run
 TESTS  =
@@ -72,6 +74,7 @@ TESTS += mixture_viscosity_unit
 TESTS += mixture_viscosity_vec_unit
 TESTS += stat_mech_thermo_unit
 TESTS += eucken_thermal_cond_unit
+TESTS += wilke_transport_unit
 
 if CODE_COVERAGE_ENABLED
   CLEANFILES = *.gcda *.gcno
