@@ -74,10 +74,12 @@ namespace Antioch
 
     //! Helper function to reduce code duplication.
     /*! Computes the intermediate \phi variable needed for Wilke's mixing rule.  */
-    template <typename StateType, typename VectorStateType>
-    StateType compute_phi( const VectorStateType& mu,
-			   const VectorStateType& chi,
-			   const unsigned int s ) const;
+    template <typename VectorStateType>
+    typename
+    Antioch::value_type<VectorStateType>::type
+    compute_phi( const VectorStateType& mu,
+		 const VectorStateType& chi,
+		 const unsigned int s ) const;
 
   protected:
 
@@ -124,7 +126,7 @@ namespace Antioch
 
     for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
-	StateType phi_s = this->compute_phi<StateType,VectorStateType>( mu, chi, s );
+	StateType phi_s = this->compute_phi( mu, chi, s );
 	
 	// Now compute phi_s, chi_s
 	mu_mix += mu[s]*chi[s]/phi_s;
@@ -180,11 +182,16 @@ namespace Antioch
   }
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
-  template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_phi( const VectorStateType& mu,
-										  const VectorStateType& chi,
-										  const unsigned int s ) const
+  template <typename VectorStateType>
+  typename
+  Antioch::value_type<VectorStateType>::type
+  WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_phi( const VectorStateType& mu,
+									const VectorStateType& chi,
+									const unsigned int s ) const
   {
+    typedef typename
+      Antioch::value_type<VectorStateType>::type StateType;
+
     /* We initialize to the first iterate and loop starting from 1
        since some StateTypes have a hard time initializing from
        a constant. */
