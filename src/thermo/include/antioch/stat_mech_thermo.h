@@ -367,15 +367,14 @@ namespace Antioch
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_trans( const unsigned int species ) const
   {
-    return 1.5*_chem_mixture.R(species);
+    return CoeffType(1.5)*_chem_mixture.R(species);
   }
 
   template<typename CoeffType>
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_rot( const unsigned int species ) const
   {
-    /* avoid floating point error, should be >= 0. */ 
-    return std::max(this->cv_tr(species) - this->cv_trans(species), 0.); 
+    return std::max(this->cv_tr(species) - this->cv_trans(species), CoeffType(0) ); 
   }
 
   template<typename CoeffType>
