@@ -46,10 +46,10 @@ namespace Antioch
     StateType rot( const unsigned int s, const StateType mu ) const;
 
     template <typename StateType>
-    StateType vib( const unsigned int s, const StateType mu ) const;
+    StateType vib( const unsigned int s, const StateType mu, const StateType Tv ) const;
 
     template <typename StateType>
-    StateType elec( const unsigned int s, const StateType mu ) const;
+    StateType elec( const unsigned int s, const StateType mu, const StateType Te ) const;
 
   protected:
 
@@ -86,19 +86,21 @@ namespace Antioch
 
   template<class ThermoEvaluator>
   template <typename StateType>
-  StateType EuckenThermalConductivity<ThermoEvaluator>::vib( const unsigned int s, const StateType mu ) const
+  StateType EuckenThermalConductivity<ThermoEvaluator>::vib( const unsigned int s, const StateType mu,
+                                                             const StateType Tv ) const
   {
     /* Note: Cander, "High-temperature effects in hypersonic flight",
              Encyclopedia of Aerospace Engineering, 2010 suggests that
              there should be a factor of 1.2 here. */
-    return mu*_thermo.cv_vib(s);
+    return mu*_thermo.cv_vib(s, Tv);
   }
 
   template<class ThermoEvaluator>
   template <typename StateType>
-  StateType EuckenThermalConductivity<ThermoEvaluator>::elec( const unsigned int s, const StateType mu ) const
+  StateType EuckenThermalConductivity<ThermoEvaluator>::elec( const unsigned int s, const StateType mu,
+                                                              const StateType Te ) const
   {
-    return mu*_thermo.cv_elec(s);
+    return mu*_thermo.cv_el(s, Te);
   }
 
 } // end namespace Antioch
