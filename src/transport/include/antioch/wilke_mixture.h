@@ -47,10 +47,10 @@ namespace Antioch
     ~WilkeMixture();
 
     CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
-				       const unsigned int s ) const;
+                                       const unsigned int s ) const;
     
     CoeffType denominator( const unsigned int r,
-			   const unsigned int s ) const;
+                           const unsigned int s ) const;
 
     const ChemicalMixture<CoeffType>& chem_mixture() const;
 
@@ -77,17 +77,17 @@ namespace Antioch
 
     for( unsigned int r = 0; r < chem_mixture.n_species(); r++ )
       {
-	_Mr_Ms_to_the_one_fourth[r].resize(chem_mixture.n_species());
-	_denom[r].resize(chem_mixture.n_species());
+        _Mr_Ms_to_the_one_fourth[r].resize(chem_mixture.n_species());
+        _denom[r].resize(chem_mixture.n_species());
 
-	for( unsigned int s = 0; s < chem_mixture.n_species(); s++ )
-	  {
-	    const CoeffType Mr = chem_mixture.M(r);
-	    const CoeffType Ms = chem_mixture.M(s);
+        for( unsigned int s = 0; s < chem_mixture.n_species(); s++ )
+          {
+            const CoeffType Mr = chem_mixture.M(r);
+            const CoeffType Ms = chem_mixture.M(s);
 
-	    _Mr_Ms_to_the_one_fourth[r][s] = std::pow( Mr/Ms, 0.25 );
-	    _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
-	  }
+            _Mr_Ms_to_the_one_fourth[r][s] = std::pow( Mr/Ms, 0.25 );
+            _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
+          }
       }
 
     return;
@@ -103,7 +103,7 @@ namespace Antioch
   template<class CoeffType>
   inline
   CoeffType WilkeMixture<CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
-							      const unsigned int s ) const
+                                                              const unsigned int s ) const
   {
     return _Mr_Ms_to_the_one_fourth[r][s];
   }
@@ -112,7 +112,7 @@ namespace Antioch
   template<class CoeffType>
   inline
   CoeffType WilkeMixture<CoeffType>::denominator( const unsigned int r,
-						  const unsigned int s ) const
+                                                  const unsigned int s ) const
   {
     return _denom[r][s];
   }
