@@ -52,6 +52,8 @@ namespace Antioch
     CoeffType denominator( const unsigned int r,
 			   const unsigned int s ) const;
 
+    const ChemicalMixture<CoeffType>& chem_mixture() const;
+
   protected:
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
@@ -113,6 +115,13 @@ namespace Antioch
 						  const unsigned int s ) const
   {
     return _denom[r][s];
+  }
+
+  template<class CoeffType>
+  inline
+  const ChemicalMixture<CoeffType>& WilkeMixture<CoeffType>::chem_mixture() const
+  {
+    return _chem_mixture;
   }
 
 } // end namespace Antioch

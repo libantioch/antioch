@@ -80,7 +80,7 @@ include_HEADERS += transport/include/antioch/sutherland_viscosity.h
 include_HEADERS += transport/include/antioch/mixture_viscosity.h
 include_HEADERS += transport/include/antioch/wilke_mixture.h
 include_HEADERS += transport/include/antioch/eucken_thermal_conductivity.h
-
+include_HEADERS += transport/include/antioch/wilke_evaluator.h
 
 # utilities
 include_HEADERS += utilities/include/antioch/antioch_exceptions.h

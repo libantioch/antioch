@@ -31,6 +31,9 @@
 
 // Antioch
 #include "antioch/metaprogramming.h"
+#include "antioch/vector_utils.h"
+#include "antioch/wilke_mixture.h"
+#include "antioch/mixture_viscosity.h"
 
 namespace Antioch
 {
@@ -42,7 +45,7 @@ namespace Antioch
   public:
 
     WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
-		    const MixtureViscosity<Viscosity,CoeffType>& viscosity,
+		    const Viscosity& viscosity,
 		    const ThermalConductivity& conductivity );
 
     ~WilkeEvaluator();
@@ -63,14 +66,15 @@ namespace Antioch
     //! Helper function to reduce code duplication.
     /*! Populates species viscosities and the intermediate \chi variable
         needed for Wilke's mixing rule. */
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     void compute_mu_chi( const StateType T,
+			 const VectorStateType& mass_fractions,
 			 VectorStateType& mu,
 			 VectorStateType& chi ) const;
 
     //! Helper function to reduce code duplication.
     /*! Computes the intermediate \phi variable needed for Wilke's mixing rule.  */
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     StateType compute_phi( const VectorStateType& mu,
 			   const VectorStateType& chi,
 			   const unsigned int s ) const;
@@ -79,7 +83,7 @@ namespace Antioch
 
     const WilkeMixture<CoeffType>& _mixture;
 
-    const MixtureViscosity<Viscosity,CoeffType>& _viscosity;
+    const Viscosity& _viscosity;
 
     const ThermalConductivity& _conductivity;
 
@@ -89,10 +93,10 @@ namespace Antioch
 
   };
 
-  template<class V, class T, class CoeffType>
-  WilkeEvaluator<V,T,CoeffType>::WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
-						 const MixtureViscosity<V,CoeffType>& viscosity,
-						 const MixtureThermalConductivity<T,CoeffType>& conductivity )
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
+  WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
+									   const Viscosity& viscosity,
+									   const ThermalConductivity& conductivity )
     : _mixture(mixture),
       _viscosity(viscosity),
       _conductivity(conductivity)
@@ -100,16 +104,16 @@ namespace Antioch
     return;
   }
 
-  template<class V, class T, class CoeffType>
-  WilkeEvaluator<CoeffType,V,T>::~WilkeEvaluator()
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
+  WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::~WilkeEvaluator()
   {
     return;
   }
 
-  template<class V, class T, class CoeffType>
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<CoeffType,V,T>::mu( const StateType T,
-					       const VectorStateType& mass_fractions )
+  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu( const StateType T,
+									 const VectorStateType& mass_fractions ) const
   {
     StateType mu_mix = zero_clone(T);
     
@@ -118,21 +122,21 @@ namespace Antioch
     
     this->compute_mu_chi( T, mass_fractions, mu, chi );
 
-    for( unsigned int s = 0; s < this->n_species(); s++ )
+    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
-	StateType phi_s = this->compute_phi( mu, chi, s );
+	StateType phi_s = this->compute_phi<StateType,VectorStateType>( mu, chi, s );
 	
 	// Now compute phi_s, chi_s
-	mu_mix += mu[s]*chi[s]/phi_s
+	mu_mix += mu[s]*chi[s]/phi_s;
       }
 
     return mu_mix;
   }
 
-  template<class V, class T, class CoeffType>
-  template <typename StateType>
-  StateType WilkeEvaluator<V,T,CoeffType>::k( const StateType T,
-					      const VectorStateType& mass_fractions )
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
+  template <typename StateType, typename VectorStateType>
+  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::k( const StateType T,
+									const VectorStateType& mass_fractions ) const
   {
     antioch_not_implemented();
 
@@ -141,11 +145,11 @@ namespace Antioch
     return k;
   }
 
-  template<class V, class T, class CoeffType>
-  template <typename StateType>
-  void WilkeEvaluator<V,T,CoeffType>::mu_and_k( const StateType T,
-						const VectorStateType& mass_fractions,
-						StateType& mu, StateType& k )
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
+  template <typename StateType, typename VectorStateType>
+  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu_and_k( const StateType T,
+									  const VectorStateType& mass_fractions,
+									  StateType& mu, StateType& k ) const
   {
     antioch_not_implemented();
 
@@ -155,17 +159,18 @@ namespace Antioch
     return;
   }
 
-  template <typename StateType>
-  void WilkeEvaluator<V,T,CoeffType>::compute_mu_chi( const StateType T,
-						      const VectorStateType& mass_fractions
-						      VectorStateType& mu,
-						      VectorStateType& chi ) const
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
+  template <typename StateType, typename VectorStateType>
+  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_mu_chi( const StateType T,
+										const VectorStateType& mass_fractions,
+										VectorStateType& mu,
+										VectorStateType& chi ) const
   {
     const StateType M = _viscosity.chemical_mixture().M(mass_fractions);
 
     // Precompute needed quantities
     // chi_s = w_s*M/M_s
-    for( unsigned int s = 0; s < this->n_species(); s++ )
+    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
 	mu[s] = _viscosity(s,T);
 	chi[s] = mass_fractions[s]*M/_viscosity.chemical_mixture().M(s);
@@ -174,22 +179,23 @@ namespace Antioch
     return;
   }
 
-  template <typename StateType>
-  StateType WilkeEvaluator<V,T,CoeffType>::compute_phi( const VectorStateType& mu,
-							const VectorStateType& chi,
-							const unsigned int s ) const
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
+  template <typename StateType, typename VectorStateType>
+  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_phi( const VectorStateType& mu,
+										  const VectorStateType& chi,
+										  const unsigned int s ) const
   {
     /* We initialize to the first iterate and loop starting from 1
        since some StateTypes have a hard time initializing from
        a constant. */
     // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/(8*(1+Ms/Mr))
     const StateType dummy = 1.0 + std::sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
-    StateType phi_s = chi[0]*numerator*numerator/_mixture.denom(0,s);
+    StateType phi_s = chi[0]*dummy*dummy/_mixture.denominator(0,s);
 
-    for(unsigned int r = 1; r < this->n_species(); r++ )
+    for(unsigned int r = 1; r < _mixture.chem_mixture().n_species(); r++ )
       {
 	const StateType numerator = 1.0 + std::sqrt(mu[s]/mu[r])*_mixture.Mr_Ms_to_the_one_fourth(r,s);
-	phi_s += chi[r]*numerator*numerator/_mixture.denom(r,s);
+	phi_s += chi[r]*numerator*numerator/_mixture.denominator(r,s);
       }
 
     return phi_s;
