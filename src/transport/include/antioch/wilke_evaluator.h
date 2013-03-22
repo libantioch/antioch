@@ -195,7 +195,7 @@ namespace Antioch
     /* We initialize to the first iterate and loop starting from 1
        since some StateTypes have a hard time initializing from
        a constant. */
-    // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/(8*(1+Ms/Mr))
+    // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/sqrt(8*(1+Ms/Mr))
     const StateType dummy = 1.0 + std::sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
     StateType phi_s = chi[0]*dummy*dummy/_mixture.denominator(0,s);
 
