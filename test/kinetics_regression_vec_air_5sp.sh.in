@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROG="@top_builddir@/test/kinetics_regression"
+PROG="@top_builddir@/test/kinetics_regression_vec"
 
 INPUT="@top_srcdir@/test/input_files/air_5sp.xml"
 
