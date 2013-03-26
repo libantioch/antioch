@@ -120,7 +120,6 @@ int vectester(const TrioScalars& example)
   Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
 
   //const Scalar P = 100000.0;
-  const std::vector<Scalar> mass_fractions( 5, 0.2 );
   TrioScalars T = example;
   T[0] = 190.0;
   T[1] = 1500.0;
