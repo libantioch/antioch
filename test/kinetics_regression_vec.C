@@ -67,14 +67,19 @@
 static const unsigned int n_species = 5;
 
 template <typename SpeciesVector1, typename SpeciesVector2>
-int species_vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::string &name)
+int vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::string &name)
 {
   int found_errors = 0;
 
   typedef typename Antioch::value_type<SpeciesVector1>::type StateType;
   typedef typename Antioch::value_type<StateType>::type Scalar;
 
-  for (unsigned int s=0; s != n_species; s++)
+  if (a.size() != b.size())
+    {
+      std::cerr << "Error: Mismatch in vector sizes " << name << std::endl;
+    }
+
+  for (unsigned int s=0; s != a.size(); s++)
     {
       using std::abs;
       using std::max;
@@ -162,69 +167,76 @@ int vectester(const std::string& input_name, const PairScalars& example)
 #ifdef ANTIOCH_HAVE_EIGEN
   {
     typedef Eigen::Array<PairScalars,n_species,1> SpeciesVecEigenType;
-    SpeciesVecEigenType eigen_Y = SpeciesVecEigenType::Constant(massfrac);
+    SpeciesVecEigenType eigen_Y;
+    Antioch::init_constant(eigen_Y, massfrac);
 
     const PairScalars eigen_R = chem_mixture.R(eigen_Y);
 
     return_flag +=
-      species_vec_compare(eigen_R,R_mix,"eigen_R");
+      vec_compare(eigen_R,R_mix,"eigen_R");
 
     SpeciesVecEigenType eigen_molar_densities;
+    Antioch::init_constant(eigen_molar_densities, example);
 
     chem_mixture.molar_densities(rho,eigen_Y,eigen_molar_densities);
 
     return_flag +=
-      species_vec_compare(eigen_molar_densities, molar_densities,
-                          "eigen_molar_densities");
+      vec_compare(eigen_molar_densities, molar_densities,
+                  "eigen_molar_densities");
 
     SpeciesVecEigenType eigen_h_RT_minus_s_R;
+    Antioch::init_constant(eigen_h_RT_minus_s_R, example);
 
     thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
 
     return_flag +=
-      species_vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
-                          "eigen_h_RT_minus_s_R");
+      vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
+                  "eigen_h_RT_minus_s_R");
 
     SpeciesVecEigenType eigen_omega_dot;
+    Antioch::init_constant(eigen_omega_dot, example);
   
     kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
     return_flag +=
-      species_vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
+      vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
   }
 
   {
     typedef Eigen::Matrix<PairScalars,Eigen::Dynamic,1> SpeciesVecEigenType;
-    SpeciesVecEigenType eigen_Y =
-      SpeciesVecEigenType::Constant(n_species, 1, massfrac);
+    SpeciesVecEigenType eigen_Y(n_species,1);
+    Antioch::init_constant(eigen_Y, massfrac);
 
     const PairScalars eigen_R = chem_mixture.R(eigen_Y);
 
     return_flag +=
-      species_vec_compare(eigen_R,R_mix,"eigen_R");
+      vec_compare(eigen_R,R_mix,"eigen_R");
 
     SpeciesVecEigenType eigen_molar_densities(n_species,1);
+    Antioch::init_constant(eigen_molar_densities, example);
 
     chem_mixture.molar_densities(rho,eigen_Y,eigen_molar_densities);
 
     return_flag +=
-      species_vec_compare(eigen_molar_densities, molar_densities,
-                          "eigen_molar_densities");
+      vec_compare(eigen_molar_densities, molar_densities,
+                  "eigen_molar_densities");
 
     SpeciesVecEigenType eigen_h_RT_minus_s_R(n_species,1);
+    Antioch::init_constant(eigen_h_RT_minus_s_R, example);
 
     thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
 
     return_flag +=
-      species_vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
-                          "eigen_h_RT_minus_s_R");
+      vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
+                  "eigen_h_RT_minus_s_R");
 
     SpeciesVecEigenType eigen_omega_dot(n_species,1);
+    Antioch::init_constant(eigen_omega_dot, example);
   
     kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
     return_flag +=
-      species_vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
+      vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
   }
 
 #endif // ANTIOCH_HAVE_EIGEN
@@ -249,7 +261,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
   omega_dot_reg[4][1] = omega_dot_reg[4][0];
 
   return_flag +=
-    species_vec_compare(omega_dot, omega_dot_reg, "omega_dot");
+    vec_compare(omega_dot, omega_dot_reg, "omega_dot");
 
   return return_flag;
 }

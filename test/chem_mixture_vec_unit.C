@@ -241,7 +241,7 @@ int vectester(const PairScalars& example)
                                 Scalar(2.9961230000e6), Scalar(2.5), Scalar(0));
   }
 
-  std::vector<PairScalars> mass_fractions( 5, example );
+  std::vector<PairScalars> mass_fractions( n_species, example );
   mass_fractions[0][0] = 0.25L;
   mass_fractions[1][0] = 0.25L;
   mass_fractions[2][0] = 0.25L;
@@ -260,7 +260,7 @@ int vectester(const PairScalars& example)
   M_exact[0] = 1.0L/( 0.25L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L) );
   M_exact[1] = 1.0L/( 0.2L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L + 1.0L/30.008L) );
   
-  std::vector<PairScalars> X_exact(5, example);
+  std::vector<PairScalars> X_exact(n_species, example);
   X_exact[0][0] = 0.25L*M_exact[0]/28.016L;
   X_exact[1][0] = 0.25L*M_exact[0]/32.0L;
   X_exact[2][0] = 0.25L*M_exact[0]/14.008L;
@@ -297,7 +297,7 @@ int vectester(const PairScalars& example)
   
   std::vector<PairScalars> X;
   chem_mixture.X( chem_mixture.M(mass_fractions), mass_fractions, X );
-  for( unsigned int s = 0; s < 5; s++ )
+  for( unsigned int s = 0; s < n_species; s++ )
     {
       const PairScalars rel_X_error = 
         std::abs( (X[s] - X_exact[s])/X_exact[s]);
@@ -311,6 +311,131 @@ int vectester(const PairScalars& example)
 	}
     }
   
+
+#ifdef ANTIOCH_HAVE_EIGEN
+  {
+    typedef Eigen::Array<PairScalars,n_species,1> SpeciesVecEigenType;
+
+    SpeciesVecEigenType eigen_mass_fractions;
+    Antioch::init_constant(eigen_mass_fractions, mass_fractions[0]);
+    eigen_mass_fractions[4][0] = 0L;
+
+    SpeciesVecEigenType eigen_X_exact;
+    Antioch::init_constant(eigen_X_exact, example);
+    eigen_X_exact[0][0] = 0.25L*M_exact[0]/28.016L;
+    eigen_X_exact[1][0] = 0.25L*M_exact[0]/32.0L;
+    eigen_X_exact[2][0] = 0.25L*M_exact[0]/14.008L;
+    eigen_X_exact[3][0] = 0.25L*M_exact[0]/16.0L;
+    eigen_X_exact[4][0] = 0L;
+    eigen_X_exact[0][1] = 0.2L*M_exact[1]/28.016L;
+    eigen_X_exact[1][1] = 0.2L*M_exact[1]/32.0L;
+    eigen_X_exact[2][1] = 0.2L*M_exact[1]/14.008L;
+    eigen_X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
+    eigen_X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
+
+    Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    const PairScalars eigen_rel_R_error = 
+      std::abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
+    if( Antioch::max(eigen_rel_R_error) > tol )
+      {
+        std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
+		  << std::setprecision(16) << std::scientific
+		  << "R_eigen = " << chem_mixture.R(eigen_mass_fractions) << std::endl
+		  << "R_exact = " << R_exact <<  std::endl;
+        return_flag = 1;
+      }
+
+    const PairScalars eigen_rel_M_error = 
+      std::abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
+    if( Antioch::max(eigen_rel_M_error) > tol )
+      {
+        std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
+		  << std::setprecision(16) << std::scientific
+		  << "M_eigen = " << chem_mixture.M(eigen_mass_fractions) << std::endl
+		  << "M_exact = " << M_exact << std::endl;
+        return_flag = 1;
+      }
+  
+    SpeciesVecEigenType eigen_X;
+    Antioch::init_constant(eigen_X, example);
+    chem_mixture.X( chem_mixture.M(eigen_mass_fractions), eigen_mass_fractions, eigen_X );
+    for( unsigned int s = 0; s < n_species; s++ )
+      {
+        const PairScalars eigen_rel_X_error = 
+          std::abs( (eigen_X[s] - X_exact[s])/X_exact[s]);
+        if( Antioch::max(eigen_rel_X_error) > tol )
+	  {
+	    std::cerr << "Error: Mismatch in mole fraction for species " << s << std::endl
+		      << std::setprecision(16) << std::scientific
+		      << "X_eigen = " << eigen_X[s] << std::endl
+		      << "X_exact = " << X_exact[s] << std::endl;
+	    return_flag = 1;
+	  }
+      }
+  }
+
+  {
+    typedef Eigen::Matrix<PairScalars,Eigen::Dynamic,1> SpeciesVecEigenType;
+
+    SpeciesVecEigenType eigen_mass_fractions(n_species, 1);
+    Antioch::init_constant(eigen_mass_fractions, mass_fractions[0]);
+    eigen_mass_fractions[4][0] = 0L;
+
+    SpeciesVecEigenType eigen_X_exact(n_species, 1);
+    Antioch::init_constant(eigen_X_exact, example);
+    eigen_X_exact[0][0] = 0.25L*M_exact[0]/28.016L;
+    eigen_X_exact[1][0] = 0.25L*M_exact[0]/32.0L;
+    eigen_X_exact[2][0] = 0.25L*M_exact[0]/14.008L;
+    eigen_X_exact[3][0] = 0.25L*M_exact[0]/16.0L;
+    eigen_X_exact[4][0] = 0L;
+    eigen_X_exact[0][1] = 0.2L*M_exact[1]/28.016L;
+    eigen_X_exact[1][1] = 0.2L*M_exact[1]/32.0L;
+    eigen_X_exact[2][1] = 0.2L*M_exact[1]/14.008L;
+    eigen_X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
+    eigen_X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
+
+    Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    const PairScalars eigen_rel_R_error = 
+      std::abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
+    if( Antioch::max(eigen_rel_R_error) > tol )
+      {
+        std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
+		  << std::setprecision(16) << std::scientific
+		  << "R_eigen = " << chem_mixture.R(eigen_mass_fractions) << std::endl
+		  << "R_exact = " << R_exact <<  std::endl;
+        return_flag = 1;
+      }
+
+    const PairScalars eigen_rel_M_error = 
+      std::abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
+    if( Antioch::max(eigen_rel_M_error) > tol )
+      {
+        std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
+		  << std::setprecision(16) << std::scientific
+		  << "M_eigen = " << chem_mixture.M(eigen_mass_fractions) << std::endl
+		  << "M_exact = " << M_exact << std::endl;
+        return_flag = 1;
+      }
+  
+    SpeciesVecEigenType eigen_X(n_species,1);
+    Antioch::init_constant(eigen_X, example);
+    chem_mixture.X( chem_mixture.M(eigen_mass_fractions), eigen_mass_fractions, eigen_X );
+    for( unsigned int s = 0; s < n_species; s++ )
+      {
+        const PairScalars eigen_rel_X_error = 
+          std::abs( (eigen_X[s] - X_exact[s])/X_exact[s]);
+        if( Antioch::max(eigen_rel_X_error) > tol )
+	  {
+	    std::cerr << "Error: Mismatch in mole fraction for species " << s << std::endl
+		      << std::setprecision(16) << std::scientific
+		      << "X_eigen = " << eigen_X[s] << std::endl
+		      << "X_exact = " << X_exact[s] << std::endl;
+	    return_flag = 1;
+	  }
+      }
+  }
+#endif // ANTIOCH_HAVE_EIGEN
+
   return return_flag;
 }
 

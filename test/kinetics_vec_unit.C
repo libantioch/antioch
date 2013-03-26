@@ -96,7 +96,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
   Y_vals[0] = 0.2;
   Y_vals[1] = 0.25;
   std::vector<PairScalars> Y(n_species,Y_vals);
-  Y[5][1] = 0;
+  Y[4][1] = 0;
 
   const PairScalars R_mix = chem_mixture.R(Y);
 
@@ -150,6 +150,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
 	}
     }
   
+#ifdef ANTIOCH_HAVE_EIGEN
+  {
+  }
+#endif // ANTIOCH_HAVE_EIGEN
+
   return return_flag;
 }
 
