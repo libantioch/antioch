@@ -26,49 +26,74 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_METAPROGRAMMING_H
-#define ANTIOCH_METAPROGRAMMING_H
-
-#include "antioch/metaprogramming_decl.h"
+#ifndef ANTIOCH_METAPROGRAMMING_DECL_H
+#define ANTIOCH_METAPROGRAMMING_DECL_H
 
 namespace Antioch
 {
+  // Helper metafunctions
+  template <bool B, class T = void>
+  struct enable_if_c {
+    typedef T type;
+  };
+
+  template <class T>
+  struct enable_if_c<false, T> {};
+
+  template <typename T>
+  class has_size
+  {
+    typedef char no;
+    typedef char yes[2];
+    template <class C> static yes& test(char (*)[sizeof(&C::size)]);
+    template <class C> static no& test(...);
+  public:
+    const static bool value = (sizeof(test<T>(0)) == sizeof(yes&));
+  };
+
+  // A class for uniformly assigning third-party vectorized numeric
+  // types from scalar numeric types.  First-party vectorized numeric
+  // types should correctly implement operator=(scalar)...
+  template <typename T>
+  struct value_type
+  {
+    typedef T type;
+  };
+
   template <typename T>
   inline
   T
-  max (const T& in)
+  max (const T& in);
+
+  template <typename T>
+  struct value_type<const T>
   {
-    return in;
-  }
+    typedef const typename value_type<T>::type type;
+  };
 
   // A function for zero-initializing vectorized numeric types
   // while resizing them to match the example input
   template <typename T>
   inline
-  T zero_clone(const T& example) { return 0; }
+  T zero_clone(const T& example);
 
   // A function for initializing vectorized numeric types
   // while resizing them to match the example input
   template <typename T>
   inline
-  void init_clone(T& output, const T& example) { output = example; }
+  void init_clone(T& output, const T& example);
 
   // A function for zero-setting vectorized numeric types
   template <typename T>
   inline
-  void set_zero(T& output) { output = 0; }
+  void set_zero(T& output);
 
   // A function for initializing numeric vector types.  Resizes the
   // contents of vector-of-vector types but does not resize the outer
   // vector.
   template <typename Vector, typename Scalar>
   inline
-  void init_constant(Vector& output, const Scalar& example)
-  {
-    // We can't just use setZero here with arbitrary Scalar types
-    for (std::size_t i=0; i != output.size(); ++i)
-      init_clone(output[i], example);
-  }
+  void init_constant(Vector& output, const Scalar& example);
 } // end namespace Antioch
 
-#endif //ANTIOCH_METAPROGRAMMING_H
+#endif //ANTIOCH_METAPROGRAMMING_DECL_H

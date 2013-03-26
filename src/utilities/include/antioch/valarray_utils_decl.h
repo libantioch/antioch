@@ -32,7 +32,7 @@
 #include <iostream>
 #include <valarray>
 
-#include "antioch/metaprogramming.h"
+#include "antioch/metaprogramming_decl.h"
 
 // Add some overloads that are blatantly missing from the std:: namespace
 
@@ -72,6 +72,11 @@ template <typename T>
 inline
 std::valarray<T>
 zero_clone(const std::valarray<T>& example);
+
+template <typename T>
+inline
+void
+init_clone(std::valarray<T>& output, const std::valarray<T>& example);
 
 } // end namespace Antioch
 

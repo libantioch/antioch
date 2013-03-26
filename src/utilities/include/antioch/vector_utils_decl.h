@@ -32,7 +32,7 @@
 #include <iostream>
 #include <vector>
 
-#include "antioch/metaprogramming.h"
+#include "antioch/metaprogramming_decl.h"
 
 // Add some overloads
 

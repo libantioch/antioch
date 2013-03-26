@@ -33,7 +33,7 @@
 
 #ifdef ANTIOCH_HAVE_EIGEN
 
-#include "antioch/metaprogramming.h"
+#include "antioch/metaprogramming_decl.h"
 
 #include <Eigen/Dense>
 

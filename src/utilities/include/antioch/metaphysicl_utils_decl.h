@@ -34,7 +34,7 @@
 #ifdef ANTIOCH_HAVE_METAPHYSICL
 #include "metaphysicl/numberarray.h"
 
-#include "antioch/metaprogramming.h"
+#include "antioch/metaprogramming_decl.h"
 
 // Specializations to match other Antioch workarounds
 

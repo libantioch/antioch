@@ -113,6 +113,19 @@ zero_clone(const std::valarray<T>& example)
     return std::valarray<T>();
 }
 
+
+template <typename T>
+inline
+void
+init_clone(std::valarray<T>& output, const std::valarray<T>& example)
+{
+  const std::size_t sz = example.size();
+  output.resize(sz);
+  for (std::size_t i=0; i != sz; ++i)
+    init_clone(output[i], example[i]);
+}
+
+
 } // end namespace Antioch
 
 
