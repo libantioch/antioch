@@ -428,6 +428,8 @@ namespace Antioch
 	  (SubCache(cache.T[i],cache.T2[i],cache.T3[i],cache.T4[i],cache.lnT[i]),
 	   species);
       }
+
+    return returnval;
   }
 
 
