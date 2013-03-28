@@ -58,6 +58,8 @@ AC_PROG_CXX
 dnl Added for AX_CODE_COVERAGE macro to work correctly, even though there's no Fortran here.
 AC_PROG_FC
 
+dnl -Wall warnings, -Wall the time.
+AX_CXXFLAGS_WARN_ALL
 
 dnl--------------------------
 dnl Checks for third-party libraries
