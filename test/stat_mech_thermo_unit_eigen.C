@@ -527,6 +527,10 @@ int test_cv_el()
 template <typename Scalar>
 int test_T_from_e_tot()
 {
+
+  // Convenience 
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Eigen::ColMajor> VectorXr;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -542,7 +546,7 @@ int test_T_from_e_tot()
   Antioch::StatMechThermodynamics<Scalar> sm_thermo( chem_mixture );
 
   // Mass fractions
-  std::vector<Scalar> mass_fractions( 5, 0.2 );
+  VectorXr mass_fractions(5);
   mass_fractions[0] = 0.5;
   mass_fractions[1] = 0.2;
   mass_fractions[2] = 0.1;

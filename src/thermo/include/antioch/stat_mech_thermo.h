@@ -96,9 +96,6 @@ namespace Antioch
     >::type
     cv_tr (const VectorStateType& mass_fractions) const;
 
-    // template<typename StateType>
-    // StateType cv_tr (const std::vector<StateType>& mass_fractions) const;
-      
     /**
      * @returns species vibrational specific heat
      * constant volume.
@@ -206,15 +203,26 @@ namespace Antioch
     /**
      * @returns mixture specific enthalpy, J/kg.
      */
-    template<typename StateType>
-    StateType h_tot (const StateType T, const StateType Tv, const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    h_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+           const typename Antioch::value_type<VectorStateType>::type Tv, 
+           const VectorStateType& mass_fractions) const;
 
     /**
      * @returns mixture specific enthalpy, J/kg. Assumes thermal equilibrium
      * of translational/rotational and vivbrational/electronic temperature.
      */
-    template<typename StateType>
-    StateType h_tot (const StateType T, const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    h_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+           const VectorStateType& mass_fractions) const;
       
     /**
      * @returns species total internal energy, J/kg.
@@ -225,8 +233,14 @@ namespace Antioch
     /**
      * @returns mixture total internal energy, J/kg.
      */
-    template<typename StateType>
-    StateType e_tot (const StateType T, const StateType Tv, const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    e_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+           const typename Antioch::value_type<VectorStateType>::type Tv, 
+           const VectorStateType& mass_fractions) const;
       
     /**
      * @returns species total internal energy, J/kg.  Assumes thermal equilibrium
@@ -239,9 +253,14 @@ namespace Antioch
      * @returns mixture total internal energy, J/kg.  Assumes thermal equilibrium
      * of translational/rotational and vivbrational/electronic temperature.
      */
-    template<typename StateType>
-    StateType e_tot (const StateType T, const std::vector<StateType>& mass_fractions) const;
-      
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    e_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+           const VectorStateType& mass_fractions) const;
+
     /**
      * @returns species translational/rotational energy, J/kg.
      */
@@ -251,8 +270,13 @@ namespace Antioch
     /**
      * @returns mixture translational/rotational energy, J/kg.
      */
-    template<typename StateType>
-    StateType e_tr (const StateType T, const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    e_tr (const typename Antioch::value_type<VectorStateType>::type T, 
+          const VectorStateType& mass_fractions) const;
 
     /**
      * @returns species vibrational energy, J/kg.
@@ -263,8 +287,13 @@ namespace Antioch
     /**
      * @returns mixture vibrational energy, J/kg.
      */
-    template<typename StateType>
-    StateType e_vib (const StateType Tv, const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    e_vib (const typename Antioch::value_type<VectorStateType>::type Tv, 
+           const VectorStateType& mass_fractions) const;
 
     /**
      * @returns species electronic energy, J/kg.
@@ -275,8 +304,13 @@ namespace Antioch
     /**
      * @returns mixture electronic energy, J/kg.
      */
-    template<typename StateType>
-    StateType e_el (const StateType Te, const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    e_el (const typename Antioch::value_type<VectorStateType>::type Te, 
+          const VectorStateType& mass_fractions) const;
       
     /**
      * @returns species vibrational/electronic energy, J/kg.
@@ -287,8 +321,13 @@ namespace Antioch
     /**
      * @returns mixture vibrational/electronic energy, J/kg.
      */
-    template<typename StateType>
-    StateType e_ve (const StateType Tv, const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    e_ve (const typename Antioch::value_type<VectorStateType>::type Te, 
+          const VectorStateType& mass_fractions) const;
 
     /**
      * @returns the minimum valid mixture vibrational/electronic energy, J/kg.
@@ -305,9 +344,11 @@ namespace Antioch
      * e_ve()) and specific heat (same as cv_ve()), calculated
      * together for efficiency.
      */
-    template<typename StateType>
-    void e_and_cv_ve (const StateType Tv, const std::vector<StateType>& mass_fractions,
-                      StateType &e_ve, StateType &cv_ve) const;
+    template<typename VectorStateType>
+    void e_and_cv_ve (const typename Antioch::value_type<VectorStateType>::type Tv, 
+                      const VectorStateType& mass_fractions,
+                      typename Antioch::value_type<VectorStateType>::type &e_ve, 
+                      typename Antioch::value_type<VectorStateType>::type &cv_ve) const;
       
     /**
      * @returns species formation energy, J/kg.
@@ -317,8 +358,12 @@ namespace Antioch
     /**
      * @returns mixture formation energy, J/kg.
      */
-    template<typename StateType>
-    StateType e_0 (const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    e_0 (const VectorStateType& mass_fractions) const;
       
     /**
      * Computes the mixture vibrational temperature (K) from input
@@ -332,9 +377,14 @@ namespace Antioch
      * Computes the mixture temperature (K) from input
      * total energy per unit mass (J/kg).
      */
-    template<typename StateType>
-    StateType T_from_e_tot (const StateType e_tot, const std::vector<StateType>& mass_fractions,
-                            StateType T = -1.) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    T_from_e_tot (const typename Antioch::value_type<VectorStateType>::type e_tot, 
+                  const VectorStateType& mass_fractions,
+                  typename Antioch::value_type<VectorStateType>::type T = -1.) const;
       
     /**
      * Computes the mixture temperature (K) from input
@@ -387,7 +437,7 @@ namespace Antioch
   StatMechThermodynamics<CoeffType>::StatMechThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture )
     : _chem_mixture(chem_mixture)
   {
-    /*! \todo Read all necessary data */
+    // NOP
   }
 
   template<typename CoeffType>
@@ -643,13 +693,18 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::h_tot (const StateType T, 
-                                                      const StateType Tv,
-                                                      const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::h_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+                                            const typename Antioch::value_type<VectorStateType>::type Tv, 
+                                            const VectorStateType& mass_fractions) const
   {
-    StateType h_tot = mass_fractions[0]*this->h_tot(0, T, Tv);
+    typename Antioch::value_type<VectorStateType>::type
+      h_tot = mass_fractions[0]*this->h_tot(0, T, Tv);
 
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
       {
@@ -660,10 +715,14 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::h_tot (const StateType T,
-                                                      const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::h_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+                                            const VectorStateType& mass_fractions) const
   {
     return this->h_tot(T, T, mass_fractions);
   }
@@ -680,11 +739,15 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::e_tot (const StateType T, 
-                                                      const StateType Tv,
-                                                      const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::e_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+                                            const typename Antioch::value_type<VectorStateType>::type Tv, 
+                                            const VectorStateType& mass_fractions) const
   {
     return (this->e_tr(T, mass_fractions) + this->e_ve(Tv, mass_fractions) + this->e_0(mass_fractions));
   }
@@ -699,10 +762,14 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::e_tot (const StateType T,
-                                                      const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::e_tot (const typename Antioch::value_type<VectorStateType>::type T, 
+                                            const VectorStateType& mass_fractions) const
   {
     return this->e_tot(T, T, mass_fractions);
   }
@@ -717,12 +784,17 @@ namespace Antioch
   }
       
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::e_tr (const StateType T,
-                                                     const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::e_tr (const typename Antioch::value_type<VectorStateType>::type T, 
+                                           const VectorStateType& mass_fractions) const
   {
-    StateType e_tr = mass_fractions[0]*this->e_tr(0, T);
+    typename Antioch::value_type<VectorStateType>::type
+      e_tr = mass_fractions[0]*this->e_tr(0, T);
 
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
       {
@@ -756,12 +828,17 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::e_vib (const StateType Tv,
-                                                      const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::e_vib (const typename Antioch::value_type<VectorStateType>::type Tv, 
+                                            const VectorStateType& mass_fractions) const
   {
-    StateType e_vib = mass_fractions[0]*this->e_vib(0, Tv);
+    typename Antioch::value_type<VectorStateType>::type
+      e_vib = mass_fractions[0]*this->e_vib(0, Tv);
 
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
       {
@@ -800,11 +877,17 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::e_el (const StateType Te, const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::e_el (const typename Antioch::value_type<VectorStateType>::type Te, 
+                                           const VectorStateType& mass_fractions) const
   {
-    StateType e_el = mass_fractions[0]*this->e_el(0, Te);
+    typename Antioch::value_type<VectorStateType>::type
+      e_el = mass_fractions[0]*this->e_el(0, Te);
 
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
       {
@@ -824,10 +907,14 @@ namespace Antioch
   }
       
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::e_ve (const StateType Tv,
-                                                     const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::e_ve (const typename Antioch::value_type<VectorStateType>::type Tv, 
+                                           const VectorStateType& mass_fractions) const
   {
     return (this->e_vib(Tv,mass_fractions) + this->e_el(Tv,mass_fractions));
   }
@@ -840,12 +927,12 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  void StatMechThermodynamics<CoeffType>::e_and_cv_ve (const StateType Tv,
-                                                       const std::vector<StateType>& mass_fractions,
-                                                       StateType &e_ve, 
-                                                       StateType &cv_ve) const
+  void StatMechThermodynamics<CoeffType>::e_and_cv_ve (const typename Antioch::value_type<VectorStateType>::type Tv, 
+                                                       const VectorStateType& mass_fractions,
+                                                       typename Antioch::value_type<VectorStateType>::type &e_ve, 
+                                                       typename Antioch::value_type<VectorStateType>::type &cv_ve) const
   {
     e_ve  = this->e_ve (Tv, mass_fractions);
     cv_ve = this->cv_ve(Tv, mass_fractions);
@@ -860,11 +947,16 @@ namespace Antioch
   }
       
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::e_0 (const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::e_0 (const VectorStateType& mass_fractions) const
   {
-    StateType e_0 = mass_fractions[0]*this->e_0(0);
+    typename Antioch::value_type<VectorStateType>::type
+      e_0 = mass_fractions[0]*this->e_0(0);
     
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
       {
@@ -885,19 +977,27 @@ namespace Antioch
   }
       
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::T_from_e_tot (const StateType e_tot, 
-                                                             const std::vector<StateType>& mass_fractions,
-                                                             StateType T ) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::T_from_e_tot (const typename Antioch::value_type<VectorStateType>::type e_tot, 
+                                                   const VectorStateType& mass_fractions,
+                                                   typename Antioch::value_type<VectorStateType>::type T) const
   {
+    typedef typename Antioch::value_type<VectorStateType>::type StateType;
+
     // Cache the translational/rotational specific heat - this will be used repeatedly 
     // and involves (2*NS-1) flops to compute, and since this has no functional 
     // dependence on temperature it will not change throughout the Newton iteration.
-    const StateType Cv_tr = this->cv_tr(mass_fractions);
+    const typename Antioch::value_type<VectorStateType>::type
+      Cv_tr = this->cv_tr(mass_fractions);
 
     // Similarly for mixture formation energy
-    const StateType E_0 = this->e_0(mass_fractions);
+    const typename Antioch::value_type<VectorStateType>::type
+      E_0 = this->e_0(mass_fractions);
 
     // if the user does not provide an initial guess for the temperature
     // assume it is all in translation/rotation to compute a starting value.
@@ -916,7 +1016,7 @@ namespace Antioch
       }
     
     // compute the translational/rotational temperature of the mixture using Newton-Rhapson iteration
-    StateType delta_T = std::numeric_limits<StateType>::max();
+    CoeffType delta_T = std::numeric_limits<StateType>::max();
     const unsigned int max_iterations = 100;
 
     const CoeffType dT_reltol= std::numeric_limits<CoeffType>::epsilon() * 100;
@@ -933,7 +1033,9 @@ namespace Antioch
 	
 	// compute the residual, defined as the mismatch between the input e_tot and
 	// the value corresponding to the current T iterate
-        StateType Re = 0., dRevdT = 0.;
+        typename Antioch::value_type<VectorStateType>::type
+          Re = 0., dRevdT = 0.;
+        
         this->e_and_cv_ve(T, mass_fractions, Re, dRevdT);
         Re += this->e_tr(T, mass_fractions) + E_0 - e_tot;
         dRevdT += Cv_tr;
