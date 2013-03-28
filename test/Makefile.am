@@ -22,6 +22,10 @@ check_PROGRAMS += eucken_thermal_cond_unit
 check_PROGRAMS += wilke_transport_unit
 check_PROGRAMS += constant_lewis_unit
 
+if ANTIOCH_ENABLE_EIGEN
+check_PROGRAMS += stat_mech_thermo_unit_eigen
+endif
+
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
@@ -56,6 +60,10 @@ eucken_thermal_cond_unit_SOURCES = eucken_thermal_cond_unit.C
 wilke_transport_unit_SOURCES = wilke_transport_unit.C
 constant_lewis_unit_SOURCES = constant_lewis_unit.C
 
+if ANTIOCH_ENABLE_EIGEN
+stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
+endif
+
 #Define tests to actually be run
 TESTS  =
 TESTS += chem_mixture_unit
@@ -78,6 +86,11 @@ TESTS += stat_mech_thermo_unit
 TESTS += eucken_thermal_cond_unit
 TESTS += wilke_transport_unit
 TESTS += constant_lewis_unit
+
+if ANTIOCH_ENABLE_EIGEN
+TESTS += stat_mech_thermo_unit_eigen
+endif
+
 
 if CODE_COVERAGE_ENABLED
   CLEANFILES = *.gcda *.gcno

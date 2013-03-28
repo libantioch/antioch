@@ -89,8 +89,15 @@ namespace Antioch
      * @returns mixture translational/rotational specific heat at
      * constant volume.
      */
-    template<typename StateType>
-    StateType cv_tr (const std::vector<StateType>& mass_fractions) const;
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type 
+    >::type
+    cv_tr (const VectorStateType& mass_fractions) const;
+
+    // template<typename StateType>
+    // StateType cv_tr (const std::vector<StateType>& mass_fractions) const;
       
     /**
      * @returns species vibrational specific heat
@@ -385,11 +392,16 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  template<typename StateType>
+  template<typename VectorStateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::cv_tr (const std::vector<StateType>& mass_fractions) const
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type 
+  >::type
+  StatMechThermodynamics<CoeffType>::cv_tr (const VectorStateType& mass_fractions) const
   {
-    StateType cv_tr = mass_fractions[0]*this->cv_tr(0);
+    typename Antioch::value_type<VectorStateType>::type 
+      cv_tr = mass_fractions[0]*this->cv_tr(0);
 
     for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
       {

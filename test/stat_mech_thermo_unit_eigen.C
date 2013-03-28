@@ -26,12 +26,23 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+
+// This source file shouldn't get built if eigen wasn't detected at
+// configure, but protect anyway.
+#ifdef ANTIOCH_HAVE_EIGEN
+
 // C++
 #include <cmath>
 #include <limits>
 
+// Eigen
+#include <Eigen/Core>
+
 // Antioch
 #include "antioch/vector_utils.h"
+#include "antioch/eigen_utils.h"
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
@@ -57,6 +68,10 @@ bool test_zero(const Scalar val, const Scalar tol)
 template <typename Scalar>
 int test_cv_tr()
 {
+
+  // Convenience 
+  typedef Eigen::Matrix<Scalar, Eigen::Dynamic, 1, Eigen::ColMajor> VectorXr;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -72,7 +87,7 @@ int test_cv_tr()
   Antioch::StatMechThermodynamics<Scalar> sm_thermo( chem_mixture );
 
   // Mass fractions
-  std::vector<Scalar> mass_fractions( 5, 0.2 );
+  VectorXr mass_fractions(n_species);
   mass_fractions[0] = 0.5;
   mass_fractions[1] = 0.2;
   mass_fractions[2] = 0.1;
@@ -631,3 +646,10 @@ int main()
 
   return ierr;
 }
+
+#else // don't have eigen
+int main()
+{
+  return 0; // NOP
+}
+#endif // ANTIOCH_HAVE_EIGEN
