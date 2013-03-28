@@ -124,8 +124,9 @@ namespace Antioch
 		 const StateType mass_fraction ) const;
 
     //! All species mole fractions
-    template<typename StateType, typename VectorStateType>
-    void X( StateType M, const VectorStateType& mass_fractions, 
+    template<typename VectorStateType>
+    void X( typename Antioch::value_type<VectorStateType>::type M,
+	    const VectorStateType& mass_fractions, 
 	    VectorStateType& mole_fractions ) const;
 
     //! Species molar density
@@ -373,12 +374,15 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType, typename VectorStateType>
+  template<typename VectorStateType>
   inline
-  void ChemicalMixture<CoeffType>::X( StateType M,
+  void ChemicalMixture<CoeffType>::X( typename Antioch::value_type<VectorStateType>::type M,
 				      const VectorStateType& mass_fractions, 
 				      VectorStateType& mole_fractions ) const
   {
+    typedef typename 
+      Antioch::value_type<VectorStateType>::type StateType;
+
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
 
     mole_fractions.resize( mass_fractions.size() );
