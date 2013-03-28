@@ -55,6 +55,10 @@ install-data-hook:
           done ; \
 	fi
 
+# Install config file
+BUILT_SOURCES = antioch_config.h
+include_HEADERS	= antioch_config.h
+
 # Additional files to be deleted by 'make distclean'
 DISTCLEANFILES  = _configs.sed
 DISTCLEANFILES += antioch_config.h
