@@ -38,16 +38,16 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
-// Declare metaprogramming overloads before they're used
-#include "antioch/eigen_utils_decl.h"
-#include "antioch/metaphysicl_utils_decl.h"
-#include "antioch/valarray_utils_decl.h"
-
 // C++
 #include <cmath>
 #include <limits>
 
 // Antioch
+// Declare metaprogramming overloads before they're used
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
+
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/physical_constants.h"
