@@ -91,7 +91,6 @@ int tester()
   Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
 
   //const Scalar P = 100000.0;
-  const std::vector<Scalar> mass_fractions( 5, 0.2 );
   const Scalar T1 = 190.0;
   const Scalar T2 = 1500.0;
   const Scalar T3 = 10000.0;
@@ -101,10 +100,6 @@ int tester()
   const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
   const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
   const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
-  /*
-    const Scalar R_exact = mass_fractions[0]*R_N2 + mass_fractions[1]*R_O2 + mass_fractions[2]*R_N +
-    mass_fractions[3]*R_O + mass_fractions[4]*R_NO;
-  */
 
   int return_flag = 0;
 
