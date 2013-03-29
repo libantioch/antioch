@@ -29,6 +29,8 @@
 #ifndef ANTIOCH_METAPROGRAMMING_H
 #define ANTIOCH_METAPROGRAMMING_H
 
+#include <cstddef> // For size_t
+
 #include "antioch/metaprogramming_decl.h"
 
 namespace Antioch
