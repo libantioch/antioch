@@ -29,19 +29,19 @@
 #ifndef ANTIOCH_CHEMICAL_MIXTURE_H
 #define ANTIOCH_CHEMICAL_MIXTURE_H
 
-// C++
-#include <vector>
-#include <map>
-#include <string>
-#include <algorithm>
-#include <iomanip>
-
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/species_ascii_parsing.h"
 #include "antioch/species_enum.h"
+
+// C++
+#include <vector>
+#include <map>
+#include <string>
+#include <algorithm>
+#include <iomanip>
 
 namespace Antioch
 {

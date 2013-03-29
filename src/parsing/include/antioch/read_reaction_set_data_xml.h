@@ -29,15 +29,15 @@
 #ifndef ANTIOCH_REACTION_SET_DATA_XML_H
 #define ANTIOCH_REACTION_SET_DATA_XML_H
 
-// C++
-#include <string>
+// Antioch
+#include "antioch/string_utils.h"
+#include "antioch/reaction_set.h"
 
 // XML
 #include "antioch/tinyxml2.h"
 
-// Antioch
-#include "antioch/string_utils.h"
-#include "antioch/reaction_set.h"
+// C++
+#include <string>
 
 namespace Antioch
 {

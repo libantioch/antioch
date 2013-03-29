@@ -29,14 +29,15 @@
 #ifndef ANTIOCH_SPECIES_ASCII_PARSING_H
 #define ANTIOCH_SPECIES_ASCII_PARSING_H
 
-// C++
-#include <sstream>
-
 // Antioch
 #include "antioch/input_utils.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
 #include "antioch/species_enum.h"
+
+// C++
+#include <algorithm> // std::search_n
+#include <sstream>
 
 namespace Antioch
 {

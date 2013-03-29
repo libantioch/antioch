@@ -29,10 +29,12 @@
 #ifndef ANTIOCH_VALARRAY_UTILS_DECL_H
 #define ANTIOCH_VALARRAY_UTILS_DECL_H
 
+// Antioch
+#include "antioch/metaprogramming_decl.h"
+
+// C++
 #include <iostream>
 #include <valarray>
-
-#include "antioch/metaprogramming_decl.h"
 
 // Add some overloads that are blatantly missing from the std:: namespace
 

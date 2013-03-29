@@ -29,12 +29,12 @@
 #ifndef ANTIOCH_SUTHERLAND_PARSING_H
 #define ANTIOCH_SUTHERLAND_PARSING_H
 
-// C++
-#include <iostream>
-
 // Antioch
 #include "antioch/sutherland_viscosity.h"
 #include "antioch/mixture_viscosity.h"
+
+// C++
+#include <iostream>
 
 namespace Antioch
 {

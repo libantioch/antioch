@@ -29,11 +29,6 @@
 #ifndef ANTIOCH_CEA_THERMO_H
 #define ANTIOCH_CEA_THERMO_H
 
-// C++
-#include <iomanip>
-#include <vector>
-#include <cmath>
-
 // Antioch
 #include "antioch/cea_curve_fit.h"
 #include "antioch/cea_thermo_ascii_parsing.h"
@@ -41,6 +36,11 @@
 #include "antioch/chemical_species.h"
 #include "antioch/input_utils.h"
 #include "antioch/metaprogramming.h"
+
+// C++
+#include <iomanip>
+#include <vector>
+#include <cmath>
 
 namespace Antioch
 {

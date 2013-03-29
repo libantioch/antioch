@@ -29,13 +29,13 @@
 #ifndef ANTIOCH_STRING_UTILS_H
 #define ANTIOCH_STRING_UTILS_H
 
+// Antioch
+#include "antioch/antioch_asserts.h"
+
 // C++
 #include <string>
 #include <vector>
 #include <cstdlib> // atoi
-
-// Antioch
-#include "antioch/antioch_asserts.h"
 
 namespace Antioch
 {

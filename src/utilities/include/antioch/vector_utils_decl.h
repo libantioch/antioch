@@ -29,10 +29,12 @@
 #ifndef ANTIOCH_VECTOR_UTILS_DECL_H
 #define ANTIOCH_VECTOR_UTILS_DECL_H
 
+// Antioch
+#include "antioch/metaprogramming_decl.h"
+
+// C++
 #include <iostream>
 #include <vector>
-
-#include "antioch/metaprogramming_decl.h"
 
 // Add some overloads
 

@@ -29,13 +29,13 @@
 #ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
 #define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
 
-// C++
-#include <iostream>
-#include <vector>
-
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/input_utils.h"
+
+// C++
+#include <iostream>
+#include <vector>
 
 namespace Antioch
 {

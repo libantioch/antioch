@@ -29,12 +29,12 @@
 #ifndef ANTIOCH_MIXTURE_VISCOSITY_H
 #define ANTIOCH_MIXTURE_VISCOSITY_H
 
+// Antioch
+#include "antioch/chemical_mixture.h"
+
 // C++
 #include <string>
 #include <vector>
-
-// Antioch
-#include "antioch/chemical_mixture.h"
 
 namespace Antioch
 {

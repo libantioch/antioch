@@ -29,17 +29,17 @@
 #ifndef ANTIOCH_STAT_MECH_THERMO_H
 #define ANTIOCH_STAT_MECH_THERMO_H
 
-// C++
-#include <iomanip>
-#include <vector>
-#include <cmath>
-#include <limits>
-
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/input_utils.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/antioch_exceptions.h"
+
+// C++
+#include <iomanip>
+#include <vector>
+#include <cmath>
+#include <limits>
 
 namespace Antioch
 {

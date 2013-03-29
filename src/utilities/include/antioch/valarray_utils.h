@@ -29,8 +29,10 @@
 #ifndef ANTIOCH_VALARRAY_UTILS_H
 #define ANTIOCH_VALARRAY_UTILS_H
 
+// Antioch
 #include "antioch/metaprogramming.h"
 
+// C++
 #include <cmath>
 #include <iostream>
 #include <valarray>

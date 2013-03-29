@@ -29,13 +29,13 @@
 #ifndef ANTIOCH_BLOTTNER_VISCOSITY_H
 #define ANTIOCH_BLOTTNER_VISCOSITY_H
 
+// Antioch
+#include "antioch/antioch_asserts.h"
+
 // C++
 #include <cmath>
 #include <vector>
 #include <iostream>
-
-// Antioch
-#include "antioch/antioch_asserts.h"
 
 namespace Antioch
 {

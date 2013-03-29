@@ -29,13 +29,12 @@
 #ifndef ANTIOCH_KINETICS_EVALUATOR_H
 #define ANTIOCH_KINETICS_EVALUATOR_H
 
-// C++
-#include <vector>
-
 // Antioch
 #include "antioch/metaprogramming.h"
-
 #include "antioch/reaction.h"
+
+// C++
+#include <vector>
 
 namespace Antioch
 {

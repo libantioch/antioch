@@ -29,14 +29,14 @@
 #ifndef ANTIOCH_CHEMICAL_SPECIES_H
 #define ANTIOCH_CHEMICAL_SPECIES_H
 
-// C++ includes
-#include <string>
-#include <vector>
-#include <iostream>
-
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/physical_constants.h"
+
+// C++
+#include <string>
+#include <vector>
+#include <iostream>
 
 namespace Antioch
 {

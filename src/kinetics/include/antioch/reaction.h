@@ -29,15 +29,15 @@
 #ifndef ANTIOCH_REACTION_H
 #define ANTIOCH_REACTION_H
 
-//C++
-#include <string>
-#include <vector>
-#include <iostream>
-
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/reaction_enum.h"
 #include "antioch/arrhenius_rate.h"
+
+//C++
+#include <string>
+#include <vector>
+#include <iostream>
 
 namespace Antioch
 {

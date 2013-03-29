@@ -29,13 +29,13 @@
 #ifndef ANTIOCH_REACTION_SET_H
 #define ANTIOCH_REACTION_SET_H
 
-// C++
-#include <iostream>
-#include <vector>
-
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction.h"
+
+// C++
+#include <iostream>
+#include <vector>
 
 namespace Antioch
 {

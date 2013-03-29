@@ -29,11 +29,11 @@
 #ifndef ANTIOCH_CEA_CURVE_FIT_H
 #define ANTIOCH_CEA_CURVE_FIT_H
 
-// C++
-#include <vector>
-
 // Antioch
 #include "antioch/antioch_asserts.h"
+
+// C++
+#include <vector>
 
 namespace Antioch
 {
