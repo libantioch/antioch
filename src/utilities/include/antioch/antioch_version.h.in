@@ -44,9 +44,6 @@
 #define ANTIOCH_CXX            "@CXX@"
 #define ANTIOCH_CXXFLAGS       "@CXXFLAGS@"
 
-#include <iostream>
-#include <iomanip>
-
 namespace Antioch
 {
   void antioch_version_stdout();
