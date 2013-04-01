@@ -455,7 +455,6 @@ int test_cv_el()
   const Scalar Te = 1000.0;
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 7;
-  const Scalar ztol = std::numeric_limits<Scalar>::epsilon();
 
   Scalar cv_el_mix_true = 0.0;
 
