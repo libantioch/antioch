@@ -70,9 +70,9 @@ namespace Antioch
 
     //! Compute the rates of progress for each reaction
     template <typename StateType, typename VectorStateType, typename VectorReactionsType>
-    void compute_reaction_rates( const StateType T,
-				 const StateType rho,
-				 const StateType R_mix,
+    void compute_reaction_rates( const StateType& T,
+				 const StateType& rho,
+				 const StateType& R_mix,
 				 const VectorStateType& mass_fractions,
 				 const VectorStateType& molar_densities,
 				 const VectorStateType& h_RT_minus_s_R,
@@ -161,9 +161,9 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType, typename VectorReactionsType>
   inline
-  void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType T,
-							const StateType rho,
-							const StateType R_mix,
+  void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType& T,
+							const StateType& rho,
+							const StateType& R_mix,
 							const VectorStateType& mass_fractions,
 							const VectorStateType& molar_densities,
 							const VectorStateType& h_RT_minus_s_R,

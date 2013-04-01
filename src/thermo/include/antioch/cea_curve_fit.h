@@ -55,7 +55,7 @@ namespace Antioch
       [200-1,000], [1,000-6,000], [6,000-20,000] K
      */
     template <typename StateType>
-    unsigned int interval(const StateType T) const;
+    unsigned int interval(const StateType& T) const;
 
     
     //! @returns a pointer to the coefficients in the interval specified.
@@ -103,7 +103,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  unsigned int CEACurveFit<CoeffType>::interval(const StateType T) const
+  unsigned int CEACurveFit<CoeffType>::interval(const StateType& T) const
   {
     unsigned int interval = -1;
 

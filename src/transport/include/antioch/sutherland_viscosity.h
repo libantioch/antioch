@@ -51,7 +51,7 @@ namespace Antioch
     ~SutherlandViscosity();
 
     template <typename StateType>
-    StateType operator()( StateType T ) const;
+    StateType operator()( StateType& T ) const;
     
     void reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref );
     void reset_coeffs( const std::vector<CoeffType> coeffs );
@@ -113,7 +113,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType SutherlandViscosity<CoeffType>::operator()( StateType T ) const
+  StateType SutherlandViscosity<CoeffType>::operator()( StateType& T ) const
   {
     using std::pow;
     return _mu_ref*pow(T,1.5)/(T+_T_ref);

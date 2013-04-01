@@ -62,9 +62,9 @@ namespace Antioch
 
     //! Compute species production/destruction rates per unit volume in \f$ \left(kg/sec/m^3\right)\f$
     template <typename StateType, typename VectorStateType>
-    void compute_mass_sources ( const StateType T,
-				const StateType rho,
-				const StateType R_mix,
+    void compute_mass_sources ( const StateType& T,
+				const StateType& rho,
+				const StateType& R_mix,
 				const VectorStateType& mass_fractions,
 				const VectorStateType& molar_densities,
 				const VectorStateType& h_RT_minus_s_R,
@@ -125,9 +125,9 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void KineticsEvaluator<CoeffType>::compute_mass_sources( const StateType T,
-							   const StateType rho,
-							   const StateType R_mix,
+  void KineticsEvaluator<CoeffType>::compute_mass_sources( const StateType& T,
+							   const StateType& rho,
+							   const StateType& R_mix,
 							   const VectorStateType& mass_fractions,
 							   const VectorStateType& molar_densities,
 							   const VectorStateType& h_RT_minus_s_R,

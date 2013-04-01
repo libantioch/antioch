@@ -51,15 +51,15 @@ namespace Antioch
     ~WilkeEvaluator();
 
     template <typename StateType, typename VectorStateType>
-    StateType mu( const StateType T,
+    StateType mu( const StateType& T,
 		  const VectorStateType& mass_fractions ) const;
 
     template <typename StateType, typename VectorStateType>
-    StateType k( const StateType T,
+    StateType k( const StateType& T,
 		 const VectorStateType& mass_fractions ) const;
 
     template <typename StateType, typename VectorStateType>
-    void mu_and_k( const StateType T,
+    void mu_and_k( const StateType& T,
 		   const VectorStateType& mass_fractions,
 		   StateType& mu, StateType& k ) const;
 
@@ -67,7 +67,7 @@ namespace Antioch
     /*! Populates species viscosities and the intermediate \chi variable
         needed for Wilke's mixing rule. */
     template <typename StateType, typename VectorStateType>
-    void compute_mu_chi( const StateType T,
+    void compute_mu_chi( const StateType& T,
 			 const VectorStateType& mass_fractions,
 			 VectorStateType& mu,
 			 VectorStateType& chi ) const;
@@ -114,7 +114,7 @@ namespace Antioch
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu( const StateType T,
+  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu( const StateType& T,
 									 const VectorStateType& mass_fractions ) const
   {
     StateType mu_mix = zero_clone(T);
@@ -136,7 +136,7 @@ namespace Antioch
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::k( const StateType T,
+  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::k( const StateType& T,
 									const VectorStateType& mass_fractions ) const
   {
     antioch_assert_equal_to(mass_fractions.size(), _mixture.chem_mixture().n_species());
@@ -165,7 +165,7 @@ namespace Antioch
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu_and_k( const StateType T,
+  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu_and_k( const StateType& T,
 									  const VectorStateType& mass_fractions,
 									  StateType& mu_mix,
                                                                           StateType& k_mix ) const
@@ -196,7 +196,7 @@ namespace Antioch
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_mu_chi( const StateType T,
+  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_mu_chi( const StateType& T,
 										const VectorStateType& mass_fractions,
 										VectorStateType& mu,
 										VectorStateType& chi ) const

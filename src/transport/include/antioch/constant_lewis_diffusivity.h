@@ -42,7 +42,7 @@ namespace Antioch
     ~ConstantLewisDiffusivity();
     
     template<typename StateType>
-    StateType D( const StateType rho, const StateType cp, const StateType k ) const;
+    StateType D( const StateType& rho, const StateType& cp, const StateType& k ) const;
 
   protected:
 
@@ -65,9 +65,9 @@ namespace Antioch
 
   template<typename CoeffType>
   template<typename StateType>
-  StateType ConstantLewisDiffusivity<CoeffType>::D( const StateType rho,
-                                                    const StateType cp,
-                                                    const StateType k ) const
+  StateType ConstantLewisDiffusivity<CoeffType>::D( const StateType& rho,
+                                                    const StateType& cp,
+                                                    const StateType& k ) const
   {
     return _Le*k/(rho*cp);
   }

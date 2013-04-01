@@ -62,15 +62,15 @@ namespace Antioch
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
-    StateType operator()(const StateType T) const;
+    StateType operator()(const StateType& T) const;
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
-    StateType derivative( const StateType T ) const;
+    StateType derivative( const StateType& T ) const;
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
-    void rate_and_derivative(const StateType T, StateType& rate, StateType& drate_dT) const;
+    void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -166,7 +166,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType ArrheniusRate<CoeffType>::operator()(const StateType T) const
+  StateType ArrheniusRate<CoeffType>::operator()(const StateType& T) const
   {
     using std::pow;
     using std::exp;
@@ -176,7 +176,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType ArrheniusRate<CoeffType>::derivative( const StateType T ) const
+  StateType ArrheniusRate<CoeffType>::derivative( const StateType& T ) const
   {
     return (*this)(T)/T*(_eta + _Ea/T);
   }
@@ -184,7 +184,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  void ArrheniusRate<CoeffType>::rate_and_derivative( const StateType T,
+  void ArrheniusRate<CoeffType>::rate_and_derivative( const StateType& T,
 						      StateType& rate,
 						      StateType& drate_dT) const
   {

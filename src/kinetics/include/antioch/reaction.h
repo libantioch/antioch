@@ -127,13 +127,13 @@ namespace Antioch
     
     //!
     template <typename StateType, typename VectorStateType>
-    StateType equilibrium_constant( const StateType P0_RT,
+    StateType equilibrium_constant( const StateType& P0_RT,
 				    const VectorStateType& h_RT_minus_s_R ) const;
 
     //!
     template <typename StateType, typename VectorStateType>
-    void equilibrium_constant_and_derivative( const StateType T,
-					      const StateType P0_RT,
+    void equilibrium_constant_and_derivative( const StateType& T,
+					      const StateType& P0_RT,
 					      const VectorStateType& h_RT_minus_s_R,
 					      const VectorStateType& ddT_h_RT_minus_s_R,
 					      StateType& keq,
@@ -142,17 +142,17 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_rate_of_progress( const VectorStateType& molar_densities,
-					const StateType kfwd, 
-					const StateType kbkwd ) const;
+					const StateType& kfwd, 
+					const StateType& kbkwd ) const;
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_rate_of_progress_and_derivatives( const VectorStateType& molar_densities,
 						   const VectorStateType& molar_mass,
-						   const StateType kfwd,  
-						   const StateType dkfwd_dT, 
-						   const StateType kbkwd,
-						   const StateType dkbkwd_dT,
+						   const StateType& kfwd,  
+						   const StateType& dkfwd_dT, 
+						   const StateType& kbkwd,
+						   const StateType& dkbkwd_dT,
 						   StateType& Rfwd,
 						   StateType& dRfwd_dT,
 						   VectorStateType& dRfwd_drho, 
@@ -451,7 +451,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  StateType Reaction<CoeffType>::equilibrium_constant( const StateType P0_RT,
+  StateType Reaction<CoeffType>::equilibrium_constant( const StateType& P0_RT,
 						       const VectorStateType& h_RT_minus_s_R ) const
   {
     antioch_assert( this->initialized() );
@@ -477,8 +477,8 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void Reaction<CoeffType>::equilibrium_constant_and_derivative( const StateType T,
-								 const StateType P0_RT,
+  void Reaction<CoeffType>::equilibrium_constant_and_derivative( const StateType& T,
+								 const StateType& P0_RT,
 								 const VectorStateType& h_RT_minus_s_R,
 								 const VectorStateType& ddT_h_RT_minus_s_R,
 								 StateType& keq,
@@ -513,8 +513,8 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
-							   const StateType kfwd, 
-							   const StateType kbkwd ) const
+							   const StateType& kfwd, 
+							   const StateType& kbkwd ) const
   {
     using std::pow;
 
@@ -592,10 +592,10 @@ namespace Antioch
   inline
   void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
 								      const VectorStateType &molar_mass,
-								      const StateType kfwd, 
-								      const StateType dkfwd_dT,
-								      const StateType kbkwd,
-								      const StateType dkbkwd_dT,
+								      const StateType& kfwd, 
+								      const StateType& dkfwd_dT,
+								      const StateType& kbkwd,
+								      const StateType& dkbkwd_dT,
 								      StateType& Rfwd,
 								      StateType& dRfwd_dT,
 								      VectorStateType& dRfwd_drho, 

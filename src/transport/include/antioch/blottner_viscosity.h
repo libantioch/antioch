@@ -51,7 +51,7 @@ namespace Antioch
     ~BlottnerViscosity();
 
     template <typename StateType>
-    StateType operator()( StateType T ) const;
+    StateType operator()( const StateType& T ) const;
     
     void reset_coeffs( const CoeffType a, const CoeffType b, const CoeffType c );
     void reset_coeffs( const std::vector<CoeffType> coeffs );
@@ -116,7 +116,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType BlottnerViscosity<CoeffType>::operator()( StateType T ) const
+  StateType BlottnerViscosity<CoeffType>::operator()( const StateType& T ) const
   {
     using std::log;
     using std::exp;

@@ -40,16 +40,16 @@ namespace Antioch
     ~EuckenThermalConductivity();
 
     template <typename StateType>
-    StateType trans( const unsigned int s, const StateType mu ) const;
+    StateType trans( const unsigned int s, const StateType& mu ) const;
 
     template <typename StateType>
-    StateType rot( const unsigned int s, const StateType mu ) const;
+    StateType rot( const unsigned int s, const StateType& mu ) const;
 
     template <typename StateType>
-    StateType vib( const unsigned int s, const StateType mu, const StateType Tv ) const;
+    StateType vib( const unsigned int s, const StateType& mu, const StateType& Tv ) const;
 
     template <typename StateType>
-    StateType elec( const unsigned int s, const StateType mu, const StateType Te ) const;
+    StateType elec( const unsigned int s, const StateType& mu, const StateType& Te ) const;
 
   protected:
 
@@ -72,7 +72,7 @@ namespace Antioch
 
   template<class ThermoEvaluator>
   template <typename StateType>
-  StateType EuckenThermalConductivity<ThermoEvaluator>::trans( const unsigned int s, const StateType mu ) const
+  StateType EuckenThermalConductivity<ThermoEvaluator>::trans( const unsigned int s, const StateType& mu ) const
   {
     typedef typename Antioch::value_type<StateType>::raw_type raw_type;
     return raw_type(2.5)*mu*_thermo.cv_trans(s);
@@ -80,15 +80,15 @@ namespace Antioch
 
   template<class ThermoEvaluator>
   template <typename StateType>
-  StateType EuckenThermalConductivity<ThermoEvaluator>::rot( const unsigned int s, const StateType mu ) const
+  StateType EuckenThermalConductivity<ThermoEvaluator>::rot( const unsigned int s, const StateType& mu ) const
   {
     return mu*_thermo.cv_rot(s);
   }
 
   template<class ThermoEvaluator>
   template <typename StateType>
-  StateType EuckenThermalConductivity<ThermoEvaluator>::vib( const unsigned int s, const StateType mu,
-                                                             const StateType Tv ) const
+  StateType EuckenThermalConductivity<ThermoEvaluator>::vib( const unsigned int s, const StateType& mu,
+                                                             const StateType& Tv ) const
   {
     /* Note: Cander, "High-temperature effects in hypersonic flight",
              Encyclopedia of Aerospace Engineering, 2010 suggests that
@@ -98,8 +98,8 @@ namespace Antioch
 
   template<class ThermoEvaluator>
   template <typename StateType>
-  StateType EuckenThermalConductivity<ThermoEvaluator>::elec( const unsigned int s, const StateType mu,
-                                                              const StateType Te ) const
+  StateType EuckenThermalConductivity<ThermoEvaluator>::elec( const unsigned int s, const StateType& mu,
+                                                              const StateType& Te ) const
   {
     return mu*_thermo.cv_el(s, Te);
   }

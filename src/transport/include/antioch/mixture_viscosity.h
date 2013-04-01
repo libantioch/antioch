@@ -47,7 +47,7 @@ namespace Antioch
     ~MixtureViscosity();
 
     template <typename StateType>
-    StateType operator()( const unsigned int s, const StateType T ) const;
+    StateType operator()( const unsigned int s, const StateType& T ) const;
 
     void add( const std::string& species_name,
 	      const std::vector<CoeffType>& coeffs );
@@ -122,7 +122,7 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType MixtureViscosity<Viscosity,CoeffType>::operator()( const unsigned int s,
-							       const StateType T ) const
+							       const StateType& T ) const
   {
     antioch_assert_less_equal( s, _species_viscosities.size() );
     antioch_assert( _species_viscosities[s] );

@@ -120,8 +120,8 @@ namespace Antioch
       \f$ w_i = x_i \frac{M_i}{M} \f$ 
     */
     template<typename StateType>
-    StateType X( const unsigned int species, const StateType M,
-		 const StateType mass_fraction ) const;
+    StateType X( const unsigned int species, const StateType& M,
+		 const StateType& mass_fraction ) const;
 
     //! All species mole fractions
     template<typename VectorStateType>
@@ -136,8 +136,8 @@ namespace Antioch
     */
     template<typename StateType>
     StateType molar_density( const unsigned int species,
-			     const StateType rho,
-			     const StateType mass_fraction ) const;
+			     const StateType& rho,
+			     const StateType& mass_fraction ) const;
 
     //! Species molar densities
     /*! 
@@ -145,7 +145,7 @@ namespace Antioch
       compute moles per unit volume for all species
     */
     template<typename StateType, typename VectorStateType>
-    void molar_densities( const StateType rho,
+    void molar_densities( const StateType& rho,
 			  const VectorStateType& mass_fractions,
 			  VectorStateType& molar_densities ) const;
 
@@ -237,8 +237,8 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType ChemicalMixture<CoeffType>::X( const unsigned int species,
-					   const StateType M,
-					   const StateType mass_fraction ) const
+					   const StateType& M,
+					   const StateType& mass_fraction ) const
   {
     return mass_fraction*M/this->M(species);
   }
@@ -247,8 +247,8 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType ChemicalMixture<CoeffType>::molar_density( const unsigned int species,
-						       const StateType rho,
-						       const StateType mass_fraction ) const
+						       const StateType& rho,
+						       const StateType& mass_fraction ) const
   {
     // !\todo Figure out how to make this assert vector-compatible
     // antioch_assert_greater( rho, 0.0 );
@@ -258,7 +258,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void ChemicalMixture<CoeffType>::molar_densities( const StateType rho,
+  void ChemicalMixture<CoeffType>::molar_densities( const StateType& rho,
 						    const VectorStateType& mass_fractions,
 						    VectorStateType& molar_densities ) const
   {
