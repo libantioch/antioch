@@ -139,6 +139,8 @@ namespace Antioch
   StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::k( const StateType T,
 									const VectorStateType& mass_fractions ) const
   {
+    antioch_assert_equal_to(mass_fractions.size(), _mixture.chem_mixture().n_species());
+
     StateType k_mix = zero_clone(T);
 
     VectorStateType mu  = zero_clone(mass_fractions);
@@ -227,12 +229,12 @@ namespace Antioch
        since some StateTypes have a hard time initializing from
        a constant. */
     // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/sqrt(8*(1+Ms/Mr))
-    const StateType dummy = 1.0 + std::sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
+    const StateType dummy = 1 + std::sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
     StateType phi_s = chi[0]*dummy*dummy/_mixture.denominator(0,s);
 
     for(unsigned int r = 1; r < _mixture.chem_mixture().n_species(); r++ )
       {
-	const StateType numerator = 1.0 + std::sqrt(mu[s]/mu[r])*_mixture.Mr_Ms_to_the_one_fourth(r,s);
+	const StateType numerator = 1 + std::sqrt(mu[s]/mu[r])*_mixture.Mr_Ms_to_the_one_fourth(r,s);
 	phi_s += chi[r]*numerator*numerator/_mixture.denominator(r,s);
       }
 
