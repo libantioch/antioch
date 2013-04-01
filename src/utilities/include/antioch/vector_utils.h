@@ -67,6 +67,7 @@ struct value_type<std::vector<T> >
 {
   typedef std::vector<T> container_type;
   typedef T type;
+  typedef typename value_type<T>::raw_type raw_type;
 };
 
 template <typename T>

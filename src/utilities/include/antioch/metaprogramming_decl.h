@@ -58,6 +58,8 @@ namespace Antioch
   struct value_type
   {
     typedef T type;
+
+    typedef T raw_type;
   };
 
   template <typename T>
@@ -69,6 +71,8 @@ namespace Antioch
   struct value_type<const T>
   {
     typedef const typename value_type<T>::type type;
+
+    typedef const typename value_type<T>::raw_type raw_type;
   };
 
   // A function for zero-initializing vectorized numeric types

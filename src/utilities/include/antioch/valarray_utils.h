@@ -102,6 +102,7 @@ struct value_type<std::valarray<T> >
 {
   typedef std::valarray<T> container_type;
   typedef T type;
+  typedef typename value_type<T>::raw_type raw_type;
 };
 
 template <typename T>

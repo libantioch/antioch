@@ -60,6 +60,7 @@ struct value_type<MetaPhysicL::NumberArray<size,T> >
 {
   typedef MetaPhysicL::NumberArray<size,T> container_type;
   typedef T type;
+  typedef typename value_type<T>::raw_type raw_type;
 };
 
 template <std::size_t size, typename T>

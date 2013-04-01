@@ -92,6 +92,7 @@ struct value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCo
   typedef Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> 
     container_type;
   typedef _Scalar type;
+  typedef typename value_type<_Scalar>::raw_type raw_type;
 };
 
 template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
@@ -135,6 +136,7 @@ struct value_type<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxC
   typedef Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> 
     container_type;
   typedef _Scalar type;
+  typedef typename value_type<_Scalar>::raw_type raw_type;
 };
 
 template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
