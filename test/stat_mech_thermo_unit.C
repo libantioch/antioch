@@ -229,8 +229,6 @@ int test_cv_vib()
 
   const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
   const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
   const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
 
   const Scalar th0_N2 = 3.39500e+03; // degeneracy = 1
@@ -436,7 +434,6 @@ int test_cv_el()
   const Scalar Te = 1000.0;
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 7;
-  const Scalar ztol = std::numeric_limits<Scalar>::epsilon();
 
   Scalar cv_el_mix_true = 0.0;
 

@@ -73,12 +73,6 @@ int tester()
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016L;
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0L;
-  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008L;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0L;
-  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008L;
-
   Antioch::WilkeMixture<Scalar> wilke_mixture( chem_mixture );
   
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
@@ -139,8 +133,8 @@ int tester()
   // Currently dummy
   //const Scalar mu_exact = ;
 
-  wilke.mu(T, mass_fractions );
-  wilke.k(T, mass_fractions );
+  Scalar wilke_mu = wilke.mu(T, mass_fractions );
+  Scalar wilke_k = wilke.k(T, mass_fractions );
 
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );
