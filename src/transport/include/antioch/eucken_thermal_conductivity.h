@@ -74,7 +74,8 @@ namespace Antioch
   template <typename StateType>
   StateType EuckenThermalConductivity<ThermoEvaluator>::trans( const unsigned int s, const StateType mu ) const
   {
-    return 2.5*mu*_thermo.cv_trans(s);
+    typedef typename Antioch::value_type<StateType>::raw_type raw_type;
+    return raw_type(2.5)*mu*_thermo.cv_trans(s);
   }
 
   template<class ThermoEvaluator>
