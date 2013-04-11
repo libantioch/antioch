@@ -40,15 +40,11 @@ namespace Antioch
   template <class T>
   struct enable_if_c<false, T> {};
 
+  // True for vector classes with size() methods
   template <typename T>
-  class has_size
+  struct has_size
   {
-    typedef char no;
-    typedef char yes[2];
-    template <class C> static yes& test(char (*)[sizeof(&C::size)]);
-    template <class C> static no& test(...);
-  public:
-    const static bool value = (sizeof(test<T>(0)) == sizeof(yes&));
+    const static bool value = false;
   };
 
   // A class for uniformly assigning third-party vectorized numeric

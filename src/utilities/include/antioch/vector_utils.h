@@ -63,6 +63,12 @@ namespace Antioch
 {
 
 template <typename T>
+struct has_size<std::vector<T> >
+{
+  static const bool value = true;
+};
+
+template <typename T>
 struct value_type<std::vector<T> >
 {
   typedef std::vector<T> container_type;

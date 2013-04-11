@@ -56,6 +56,12 @@ max (const MetaPhysicL::NumberArray<size,T>& in)
 }
 
 template <std::size_t size, typename T>
+struct has_size<MetaPhysicL::NumberArray<size,T> >
+{
+  static const bool value = true;
+};
+
+template <std::size_t size, typename T>
 struct value_type<MetaPhysicL::NumberArray<size,T> >
 {
   typedef MetaPhysicL::NumberArray<size,T> container_type;

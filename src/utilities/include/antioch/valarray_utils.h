@@ -98,6 +98,12 @@ max (const std::valarray<T>& in)
 }
 
 template <typename T>
+struct has_size<std::valarray<T> >
+{
+  static const bool value = true;
+};
+
+template <typename T>
 struct value_type<std::valarray<T> >
 {
   typedef std::valarray<T> container_type;

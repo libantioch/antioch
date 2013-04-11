@@ -52,6 +52,9 @@ namespace Antioch
 {
 
 template <typename T>
+struct has_size<std::vector<T> >;
+
+template <typename T>
 struct value_type<std::vector<T> >;
 
 template <typename T>
