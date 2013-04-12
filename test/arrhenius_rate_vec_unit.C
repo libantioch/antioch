@@ -66,8 +66,8 @@ int vectester(const PairScalars& example)
   T[0] = 1500.1;
   T[1] = 1600.1;
   
-  const Scalar rate_exact0 = Cf*std::pow(1500.1,eta)*std::exp(-Ea/1500.1);
-  const Scalar rate_exact1 = Cf*std::pow(1600.1,eta)*std::exp(-Ea/1600.1);
+  const Scalar rate_exact0 = Cf*std::pow(Scalar(1500.1),eta)*std::exp(-Ea/1500.1);
+  const Scalar rate_exact1 = Cf*std::pow(Scalar(1600.1),eta)*std::exp(-Ea/1600.1);
 
   int return_flag = 0;
 
