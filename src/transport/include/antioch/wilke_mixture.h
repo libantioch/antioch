@@ -85,7 +85,7 @@ namespace Antioch
             const CoeffType Mr = chem_mixture.M(r);
             const CoeffType Ms = chem_mixture.M(s);
 
-            _Mr_Ms_to_the_one_fourth[r][s] = std::pow( Mr/Ms, 0.25 );
+            _Mr_Ms_to_the_one_fourth[r][s] = std::pow( Mr/Ms, CoeffType(0.25) );
             _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
           }
       }
