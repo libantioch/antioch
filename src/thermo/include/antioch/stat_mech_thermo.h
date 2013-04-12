@@ -485,7 +485,9 @@ namespace Antioch
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_rot( const unsigned int species ) const
   {
-    return std::max(this->cv_tr(species) - this->cv_trans(species), CoeffType(0) ); 
+    using std::max;
+
+    return max(this->cv_tr(species) - this->cv_trans(species), CoeffType(0) ); 
   }
 
   template<typename CoeffType>
@@ -521,6 +523,8 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_vib (const unsigned int species, 
                                                        const StateType& Tv) const
   {
+    using std::exp;
+
     // convenience
     const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_v  = chem_species.theta_v();
@@ -537,7 +541,7 @@ namespace Antioch
     for (unsigned int level=0; level<ndg_v.size(); level++)
       {
         typedef typename Antioch::value_type<StateType>::raw_type raw_type;
-        const StateType expval = std::exp(theta_v[level]/Tv);
+        const StateType expval = exp(theta_v[level]/Tv);
         const StateType expvalminusone = expval - raw_type(1);
       
         cv_vib += (static_cast<CoeffType>(ndg_v[level])*
@@ -574,6 +578,8 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_el (const unsigned int species, 
                                                       const StateType& Te) const
   {
+    using std::exp;
+
     // convenience
     const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_e  = chem_species.theta_e();
@@ -601,7 +607,7 @@ namespace Antioch
     for (unsigned int level=0; level<theta_e.size(); level++)
       {
         const StateType 
-          expval = std::exp (-theta_e[level] * Teinv),
+          expval = exp (-theta_e[level] * Teinv),
           den_l  = static_cast<raw_type>(ndg_e[level])*expval,
           num_l  = den_l*theta_e[level],
           dden_l = num_l*Te2inv,
@@ -842,6 +848,8 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::e_vib (const unsigned int species, 
                                                       const StateType& Tv) const
   {
+    using std::exp;
+
     // convenience
     const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_v  = chem_species.theta_v();
@@ -854,7 +862,7 @@ namespace Antioch
     if (theta_v.empty()) return e_vib;
     
     for (unsigned int level=0; level<ndg_v.size(); level++)
-      e_vib += ndg_v[level]*chem_species.gas_constant()*theta_v[level]/(std::exp(theta_v[level]/Tv) - 1.);
+      e_vib += ndg_v[level]*chem_species.gas_constant()*theta_v[level]/(exp(theta_v[level]/Tv) - 1.);
     
     return e_vib;
   }
@@ -886,6 +894,8 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::e_el (const unsigned int species,
                                                      const StateType& Te) const
   {
+    using std::exp;
+
     // convenience
     const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_e  = chem_species.theta_e();
@@ -901,7 +911,7 @@ namespace Antioch
     
     for (unsigned int level=0; level<theta_e.size(); level++)
       {
-        const StateType expval = std::exp (-theta_e[level] / Te);
+        const StateType expval = exp (-theta_e[level] / Te);
         num += static_cast<StateType>(ndg_e[level])*theta_e[level]*expval;
         den += static_cast<StateType>(ndg_e[level])*expval;	  
       }
@@ -1025,6 +1035,10 @@ namespace Antioch
                                                    const VectorStateType& mass_fractions,
                                                    typename Antioch::value_type<VectorStateType>::type T) const
   {
+    using std::abs;
+    using std::max;
+    using std::min;
+
     typedef typename Antioch::value_type<VectorStateType>::type StateType;
 
     // Cache the translational/rotational specific heat - this will be used repeatedly 
@@ -1042,15 +1056,15 @@ namespace Antioch
     if (T < 0)
       {
 	T = (e_tot - E_0) / Cv_tr;
-	T = std::min(std::max(T,StateType(10.)),StateType(20000.));
+	T = min(max(T,StateType(10.)),StateType(20000.));
 	
         // FIXME: Use Antioch::Limits or similar? (i.e., don't
         // hardcode min and max T)
 
 	// make sure the initial guess is valid
-	//T = std::max(T, Limits::CompNSLimits::T_min());
-        T = std::max(T, StateType(10.));
-	T = std::min(T, StateType(2.e4));
+	//T = max(T, Limits::CompNSLimits::T_min());
+        T = max(T, StateType(10.));
+	T = min(T, StateType(2.e4));
       }
     
     // compute the translational/rotational temperature of the mixture using Newton-Rhapson iteration
@@ -1062,7 +1076,7 @@ namespace Antioch
     // NOTE: FIN-S uses a hardcoded, absolute tolerance on delta_T of
     // 1e-8.  Using a relative tolerance here of 100*epsilon.
     for (unsigned int iter = 0;
-         std::abs(delta_T/T) > dT_reltol &&
+         abs(delta_T/T) > dT_reltol &&
          T >= 0.;
          ++iter)
       {

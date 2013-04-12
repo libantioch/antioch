@@ -58,9 +58,11 @@
 template <typename Scalar, typename PairScalars>
 int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scalar tol )
 {
+  using std::abs;
+
   int return_flag = 0;
 
-  const PairScalars rel_error = std::abs( (mu - mu_exact)/mu_exact);
+  const PairScalars rel_error = abs( (mu - mu_exact)/mu_exact);
 
   if( Antioch::max(rel_error) > tol )
     {

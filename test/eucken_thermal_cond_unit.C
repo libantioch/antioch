@@ -37,9 +37,11 @@
 template <typename Scalar>
 int test_k( const Scalar k, const Scalar k_exact, const Scalar tol )
 {
+  using std::abs;
+
   int return_flag = 0;
 
-  const Scalar rel_error = std::fabs( (k - k_exact)/k_exact);
+  const Scalar rel_error = abs( (k - k_exact)/k_exact);
 
   if( rel_error  > tol )
     {

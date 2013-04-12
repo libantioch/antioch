@@ -31,6 +31,10 @@
 template <typename Scalar>
 int tester()
 {
+  using std::abs;
+  using std::exp;
+  using std::pow;
+
   const Scalar Cf = 1.4;
   const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
@@ -39,7 +43,7 @@ int tester()
 
   const Scalar T = 1500.1;
   
-  const Scalar rate_exact = Cf*std::pow(T,eta)*std::exp(-Ea/T);
+  const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
 
   int return_flag = 0;
 
@@ -47,7 +51,7 @@ int tester()
 
   const Scalar tol = 1.0e-15;
 
-  if( std::fabs( (rate - rate_exact)/rate_exact ) > tol )
+  if( abs( (rate - rate_exact)/rate_exact ) > tol )
     {
       std::cout << "Error: Mismatch in rate values." << std::endl
 		<< "rate(T) = " << rate << std::endl

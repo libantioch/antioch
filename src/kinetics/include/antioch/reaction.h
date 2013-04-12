@@ -454,6 +454,9 @@ namespace Antioch
   StateType Reaction<CoeffType>::equilibrium_constant( const StateType& P0_RT,
 						       const VectorStateType& h_RT_minus_s_R ) const
   {
+    using std::exp;
+    using std::pow;
+
     antioch_assert( this->initialized() );
     //!\todo Make this assertion vector-compatible
     // antioch_assert_greater( P0_RT, 0.0 );
@@ -470,7 +473,7 @@ namespace Antioch
 		       h_RT_minus_s_R[s] );
       }
 
-    return std::pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*std::exp(exppower);
+    return pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*exp(exppower);
   }
 
 

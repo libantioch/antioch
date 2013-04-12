@@ -101,6 +101,8 @@ int test_species( const unsigned int species,
 template <typename Scalar>
 int tester()
 {
+  using std::abs;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -231,7 +233,7 @@ int tester()
   X_exact[4] = 0.2L*M_exact/30.008L;
 
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
-  if( std::fabs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact) > tol )
+  if( abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
 		<< std::setprecision(16) << std::scientific
@@ -240,7 +242,7 @@ int tester()
       return_flag = 1;
     }
 
-  if( std::fabs( (chem_mixture.M(mass_fractions) - M_exact)/M_exact ) > tol )
+  if( abs( (chem_mixture.M(mass_fractions) - M_exact)/M_exact ) > tol )
     {
       std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
 		<< std::setprecision(16) << std::scientific
@@ -253,7 +255,7 @@ int tester()
   chem_mixture.X( chem_mixture.M(mass_fractions), mass_fractions, X );
   for( unsigned int s = 0; s < 5; s++ )
     {
-      if( std::fabs( (X[s] - X_exact[s])/X_exact[s]) > tol )
+      if( abs( (X[s] - X_exact[s])/X_exact[s]) > tol )
 	{
 	  std::cerr << "Error: Mismatch in mole fraction for species " << s << std::endl
 		    << std::setprecision(16) << std::scientific

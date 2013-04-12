@@ -122,6 +122,8 @@ int test_species( const unsigned int species,
 template <typename PairScalars>
 int vectester(const PairScalars& example)
 {
+  using std::abs;
+
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   std::vector<std::string> species_str_list;
@@ -274,7 +276,7 @@ int vectester(const PairScalars& example)
 
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
   const PairScalars rel_R_error = 
-    std::abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact);
+    abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact);
   if( Antioch::max(rel_R_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
@@ -285,7 +287,7 @@ int vectester(const PairScalars& example)
     }
 
   const PairScalars rel_M_error = 
-    std::abs( (chem_mixture.M(mass_fractions) - M_exact)/M_exact);
+    abs( (chem_mixture.M(mass_fractions) - M_exact)/M_exact);
   if( Antioch::max(rel_M_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
@@ -300,7 +302,7 @@ int vectester(const PairScalars& example)
   for( unsigned int s = 0; s < n_species; s++ )
     {
       const PairScalars rel_X_error = 
-        std::abs( (X[s] - X_exact[s])/X_exact[s]);
+        abs( (X[s] - X_exact[s])/X_exact[s]);
       if( Antioch::max(rel_X_error) > tol )
 	{
 	  std::cerr << "Error: Mismatch in mole fraction for species " << s << std::endl
@@ -335,7 +337,7 @@ int vectester(const PairScalars& example)
 
     Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
     const PairScalars eigen_rel_R_error = 
-      std::abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
+      abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
     if( Antioch::max(eigen_rel_R_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
@@ -346,7 +348,7 @@ int vectester(const PairScalars& example)
       }
 
     const PairScalars eigen_rel_M_error = 
-      std::abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
+      abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
     if( Antioch::max(eigen_rel_M_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
@@ -362,7 +364,7 @@ int vectester(const PairScalars& example)
     for( unsigned int s = 0; s < n_species; s++ )
       {
         const PairScalars eigen_rel_X_error = 
-          std::abs( (eigen_X[s] - X_exact[s])/X_exact[s]);
+          abs( (eigen_X[s] - X_exact[s])/X_exact[s]);
         if( Antioch::max(eigen_rel_X_error) > tol )
 	  {
 	    std::cerr << "Error: Mismatch in mole fraction for species " << s << std::endl
@@ -396,7 +398,7 @@ int vectester(const PairScalars& example)
 
     Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
     const PairScalars eigen_rel_R_error = 
-      std::abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
+      abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
     if( Antioch::max(eigen_rel_R_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
@@ -407,7 +409,7 @@ int vectester(const PairScalars& example)
       }
 
     const PairScalars eigen_rel_M_error = 
-      std::abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
+      abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
     if( Antioch::max(eigen_rel_M_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
@@ -423,7 +425,7 @@ int vectester(const PairScalars& example)
     for( unsigned int s = 0; s < n_species; s++ )
       {
         const PairScalars eigen_rel_X_error = 
-          std::abs( (eigen_X[s] - X_exact[s])/X_exact[s]);
+          abs( (eigen_X[s] - X_exact[s])/X_exact[s]);
         if( Antioch::max(eigen_rel_X_error) > tol )
 	  {
 	    std::cerr << "Error: Mismatch in mole fraction for species " << s << std::endl

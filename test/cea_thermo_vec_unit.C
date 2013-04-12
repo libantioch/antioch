@@ -61,6 +61,8 @@ int test_cp( const std::string& species_name, unsigned int species,
 	     TrioScalars cp_exact, TrioScalars T,
 	     const Antioch::CEAThermodynamics<Scalar>& thermo )
 {
+  using std::abs;
+
   int return_flag = 0;
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
@@ -72,7 +74,7 @@ int test_cp( const std::string& species_name, unsigned int species,
 
   // Workaround for a non-standard gcc definition of valarray binary operator-
   const TrioScalars diff = cp_exact - cp; 
-  const TrioScalars rel_cp_error = std::abs(diff/cp_exact);
+  const TrioScalars rel_cp_error = abs(diff/cp_exact);
 
   if( Antioch::max(rel_cp_error) > tol )
     {

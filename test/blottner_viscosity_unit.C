@@ -36,9 +36,11 @@
 template <typename Scalar>
 int test_viscosity( const Scalar mu, const Scalar mu_exact, const Scalar tol )
 {
+  using std::abs;
+
   int return_flag = 0;
 
-  const double rel_error = std::fabs( (mu - mu_exact)/mu_exact);
+  const double rel_error = abs( (mu - mu_exact)/mu_exact);
 
   if( rel_error  > tol )
     {

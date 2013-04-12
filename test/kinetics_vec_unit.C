@@ -67,6 +67,8 @@
 template <typename PairScalars>
 int vectester(const std::string& input_name, const PairScalars& example)
 {
+  using std::abs;
+
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   std::vector<std::string> species_str_list;
@@ -132,7 +134,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 	  sum += omega_dot[s];
 	}
       const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
-      const PairScalars abs_sum = std::abs(sum);
+      const PairScalars abs_sum = abs(sum);
       if( Antioch::max(abs_sum) > sum_tol )
 	{
 	  return_flag = 1;

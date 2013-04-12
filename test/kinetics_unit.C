@@ -45,6 +45,8 @@
 template <typename Scalar>
 int tester_N2N(const std::string& input_name)
 {
+  using std::abs;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 2;
   species_str_list.reserve(n_species);
@@ -95,7 +97,7 @@ int tester_N2N(const std::string& input_name)
 	  sum += omega_dot[s];
 	}
       const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
-      if( std::fabs( sum ) > sum_tol )
+      if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
 	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl
@@ -119,6 +121,8 @@ int tester_N2N(const std::string& input_name)
 template <typename Scalar>
 int tester(const std::string& input_name)
 {
+  using std::abs;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -172,7 +176,7 @@ int tester(const std::string& input_name)
 	  sum += omega_dot[s];
 	}
       const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
-      if( std::fabs( sum ) > sum_tol )
+      if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
 	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl

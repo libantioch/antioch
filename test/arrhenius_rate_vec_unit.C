@@ -53,6 +53,10 @@
 template <typename PairScalars>
 int vectester(const PairScalars& example)
 {
+  using std::abs;
+  using std::exp;
+  using std::pow;
+
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   const Scalar Cf = 1.4;
@@ -66,8 +70,8 @@ int vectester(const PairScalars& example)
   T[0] = 1500.1;
   T[1] = 1600.1;
   
-  const Scalar rate_exact0 = Cf*std::pow(Scalar(1500.1),eta)*std::exp(-Ea/1500.1);
-  const Scalar rate_exact1 = Cf*std::pow(Scalar(1600.1),eta)*std::exp(-Ea/1600.1);
+  const Scalar rate_exact0 = Cf*pow(Scalar(1500.1),eta)*exp(-Ea/1500.1);
+  const Scalar rate_exact1 = Cf*pow(Scalar(1600.1),eta)*exp(-Ea/1600.1);
 
   int return_flag = 0;
 
@@ -75,7 +79,7 @@ int vectester(const PairScalars& example)
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
 
-  if( std::fabs( (rate[0] - rate_exact0)/rate_exact0 ) > tol )
+  if( abs( (rate[0] - rate_exact0)/rate_exact0 ) > tol )
     {
       std::cout << "Error: Mismatch in rate values." << std::endl
 		<< "rate(T0)   = " << rate[0] << std::endl
@@ -85,7 +89,7 @@ int vectester(const PairScalars& example)
       return_flag = 1;
     }
 
-  if( std::fabs( (rate[1] - rate_exact1)/rate_exact1 ) > tol )
+  if( abs( (rate[1] - rate_exact1)/rate_exact1 ) > tol )
     {
       std::cout << "Error: Mismatch in rate values." << std::endl
 		<< "rate(T1)   = " << rate[1] << std::endl

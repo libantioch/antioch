@@ -75,6 +75,9 @@ int test_val( const PairScalars val, const PairScalars val_exact,
 template <typename PairScalars>
 int tester(const PairScalars& example)
 {
+  using std::pow;
+  using std::sqrt;
+
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   std::vector<std::string> species_str_list;
@@ -140,8 +143,8 @@ int tester(const PairScalars& example)
     for( unsigned int r = 0; r < 5; r++ )
       {
         Scalar M_r = chem_mixture.M(r);
-        PairScalars dummy = 1.0L + std::sqrt(mu[N_index]/mu[r])*std::pow( M_r/M_N, Scalar(0.25L) );
-        phi_N_exact += chi[r]*dummy*dummy/std::sqrt(8.0L*( 1.0L + M_N/M_r ) );
+        PairScalars dummy = 1.0L + sqrt(mu[N_index]/mu[r])*pow( M_r/M_N, Scalar(0.25L) );
+        phi_N_exact += chi[r]*dummy*dummy/sqrt(8.0L*( 1.0L + M_N/M_r ) );
       }
 
     const PairScalars phi_N = wilke.compute_phi( mu, chi, N_index );

@@ -50,7 +50,9 @@
 template <typename Scalar>
 bool test_relative(const Scalar val, const Scalar truth, const Scalar tol)
 {
-  if( std::abs( (val-truth)/truth ) > tol )
+  using std::abs;
+
+  if( abs( (val-truth)/truth ) > tol )
     return false;
   else
     return true;
@@ -59,7 +61,9 @@ bool test_relative(const Scalar val, const Scalar truth, const Scalar tol)
 template <typename Scalar>
 bool test_zero(const Scalar val, const Scalar tol)
 {
-  if( std::abs(val) > tol )
+  using std::abs;
+
+  if( abs(val) > tol )
     return false;
   else
     return true;

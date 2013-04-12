@@ -45,6 +45,8 @@
 template <typename Scalar>
 int tester(const std::string& input_name)
 {
+  using std::abs;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -101,7 +103,7 @@ int tester(const std::string& input_name)
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error = std::fabs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = abs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
 	{
 	  return_flag = 1;
