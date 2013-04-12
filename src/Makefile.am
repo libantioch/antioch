@@ -21,6 +21,11 @@ libantioch_la_SOURCES += core/src/SIPrefix.cpp
 libantioch_la_SOURCES += core/src/Converter.cpp
 libantioch_la_SOURCES += core/src/InSI.cpp
 libantioch_la_SOURCES += core/src/Units.cpp
+libantioch_la_SOURCES += core/src/CoreUnc.cpp
+libantioch_la_SOURCES += core/src/AtomicParameter.cpp
+libantioch_la_SOURCES += core/src/PDF.cpp
+libantioch_la_SOURCES += core/src/ParameterPhy.cpp
+libantioch_la_SOURCES += core/src/phymath.cpp
 
 # kinetics
 libantioch_la_SOURCES += kinetics/src/reaction.C
@@ -64,6 +69,11 @@ include_HEADERS += core/include/antioch/Converter.hpp
 include_HEADERS += core/include/antioch/InSI.hpp
 include_HEADERS += core/include/antioch/Units.hpp
 include_HEADERS += core/include/antioch/unit_defs.hpp
+include_HEADERS += core/include/antioch/CoreUnc.hpp
+include_HEADERS += core/include/antioch/AtomicParameter.hpp
+include_HEADERS += core/include/antioch/PDF.hpp
+include_HEADERS += core/include/antioch/ParameterPhy.hpp
+include_HEADERS += core/include/antioch/phymath.hpp
 
 # kinetics
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h

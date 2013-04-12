@@ -347,6 +347,20 @@ class Units{
 /*! \brief showAll().*/
         void showAll(std::ostream &out = std::cout);
 
+/*! \brief Memory dealing method
+ *
+ * This is a memory dealing method. In case of densification, the
+ * integer nConnected keeps
+ * track of how many objects are associated with this unit object.
+ * This method adds one.
+ * BEWARE: at the constructor level, nConnected is null, the management
+ * should be done at another level.
+ */
+        void addOneToConnection()                     {nConnected++;}
+/*! \brief See void CoreUnit::addOneToConnection()*/
+        void suppressOneToConnection()                {nConnected--;}
+/*! \brief Integer nConnected getter*/
+        unsigned int nConnections()             const {return nConnected;}
 
       private:
 
@@ -539,6 +553,8 @@ class Units{
         Converter toSI;
 /*!\brief An InSI for the power vector.*/
         InSI power;
+/*! \brief Number of objects using this object as unit*/
+        unsigned int nConnected;
 };
 
 
