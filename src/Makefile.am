@@ -16,6 +16,11 @@ libantioch_la_SOURCES =
 # core
 libantioch_la_SOURCES += core/src/chemical_species.C
 libantioch_la_SOURCES += core/src/chemical_mixture.C
+libantioch_la_SOURCES += core/src/Error.cpp
+libantioch_la_SOURCES += core/src/SIPrefix.cpp
+libantioch_la_SOURCES += core/src/Converter.cpp
+libantioch_la_SOURCES += core/src/InSI.cpp
+libantioch_la_SOURCES += core/src/Units.cpp
 
 # kinetics
 libantioch_la_SOURCES += kinetics/src/reaction.C
@@ -53,6 +58,12 @@ include_HEADERS =
 include_HEADERS += core/include/antioch/chemical_species.h
 include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
+include_HEADERS += core/include/antioch/Error.hpp
+include_HEADERS += core/include/antioch/SIPrefix.hpp
+include_HEADERS += core/include/antioch/Converter.hpp
+include_HEADERS += core/include/antioch/InSI.hpp
+include_HEADERS += core/include/antioch/Units.hpp
+include_HEADERS += core/include/antioch/unit_defs.hpp
 
 # kinetics
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
