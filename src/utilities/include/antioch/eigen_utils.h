@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -32,154 +32,102 @@
 #include "antioch_config.h"
 
 #ifdef ANTIOCH_HAVE_EIGEN
-
+// Though the following implementations are all valid without <Eigen/Dense>,
+// successfully using them with Eigen types requires Eigen be included first.
+// Configure-time Eigen support enforces this constraint but header-only Eigen
+// may be mixed with header-only Antioch without configure-time flags.
 #include <Eigen/Dense>
+#endif
 
 #include "antioch/metaprogramming.h"
 
-namespace std {
+// Notice _Matrix template templates might be Eigen::Matrix or Eigen::Array.
+// Therefore, always use .array()- or .matrix()-like operations for robustness.
+// Otherwise Eigen will complain with YOU_CANNOT_MIX_ARRAYS_AND_MATRICES.
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-max (const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
-     const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b)
+namespace std
 {
-  using std::max;
 
-  Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> out = a;
-  const size_t size = a.size();
-  for (size_t i=0; i != size; ++i)
-    out[i] = max(a[i], b[i]);
-  return out;
-}
-
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
-Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-max (const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
-     const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b)
+_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
+    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b)
 {
-  using std::max;
-
-  Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> out = a;
-  const size_t size = a.size();
-  for (size_t i=0; i != size; ++i)
-    out[i] = max(a[i], b[i]);
-  return out;
+  return a.array().max(b.array());
 }
 
-
-
-}
+} // end namespace std
 
 
 namespace Antioch
 {
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
 _Scalar
-max (const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in)
+max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in)
 {
   return in.maxCoeff();
 }
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-struct has_size<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct has_size<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
   static const bool value = true;
 };
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-struct value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
-  typedef Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> 
-    container_type;
+  typedef _Matrix<
+      _Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols
+    > container_type;
   typedef _Scalar type;
   typedef typename value_type<_Scalar>::raw_type raw_type;
 };
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
-Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-zero_clone(const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example)
+_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex)
 {
-  // We can't just use setZero here with arbitrary Scalar types
-  if (example.size())
-    return 
-      Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-      (example.rows(), example.cols()).setConstant(zero_clone(example[0]));
+  // We can't just use setZero here with arbitrary _Scalar types
+  if (ex.size())
+    return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
+        ex.rows(), ex.cols()).setConstant(zero_clone(ex[0]));
 
-  return 
-    Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-    (example.rows(), example.cols());
+  return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
+      ex.rows(), ex.cols());
 }
 
-// A function for zero-setting vectorized numeric types
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
-void set_zero(Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
+void set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
 {
-  // We can't just use setZero here with arbitrary Scalar types
+  // We can't just use setZero here with arbitrary _Scalar types
   if (a.size())
     a.setConstant (zero_clone(a[0]));
 }
-
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-_Scalar
-max (const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in)
-{
-  return in.maxCoeff();
-}
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-struct has_size<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
-{
-  static const bool value = true;
-};
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-struct value_type<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
-{
-  typedef Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> 
-    container_type;
-  typedef _Scalar type;
-  typedef typename value_type<_Scalar>::raw_type raw_type;
-};
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-zero_clone(const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example)
-{
-  // We can't just use setZero here with arbitrary Scalar types
-  if (example.size())
-    return 
-      Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-      (example.rows(), example.cols()).setConstant(zero_clone(example[0]));
-
-  return 
-    Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-    (example.rows(), example.cols());
-}
-
-// A function for zero-setting vectorized numeric types
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-void set_zero(Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
-{
-  // We can't just use setZero here with arbitrary Scalar types
-  if (a.size())
-    a.setConstant (zero_clone(a[0]));
-}
-
 
 } // end namespace Antioch
-
-#endif // ANTIOCH_HAVE_EIGEN
 
 #endif //ANTIOCH_EIGEN_UTILS_H
