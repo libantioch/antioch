@@ -26,9 +26,19 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
 // C++
 #include <iostream>
 #include <cmath>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+#include "metaphysicl/numberarray.h"
+#endif
 
 // Antioch
 // Declare metaprogramming overloads before they're used
