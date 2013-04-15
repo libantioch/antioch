@@ -7,6 +7,7 @@
 #include "antioch/Error.hpp"
 #include "antioch/CoreUnc.hpp"
 #include "antioch/Units.hpp"
+#include "antioch/unit_defs.hpp"
 #include "antioch/PDF.hpp"
 #include "antioch/AtomicParameter.hpp"
 
@@ -316,7 +317,7 @@ class ParameterPhy{
 /*!\brief Overload of double variance(int).*/
          double variance(unsigned int jval)const  {return variance((int)jval);}
 /*!\brief Standard uncertainty value getter.*/
-         double StdUnc(int jval = 0)     const    {return (sqrt(variance(jval)));}
+         double StdUnc(int jval = 0)     const    {return (std::sqrt(variance(jval)));}
 /*!\brief Overload of double StdUnc(int).*/
          double StdUnc(unsigned int jval)const    {return StdUnc((int)jval);}
 /*!\brief Uncertainty value setter.*/
@@ -342,11 +343,23 @@ class ParameterPhy{
 
 /*!\brief Vector of uncertainty values getter.*/
    const std::vector<double> DValues()           const;
+/*!\brief Vector of variances getter.
+ *
+ * If the uncertainty is of type CORE_UNCERTAINTY_TYPE_UNKNOWN
+ * it sends back an empty vector, if the uncertainty is 
+ * CORE_UNCERTAINTY_TYPE_NONE, it sends back only one value (0.)
+ * in the vector. Else, it sends back the variance.
+ */
+   const std::vector<double> variances()         const;
 /*!\brief Vector of uncertainty value setter.*/
          void setDValues(const std::vector<double> &a);
 /*!\brief Vector of uncertainty value adder.*/
          void addDValues(const std::vector<double> &a);
 
+/*!\brief Check if uncertainty is of type CORE_UNCERTAINTY_TYPE_ABSOLUTE*/
+         bool absoluteUnc()                      const {return (uncertainty->getType() == CORE_UNCERTAINTY_TYPE_ABSOLUTE);}
+/*!\brief Check if uncertainty is of type CORE_UNCERTAINTY_TYPE_RELATIVE*/
+         bool relativeUnc()                      const {return (uncertainty->getType() == CORE_UNCERTAINTY_TYPE_RELATIVE);}
 /*!\brief Check if uncertainty is of type CORE_UNCERTAINTY_TYPE_NONE*/
          bool noUnc()                            const {return (uncertainty->getType() == CORE_UNCERTAINTY_TYPE_NONE);}
 /*!\brief Check if uncertainty is of type CORE_UNCERTAINTY_TYPE_UNKNOWN*/
@@ -682,14 +695,14 @@ class ParameterPhy{
  *      f_{add}^{uncertainty}(\varphi_1 + \varphi_2) = u_c^2 = u_1^2 + u_2^2
  * \f]
  */
-  double additiveModelUncertainty(double val1, double val2, double var1, double var2);
+  double additiveModelUncertainty(const double &val1, const double &val2, const double &var1, const double &var2);
 /*!\brief GUM advised model for the combined uncertainty, applied to multiplication.
  *
  * \f[
  *      f_{mult}^{uncertainty}(\varphi_1 \times \varphi_2) = u_c^2 = \nu_2^2u_1^2 + \nu_1^2u_2^2
  * \f]
  */
-  double multiplyModelUncertainty(double val1, double val2, double var1, double var2);
+  double multiplyModelUncertainty(const double &val1, const double &val2, const double &var1, const double &var2);
 /*!\brief GUM advised model for the combined uncertainty, applied to division.
  *
  * \f[
@@ -697,7 +710,7 @@ class ParameterPhy{
  *     u_c^2 = \left(\frac{1}{\nu_2}\right)^2u_1^2 + \left(-\frac{\nu_1}{\nu_2^2}\right)^2u_2^2
  * \f]
  */
-  double divideModelUncertainty(double val1, double val2, double var1, double var2);
+  double divideModelUncertainty(const double &val1, const double &val2, const double &var1, const double &var2);
 /*!\brief Uncertainty manager
  *
  * It will combine the uncertainty of two parameters, using the given
@@ -706,7 +719,7 @@ class ParameterPhy{
  * double multiplyModelUncertainty(double val1, double val2, double var1, double var2)
  * are exemples.
  */
-  void modelUncertainty(const ParameterPhy &rhs,double (ParameterPhy::*modelU)(double,double,double,double));
+  void modelUncertainty(const ParameterPhy &rhs,double (ParameterPhy::*modelU)(const double&,const double&,const double&,const double&));
 
 /*! \brief Set the pointer to NULL value, with memory management.
  *

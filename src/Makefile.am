@@ -26,6 +26,8 @@ libantioch_la_SOURCES += core/src/AtomicParameter.cpp
 libantioch_la_SOURCES += core/src/PDF.cpp
 libantioch_la_SOURCES += core/src/ParameterPhy.cpp
 libantioch_la_SOURCES += core/src/phymath.cpp
+libantioch_la_SOURCES += core/src/PhyFunct.cpp
+libantioch_la_SOURCES += core/src/PhyHarmFunct.cpp
 
 # kinetics
 libantioch_la_SOURCES += kinetics/src/reaction.C
@@ -74,6 +76,8 @@ include_HEADERS += core/include/antioch/AtomicParameter.hpp
 include_HEADERS += core/include/antioch/PDF.hpp
 include_HEADERS += core/include/antioch/ParameterPhy.hpp
 include_HEADERS += core/include/antioch/phymath.hpp
+include_HEADERS += core/include/antioch/PhyFunct.hpp
+include_HEADERS += core/include/antioch/PhyHarmFunct.hpp
 
 # kinetics
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h

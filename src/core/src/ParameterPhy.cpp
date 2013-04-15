@@ -163,6 +163,19 @@ const std::vector<double> ParameterPhy::DValues() const
   return uncertainty->getDvalues();
 }
 
+const std::vector<double> ParameterPhy::variances() const
+{
+  if(unknownUnc()) return std::vector<double>();
+  if(noUnc())      return std::vector<double>(1,0.);
+  if(absoluteUnc())return uncertainty->getDvalues();
+  std::vector<double> out;
+  for(int i = 0; i < nValues(); i++)
+  {
+    out.push_back(value(i)*Dvalue(i)*value(i)*Dvalue(i));
+  }
+  return out;
+}
+
 
 //unit object
 void ParameterPhy::changeUnitObject(Units *target)
@@ -520,9 +533,8 @@ void ParameterPhy::setParameterPdf(const std::string &pdfID,const std::vector<do
   pdf->setNameMar(namePar(),i);
 }
 
-void ParameterPhy::modelUncertainty(const ParameterPhy &rhs,double (ParameterPhy::*modelU)(double,double,double,double))
+void ParameterPhy::modelUncertainty(const ParameterPhy &rhs,double (ParameterPhy::*modelU)(const double&, const double&, const double&, const double&))
 {
-  const std::string method("void ParameterPhy::modelUncertainty(const ParameterPhy &,double (ParameterPhy::*)(double, double, double, double))");
 
 // if rhs has no unc object
   if(rhs.getUncertaintyObject() == NULL)
@@ -550,17 +562,21 @@ void ParameterPhy::modelUncertainty(const ParameterPhy &rhs,double (ParameterPhy
      mul->setType(CORE_UNCERTAINTY_TYPE_ABSOLUTE);
      for(int i = 0; i < rhs.nDValues(); i++)
      {
-        mul->addDvalue(rhs.getDValueAbsolute(i));
+        mul->addDvalue(rhs.variance(i));
      }
   }
 //now getting number of values
-// hypothesis, nDValues() = nValues(), if not, there's a problem
+// hypothesis, nDValues() = nValues(), if not, there's a problem in all cases...
   int min = (nValues() < rhs.nValues())?nValues():rhs.nValues();
   int max = (nValues() > rhs.nValues())?nValues():rhs.nValues();
   if((min != 1) && (max != min))
-        antiochError(method,"No fixed parameter found (1 value), but the number of values are different for parameters "
+  {
+       const std::string method("void ParameterPhy::modelUncertainty(const ParameterPhy &,double (ParameterPhy::*)(const double&,const double&,const double&,const double&))");;
+        antiochError(method,"No fixed parameter found (only 1 value), but the number of values are different for parameters "
                        + namePar() + " and " + rhs.namePar());
  
+  }
+
 //setting the indexes, either from 0 to max - 1 or 0
   int i, z(0);
   int *kv1(&i),*kv2(&i),*ku1(&i),*ku2(&i);
@@ -573,22 +589,22 @@ void ParameterPhy::modelUncertainty(const ParameterPhy &rhs,double (ParameterPhy
   if(rhs.nDValues() != max)ku2 = &z;
   for(i = 0; i < max; i++)
   {
-    setDValue((this->*modelU)(value(*kv1),rhs.value(*kv2),Dvalue(*ku1),mul->getDvalue(*ku2)),i);
+    setDValue((this->*modelU)(value(*kv1),rhs.value(*kv2),variance(*ku1),mul->getDvalue(*ku2)),i);
   }
   if(delmul)delete mul;
 }
 
-double ParameterPhy::additiveModelUncertainty(double val1, double val2, double var1, double var2)
+double ParameterPhy::additiveModelUncertainty(const double &val1, const double &val2, const double &var1, const double &var2)
 {
   return (var2 + var1);
 }
 
-double ParameterPhy::multiplyModelUncertainty(double val1, double val2, double var1, double var2)
+double ParameterPhy::multiplyModelUncertainty(const double &val1, const double &val2, const double &var1, const double &var2)
 {
   return (val1*val1*var2 + val2*val2*var1);
 }
 
-double ParameterPhy::divideModelUncertainty(double val1, double val2, double var1, double var2)
+double ParameterPhy::divideModelUncertainty(const double &val1, const double &val2, const double &var1, const double &var2)
 {
   return (var1/(val2*val2) + var2*val1*val1/(val2*val2*val2*val2));
 }
@@ -596,7 +612,7 @@ double ParameterPhy::divideModelUncertainty(double val1, double val2, double var
 // conversion of dvalues in "absolute" core version
 void ParameterPhy::setUncertaintyToAbsolute()
 {
-  if(typeDPar() != CORE_UNCERTAINTY_TYPE_ABSOLUTE)return;
+  if(typeDPar() == CORE_UNCERTAINTY_TYPE_ABSOLUTE)return;
   if(typeDPar() == CORE_UNCERTAINTY_TYPE_RELATIVE) // compute
   {
     double dv = uncertainty->getDvalue(0);
@@ -608,7 +624,6 @@ void ParameterPhy::setUncertaintyToAbsolute()
     }
   }
   setTypeDPar(CORE_UNCERTAINTY_TYPE_ABSOLUTE);
-  
 }
 
 // conversion of dvalues in "relative" core version
@@ -792,15 +807,7 @@ ParameterPhy& ParameterPhy::operator= (const ParameterPhy &rhs)
 ParameterPhy& ParameterPhy::operator+= (const ParameterPhy &rhs)
 {
   const std::string method("ParameterPhy& ParameterPhy::operator+= (const ParameterPhy &)");
-//// 1 - unit check
-//// 1.a - test pointer
-  if(rhs.getUnitObject() == NULL)
-  {
-    std::string errorStr = "It may be wrong to try to add physical parameters with units pointer NULL.\n";
-    errorStr += "The adding part will be done, considering thus that this is a scalar, but there is a potential problem.";
-    antiochWarning(method,errorStr);
-  }
-//// 1.b - unit homogeneity
+//// 1 - unit
   changeToSomeUnit(rhs.unitPar());
 
 //// 2 - uncertainty

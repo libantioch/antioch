@@ -553,97 +553,35 @@ ParameterPhy pow(const ParameterPhy &base, const ParameterPhy &p)
   }
   int nval;
   (p.nValues() > base.nValues())?nval = p.nValues():nval = base.nValues();
-  for(int i = 0; i < nval; i++)
+  int ival,z(0);
+  int *bval(&ival),*pval(&ival);
+  if(base.nValues() == 1)bval=&z;
+  if(p.nValues() == 1)pval=&z;
+  for(ival = 0; ival < nval; ival++)
   {
-     int baseval(i),pval(i);
-     if(base.nValues() == 1)baseval=0;
-     if(p.nValues() == 1)pval=0;
-     out.addValue(std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower));
+     out.addValue(std::pow(base.value(*bval)*coefbase,p.value(*pval)*coefpower));
   }
 
 //uncertainty management
-  if(base.noUnc() || base.unknownUnc())
+  if(base.unknownUnc() || p.unknownUnc())
   {
-     out.setTypeDPar(base.typeDPar());
-     return out;
-  }else if(p.noUnc() || p.unknownUnc())
-  {
-     out.setTypeDPar(p.typeDPar());
+     out.setTypeDPar(CORE_UNCERTAINTY_TYPE_UNKNOWN);
      return out;
   }
 
-//uncertainty calculations
   out.setTypeDPar(CORE_UNCERTAINTY_TYPE_ABSOLUTE);
-  if(base.typeDPar() == CORE_UNCERTAINTY_TYPE_RELATIVE && p.typeDPar() == CORE_UNCERTAINTY_TYPE_RELATIVE)
+//uncertainty calculations
+  std::vector<double> bvar(base.variances()),pvar(p.variances());
+  int *bdval(&ival),*pdval(&ival);
+  if(bvar.size() == 1)bdval = &z;
+  if(pvar.size() == 1)pdval = &z;
+  for(ival = 0; ival < nval; ival++)
   {
-    for(int i = 0; i < nval; i++)
-    {
-     int baseval(i),pval(i);
-     if(base.nValues() == 1)baseval=0;
-     if(p.nValues() == 1)pval=0;
-// f = x^y
-     out.addDValue(// dx^2 * y^2 * (x^(y-1))^2
-                base.Dvalue(baseval)*base.value(baseval)*coefbase*base.Dvalue(baseval)*base.value(baseval)*coefbase
-                   *p.value(pval)*coefpower*p.value(pval)*coefpower*std::pow(base.value(baseval)*coefbase,2.*(p.value(pval)*coefpower - 1.))
-                + //dy^2 * (ln(x)*x^y)^2
-                std::log(base.value(baseval)*coefbase)*std::log(base.value(baseval)*coefbase)*std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *p.Dvalue(pval)*p.value(pval)*coefpower*p.Dvalue(pval)*p.value(pval)*coefpower
-                  );
-    }
-  }else if(base.typeDPar() == CORE_UNCERTAINTY_TYPE_RELATIVE)
-  {
-    for(int i = 0; i < nval; i++)
-    {
-     int baseval(i),pval(i);
-     if(base.nValues() == 1)baseval=0;
-     if(p.nValues() == 1)pval=0;
-// f = x^y
-     out.addDValue(// dx^2 * y^2 * (x^(y-1))^2
-                base.Dvalue(baseval)*base.value(baseval)*coefbase*base.Dvalue(baseval)*base.value(baseval)*coefbase
-                   *p.value(pval)*coefpower*p.value(pval)*coefpower*std::pow(base.value(baseval)*coefbase,2.*(p.value(pval)*coefpower - 1.))
-                + //dy^2 * (ln(x)*x^y)^2
-                std::log(base.value(baseval)*coefbase)*std::log(base.value(baseval)*coefbase)*std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *p.Dvalue(pval)*coefpower*coefpower
-                  );
-    }
-  }else if(p.typeDPar() == CORE_UNCERTAINTY_TYPE_RELATIVE)
-  {
-    for(int i = 0; i < nval; i++)
-    {
-     int baseval(i),pval(i);
-     if(base.nValues() == 1)baseval=0;
-     if(p.nValues() == 1)pval=0;
-// f = x^y
-     out.addDValue(// dx^2 * y^2 * (x^(y-1))^2
-                base.Dvalue(baseval)*coefbase*coefbase
-                   *p.value(pval)*coefpower*p.value(pval)*coefpower*std::pow(base.value(baseval)*coefbase,2.*(p.value(pval)*coefpower - 1.))
-                + //dy^2 * (ln(x)*x^y)^2
-                std::log(base.value(baseval)*coefbase)*std::log(base.value(baseval)*coefbase)*std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *p.Dvalue(pval)*p.value(pval)*coefpower*p.Dvalue(pval)*p.value(pval)*coefpower
-                  );
-    }
-  }else
-  {
-    for(int i = 0; i < nval; i++)
-    {
-     int baseval(i),pval(i);
-     if(base.nValues() == 1)baseval=0;
-     if(p.nValues() == 1)pval=0;
-// f = x^y
-     out.addDValue(// dx^2 * y^2 * (x^(y-1))^2
-                base.Dvalue(baseval)*coefbase*coefbase
-                   *p.value(pval)*coefpower*p.value(pval)*coefpower*std::pow(base.value(baseval)*coefbase,2.*(p.value(pval)*coefpower - 1.))
-                + //dy^2 * (ln(x)*x^y)^2
-                std::log(base.value(baseval)*coefbase)*std::log(base.value(baseval)*coefbase)*std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *std::pow(base.value(baseval)*coefbase,p.value(pval)*coefpower)
-                        *p.Dvalue(pval)*coefpower*coefpower
-                  );
-    }
+    double f = std::pow(coefbase*base.value(*bval),p.value(*pval)*coefpower); // x ^ y
+    double dfdb2 = coefpower*p.value(*pval)/(coefbase*base.value(*bval)) * f * coefpower*p.value(*pval)/(coefbase*base.value(*bval)) * f; // y*x^(y-1)
+    double dfdp2 = std::log(coefbase*base.value(*bval))*f *std::log(coefbase*base.value(*bval))*f; // ln(x)*x^y
+    out.addDValue(dfdb2 * bvar[*bdval] + dfdp2 * pvar[*pdval]);
   }
-
 
   return out;
 }
