@@ -81,6 +81,11 @@ include_HEADERS += core/include/antioch/PhyHarmFunct.hpp
 
 # kinetics
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
+include_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
+include_HEADERS += kinetics/include/antioch/berthelot_rate.h
+include_HEADERS += kinetics/include/antioch/kooij_rate.h
+include_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
+include_HEADERS += kinetics/include/antioch/vanthoff_rate.h
 include_HEADERS += kinetics/include/antioch/reaction.h
 include_HEADERS += kinetics/include/antioch/reaction_enum.h
 include_HEADERS += kinetics/include/antioch/reaction_set.h

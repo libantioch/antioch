@@ -48,7 +48,7 @@ namespace Antioch
     to be reversible. This class was originally taken from \p FIN-S.
     \todo{Do we want to template this class around the rate type?}
   */
-  template<typename CoeffType=double>
+  template<typename RateType, typename CoeffType=double>
   class Reaction
   {
   public:
@@ -161,10 +161,10 @@ namespace Antioch
 						   VectorStateType& dRbkwd_drho) const;
 
     //! Return const reference to the forward rate object
-    const ArrheniusRate<CoeffType>& forward_rate() const;
+    const RateType& forward_rate() const;
 
     //! Return writeable reference to the forward rate object
-    ArrheniusRate<CoeffType>& forward_rate();
+    RateType<CoeffType>& forward_rate();
 
     //! Formatted print, by default to \p std::cout.
     void print(std::ostream& os = std::cout) const;
@@ -194,8 +194,8 @@ namespace Antioch
     int _gamma;
     bool _initialized;
 
-    //! The forward reaction rate modified Arrhenius form.
-    ArrheniusRate<CoeffType> _forward_rate;
+    //! The forward reaction rate (kinetics model choice)
+    RateType<CoeffType> _forward_rate;
 
   };
 
@@ -365,14 +365,14 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  const ArrheniusRate<CoeffType>& Reaction<CoeffType>::forward_rate() const
+  const RateType<CoeffType>& Reaction<CoeffType>::forward_rate() const
   {
     return _forward_rate;
   }
 
   template<typename CoeffType>
   inline
-  ArrheniusRate<CoeffType>& Reaction<CoeffType>::forward_rate()
+  RateType<CoeffType>& Reaction<CoeffType>::forward_rate()
   {
     return _forward_rate;
   }
