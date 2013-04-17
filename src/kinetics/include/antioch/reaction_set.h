@@ -43,7 +43,7 @@ namespace Antioch
    * This class encapsulates all the reaction mechanisms considered in a
    * chemical nonequilibrium simulation.
    */
-  template<typename CoeffType=double>
+  template<typename RateType,typename CoeffType=double>
   class ReactionSet
   {
 
@@ -61,10 +61,10 @@ namespace Antioch
     unsigned int n_reactions() const;
      
     //! Add a reaction to the system.
-    void add_reaction(const Reaction<CoeffType>& reaction);
+    void add_reaction(const Reaction<RateType,CoeffType>& reaction);
 
     //! \returns a constant reference to reaction \p r.
-    const Reaction<CoeffType>& reaction(const unsigned int r) const;
+    const Reaction<RateType,CoeffType>& reaction(const unsigned int r) const;
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
@@ -94,28 +94,28 @@ namespace Antioch
      
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
-    std::vector<Reaction<CoeffType> > _reactions;
+    std::vector<Reaction<RateType,CoeffType> > _reactions;
 
   };
   
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  unsigned int ReactionSet<CoeffType>::n_species() const
+  unsigned int ReactionSet<RateType,CoeffType>::n_species() const
   {
     return _chem_mixture.n_species();
   }
 
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  unsigned int ReactionSet<CoeffType>::n_reactions() const
+  unsigned int ReactionSet<RateType,CoeffType>::n_reactions() const
   {
     return _reactions.size();
   }
 
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  void ReactionSet<CoeffType>::add_reaction(const Reaction<CoeffType>& reaction)
+  void ReactionSet<RateType,CoeffType>::add_reaction(const Reaction<RateType,CoeffType>& reaction)
   {
     _reactions.push_back(reaction);
     
@@ -125,43 +125,43 @@ namespace Antioch
     return;
   }
   
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const      
+  const Reaction<RateType,CoeffType>& ReactionSet<RateType,CoeffType>::reaction(const unsigned int r) const      
   {
     antioch_assert_less(r, this->n_reactions());
     return _reactions[r];
   }
 
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  const ChemicalMixture<CoeffType>& ReactionSet<CoeffType>::chemical_mixture() const
+  const ChemicalMixture<CoeffType>& ReactionSet<RateType,CoeffType>::chemical_mixture() const
   {
     return _chem_mixture;
   }
 
 
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  ReactionSet<CoeffType>::ReactionSet( const ChemicalMixture<CoeffType>& chem_mixture )
+  ReactionSet<RateType,CoeffType>::ReactionSet( const ChemicalMixture<CoeffType>& chem_mixture )
     : _chem_mixture(chem_mixture)
   {
     return;
   }
 
 
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  ReactionSet<CoeffType>::~ReactionSet()
+  ReactionSet<RateType,CoeffType>::~ReactionSet()
   {
     return;
   }
   
 
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   template<typename StateType, typename VectorStateType, typename VectorReactionsType>
   inline
-  void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType& T,
+  void ReactionSet<RateType,CoeffType>::compute_reaction_rates ( const StateType& T,
 							const StateType& rho,
 							const StateType& R_mix,
 							const VectorStateType& mass_fractions,
@@ -188,7 +188,7 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-	const Reaction<CoeffType>& reaction = this->reaction(rxn);
+	const Reaction<RateType,CoeffType>& reaction = this->reaction(rxn);
 
 	StateType kfwd = (reaction.forward_rate())(T);
 
@@ -203,9 +203,9 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType>
+  template<typename RateType,typename CoeffType>
   inline
-  void ReactionSet<CoeffType>::print(std::ostream& os) const
+  void ReactionSet<RateType,CoeffType>::print(std::ostream& os) const
   {
     os << "# Number of reactions: " << this->n_reactions() << "\n";
 

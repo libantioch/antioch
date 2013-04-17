@@ -32,7 +32,12 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/reaction_enum.h"
+#include "antioch/hercourtessen_rate.h"
 #include "antioch/arrhenius_rate.h"
+#include "antioch/berthelot_rate.h"
+#include "antioch/berthelothercourtessen_rate.h"
+#include "antioch/kooij_rate.h"
+#include "antioch/vanthoff_rate.h"
 
 //C++
 #include <string>
