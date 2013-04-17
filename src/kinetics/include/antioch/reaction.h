@@ -38,7 +38,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-
 namespace Antioch
 {
   //!A single reaction mechanism. 
@@ -47,8 +46,31 @@ namespace Antioch
     an elementary reaction, or a three-body reaction.  All reactions are assumed
     to be reversible. This class was originally taken from \p FIN-S.
     \todo{Do we want to template this class around the rate type?}
+
+    \f[
+        \begin{array}{ccc}\toprule
+        \text{Type of reaction}    & \text{Rate constant }(k(T,[{M}])   & \frac{\mathrm{d}[R]}{\mathrm{d}t}\\\midrule
+        \text{ELEMENTARY\_PROCESS} & \alpha(T)                          & k(T)\times \sum_r [R]_r^{\gamma_r}\\
+        \text{DUPLICATE\_PROCESS}  & \sum_p \alpha_p(T)                 & k(T)\times \sum_r [R]_r^{\gamma_r}\\
+        \text{THREE\_BODY}         & \alpha(T)                          & k(T)\times \sum_r [R]_i^{\gamma_i}\times \sum_{s\ne r}\epsilon_s[{S}]_s\\
+        \text{FALLOFF}             & \frac{\alpha_0(T) [{M}]}{1+[{M}]\frac{\alpha_0(T)}{\alpha_\infty(T)}}\times F
+                                                                       & k(T)\times \sum_r [R]_i^{\gamma_i}\\\bottomrule
+        \end{array}
+    \f]
+     where \f$\alpha(T,[{M}])\f$ is the Arrhenius, Kooij, Hercourt-Essen... equation.
+    \f[
+        \begin{array}{cc}\toprule
+        \text{Kinetics model}           & \text{equation }(\alpha(T)  \\\midrule
+        \text{Hercourt Essen}           & A \left(\frac{T}{T_0}\right)^\beta\\
+        \text{Berthelot}                & A \exp\left(D\times T \right)\\
+        \text{Arrhenius}                & A \exp\left(-\frac{E_a}{\mathrm{R} T} \right)\\
+        \text{Berthelot Hercourt Essen} & A \left(\frac{T}{T_0}\right)^\beta\times \exp\left(D\times T \right)\\
+        \text{Kooij}                    & A \left(\frac{T}{T_0}\right)^\beta\times \exp\left(-\frac{E_a}{\mathrm{R} T} \right)\\
+        \text{Van't Hoff}               & A \left(\frac{T}{T_0}\right)^\beta\times \exp\left(-\frac{E_a}{\mathrm{R} T} + D\times T \right)\\\bottomrule
+        \end{array}
+    \f]
   */
-  template< template<typename CoeffType=double> class RateType, typename CoeffType=double>
+  template< typename RateType, typename CoeffType=double>
   class Reaction
   {
   public:
@@ -161,10 +183,10 @@ namespace Antioch
 						   VectorStateType& dRbkwd_drho) const;
 
     //! Return const reference to the forward rate object
-    const RateType<CoeffType>& forward_rate() const;
+    const RateType& forward_rate() const;
 
     //! Return writeable reference to the forward rate object
-    RateType<CoeffType>& forward_rate();
+    RateType& forward_rate();
 
     //! Formatted print, by default to \p std::cout.
     void print(std::ostream& os = std::cout) const;
@@ -195,33 +217,33 @@ namespace Antioch
     bool _initialized;
 
     //! The forward reaction rate (kinetics model choice)
-    RateType<CoeffType> _forward_rate;
+    RateType _forward_rate;
 
   };
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   unsigned int Reaction<RateType,CoeffType>::n_species() const
   {
     return _n_species;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   std::string Reaction<RateType,CoeffType>::equation() const
   {
     return _equation;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   ReactionType::ReactionType Reaction<RateType,CoeffType>::type() const
   {
     return _type;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   void Reaction<RateType,CoeffType>::set_type( const ReactionType::ReactionType type)
   {
@@ -229,14 +251,14 @@ namespace Antioch
     return;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   bool Reaction<RateType,CoeffType>::initialized() const
   {
     return _initialized;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   unsigned int Reaction<RateType,CoeffType>::n_reactants () const
   {
@@ -246,7 +268,7 @@ namespace Antioch
     return _reactant_ids.size();
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   unsigned int Reaction<RateType,CoeffType>::n_products() const
   {
@@ -256,7 +278,7 @@ namespace Antioch
     return _product_ids.size();
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   const std::string& Reaction<RateType,CoeffType>::reactant_name(const unsigned int r) const
   {       
@@ -264,7 +286,7 @@ namespace Antioch
     return _reactant_names[r]; 
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   const std::string& Reaction<RateType,CoeffType>::product_name(const unsigned int p) const
   { 
@@ -272,7 +294,7 @@ namespace Antioch
     return _product_names[p]; 
   }
   
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   unsigned int Reaction<RateType,CoeffType>::reactant_id(const unsigned int r) const
   { 
@@ -281,7 +303,7 @@ namespace Antioch
     return _reactant_ids[r]; 
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   unsigned int Reaction<RateType,CoeffType>::product_id(const unsigned int p) const
   { 
@@ -290,7 +312,7 @@ namespace Antioch
     return _product_ids[p]; 
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   unsigned int Reaction<RateType,CoeffType>::reactant_stoichiometric_coefficient(const unsigned int r) const
   {      
@@ -299,7 +321,7 @@ namespace Antioch
     return _reactant_stoichiometry[r];
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   unsigned int Reaction<RateType,CoeffType>::product_stoichiometric_coefficient(const unsigned int p) const
   {
@@ -308,7 +330,7 @@ namespace Antioch
     return _product_stoichiometry[p];
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   void Reaction<RateType,CoeffType>::add_reactant (const std::string &name,
 			                  const unsigned int r_id,
@@ -321,7 +343,7 @@ namespace Antioch
     return;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   void Reaction<RateType,CoeffType>::add_product (const std::string &name,
 			                 const unsigned int p_id,
@@ -334,7 +356,7 @@ namespace Antioch
     return;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   void Reaction<RateType,CoeffType>::set_efficiency (const std::string &,
 				            const unsigned int s,
@@ -347,7 +369,7 @@ namespace Antioch
     return;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   CoeffType Reaction<RateType,CoeffType>::efficiency( const unsigned int s ) const
   {
@@ -356,29 +378,29 @@ namespace Antioch
     return _efficiencies[s];
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   int Reaction<RateType,CoeffType>::gamma () const
   {
     return _gamma;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
-  const RateType<CoeffType>& Reaction<RateType,CoeffType>::forward_rate() const
+  const RateType& Reaction<RateType,CoeffType>::forward_rate() const
   {
     return _forward_rate;
   }
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
-  RateType<CoeffType>& Reaction<RateType,CoeffType>::forward_rate()
+  RateType& Reaction<RateType,CoeffType>::forward_rate()
   {
     return _forward_rate;
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   Reaction<RateType,CoeffType>::Reaction( const unsigned int n_species,
 				 const std::string &equation ) 
@@ -393,7 +415,7 @@ namespace Antioch
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   Reaction<RateType,CoeffType>::~Reaction()
   {
@@ -401,7 +423,7 @@ namespace Antioch
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   void Reaction<RateType,CoeffType>::initialize()
   {
@@ -448,7 +470,7 @@ namespace Antioch
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
   StateType Reaction<RateType,CoeffType>::equilibrium_constant( const StateType& P0_RT,
@@ -474,7 +496,7 @@ namespace Antioch
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
   void Reaction<RateType,CoeffType>::equilibrium_constant_and_derivative( const StateType& T,
@@ -509,7 +531,7 @@ namespace Antioch
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
   StateType Reaction<RateType,CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
@@ -529,7 +551,7 @@ namespace Antioch
 				     static_cast<int>(this->reactant_stoichiometric_coefficient(r)) );
       }
       
-    for (unsigned int p=0; p<this->n_products(); p++)
+    for (unsigned int p=0; p<this->n_products(); p++)  
       {
 	kbkwd_times_products *= pow( molar_densities[this->product_id(p)],
 				     static_cast<int>(this->product_stoichiometric_coefficient(p)) );
@@ -587,7 +609,7 @@ namespace Antioch
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
   void Reaction<RateType,CoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
@@ -747,7 +769,7 @@ namespace Antioch
   }
 
 
-  template<template<typename CoeffType=double> class RateType,typename CoeffType=double>
+  template<typename RateType,typename CoeffType>
   inline
   void Reaction<RateType,CoeffType>::print( std::ostream& os ) const
   {
