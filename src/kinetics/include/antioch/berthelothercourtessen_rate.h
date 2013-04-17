@@ -20,14 +20,9 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_ARRHENIUS_RATE_H
-#define ANTIOCH_ARRHENIUS_RATE_H
+#ifndef ANTIOCH_BERTHELOT_HERCOURT_ESSEN_RATE_H
+#define ANTIOCH_BERTHELOT_HERCOURT_ESSEN_RATE_H
 
 // C++
 #include <cmath>
@@ -35,28 +30,29 @@
 
 namespace Antioch
 {
-  //! Arrhenius rate equation.
+  //! Berthelot Hercourt-Essen rate equation.
   /*!
-   * Arrhenius rate equation.  Computes rates of the form
-   * \f$ C_f\times \exp(-E_a/T) \f$. This class copied from
-   * the \p FIN-S code and slightly reformatted for \p Antioch.
+   * Berthelot Hercourt-Essen rate equation.  Computes rates of the form
+   * \f$ C_f\times T^\eta\times \exp(D*T) \f$.
    */
   template<typename CoeffType=double>
-  class ArrheniusRate: public KineticsType
+  class BerthelotHercourtEssenRate: public KineticsType
   {
   
   public:
 
-    ArrheniusRate (const CoeffType Cf=0., const CoeffType Ea=0.);
-    ~ArrheniusRate();
+    BerthelotHercourtEssenRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType D=0.);
+    ~BerthelotHercourtEssenRate();
     
     void set_Cf( const CoeffType Cf );
-    void set_Ea( const CoeffType Ea );
+    void set_eta( const CoeffType eta );
+    void set_D( const CoeffType D );
 
-    void scale_Ea( const CoeffType scale );
+    void scale_D( const CoeffType scale );
 
     CoeffType Cf() const;
-    CoeffType Ea() const;
+    CoeffType eta() const;
+    CoeffType D() const;
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
@@ -74,7 +70,7 @@ namespace Antioch
     void print(std::ostream& os = std::cout) const;
 
     //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const ArrheniusRate& rate)
+    friend std::ostream& operator<<(std::ostream& os, const BerthelotHercourtEssenRate& rate)
     {
       rate.print(os);
       return os;
@@ -83,29 +79,32 @@ namespace Antioch
   private:
 
     CoeffType _Cf;
-    CoeffType _Ea;
+    CoeffType _eta;
+    CoeffType _D;
     
   };
 
   template<typename CoeffType>
-  ArrheniusRate<CoeffType>::ArrheniusRate(const CoeffType Cf, const CoeffType Ea)
+  BerthelotHercourtEssenRate<CoeffType>::BerthelotHercourtEssenRate(const CoeffType Cf, const CoeffType eta, const CoeffType D)
     : _Cf(Cf),
-      _Ea(Ea)
+      _eta(eta),
+      _D(D)
   {
     return;
   }
 
   template<typename CoeffType>
-  ArrheniusRate<CoeffType>::~ArrheniusRate()
+  BerthelotHercourtEssenRate<CoeffType>::~BerthelotHercourtEssenRate()
   {
     return;
   }
 
   template<typename CoeffType>
-  void ArrheniusRate<CoeffType>::print(std::ostream& os) const
+  void BerthelotHercourtEssenRate<CoeffType>::print(std::ostream& os) const
   {
     os << _Cf;
-    os << "*exp(-" << _Ea << "/T)";
+    if (_eta != 0.) os << "*T^" << _eta;
+    os << "*exp(-" << _D << "*T)";
 
     return;
   }
@@ -113,7 +112,7 @@ namespace Antioch
   /* ------------------------- Inline Functions -------------------------*/
   template<typename CoeffType>
   inline
-  void ArrheniusRate<CoeffType>::set_Cf( const CoeffType Cf )
+  void BerthelotHercourtEssenRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
     _Cf = Cf;
     return;
@@ -121,59 +120,73 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void ArrheniusRate<CoeffType>::set_Ea( const CoeffType Ea )
+  void BerthelotHercourtEssenRate<CoeffType>::set_eta( const CoeffType eta )
   {
-    _Ea = Ea;
+    _eta = eta;
     return;
   }
 
   template<typename CoeffType>
   inline
-  void ArrheniusRate<CoeffType>::scale_Ea( const CoeffType scale )
+  void BerthelotHercourtEssenRate<CoeffType>::set_D( const CoeffType D )
   {
-    _Ea *= scale;
+    _D = D;
     return;
   }
 
   template<typename CoeffType>
   inline
-  CoeffType ArrheniusRate<CoeffType>::Cf() const
+  void BerthelotHercourtEssenRate<CoeffType>::scale_D( const CoeffType scale )
+  {
+    _D *= scale;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType BerthelotHercourtEssenRate<CoeffType>::Cf() const
   { return _Cf; }
 
   template<typename CoeffType>
   inline
-  CoeffType ArrheniusRate<CoeffType>::Ea() const
-  { return _Ea; }
+  CoeffType BerthelotHercourtEssenRate<CoeffType>::eta() const
+  { return _eta; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType BerthelotHercourtEssenRate<CoeffType>::D() const
+  { return _D; }
 
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType ArrheniusRate<CoeffType>::operator()(const StateType& T) const
+  StateType BerthelotHercourtEssenRate<CoeffType>::operator()(const StateType& T) const
   {
+    using std::pow;
     using std::exp;
-    return _Cf* (exp(-_Ea/T));
+    return _Cf* (pow(T,_eta)*exp(_D*T));
   }
 
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType ArrheniusRate<CoeffType>::derivative( const StateType& T ) const
+  StateType BerthelotHercourtEssenRate<CoeffType>::derivative( const StateType& T ) const
   {
-    return (*this)(T)*(_Ea/(T*T));
+    return (*this)(T)*(_eta/T + _D);
   }
 
   template<typename CoeffType>
   template<typename StateType>
   inline
-  void ArrheniusRate<CoeffType>::rate_and_derivative( const StateType& T,
+  void BerthelotHercourtEssenRate<CoeffType>::rate_and_derivative( const StateType& T,
 						      StateType& rate,
 						      StateType& drate_dT) const
   {
     rate     = (*this)(T);
-    drate_dT = rate*_Ea/(T*T);
+    drate_dT = rate*(_eta/T + _D);
     return;
   }
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_ARRHENIUS_RATE_H
+#endif // ANTIOCH_BERTHELOT-HERCOURT-ESSEN_RATE_H
