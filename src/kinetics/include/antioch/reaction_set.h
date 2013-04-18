@@ -71,12 +71,12 @@ namespace Antioch
     //! Compute the rates of progress for each reaction
     template <typename StateType, typename VectorStateType, typename VectorReactionsType>
     void compute_reaction_rates( const StateType& T,
-				 const StateType& rho,
-				 const StateType& R_mix,
-				 const VectorStateType& mass_fractions,
-				 const VectorStateType& molar_densities,
-				 const VectorStateType& h_RT_minus_s_R,
-				 VectorReactionsType& net_reaction_rates ) const;
+                                 const StateType& rho,
+                                 const StateType& R_mix,
+                                 const VectorStateType& mass_fractions,
+                                 const VectorStateType& molar_densities,
+                                 const VectorStateType& h_RT_minus_s_R,
+                                 VectorReactionsType& net_reaction_rates ) const;
 
     //! Formatted print, by default to \p std::cout.
     void print( std::ostream& os = std::cout ) const;
@@ -162,12 +162,12 @@ namespace Antioch
   template<typename StateType, typename VectorStateType, typename VectorReactionsType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType& T,
-							const StateType& rho,
-							const StateType& R_mix,
-							const VectorStateType& mass_fractions,
-							const VectorStateType& molar_densities,
-							const VectorStateType& h_RT_minus_s_R,
-							VectorReactionsType& net_reaction_rates ) const
+                                                        const StateType& rho,
+                                                        const StateType& R_mix,
+                                                        const VectorStateType& mass_fractions,
+                                                        const VectorStateType& molar_densities,
+                                                        const VectorStateType& h_RT_minus_s_R,
+                                                        VectorReactionsType& net_reaction_rates ) const
   {
     antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
 
@@ -188,15 +188,26 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-	const Reaction<CoeffType>& reaction = this->reaction(rxn);
+        const Reaction<CoeffType>& reaction = this->reaction(rxn);
 
-	StateType kfwd = (reaction.forward_rate())(T);
+        StateType kfwd = (reaction.compute_forward_rate_coefficient(T,molar_densities));
 
-	StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
+        StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-	const StateType kbkwd = kfwd/keq;
+        const StateType kbkwd = kfwd/keq;
 
-	net_reaction_rates[rxn] = reaction.compute_rate_of_progress( molar_densities, kfwd, kbkwd );
+        for (unsigned int r=0; r<reaction.n_reactants(); r++)
+        {
+           kfwd *= pow( molar_densities[reaction.reactant_id(r)],
+                   static_cast<int>(reaction.reactant_stoichiometric_coefficient(r)) );
+        }
+        for (unsigned int p=0; p<reaction.n_products(); p++)
+        {
+           kbkwd *= pow( molar_densities[reaction.product_id(p)],
+                        static_cast<int>(reaction.product_stoichiometric_coefficient(p)) );
+        }
+
+        net_reaction_rates[rxn] = kfwd - kbkwd;
       }
     
     return;
@@ -211,8 +222,8 @@ namespace Antioch
 
     for (unsigned int r=0; r < this->n_reactions(); r++)
       {
-	os << "# " << r << '\n'
-	   << this->reaction(r) << "\n";
+        os << "# " << r << '\n'
+           << this->reaction(r) << "\n";
       }
 
     return;

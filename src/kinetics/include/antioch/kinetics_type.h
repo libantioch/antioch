@@ -10,7 +10,6 @@ namespace Antioch{
  * \class KineticsType
  * \brief base class for kinetics models
  */
-template<typename CoeffType=double>
 class KineticsType{
    public:
       KineticsType(){}
