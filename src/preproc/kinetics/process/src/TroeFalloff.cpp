@@ -367,13 +367,13 @@ double TroeFalloff::logFcentT(double t, int i) const
 template <class P>
 P TroeFalloff::logFEquation(const P& logFc, const P& pr, const P& C, const P& N) const
 {
-  using std::log;
-  using Antioch::log;
+  using std::log10;
+  using Antioch::log10;
   using std::pow;
   using Antioch::pow;
   return ( logFc /
              (
-                P(1.) + pow( (log(pr) + C) / (N - (log(pr) + C ) * d) , 2)
+                P(1.) + pow( (log10(pr) + C) / (N - (log10(pr) + C ) * d) , 2)
              )
          );
 }
@@ -381,9 +381,9 @@ P TroeFalloff::logFEquation(const P& logFc, const P& pr, const P& C, const P& N)
 template <class P>
 P TroeFalloff::CEquation(const P& Fc) const
 {
-   using std::log;
-   using Antioch::log;
-   return (P(-0.4) - P(0.67) * log(Fc));
+   using std::log10;
+   using Antioch::log10;
+   return (P(-0.4) - P(0.67) * log10(Fc));
 }
 
 template <class P>
@@ -395,12 +395,12 @@ P TroeFalloff::NEquation(const P& logFc) const
 template <class P>
 P TroeFalloff::logFcentEquation(const P& temp, const P& t3, const P& t1, const P& al, const P& t2) const
 {
-   using std::log;
-   using Antioch::log;
+   using std::log10;
+   using Antioch::log10;
    using std::exp;
    using Antioch::exp;
    P out = exp(-temp/t3) * (P(1.0) - al) +  exp(-temp/t1) * al;
    if(!T2.empty()) out += exp(-t2/temp);
-   return log(out);
+   return log10(out);
 }
 }
