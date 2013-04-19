@@ -36,7 +36,7 @@ namespace Antioch
 
     enum ReactionType { ELEMENTARY = 0,
                         DUPLICATE,
-			THREE_BODY 
+			THREE_BODY, 
                         LINDEMANN_FALLOFF,
                         TROE_FALLOFF};
 

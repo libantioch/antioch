@@ -105,7 +105,7 @@ namespace Antioch
 
       }
 //... alpha(T)
-      return kfwd * _forward_rate[0]->(T);
+      return kfwd * (*_forward_rate[0])(T);
   }
 
 
@@ -138,7 +138,7 @@ namespace Antioch
     for (unsigned int s=0; s<this->n_species(); s++)
     {        
        dkfwd_dT[s] += coef;
-       dkfwd_dT[s] *= _forward_rate[0]->(T);
+       dkfwd_dT[s] *= (*_forward_rate[0])(T);
     }
 
     return;

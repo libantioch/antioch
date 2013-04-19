@@ -54,11 +54,25 @@ include_HEADERS += core/include/antioch/chemical_species.h
 include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
-# kinetics
+# kinetics-kinetics models
+include_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
+include_HEADERS += kinetics/include/antioch/berthelot_rate.h
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
-include_HEADERS += kinetics/include/antioch/reaction.h
+include_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
+include_HEADERS += kinetics/include/antioch/kooij_rate.h
+include_HEADERS += kinetics/include/antioch/vanthoff_rate.h
+# kinetics-chemical process
 include_HEADERS += kinetics/include/antioch/reaction_enum.h
+include_HEADERS += kinetics/include/antioch/reaction.h
+include_HEADERS += kinetics/include/antioch/elementary_reaction.h
+include_HEADERS += kinetics/include/antioch/duplicate_reaction.h
+include_HEADERS += kinetics/include/antioch/threebody_reaction.h
+include_HEADERS += kinetics/include/antioch/falloff_reaction.h
+include_HEADERS += kinetics/include/antioch/lindemann_falloff.h
+include_HEADERS += kinetics/include/antioch/troe_falloff.h
+# kinetics-other
 include_HEADERS += kinetics/include/antioch/reaction_set.h
+include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
 # parsing

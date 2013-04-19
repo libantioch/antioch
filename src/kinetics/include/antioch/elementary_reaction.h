@@ -96,7 +96,7 @@ namespace Antioch
 							   const StateType& T  ) const
   {
 //k(T,[M]) = alpha(T)
-    return *_forward_rate[0](T);
+    return (*_forward_rate[0])(T);
   }
 
   template<typename StateType, typename VectorStateType>

@@ -96,10 +96,10 @@ namespace Antioch
   StateType DuplicateReaction::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
 							   const StateType& T  ) const
   {
-    StateType kfwd = _forward_rate[0]->(T);
+    StateType kfwd = (*_forward_rate[0])(T);
     for(unsigned int ir = 1; ir < _forward_rate.size(); ir++)
     {
-      kfwd += _forward_rate[ir]->(T);
+      kfwd += (*_forward_rate[ir])(T);
     }
     return kfwd;
   }

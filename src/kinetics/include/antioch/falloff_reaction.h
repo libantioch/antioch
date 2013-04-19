@@ -76,10 +76,9 @@ namespace Antioch
 						   VectorStateType& dkfkwd_dY) const;
 
 
-    //! Return const reference to the forward rate object
-     template <typename StateType>
-    const FalloffType &F(StateType &T) const;
-    //! Return writeable reference to the forward rate object
+    //! Return const reference to the falloff object
+    const FalloffType &F() const;
+    //! Return writeable reference to the falloff object
     FalloffType &F();
 
   protected:
@@ -131,7 +130,10 @@ namespace Antioch
        M += molar_densities[s];
      }
 
-     StateType kfwd = _forward_rate[0]->(T) * M /(1. + M * _forward_rate[0]->(T)/_forward_rate[1]->(T) ) * F(T);
+//Pr = [M] k0 / kinf
+     StateType Pr = M * (*_forward_rate[0])(T) / (*_forward_rate[1])(T)
+
+     StateType kfwd = (*_forward_rate[1])(T) * Pr /(1. + Pr ) * _F.compute_F(T,Pr);
   }
 
   template<typename FalloffType>
