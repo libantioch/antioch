@@ -21,31 +21,31 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id$
+// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#include "antioch/arrhenius_rate.h"
+#include "antioch/hercourtessen_rate.h"
 
 template <typename Scalar>
 int tester()
 {
   using std::abs;
-  using std::exp;
+  using std::pow;
 
   const Scalar Cf = 1.4;
-  const Scalar Ea = 5.0;
+  const Scalar eta = 1.2;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
+  Antioch::HercourtEssenRate<Scalar> hercourtessen_rate(Cf,eta);
 
   const Scalar T = 1500.1;
   
-  const Scalar rate_exact = Cf*exp(-Ea/T);
+  const Scalar rate_exact = Cf*pow(T,eta);
 
   int return_flag = 0;
 
-  Scalar rate = arrhenius_rate(T);
+  Scalar rate = hercourtessen_rate(T);
 
   const Scalar tol = 1.0e-15;
 
@@ -58,7 +58,7 @@ int tester()
       return_flag = 1;
     }
 
-  std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
+  std::cout << "Hercourt-Essen rate: " << hercourtessen_rate << std::endl;
 
   return return_flag;
 }

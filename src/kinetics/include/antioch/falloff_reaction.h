@@ -31,6 +31,7 @@
 
 // Antioch
 #include "antioch/reaction.h"
+#include "antioch/lindemann_falloff.h"
 
 //C++
 #include <string>
@@ -51,29 +52,33 @@ namespace Antioch
     the mixture concentration (or pressure, it's equivalent, \f$[M] = \frac{P}{\mathrm{R}T}\f$
     in ideal gas model).  All reactions are assumed to be reversible, the kinetics models are
     assumed to be the same.
+    By default, the falloff is Lindemann and the kinetics model Kooij.
   */
-  template<typename FalloffType>
-  class FalloffReaction: public Reaction
+  template<typename CoeffType=double,typename FalloffType = LindemannFalloff<CoeffType> >
+  class FalloffReaction: public Reaction<CoeffType>
   {
   public:
 
     //! Construct a single reaction mechanism.
-    FalloffReaction( const unsigned int n_species, const KinMod::KinMod kin, const std::string &equation );
+    FalloffReaction( const unsigned int n_species,
+                     const std::string &equation, 
+                     const ReactionType::ReactionType &falloffType = ReactionType::LINDEMANN_FALLOFF,
+                     const KinMod::KinMod kin = KinMod::KOOIJ);
     
     virtual ~FalloffReaction();
 
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-					const StateType& kfwd, 
-					const StateType& kbkwd ) const;
+                                        const StateType& T ) const;
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-						   StateType& kfwd,  
-						   StateType& dkfwd_dT, 
-						   VectorStateType& dkfkwd_dY) const;
+                                                   const StateType& T,  
+                                                   StateType& kfwd,  
+                                                   StateType& dkfwd_dT, 
+                                                   VectorStateType& dkfkwd_dY) const;
 
 
     //! Return const reference to the falloff object
@@ -84,44 +89,60 @@ namespace Antioch
   protected:
 
     FalloffType _F;
+
+    template <typename StateType, typename VectorStateType>
+    StateType _Pr(const VectorStateType& molar_densities,
+                                        const StateType& T ) const;
+
+    template <typename StateType, typename VectorStateType>
+    void _Pr_and_derivatives(const VectorStateType& molar_densities,
+                                        const StateType& T ,
+                                        const StateType& k0, 
+                                        const StateType& kinf, 
+                                        const StateType& dk0_dT, 
+                                        const StateType& dkinf_dT, 
+                                        StateType &Pr,
+                                        StateType &dPr_dT,
+                                        VectorStateType &dPr_dY) const;
     
   };
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename FalloffType>
+  template<typename CoeffType, typename FalloffType>
   inline
-  FalloffReaction<FalloffType>::FalloffReaction( const unsigned int n_species,
-                                 const KinModel::KinModel kin,
-				 const std::string &equation ) 
-    :Reaction(n_species,kin,equation){}
+  FalloffReaction<CoeffType,FalloffType>::FalloffReaction( const unsigned int n_species,
+                                 const std::string &equation,
+                                 const ReactionType::ReactionType &falloffType, 
+                                 const KinMod::KinMod kin) 
+    :Reaction<CoeffType>(n_species,equation,falloffType,kin){}
 
 
-  template<typename FalloffType>
+  template<typename CoeffType, typename FalloffType>
   inline
-  FalloffReaction<FalloffType>::~FalloffReaction()
+  FalloffReaction<CoeffType,FalloffType>::~FalloffReaction()
   {
     return;
   }
 
-  template<typename FalloffType>
+  template<typename CoeffType, typename FalloffType>
   inline
-  FalloffType &FalloffReaction<FalloffType>::F()
+  FalloffType &FalloffReaction<CoeffType,FalloffType>::F()
   {
      return _F;
   }
 
-  template<typename FalloffType>
+  template<typename CoeffType, typename FalloffType>
   inline
-  const FalloffType &FalloffReaction<FalloffType>::F() const
+  const FalloffType &FalloffReaction<CoeffType,FalloffType>::F() const
   {
      return _F;
   }
 
-  template<typename FalloffType>
+  template<typename CoeffType, typename FalloffType>
   template<typename StateType, typename VectorStateType>
   inline
-  StateType FalloffReaction::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-							   const StateType& T  ) const
+  StateType FalloffReaction<CoeffType,FalloffType>::_Pr( const VectorStateType& molar_densities,
+                                                           const StateType& T  ) const
   {
 //k(T,[M]) = [M] * alpha_0(T) /(1 + [M] * alpha_0(T)/alpha_inf(T)) * F
      StateType M = (molar_densities[0] );
@@ -131,47 +152,88 @@ namespace Antioch
      }
 
 //Pr = [M] k0 / kinf
-     StateType Pr = M * (*_forward_rate[0])(T) / (*_forward_rate[1])(T)
-
-     StateType kfwd = (*_forward_rate[1])(T) * Pr /(1. + Pr ) * _F.compute_F(T,Pr);
+     return (M * (*Reaction<CoeffType>::_forward_rate[0])(T) / (*Reaction<CoeffType>::_forward_rate[1])(T));
   }
 
-  template<typename FalloffType>
+  template<typename CoeffType, typename FalloffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void FalloffReaction::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
-								      StateType& kfwd, 
-								      StateType& dkfwd_dT,
-								      VectorStateType& dkfwd_dY) const 
+  void FalloffReaction<CoeffType,FalloffType>::_Pr_and_derivatives( const VectorStateType& molar_densities,
+                                                           const StateType& T, 
+                                                           const StateType& k0, 
+                                                           const StateType& kinf, 
+                                                           const StateType& dk0_dT, 
+                                                           const StateType& dkinf_dT, 
+                                                           StateType &Pr, 
+                                                           StateType &dPr_dT,
+                                                           VectorStateType &dPr_dY) const
   {
-    using std::pow;
-//variables
-    StateType k0,dk0_dT;
-    _forward_rate[0]->rate_and_derivative(T,k0,dk0_dT);
-    StateType kinf,dkinf_dT;
-    _forward_rate[1]->rate_and_derivative(T,kinf,dkinf_dT);
-
+//k(T,[M]) = [M] * alpha_0(T) /(1 + [M] * alpha_0(T)/alpha_inf(T)) * F
     StateType M = (molar_densities[0] );
     for (unsigned int s=1; s<this->n_species(); s++)
     {        
       M += molar_densities[s];
     }
-    StateType Pr = M * k0/kinf;
-//k = kinf * Pr/(1 + Pr)
-    kfwd = kinf * Pr / (1. + Pr);
+//Pr = [M] k0 / kinf
+    Pr = M * (k0 / kinf);
+    dPr_dT = M * dk0_dT / kinf - M * k0 * dkinf_dT / pow(kinf,2);
+//dPr_dY = k0/kinf
+    dPr_dY.resize(this->n_species(), 0.);
+    std::fill( dPr_dY.begin(),  dPr_dY.end(),  k0/kinf);
+    return;   
+  }
 
-    StateType dPr_dT = M * dk0_dT / kinf - M * k0 * dkinf_dT / pow(kinf,2);
-//dk_dT = kfwd * [ dkinf_dT / kinf + dPr_dT /  Pr -  dPr_dT /(1 + Pr) ]
-    dkfwd_dT = kfwd * (dkinf_dT/kinf + dPr_dT / Pr - dPr_dT / (1. + Pr));
+  template<typename CoeffType, typename FalloffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  StateType FalloffReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+                                                           const StateType& T  ) const
+  {
+     StateType Pr = _Pr(molar_densities,T);
+
+     StateType kfwd = (*Reaction<CoeffType>::_forward_rate[1])(T) * Pr /(1. + Pr ) * _F.compute_F(T,Pr);
+  }
+
+  template<typename CoeffType, typename FalloffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  void FalloffReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
+                                                                      const StateType& T,
+                                                                      StateType& kfwd, 
+                                                                      StateType& dkfwd_dT,
+                                                                      VectorStateType& dkfwd_dY) const 
+  {
+    using std::pow;
+//variables, k0,kinf and derivatives
+    StateType k0,dk0_dT;
+    StateType kinf,dkinf_dT;
+    Reaction<CoeffType>::_forward_rate[0]->rate_and_derivative(T,k0,dk0_dT);
+    Reaction<CoeffType>::_forward_rate[1]->rate_and_derivative(T,kinf,dkinf_dT);
+
+//Pr
+    StateType Pr,dPr_dT;
+    VectorStateType dPr_dY;
+    _Pr_and_derivatives(molar_densities,T,k0,kinf,dk0_dT,dkinf_dT,Pr,dPr_dT,dPr_dY);
+
+//F
+    StateType f,df_dT;
+    VectorStateType df_dY;
+    _F.F_and_derivatives(T,Pr,dPr_dT,dPr_dY,f,df_dT,df_dY);
+
+//k = kinf * Pr/(1 + Pr)
+    kfwd = kinf * Pr / (1. + Pr) * f;
+
+//dk_dT = kfwd * [ dkinf_dT / kinf + dPr_dT /  Pr -  dPr_dT /(1 + Pr) + dF_dT / F]
+    dkfwd_dT = kfwd * (dkinf_dT/kinf + dPr_dT / Pr - dPr_dT / (1. + Pr) + df_dT/f);
 
 
     dkfwd_dY.resize(this->n_species(), kfwd);
-//dM_dY = 1.
-//dPr_dY = k0/kinf
-//dkfwd_dY = kfwd * [dPr_dY/Pr - dPr_dY/(1+Pr)]
-//dkfwd_dY = kfwd * [k0/kinf/Pr - k0/kinf/(1+Pr)]
-    StateType dkfwd_dCi = kfwd * (k0/kinf/Pr - k0/kinf/(1. + Pr));
-    std::fill( dkfwd_dY.begin(),  dkfwd_dY.end(),  dkfwd_dCi);    
+//dkfwd_dY = kfwd * [dPr_dY/Pr - dPr_dY/(1+Pr) + dF_dY/F]
+    for(unsigned int ic = 0; ic < this->n_species(); ic++)
+    {
+       dkfwd_dY[ic] = kfwd * (dPr_dY[ic]/(Pr*(1. + Pr)) + df_dY[ic]/f) ;
+    }
+
     return;
   }
   

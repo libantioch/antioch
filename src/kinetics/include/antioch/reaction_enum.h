@@ -41,6 +41,7 @@ namespace Antioch
                         TROE_FALLOFF};
 
   } // end namespace ReactionType
+
 } // end namespace Antioch
 
 #endif // ANTIOCH_REACTION_ENUM_H

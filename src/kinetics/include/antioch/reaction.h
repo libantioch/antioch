@@ -31,14 +31,14 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/reaction_enum.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/hercourtessen_rate.h"
-#include "antioch/arrhenius_rate.h"
 #include "antioch/berthelot_rate.h"
+#include "antioch/arrhenius_rate.h"
 #include "antioch/berthelothercourtessen_rate.h"
 #include "antioch/kooij_rate.h"
 #include "antioch/vanthoff_rate.h"
+#include "antioch/reaction_enum.h"
 
 //C++
 #include <string>
@@ -50,16 +50,21 @@ namespace Antioch
   //!A single reaction mechanism. 
   /*!\class Reaction
  *
-    This virtual base class encapsulates a kinetics model.  The choosable kinetics models
-    are
+    This virtual base is derived for the following processes:
+        - elementary process,
+        - duplicate process,
+        - falloff processes with:
+                - Lindemann falloff,
+                - Troe falloff.
+    This class encapsulates a kinetics model.  The choosable kinetics models are
         - Hercourt Hessen \f$\alpha(T) = A T^\beta\f$
         - Berthelot \f$\alpha(T) = A \exp\left(D T\right)\f$
         - Arrhenius \f$\alpha(T) = A \exp\left(-\frac{E_a}{T}\right)\f$
         - Berthelot Hercourt Hessen \f$\alpha(T) = A T^\beta \exp\left(D T\right)\f$
         - Kooij \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T}\right)\f$
         - Van't Hoff \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T} + D T\right)\f$
-    All reactions are assumed
-    to be reversible. 
+    All reactions are assumed to be reversible. 
+    By default, we choose an elementary process with a Kooij equation.
   */
   template<typename CoeffType=double>
   class Reaction
@@ -67,7 +72,7 @@ namespace Antioch
   public:
 
     //! Construct a single reaction mechanism.
-    Reaction( const unsigned int n_species, const KinMod::KinMod kin, const std::string &equation );
+    Reaction( const unsigned int n_species, const std::string &equation, const ReactionType::ReactionType type = ReactionType::ELEMENTARY, const KinMod::KinMod kin = KinMod::KOOIJ);
     
     virtual ~Reaction();
 
@@ -75,6 +80,22 @@ namespace Antioch
     
     //! \returns the equation for this reaction.
     std::string equation() const;
+
+    /*! Type of reaction.
+     *  reversible reactions are considered.
+     */
+    ReactionType::ReactionType type() const;
+
+    /*! Set the type of reaction.
+     * reversible reactions are considered.
+     */
+    void set_type( const ReactionType::ReactionType type);
+
+    //! Model of kinetics.
+    KinMod::KinMod kinetics_model() const;
+
+    //! Set the model of kinetics.
+    void set_kinetics_model( const KinMod::KinMod kin);
     
     bool initialized() const;
 
@@ -146,21 +167,24 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                        const StateType& kfwd, 
-                                        const StateType& kbkwd ) const = 0;
+                                        const StateType& T) const;
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
+                                                           const StateType& T, 
                                                            StateType& kfwd, 
                                                            StateType& dkfwd_dT,
-                                                           VectorStateType& dkfwd_dY) const = 0;
+                                                           VectorStateType& dkfwd_dY) const;
 ////
     //! Return const reference to the forward rate object
-    const KineticsType& forward_rate(unsigned int ir = 0) const;
+    const KineticsType<CoeffType>& forward_rate(unsigned int ir = 0) const;
 
     //! Return writeable reference to the forward rate object
-    KineticsType& forward_rate(unsigned int ir = 0);
+    KineticsType<CoeffType>& forward_rate(unsigned int ir = 0);
+
+    //! Return const reference to the forward rate object
+    void add_forward_rate(KineticsType<CoeffType> *rate);
 
     //! Formatted print, by default to \p std::cout.
     void print(std::ostream& os = std::cout) const;
@@ -188,9 +212,11 @@ namespace Antioch
     std::vector<int>          _species_delta_stoichiometry;
     int _gamma;
     bool _initialized;
+    ReactionType::ReactionType _type;
+    KinMod::KinMod _kintype;
 
     //! The forward reaction rate modified Arrhenius form.
-    std::vector<KineticsType* > _forward_rate;
+    std::vector<KineticsType<CoeffType>* > _forward_rate;
 
   };
 
@@ -226,9 +252,33 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  KinMod::KinMod Reaction<CoeffType>::kinetics_model() const
+  {
+    return _kintype;
+  }
+
+  template<typename CoeffType>
+  inline
+  void Reaction<CoeffType>::set_kinetics_model( const KinMod::KinMod kin)
+  {
+     _kintype = kin;
+     return;
+  }
+
+  template<typename CoeffType>
+  inline
   bool Reaction<CoeffType>::initialized() const
   {
     return _initialized;
+  }
+
+
+  template<typename CoeffType>
+  inline
+  void Reaction<CoeffType>::add_forward_rate(KineticsType<CoeffType> *rate)
+  {
+    _forward_rate.push_back(rate);
+    return;
   }
 
   template<typename CoeffType>
@@ -360,14 +410,14 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  const KineticsType& Reaction<CoeffType>::forward_rate(unsigned int ir) const
+  const KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir) const
   {
     return *_forward_rate[ir];
   }
 
   template<typename CoeffType>
   inline
-  KineticsType& Reaction<CoeffType>::forward_rate(unsigned int ir)
+  KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir)
   {
     return *_forward_rate[ir];
   }
@@ -376,12 +426,15 @@ namespace Antioch
   template<typename CoeffType>
   inline
   Reaction<CoeffType>::Reaction( const unsigned int n_species,
-                                 const KinModel::KinModel kin,
-                                 const std::string &equation ) 
+                                 const std::string &equation, 
+                                 const ReactionType::ReactionType type,
+                                 const KinMod::KinMod kin) 
     : _n_species(n_species),
       _equation(equation),
       _gamma(0),
-      _initialized(false)
+      _initialized(false),
+      _type(type),
+      _kintype(kin)
   {
     _efficiencies.resize(_n_species); 
     std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
@@ -525,8 +578,11 @@ namespace Antioch
           os << this->product_name(p) << ":"
              << this->product_stoichiometric_coefficient(p) << " ";
       }
-    os << "\n#   forward rate eqn: " << _forward_rate;
-    
+    for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
+    {
+      os << "\n#   forward rate eqn: " << *_forward_rate[ir];
+    }
+
     if (_type == ReactionType::THREE_BODY)
       {
         os << "\n#   efficiencies: ";

@@ -21,31 +21,34 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id$
+// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#include "antioch/arrhenius_rate.h"
+#include "antioch/vanthoff_rate.h"
 
 template <typename Scalar>
 int tester()
 {
   using std::abs;
   using std::exp;
+  using std::pow;
 
   const Scalar Cf = 1.4;
+  const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
+  const Scalar D = 2.50;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
+  Antioch::VantHoffRate<Scalar> vanthoff_rate(Cf,eta,Ea,D);
 
   const Scalar T = 1500.1;
   
-  const Scalar rate_exact = Cf*exp(-Ea/T);
+  const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T+D*T);
 
   int return_flag = 0;
 
-  Scalar rate = arrhenius_rate(T);
+  Scalar rate = vanthoff_rate(T);
 
   const Scalar tol = 1.0e-15;
 
@@ -58,7 +61,7 @@ int tester()
       return_flag = 1;
     }
 
-  std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
+  std::cout << "Van't Hoff rate: " << vanthoff_rate << std::endl;
 
   return return_flag;
 }

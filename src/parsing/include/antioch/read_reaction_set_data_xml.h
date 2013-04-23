@@ -32,6 +32,8 @@
 // Antioch
 #include "antioch/string_utils.h"
 #include "antioch/reaction_set.h"
+#include "antioch/kinetics_parsing.h"
+#include "antioch/reaction_parsing.h"
 
 // XML
 #include "antioch/tinyxml2.h"
@@ -103,16 +105,94 @@ namespace Antioch
 			       << " eqn: " << reaction->FirstChildElement("equation")->GetText()
 			       << std::endl;
 
-	// construct a Reaction object	  
-	Reaction<NumericType> my_rxn(n_species, reaction->FirstChildElement("equation")->GetText());
+        ReactionType::ReactionType typeReaction(ReactionType::ELEMENTARY);
+        KinMod::KinMod kineticsModel(KinMod::KOOIJ);
 
 	if (reaction->Attribute("type"))
 	  {
 	    if (verbose) std::cout << " type: " << reaction->Attribute("type");
 	    if (std::string(reaction->Attribute("type")) == "threeBody")
-	      my_rxn.set_type( ReactionType::THREE_BODY );
+	      typeReaction = ReactionType::THREE_BODY;
 	  }
-	  
+	    
+	// construct a Reaction object	  
+	Reaction<NumericType> *my_rxn = get_reaction_ptr<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
+
+	tinyxml2::XMLElement *Arrhenius = reaction->FirstChildElement("rateCoeff")->FirstChildElement("Arrhenius");
+
+	if(verbose) 
+	  {
+	    std::cout << "\n rates:\n"
+		      << "   A: " << Arrhenius->FirstChildElement("A")->GetText() << "\n"
+		      << "   b: " << Arrhenius->FirstChildElement("b")->GetText() << "\n"
+		      << "   E: " << Arrhenius->FirstChildElement("E")->GetText() << "\n";
+	  }
+
+	// typically Cantera files list activation energy in cal/mol, but we want it in K.
+        double coEa = 1.;
+	if( std::string(Arrhenius->FirstChildElement("E")->Attribute("units")) == "cal/mol" )
+	  {
+	    coEa = 1.9858775;
+	  }
+	else 
+	  {
+	    // huh?
+	    antioch_error();
+	  }
+        std::vector<NumericType> data;
+        data.push_back(std::atof(Arrhenius->FirstChildElement("A")->GetText()));
+        data.push_back(std::atof(Arrhenius->FirstChildElement("b")->GetText()));
+        data.push_back(std::atof(Arrhenius->FirstChildElement("E")->GetText()) /coEa);
+
+        NumericType T0(1.);
+        if(Arrhenius->FirstChildElement("Tref"))T0 = std::atof(Arrhenius->FirstChildElement("Tref")->GetText());
+
+        KineticsType<NumericType> *rate = get_rate_ptr<NumericType>(data,kineticsModel,T0);
+
+        my_rxn->add_forward_rate(rate);
+
+	tinyxml2::XMLElement *efficiencies = 
+	  reaction->FirstChildElement("rateCoeff")->FirstChildElement("efficiencies");
+
+	if(efficiencies)
+	  {
+	    if(efficiencies->GetText())
+	      {
+		antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn->type());
+
+		if(verbose) std::cout << "   efficiencies: " << efficiencies->GetText();
+
+		std::vector<std::string> efficiency_pairs;
+
+		SplitString( std::string(efficiencies->GetText()),
+			     " ",
+			     efficiency_pairs,
+			     /* include_empties = */ false );
+
+		for(unsigned int p = 0; p < efficiency_pairs.size(); p++)
+		  {
+		    std::pair<std::string, double> pair(split_string_double_on_colon (efficiency_pairs[p]));
+		    if(verbose) 
+		      {
+			std::cout  << "\n    " << efficiency_pairs[p] 
+				   << " " << pair.first << " " << pair.second;
+		      }
+
+		    if(pair.first == "e-") pair.first = "e";
+
+		    // it is possible that the efficiency is specified for a species we are not
+		    // modeling - so only add the efficiency if it is included in our list
+		    if( chem_mixture.active_species_name_map().count( pair.first ) )
+		      {
+			my_rxn->set_efficiency( pair.first,
+					       chem_mixture.active_species_name_map().find( pair.first )->second,
+					       pair.second );
+		      }
+		  }
+	      }
+	  }
+	
+
 	tinyxml2::XMLElement* reactants = reaction->FirstChildElement("reactants");
 	tinyxml2::XMLElement* products  = reaction->FirstChildElement("products");
 	
@@ -151,7 +231,7 @@ namespace Antioch
 		  }
 		else
 		  {
-		    my_rxn.add_reactant( pair.first,
+		    my_rxn->add_reactant( pair.first,
 					 chem_mixture.active_species_name_map().find( pair.first )->second,
 					 pair.second );
 		  }
@@ -188,79 +268,12 @@ namespace Antioch
 		  }
 		else
 		  {
-		    my_rxn.add_product( pair.first,
+		    my_rxn->add_product( pair.first,
 					chem_mixture.active_species_name_map().find( pair.first )->second,
 					pair.second );
 		  }
 	      }
 	  }
-	    
-	tinyxml2::XMLElement *Arrhenius = reaction->FirstChildElement("rateCoeff")->FirstChildElement("Arrhenius");
-
-	if(verbose) 
-	  {
-	    std::cout << "\n rates:\n"
-		      << "   A: " << Arrhenius->FirstChildElement("A")->GetText() << "\n"
-		      << "   b: " << Arrhenius->FirstChildElement("b")->GetText() << "\n"
-		      << "   E: " << Arrhenius->FirstChildElement("E")->GetText() << "\n";
-	  }
-
-	my_rxn.forward_rate().set_Cf( std::atof(Arrhenius->FirstChildElement("A")->GetText()) );
-	my_rxn.forward_rate().set_eta( std::atof(Arrhenius->FirstChildElement("b")->GetText()) );
-	my_rxn.forward_rate().set_Ea( std::atof(Arrhenius->FirstChildElement("E")->GetText()) );
-
-	// typically Cantera files list activation energy in cal/mol, but we want it in K.
-	if( std::string(Arrhenius->FirstChildElement("E")->Attribute("units")) == "cal/mol" )
-	  {
-	    my_rxn.forward_rate().scale_Ea( 1.0/1.9858775 );
-	  }
-	else 
-	  {
-	    // huh?
-	    antioch_error();
-	  }
-	
-	tinyxml2::XMLElement *efficiencies = 
-	  reaction->FirstChildElement("rateCoeff")->FirstChildElement("efficiencies");
-
-	if(efficiencies)
-	  {
-	    if(efficiencies->GetText())
-	      {
-		antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn.type());
-
-		if(verbose) std::cout << "   efficiencies: " << efficiencies->GetText();
-
-		std::vector<std::string> efficiency_pairs;
-
-		SplitString( std::string(efficiencies->GetText()),
-			     " ",
-			     efficiency_pairs,
-			     /* include_empties = */ false );
-
-		for(unsigned int p = 0; p < efficiency_pairs.size(); p++)
-		  {
-		    std::pair<std::string, double> pair(split_string_double_on_colon (efficiency_pairs[p]));
-		    if(verbose) 
-		      {
-			std::cout  << "\n    " << efficiency_pairs[p] 
-				   << " " << pair.first << " " << pair.second;
-		      }
-
-		    if(pair.first == "e-") pair.first = "e";
-
-		    // it is possible that the efficiency is specified for a species we are not
-		    // modeling - so only add the efficiency if it is included in our list
-		    if( chem_mixture.active_species_name_map().count( pair.first ) )
-		      {
-			my_rxn.set_efficiency( pair.first,
-					       chem_mixture.active_species_name_map().find( pair.first )->second,
-					       pair.second );
-		      }
-		  }
-	      }
-	  }
-	
 	if(verbose) std::cout << "\n\n";
 
 	if(relevant_reaction) 

@@ -47,25 +47,29 @@ namespace Antioch
     with \f$\alpha(T)\f$ being a kinetics model (see base class Reaction), \f$[M]\f$
     the mixture concentration (or pressure, it's equivalent, \f$[M] = \frac{P}{\mathrm{R}T}\f$
     in ideal gas model) and \f$C_i\f$ the concentration of species \f$i\f$.  All reactions are assumed to be reversible. 
+    By default, the Kooij kinetics model is used.
   */
-  class ThreeBodyReaction: public Reaction
+  template <typename CoeffType=double>
+  class ThreeBodyReaction: public Reaction<CoeffType>
   {
   public:
 
     //! Construct a single reaction mechanism.
-    ThreeBodyReaction( const unsigned int n_species, const KinMod::KinMod kin, const std::string &equation );
+    ThreeBodyReaction( const unsigned int n_species, 
+                       const std::string &equation,
+                       const KinMod::KinMod kin = KinMod::KOOIJ);
     
     ~ThreeBodyReaction();
 
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                        const StateType& kfwd, 
-                                        const StateType& kbkwd ) const;
+                                        const StateType& T ) const;
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
+                                                   const StateType& T,  
                                                    StateType& kfwd,  
                                                    StateType& dkfwd_dT, 
                                                    VectorStateType& dkfwd_dY) const;
@@ -75,24 +79,29 @@ namespace Antioch
   };
 
   /* ------------------------- Inline Functions -------------------------*/
+  template <typename CoeffType>
   inline
-  ThreeBodyReaction::ThreeBodyReaction( const unsigned int n_species,
-                                 const KinModel::KinModel kin,
-                                 const std::string &equation ) 
-    :Reaction(n_species,kin,equation){}
+  ThreeBodyReaction<CoeffType>::ThreeBodyReaction( const unsigned int n_species,
+                                 const std::string &equation ,
+                                 const KinMod::KinMod kin) 
+    :Reaction<CoeffType>(n_species,equation,ReactionType::THREE_BODY,kin)
+  {
+    return;
+  }
 
-
+  template <typename CoeffType>
   inline
-  ThreeBodyReaction::~ThreeBodyReaction()
+  ThreeBodyReaction<CoeffType>::~ThreeBodyReaction()
   {
     return;
   }
 
 
 
+  template <typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  StateType ThreeBodyReaction::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+  StateType ThreeBodyReaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
                                                            const StateType& T  ) const
   {
 //k(T,[M]) = (sum eff_i * C_i) * ...
@@ -105,22 +114,24 @@ namespace Antioch
 
       }
 //... alpha(T)
-      return kfwd * (*_forward_rate[0])(T);
+      return kfwd * (*Reaction<CoeffType>::_forward_rate[0])(T);
   }
 
 
+  template <typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void ThreeBodyReaction::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
+  void ThreeBodyReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
+                                                                      const StateType& T,  
                                                                       StateType& kfwd, 
                                                                       StateType& dkfwd_dT,
-						                      VectorStateType& dkfkwd_dY) const
+						                      VectorStateType& dkfwd_dY) const
   {
 //dk_dT = dalpha_dT
 //dk_dCi = alpha(T)*sum_{j /= i} eps_j Cj + alpha(T) * eps_i = k(T,[M])[sum_j eps_j Cj + eps_i(1 - Ci)]
     dkfwd_dY.resize(this->n_species(), kfwd);
     std::fill( dkfwd_dY.begin(),  dkfwd_dY.end(),  0.);    
-    _forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+    Reaction<CoeffType>::_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
     StateType coef = (this->efficiency(0) * molar_densities[0] );
 
 //pre-fill with eps_i(1-Ci)
@@ -138,7 +149,7 @@ namespace Antioch
     for (unsigned int s=0; s<this->n_species(); s++)
     {        
        dkfwd_dT[s] += coef;
-       dkfwd_dT[s] *= (*_forward_rate[0])(T);
+       dkfwd_dT[s] *= (*Reaction<CoeffType>::_forward_rate[0])(T);
     }
 
     return;

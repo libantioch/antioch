@@ -53,7 +53,10 @@ namespace Antioch
                         KOOIJ,       // A * T^beta * exp(-Ea/T)
                         VANTHOFF };  // A * T^beta * exp(-Ea/T + D*T)
 
+    const double Tref(300.);
+
   } // end namespace KinMod
+
 } // end namespace Antioch
 
 #endif // ANTIOCH_REACTION_ENUM_H

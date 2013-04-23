@@ -24,67 +24,75 @@
 #ifndef _ANTIOCH_KINETICS_TYPE_H
 #define _ANTIOCH_KINETICS_TYPE_H
 
+//Antioch
+#include "antioch/kinetics_enum.h"
+
+//C++
+#include <string>
+#include <iostream>
+
 namespace Antioch{
 /*!
  *
  * \class KineticsType
  * \brief base class for kinetics models
  */
+template <typename CoeffType>
 class KineticsType{
    public:
-      KineticsType();
+      KineticsType(const KinMod::KinMod type);
       virtual ~KineticsType();
 
     //!\return error because I cannot make it pure virtual.
     template <typename StateType>
-    virtual StateType operator()(const StateType& T) const;
+    StateType operator()(const StateType& T) const;
 
     //!\return error because I cannot make it pure virtual.
     template <typename StateType>
-    virtual StateType derivative( const StateType& T ) const;
+    StateType derivative( const StateType& T ) const;
 
     //!\return error because I cannot make it pure virtual.
     template <typename StateType>
-    virtual void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+    void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+
+    virtual const std::string numeric() const = 0;
+
+    //! Formatted print, by default to \p std::cout
+    void print(std::ostream& os = std::cout) const;
+
+    //! Formatted print.
+    friend std::ostream& operator<<(std::ostream& os, const KineticsType& rate)
+    {
+      rate.print(os);
+      return os;
+    }
+
+   private:
+   KinMod::KinMod my_type;
 };
 
   /* ------------------------- Inline Functions -------------------------*/
+  template <typename CoeffType>
   inline
-  KineticsType::KineticsType()
+  void KineticsType<CoeffType>::print(std::ostream& os) const
+  {
+    os << numeric() << std::endl;
+  }
+
+  template <typename CoeffType>
+  inline
+  KineticsType<CoeffType>::KineticsType(const KinMod::KinMod type):
+    my_type(type)
   {
       return;
   }
 
+  template <typename CoeffType>
   inline
-  KineticsType::~KineticsType()
+  KineticsType<CoeffType>::~KineticsType()
   {
      return;
   }
-
-  inline
-  template <typename StateType>
-  StateType operator()(const StateType& T) const
-  {
-    std::cerr << "Kinetics base class, get outta here!!" << std::endl;
-    antioch_error();
-  }
-
-  inline
-  template <typename StateType>
-  StateType derivative( const StateType& T ) const
-  {
-    std::cerr << "Kinetics base class, get outta here!!" << std::endl;
-    antioch_error();
-  }
-
-  inline
-  template <typename StateType>
-  void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
-  {
-    std::cerr << "Kinetics base class, get outta here!!" << std::endl;
-    antioch_error();
-  }
-
 }
 
 #endif

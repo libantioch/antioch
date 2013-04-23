@@ -21,6 +21,7 @@ libantioch_la_SOURCES += core/src/chemical_mixture.C
 libantioch_la_SOURCES += kinetics/src/reaction.C
 libantioch_la_SOURCES += kinetics/src/reaction_set.C
 libantioch_la_SOURCES += kinetics/src/kinetics_evaluator.C
+libantioch_la_SOURCES += kinetics/src/kinetics_type.C
 
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
@@ -55,6 +56,8 @@ include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
 # kinetics-kinetics models
+include_HEADERS += kinetics/include/antioch/kinetics_enum.h
+include_HEADERS += kinetics/include/antioch/kinetics_type.h
 include_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
 include_HEADERS += kinetics/include/antioch/berthelot_rate.h
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
@@ -72,7 +75,8 @@ include_HEADERS += kinetics/include/antioch/lindemann_falloff.h
 include_HEADERS += kinetics/include/antioch/troe_falloff.h
 # kinetics-other
 include_HEADERS += kinetics/include/antioch/reaction_set.h
-include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
+include_HEADERS += kinetics/include/antioch/reaction_parsing.h
+include_HEADERS += kinetics/include/antioch/kinetics_parsing.h
 include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
 # parsing

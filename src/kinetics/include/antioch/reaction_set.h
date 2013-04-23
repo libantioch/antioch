@@ -32,6 +32,12 @@
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction.h"
+#include "antioch/elementary_reaction.h"
+#include "antioch/duplicate_reaction.h"
+#include "antioch/threebody_reaction.h"
+#include "antioch/falloff_reaction.h"
+#include "antioch/lindemann_falloff.h"
+#include "antioch/troe_falloff.h"
 
 // C++
 #include <iostream>
@@ -61,10 +67,10 @@ namespace Antioch
     unsigned int n_reactions() const;
      
     //! Add a reaction to the system.
-    void add_reaction(const Reaction<CoeffType>& reaction);
+    void add_reaction(Reaction<CoeffType>* reaction);
 
     //! \returns a constant reference to reaction \p r.
-    const Reaction<CoeffType>& reaction(const unsigned int r) const;
+    const Reaction<CoeffType> reaction(const unsigned int r) const;
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
@@ -94,7 +100,7 @@ namespace Antioch
      
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
-    std::vector<Reaction<CoeffType> > _reactions;
+    std::vector<Reaction<CoeffType>* > _reactions;
 
   };
   
@@ -115,22 +121,22 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void ReactionSet<CoeffType>::add_reaction(const Reaction<CoeffType>& reaction)
+  void ReactionSet<CoeffType>::add_reaction(Reaction<CoeffType>* reaction)
   {
     _reactions.push_back(reaction);
     
     // and make sure it is initialized!
-    _reactions.back().initialize();
+    _reactions.back()->initialize();
 
     return;
   }
   
   template<typename CoeffType>
   inline
-  const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const      
+  const Reaction<CoeffType> ReactionSet<CoeffType>::reaction(const unsigned int r) const      
   {
     antioch_assert_less(r, this->n_reactions());
-    return _reactions[r];
+    return &(*_reactions[r]);
   }
 
   template<typename CoeffType>
@@ -154,6 +160,7 @@ namespace Antioch
   inline
   ReactionSet<CoeffType>::~ReactionSet()
   {
+    for(unsigned int ir = 1; ir < _reactions.size(); ir++)delete _reactions[ir];
     return;
   }
   
@@ -190,11 +197,11 @@ namespace Antioch
       {
         const Reaction<CoeffType>& reaction = this->reaction(rxn);
 
-        StateType kfwd = (reaction.compute_forward_rate_coefficient(T,molar_densities));
+        StateType kfwd = reaction.compute_forward_rate_coefficient(molar_densities,T);
 
         StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-        const StateType kbkwd = kfwd/keq;
+        StateType kbkwd = kfwd/keq;
 
         for (unsigned int r=0; r<reaction.n_reactants(); r++)
         {

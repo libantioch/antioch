@@ -24,9 +24,13 @@
 #ifndef ANTIOCH_HERCOURT_ESSEN_RATE_H
 #define ANTIOCH_HERCOURT_ESSEN_RATE_H
 
+//Antioch
+#include "antioch/kinetics_type.h"
+
 // C++
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 namespace Antioch
 {
@@ -36,7 +40,7 @@ namespace Antioch
    * \f$ C_f\times T^\eta \f$.
    */
   template<typename CoeffType=double>
-  class HercourtEssenRate:public KineticsType
+  class HercourtEssenRate:public KineticsType<CoeffType>
   {
   
   public:
@@ -54,6 +58,10 @@ namespace Antioch
     template <typename StateType>
     StateType operator()(const StateType& T) const;
 
+    //! \return the rate evaluated at \p T.
+    template <typename StateType>
+    StateType rate(const StateType& T) const;
+
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     StateType derivative( const StateType& T ) const;
@@ -62,15 +70,8 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
-    //! Formatted print, by default to \p std::cout
-    void print(std::ostream& os = std::cout) const;
-
-    //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const HercourtEssenRate& rate)
-    {
-      rate.print(os);
-      return os;
-    }
+    //! print equation
+    const std::string numeric() const;
 
   private:
 
@@ -81,7 +82,8 @@ namespace Antioch
 
   template<typename CoeffType>
   HercourtEssenRate<CoeffType>::HercourtEssenRate(const CoeffType Cf, const CoeffType eta)
-    : _Cf(Cf),
+    : KineticsType<CoeffType>(KinMod::HERCOURT_ESSEN),
+      _Cf(Cf),
       _eta(eta)
   {
     return;
@@ -94,12 +96,13 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  void HercourtEssenRate<CoeffType>::print(std::ostream& os) const
+  const std::string HercourtEssenRate<CoeffType>::numeric() const
   {
+    std::stringstream os;
     os << _Cf;
     os << "*T^" << _eta;
 
-    return;
+    return os.str();
   }
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -141,6 +144,15 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
+  StateType HercourtEssenRate<CoeffType>::rate(const StateType& T) const
+  {
+    using std::pow;
+    return _Cf* (pow(T,_eta));
+  }
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
   StateType HercourtEssenRate<CoeffType>::derivative( const StateType& T ) const
   {
     return (*this)(T)/T*(_eta);
@@ -160,4 +172,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_ARRHENIUS_RATE_H
+#endif // ANTIOCH_HERCOURT_ESSEN_RATE_H

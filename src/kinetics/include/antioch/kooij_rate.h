@@ -24,9 +24,13 @@
 #ifndef ANTIOCH_KOOIJ_RATE_H
 #define ANTIOCH_KOOIJ_RATE_H
 
+//Antioch
+#include "antioch/kinetics_type.h"
+
 // C++
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 namespace Antioch
 {
@@ -37,7 +41,7 @@ namespace Antioch
    * the \p FIN-S code and slightly reformatted for \p Antioch.
    */
   template<typename CoeffType=double>
-  class KooijRate: public KineticsType
+  class KooijRate: public KineticsType<CoeffType>
   {
   
   public:
@@ -59,6 +63,10 @@ namespace Antioch
     template <typename StateType>
     StateType operator()(const StateType& T) const;
 
+    //! \return the rate evaluated at \p T.
+    template <typename StateType>
+    StateType rate(const StateType& T) const;
+
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     StateType derivative( const StateType& T ) const;
@@ -67,15 +75,9 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
-    //! Formatted print, by default to \p std::cout
-    void print(std::ostream& os = std::cout) const;
+    //! print equation
+    const std::string numeric() const;
 
-    //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const KooijRate& rate)
-    {
-      rate.print(os);
-      return os;
-    }
 
   private:
 
@@ -87,7 +89,8 @@ namespace Antioch
 
   template<typename CoeffType>
   KooijRate<CoeffType>::KooijRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea)
-    : _Cf(Cf),
+    : KineticsType<CoeffType>(KinMod::KOOIJ),
+      _Cf(Cf),
       _eta(eta),
       _Ea(Ea)
   {
@@ -101,13 +104,14 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  void KooijRate<CoeffType>::print(std::ostream& os) const
+  const std::string KooijRate<CoeffType>::numeric() const
   {
+    std::stringstream os;
     os << _Cf;
     if (_eta != 0.) os << "*T^" << _eta;
     os << "*exp(-" << _Ea << "/T)";
 
-    return;
+    return os.str();
   }
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -171,6 +175,16 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
+  StateType KooijRate<CoeffType>::rate(const StateType& T) const
+  {
+    using std::pow;
+    using std::exp;
+    return _Cf* (pow(T,_eta)*exp(-_Ea/T));
+  }
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
   StateType KooijRate<CoeffType>::derivative( const StateType& T ) const
   {
     return (*this)(T)/T*(_eta + _Ea/T);
@@ -190,4 +204,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_ARRHENIUS_RATE_H
+#endif // ANTIOCH_KOOIJ_RATE_H

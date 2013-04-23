@@ -29,9 +29,14 @@
 #ifndef ANTIOCH_ARRHENIUS_RATE_H
 #define ANTIOCH_ARRHENIUS_RATE_H
 
+//Antioch
+#include "antioch/kinetics_type.h"
+
 // C++
 #include <cmath>
 #include <iostream>
+#include <sstream>
+
 
 namespace Antioch
 {
@@ -42,7 +47,7 @@ namespace Antioch
    * the \p FIN-S code and slightly reformatted for \p Antioch.
    */
   template<typename CoeffType=double>
-  class ArrheniusRate: public KineticsType
+  class ArrheniusRate: public KineticsType<CoeffType>
   {
   
   public:
@@ -62,6 +67,10 @@ namespace Antioch
     template <typename StateType>
     StateType operator()(const StateType& T) const;
 
+    //! \return the rate evaluated at \p T.
+    template <typename StateType>
+    StateType rate(const StateType& T) const;
+
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     StateType derivative( const StateType& T ) const;
@@ -70,15 +79,8 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
-    //! Formatted print, by default to \p std::cout
-    void print(std::ostream& os = std::cout) const;
-
-    //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const ArrheniusRate& rate)
-    {
-      rate.print(os);
-      return os;
-    }
+    //! print equation
+    const std::string numeric() const;
 
   private:
 
@@ -89,7 +91,8 @@ namespace Antioch
 
   template<typename CoeffType>
   ArrheniusRate<CoeffType>::ArrheniusRate(const CoeffType Cf, const CoeffType Ea)
-    : _Cf(Cf),
+    : KineticsType<CoeffType>(KinMod::ARRHENIUS),
+      _Cf(Cf),
       _Ea(Ea)
   {
     return;
@@ -102,12 +105,13 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  void ArrheniusRate<CoeffType>::print(std::ostream& os) const
+  const std::string ArrheniusRate<CoeffType>::numeric() const
   {
+    std::stringstream os;
     os << _Cf;
     os << "*exp(-" << _Ea << "/T)";
 
-    return;
+    return os.str();
   }
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -149,6 +153,15 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType ArrheniusRate<CoeffType>::operator()(const StateType& T) const
+  {
+    using std::exp;
+    return _Cf* (exp(-_Ea/T));
+  }
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  StateType ArrheniusRate<CoeffType>::rate(const StateType& T) const
   {
     using std::exp;
     return _Cf* (exp(-_Ea/T));

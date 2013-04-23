@@ -43,27 +43,59 @@ class LindemannFalloff{
        LindemannFalloff();
        ~LindemannFalloff();
 
-     CoeffType compute_F(const CoeffType& T, const CoeffType &Pr) const;
+     template <typename StateType>
+     StateType operator()(const StateType& T, const StateType &Pr) const;
+
+     template <typename StateType, typename VectorStateType>
+     StateType F_and_derivatives(const StateType& T, 
+                           const StateType &Pr, 
+                           const StateType &dPr_dT, 
+                           const VectorStateType &dPr_dY,
+                           StateType &F,
+                           StateType &dF_dT,
+                           VectorStateType &dF_dY) const;
+
 
 };
   template<typename CoeffType>
+  template <typename StateType>
   inline
-  CoeffType LindemannFallOff<CoeffType>::compute_F(const CoeffType &T, const CoeffType &Pr) const
+  StateType LindemannFalloff<CoeffType>::operator()(const StateType &T, const StateType &Pr) const
   {
     return 1.;
   }
 
+  template <typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  StateType LindemannFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
+                        const StateType &Pr, 
+                        const StateType &dPr_dT, 
+                        const VectorStateType &dPr_dY,
+                        StateType &dF_dT,
+                        StateType &F,
+                        VectorStateType &dF_dY) const
+  {
+//all derived are 0
+    dF_dT = 0.;
+    dF_dY.resize(this->n_species(), 0.);
+    std::fill( dF_dY.begin(),  dF_dY.end(),  0.);    
+    return;
+  }
+
   template<typename CoeffType>
   inline
-  LindemannFallOff<CoeffType>::LindemannFalloff()
+  LindemannFalloff<CoeffType>::LindemannFalloff()
   {
     return;
   }
 
   template<typename CoeffType>
   inline
-  LindemannFallOff<CoeffType>::~LindemannFalloff()
+  LindemannFalloff<CoeffType>::~LindemannFalloff()
   {
     return;
   }
 }
+
+#endif
