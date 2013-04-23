@@ -70,7 +70,7 @@ namespace Antioch
     void add_reaction(Reaction<CoeffType>* reaction);
 
     //! \returns a constant reference to reaction \p r.
-    const Reaction<CoeffType> reaction(const unsigned int r) const;
+    const Reaction<CoeffType>* reaction(const unsigned int r) const;
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
@@ -133,10 +133,10 @@ namespace Antioch
   
   template<typename CoeffType>
   inline
-  const Reaction<CoeffType> ReactionSet<CoeffType>::reaction(const unsigned int r) const      
+  const Reaction<CoeffType>* ReactionSet<CoeffType>::reaction(const unsigned int r) const      
   {
     antioch_assert_less(r, this->n_reactions());
-    return &(*_reactions[r]);
+    return _reactions[r];
   }
 
   template<typename CoeffType>
@@ -188,30 +188,30 @@ namespace Antioch
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
     // useful constants
-    const CoeffType P0    = 1.e5; // standard pressure
+    const CoeffType P0    = 1.e5; // standard pressure in Pa
     const StateType RT    = R_mix*T;
     const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-        const Reaction<CoeffType>& reaction = this->reaction(rxn);
+        const Reaction<CoeffType>* reaction = this->reaction(rxn);
 
-        StateType kfwd = reaction.compute_forward_rate_coefficient(molar_densities,T);
+        StateType kfwd = reaction->compute_forward_rate_coefficient(molar_densities,T);
 
-        StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
+        StateType keq = reaction->equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
         StateType kbkwd = kfwd/keq;
 
-        for (unsigned int r=0; r<reaction.n_reactants(); r++)
+        for (unsigned int r=0; r<reaction->n_reactants(); r++)
         {
-           kfwd *= pow( molar_densities[reaction.reactant_id(r)],
-                   static_cast<int>(reaction.reactant_stoichiometric_coefficient(r)) );
+           kfwd *= pow( molar_densities[reaction->reactant_id(r)],
+                   static_cast<int>(reaction->reactant_stoichiometric_coefficient(r)) );
         }
-        for (unsigned int p=0; p<reaction.n_products(); p++)
+        for (unsigned int p=0; p<reaction->n_products(); p++)
         {
-           kbkwd *= pow( molar_densities[reaction.product_id(p)],
-                        static_cast<int>(reaction.product_stoichiometric_coefficient(p)) );
+           kbkwd *= pow( molar_densities[reaction->product_id(p)],
+                        static_cast<int>(reaction->product_stoichiometric_coefficient(p)) );
         }
 
         net_reaction_rates[rxn] = kfwd - kbkwd;

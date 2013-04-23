@@ -122,7 +122,7 @@ namespace Antioch
 
 	if(verbose) 
 	  {
-	    std::cout << "\n rates:\n"
+	    std::cout << "\n rates: Kooij model\n"
 		      << "   A: " << Arrhenius->FirstChildElement("A")->GetText() << "\n"
 		      << "   b: " << Arrhenius->FirstChildElement("b")->GetText() << "\n"
 		      << "   E: " << Arrhenius->FirstChildElement("E")->GetText() << "\n";

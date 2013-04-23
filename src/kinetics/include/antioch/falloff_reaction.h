@@ -189,9 +189,10 @@ namespace Antioch
   StateType FalloffReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
                                                            const StateType& T  ) const
   {
-     StateType Pr = _Pr(molar_densities,T);
+    StateType Pr = _Pr(molar_densities,T);
 
-     StateType kfwd = (*Reaction<CoeffType>::_forward_rate[1])(T) * Pr /(1. + Pr ) * _F.compute_F(T,Pr);
+    StateType one(1.);
+    return (*this->_forward_rate[1])(T) * Pr /(one + Pr ) * _F(T,Pr);
   }
 
   template<typename CoeffType, typename FalloffType>
@@ -207,9 +208,10 @@ namespace Antioch
 //variables, k0,kinf and derivatives
     StateType k0,dk0_dT;
     StateType kinf,dkinf_dT;
-    Reaction<CoeffType>::_forward_rate[0]->rate_and_derivative(T,k0,dk0_dT);
-    Reaction<CoeffType>::_forward_rate[1]->rate_and_derivative(T,kinf,dkinf_dT);
+    this->_forward_rate[0]->rate_and_derivative(T,k0,dk0_dT);
+    this->_forward_rate[1]->rate_and_derivative(T,kinf,dkinf_dT);
 
+    StateType one(1.);
 //Pr
     StateType Pr,dPr_dT;
     VectorStateType dPr_dY;
@@ -221,17 +223,17 @@ namespace Antioch
     _F.F_and_derivatives(T,Pr,dPr_dT,dPr_dY,f,df_dT,df_dY);
 
 //k = kinf * Pr/(1 + Pr)
-    kfwd = kinf * Pr / (1. + Pr) * f;
+    kfwd = kinf * Pr / (one + Pr) * f;
 
 //dk_dT = kfwd * [ dkinf_dT / kinf + dPr_dT /  Pr -  dPr_dT /(1 + Pr) + dF_dT / F]
-    dkfwd_dT = kfwd * (dkinf_dT/kinf + dPr_dT / Pr - dPr_dT / (1. + Pr) + df_dT/f);
+    dkfwd_dT = kfwd * (dkinf_dT/kinf + dPr_dT / Pr - dPr_dT / (one + Pr) + df_dT/f);
 
 
     dkfwd_dY.resize(this->n_species(), kfwd);
 //dkfwd_dY = kfwd * [dPr_dY/Pr - dPr_dY/(1+Pr) + dF_dY/F]
     for(unsigned int ic = 0; ic < this->n_species(); ic++)
     {
-       dkfwd_dY[ic] = kfwd * (dPr_dY[ic]/(Pr*(1. + Pr)) + df_dY[ic]/f) ;
+       dkfwd_dY[ic] = kfwd * (dPr_dY[ic]/(Pr*(one + Pr)) + df_dY[ic]/f) ;
     }
 
     return;

@@ -60,7 +60,7 @@ namespace Antioch{
 template <typename CoeffType = double>
 class TroeFalloff{
      public:
-       TroeFalloff();
+       TroeFalloff(const CoeffType alpha=0., const CoeffType T3 = 0., const CoeffType T1 = 0., const CoeffType T2 = 1e50);
        ~TroeFalloff();
 
      template<typename StateType>
@@ -83,11 +83,11 @@ class TroeFalloff{
      CoeffType _T2;
 
      template <typename StateType>
-     StateType _Fcent(const StateType &T);
+     StateType _Fcent(const StateType &T) const;
      template <typename StateType>
      void _Fcent_and_derivatives(const StateType &T,
                                 StateType &Fc,
-                                StateType &dFc_dT);
+                                StateType &dFc_dT) const;
 };
   template<typename CoeffType>
   template<typename StateType>
@@ -114,25 +114,27 @@ class TroeFalloff{
   template <typename CoeffType>
   template <typename StateType>
   inline
-  StateType TroeFalloff<CoeffType>::_Fcent(const StateType &T)
+  StateType TroeFalloff<CoeffType>::_Fcent(const StateType &T) const
   {
 // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
     using std::exp;
-    StateType Fc = (1. - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
-    if(_T2/T < 1e6)Fc += exp(-_T2/T);
+    StateType one(1.);
+    StateType Fc = (one - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
+    if(_T2 != 1e50)Fc += exp(-_T2/T);
     return Fc;
   }
 
   template <typename CoeffType>
   template <typename StateType>
   inline
-  void TroeFalloff<CoeffType>::_Fcent_and_derivatives(const StateType &T, StateType &Fc, StateType &dFc_dT)
+  void TroeFalloff<CoeffType>::_Fcent_and_derivatives(const StateType &T, StateType &Fc, StateType &dFc_dT) const
   {
 // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
     using std::exp;
-    Fc = (1. - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
-    dFc_dT = -(1. - _alpha)/_T3 * exp(-T/_T3) - _alpha/_T1 * exp(-T/_T1);
-    if(_T2/T < 1e6)
+    StateType one(1.);
+    Fc = (one - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
+    dFc_dT = -(one - _alpha)/_T3 * exp(-T/_T3) - _alpha/_T1 * exp(-T/_T1);
+    if(_T2 != 1e50)
     {
       Fc += exp(-_T2/T);
       dFc_dT += _T2/(T*T) * exp(-_T2/T);
@@ -178,8 +180,9 @@ class TroeFalloff{
 //df_dY = dlogPr_dY * f * [1./upPart + 0.14/downPart]
 
 //finally log10F
-    StateType logF = logFcent / (1. + f*f);
-    StateType dlogF_dT = dlogFcent_dT / (1. + f*f) - 2. * df_dT * f * logFcent/( (1. + f*f) * (1. + f*f) );
+    StateType one(1.);
+    StateType logF = logFcent / (one + f*f);
+    StateType dlogF_dT = dlogFcent_dT / (one + f*f) - 2. * df_dT * f * logFcent/( (one + f*f) * (one + f*f) );
 //dlogF_dY = - 2. * df_dY * f * logFcent/( (1. + f*f) * (1. + f*f) );
     using std::pow;
     F = pow(10.,logF);
@@ -187,7 +190,7 @@ class TroeFalloff{
     dF_dY.resize(this->n_species(), logPr);
     for(unsigned int ip = 0; ip < dF_dY.size(); ip++)
     {
-       dF_dY[ip] = - 2. * dlogPr_dY * f * (1./upPart + 0.14/downPart) * f * logFcent/( (1. + f*f) * (1. + f*f) );
+       dF_dY[ip] = - 2. * dlogPr_dY * f * (1./upPart + 0.14/downPart) * f * logFcent/( (one + f*f) * (one + f*f) );
     }
     return;
   }
@@ -195,7 +198,11 @@ class TroeFalloff{
 
   template<typename CoeffType>
   inline
-  TroeFalloff<CoeffType>::TroeFalloff()
+  TroeFalloff<CoeffType>::TroeFalloff(const CoeffType alpha, const CoeffType T3, const CoeffType T1, const CoeffType T2):
+    _alpha(alpha),
+    _T3(T3),
+    _T1(T1),
+    _T2(T2)
   {
     return;
   }

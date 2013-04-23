@@ -114,7 +114,7 @@ namespace Antioch
 
       }
 //... alpha(T)
-      return kfwd * (*Reaction<CoeffType>::_forward_rate[0])(T);
+      return kfwd * (*this->_forward_rate[0])(T);
   }
 
 
@@ -131,7 +131,7 @@ namespace Antioch
 //dk_dCi = alpha(T)*sum_{j /= i} eps_j Cj + alpha(T) * eps_i = k(T,[M])[sum_j eps_j Cj + eps_i(1 - Ci)]
     dkfwd_dY.resize(this->n_species(), kfwd);
     std::fill( dkfwd_dY.begin(),  dkfwd_dY.end(),  0.);    
-    Reaction<CoeffType>::_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+    this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
     StateType coef = (this->efficiency(0) * molar_densities[0] );
 
 //pre-fill with eps_i(1-Ci)

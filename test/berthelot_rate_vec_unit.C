@@ -21,7 +21,7 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id$
+// $Id: berthelot_rate_vec_unit.C 38747 2013-04-17 23:26:39Z splessis $
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -41,7 +41,7 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
-#include "antioch/arrhenius_rate.h"
+#include "antioch/berthelot_rate.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
@@ -59,21 +59,21 @@ int vectester(const PairScalars& example)
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   const Scalar Cf = 1.4;
-  const Scalar Ea = 5.0;
+  const Scalar D = -2.5;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
+  Antioch::BerthelotRate<Scalar> berthelot_rate(Cf,D);
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;
   T[0] = 1500.1;
   T[1] = 1600.1;
   
-  const Scalar rate_exact0 = Cf*exp(-Ea/1500.1);
-  const Scalar rate_exact1 = Cf*exp(-Ea/1600.1);
+  const Scalar rate_exact0 = Cf*exp(D*1500.1);
+  const Scalar rate_exact1 = Cf*exp(D*1600.1);
 
   int return_flag = 0;
 
-  const PairScalars rate = arrhenius_rate(T);
+  const PairScalars rate = berthelot_rate(T);
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
 
@@ -97,7 +97,7 @@ int vectester(const PairScalars& example)
       return_flag = 1;
     }
 
-  std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
+  std::cout << "Berthelot rate: " << berthelot_rate << std::endl;
 
   return return_flag;
 }

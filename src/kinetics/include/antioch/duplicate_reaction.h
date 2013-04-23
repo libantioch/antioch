@@ -102,10 +102,10 @@ namespace Antioch
   StateType DuplicateReaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
 							   const StateType& T  ) const
   {
-    StateType kfwd = (*Reaction<CoeffType>::_forward_rate[0])(T);
-    for(unsigned int ir = 1; ir < Reaction<CoeffType>::_forward_rate.size(); ir++)
+    StateType kfwd = (*this->_forward_rate[0])(T);
+    for(unsigned int ir = 1; ir < this->_forward_rate.size(); ir++)
     {
-      kfwd += (*Reaction<CoeffType>::_forward_rate[ir])(T);
+      kfwd += (*this->_forward_rate[ir])(T);
     }
     return kfwd;
   }
@@ -121,10 +121,10 @@ namespace Antioch
   {
 //dk_dT = sum_p dalpha_p_dT
     StateType kfwd_tmp,dkfwd_dT_tmp;
-     Reaction<CoeffType>::_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+     this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
     for(unsigned int ir = 1; ir < Reaction<CoeffType>::_forward_rate.size(); ir++)
     {
-     Reaction<CoeffType>::_forward_rate[ir]->compute_rate_and_derivative(T,kfwd_tmp,dkfwd_dT_tmp);
+      this->_forward_rate[ir]->compute_rate_and_derivative(T,kfwd_tmp,dkfwd_dT_tmp);
       kfwd += kfwd_tmp;
       dkfwd_dT += dkfwd_dT_tmp;
     }

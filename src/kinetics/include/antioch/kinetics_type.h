@@ -26,12 +26,27 @@
 
 //Antioch
 #include "antioch/kinetics_enum.h"
+#include "antioch/antioch_asserts.h"
 
 //C++
 #include <string>
 #include <iostream>
 
 namespace Antioch{
+
+template <typename CoeffType>
+class HercourtEssenRate;
+template <typename CoeffType>
+class BerthelotRate;
+template <typename CoeffType>
+class ArrheniusRate;
+template <typename CoeffType>
+class BerthelotHercourtEssenRate;
+template <typename CoeffType>
+class KooijRate;
+template <typename CoeffType>
+class VantHoffRate;
+
 /*!
  *
  * \class KineticsType
@@ -93,6 +108,100 @@ class KineticsType{
   {
      return;
   }
-}
+
+  template <typename CoeffType>
+  template <typename StateType>
+  inline
+  StateType KineticsType<CoeffType>::operator()(const StateType& T) const
+  {
+      switch (my_type) 
+      {
+      case KinMod::HERCOURT_ESSEN:
+        return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate(T);
+        break;
+      case KinMod::BERTHELOT:
+        return (static_cast<const BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::rate(T);
+        break;
+      case KinMod::ARRHENIUS:
+        return (static_cast<const ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::rate(T);
+        break;
+      case KinMod::BHE:
+        return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::rate(T);
+        break;
+      case KinMod::KOOIJ:
+        return (static_cast<const KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::rate(T);
+        break;
+      case KinMod::VANTHOFF:
+        return (static_cast<const VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::rate(T);
+        break;
+      default:
+        antioch_error();
+        break;
+      }
+  }
+
+  template <typename CoeffType>
+  template <typename StateType>
+  inline
+  StateType KineticsType<CoeffType>::derivative( const StateType& T ) const
+  {
+      switch (my_type) 
+      {
+      case KinMod::HERCOURT_ESSEN:
+        return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::derivative(T);
+        break;
+      case KinMod::BERTHELOT:
+        return (static_cast<const BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::derivative(T);
+        break;
+      case KinMod::ARRHENIUS:
+        return (static_cast<const ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::derivative(T);
+        break;
+      case KinMod::BHE:
+        return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::derivative(T);
+        break;
+      case KinMod::KOOIJ:
+        return (static_cast<const KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::derivative(T);
+        break;
+      case KinMod::VANTHOFF:
+        return (static_cast<const VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::derivative(T);
+        break;
+      default:
+        antioch_error();
+        break;
+      }
+  }
+
+  template <typename CoeffType>
+  template <typename StateType>
+  inline
+  void KineticsType<CoeffType>::rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
+  {
+      switch (my_type) 
+      {
+      case KinMod::HERCOURT_ESSEN:
+        return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
+        break;
+      case KinMod::BERTHELOT:
+        return (static_cast<const BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
+        break;
+      case KinMod::ARRHENIUS:
+        return (static_cast<const ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
+        break;
+      case KinMod::BHE:
+        return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
+        break;
+      case KinMod::KOOIJ:
+        return (static_cast<const KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
+        break;
+      case KinMod::VANTHOFF:
+        return (static_cast<const VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
+        break;
+      default:
+        antioch_error();
+        break;
+      }
+  }
+
+} // end namespace Antioch
 
 #endif

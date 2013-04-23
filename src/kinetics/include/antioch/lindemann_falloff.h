@@ -62,7 +62,7 @@ class LindemannFalloff{
   inline
   StateType LindemannFalloff<CoeffType>::operator()(const StateType &T, const StateType &Pr) const
   {
-    return 1.;
+    return StateType(1.);
   }
 
   template <typename CoeffType>

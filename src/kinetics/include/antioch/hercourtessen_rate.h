@@ -138,7 +138,7 @@ namespace Antioch
   StateType HercourtEssenRate<CoeffType>::operator()(const StateType& T) const
   {
     using std::pow;
-    return _Cf* (pow(T,_eta));
+    return _Cf * (pow(T,_eta));
   }
 
   template<typename CoeffType>

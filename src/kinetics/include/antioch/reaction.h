@@ -47,6 +47,21 @@
 
 namespace Antioch
 {
+template <typename CoeffType>
+class ElementaryReaction;
+template <typename CoeffType>
+class DuplicateReaction;
+template <typename CoeffType>
+class ThreeBodyReaction;
+template <typename CoeffType>
+class ElementaryReaction;
+template <typename CoeffType,typename FalloffType>
+class FalloffReaction;
+template <typename CoeffType>
+class LindemannFalloff;
+template <typename CoeffType>
+class TroeFalloff;
+
   //!A single reaction mechanism. 
   /*!\class Reaction
  *
@@ -592,7 +607,68 @@ namespace Antioch
     os << "\n#";
     return;
   }
-  
+
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  StateType Reaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+                                        const StateType& T) const
+  {
+     switch(_type)
+     {
+       case(ReactionType::ELEMENTARY):
+        return static_cast<const ElementaryReaction<CoeffType>*>(this)->ElementaryReaction<CoeffType>::compute_forward_rate_coefficient(molar_densities,T);
+        break;
+       case(ReactionType::DUPLICATE):
+        return static_cast<const DuplicateReaction<CoeffType>*>(this)->DuplicateReaction<CoeffType>::compute_forward_rate_coefficient(molar_densities,T);
+        break;
+       case(ReactionType::THREE_BODY):
+        return static_cast<const ThreeBodyReaction<CoeffType>*>(this)->ThreeBodyReaction<CoeffType>::compute_forward_rate_coefficient(molar_densities,T);
+        break;
+       case(ReactionType::LINDEMANN_FALLOFF):
+        return static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >::compute_forward_rate_coefficient(molar_densities,T);
+        break;
+       case(ReactionType::TROE_FALLOFF):
+        return static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,TroeFalloff<CoeffType> >::compute_forward_rate_coefficient(molar_densities,T);
+        break;
+       default:
+        antioch_error();
+        break;
+     }
+  }
+    
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void Reaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
+                                                           const StateType& T, 
+                                                           StateType& kfwd, 
+                                                           StateType& dkfwd_dT,
+                                                           VectorStateType& dkfwd_dY) const
+  {
+     switch(_type)
+     {
+       case(ReactionType::ELEMENTARY):
+        return static_cast<const ElementaryReaction<CoeffType>*>(this)->ElementaryReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dY);
+        break;
+       case(ReactionType::DUPLICATE):
+        return static_cast<const DuplicateReaction<CoeffType>*>(this)->DuplicateReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dY);
+        break;
+       case(ReactionType::THREE_BODY):
+        return static_cast<const ThreeBodyReaction<CoeffType>*>(this)->ThreeBodyReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dY);
+        break;
+       case(ReactionType::LINDEMANN_FALLOFF):
+        return static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dY);
+        break;
+       case(ReactionType::TROE_FALLOFF):
+        return static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,TroeFalloff<CoeffType> >::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dY);
+        break;
+       default:
+        antioch_error();
+        break;
+     }
+  }
+
 } // namespace Antioch
 
 #endif // ANTIOCH_REACTION_H

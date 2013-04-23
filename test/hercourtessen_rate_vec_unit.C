@@ -21,7 +21,7 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id$
+// $Id: hercourtessen_rate_vec_unit.C 38747 2013-04-17 23:26:39Z splessis $
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -41,7 +41,7 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
-#include "antioch/arrhenius_rate.h"
+#include "antioch/hercourtessen_rate.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
@@ -54,26 +54,26 @@ template <typename PairScalars>
 int vectester(const PairScalars& example)
 {
   using std::abs;
-  using std::exp;
+  using std::pow;
 
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   const Scalar Cf = 1.4;
-  const Scalar Ea = 5.0;
+  const Scalar eta = 1.2;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
+  Antioch::HercourtEssenRate<Scalar> hercourtessen_rate(Cf,eta);
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;
   T[0] = 1500.1;
   T[1] = 1600.1;
   
-  const Scalar rate_exact0 = Cf*exp(-Ea/1500.1);
-  const Scalar rate_exact1 = Cf*exp(-Ea/1600.1);
+  const Scalar rate_exact0 = Cf*pow(Scalar(1500.1),eta);
+  const Scalar rate_exact1 = Cf*pow(Scalar(1600.1),eta);
 
   int return_flag = 0;
 
-  const PairScalars rate = arrhenius_rate(T);
+  const PairScalars rate = hercourtessen_rate(T);
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
 
@@ -97,7 +97,7 @@ int vectester(const PairScalars& example)
       return_flag = 1;
     }
 
-  std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
+  std::cout << "Hercourt Essen rate: " << hercourtessen_rate << std::endl;
 
   return return_flag;
 }

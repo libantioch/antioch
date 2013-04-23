@@ -107,7 +107,7 @@ namespace Antioch
   {
     antioch_assert_equal_to(1, Reaction<CoeffType>::_forward_rate.size());
 //k(T,[M]) = alpha(T)
-    return (*Reaction<CoeffType>::_forward_rate[0])(T);
+    return (*this->_forward_rate[0])(T);
   }
 
   template<typename CoeffType>
@@ -120,7 +120,7 @@ namespace Antioch
 								      VectorStateType& dkfwd_dY) const 
   {
 //dk_dT = dalpha_dT(T)
-     Reaction<CoeffType>::_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+     this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
 //dk_dCi = 0.
     dkfwd_dY.resize(this->n_species(), kfwd);
     std::fill( dkfwd_dY.begin(),  dkfwd_dY.end(),  0.);    
