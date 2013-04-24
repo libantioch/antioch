@@ -178,7 +178,6 @@ int tester(const std::string& input_name)
       const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 5e6; // 1.0e-10;
       if( abs( sum ) > sum_tol )
 	{
-          reaction_set.print_reaction_mechanism(T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R);
 	  return_flag = 1;
 	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl
 		    << std::scientific << std::setprecision(16)

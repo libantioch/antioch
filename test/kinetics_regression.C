@@ -115,6 +115,8 @@ int tester(const std::string& input_name)
       std::cerr << "Error: Mismatch between compute mass source terms and regression values." << std::endl;
       for( unsigned int s = 0; s < n_species; s++)
 	{
+          std::vector<std::vector<Scalar> > loss,prod,net;
+          reaction_set.print_chemical_scheme(T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R,loss,prod,net);
 	  std::cout << std::scientific << std::setprecision(16)
 		    << "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = " << omega_dot[s]
 		    << ", omega_dot_reg(" << chem_mixture.chemical_species()[s]->species() << ") = " << omega_dot_reg[s]

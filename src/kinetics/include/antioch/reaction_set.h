@@ -86,23 +86,33 @@ namespace Antioch
                                  const VectorStateType& h_RT_minus_s_R,
                                  VectorReactionsType& net_reaction_rates ) const;
 
-    //! Compute the rates of progress for each reaction
+    //!
     template <typename StateType, typename VectorStateType>
-    void print_reaction_mechanism( const StateType& T,
-                                   const StateType& rho,
-                                   const StateType& R_mix,
-                                   const VectorStateType& mass_fractions,
-                                   const VectorStateType& molar_densities,
-                                   const VectorStateType& h_RT_minus_s_R ) const;
+    void print_chemical_scheme( const StateType& T,
+                                const StateType& rho,
+                                const StateType& R_mix,
+                                const VectorStateType& mass_fractions,
+                                const VectorStateType& molar_densities,
+                                const VectorStateType& h_RT_minus_s_R ,
+                                std::vector<VectorStateType> &lossMatrix,
+                                std::vector<VectorStateType> &prodMatrix,
+                                std::vector<VectorStateType> &netMatrix) const;
 
+    //!
     template<typename StateType, typename VectorStateType>
-    VectorStateType print_species_mechanism(unsigned int ispecies,
-                                            const StateType& T,
-                                            const StateType& rho,
-                                            const StateType& R_mix,
-                                            const VectorStateType& mass_fractions,
-                                            const VectorStateType& molar_densities,
-                                            const VectorStateType& h_RT_minus_s_R ) const;
+    void get_reactive_scheme( const StateType& T,
+                              const StateType& rho,
+                              const StateType& R_mix,
+                              const VectorStateType& mass_fractions,
+                              const VectorStateType& molar_densities,
+                              const VectorStateType& h_RT_minus_s_R,
+                              VectorStateType& netRates,
+                              VectorStateType& kfwdCoeff,
+                              VectorStateType& kbkwdCoeff,
+                              VectorStateType& kfwd,
+                              VectorStateType& kbkwd,
+                              VectorStateType& fwdC,
+                              VectorStateType& bkwdC) const;
 
     //! Formatted print, by default to \p std::cout.
     void print( std::ostream& os = std::cout ) const;
@@ -243,63 +253,223 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void ReactionSet<CoeffType>::print_reaction_mechanism( const StateType& T,
-                                                         const StateType& rho,
-                                                         const StateType& R_mix,
-                                                         const VectorStateType& mass_fractions,
-                                                         const VectorStateType& molar_densities,
-                                                         const VectorStateType& h_RT_minus_s_R ) const
+  void ReactionSet<CoeffType>::print_chemical_scheme( const StateType& T,
+                                                      const StateType& rho,
+                                                      const StateType& R_mix,
+                                                      const VectorStateType& mass_fractions,
+                                                      const VectorStateType& molar_densities,
+                                                      const VectorStateType& h_RT_minus_s_R,
+                                                            std::vector<VectorStateType> &lossMatrix,
+                                                            std::vector<VectorStateType> &prodMatrix,
+                                                            std::vector<VectorStateType> &netMatrix) const
   {
-    CoeffType fullTotal(0.),SfullTotal(0.);
-    std::vector<CoeffType> reactionTotal;
-    reactionTotal.resize(this->n_reactions(),0.);
-    std::ofstream netrate("net_rate.log");
-//header
-    netrate << "          ";
+
+//filling matrixes
+    VectorStateType netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC;
+//getting reaction infos
+    get_reactive_scheme(T,rho,R_mix,mass_fractions,molar_densities,h_RT_minus_s_R,netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC);
+
+    lossMatrix.resize(this->n_species());
+    prodMatrix.resize(this->n_species());
+    netMatrix.resize(this->n_species());
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
     {
-       netrate << std::setw(25) << this->_reactions[rxn]->equation();
+       lossMatrix[rxn].resize(this->n_reactions(),0.);
+       prodMatrix[rxn].resize(this->n_reactions(),0.);
+       netMatrix[rxn].resize(this->n_reactions(),0.);
     }
-    netrate << std::setw(25) << "total" << std::endl;
+    
+
+//filling matrixes
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+      const Reaction<CoeffType>* reaction = this->reaction(rxn);
+      for (unsigned int r=0; r<reaction->n_reactants(); r++)
+      {
+        lossMatrix[reaction->reactant_id(r)][rxn] += - static_cast<CoeffType>(reaction->reactant_stoichiometric_coefficient(r)) * kfwd[rxn];
+        prodMatrix[reaction->reactant_id(r)][rxn] +=   static_cast<CoeffType>(reaction->reactant_stoichiometric_coefficient(r)) * kbkwd[rxn];
+        netMatrix[reaction->reactant_id(r)][rxn]  +=   lossMatrix[reaction->reactant_id(r)][rxn] + prodMatrix[reaction->reactant_id(r)][rxn];
+      }
+      for (unsigned int p=0; p<reaction->n_products(); p++)
+      {
+        lossMatrix[reaction->product_id(p)][rxn] += - static_cast<CoeffType>(reaction->product_stoichiometric_coefficient(p)) * kbkwd[rxn];
+        prodMatrix[reaction->product_id(p)][rxn] +=   static_cast<CoeffType>(reaction->product_stoichiometric_coefficient(p)) * kfwd[rxn];
+        netMatrix[reaction->product_id(p)][rxn]  +=   lossMatrix[reaction->product_id(p)][rxn] + prodMatrix[reaction->product_id(p)][rxn];
+      }
+    }
+
+    std::ofstream meca("chemical_scheme.log");
+//explanation of header
+    meca << "# molar units considered for those budgets" << std::endl;
+    meca << "# formatted as follow:" << std::endl;
+    meca << "# rows: species, columns: reactions" << std::endl;
+    meca << "#" << std::endl;
+    meca << "#         |                        equation" << std::endl;
+    meca << "#         |  rate coefficient forward , rate coefficient backward" << std::endl;
+    meca << "#         |  forward concentrations   , backward concentrations" << std::endl;
+    meca << "#         |  rate forward             , rate backward" << std::endl;
+    meca << "# ------------------------------------------------------------------" << std::endl;
+    meca << "# species |  production term          ,  loss term" << std::endl;
+    meca << "# species |  net production/loss term" << std::endl;
+    meca << "#" << std::endl << std::endl;
+
+
+//header
+// // equation
+    meca << std::setw(10) << " ";
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+       meca << std::setw(31) << this->_reactions[rxn]->equation();
+    }
+    meca << std::endl;
+// // coeffs
+    meca << std::setw(10) << " ";
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+       meca << std::setw(15) << kfwdCoeff[rxn] << "," << std::setw(15) << kbkwdCoeff[rxn];
+    }
+    meca << std::endl;
+// // conc
+    meca << std::setw(10) << " ";
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+       meca << std::setw(15) << fwdC[rxn] << "," << std::setw(15) << bkwdC[rxn];
+    }
+    meca << std::endl;
+// // rates
+    meca << std::setw(10) << " ";
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+       meca << std::setw(15) << kfwd[rxn] << "," << std::setw(15) << kbkwd[rxn];
+    }
+    meca << std::endl;
+    meca << "----------------------------" << std::endl;
+
+//species
+
     for(unsigned int isp = 0; isp < this->n_species(); isp++)
     {
-      CoeffType total(0.);
-      VectorStateType netRate = print_species_mechanism(isp,T,rho,R_mix,mass_fractions,molar_densities,h_RT_minus_s_R);
-      antioch_assert_equal_to(netRate.size(),this->n_reactions());
-      netrate << std::setw(10) << _chem_mixture.species_inverse_name_map().at(_chem_mixture.species_list()[isp]);
+      meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
       for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-         netrate << std::setw(25) <<std::scientific << std::setprecision(16) << netRate[rxn];
-         total += netRate[rxn];
-         reactionTotal[rxn] += netRate[rxn];
+         meca << std::setw(15) << std::scientific << std::setprecision(6) << prodMatrix[isp][rxn] << "," 
+              << std::setw(15) << std::scientific << std::setprecision(6) << lossMatrix[isp][rxn];
       }
-      netrate << std::setw(25) << total;
-      netrate << std::endl;
-      fullTotal += total;
+      meca << std::endl;
+// // net
+      meca << std::setw(10) << "";
+      for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+      {
+         meca << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
+      }
+      meca << std::endl;
     }
-    netrate << std::setw(10) << "Total";
+    meca << std::endl;
+    meca << std::endl;
+    meca << std::endl;
+
+    meca << "# production table" << std::endl << std::endl;
+//header
+// // equation
+    meca << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
     {
-       netrate << std::setw(25) << std::scientific << std::setprecision(16) << reactionTotal[rxn];
-       SfullTotal += reactionTotal[rxn];
+       meca << std::setw(31) << this->_reactions[rxn]->equation();
     }
-    netrate << std::setw(25) << std::scientific << std::setprecision(16) << fullTotal << std::endl;
-    netrate << std::setw(25) << std::scientific << std::setprecision(16) << SfullTotal << std::endl;
+    meca << std::setw(31) << "Total" << std::endl;
+    for(unsigned int isp = 0; isp < this->n_species(); isp++)
+    {
+      meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+      CoeffType rowTotal(0.);
+      for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+      {
+         meca << std::setw(31) << std::scientific << std::setprecision(16) << prodMatrix[isp][rxn];
+         rowTotal += prodMatrix[isp][rxn];
+      }
+      meca << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
+    }
+    meca << std::endl << std::endl;
+
+    meca << "# loss table" << std::endl << std::endl;
+//header
+// // equation
+    meca << std::setw(10) << " ";
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+       meca << std::setw(31) << this->_reactions[rxn]->equation();
+    }
+    meca << std::setw(31) << "Total" << std::endl;
+    for(unsigned int isp = 0; isp < this->n_species(); isp++)
+    {
+      meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+      CoeffType rowTotal(0.);
+      for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+      {
+         meca << std::setw(31) << std::scientific << std::setprecision(16) << lossMatrix[isp][rxn];
+         rowTotal += lossMatrix[isp][rxn];
+      }
+      meca << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
+    }
+    meca << std::endl << std::endl;
+
+    meca << "# net table" << std::endl << std::endl;
+//header
+// // equation
+    meca << std::setw(10) << " ";
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+       meca << std::setw(31) << this->_reactions[rxn]->equation();
+    }
+    meca << std::setw(31) << "Total" << std::endl;
+
+    CoeffType columnTotal(0.);
+    std::vector<CoeffType> columnSum;
+    columnSum.resize(this->n_reactions(),0.);
+    CoeffType netTotalRow(0.);
+
+    for(unsigned int isp = 0; isp < this->n_species(); isp++)
+    {
+      meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+      CoeffType rowTotal(0.);
+      for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+      {
+         meca << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
+         rowTotal += netMatrix[isp][rxn];
+         columnSum[rxn] += netMatrix[isp][rxn];
+      }
+      meca << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
+      netTotalRow += rowTotal;
+    }
+    meca << std::setw(10) << "Total";
+    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+    {
+      meca << std::setw(31) << std::scientific << std::setprecision(16) << columnSum[rxn];
+      columnTotal += columnSum[rxn];
+    }
+    meca << std::endl << std::endl;
+    meca << "sum of row sums:    " << std::scientific << std::setprecision(16) << netTotalRow << std::endl;
+    meca << "sum of column sums: " << std::scientific << std::setprecision(16) << columnTotal << std::endl;
   
-    netrate.close();
+    meca.close();
     return;
   }
 
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  VectorStateType ReactionSet<CoeffType>::print_species_mechanism( unsigned int ispecies,
-                                                         const StateType& T,
-                                                         const StateType& rho,
-                                                         const StateType& R_mix,
-                                                         const VectorStateType& mass_fractions,
-                                                         const VectorStateType& molar_densities,
-                                                         const VectorStateType& h_RT_minus_s_R ) const
+  void ReactionSet<CoeffType>::get_reactive_scheme( const StateType& T,
+                                                    const StateType& rho,
+                                                    const StateType& R_mix,
+                                                    const VectorStateType& mass_fractions,
+                                                    const VectorStateType& molar_densities,
+                                                    const VectorStateType& h_RT_minus_s_R,
+                                                          VectorStateType& netRates,
+                                                          VectorStateType& kfwdCoeff,
+                                                          VectorStateType& kbkwdCoeff,
+                                                          VectorStateType& kfwd,
+                                                          VectorStateType& kbkwd,
+                                                          VectorStateType& fwdC,
+                                                          VectorStateType& bkwdC) const
   {
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
@@ -315,80 +485,43 @@ namespace Antioch
     const StateType RT    = R_mix*T;
     const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
 
-    VectorStateType netRate;
-    netRate.resize(this->n_reactions(),0.);
+    netRates.resize(this->n_reactions(),0.);
+    kfwdCoeff.resize(this->n_reactions(),0.);
+    kfwd.resize(this->n_reactions(),0.);
+    kbkwdCoeff.resize(this->n_reactions(),0.);
+    kbkwd.resize(this->n_reactions(),0.);
+    fwdC.resize(this->n_reactions(),1.);
+    bkwdC.resize(this->n_reactions(),1.);
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-
         const Reaction<CoeffType>* reaction = this->reaction(rxn);
+        kfwdCoeff[rxn] = reaction->compute_forward_rate_coefficient(molar_densities,T);
+        kfwd[rxn] = kfwdCoeff[rxn];
+        StateType keq = reaction->equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-        bool is_reac(false),is_prod(false);
-        CoeffType reacSto(0),prodSto(0);
+        kbkwdCoeff[rxn] = kfwdCoeff[rxn]/keq;
+        kbkwd[rxn] = kbkwdCoeff[rxn];
+
         for (unsigned int r=0; r<reaction->n_reactants(); r++)
         {
-           if(ispecies == reaction->reactant_id(r))
-           {
-              is_reac = true;
-              reacSto = static_cast<CoeffType>(reaction->reactant_stoichiometric_coefficient(r));
-              break;
-           }
+           fwdC[rxn] *= pow( molar_densities[reaction->reactant_id(r)],
+                        static_cast<int>(reaction->reactant_stoichiometric_coefficient(r)) );
         }
+        kfwd[rxn] *= fwdC[rxn];
         for (unsigned int p=0; p<reaction->n_products(); p++)
         {
-           if(ispecies == reaction->product_id(p))
-           {
-              is_prod = true;
-              prodSto = static_cast<CoeffType>(reaction->product_stoichiometric_coefficient(p));
-              break;
-           }
+           bkwdC[rxn] *= pow( molar_densities[reaction->product_id(p)],
+                          static_cast<int>(reaction->product_stoichiometric_coefficient(p)) );
         }
+        kbkwd[rxn] *= bkwdC[rxn];
 
-//rate coefficients and rates
-        StateType kfwdCoef(0),kfwd(0);
-        StateType kbkwdCoef(0),kbkwd(0);
-//net rate
-        StateType knet(0.);
-//loss and prod du to fwd
-        StateType lossfwd(0.);
-        StateType prodfwd(0.);
-//loss and prod du to bkwd
-        StateType lossbkwd(0.);
-        StateType prodbkwd(0.);
+        netRates[rxn] = kfwd[rxn] - kbkwd[rxn];
 
+      }
 
-        if(is_reac || is_prod)
-        {
-          kfwdCoef = reaction->compute_forward_rate_coefficient(molar_densities,T);
-          kfwd = kfwdCoef;
-
-          StateType keq = reaction->equilibrium_constant( P0_RT, h_RT_minus_s_R );
-
-          kbkwdCoef = kfwd/keq;
-          kbkwd = kbkwdCoef;
-
-          for (unsigned int r=0; r<reaction->n_reactants(); r++)
-          {
-           kfwd *= pow( molar_densities[reaction->reactant_id(r)],
-                   static_cast<int>(reaction->reactant_stoichiometric_coefficient(r)) );
-          }
-          for (unsigned int p=0; p<reaction->n_products(); p++)
-          {
-           kbkwd *= pow( molar_densities[reaction->product_id(p)],
-                        static_cast<int>(reaction->product_stoichiometric_coefficient(p)) );
-          }
-
-          knet = (kfwd - kbkwd) * (prodSto - reacSto) * _chem_mixture.M(ispecies);
-          lossfwd  = - reacSto * kfwd;
-          prodfwd  =   prodSto * kfwd;
-          lossbkwd = - prodSto * kbkwd;
-          prodbkwd =   reacSto * kbkwd;
-        }
-        netRate[rxn] = knet;
-    }
-    
-    return netRate;
+      return;
   }
 
   template<typename CoeffType>
