@@ -50,7 +50,7 @@ namespace Antioch
    *  thread, if running in a threaded environment. It takes a reference to an
    *  already created ReactionSet, so there's little construction penalty.
    */
-  template<typename CoeffType=double>
+  template<typename CoeffType=double, typename StateType=CoeffType>
   class KineticsEvaluator
   {
   public:
@@ -61,7 +61,7 @@ namespace Antioch
     const ReactionSet<CoeffType>& reaction_set() const;
 
     //! Compute species production/destruction rates per unit volume in \f$ \left(kg/sec/m^3\right)\f$
-    template <typename StateType, typename VectorStateType>
+    template <typename VectorStateType>
     void compute_mass_sources ( const StateType& T,
 				const StateType& rho,
 				const StateType& R_mix,
@@ -79,59 +79,62 @@ namespace Antioch
     const ReactionSet<CoeffType>& _reaction_set;
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
+
+    std::vector<StateType> _net_reaction_rates;
   };
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename CoeffType>
+  template<typename CoeffType, typename StateType>
   inline
-  const ReactionSet<CoeffType>& KineticsEvaluator<CoeffType>::reaction_set() const
+  const ReactionSet<CoeffType>& KineticsEvaluator<CoeffType,StateType>::reaction_set() const
   {
     return _reaction_set;
   }
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename StateType>
   inline
-  unsigned int KineticsEvaluator<CoeffType>::n_species() const
+  unsigned int KineticsEvaluator<CoeffType,StateType>::n_species() const
   {
     return _chem_mixture.n_species();
   }
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename StateType>
   inline
-  unsigned int KineticsEvaluator<CoeffType>::n_reactions() const
+  unsigned int KineticsEvaluator<CoeffType,StateType>::n_reactions() const
   {
     return _reaction_set.n_reactions();
   }
 
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename StateType>
   inline
-  KineticsEvaluator<CoeffType>::KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set )
+  KineticsEvaluator<CoeffType,StateType>::KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set )
     : _reaction_set( reaction_set ),
-      _chem_mixture( reaction_set.chemical_mixture() )
+      _chem_mixture( reaction_set.chemical_mixture() ),
+      _net_reaction_rates( reaction_set.n_reactions() )
   {
     return;
   }
 
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename StateType>
   inline
-  KineticsEvaluator<CoeffType>::~KineticsEvaluator()
+  KineticsEvaluator<CoeffType,StateType>::~KineticsEvaluator()
   {
     return;
   }
 
 
-  template<typename CoeffType>
-  template<typename StateType, typename VectorStateType>
+  template<typename CoeffType, typename StateType>
+  template<typename VectorStateType>
   inline
-  void KineticsEvaluator<CoeffType>::compute_mass_sources( const StateType& T,
-							   const StateType& rho,
-							   const StateType& R_mix,
-							   const VectorStateType& mass_fractions,
-							   const VectorStateType& molar_densities,
-							   const VectorStateType& h_RT_minus_s_R,
-							   VectorStateType& mass_sources )
+  void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources( const StateType& T,
+                                                                     const StateType& rho,
+                                                                     const StateType& R_mix,
+                                                                     const VectorStateType& mass_fractions,
+                                                                     const VectorStateType& molar_densities,
+                                                                     const VectorStateType& h_RT_minus_s_R,
+                                                                     VectorStateType& mass_sources )
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
@@ -145,19 +148,19 @@ namespace Antioch
     //! Work arrays for compute mass sources; initialize to zero
     // Use T as an example to get the right sizing when vectorizing.
     // This could be left uninitialized here for efficiency...
-    std::vector<StateType> net_reaction_rates(this->n_reactions(), Antioch::zero_clone(T));
+    Antioch::set_zero(_net_reaction_rates);
 
     Antioch::set_zero(mass_sources);
 
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates( T, rho, R_mix, mass_fractions, molar_densities,
-						h_RT_minus_s_R, net_reaction_rates );
+						h_RT_minus_s_R, _net_reaction_rates );
 
     // compute the actual mass sources in kmol/sec/m^3
     for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
 	const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
-	const StateType rate = net_reaction_rates[rxn];
+	const StateType rate = _net_reaction_rates[rxn];
 	
 	// reactant contributions
 	for (unsigned int r = 0; r < reaction.n_reactants(); r++)
