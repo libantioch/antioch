@@ -105,6 +105,26 @@ namespace Antioch
       >::type 
     h_RT_minus_s_R( const TempCache<StateType>& cache, VectorStateType& h_RT_minus_s_R ) const;
 
+
+    template<typename StateType>
+    typename enable_if_c<
+      !has_size<StateType>::value, StateType
+      >::type 
+    dh_RT_minus_s_R_dT( const TempCache<StateType>& cache, unsigned int species ) const;
+
+    template<typename StateType>
+    typename enable_if_c<
+      has_size<StateType>::value, StateType
+      >::type 
+    dh_RT_minus_s_R_dT( const TempCache<StateType>& cache, unsigned int species ) const;
+
+    template<typename StateType, typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value, void
+      >::type 
+    dh_RT_minus_s_R_dT( const TempCache<StateType>& cache, VectorStateType& h_RT_minus_s_R ) const;
+
+
     template<typename StateType>
     StateType cp_over_R( const TempCache<StateType>& cache, unsigned int species ) const;
 
@@ -381,6 +401,77 @@ namespace Antioch
     for( unsigned int s = 0; s < this->n_species(); s++ )
       {
         h_RT_minus_s_R[s] = this->h_RT_minus_s_R(cache,s);
+      }
+    
+    return;
+  }
+
+
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  typename enable_if_c<
+    !has_size<StateType>::value, StateType
+    >::type 
+    CEAEvaluator<CoeffType>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache, unsigned int species ) const
+    {
+      antioch_assert_less( species, this->n_species() );
+      antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
+                           _cea_mixture.curve_fit(species).n_intervals() );
+      
+      const unsigned int interval = this->_cea_mixture.curve_fit(species).interval(cache.T);
+      
+      const CoeffType *a = this->_cea_mixture.curve_fit(species).coefficients(interval);
+      
+      /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
+         s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
+
+      return a[0]/cache.T3 - a[8]/cache.T2 - a[1]*cache.lnT/cache.T2 - a[2]/cache.T - a[3]/2. - a[4]*cache.T/3. - a[5]*cache.T2/4. - a[6]*cache.T3/5.;
+    }
+
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  typename enable_if_c<
+    has_size<StateType>::value, StateType
+    >::type 
+  CEAEvaluator<CoeffType>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache, unsigned int species ) const
+  {
+    antioch_assert_less( species, this->n_species() );
+    
+    const std::size_t size = cache.T.size();
+    
+    // Use an input variable to determine sizing
+    StateType returnval = Antioch::zero_clone(cache.T);
+    
+    for (std::size_t i = 0; i != size; ++i)
+      {
+        typedef TempCache<typename Antioch::value_type<StateType>::type> SubCache;
+        returnval[i] = this->dh_RT_minus_s_R_dT
+          (SubCache(cache.T[i],cache.T2[i],cache.T3[i],cache.T4[i],cache.lnT[i]),
+           species);
+      }
+    
+    return returnval;
+  }
+  
+  
+  template<typename CoeffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  typename enable_if_c<
+    has_size<VectorStateType>::value, void
+    >::type 
+  CEAEvaluator<CoeffType>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache,
+                                               VectorStateType& dh_RT_minus_s_R_dT ) const
+  {
+    antioch_assert_equal_to( dh_RT_minus_s_R_dT.size(), this->n_species() );
+    
+    for( unsigned int s = 0; s < this->n_species(); s++ )
+      {
+        dh_RT_minus_s_R_dT[s] = this->dh_RT_minus_s_R_dT(cache,s);
       }
     
     return;
