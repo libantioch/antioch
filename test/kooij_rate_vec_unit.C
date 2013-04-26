@@ -63,7 +63,7 @@ int vectester(const PairScalars& example)
   const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
 
-  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea);
+  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea,1.,1.);
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;

@@ -533,7 +533,7 @@ namespace Antioch
     for (unsigned int r=0; r < this->n_reactions(); r++)
       {
         os << "# " << r << '\n'
-           << this->reaction(r) << "\n";
+           << (*this->reaction(r)) << "\n";
       }
 
     return;

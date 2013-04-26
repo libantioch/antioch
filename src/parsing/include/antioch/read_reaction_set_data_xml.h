@@ -34,6 +34,7 @@
 #include "antioch/reaction_set.h"
 #include "antioch/kinetics_parsing.h"
 #include "antioch/reaction_parsing.h"
+#include "antioch/physical_constants.h"
 
 // XML
 #include "antioch/tinyxml2.h"
@@ -129,25 +130,25 @@ namespace Antioch
 	  }
 
 	// typically Cantera files list activation energy in cal/mol, but we want it in K.
-        double coEa = 1.;
+        std::vector<NumericType> data;
+        data.push_back(std::atof(Arrhenius->FirstChildElement("A")->GetText()));
+        data.push_back(std::atof(Arrhenius->FirstChildElement("b")->GetText()));
+        data.push_back(std::atof(Arrhenius->FirstChildElement("E")->GetText()));
+        data.push_back(1.);
+        data.push_back(Constants::R_universal<NumericType>()/1000.);
+        
+        if(Arrhenius->FirstChildElement("Tref"))data[3] = std::atof(Arrhenius->FirstChildElement("Tref")->GetText());
 	if( std::string(Arrhenius->FirstChildElement("E")->Attribute("units")) == "cal/mol" )
 	  {
-	    coEa = 1.9858775;
+	    data[4] = 1.9858775;
 	  }
 	else 
 	  {
 	    // huh?
 	    antioch_error();
 	  }
-        std::vector<NumericType> data;
-        data.push_back(std::atof(Arrhenius->FirstChildElement("A")->GetText()));
-        data.push_back(std::atof(Arrhenius->FirstChildElement("b")->GetText()));
-        data.push_back(std::atof(Arrhenius->FirstChildElement("E")->GetText()) /coEa);
 
-        NumericType T0(1.);
-        if(Arrhenius->FirstChildElement("Tref"))T0 = std::atof(Arrhenius->FirstChildElement("Tref")->GetText());
-
-        KineticsType<NumericType> *rate = get_rate_ptr<NumericType>(data,kineticsModel,T0);
+        KineticsType<NumericType> *rate = get_rate_ptr<NumericType>(data,kineticsModel);
 
         my_rxn->add_forward_rate(rate);
 

@@ -37,7 +37,7 @@ int tester()
   const Scalar Cf = 1.4;
   const Scalar Ea = 5.0;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea,1.);
 
   const Scalar T = 1500.1;
   

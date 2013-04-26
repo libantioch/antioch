@@ -175,7 +175,7 @@ int tester(const std::string& input_name)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 5e6; // 1.0e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
       if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;

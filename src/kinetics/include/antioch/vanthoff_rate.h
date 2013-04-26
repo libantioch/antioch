@@ -26,6 +26,7 @@
 
 //Antioch
 #include "antioch/kinetics_type.h"
+#include "antioch/physical_constants.h"
 
 // C++
 #include <cmath>
@@ -46,21 +47,22 @@ namespace Antioch
   
   public:
 
-    VantHoffRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0., const CoeffType D=0.);
+    VantHoffRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0., const CoeffType D=0., const CoeffType Tref = 1., const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
     ~VantHoffRate();
     
-    void set_Cf( const CoeffType Cf );
-    void set_eta( const CoeffType eta );
-    void set_Ea( const CoeffType Ea );
-    void set_D( const CoeffType D );
+    void set_Cf(    const CoeffType Cf );
+    void set_eta(   const CoeffType eta );
+    void set_Ea(    const CoeffType Ea );
+    void set_D(     const CoeffType D );
+    void set_Tref(  const CoeffType Tref );
+    void set_rscale(const CoeffType rscale );
 
-    void scale_Ea( const CoeffType scale );
-    void scale_D( const CoeffType scale );
-
-    CoeffType Cf()  const;
-    CoeffType eta() const;
-    CoeffType Ea()  const;
-    CoeffType D()   const;
+    CoeffType Cf()     const;
+    CoeffType eta()    const;
+    CoeffType Ea()     const;
+    CoeffType D()      const;
+    CoeffType Tref()   const;
+    CoeffType rscale() const;
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
@@ -83,21 +85,30 @@ namespace Antioch
 
   private:
 
+    CoeffType _raw_Cf;
     CoeffType _Cf;
     CoeffType _eta;
+    CoeffType _raw_Ea;
     CoeffType _Ea;
     CoeffType _D;
+    CoeffType _Tref;
+    CoeffType _rscale;
     
   };
 
   template<typename CoeffType>
-  VantHoffRate<CoeffType>::VantHoffRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea, const CoeffType D)
+  VantHoffRate<CoeffType>::VantHoffRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea, const CoeffType D, const CoeffType Tref, const CoeffType rscale)
     : KineticsType<CoeffType>(KinMod::VANTHOFF),
-      _Cf(Cf),
+      _raw_Cf(Cf),
       _eta(eta),
-      _Ea(Ea),
-      _D(D)
+      _raw_Ea(Ea),
+      _D(D),
+      _Tref(Tref),
+      _rscale(rscale)
   {
+    using std::pow;
+    _Ea = _raw_Ea / _rscale;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -111,9 +122,9 @@ namespace Antioch
   const std::string VantHoffRate<CoeffType>::numeric() const
   {
     std::stringstream os;
-    os << _Cf;
-    if (_eta != 0.) os << "*T^" << _eta;
-    os << "*exp(-" << _Ea << "/T + " << _D << "*T)";
+    os << _raw_Cf;
+    if (_eta != 0.) os << "*(T/" << _Tref << ")^" << _eta;
+    os << "*exp(-" << _raw_Ea << "/(R*T) + " << _D << "*T)";
 
     return os.str();
   }
@@ -123,7 +134,19 @@ namespace Antioch
   inline
   void VantHoffRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    _Cf = Cf;
+    using std::pow;
+    _raw_Cf = Cf;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void VantHoffRate<CoeffType>::set_Tref( const CoeffType Tref )
+  {
+    using std::pow;
+    _Tref = Tref;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -139,7 +162,17 @@ namespace Antioch
   inline
   void VantHoffRate<CoeffType>::set_Ea( const CoeffType Ea )
   {
-    _Ea = Ea;
+    _raw_Ea = Ea;
+    _Ea = _raw_Ea / _rscale;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void VantHoffRate<CoeffType>::set_rscale( const CoeffType rscale )
+  {
+    _rscale = rscale;
+    _Ea = _raw_Ea / _rscale;
     return;
   }
 
@@ -151,21 +184,6 @@ namespace Antioch
     return;
   }
 
-  template<typename CoeffType>
-  inline
-  void VantHoffRate<CoeffType>::scale_Ea( const CoeffType scale )
-  {
-    _Ea *= scale;
-    return;
-  }
-
-  template<typename CoeffType>
-  inline
-  void VantHoffRate<CoeffType>::scale_D( const CoeffType scale )
-  {
-    _D *= scale;
-    return;
-  }
 
   template<typename CoeffType>
   inline
@@ -186,6 +204,11 @@ namespace Antioch
   inline
   CoeffType VantHoffRate<CoeffType>::D() const
   { return _D; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType VantHoffRate<CoeffType>::rscale() const
+  { return _rscale; }
 
   template<typename CoeffType>
   template<typename StateType>

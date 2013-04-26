@@ -45,14 +45,16 @@ namespace Antioch
   
   public:
 
-    HercourtEssenRate (const CoeffType Cf=0., const CoeffType eta=0.);
+    HercourtEssenRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Tref = 1.);
     ~HercourtEssenRate();
     
-    void set_Cf( const CoeffType Cf );
+    void set_Cf(  const CoeffType Cf );
     void set_eta( const CoeffType eta );
+    void set_Tref(const CoeffType Tref );
 
-    CoeffType Cf() const;
-    CoeffType eta() const;
+    CoeffType Cf()   const;
+    CoeffType eta()  const;
+    CoeffType Tref() const;
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
@@ -75,17 +77,22 @@ namespace Antioch
 
   private:
 
+    CoeffType _raw_Cf;
     CoeffType _Cf;
     CoeffType _eta;
+    CoeffType _Tref;
     
   };
 
   template<typename CoeffType>
-  HercourtEssenRate<CoeffType>::HercourtEssenRate(const CoeffType Cf, const CoeffType eta)
+  HercourtEssenRate<CoeffType>::HercourtEssenRate(const CoeffType Cf, const CoeffType eta, const CoeffType Tref)
     : KineticsType<CoeffType>(KinMod::HERCOURT_ESSEN),
-      _Cf(Cf),
-      _eta(eta)
+      _raw_Cf(Cf),
+      _eta(eta),
+      _Tref(Tref)
   {
+    using std::pow;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -99,8 +106,8 @@ namespace Antioch
   const std::string HercourtEssenRate<CoeffType>::numeric() const
   {
     std::stringstream os;
-    os << _Cf;
-    os << "*T^" << _eta;
+    os << _raw_Cf;
+    os << "*(T/" << _Tref << ")^" << _eta;
 
     return os.str();
   }
@@ -110,7 +117,9 @@ namespace Antioch
   inline
   void HercourtEssenRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    _Cf = Cf;
+    using std::pow;
+    _raw_Cf = Cf;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -124,6 +133,16 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  void HercourtEssenRate<CoeffType>::set_Tref( const CoeffType Tref )
+  {
+    using std::pow;
+    _Tref = Tref;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
   CoeffType HercourtEssenRate<CoeffType>::Cf() const
   { return _Cf; }
 
@@ -131,6 +150,11 @@ namespace Antioch
   inline
   CoeffType HercourtEssenRate<CoeffType>::eta() const
   { return _eta; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType HercourtEssenRate<CoeffType>::Tref() const
+  { return _Tref; }
 
   template<typename CoeffType>
   template<typename StateType>

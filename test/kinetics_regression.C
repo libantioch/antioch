@@ -62,15 +62,15 @@ int tester(const std::string& input_name)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  const Scalar T = 1500.0;
-  const Scalar P = 1.0e5;
+  const Scalar T = 1500.0; // K
+  const Scalar P = 1.0e5; // Pa
 
   // Mass fractions
   std::vector<Scalar> Y(n_species,0.2);
 
-  const Scalar R_mix = chem_mixture.R(Y);
+  const Scalar R_mix = chem_mixture.R(Y); // get R_tot in J.kg-1.K-1
 
-  const Scalar rho = P/(R_mix*T);
+  const Scalar rho = P/(R_mix*T); // kg.m-3
 
   std::vector<Scalar> molar_densities(n_species,0.0);
   chem_mixture.molar_densities(rho,Y,molar_densities);
@@ -83,13 +83,6 @@ int tester(const std::string& input_name)
   std::vector<Scalar> omega_dot(n_species);
   
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
-
-  for( unsigned int s = 0; s < n_species; s++)
-    {
-      std::cout << std::scientific << std::setprecision(16)
-		<< "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = "
-		<< omega_dot[s] << std::endl;
-    }
 
   int return_flag = 0;
 
@@ -115,8 +108,6 @@ int tester(const std::string& input_name)
       std::cerr << "Error: Mismatch between compute mass source terms and regression values." << std::endl;
       for( unsigned int s = 0; s < n_species; s++)
 	{
-          std::vector<std::vector<Scalar> > loss,prod,net;
-          reaction_set.print_chemical_scheme(T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R,loss,prod,net);
 	  std::cout << std::scientific << std::setprecision(16)
 		    << "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = " << omega_dot[s]
 		    << ", omega_dot_reg(" << chem_mixture.chemical_species()[s]->species() << ") = " << omega_dot_reg[s]

@@ -40,6 +40,11 @@
  *     D         &  D\\\bottomrule
  *     \end{array}
  * \f]
+ *
+ * This library is intended for performances, thus the reference temperature is taken equal
+ * to one in order to skip the division step (\f$\frac{T}{\mathrm{T_0}}\f$). This
+ * is \e not an option, this is an \e obligation: the kinetics equations are coded without the
+ * division step.
  */
 namespace Antioch
 {
@@ -53,7 +58,7 @@ namespace Antioch
                         KOOIJ,       // A * T^beta * exp(-Ea/T)
                         VANTHOFF };  // A * T^beta * exp(-Ea/T + D*T)
 
-    const double Tref(300.);
+    const double Tref(1.);// this HAS to stay this way because it is hard-coded for performances (see eq. above)
 
   } // end namespace KinMod
 

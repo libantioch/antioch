@@ -91,7 +91,7 @@ class KineticsType{
   inline
   void KineticsType<CoeffType>::print(std::ostream& os) const
   {
-    os << numeric() << std::endl;
+    os << numeric();
   }
 
   template <typename CoeffType>

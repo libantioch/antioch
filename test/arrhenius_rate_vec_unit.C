@@ -61,7 +61,7 @@ int vectester(const PairScalars& example)
   const Scalar Cf = 1.4;
   const Scalar Ea = 5.0;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea,1.);
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;

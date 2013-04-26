@@ -26,6 +26,7 @@
 
 //Antioch
 #include "antioch/kinetics_type.h"
+#include "antioch/physical_constants.h"
 
 // C++
 #include <cmath>
@@ -46,18 +47,20 @@ namespace Antioch
   
   public:
 
-    KooijRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0.);
+    KooijRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0., const CoeffType Tref = 1., const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
     ~KooijRate();
     
-    void set_Cf( const CoeffType Cf );
-    void set_eta( const CoeffType eta );
-    void set_Ea( const CoeffType Ea );
+    void set_Cf(    const CoeffType Cf );
+    void set_eta(   const CoeffType eta );
+    void set_Ea(    const CoeffType Ea );
+    void set_Tref(  const CoeffType Tref );
+    void set_rscale(const CoeffType scale );
 
-    void scale_Ea( const CoeffType scale );
-
-    CoeffType Cf() const;
-    CoeffType eta() const;
-    CoeffType Ea() const;
+    CoeffType Cf()     const;
+    CoeffType eta()    const;
+    CoeffType Ea()     const;
+    CoeffType Tref()   const;
+    CoeffType rscale() const;
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
@@ -81,19 +84,28 @@ namespace Antioch
 
   private:
 
+    CoeffType _raw_Cf;
     CoeffType _Cf;
     CoeffType _eta;
+    CoeffType _raw_Ea;
     CoeffType _Ea;
+    CoeffType _Tref;
+    CoeffType _rscale;
     
   };
 
   template<typename CoeffType>
-  KooijRate<CoeffType>::KooijRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea)
+  KooijRate<CoeffType>::KooijRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea, const CoeffType Tref, const CoeffType rscale)
     : KineticsType<CoeffType>(KinMod::KOOIJ),
-      _Cf(Cf),
+      _raw_Cf(Cf),
       _eta(eta),
-      _Ea(Ea)
+      _raw_Ea(Ea),
+      _Tref(Tref),
+      _rscale(rscale)
   {
+    using std::pow;
+    _Ea = _raw_Ea / _rscale;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -107,9 +119,9 @@ namespace Antioch
   const std::string KooijRate<CoeffType>::numeric() const
   {
     std::stringstream os;
-    os << _Cf;
-    if (_eta != 0.) os << "*T^" << _eta;
-    os << "*exp(-" << _Ea << "/T)";
+    os << _raw_Cf;
+    if (_eta != 0.) os << "*(T/" << _Tref << ")^" << _eta;
+    os << "*exp(-" << _raw_Ea << "/(R*T))";
 
     return os.str();
   }
@@ -119,7 +131,19 @@ namespace Antioch
   inline
   void KooijRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    _Cf = Cf;
+    using std::pow;
+    _raw_Cf = Cf;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void KooijRate<CoeffType>::set_Tref( const CoeffType Tref )
+  {
+    using std::pow;
+    _Tref = Tref;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -135,15 +159,17 @@ namespace Antioch
   inline
   void KooijRate<CoeffType>::set_Ea( const CoeffType Ea )
   {
-    _Ea = Ea;
+    _raw_Ea = Ea;
+    _Ea = _raw_Ea / _rscale;
     return;
   }
 
   template<typename CoeffType>
   inline
-  void KooijRate<CoeffType>::scale_Ea( const CoeffType scale )
+  void KooijRate<CoeffType>::set_rscale( const CoeffType rscale )
   {
-    _Ea *= scale;
+    _rscale = rscale;
+    _Ea = _raw_Ea / _rscale;
     return;
   }
 
@@ -161,6 +187,16 @@ namespace Antioch
   inline
   CoeffType KooijRate<CoeffType>::Ea() const
   { return _Ea; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType KooijRate<CoeffType>::Tref() const
+  { return _Tref; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType KooijRate<CoeffType>::rscale() const
+  { return _rscale; }
 
   template<typename CoeffType>
   template<typename StateType>

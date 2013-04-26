@@ -39,7 +39,7 @@ int tester()
   const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
 
-  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea);
+  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea,1.,1.);
 
   const Scalar T = 1500.1;
   

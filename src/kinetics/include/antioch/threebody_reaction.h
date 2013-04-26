@@ -111,10 +111,9 @@ namespace Antioch
       for (unsigned int s=1; s<this->n_species(); s++)
       {        
          kfwd += ( this->efficiency(s) * molar_densities[s] );
-
       }
 //... alpha(T)
-      return kfwd * (*this->_forward_rate[0])(T);
+      return (kfwd * (*this->_forward_rate[0])(T));
   }
 
 

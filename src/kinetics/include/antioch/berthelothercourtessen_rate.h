@@ -45,18 +45,18 @@ namespace Antioch
   
   public:
 
-    BerthelotHercourtEssenRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType D=0.);
+    BerthelotHercourtEssenRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType D=0., const CoeffType Tref = 1.);
     ~BerthelotHercourtEssenRate();
     
-    void set_Cf( const CoeffType Cf );
+    void set_Cf(  const CoeffType Cf );
     void set_eta( const CoeffType eta );
-    void set_D( const CoeffType D );
+    void set_D(   const CoeffType D );
+    void set_Tref(const CoeffType Tref );
 
-    void scale_D( const CoeffType scale );
-
-    CoeffType Cf() const;
-    CoeffType eta() const;
-    CoeffType D() const;
+    CoeffType Cf()   const;
+    CoeffType eta()  const;
+    CoeffType D()    const;
+    CoeffType Tref() const;
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
@@ -79,19 +79,24 @@ namespace Antioch
 
   private:
 
+    CoeffType _raw_Cf;
     CoeffType _Cf;
     CoeffType _eta;
     CoeffType _D;
+    CoeffType _Tref;
     
   };
 
   template<typename CoeffType>
-  BerthelotHercourtEssenRate<CoeffType>::BerthelotHercourtEssenRate(const CoeffType Cf, const CoeffType eta, const CoeffType D)
+  BerthelotHercourtEssenRate<CoeffType>::BerthelotHercourtEssenRate(const CoeffType Cf, const CoeffType eta, const CoeffType D, const CoeffType Tref)
     : KineticsType<CoeffType>(KinMod::BHE),
-      _Cf(Cf),
+      _raw_Cf(Cf),
       _eta(eta),
-      _D(D)
+      _D(D),
+      _Tref(Tref)
   {
+    using std::pow;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -105,8 +110,8 @@ namespace Antioch
   const std::string BerthelotHercourtEssenRate<CoeffType>::numeric() const
   {
     std::stringstream os;
-    os << _Cf;
-    if (_eta != 0.) os << "*T^" << _eta;
+    os << _raw_Cf;
+    if (_eta != 0.) os << "*(T/" << _Tref << ")^" << _eta;
     os << "*exp(" << _D << "*T)";
 
     return os.str();
@@ -117,7 +122,19 @@ namespace Antioch
   inline
   void BerthelotHercourtEssenRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    _Cf = Cf;
+    using std::pow;
+    _raw_Cf = Cf;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::set_Tref( const CoeffType Tref )
+  {
+    using std::pow;
+    _Tref = Tref;
+    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
     return;
   }
 
@@ -139,14 +156,6 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void BerthelotHercourtEssenRate<CoeffType>::scale_D( const CoeffType scale )
-  {
-    _D *= scale;
-    return;
-  }
-
-  template<typename CoeffType>
-  inline
   CoeffType BerthelotHercourtEssenRate<CoeffType>::Cf() const
   { return _Cf; }
 
@@ -159,6 +168,11 @@ namespace Antioch
   inline
   CoeffType BerthelotHercourtEssenRate<CoeffType>::D() const
   { return _D; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType BerthelotHercourtEssenRate<CoeffType>::Tref() const
+  { return _Tref; }
 
   template<typename CoeffType>
   template<typename StateType>

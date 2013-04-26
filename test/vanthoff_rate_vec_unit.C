@@ -64,7 +64,7 @@ int vectester(const PairScalars& example)
   const Scalar Ea = 5.0;
   const Scalar D = -2.5;
 
-  Antioch::VantHoffRate<Scalar> vanthoff_rate(Cf,eta,Ea,D);
+  Antioch::VantHoffRate<Scalar> vanthoff_rate(Cf,eta,Ea,D,1.,1.);
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;
