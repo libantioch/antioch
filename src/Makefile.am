@@ -71,6 +71,9 @@ include_HEADERS += parsing/include/antioch/species_ascii_parsing.h
 
 # thermo
 include_HEADERS += thermo/include/antioch/cea_curve_fit.h
+include_HEADERS += thermo/include/antioch/cea_mixture.h
+include_HEADERS += thermo/include/antioch/temp_cache.h
+include_HEADERS += thermo/include/antioch/cea_evaluator.h
 include_HEADERS += thermo/include/antioch/cea_thermo.h
 include_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 

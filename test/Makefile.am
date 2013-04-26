@@ -3,6 +3,8 @@ BUILT_SOURCES   = .license.stamp
 check_PROGRAMS  =
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
+check_PROGRAMS += cea_evaluator_unit
+check_PROGRAMS += cea_evaluator_vec_unit
 check_PROGRAMS += cea_thermo_unit
 check_PROGRAMS += cea_thermo_vec_unit
 check_PROGRAMS += arrhenius_rate_unit
@@ -42,6 +44,8 @@ AM_LDFLAGS = $(top_builddir)/src/libantioch.la
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
 chem_mixture_vec_unit_SOURCES = chem_mixture_vec_unit.C
+cea_evaluator_unit_SOURCES = cea_evaluator_unit.C
+cea_evaluator_vec_unit_SOURCES = cea_evaluator_vec_unit.C
 cea_thermo_unit_SOURCES = cea_thermo_unit.C
 cea_thermo_vec_unit_SOURCES = cea_thermo_vec_unit.C
 arrhenius_rate_unit_SOURCES = arrhenius_rate_unit.C
@@ -70,6 +74,8 @@ endif
 TESTS  =
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
+TESTS += cea_evaluator_unit
+TESTS += cea_evaluator_vec_unit
 TESTS += cea_thermo_unit
 TESTS += cea_thermo_vec_unit
 TESTS += arrhenius_rate_unit
