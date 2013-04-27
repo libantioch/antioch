@@ -78,6 +78,19 @@ namespace Antioch
 				 const VectorStateType& h_RT_minus_s_R,
 				 VectorReactionsType& net_reaction_rates ) const;
 
+    //! Compute the rates of progress and derivatives for each reaction
+    template <typename StateType, typename VectorStateType, typename VectorReactionsType>
+    void compute_reaction_rates_and_derivs( const StateType& T,
+                                            const StateType& rho,
+                                            const StateType& R_mix,
+                                            const VectorStateType& mass_fractions,
+                                            const VectorStateType& molar_densities,
+                                            const VectorStateType& h_RT_minus_s_R,
+                                            const VectorStateType& dh_RT_minus_s_R_dT,
+                                            VectorReactionsType& net_reaction_rates,
+                                            VectorReactionsType& dnet_rate_dT,
+                                            std::vector<VectorReactionsType>& dnet_rate_drho_s ) const;
+
     //! Formatted print, by default to \p std::cout.
     void print( std::ostream& os = std::cout ) const;
      
@@ -170,6 +183,65 @@ namespace Antioch
 							VectorReactionsType& net_reaction_rates ) const
   {
     antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
+
+    //!\todo Make these assertions vector-compatible
+    // antioch_assert_greater(T, 0.0);
+    // antioch_assert_greater(rho, 0.0);
+    // antioch_assert_greater(R_mix, 0.0);
+
+    antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
+    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+
+    // useful constants
+    const CoeffType P0    = 1.e5; // standard pressure
+    const StateType RT    = R_mix*T;
+    const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
+
+    // compute reaction forward rates & other reaction-sized arrays
+    for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
+      {
+	const Reaction<CoeffType>& reaction = this->reaction(rxn);
+
+	StateType kfwd = (reaction.forward_rate())(T);
+
+	StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
+
+	const StateType kbkwd = kfwd/keq;
+
+	net_reaction_rates[rxn] = reaction.compute_rate_of_progress( molar_densities, kfwd, kbkwd );
+      }
+    
+    return;
+  }
+
+
+  template<typename CoeffType>
+  template<typename StateType, typename VectorStateType, typename VectorReactionsType>
+  inline
+  void ReactionSet<CoeffType>::compute_reaction_rates_and_derivs( const StateType& T,
+                                                                  const StateType& rho,
+                                                                  const StateType& R_mix,
+                                                                  const VectorStateType& mass_fractions,
+                                                                  const VectorStateType& molar_densities,
+                                                                  const VectorStateType& h_RT_minus_s_R,
+                                                                  const VectorStateType& dh_RT_minus_s_R_dT,
+                                                                  VectorReactionsType& net_reaction_rates,
+                                                                  VectorReactionsType& dnet_rate_dT,
+                                                                  std::vector<VectorReactionsType>& dnet_rate_drho_s ) const
+  {
+    antioch_not_implemented();
+
+    antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
+    antioch_assert_equal_to( dnet_rate_dT.size(), this->n_reactions() );
+    antioch_assert_equal_to( dnet_rate_drho_s.size(), this->n_species() );
+#ifdef NDEBUG
+#else
+    for (unsigned int s=0; s < this->n_species(); s++)
+      {
+        antioch_assert_equal_to( dnet_rate_drho_s[s].size(), this->n_reactions() );
+      }
+#endif
 
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
