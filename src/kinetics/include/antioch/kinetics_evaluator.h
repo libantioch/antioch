@@ -55,12 +55,20 @@ namespace Antioch
   {
   public:
 
-    KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set );
+    //! Constructor.  Requires a reaction set to be evaluated later,
+    //as well as an \p example instantiation of the data type to be
+    //used as inputs.  For scalar-valued inputs, "0" is a valid
+    //example input.  For vector-valued inputs, an appropriately-sized
+    //vector should be used.
+    KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set,
+                       const StateType& example );
+
     ~KineticsEvaluator();
 
     const ReactionSet<CoeffType>& reaction_set() const;
 
-    //! Compute species production/destruction rates per unit volume in \f$ \left(kg/sec/m^3\right)\f$
+    //! Compute species production/destruction rates per unit volume
+    //in \f$ \left(kg/sec/m^3\right)\f$
     template <typename VectorStateType>
     void compute_mass_sources( const StateType& T,
                                const StateType& rho,
@@ -70,7 +78,8 @@ namespace Antioch
                                const VectorStateType& h_RT_minus_s_R,
                                VectorStateType& mass_sources );
     
-    //! Compute species production/destruction rates per unit volume in \f$ \left(kg/sec/m^3\right)\f$
+    //! Compute species production/destruction rates per unit volume
+    //in \f$ \left(kg/sec/m^3\right)\f$
     template <typename VectorStateType>
     void compute_mass_sources_and_derivs( const StateType& T,
                                           const StateType& rho,
@@ -125,10 +134,12 @@ namespace Antioch
 
   template<typename CoeffType, typename StateType>
   inline
-  KineticsEvaluator<CoeffType,StateType>::KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set )
+  KineticsEvaluator<CoeffType,StateType>::KineticsEvaluator
+    ( const ReactionSet<CoeffType>& reaction_set,
+      const StateType& example )
     : _reaction_set( reaction_set ),
       _chem_mixture( reaction_set.chemical_mixture() ),
-      _net_reaction_rates( reaction_set.n_reactions() ),
+      _net_reaction_rates( reaction_set.n_reactions(), example ),
       _dnet_rate_dT( reaction_set.n_reactions() ),
       _dnet_rate_drho_s( reaction_set.n_species() )
   {
