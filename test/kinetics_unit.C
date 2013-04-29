@@ -59,7 +59,7 @@ int tester_N2N(const std::string& input_name)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
 
   const Scalar P = 1.0e5;
@@ -138,7 +138,7 @@ int tester(const std::string& input_name)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
 
   const Scalar P = 1.0e5;

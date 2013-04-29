@@ -79,7 +79,7 @@ int tester(const std::string& input_name)
   typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
   thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
   
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );

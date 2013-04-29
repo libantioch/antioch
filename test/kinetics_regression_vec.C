@@ -157,7 +157,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
     template Cache<PairScalars> Cache;
   thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-  Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set, example );
   std::vector<PairScalars> omega_dot(n_species, example);
   
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );

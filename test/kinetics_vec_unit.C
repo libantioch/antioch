@@ -86,7 +86,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set, example );
   std::vector<PairScalars> omega_dot(n_species, example);
 
   PairScalars P = example;
