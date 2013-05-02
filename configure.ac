@@ -133,6 +133,7 @@ dnl-----------------------------------------------
 AC_CONFIG_FILES([
   antioch.pc
   doxygen/Makefile
+  doxygen/antioch.dox
   Makefile
   src/Makefile
   test/Makefile
