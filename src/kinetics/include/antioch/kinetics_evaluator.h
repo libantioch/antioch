@@ -90,7 +90,7 @@ namespace Antioch
                                           const VectorStateType& dh_RT_minus_s_R_dT,
                                           VectorStateType& mass_sources,
                                           VectorStateType& dmass_dT,
-                                          std::vector<VectorStateType> dmass_drho_s );
+                                          std::vector<VectorStateType>& dmass_drho_s );
 
     unsigned int n_species() const;
 
@@ -237,10 +237,8 @@ namespace Antioch
                                                                                 const VectorStateType& dh_RT_minus_s_R_dT,
                                                                                 VectorStateType& mass_sources,
                                                                                 VectorStateType& dmass_dT,
-                                                                                std::vector<VectorStateType> dmass_drho_s )
+                                                                                std::vector<VectorStateType>& dmass_drho_s )
   {
-    antioch_not_implemented();
-
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
     // antioch_assert_greater(rho, 0.0);
@@ -260,14 +258,18 @@ namespace Antioch
       }
 #endif
     
-    /*! \todo Do we need to really initialize this? */
+    /*! \todo Do we need to really initialize these? */
     Antioch::set_zero(_net_reaction_rates);
+    Antioch::set_zero(_dnet_rate_dT);
 
     Antioch::set_zero(mass_sources);
     Antioch::set_zero(dmass_dT);
     for (unsigned int s=0; s < this->n_species(); s++)
       {
         Antioch::set_zero(dmass_drho_s[s]);
+
+        /*! \todo Do we need to really initialize this? */
+        Antioch::set_zero(_dnet_rate_drho_s[s]);
       }
 
     // compute the requisite reaction rates
@@ -282,9 +284,11 @@ namespace Antioch
       {
 	const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
 
+        /*! \todo Are these going to get optimized out? Should we remove them? */
 	const StateType rate = _net_reaction_rates[rxn];
 	const StateType drate_dT = _dnet_rate_dT[rxn];
-        
+        const VectorStateType drate_drho_s = _dnet_rate_drho_s[rxn];
+
 	// reactant contributions
 	for (unsigned int r = 0; r < reaction.n_reactants(); r++)
 	  {
@@ -299,7 +303,7 @@ namespace Antioch
             // d/drho_s rate contributions
             for (unsigned int s=0; s < this->n_species(); s++)
               {
-                dmass_drho_s[r_id][s] -= (static_cast<CoeffType>(r_stoich)*_dnet_rate_drho_s[rxn][s]);
+                dmass_drho_s[r_id][s] -= (static_cast<CoeffType>(r_stoich)*drate_drho_s[s]);
               }
 	  }
 	
@@ -317,7 +321,7 @@ namespace Antioch
             // d/drho_s rate contributions
             for (unsigned int s=0; s < this->n_species(); s++)
               {
-                dmass_drho_s[p_id][s] += (static_cast<CoeffType>(p_stoich)*_dnet_rate_drho_s[rxn][s]);
+                dmass_drho_s[p_id][s] += (static_cast<CoeffType>(p_stoich)*drate_drho_s[s]);
               }
 	  }
       }

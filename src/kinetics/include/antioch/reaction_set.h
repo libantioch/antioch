@@ -230,8 +230,6 @@ namespace Antioch
                                                                   VectorReactionsType& dnet_rate_dT,
                                                                   MatrixReactionsType& dnet_rate_drho_s ) const
   {
-    antioch_not_implemented();
-
     antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
     antioch_assert_equal_to( dnet_rate_dT.size(), this->n_reactions() );
     antioch_assert_equal_to( dnet_rate_drho_s.size(), this->n_reactions() );

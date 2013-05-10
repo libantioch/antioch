@@ -616,6 +616,7 @@ namespace Antioch
     // want StateType==valarray to have the right sizes
     // valarray compatibility makes this a bit redundant, but not much
     // worse than the previous version
+    /*! \todo Should we make this work arrays that get passed in so we aren't allocating/deallocating here? */
     VectorStateType dRfwd_drho_s(this->n_species(), kfwd);
     VectorStateType dRbkwd_drho_s(this->n_species(), kbkwd);
 
@@ -698,8 +699,11 @@ namespace Antioch
           net_reaction_rate = Rfwd - Rbkwd;
 
           dnet_rate_dT = dRfwd_dT - dRbkwd_dT;
-
-          dnet_rate_drho_s = dRfwd_drho_s - dRbkwd_drho_s;
+          
+          for (unsigned int s=0; s<this->n_species(); s++)
+	    {
+              dnet_rate_drho_s[s] = dRfwd_drho_s[s] - dRbkwd_drho_s[s];
+            }
 
 	  // and the derivatives are already handled.
 	}
@@ -741,7 +745,10 @@ namespace Antioch
 
           dnet_rate_dT = dRfwd_dT - dRbkwd_dT;
 
-          dnet_rate_drho_s = dRfwd_drho_s - dRbkwd_drho_s;
+          for (unsigned int s=0; s<this->n_species(); s++)
+	    {
+              dnet_rate_drho_s[s] = dRfwd_drho_s[s] - dRbkwd_drho_s[s];
+            }
 	}
 	break;
 	
