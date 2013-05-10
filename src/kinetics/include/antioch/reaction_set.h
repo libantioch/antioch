@@ -79,7 +79,7 @@ namespace Antioch
 				 VectorReactionsType& net_reaction_rates ) const;
 
     //! Compute the rates of progress and derivatives for each reaction
-    template <typename StateType, typename VectorStateType, typename VectorReactionsType>
+    template <typename StateType, typename VectorStateType, typename VectorReactionsType, typename MatrixReactionsType>
     void compute_reaction_rates_and_derivs( const StateType& T,
                                             const StateType& rho,
                                             const StateType& R_mix,
@@ -89,7 +89,7 @@ namespace Antioch
                                             const VectorStateType& dh_RT_minus_s_R_dT,
                                             VectorReactionsType& net_reaction_rates,
                                             VectorReactionsType& dnet_rate_dT,
-                                            std::vector<VectorReactionsType>& dnet_rate_drho_s ) const;
+                                            MatrixReactionsType& dnet_rate_drho_s ) const;
 
     //! Formatted print, by default to \p std::cout.
     void print( std::ostream& os = std::cout ) const;
@@ -217,7 +217,7 @@ namespace Antioch
 
 
   template<typename CoeffType>
-  template<typename StateType, typename VectorStateType, typename VectorReactionsType>
+  template<typename StateType, typename VectorStateType, typename VectorReactionsType, typename MatrixReactionsType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates_and_derivs( const StateType& T,
                                                                   const StateType& rho,
@@ -228,18 +228,18 @@ namespace Antioch
                                                                   const VectorStateType& dh_RT_minus_s_R_dT,
                                                                   VectorReactionsType& net_reaction_rates,
                                                                   VectorReactionsType& dnet_rate_dT,
-                                                                  std::vector<VectorReactionsType>& dnet_rate_drho_s ) const
+                                                                  MatrixReactionsType& dnet_rate_drho_s ) const
   {
     antioch_not_implemented();
 
     antioch_assert_equal_to( net_reaction_rates.size(), this->n_reactions() );
     antioch_assert_equal_to( dnet_rate_dT.size(), this->n_reactions() );
-    antioch_assert_equal_to( dnet_rate_drho_s.size(), this->n_species() );
+    antioch_assert_equal_to( dnet_rate_drho_s.size(), this->n_reactions() );
 #ifdef NDEBUG
 #else
-    for (unsigned int s=0; s < this->n_species(); s++)
+    for (unsigned int r=0; r < this->n_reactions(); r++)
       {
-        antioch_assert_equal_to( dnet_rate_drho_s[s].size(), this->n_reactions() );
+        antioch_assert_equal_to( dnet_rate_drho_s[r].size(), this->n_species() );
       }
 #endif
 
@@ -262,13 +262,25 @@ namespace Antioch
       {
 	const Reaction<CoeffType>& reaction = this->reaction(rxn);
 
-	StateType kfwd = (reaction.forward_rate())(T);
+	StateType kfwd;
+        StateType dkfwd_dT;
+        reaction.forward_rate().rate_and_derivative( T, kfwd, dkfwd_dT );
 
-	StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
+	StateType keq;
+        StateType dkeq_dT;
+
+        reaction.equilibrium_constant_and_derivative( T, P0_RT, h_RT_minus_s_R,
+                                                      dh_RT_minus_s_R_dT,
+                                                      keq, dkeq_dT );
 
 	const StateType kbkwd = kfwd/keq;
+        const StateType dkbkwd_dT = (dkfwd_dT - kbkwd*dkeq_dT)/keq;
 
-	net_reaction_rates[rxn] = reaction.compute_rate_of_progress( molar_densities, kfwd, kbkwd );
+	reaction.compute_rate_of_progress_and_derivatives( molar_densities, _chem_mixture, 
+                                                           kfwd, dkfwd_dT, kbkwd, dkbkwd_dT, 
+                                                           net_reaction_rates[rxn], 
+                                                           dnet_rate_dT[rxn], 
+                                                           dnet_rate_drho_s[rxn] );
       }
     
     return;

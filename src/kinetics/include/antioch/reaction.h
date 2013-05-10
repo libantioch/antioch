@@ -33,6 +33,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/reaction_enum.h"
 #include "antioch/arrhenius_rate.h"
+#include "antioch/chemical_mixture.h"
 
 //C++
 #include <string>
@@ -148,17 +149,14 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     void compute_rate_of_progress_and_derivatives( const VectorStateType& molar_densities,
-						   const VectorStateType& molar_mass,
+						   const ChemicalMixture<CoeffType>& chem_mixture,
 						   const StateType& kfwd,  
 						   const StateType& dkfwd_dT, 
 						   const StateType& kbkwd,
 						   const StateType& dkbkwd_dT,
-						   StateType& Rfwd,
-						   StateType& dRfwd_dT,
-						   VectorStateType& dRfwd_drho, 
-						   StateType& Rbkwd,
-						   StateType& dRbkwd_dT,
-						   VectorStateType& dRbkwd_drho) const;
+						   StateType& net_reaction_rate,
+                                                   StateType& dnet_rate_dT,
+                                                   VectorStateType& dnet_rate_drho_s ) const;
 
     //! Return const reference to the forward rate object
     const ArrheniusRate<CoeffType>& forward_rate() const;
@@ -594,53 +592,50 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
-								      const VectorStateType &molar_mass,
+								      const ChemicalMixture<CoeffType>& chem_mixture,
 								      const StateType& kfwd, 
 								      const StateType& dkfwd_dT,
 								      const StateType& kbkwd,
 								      const StateType& dkbkwd_dT,
-								      StateType& Rfwd,
-								      StateType& dRfwd_dT,
-								      VectorStateType& dRfwd_drho, 
-								      StateType& Rbkwd,
-								      StateType& dRbkwd_dT,
-								      VectorStateType &dRbkwd_drho) const
+								      StateType& net_reaction_rate,
+								      StateType& dnet_rate_dT,
+								      VectorStateType& dnet_rate_drho_s ) const
   {
     using std::pow;
 
     antioch_assert_equal_to (molar_densities.size(), this->n_species());
-    antioch_assert_equal_to (molar_mass.size(),      this->n_species());
 
     // If users want to use valarrays, then the output reference sizes
     // had better already match the input value sizes...
-    Rfwd = 0.0;
-    dRfwd_dT = 0.0;
-    Rbkwd = 0.0;
-    dRbkwd_dT = 0.0;
+    StateType Rfwd = 0.0;
+    StateType dRfwd_dT = 0.0;
+    StateType Rbkwd = 0.0;
+    StateType dRbkwd_dT = 0.0;
 
     // We need to construct using an input StateType argument if we
     // want StateType==valarray to have the right sizes
     // valarray compatibility makes this a bit redundant, but not much
     // worse than the previous version
-    dRfwd_drho.resize(this->n_species(), kfwd);
-    dRbkwd_drho.resize(this->n_species(), kfwd);
-    std::fill( dRfwd_drho.begin(),  dRfwd_drho.end(),  0.);    
-    std::fill( dRbkwd_drho.begin(), dRbkwd_drho.end(), 0.);
+    VectorStateType dRfwd_drho_s(this->n_species(), kfwd);
+    VectorStateType dRbkwd_drho_s(this->n_species(), kbkwd);
+
+    std::fill( dRfwd_drho_s.begin(),  dRfwd_drho_s.end(),  0.);    
+    std::fill( dRbkwd_drho_s.begin(), dRbkwd_drho_s.end(), 0.);
 
     StateType kfwd_times_reactants = kfwd;
     StateType kbkwd_times_products = kbkwd;
-    StateType ddT_kfwd_times_reactants = dkfwd_dT;
-    StateType ddT_kbkwd_times_products = dkbkwd_dT;
+    StateType dkfwd_times_reactants_dT = dkfwd_dT;
+    StateType dkbkwd_times_products_dT = dkbkwd_dT;
       
     // pre-fill the participating species partials with the rates
     for (unsigned int r=0; r< this->n_reactants(); r++)
       {
-	dRfwd_drho[this->reactant_id(r)] = kfwd;
+	dRfwd_drho_s[this->reactant_id(r)] = kfwd;
       }
     
     for (unsigned int p=0; p < this->n_products(); p++)
       {
-	dRbkwd_drho[this->product_id(p)] = kbkwd;
+	dRbkwd_drho_s[this->product_id(p)] = kbkwd;
       }
     
     // Rfwd & derivatives
@@ -654,14 +649,14 @@ namespace Antioch
 	  ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
 	    pow( molar_densities[this->reactant_id(ro)],
 		 static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
-	    / molar_mass[this->reactant_id(ro)] );
+	    / chem_mixture.M(this->reactant_id(ro)) );
 	  	  
 	kfwd_times_reactants     *= val;
-	ddT_kfwd_times_reactants *= val;
+	dkfwd_times_reactants_dT *= val;
 
 	for (unsigned int ri=0; ri<this->n_reactants(); ri++)
 	  {
-	    dRfwd_drho[this->reactant_id(ri)] *= (ri == ro) ? dval : val;
+	    dRfwd_drho_s[this->reactant_id(ri)] *= (ri == ro) ? dval : val;
 	  }
       }
 
@@ -676,14 +671,14 @@ namespace Antioch
 	  ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
 	    pow( molar_densities[this->product_id(po)],
 		 static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
-	    / molar_mass[this->product_id(po)] );
+	    / chem_mixture.M(this->product_id(po)) );
 	
 	kbkwd_times_products     *= val;
-	ddT_kbkwd_times_products *= val;
+	dkbkwd_times_products_dT *= val;
 	
 	for (unsigned int pi=0; pi<this->n_products(); pi++)
 	  {
-	    dRbkwd_drho[this->product_id(pi)] *= (pi == po) ? dval : val;
+	    dRbkwd_drho_s[this->product_id(pi)] *= (pi == po) ? dval : val;
 	  }
       }
 
@@ -697,8 +692,14 @@ namespace Antioch
 	  Rfwd  = kfwd_times_reactants;
 	  Rbkwd = kbkwd_times_products;
 
-	  dRfwd_dT  = ddT_kfwd_times_reactants;
-	  dRbkwd_dT = ddT_kbkwd_times_products;
+	  dRfwd_dT  = dkfwd_times_reactants_dT;
+	  dRbkwd_dT = dkbkwd_times_products_dT;
+
+          net_reaction_rate = Rfwd - Rbkwd;
+
+          dnet_rate_dT = dRfwd_dT - dRbkwd_dT;
+
+          dnet_rate_drho_s = dRfwd_drho_s - dRbkwd_drho_s;
 
 	  // and the derivatives are already handled.
 	}
@@ -717,24 +718,30 @@ namespace Antioch
 	  
 	  Rfwd = kfwd_times_reactants * summed_value;
 	  
-	  dRfwd_dT = ddT_kfwd_times_reactants * summed_value;
+	  dRfwd_dT = dkfwd_times_reactants_dT * summed_value;
 	  
 	  Rbkwd = kbkwd_times_products * summed_value;
 	  
-	  dRbkwd_dT = ddT_kbkwd_times_products * summed_value;
+	  dRbkwd_dT = dkbkwd_times_products_dT * summed_value;
 	  
 	  for (unsigned int s=0; s<this->n_species(); s++)
 	    {
-	      dRfwd_drho[s]  *= summed_value;
-	      dRbkwd_drho[s] *= summed_value;
+	      dRfwd_drho_s[s]  *= summed_value;
+	      dRbkwd_drho_s[s] *= summed_value;
 	      
 	      // and the efficiency contribution derivative
-	      dRfwd_drho[s]  += 
-		this->efficiency(s) / molar_mass[s] * kfwd_times_reactants;
+	      dRfwd_drho_s[s]  += 
+		this->efficiency(s) / chem_mixture.M(s) * kfwd_times_reactants;
 
-	      dRbkwd_drho[s] +=
-		this->efficiency(s) / molar_mass[s] * kbkwd_times_products;
+	      dRbkwd_drho_s[s] +=
+		this->efficiency(s) / chem_mixture.M(s) * kbkwd_times_products;
 	    }
+
+          net_reaction_rate = Rfwd - Rbkwd;
+
+          dnet_rate_dT = dRfwd_dT - dRbkwd_dT;
+
+          dnet_rate_drho_s = dRfwd_drho_s - dRbkwd_drho_s;
 	}
 	break;
 	

@@ -141,12 +141,12 @@ namespace Antioch
       _chem_mixture( reaction_set.chemical_mixture() ),
       _net_reaction_rates( reaction_set.n_reactions(), example ),
       _dnet_rate_dT( reaction_set.n_reactions() ),
-      _dnet_rate_drho_s( reaction_set.n_species() )
+      _dnet_rate_drho_s( reaction_set.n_reactions() )
   {
 
-    for( unsigned int s = 0; s < reaction_set.n_species(); s++ )
+    for( unsigned int r = 0; r < reaction_set.n_reactions(); r++ )
       {
-        _dnet_rate_drho_s[s].resize( reaction_set.n_reactions() );
+        _dnet_rate_drho_s[r].resize( reaction_set.n_species() );
       }
 
     return;
@@ -299,8 +299,7 @@ namespace Antioch
             // d/drho_s rate contributions
             for (unsigned int s=0; s < this->n_species(); s++)
               {
-                /*! \todo We need to update the data structure to be more efficient here */
-                dmass_drho_s[s][r_id] -= (static_cast<CoeffType>(r_stoich)*_dnet_rate_drho_s[s][rxn]);
+                dmass_drho_s[r_id][s] -= (static_cast<CoeffType>(r_stoich)*_dnet_rate_drho_s[rxn][s]);
               }
 	  }
 	
@@ -318,8 +317,7 @@ namespace Antioch
             // d/drho_s rate contributions
             for (unsigned int s=0; s < this->n_species(); s++)
               {
-                /*! \todo We need to update the data structure to be more efficient here */
-                dmass_drho_s[s][p_id] += (static_cast<CoeffType>(p_stoich)*_dnet_rate_drho_s[s][rxn]);
+                dmass_drho_s[p_id][s] += (static_cast<CoeffType>(p_stoich)*_dnet_rate_drho_s[rxn][s]);
               }
 	  }
       }
@@ -333,7 +331,7 @@ namespace Antioch
 
         for (unsigned int t=0; t < this->n_species(); t++)
           {
-            dmass_drho_s[t][s] *= _chem_mixture.M(s);
+            dmass_drho_s[s][t] *= _chem_mixture.M(s);
           }
       }
 
