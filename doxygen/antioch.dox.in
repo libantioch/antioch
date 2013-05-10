@@ -567,8 +567,8 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = src                  \
-                         test                 \
+INPUT                  = @abs_top_srcdir@/src                  \
+                         @abs_top_srcdir@/test                 \
 		       	 @abs_top_srcdir@/doxygen/antioch.page \
 			 @abs_top_builddir@/doxygen/txt_common/about_vpath.page \
 			 @abs_top_srcdir@/doxygen/txt_common/acknowledgement.page \
