@@ -85,6 +85,7 @@ int tester(const std::string& input_name)
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
 
   std::vector<Scalar> omega_dot(n_species);
+  std::vector<Scalar> omega_dot_2(n_species);
   std::vector<Scalar> domega_dot_dT(n_species);
 
   std::vector<std::vector<Scalar> > domega_dot_drho_s(n_species);
@@ -96,7 +97,7 @@ int tester(const std::string& input_name)
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
   kinetics.compute_mass_sources_and_derivs( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
-                                            omega_dot, domega_dot_dT, domega_dot_drho_s );
+                                            omega_dot_2, domega_dot_dT, domega_dot_drho_s );
 
   for( unsigned int s = 0; s < n_species; s++)
     {
@@ -138,6 +139,15 @@ int tester(const std::string& input_name)
   for( unsigned int s = 0; s < n_species; s++)
     {
       const Scalar rel_error = abs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      if( rel_error > tol )
+        {
+          return_flag = 1;
+        }
+    }
+ 
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      const Scalar rel_error = abs( (omega_dot_2[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
         {
           return_flag = 1;
