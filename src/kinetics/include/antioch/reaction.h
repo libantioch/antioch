@@ -486,8 +486,10 @@ namespace Antioch
 								 StateType& dkeq_dT) const
   {
     antioch_assert(this->initialized());
-    antioch_assert_greater( P0_RT, 0.0 );
-    antioch_assert_greater( T, 0.0 );
+
+    //!\todo Make these assertions vector-compatible
+    // antioch_assert_greater( P0_RT, 0.0 );
+    // antioch_assert_greater( T, 0.0 );
     antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( ddT_h_RT_minus_s_R.size(), this->n_species() );
@@ -607,10 +609,11 @@ namespace Antioch
 
     // If users want to use valarrays, then the output reference sizes
     // had better already match the input value sizes...
-    StateType Rfwd = 0.0;
-    StateType dRfwd_dT = 0.0;
-    StateType Rbkwd = 0.0;
-    StateType dRbkwd_dT = 0.0;
+
+    StateType Rfwd = Antioch::zero_clone(kfwd);
+    StateType dRfwd_dT = Antioch::zero_clone(kfwd);
+    StateType Rbkwd = Antioch::zero_clone(kfwd);
+    StateType dRbkwd_dT = Antioch::zero_clone(kfwd);
 
     // We need to construct using an input StateType argument if we
     // want StateType==valarray to have the right sizes
@@ -620,8 +623,8 @@ namespace Antioch
     VectorStateType dRfwd_drho_s(this->n_species(), kfwd);
     VectorStateType dRbkwd_drho_s(this->n_species(), kbkwd);
 
-    std::fill( dRfwd_drho_s.begin(),  dRfwd_drho_s.end(),  0.);    
-    std::fill( dRbkwd_drho_s.begin(), dRbkwd_drho_s.end(), 0.);
+    Antioch::set_zero(dRfwd_drho_s);
+    Antioch::set_zero(dRbkwd_drho_s);
 
     StateType kfwd_times_reactants = kfwd;
     StateType kbkwd_times_products = kbkwd;
