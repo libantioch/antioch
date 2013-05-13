@@ -153,14 +153,32 @@ int vectester(const std::string& input_name, const PairScalars& example)
   chem_mixture.molar_densities(rho,Y,molar_densities);
 
   std::vector<PairScalars> h_RT_minus_s_R(n_species, example);
+  std::vector<PairScalars> h_RT_minus_s_R2(n_species, example);
+  std::vector<PairScalars> dh_RT_minus_s_R_dT(n_species, example);
+
   typedef typename Antioch::CEAThermodynamics<Scalar>::
     template Cache<PairScalars> Cache;
   thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+  thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
 
   Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set, example );
+
   std::vector<PairScalars> omega_dot(n_species, example);
+  std::vector<PairScalars> omega_dot_2(n_species, example);
+  std::vector<PairScalars> domega_dot_dT(n_species, example);
+
+  std::vector<std::vector<PairScalars> > domega_dot_drhos
+    (n_species, omega_dot); // omega_dot is a good example vec<Pair>
   
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+
+  kinetics.compute_mass_sources_and_derivs ( T, rho, R_mix, Y,
+					     molar_densities,
+					     h_RT_minus_s_R2,
+					     dh_RT_minus_s_R_dT,
+					     omega_dot_2,
+					     domega_dot_dT,
+					     domega_dot_drhos );
 
   int return_flag = 0;
 
@@ -193,6 +211,15 @@ int vectester(const std::string& input_name, const PairScalars& example)
       vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
                   "eigen_h_RT_minus_s_R");
 
+    SpeciesVecEigenType eigen_dh_RT_minus_s_R_dT;
+    Antioch::init_constant(eigen_dh_RT_minus_s_R_dT, example);
+
+    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
+
+    return_flag +=
+      vec_compare(eigen_dh_RT_minus_s_R_dT, dh_RT_minus_s_R_dT,
+                  "eigen_dh_RT_minus_s_R_dT");
+
     SpeciesVecEigenType eigen_omega_dot;
     Antioch::init_constant(eigen_omega_dot, example);
   
@@ -200,6 +227,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
     return_flag +=
       vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
+
+    SpeciesVecEigenType eigen_domega_dot_dT;
+    Antioch::init_constant(eigen_domega_dot_dT, example);
+  
+    // FIXME: What to do for domega_dot_drhos type?
   }
 
   {
@@ -230,6 +262,15 @@ int vectester(const std::string& input_name, const PairScalars& example)
       vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
                   "eigen_h_RT_minus_s_R");
 
+    SpeciesVecEigenType eigen_dh_RT_minus_s_R_dT(n_species,1);
+    Antioch::init_constant(eigen_dh_RT_minus_s_R_dT, example);
+
+    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
+
+    return_flag +=
+      vec_compare(eigen_dh_RT_minus_s_R_dT, dh_RT_minus_s_R_dT,
+                  "eigen_dh_RT_minus_s_R_dT");
+
     SpeciesVecEigenType eigen_omega_dot(n_species,1);
     Antioch::init_constant(eigen_omega_dot, example);
   
@@ -237,6 +278,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
     return_flag +=
       vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
+
+    SpeciesVecEigenType eigen_domega_dot_dT(n_species,1);
+    Antioch::init_constant(eigen_domega_dot_dT, example);
+  
+    // FIXME: What to do for domega_dot_drhos type?
   }
 
 #endif // ANTIOCH_HAVE_EIGEN
@@ -248,6 +294,25 @@ int vectester(const std::string& input_name, const PairScalars& example)
 		<< omega_dot[s] << std::endl;
     }
 
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      std::cout << std::scientific << std::setprecision(16)
+		<< "domega_dot_dT(" << chem_mixture.chemical_species()[s]->species() << ") = "
+		<< domega_dot_dT[s] << std::endl;
+    }
+
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      for( unsigned int t = 0; t < n_species; t++)
+        {
+          std::cout << std::scientific << std::setprecision(16)
+		    << "domega_dot_drhos(" << chem_mixture.chemical_species()[s]->species()
+		    << ", " << chem_mixture.chemical_species()[t]->species() << ") = "
+		    << domega_dot_drhos[s][t] << std::endl;
+        }
+    }
+
+  // Regression values for omega_dot
   std::vector<PairScalars> omega_dot_reg(n_species,example);
   omega_dot_reg[0][0] =  7.9004530802650654e+04;
   omega_dot_reg[1][0] = -3.4113853617637843e+05;
@@ -262,6 +327,74 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
   return_flag +=
     vec_compare(omega_dot, omega_dot_reg, "omega_dot");
+
+  return_flag +=
+    vec_compare(omega_dot_2, omega_dot_reg, "omega_dot_2");
+
+  // Regression values for domega_dot_dT
+  std::vector<PairScalars> domega_dot_dT_reg(n_species, example);
+  domega_dot_dT_reg[0][0] =  1.9573634782953712e+02;
+  domega_dot_dT_reg[1][0] = -5.1996539987130484e+02;
+  domega_dot_dT_reg[2][0] = -3.2528809609986996e+02;
+  domega_dot_dT_reg[3][0] =  3.7199081589605311e+02;
+  domega_dot_dT_reg[4][0] =  2.7752633224558451e+02;
+  domega_dot_dT_reg[0][1] = domega_dot_dT_reg[0][0];
+  domega_dot_dT_reg[1][1] = domega_dot_dT_reg[1][0];
+  domega_dot_dT_reg[2][1] = domega_dot_dT_reg[2][0];
+  domega_dot_dT_reg[3][1] = domega_dot_dT_reg[3][0];
+  domega_dot_dT_reg[4][1] = domega_dot_dT_reg[4][0];
+
+  return_flag +=
+    vec_compare(domega_dot_dT, domega_dot_dT_reg, "domega_dot_dT");
+
+  // Regression values for domega_dot_drhos
+  std::vector<std::vector<PairScalars> > domega_dot_drhos_reg
+    (n_species, omega_dot); // omega_dot is the right size for an example
+
+  domega_dot_drhos_reg[0][0][0] = 1.5777705018045012e+02;
+  domega_dot_drhos_reg[0][1][0] = 1.3813389268698828e+02;
+  domega_dot_drhos_reg[0][2][0] = 2.3115223534864103e+06;
+  domega_dot_drhos_reg[0][3][0] = 1.1840007503997479e+03;
+  domega_dot_drhos_reg[0][4][0] = 2.3043581130447080e+06;
+
+  domega_dot_drhos_reg[1][0][0] =  7.1306539959731154e+01;
+  domega_dot_drhos_reg[1][1][0] = -9.9638812606792040e+06;
+  domega_dot_drhos_reg[1][2][0] = -9.9632306241494343e+06;
+  domega_dot_drhos_reg[1][3][0] =  3.7459340498153397e+03;
+  domega_dot_drhos_reg[1][4][0] =  1.1289308740617102e+02;
+
+  domega_dot_drhos_reg[2][0][0] = -1.7978873571638729e+02;
+  domega_dot_drhos_reg[2][1][0] = -4.3618737551808357e+06;
+  domega_dot_drhos_reg[2][2][0] = -5.5244116479589976e+06;
+  domega_dot_drhos_reg[2][3][0] = -4.3214935810689167e+03;
+  domega_dot_drhos_reg[2][4][0] = -1.1526845416778582e+06;
+
+  domega_dot_drhos_reg[3][0][0] = -9.6448385232075168e+01;
+  domega_dot_drhos_reg[3][1][0] =  4.9818874042678401e+06;
+  domega_dot_drhos_reg[3][2][0] =  6.2934541598746339e+06;
+  domega_dot_drhos_reg[3][3][0] = -7.3295923372729849e+03;
+  domega_dot_drhos_reg[3][4][0] =  1.3153337903698755e+06;
+
+  domega_dot_drhos_reg[4][0][0] =  4.7153530808281197e+01;
+  domega_dot_drhos_reg[4][1][0] =  9.3437294776995126e+06;
+  domega_dot_drhos_reg[4][2][0] =  6.8826657587473867e+06;
+  domega_dot_drhos_reg[4][3][0] =  6.7211511181268143e+03;
+  domega_dot_drhos_reg[4][4][0] = -2.4671202548241317e+06;
+
+  for (unsigned int i = 0; i != 5; ++i)
+    for (unsigned int j = 0; j != 5; ++j)
+      domega_dot_drhos_reg[i][j][1] = 
+        domega_dot_drhos_reg[i][j][0];
+
+  char vecname[] = "domega_dot_drho_0";
+  for (unsigned int i = 0; i != 5; ++i)
+    {
+      return_flag +=
+        vec_compare(domega_dot_drhos[i], domega_dot_drhos_reg[i], vecname);
+
+      // Should b=e safe to assume "1"+1 = "2" etc.
+      ++vecname[16];
+    }
 
   return return_flag;
 }
