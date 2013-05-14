@@ -69,8 +69,9 @@ namespace Antioch
   inline
   void init_constant(Vector& output, const Scalar& example)
   {
+    typedef typeof(output.size()) Vector_size_t;
     // We can't just use setZero here with arbitrary Scalar types
-    for (std::size_t i=0; i != output.size(); ++i)
+    for (Vector_size_t i=0; i != output.size(); ++i)
       init_clone(output[i], example);
   }
 } // end namespace Antioch
