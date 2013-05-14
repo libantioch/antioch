@@ -130,15 +130,15 @@ int tester()
   }
   
 
-  const Scalar T = 1000.0L;
-
   std::vector<Scalar> mass_fractions( 5, 0.2L); 
 
   // Currently dummy
   //const Scalar mu_exact = ;
 
-  Scalar wilke_mu = wilke.mu(T, mass_fractions );
-  Scalar wilke_k = wilke.k(T, mass_fractions );
+  // const Scalar T = 1000.0L;
+
+  // Scalar wilke_mu = wilke.mu(T, mass_fractions );
+  // Scalar wilke_k = wilke.k(T, mass_fractions );
 
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );
