@@ -58,7 +58,7 @@ namespace Antioch
 
   template<typename StateType>
   TempCache<StateType>::TempCache(const StateType& T_in)
-    : T(T_in), T2(T*T), T3(T2*T), T4(T2*T2)
+    : T(T_in), T2(T*T), T3(T2*T), T4(T2*T2), lnT(T_in)
   {
     using std::log;
 
