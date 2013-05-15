@@ -70,7 +70,10 @@ namespace Antioch
       StateType lnT;
       
       explicit Cache(const StateType &T_in) 
-	: T(T_in), T2(T*T), T3(T2*T), T4(T2*T2), lnT(log(T)) {}
+	: T(T_in), T2(T*T), T3(T2*T), T4(T2*T2) {
+        using std::log;
+        lnT = log(T);
+      }
 
       Cache(const StateType &T_in, 
             const StateType &T2_in, 
