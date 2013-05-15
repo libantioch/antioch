@@ -124,11 +124,13 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_INCLUDES)
 
+CLEANFILES =
+
 #--------------
 # Code coverage
 #--------------
 if CODE_COVERAGE_ENABLED
-  CLEANFILES = *.gcda *.gcno
+  CLEANFILES += *.gcda *.gcno
 endif
 
 #---------------------------------
@@ -139,6 +141,8 @@ STAMPED_FILES = $(libantioch_la_SOURCES) $(include_HEADERS) $(antioch_version_SO
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl -S=$(top_srcdir)/src $(top_srcdir)/LICENSE $(STAMPED_FILES) 
 	echo 'updated source license headers' >$@
+
+CLEANFILES += .license.stamp
 
 EXTRA_DIST = common
 
