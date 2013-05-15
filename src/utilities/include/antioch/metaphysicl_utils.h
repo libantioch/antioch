@@ -32,7 +32,19 @@
 #include "antioch_config.h"
 
 #ifdef ANTIOCH_HAVE_METAPHYSICL
+// Though the following implementations are all valid without
+// <metaphysicl/numberarray.h>, successfully using them with
+// MetaPhysicL types requires MetaPhysicL to be included first.
+// Configure-time MetaPhysicL support enforces this constraint but
+// header-only MetaPhysicL may be mixed with header-only Antioch
+// without configure-time flags.
 #include "metaphysicl/numberarray.h"
+#else
+// Forward declaration instead
+namespace MetaPhysicL {
+template <std::size_t size, typename T> class NumberArray;
+}
+#endif
 
 #include "antioch/metaprogramming.h"
 
@@ -78,7 +90,5 @@ zero_clone(const MetaPhysicL::NumberArray<size,T>& example)
 }
 
 } // end namespace Antioch
-
-#endif // ANTIOCH_HAVE_METAPHYSICL
 
 #endif // ANTIOCH_METAPHYSICL_UTILS_H
