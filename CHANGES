@@ -23,3 +23,6 @@ https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.0
 * Currently 23 unit and regression tests yielding 67.1% line
   coverage and 80.6% function coverage (pass --enable-coverage
   to configure, then run make coverage).
+* Supports documentation generation using Doxygen
+* Optionally supports Eigen package for vector evaluation of quantities
+* Optionally supports the MetaPhysicL library for AD support
