@@ -11,8 +11,16 @@ aclocaldir = $(prefix)/share/aclocal
 aclocal_DATA = $(top_srcdir)/share/aclocal/*
 
 # Eliminate .svn directories in dist tarball
+# Also hacking around EXTRA_DIST not dealing with
+# the antioch.m4 symlink correctly. So we manually
+# deal with it. Also, by default, it seems permissions
+# don't let us remove stuff, we chmod it before
+# trying to remove stuff.
 dist-hook:
+	chmod -R u+w $(distdir)
 	rm -rf `find $(distdir)/ -name .svn`
+	rm -rf $(distdir)/share/aclocal/antioch.m4
+	cp -L $(top_srcdir)/share/aclocal/antioch.m4 $(distdir)/share/aclocal
 
 #if SVN_CHECKOUT
 #  EXTRA_DIST     += dist_version
