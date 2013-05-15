@@ -129,16 +129,10 @@ endif
 #---------------------------------
 # Embedded license header support
 #---------------------------------
+STAMPED_FILES = $(libantioch_la_SOURCES) $(include_HEADERS) $(antioch_version_SOURCES)
 
 .license.stamp: $(top_srcdir)/LICENSE
-	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE \
-        $(top_srcdir)/src/core/include/antioch/*.h $(top_srcdir)/src/core/src/*.C \
-        $(top_srcdir)/src/kinetics/include/antioch/*.h $(top_srcdir)/src/kinetics/src/*.C \
-        $(top_srcdir)/src/thermo/include/antioch/*.h $(top_srcdir)/src/thermo/src/*.C \
-        $(top_srcdir)/src/transport/include/antioch/*.h \
-	$(top_srcdir)/src/utilities/include/antioch/*.h \
-        $(top_srcdir)/src/utilities/src/*.C \
-        $(top_srcdir)/src/apps/*.C
+	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE $(STAMPED_FILES) 
 	echo 'updated source license headers' >$@
 
 EXTRA_DIST = common
