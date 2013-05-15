@@ -153,7 +153,6 @@ int vectester(const std::string& input_name, const PairScalars& example)
   chem_mixture.molar_densities(rho,Y,molar_densities);
 
   std::vector<PairScalars> h_RT_minus_s_R(n_species, example);
-  std::vector<PairScalars> h_RT_minus_s_R2(n_species, example);
   std::vector<PairScalars> dh_RT_minus_s_R_dT(n_species, example);
 
   typedef typename Antioch::CEAThermodynamics<Scalar>::
@@ -174,7 +173,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
   kinetics.compute_mass_sources_and_derivs ( T, rho, R_mix, Y,
 					     molar_densities,
-					     h_RT_minus_s_R2,
+					     h_RT_minus_s_R,
 					     dh_RT_minus_s_R_dT,
 					     omega_dot_2,
 					     domega_dot_dT,
