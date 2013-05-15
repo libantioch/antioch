@@ -140,13 +140,13 @@ namespace Antioch
     : _reaction_set( reaction_set ),
       _chem_mixture( reaction_set.chemical_mixture() ),
       _net_reaction_rates( reaction_set.n_reactions(), example ),
-      _dnet_rate_dT( reaction_set.n_reactions() ),
+      _dnet_rate_dT( reaction_set.n_reactions(), example ),
       _dnet_rate_drho_s( reaction_set.n_reactions() )
   {
 
     for( unsigned int r = 0; r < reaction_set.n_reactions(); r++ )
       {
-        _dnet_rate_drho_s[r].resize( reaction_set.n_species() );
+        _dnet_rate_drho_s[r].resize( reaction_set.n_species(), example );
       }
 
     return;
