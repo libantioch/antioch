@@ -62,6 +62,9 @@ template <std::size_t size, typename T>
 struct has_size<MetaPhysicL::NumberArray<size,T> >;
 
 template <std::size_t size, typename T>
+struct size_type<MetaPhysicL::NumberArray<size,T> >;
+
+template <std::size_t size, typename T>
 struct value_type<MetaPhysicL::NumberArray<size,T> >;
 
 template <std::size_t size, typename T>

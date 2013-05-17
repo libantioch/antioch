@@ -104,6 +104,12 @@ struct has_size<std::valarray<T> >
 };
 
 template <typename T>
+struct size_type<std::valarray<T> >
+{
+  typedef std::size_t type;
+};
+
+template <typename T>
 struct value_type<std::valarray<T> >
 {
   typedef std::valarray<T> container_type;

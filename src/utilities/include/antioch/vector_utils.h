@@ -69,6 +69,12 @@ struct has_size<std::vector<T> >
 };
 
 template <typename T>
+struct size_type<std::vector<T> >
+{
+  typedef typename std::vector<T>::size_type type;
+};
+
+template <typename T>
 struct value_type<std::vector<T> >
 {
   typedef std::vector<T> container_type;
