@@ -49,7 +49,7 @@ namespace Antioch
   // while resizing them to match the example input
   template <typename T>
   inline
-  T zero_clone(const T& example) { return 0; }
+  T zero_clone(const T& /* example */) { return 0; }
 
   // A function for initializing vectorized numeric types
   // while resizing them to match the example input
