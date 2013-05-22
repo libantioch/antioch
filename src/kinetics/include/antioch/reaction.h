@@ -432,7 +432,8 @@ namespace Antioch
     
     // find the delta stoichiometric coefficient for each species,
     // and the sum of the deltas 
-    for (unsigned int s=0, _gamma=0; s<this->n_species(); s++)
+    _gamma = 0;
+    for (unsigned int s=0; s<this->n_species(); s++)
       {
 	_species_delta_stoichiometry[s] =
 	  ( _species_product_stoichiometry[s] -
