@@ -29,6 +29,10 @@
 #ifndef ANTIOCH_EIGEN_UTILS_DECL_H
 #define ANTIOCH_EIGEN_UTILS_DECL_H
 
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  error eigen_utils_decl.h must be included before metaprogramming.h
+#endif
+
 #include "antioch_config.h"
 
 #ifdef ANTIOCH_HAVE_EIGEN
