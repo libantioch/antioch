@@ -40,7 +40,7 @@ namespace Antioch
     inline
     CoeffType R_universal()
     {
-      return 8314.472L;
+      return 8314.4621L;
     }
 
     /*!
