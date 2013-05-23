@@ -31,7 +31,6 @@
 
 // Antioch
 #include "antioch/metaprogramming.h"
-#include "antioch/vector_utils.h"
 #include "antioch/wilke_mixture.h"
 #include "antioch/mixture_viscosity.h"
 
