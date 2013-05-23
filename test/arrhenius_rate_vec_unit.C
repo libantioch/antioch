@@ -41,6 +41,10 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
+
 #include "antioch/arrhenius_rate.h"
 
 #include "antioch/eigen_utils.h"

@@ -31,6 +31,8 @@
 #include <cmath>
 
 // Antioch
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
 #include "antioch/eucken_thermal_conductivity.h"
@@ -38,6 +40,8 @@
 #include "antioch/wilke_mixture.h"
 #include "antioch/wilke_evaluator.h"
 #include "antioch/blottner_parsing.h"
+
+#include "antioch/vector_utils.h"
 
 template <typename Scalar>
 int test_val( const Scalar val, const Scalar val_exact, const Scalar tol, const std::string& val_name )
