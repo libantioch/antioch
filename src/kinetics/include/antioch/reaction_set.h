@@ -109,6 +109,9 @@ namespace Antioch
 
     std::vector<Reaction<CoeffType> > _reactions;
 
+    //! Scaling for equilibrium constant
+    const CoeffType _P0_R;
+
   };
   
   /* ------------------------- Inline Functions -------------------------*/
@@ -157,7 +160,8 @@ namespace Antioch
   template<typename CoeffType>
   inline
   ReactionSet<CoeffType>::ReactionSet( const ChemicalMixture<CoeffType>& chem_mixture )
-    : _chem_mixture(chem_mixture)
+    : _chem_mixture(chem_mixture),
+      _P0_R(1.0e5/Constants::R_universal<CoeffType>())
   {
     return;
   }
@@ -194,9 +198,7 @@ namespace Antioch
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
     // useful constants
-    const CoeffType P0    = 1.e5; // standard pressure
-    const StateType RT    = R_mix*T;
-    const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
+    const StateType P0_RT = _P0_R/T; // used to transform equilibrium constant from pressure units
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
@@ -251,9 +253,7 @@ namespace Antioch
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
     // useful constants
-    const CoeffType P0    = 1.e5; // standard pressure
-    const StateType RT    = R_mix*T;
-    const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
+    const StateType P0_RT = _P0_R/T; // used to transform equilibrium constant from pressure units
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)

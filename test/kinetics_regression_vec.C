@@ -313,11 +313,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
   // Regression values for omega_dot
   std::vector<PairScalars> omega_dot_reg(n_species,example);
-  omega_dot_reg[0][0] =  7.9004530802650654e+04;
-  omega_dot_reg[1][0] = -3.4113853617637843e+05;
-  omega_dot_reg[2][0] = -1.8898881857838202e+05;
-  omega_dot_reg[3][0] =  2.1551399274321867e+05;
-  omega_dot_reg[4][0] =  2.3560883120889112e+05;
+  omega_dot_reg[0][0] =  9.1627287678053093e+04;
+  omega_dot_reg[1][0] = -3.3462436325474846e+05;
+  omega_dot_reg[2][0] = -2.1139699786100935e+05;
+  omega_dot_reg[3][0] =  1.9782286675793945e+05;
+  omega_dot_reg[4][0] =  2.5657120667976528e+05;
   omega_dot_reg[0][1] = omega_dot_reg[0][0];
   omega_dot_reg[1][1] = omega_dot_reg[1][0];
   omega_dot_reg[2][1] = omega_dot_reg[2][0];
@@ -332,11 +332,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
   // Regression values for domega_dot_dT
   std::vector<PairScalars> domega_dot_dT_reg(n_species, example);
-  domega_dot_dT_reg[0][0] =  1.9573634782953712e+02;
-  domega_dot_dT_reg[1][0] = -5.1996539987130484e+02;
-  domega_dot_dT_reg[2][0] = -3.2528809609986996e+02;
-  domega_dot_dT_reg[3][0] =  3.7199081589605311e+02;
-  domega_dot_dT_reg[4][0] =  2.7752633224558451e+02;
+  domega_dot_dT_reg[0][0] =  1.8015215534436558e+02;
+  domega_dot_dT_reg[1][0] = -5.2724813006867157e+02;
+  domega_dot_dT_reg[2][0] = -3.0930200520637231e+02;
+  domega_dot_dT_reg[3][0] =  3.7973259624570557e+02;
+  domega_dot_dT_reg[4][0] =  2.7666538368497271e+02;
   domega_dot_dT_reg[0][1] = domega_dot_dT_reg[0][0];
   domega_dot_dT_reg[1][1] = domega_dot_dT_reg[1][0];
   domega_dot_dT_reg[2][1] = domega_dot_dT_reg[2][0];
@@ -350,35 +350,35 @@ int vectester(const std::string& input_name, const PairScalars& example)
   std::vector<std::vector<PairScalars> > domega_dot_drhos_reg
     (n_species, omega_dot); // omega_dot is the right size for an example
 
-  domega_dot_drhos_reg[0][0][0] = 1.5777705018045012e+02;
-  domega_dot_drhos_reg[0][1][0] = 1.3813389268698828e+02;
-  domega_dot_drhos_reg[0][2][0] = 2.3115223534864103e+06;
-  domega_dot_drhos_reg[0][3][0] = 1.1840007503997479e+03;
-  domega_dot_drhos_reg[0][4][0] = 2.3043581130447080e+06;
+  domega_dot_drhos_reg[0][0][0] = 1.9677505036779588e+04;
+  domega_dot_drhos_reg[0][1][0] = 1.7227655744954533e+04;
+  domega_dot_drhos_reg[0][2][0] = 3.2160852249371288e+06;
+  domega_dot_drhos_reg[0][3][0] = 1.4766512835492578e+05;
+  domega_dot_drhos_reg[0][4][0] = 2.3225820766301709e+06;
 
-  domega_dot_drhos_reg[1][0][0] =  7.1306539959731154e+01;
-  domega_dot_drhos_reg[1][1][0] = -9.9638812606792040e+06;
-  domega_dot_drhos_reg[1][2][0] = -9.9632306241494343e+06;
-  domega_dot_drhos_reg[1][3][0] =  3.7459340498153397e+03;
-  domega_dot_drhos_reg[1][4][0] =  1.1289308740617102e+02;
+  domega_dot_drhos_reg[1][0][0] =  8.8931434825656524e+03;
+  domega_dot_drhos_reg[1][1][0] = -9.9561577424359526e+06;
+  domega_dot_drhos_reg[1][2][0] = -9.8750122547233738e+06;
+  domega_dot_drhos_reg[1][3][0] =  4.6145137683779188e+05;
+  domega_dot_drhos_reg[1][4][0] =  8.3491162207055422e+03;
 
-  domega_dot_drhos_reg[2][0][0] = -1.7978873571638729e+02;
-  domega_dot_drhos_reg[2][1][0] = -4.3618737551808357e+06;
-  domega_dot_drhos_reg[2][2][0] = -5.5244116479589976e+06;
-  domega_dot_drhos_reg[2][3][0] = -4.3214935810689167e+03;
-  domega_dot_drhos_reg[2][4][0] = -1.1526845416778582e+06;
+  domega_dot_drhos_reg[2][0][0] = -2.2422732159069768e+04;
+  domega_dot_drhos_reg[2][1][0] = -4.3813474521479812e+06;
+  domega_dot_drhos_reg[2][2][0] = -6.8345623004856370e+06;
+  domega_dot_drhos_reg[2][3][0] = -5.4147262809897691e+05;
+  domega_dot_drhos_reg[2][4][0] = -1.2268422322985895e+06;
 
-  domega_dot_drhos_reg[3][0][0] = -9.6448385232075168e+01;
-  domega_dot_drhos_reg[3][1][0] =  4.9818874042678401e+06;
-  domega_dot_drhos_reg[3][2][0] =  6.2934541598746339e+06;
-  domega_dot_drhos_reg[3][3][0] = -7.3295923372729849e+03;
-  domega_dot_drhos_reg[3][4][0] =  1.3153337903698755e+06;
+  domega_dot_drhos_reg[3][0][0] = -1.2028754130527022e+04;
+  domega_dot_drhos_reg[3][1][0] =  4.9714406705878349e+06;
+  domega_dot_drhos_reg[3][2][0] =  5.7419716201733928e+06;
+  domega_dot_drhos_reg[3][3][0] = -9.1126005729930103e+05;
+  domega_dot_drhos_reg[3][4][0] =  1.2432098150546583e+06;
 
-  domega_dot_drhos_reg[4][0][0] =  4.7153530808281197e+01;
-  domega_dot_drhos_reg[4][1][0] =  9.3437294776995126e+06;
-  domega_dot_drhos_reg[4][2][0] =  6.8826657587473867e+06;
-  domega_dot_drhos_reg[4][3][0] =  6.7211511181268143e+03;
-  domega_dot_drhos_reg[4][4][0] = -2.4671202548241317e+06;
+  domega_dot_drhos_reg[4][0][0] =  5.8808377702515500e+03;
+  domega_dot_drhos_reg[4][1][0] =  9.3488368682511449e+06;
+  domega_dot_drhos_reg[4][2][0] =  7.7515177100984911e+06;
+  domega_dot_drhos_reg[4][3][0] =  8.4361618020556017e+05;
+  domega_dot_drhos_reg[4][4][0] = -2.3472987756069452e+06;
 
   for (unsigned int i = 0; i != 5; ++i)
     for (unsigned int j = 0; j != 5; ++j)
