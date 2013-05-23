@@ -1,5 +1,12 @@
 Version 0.1.0 (In progress)
 
+Version 0.0.1
+https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.0
+* Bug fix for incorrect initialization of sum of stoichiometric
+  coefficients (Redmine #2898).
+* Bug fix for incorrect scaling of equilibrium constant
+  (Redmine #2900).
+
 Version 0.0.0
 https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.0
 
