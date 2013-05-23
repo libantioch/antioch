@@ -57,7 +57,7 @@ int tester_N2N(const std::string& input_name)
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
   Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
+  Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
 
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
@@ -96,7 +96,7 @@ int tester_N2N(const std::string& input_name)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1.0e6; // 1.0e-10;
       if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
@@ -136,7 +136,7 @@ int tester(const std::string& input_name)
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
   Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
+  Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
 
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
@@ -175,7 +175,7 @@ int tester(const std::string& input_name)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1.6e6; // 1.6e-10;
       if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
