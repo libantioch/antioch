@@ -29,6 +29,12 @@
 #ifndef ANTIOCH_VALARRAY_UTILS_H
 #define ANTIOCH_VALARRAY_UTILS_H
 
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  ifndef ANTIOCH_VALARRAY_UTILS_DECL_H
+#    error valarray_utils_decl.h must be included before metaprogramming.h
+#  endif
+#endif
+
 // Antioch
 #include "antioch/metaprogramming.h"
 
