@@ -68,6 +68,35 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
   return return_flag;
 }
 
+template <typename Scalar>
+int test_h( const std::string& species_name, unsigned int species, Scalar h_exact, Scalar T,
+            const Antioch::CEAEvaluator<Scalar>& thermo )
+{
+  using std::abs;
+
+  int return_flag = 0;
+
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
+
+  typedef typename Antioch::template TempCache<Scalar> Cache;
+
+  const Scalar h = thermo.h(Cache(T), species);
+
+  if( abs( (h_exact - h)/h_exact ) > tol )
+    {
+      std::cerr << "Error: Mismatch in species total enthalpy."
+		<< "\nspecies    = " << species_name
+		<< "\nh          = " << h
+		<< "\nh_exact    = " << h_exact
+		<< "\ndifference = " << (h_exact - h)
+		<< "\ntolerance  = " << tol
+		<< "\nT = " << T << std::endl;
+      return_flag = 1;
+    }
+
+  return return_flag;
+}
+
 
 template <typename Scalar>
 Scalar cp( Scalar T, Scalar a0, Scalar a1, Scalar a2, 
@@ -77,6 +106,14 @@ Scalar cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
     T = 200.1;
 
   return a0/(T*T) + a1/T + a2 + a3*T + a4*(T*T) + a5*(T*T*T) + a6*(T*T*T*T);
+}
+
+template <typename Scalar>
+Scalar h( Scalar T, Scalar a0, Scalar a1, Scalar a2, 
+          Scalar a3, Scalar a4, Scalar a5, Scalar a6,
+          Scalar a8 )
+{
+  return -a0/(T*T) + a1/T*std::log(T) + a2 + a3*T/2.0 + a4*(T*T)/3.0 + a5*(T*T*T)/4.0 + a6*(T*T*T*T)/5.0 + a8/T;
 }
 
 
@@ -240,6 +277,35 @@ int tester()
     if( return_flag_temp != 0 ) return_flag = 1;
 
     return_flag = test_cp( species_name, index, cp_3, T3, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+  }
+
+  // Test N2 h
+  {
+    unsigned int index = 0;
+    const Scalar h_N2_1 = R_N2*T1*h( T1, Scalar(2.21037122e+04), Scalar(-3.81846145e+02), Scalar(6.08273815e+00), 
+                                     Scalar(-8.53091381e-03),  Scalar(1.38464610e-05), Scalar(-9.62579293e-09),
+                                     Scalar(2.51970560e-12), Scalar(7.10845911e+02) );
+
+    const Scalar h_N2_2 = R_N2*T2*h( T2, Scalar(5.87709908e+05), Scalar(-2.23924255e+03),  Scalar(6.06694267e+00),
+                                     Scalar(-6.13965296e-04), Scalar(1.49179819e-07), Scalar(-1.92309442e-11),
+                                     Scalar(1.06194871e-15), Scalar(1.28320618e+04) );
+
+    const Scalar h_N2_3 = R_N2*T3*h( T3, Scalar(8.30971200e+08), Scalar(-6.42048187e+05),  Scalar(2.02020507e+02),
+                                     Scalar(-3.06501961e-02), Scalar(2.48685558e-06), Scalar(-9.70579208e-11),
+                                     Scalar(1.43751673e-15), Scalar(4.93850663e+06) );
+    
+    const Antioch::Species species = chem_mixture.species_list()[index];
+    const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
+
+    int return_flag_temp = 0;
+    return_flag_temp = test_h( species_name, index, h_N2_1, T1, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag = test_h( species_name, index, h_N2_2, T2, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag = test_h( species_name, index, h_N2_3, T3, thermo );
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
