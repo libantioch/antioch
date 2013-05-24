@@ -261,7 +261,7 @@ namespace Antioch
   inline
   StateType CEAEvaluator<CoeffType>::h( const TempCache<StateType>& cache, unsigned int species ) const
   {
-    return this->_chem_mixture.R(species)*cache.T*this->h_over_RT(cache,species);
+    return this->chem_mixture().R(species)*cache.T*this->h_over_RT(cache,species);
   }
 
 
@@ -277,7 +277,7 @@ namespace Antioch
     
     for( unsigned int s = 0; s < this->n_species(); s++ )
       {
-        h[s] = this->_chem_mixture.R(s)*cache.T*this->h_over_RT(cache,s);
+        h[s] = this->chem_mixture().R(s)*cache.T*this->h_over_RT(cache,s);
       }
     
     return;
