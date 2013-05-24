@@ -1,7 +1,14 @@
 Version 0.1.0 (In progress)
 
+Version 0.0.2
+https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.2
+* Enforce correct header ordering for users of metaprogramming utility
+  headers
+* Update Avogadro's number and the Universal gas constant to CODATA
+  2010 values
+
 Version 0.0.1
-https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.0
+https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.1
 * Bug fix for incorrect initialization of sum of stoichiometric
   coefficients (Redmine #2898).
 * Bug fix for incorrect scaling of equilibrium constant
