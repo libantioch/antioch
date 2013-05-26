@@ -133,7 +133,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1.6e6; // 1.6e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 2.7e6; // 1.6e-10;
       const PairScalars abs_sum = abs(sum);
       if( Antioch::max(abs_sum) > sum_tol )
 	{
