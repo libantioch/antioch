@@ -139,10 +139,12 @@ int tester()
   // Currently dummy
   //const Scalar mu_exact = ;
 
-  // const Scalar T = 1000.0L;
+  const Scalar T = 1000.0L;
 
-  // Scalar wilke_mu = wilke.mu(T, mass_fractions );
-  // Scalar wilke_k = wilke.k(T, mass_fractions );
+  Scalar wilke_mu = wilke.mu(T, mass_fractions );
+  Scalar wilke_k = wilke.k(T, mass_fractions );
+  
+  wilke.mu_and_k(T,mass_fractions,wilke_mu,wilke_k);
 
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );
