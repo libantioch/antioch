@@ -67,6 +67,9 @@ dnl--------------------------
 antioch_optional_INCLUDES=""
 antioch_optional_test_INCLUDES=""
 
+dnl Enable Thrust if CUDA is found
+AX_CHECK_CUDA
+
 dnl Enable Eigen if a new enough version is found
 enableoptional=yes
 CONFIGURE_EIGEN(3.1.2, no)
