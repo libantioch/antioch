@@ -1,5 +1,13 @@
 Version 0.1.0 (In progress)
 
+Version 0.0.3
+https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.3
+* Fixed lingering references to non-existent class member in
+  CEAEvaluator.
+* Use correct calling sequence in mu_and_k method within
+  WilkeEvaluator.
+* Improved testing coverage of CEAEvaluator.
+
 Version 0.0.2
 https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.2
 * Enforce correct header ordering for users of metaprogramming utility
