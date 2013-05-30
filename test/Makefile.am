@@ -27,6 +27,10 @@ check_PROGRAMS += wilke_transport_unit
 check_PROGRAMS += wilke_transport_vec_unit
 check_PROGRAMS += constant_lewis_unit
 
+if THRUST_ENABLED
+check_PROGRAMS += kinetics_unit_thrust
+endif
+
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
 endif
@@ -68,6 +72,10 @@ wilke_transport_unit_SOURCES = wilke_transport_unit.C
 wilke_transport_vec_unit_SOURCES = wilke_transport_vec_unit.C
 constant_lewis_unit_SOURCES = constant_lewis_unit.C
 
+if THRUST_ENABLED
+kinetics_unit_thrust_SOURCES = kinetics_unit_thrust.cu
+endif
+
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
 endif
@@ -106,7 +114,7 @@ if THRUST_ENABLED
 SUFFIXES = .cu
 
 .cu.o:
-	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
+	$(THRUST_CXX) $(AM_CPPFLAGS) $(THRUST_CPPFLAGS) -c -o $@ $<
 endif
 
 CLEANFILES =
