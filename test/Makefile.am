@@ -102,6 +102,12 @@ if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
 endif
 
+if THRUST_ENABLED
+SUFFIXES = .cu
+
+.cu.o:
+	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
+endif
 
 CLEANFILES =
 if CODE_COVERAGE_ENABLED

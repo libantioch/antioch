@@ -67,8 +67,11 @@ dnl--------------------------
 antioch_optional_INCLUDES=""
 antioch_optional_test_INCLUDES=""
 
-dnl Enable Thrust if CUDA is found
-AX_CHECK_CUDA
+dnl Enable Thrust if found
+AX_CHECK_THRUST(0.0.0, no)
+if (test x$HAVE_THRUST = x1); then
+  antioch_optional_test_INCLUDES="$THRUST_CPPFLAGS $antioch_optional_test_INCLUDES"
+fi
 
 dnl Enable Eigen if a new enough version is found
 enableoptional=yes
