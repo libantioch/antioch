@@ -112,6 +112,8 @@ int tester_N2N(const std::string& input_name)
   species_str_list.push_back( "N2" );
   species_str_list.push_back( "N" );
 
+  antioch_functor<Scalar> omega_func(species_str_list, input_name);
+
   int return_flag = 0;
 
 /*
@@ -159,6 +161,8 @@ int tester(const std::string& input_name)
   species_str_list.push_back( "N" );
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
+
+  antioch_functor<Scalar> omega_func(species_str_list, input_name);
 
   int return_flag = 0;
 
