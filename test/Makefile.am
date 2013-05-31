@@ -45,7 +45,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
 
-AM_LDFLAGS = $(top_builddir)/src/libantioch.la
+LDADD = $(top_builddir)/src/libantioch.la
 
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
@@ -77,7 +77,7 @@ kinetics_unit_thrust_SOURCES = kinetics_unit_thrust.cu
 kinetics_unit_thrust_LDADD = $(THRUST_LIBS)
 kinetics_unit_thrust_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-        $(CXXFLAGS) $(THRUST_LDFLAGS) $(LDFLAGS) -o $@
+        $(CXXFLAGS) $(THRUST_LDFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@ $(LDADD)
 endif
 
 if ANTIOCH_ENABLE_EIGEN
