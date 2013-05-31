@@ -74,6 +74,10 @@ constant_lewis_unit_SOURCES = constant_lewis_unit.C
 
 if THRUST_ENABLED
 kinetics_unit_thrust_SOURCES = kinetics_unit_thrust.cu
+kinetics_unit_thrust_LDADD = $(THRUST_LIBS)
+kinetics_unit_thrust_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+        $(CXXFLAGS) $(THRUST_LDFLAGS) $(LDFLAGS) -o $@
 endif
 
 if ANTIOCH_ENABLE_EIGEN
@@ -111,6 +115,8 @@ TESTS += stat_mech_thermo_unit_eigen
 endif
 
 if THRUST_ENABLED
+TESTS += kinetics_unit_thrust_air_5sp.sh
+
 SUFFIXES = .cu
 
 .cu.o:

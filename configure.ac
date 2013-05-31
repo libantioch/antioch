@@ -124,6 +124,7 @@ dnl-----------------------------------------------
 dnl Generate files for unit and regression testing
 dnl-----------------------------------------------
 AC_CONFIG_FILES(test/kinetics_unit_air_5sp.sh,           [chmod +x test/kinetics_unit_air_5sp.sh])
+AC_CONFIG_FILES(test/kinetics_unit_thrust_air_5sp.sh,    [chmod +x test/kinetics_unit_thrust_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_vec_unit_air_5sp.sh,       [chmod +x test/kinetics_vec_unit_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_air_5sp.sh,     [chmod +x test/kinetics_regression_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_vec_air_5sp.sh, [chmod +x test/kinetics_regression_vec_air_5sp.sh])
