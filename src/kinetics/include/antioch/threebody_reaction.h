@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -72,7 +72,7 @@ namespace Antioch
                                                    const StateType& T,  
                                                    StateType& kfwd,  
                                                    StateType& dkfwd_dT, 
-                                                   VectorStateType& dkfwd_dY) const;
+                                                   VectorStateType& dkfwd_dX) const;
 
   private:
     
@@ -124,31 +124,27 @@ namespace Antioch
                                                                       const StateType& T,  
                                                                       StateType& kfwd, 
                                                                       StateType& dkfwd_dT,
-						                      VectorStateType& dkfwd_dY) const
+						                      VectorStateType& dkfwd_dX) const
   {
-//dk_dT = dalpha_dT
-//dk_dCi = alpha(T)*sum_{j /= i} eps_j Cj + alpha(T) * eps_i = k(T,[M])[sum_j eps_j Cj + eps_i(1 - Ci)]
-    dkfwd_dY.resize(this->n_species(), kfwd);
-    std::fill( dkfwd_dY.begin(),  dkfwd_dY.end(),  0.);    
+    antioch_assert_equal_to(dkfwd_dX.size(),this->n_species());
+//dk_dT = dalpha_dT * [sum_s (eps_s * X_s)]
+//dk_dCi = alpha(T) * eps_i
     this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
-    StateType coef = (this->efficiency(0) * molar_densities[0] );
 
-//pre-fill with eps_i(1-Ci)
-    dkfwd_dT[0] = ( this->efficiency(0) * (1. - molar_densities[0]) );
+    dkfwd_dX[0] = kfwd;
+    StateType coef = (this->efficiency(0) * molar_densities[0]);
     for (unsigned int s=1; s<this->n_species(); s++)
     {        
        coef += ( this->efficiency(s) * molar_densities[s] );
-       dkfwd_dT[s] = ( this->efficiency(s) * (1. - molar_densities[s]) );
+       dkfwd_dX[s] = kfwd;
     }
 
     kfwd *= coef;
     dkfwd_dT *= coef;
 
-//finish dk_dCi
     for (unsigned int s=0; s<this->n_species(); s++)
     {        
-       dkfwd_dT[s] += coef;
-       dkfwd_dT[s] *= (*Reaction<CoeffType>::_forward_rate[0])(T);
+       dkfwd_dX[s] *= this->efficiency(s);
     }
 
     return;

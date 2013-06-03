@@ -1,1 +1,28 @@
-Version 0.0.0 (In progress)
+Version 0.0.0
+https://svn.ices.utexas.edu/repos/pecos/antioch/tags/0.0.0
+
+* Added core functionality for dealing with gas mixtures:
+  - ChemicalSpecies
+  - ChemicalMixture
+* Added thermodynamics calculations for gas mixtures:
+  - CEATheroMixture/CEAEvaluator
+  - StatMechThermodynamics
+* Added transport computations for gas mixtures:
+  - Sutherland and Blottner viscosity models used
+    through MixtureViscosity
+  - EuckenThermalConductivity
+  - ConstantLewisDiffusivity
+  - WilkeEvaluator provides interface to viscosity
+    and thermal conductivity
+* Gas mixture kinetics:
+  - ReactionSet/KineticsEvaluator
+  - Currently for ArrheniusRate only
+  - Currently only for elementary and three boday reactions
+* Default ASCII input parsing available for core, thermo, and transport
+* XML input parsing for available for ReactionSet.
+* Currently 23 unit and regression tests yielding 67.1% line
+  coverage and 80.6% function coverage (pass --enable-coverage
+  to configure, then run make coverage).
+* Supports documentation generation using Doxygen
+* Optionally supports Eigen package for vector evaluation of quantities
+* Optionally supports the MetaPhysicL library for AD support

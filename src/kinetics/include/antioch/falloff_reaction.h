@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -30,6 +30,7 @@
 #define ANTIOCH_FALLOFF_REACTION_H
 
 // Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/reaction.h"
 #include "antioch/lindemann_falloff.h"
 
@@ -78,7 +79,7 @@ namespace Antioch
                                                    const StateType& T,  
                                                    StateType& kfwd,  
                                                    StateType& dkfwd_dT, 
-                                                   VectorStateType& dkfkwd_dY) const;
+                                                   VectorStateType& dkfkwd_dX) const;
 
 
     //! Return const reference to the falloff object
@@ -103,7 +104,7 @@ namespace Antioch
                                         const StateType& dkinf_dT, 
                                         StateType &Pr,
                                         StateType &dPr_dT,
-                                        VectorStateType &dPr_dY) const;
+                                        VectorStateType &dPr_dX) const;
     
   };
 
@@ -113,8 +114,11 @@ namespace Antioch
   FalloffReaction<CoeffType,FalloffType>::FalloffReaction( const unsigned int n_species,
                                  const std::string &equation,
                                  const ReactionType::ReactionType &falloffType, 
-                                 const KinMod::KinMod kin) 
-    :Reaction<CoeffType>(n_species,equation,falloffType,kin){}
+                                 const KinMod::KinMod kin)
+    :Reaction<CoeffType>(n_species,equation,falloffType,kin),
+     _F(n_species)
+     
+    {}
 
 
   template<typename CoeffType, typename FalloffType>
@@ -166,8 +170,9 @@ namespace Antioch
                                                            const StateType& dkinf_dT, 
                                                            StateType &Pr, 
                                                            StateType &dPr_dT,
-                                                           VectorStateType &dPr_dY) const
+                                                           VectorStateType &dPr_dX) const
   {
+    antioch_assert_equal_to(dPr_dX.size(),this->n_species());
 //k(T,[M]) = [M] * alpha_0(T) /(1 + [M] * alpha_0(T)/alpha_inf(T)) * F
     StateType M = (molar_densities[0] );
     for (unsigned int s=1; s<this->n_species(); s++)
@@ -177,9 +182,8 @@ namespace Antioch
 //Pr = [M] k0 / kinf
     Pr = M * (k0 / kinf);
     dPr_dT = M * dk0_dT / kinf - M * k0 * dkinf_dT / pow(kinf,2);
-//dPr_dY = k0/kinf
-    dPr_dY.resize(this->n_species(), 0.);
-    std::fill( dPr_dY.begin(),  dPr_dY.end(),  k0/kinf);
+//dPr_dX = k0/kinf
+    std::fill( dPr_dX.begin(),  dPr_dX.end(),  k0/kinf);
     return;   
   }
 
@@ -202,25 +206,30 @@ namespace Antioch
                                                                       const StateType& T,
                                                                       StateType& kfwd, 
                                                                       StateType& dkfwd_dT,
-                                                                      VectorStateType& dkfwd_dY) const 
+                                                                      VectorStateType& dkfwd_dX) const 
   {
     using std::pow;
 //variables, k0,kinf and derivatives
-    StateType k0,dk0_dT;
-    StateType kinf,dkinf_dT;
-    this->_forward_rate[0]->rate_and_derivative(T,k0,dk0_dT);
-    this->_forward_rate[1]->rate_and_derivative(T,kinf,dkinf_dT);
+    StateType k0 = Antioch::zero_clone(T);
+    StateType dk0_dT = Antioch::zero_clone(T);
+    StateType kinf = Antioch::zero_clone(T);
+    StateType dkinf_dT = Antioch::zero_clone(T);
+    this->_forward_rate[0]->compute_rate_and_derivative(T,k0,dk0_dT);
+    this->_forward_rate[1]->compute_rate_and_derivative(T,kinf,dkinf_dT);
 
-    StateType one(1.);
+    StateType one = Antioch::zero_clone(T);
+    one = 1.;
 //Pr
-    StateType Pr,dPr_dT;
-    VectorStateType dPr_dY;
-    _Pr_and_derivatives(molar_densities,T,k0,kinf,dk0_dT,dkinf_dT,Pr,dPr_dT,dPr_dY);
+    StateType Pr = Antioch::zero_clone(T);
+    StateType dPr_dT = Antioch::zero_clone(T);
+    VectorStateType dPr_dX = Antioch::zero_clone(molar_densities);
+    _Pr_and_derivatives(molar_densities,T,k0,kinf,dk0_dT,dkinf_dT,Pr,dPr_dT,dPr_dX);
 
 //F
-    StateType f,df_dT;
-    VectorStateType df_dY;
-    _F.F_and_derivatives(T,Pr,dPr_dT,dPr_dY,f,df_dT,df_dY);
+    StateType f = Antioch::zero_clone(T);
+    StateType df_dT = Antioch::zero_clone(T);
+    VectorStateType df_dX = Antioch::zero_clone(molar_densities);
+    _F.F_and_derivatives(T,Pr,dPr_dT,dPr_dX,f,df_dT,df_dX);
 
 //k = kinf * Pr/(1 + Pr)
     kfwd = kinf * Pr / (one + Pr) * f;
@@ -229,11 +238,11 @@ namespace Antioch
     dkfwd_dT = kfwd * (dkinf_dT/kinf + dPr_dT / Pr - dPr_dT / (one + Pr) + df_dT/f);
 
 
-    dkfwd_dY.resize(this->n_species(), kfwd);
-//dkfwd_dY = kfwd * [dPr_dY/Pr - dPr_dY/(1+Pr) + dF_dY/F]
+    dkfwd_dX.resize(this->n_species(), kfwd);
+//dkfwd_dX = kfwd * [dPr_dX/Pr - dPr_dX/(1+Pr) + dF_dX/F]
     for(unsigned int ic = 0; ic < this->n_species(); ic++)
     {
-       dkfwd_dY[ic] = kfwd * (dPr_dY[ic]/(Pr*(one + Pr)) + df_dY[ic]/f) ;
+       dkfwd_dX[ic] = kfwd * (dPr_dX[ic]/(Pr*(one + Pr)) + df_dX[ic]/f) ;
     }
 
     return;

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -86,7 +86,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set, example );
   std::vector<PairScalars> omega_dot(n_species, example);
 
   PairScalars P = example;
@@ -125,7 +125,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       PairScalars sum = omega_dot[0];

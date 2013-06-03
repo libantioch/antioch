@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -40,21 +40,23 @@ namespace Antioch{
 template <typename CoeffType = double>
 class LindemannFalloff{
      public:
-       LindemannFalloff();
+       LindemannFalloff(const unsigned int nspec);
        ~LindemannFalloff();
 
      template <typename StateType>
      StateType operator()(const StateType& T, const StateType &Pr) const;
 
      template <typename StateType, typename VectorStateType>
-     StateType F_and_derivatives(const StateType& T, 
+     void F_and_derivatives(const StateType& T, 
                            const StateType &Pr, 
                            const StateType &dPr_dT, 
-                           const VectorStateType &dPr_dY,
+                           const VectorStateType &dPr_dX,
                            StateType &F,
                            StateType &dF_dT,
-                           VectorStateType &dF_dY) const;
+                           VectorStateType &dF_dX) const;
 
+    private:
+     unsigned int n_spec;
 
 };
   template<typename CoeffType>
@@ -68,24 +70,24 @@ class LindemannFalloff{
   template <typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  StateType LindemannFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
+  void LindemannFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
                         const StateType &Pr, 
                         const StateType &dPr_dT, 
-                        const VectorStateType &dPr_dY,
+                        const VectorStateType &dPr_dX,
                         StateType &dF_dT,
                         StateType &F,
-                        VectorStateType &dF_dY) const
+                        VectorStateType &dF_dX) const
   {
 //all derived are 0
     dF_dT = 0.;
-    dF_dY.resize(this->n_species(), 0.);
-    std::fill( dF_dY.begin(),  dF_dY.end(),  0.);    
+    antioch_assert_equal_to(dF_dX.size(),n_spec);
+    std::fill( dF_dX.begin(),  dF_dX.end(),  0.);    
     return;
   }
 
   template<typename CoeffType>
   inline
-  LindemannFalloff<CoeffType>::LindemannFalloff()
+  LindemannFalloff<CoeffType>::LindemannFalloff(const unsigned int nspec):n_spec(nspec)
   {
     return;
   }

@@ -21,53 +21,62 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
+// $Id$
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#include "antioch/kooij_rate.h"
+#ifndef ANTIOCH_TEMP_CACHE_H
+#define ANTIOCH_TEMP_CACHE_H
 
-template <typename Scalar>
-int tester()
+namespace Antioch
 {
-  using std::abs;
-  using std::exp;
-  using std::pow;
+  template<typename StateType=double>
+  class TempCache
+  {
+  public:
 
-  const Scalar Cf = 1.4;
-  const Scalar eta = 1.2;
-  const Scalar Ea = 5.0;
+    explicit TempCache(const StateType& T_in);
 
-  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea,1.,1.);
+    TempCache(const StateType& T_in, 
+              const StateType& T2_in, 
+              const StateType& T3_in, 
+              const StateType& T4_in, 
+              const StateType& lnT_in);
 
-  const Scalar T = 1500.1;
-  
-  const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
+    const StateType& T;
+    StateType T2;
+    StateType T3;
+    StateType T4;
+    StateType lnT;
 
-  int return_flag = 0;
+  private:
 
-  Scalar rate = kooij_rate(T);
+    TempCache();
 
-  const Scalar tol = 1.0e-15;
+  };
 
-  if( abs( (rate - rate_exact)/rate_exact ) > tol )
-    {
-      std::cout << "Error: Mismatch in rate values." << std::endl
-		<< "rate(T) = " << rate << std::endl
-		<< "rate_exact = " << rate_exact << std::endl;
+  template<typename StateType>
+  TempCache<StateType>::TempCache(const StateType& T_in)
+    : T(T_in), T2(T*T), T3(T2*T), T4(T2*T2), lnT(T_in)
+  {
+    using std::log;
 
-      return_flag = 1;
-    }
+    lnT = log(T);
+    return;
+  }
 
-  std::cout << "Kooij rate: " << kooij_rate << std::endl;
+  template<typename StateType>
+  TempCache<StateType>::TempCache(const StateType& T_in, 
+                                  const StateType& T2_in, 
+                                  const StateType& T3_in, 
+                                  const StateType& T4_in, 
+                                  const StateType& lnT_in)
+    : T(T_in), T2(T2_in), T3(T3_in), T4(T4_in), lnT(lnT_in)
+  {
+    return;
+  }
 
-  return return_flag;
 }
 
-int main()
-{
-  return (tester<double>() ||
-          tester<long double>() ||
-          tester<float>());
-}
+#endif // ANTIOCH_TEMP_CACHE_H

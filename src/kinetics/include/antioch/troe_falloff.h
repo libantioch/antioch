@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -60,23 +60,24 @@ namespace Antioch{
 template <typename CoeffType = double>
 class TroeFalloff{
      public:
-       TroeFalloff(const CoeffType alpha=0., const CoeffType T3 = 0., const CoeffType T1 = 0., const CoeffType T2 = 1e50);
+       TroeFalloff(const unsigned int nspec, const CoeffType alpha=0., const CoeffType T3 = 0., const CoeffType T1 = 0., const CoeffType T2 = 1e50);
        ~TroeFalloff();
 
      template<typename StateType>
      StateType operator()(const StateType& T, const StateType &Pr) const;
 
      template <typename StateType, typename VectorStateType>
-     StateType F_and_derivatives(const StateType& T, 
+     void F_and_derivatives(const StateType& T, 
                            const StateType &Pr, 
                            const StateType &dPr_dT, 
-                           const VectorStateType &dPr_dY,
+                           const VectorStateType &dPr_dX,
                            StateType &F,
                            StateType &dF_dT,
-                           VectorStateType &dF_dY) const;
+                           VectorStateType &dF_dX) const;
 
 
      private:
+     unsigned int n_spec;
      CoeffType _alpha;
      CoeffType _T3;
      CoeffType _T1;
@@ -145,52 +146,77 @@ class TroeFalloff{
   template <typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  StateType TroeFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
+  void TroeFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
                         const StateType &Pr, 
                         const StateType &dPr_dT, 
-                        const VectorStateType &dPr_dY,
+                        const VectorStateType &dPr_dX,
                         StateType &F,
                         StateType &dF_dT,
-                        VectorStateType &dF_dY) const
+                        VectorStateType &dF_dX) const
   {
     using std::exp;
     using std::log10;
     using std::log;
+    using std::pow;
+    antioch_assert_equal_to(dF_dX.size(),this->n_spec);
+//declarations
+    VectorStateType dlogPr_dX = Antioch::zero_clone(dF_dX);
+    StateType Fcent = Antioch::zero_clone(T);
+    StateType dFcent_dT = Antioch::zero_clone(T);
+    StateType logFcent = Antioch::zero_clone(T);
+    StateType dlogFcent_dT = Antioch::zero_clone(T);
+    StateType logPr = Antioch::zero_clone(T);
+    StateType dlogPr_dT = Antioch::zero_clone(T);
+    StateType upPart = Antioch::zero_clone(T);
+    StateType dupPart_dT = Antioch::zero_clone(T);
+    StateType downPart = Antioch::zero_clone(T);
+    StateType ddownPart_dT = Antioch::zero_clone(T);
+    StateType f = Antioch::zero_clone(T);
+    StateType df_dT = Antioch::zero_clone(T);
+    StateType logF = Antioch::zero_clone(T);
+    StateType dlogF_dT = Antioch::zero_clone(T);
+//
+    StateType tmp = Antioch::zero_clone(T);
+    StateType tmp2 = Antioch::zero_clone(T);
+    StateType tmp3 = Antioch::zero_clone(T);
+    StateType tmp4 = Antioch::zero_clone(T);
 
 //params and change of variable
-    StateType Fcent,dFcent_dT;
     _Fcent_and_derivatives(T,Fcent,dFcent_dT);
-    StateType logFcent = log10(Fcent);
-    StateType dlogFcent_dT = dFcent_dT/(Fcent * log(10.));
-    StateType logPr = log10(Pr);
-    StateType dlogPr_dT = dPr_dT/(Pr * log(10.));
-    VectorStateType dlogPr_dY;
-    dlogPr_dY.resize(this->n_species(), logPr);
-    for(unsigned int ip = 0; ip < dlogPr_dY.size(); ip++)dlogPr_dY[ip] = dPr_dY[ip]/(log(10.)*Pr);    
+    logFcent = log10(Fcent);
+    tmp = log(10.L);
+    dlogFcent_dT = dFcent_dT/(Fcent * tmp);
+    logPr = log10(Pr);
+    dlogPr_dT = dPr_dT/(Pr * tmp);
+    for(unsigned int ip = 0; ip < dlogPr_dX.size(); ip++)dlogPr_dX[ip] = dPr_dX[ip]/(tmp*Pr);    
 
 //decomposing the equation
-    StateType upPart = -0.4 - 0.67*logFcent + logPr;
-    StateType dupPart_dT = -0.67*dlogFcent_dT + dlogPr_dT;
-//dupPart_dY = dlogPr_dY
-    StateType downPart = 0.806 - 1.1761*logFcent - 0.14*logPr;
-    StateType ddownPart_dT = - 1.1761*dlogFcent_dT - 0.14*dlogPr_dT;
-//ddownPart_dY = -0.14*dlogPr_dY
-    StateType f = upPart/downPart;
-    StateType df_dT = f * (dupPart_dT/upPart - ddownPart_dT/downPart);
-//df_dY = dlogPr_dY * f * [1./upPart + 0.14/downPart]
+    tmp = 0.67L;
+    upPart = -0.4L - tmp*logFcent + logPr;
+    dupPart_dT = -tmp*dlogFcent_dT + dlogPr_dT;
+//dupPart_dX = dlogPr_dX
+    tmp2 = 1.1761L;
+    tmp = 0.14L;
+    downPart = 0.806 - tmp2*logFcent - tmp*logPr;
+    ddownPart_dT = - tmp2*dlogFcent_dT - tmp*dlogPr_dT;
+//ddownPart_dX = -0.14*dlogPr_dX
+    f = upPart/downPart;
+    df_dT = f * (dupPart_dT/upPart - ddownPart_dT/downPart);
+//df_dX = dlogPr_dX * f * [1./upPart + 0.14/downPart]
 
 //finally log10F
-    StateType one(1.);
-    StateType logF = logFcent / (one + f*f);
-    StateType dlogF_dT = dlogFcent_dT / (one + f*f) - 2. * df_dT * f * logFcent/( (one + f*f) * (one + f*f) );
-//dlogF_dY = - 2. * df_dY * f * logFcent/( (1. + f*f) * (1. + f*f) );
-    using std::pow;
-    F = pow(10.,logF);
-    dF_dT = dlogF_dT * log(10.) * pow(10.,logF);
-    dF_dY.resize(this->n_species(), logPr);
-    for(unsigned int ip = 0; ip < dF_dY.size(); ip++)
+    tmp = 2.0L;
+    tmp2 = 10.0L;
+    tmp3 = 1.0L;
+    tmp4 = 0.14L;
+    logF = logFcent / (1.L + f*f);
+    dlogF_dT = dlogFcent_dT / (1.L + f*f) - tmp * df_dT * f * logFcent/( (1.L + f*f) * (1.L + f*f) );
+//dlogF_dX = - 2. * df_dX * f * logFcent/( (1. + f*f) * (1. + f*f) );
+    F = pow(tmp,logF);
+    dF_dT = dlogF_dT * log(tmp2) * pow(tmp2,logF);
+    for(unsigned int ip = 0; ip < dF_dX.size(); ip++)
     {
-       dF_dY[ip] = - 2. * dlogPr_dY * f * (1./upPart + 0.14/downPart) * f * logFcent/( (one + f*f) * (one + f*f) );
+       dF_dX[ip] = - tmp * dlogPr_dX[ip] * f * (tmp3/upPart + tmp4/downPart) * f * logFcent/( (1.L + f*f) * (1.L + f*f) );
     }
     return;
   }
@@ -198,7 +224,8 @@ class TroeFalloff{
 
   template<typename CoeffType>
   inline
-  TroeFalloff<CoeffType>::TroeFalloff(const CoeffType alpha, const CoeffType T3, const CoeffType T1, const CoeffType T2):
+  TroeFalloff<CoeffType>::TroeFalloff(const unsigned int nspec, const CoeffType alpha, const CoeffType T3, const CoeffType T1, const CoeffType T2):
+    n_spec(nspec),
     _alpha(alpha),
     _T3(T3),
     _T1(T1),

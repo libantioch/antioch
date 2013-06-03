@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -59,7 +59,7 @@ int tester_N2N(const std::string& input_name)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
 
   const Scalar P = 1.0e5;
@@ -88,7 +88,7 @@ int tester_N2N(const std::string& input_name)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       Scalar sum = 0;
@@ -138,7 +138,7 @@ int tester(const std::string& input_name)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
 
   const Scalar P = 1.0e5;
@@ -167,7 +167,7 @@ int tester(const std::string& input_name)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       Scalar sum = 0;

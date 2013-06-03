@@ -1,8 +1,12 @@
 BUILT_SOURCES   = .license.stamp
 
+EXTRA_DIST = input_files
+
 check_PROGRAMS  =
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
+check_PROGRAMS += cea_evaluator_unit
+check_PROGRAMS += cea_evaluator_vec_unit
 check_PROGRAMS += cea_thermo_unit
 check_PROGRAMS += cea_thermo_vec_unit
 check_PROGRAMS += hercourtessen_rate_unit
@@ -52,6 +56,8 @@ AM_LDFLAGS = $(top_builddir)/src/libantioch.la
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
 chem_mixture_vec_unit_SOURCES = chem_mixture_vec_unit.C
+cea_evaluator_unit_SOURCES = cea_evaluator_unit.C
+cea_evaluator_vec_unit_SOURCES = cea_evaluator_vec_unit.C
 cea_thermo_unit_SOURCES = cea_thermo_unit.C
 cea_thermo_vec_unit_SOURCES = cea_thermo_vec_unit.C
 hercourtessen_rate_unit_SOURCES = hercourtessen_rate_unit.C
@@ -90,6 +96,8 @@ endif
 TESTS  =
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
+TESTS += cea_evaluator_unit
+TESTS += cea_evaluator_vec_unit
 TESTS += cea_thermo_unit
 TESTS += cea_thermo_vec_unit
 TESTS += hercourtessen_rate_unit
@@ -125,14 +133,17 @@ TESTS += stat_mech_thermo_unit_eigen
 endif
 
 
+CLEANFILES =
 if CODE_COVERAGE_ENABLED
-  CLEANFILES = *.gcda *.gcno
+  CLEANFILES += *.gcda *.gcno
 endif
 
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE \
 	$(top_srcdir)/test/*.C
 	echo 'updated source license headers' >$@
+
+CLEANFILES += .license.stamp
 
 # Required for AX_AM_MACROS
 ###@INC_AMINCLUDE@

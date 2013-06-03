@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -163,10 +163,6 @@ int tester(const PairScalars& example)
   }
   
 
-  PairScalars T = example;
-  T[0] = 1000.0L;
-  T[1] = 1200.0L;
-
   PairScalars each_mass = example;
   each_mass[0] = 0.2L;
   each_mass[1] = 0.2L;
@@ -175,8 +171,12 @@ int tester(const PairScalars& example)
   // Currently dummy
   //const Scalar mu_exact = ;
 
-  PairScalars wilke_mu = wilke.mu(T, mass_fractions );
-  PairScalars wilke_k = wilke.k(T, mass_fractions );
+  // PairScalars T = example;
+  // T[0] = 1000.0L;
+  // T[1] = 1200.0L;
+
+  // PairScalars wilke_mu = wilke.mu(T, mass_fractions );
+  // PairScalars wilke_k = wilke.k(T, mass_fractions );
 
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );

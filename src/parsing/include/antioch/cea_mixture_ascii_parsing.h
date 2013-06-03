@@ -26,36 +26,37 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-#define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-
-// Antioch
-#include "antioch/chemical_mixture.h"
-#include "antioch/input_utils.h"
+#ifndef ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H
+#define ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H
 
 // C++
 #include <iostream>
 #include <vector>
 
+// Antioch
+#include "antioch/input_utils.h"
+#include "antioch/chemical_mixture.h"
+#include "antioch/cea_mixture.h"
+
 namespace Antioch
 {
   // Forward declarations
   template <class NumericType>
-  class CEAThermodynamics;
+  class CEAThermoMixture;
 
   // New declarations
 
   template<class NumericType>
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo, std::istream &in );
+  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType>& thermo, std::istream &in );
 
   template<class NumericType>
-  void read_cea_thermo_data_ascii_default( CEAThermodynamics<NumericType>& thermo );
+  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType>& thermo );
 
  
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
   inline
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo, std::istream &in )
+  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType>& thermo, std::istream &in )
   {
     skip_comment_lines(in, '#');
 
@@ -108,7 +109,7 @@ namespace Antioch
 
   template<class NumericType>
   inline
-  void read_cea_thermo_data_ascii_default( CEAThermodynamics<NumericType>& thermo )
+  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType>& thermo )
   {
     static const std::string
       default_thermo_data
@@ -586,7 +587,7 @@ namespace Antioch
 
     std::istringstream buf(default_thermo_data);
 
-    read_cea_thermo_data_ascii(thermo,buf);
+    read_cea_mixture_data_ascii(thermo,buf);
 
     return;
   }
@@ -594,4 +595,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#endif // ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H

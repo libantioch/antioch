@@ -33,11 +33,15 @@
 // Antioch
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/cea_thermo.h"
+#include "antioch/cea_mixture.h"
+#include "antioch/temp_cache.h"
+#include "antioch/cea_mixture.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 
 template <typename Scalar>
 int test_cp( const std::string& species_name, unsigned int species, Scalar cp_exact, Scalar T,
-	     const Antioch::CEAThermodynamics<Scalar>& thermo )
+	     const Antioch::CEAEvaluator<Scalar>& thermo )
 {
   using std::abs;
 
@@ -45,7 +49,7 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
 
-  typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
+  typedef typename Antioch::template TempCache<Scalar> Cache;
 
   const Scalar cp = thermo.cp(Cache(T), species);
 
@@ -90,7 +94,9 @@ int tester()
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii_default( cea_mixture );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   //const Scalar P = 100000.0;
   const Scalar T1 = 190.0;

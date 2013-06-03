@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -72,7 +72,7 @@ namespace Antioch
                                                            const StateType& T, 
 						   StateType& kfwd,  
 						   StateType& dkfwd_dT, 
-						   VectorStateType& dRbkwd_Y) const;
+						   VectorStateType& dkfwd_dX) const;
 
   private:
     
@@ -117,11 +117,12 @@ namespace Antioch
                                                                       const StateType& T, 
 								      StateType& kfwd, 
 								      StateType& dkfwd_dT,
-						                      VectorStateType& dkfwd_dY) const
+						                      VectorStateType& dkfwd_dX) const
   {
 //dk_dT = sum_p dalpha_p_dT
-    StateType kfwd_tmp,dkfwd_dT_tmp;
-     this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+    StateType kfwd_tmp = Antioch::zero_clone(T);
+    StateType dkfwd_dT_tmp = Antioch::zero_clone(T);
+    this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
     for(unsigned int ir = 1; ir < Reaction<CoeffType>::_forward_rate.size(); ir++)
     {
       this->_forward_rate[ir]->compute_rate_and_derivative(T,kfwd_tmp,dkfwd_dT_tmp);
@@ -130,8 +131,8 @@ namespace Antioch
     }
 
 //dk_dCi = 0
-    dkfwd_dY.resize(this->n_species(), kfwd);
-    std::fill( dkfwd_dY.begin(),  dkfwd_dY.end(),  0.);    
+    antioch_assert_equal_to(dkfwd_dX.size(),this->n_species());
+    Antioch::set_zero(dkfwd_dX);
     return;
   }
   

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -68,7 +68,7 @@ class KineticsType{
 
     //!\return error because I cannot make it pure virtual.
     template <typename StateType>
-    void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+    void compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
     virtual const std::string numeric() const = 0;
 
@@ -174,7 +174,7 @@ class KineticsType{
   template <typename CoeffType>
   template <typename StateType>
   inline
-  void KineticsType<CoeffType>::rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
+  void KineticsType<CoeffType>::compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
   {
       switch (my_type) 
       {
