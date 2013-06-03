@@ -42,18 +42,32 @@ int tester()
   const Scalar T = 1500.1;
   
   const Scalar rate_exact = Cf*exp(D*T);
+  const Scalar derive_exact = D * Cf * exp(D*T);
 
   int return_flag = 0;
 
-  Scalar rate = berthelot_rate(T);
+  Scalar rate;
+  Scalar deriveRate;
 
   const Scalar tol = 1.0e-15;
 
+  berthelot_rate.rate_and_derivative(T,rate,deriveRate);
+
   if( abs( (rate - rate_exact)/rate_exact ) > tol )
     {
-      std::cout << "Error: Mismatch in rate values." << std::endl
+	  std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate values." << std::endl
 		<< "rate(T) = " << rate << std::endl
 		<< "rate_exact = " << rate_exact << std::endl;
+
+      return_flag = 1;
+    }
+  if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
+    {
+      std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate derivative values." << std::endl
+		<< "drate_dT(T) = " << deriveRate << std::endl
+		<< "derive_exact = " << derive_exact << std::endl;
 
       return_flag = 1;
     }

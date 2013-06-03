@@ -40,7 +40,7 @@ namespace Antioch
     inline
     CoeffType R_universal()
     {
-      return 8314.472L;
+      return 8314.4621L;
     }
 
     /*!
@@ -50,7 +50,7 @@ namespace Antioch
     inline
     CoeffType Avogadro()
     {
-      return 6.02214179e23L;
+      return 6.02214129e23L;
     }
 
   } // end namespace Constants

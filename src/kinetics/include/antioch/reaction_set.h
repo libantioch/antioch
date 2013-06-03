@@ -79,7 +79,6 @@ namespace Antioch
     //! Compute the rates of progress for each reaction
     template <typename StateType, typename VectorStateType, typename VectorReactionsType>
     void compute_reaction_rates( const StateType& T,
-                                 const StateType& R_mix,
                                  const VectorStateType& mass_fractions,
                                  const VectorStateType& molar_densities,
                                  const VectorStateType& h_RT_minus_s_R,
@@ -88,7 +87,6 @@ namespace Antioch
     //! Compute the rates of progress and derivatives for each reaction
     template <typename StateType, typename VectorStateType, typename VectorReactionsType, typename MatrixReactionsType>
     void compute_reaction_rates_and_derivs( const StateType& T,
-                                            const StateType& R_mix,
                                             const VectorStateType& mass_fractions,
                                             const VectorStateType& molar_densities,
                                             const VectorStateType& h_RT_minus_s_R,
@@ -101,7 +99,6 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     void print_chemical_scheme( const StateType& T,
-                                const StateType& R_mix,
                                 const VectorStateType& mass_fractions,
                                 const VectorStateType& molar_densities,
                                 const VectorStateType& h_RT_minus_s_R ,
@@ -112,7 +109,6 @@ namespace Antioch
     //!
     template<typename StateType, typename VectorStateType>
     void get_reactive_scheme( const StateType& T,
-                              const StateType& R_mix,
                               const VectorStateType& mass_fractions,
                               const VectorStateType& molar_densities,
                               const VectorStateType& h_RT_minus_s_R,
@@ -142,6 +138,9 @@ namespace Antioch
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
     std::vector<Reaction<CoeffType>* > _reactions;
+
+    //! Scaling for equilibrium constant
+    const CoeffType _P0_R;
 
   };
   
@@ -191,7 +190,8 @@ namespace Antioch
   template<typename CoeffType>
   inline
   ReactionSet<CoeffType>::ReactionSet( const ChemicalMixture<CoeffType>& chem_mixture )
-    : _chem_mixture(chem_mixture)
+    : _chem_mixture(chem_mixture),
+      _P0_R(1.0e5/Constants::R_universal<CoeffType>())
   {
     return;
   }
@@ -210,7 +210,6 @@ namespace Antioch
   template<typename StateType, typename VectorStateType, typename VectorReactionsType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType& T,
-                                                        const StateType& R_mix,
                                                         const VectorStateType& mass_fractions,
                                                         const VectorStateType& molar_densities,
                                                         const VectorStateType& h_RT_minus_s_R,
@@ -220,16 +219,13 @@ namespace Antioch
 
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
-    // antioch_assert_greater(R_mix, 0.0);
 
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
     // useful constants
-    const CoeffType P0    = 1.e5; // standard pressure in Pa
-    const StateType RT    = R_mix*T;
-    const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
+    const StateType P0_RT = _P0_R/T; // used to transform equilibrium constant from pressure units
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
@@ -263,7 +259,6 @@ namespace Antioch
   template<typename StateType, typename VectorStateType, typename VectorReactionsType, typename MatrixReactionsType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates_and_derivs( const StateType& T,
-                                                                  const StateType& R_mix,
                                                                   const VectorStateType& mass_fractions,
                                                                   const VectorStateType& molar_densities,
                                                                   const VectorStateType& h_RT_minus_s_R,
@@ -285,16 +280,13 @@ namespace Antioch
 
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
-    // antioch_assert_greater(R_mix, 0.0);
 
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
     // useful constants
-    const CoeffType P0    = 1.e5; // standard pressure
-    const StateType RT    = R_mix*T;
-    const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
+    const StateType P0_RT = _P0_R/T; // used to transform equilibrium constant from pressure units
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
@@ -336,7 +328,6 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   void ReactionSet<CoeffType>::print_chemical_scheme( const StateType& T,
-                                                      const StateType& R_mix,
                                                       const VectorStateType& mass_fractions,
                                                       const VectorStateType& molar_densities,
                                                       const VectorStateType& h_RT_minus_s_R,
@@ -348,7 +339,7 @@ namespace Antioch
 //filling matrixes
     VectorStateType netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC;
 //getting reaction infos
-    get_reactive_scheme(T,R_mix,mass_fractions,molar_densities,h_RT_minus_s_R,netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC);
+    get_reactive_scheme(T,mass_fractions,molar_densities,h_RT_minus_s_R,netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC);
 
     lossMatrix.resize(this->n_species());
     prodMatrix.resize(this->n_species());
@@ -539,7 +530,6 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   void ReactionSet<CoeffType>::get_reactive_scheme( const StateType& T,
-                                                    const StateType& R_mix,
                                                     const VectorStateType& mass_fractions,
                                                     const VectorStateType& molar_densities,
                                                     const VectorStateType& h_RT_minus_s_R,
@@ -553,16 +543,13 @@ namespace Antioch
   {
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
-    // antioch_assert_greater(R_mix, 0.0);
 
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
     // useful constants
-    const CoeffType P0    = 1.e5; // standard pressure in Pa
-    const StateType RT    = R_mix*T;
-    const StateType P0_RT = P0 / RT; // used to transform equilibrium constant from pressure units
+    const StateType P0_RT = _P0_R/T; // used to transform equilibrium constant from pressure units
 
     netRates.resize(this->n_reactions(),0.);
     kfwdCoeff.resize(this->n_reactions(),0.);

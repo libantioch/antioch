@@ -26,11 +26,6 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-// C++
-#include <limits>
-#include <string>
-#include <vector>
-
 // Antioch
 #include "antioch/vector_utils.h"
 
@@ -41,6 +36,70 @@
 #include "antioch/read_reaction_set_data_xml.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/kinetics_evaluator.h"
+
+// Thrust
+#include "thrust/for_each.h"
+#include "thrust/device_vector.h"
+#include "thrust/iterator/zip_iterator.h"
+
+// C++
+#include <limits>
+#include <iostream>
+#include <string>
+#include <vector>
+
+template <typename Scalar>
+struct antioch_functor
+{
+  antioch_functor(const std::vector<std::string> &species_str_list,
+		  const std::string& reaction_data_filename) :
+    chem_mixture(species_str_list),
+    reaction_set(chem_mixture),
+    thermo(chem_mixture),
+    kinetics(reaction_set, 0)
+  { 
+    Antioch::read_reaction_set_data_xml<Scalar>
+      (reaction_data_filename, false, reaction_set);
+
+    P = 1.0e5;
+    Y.resize(species_str_list.size(),1.0/species_str_list.size());
+    R_mix = chem_mixture.R(Y);
+  }
+
+  template <typename Tuple>
+  __host__ __device__
+  void operator()(Tuple t)
+  {
+    const Scalar& T = thrust::get<0>(t);
+    const Scalar rho = P / (R_mix * T);
+
+    const short n_species = Y.size();
+    std::vector<Scalar> molar_densities(n_species,0.0),
+		        h_RT_minus_s_R (n_species),
+			omega_dot(n_species);
+
+    chem_mixture.molar_densities(rho,Y,molar_densities);
+
+    typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
+
+    thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+
+    kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+  }
+
+  // Make these first three shared?
+  Antioch::ChemicalMixture<Scalar>   chem_mixture;
+  Antioch::ReactionSet<Scalar>       reaction_set;
+  Antioch::CEAThermodynamics<Scalar> thermo;
+
+  // Need one of these per object
+  Antioch::KineticsEvaluator<Scalar> kinetics;
+
+  // Matching the other unit tests
+  Scalar P;
+  std::vector<Scalar> Y;
+  Scalar R_mix;
+};
 
 template <typename Scalar>
 int tester_N2N(const std::string& input_name)
@@ -53,43 +112,13 @@ int tester_N2N(const std::string& input_name)
   species_str_list.push_back( "N2" );
   species_str_list.push_back( "N" );
 
-  Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
-  Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
-
-  Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
-
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
-  std::vector<Scalar> omega_dot(n_species);
-
-  const Scalar P = 1.0e5;
-
-  // Mass fractions
-  std::vector<Scalar> Y(n_species,0.2);
-
-  const Scalar R_mix = chem_mixture.R(Y);
-
-  const unsigned int n_T_samples = 10;
-  const Scalar T0 = 500;
-  const Scalar T_inc = 500;
-
-  std::vector<Scalar> molar_densities(n_species,0.0);
-  std::vector<Scalar> h_RT_minus_s_R(n_species);
+  antioch_functor<Scalar> omega_func(species_str_list, input_name);
 
   int return_flag = 0;
 
+/*
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
-      const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
-      const Scalar rho = P/(R_mix*T);
-      chem_mixture.molar_densities(rho,Y,molar_densities);
-
-      typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
-
-      thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
-
-      kinetics.compute_mass_sources( T, Y, molar_densities, h_RT_minus_s_R, omega_dot );
-
       // Omega dot had better sum to 0.0
       Scalar sum = 0;
       for( unsigned int s = 0; s < n_species; s++ )
@@ -113,6 +142,7 @@ int tester_N2N(const std::string& input_name)
 	  std::cout << std::endl << std::endl;
 	}
     }
+*/
   
   return return_flag;
 }
@@ -132,43 +162,13 @@ int tester(const std::string& input_name)
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
-  Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
-  Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
-
-  Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
-
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
-  std::vector<Scalar> omega_dot(n_species);
-
-  const Scalar P = 1.0e5;
-
-  // Mass fractions
-  std::vector<Scalar> Y(n_species,0.2);
-
-  const Scalar R_mix = chem_mixture.R(Y);
-
-  const unsigned int n_T_samples = 10;
-  const Scalar T0 = 500;
-  const Scalar T_inc = 500;
-
-  std::vector<Scalar> molar_densities(n_species,0.0);
-  std::vector<Scalar> h_RT_minus_s_R(n_species);
+  antioch_functor<Scalar> omega_func(species_str_list, input_name);
 
   int return_flag = 0;
 
+/*
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
-      const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
-      const Scalar rho = P/(R_mix*T);
-      chem_mixture.molar_densities(rho,Y,molar_densities);
-
-      typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
-
-      thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
-
-      kinetics.compute_mass_sources( T, Y, molar_densities, h_RT_minus_s_R, omega_dot );
-
       // Omega dot had better sum to 0.0
       Scalar sum = 0;
       for( unsigned int s = 0; s < n_species; s++ )
@@ -192,6 +192,7 @@ int tester(const std::string& input_name)
 	  std::cout << std::endl << std::endl;
 	}
     }
+*/
   
   return return_flag;
 }

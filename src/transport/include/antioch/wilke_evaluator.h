@@ -31,7 +31,6 @@
 
 // Antioch
 #include "antioch/metaprogramming.h"
-#include "antioch/vector_utils.h"
 #include "antioch/wilke_mixture.h"
 #include "antioch/mixture_viscosity.h"
 
@@ -184,8 +183,8 @@ namespace Antioch
 	
         StateType k_s = _conductivity.trans( s, mu[s] )
                       + _conductivity.rot( s, mu[s] )
-                      + _conductivity.vib( s, mu[s] )
-                      + _conductivity.elec( s, mu[s] );
+                      + _conductivity.vib( s, mu[s], T )
+                      + _conductivity.elec( s, mu[s], T );
 
         mu_mix += mu[s]*chi[s]/phi_s;
 	k_mix += k_s*chi[s]/phi_s;

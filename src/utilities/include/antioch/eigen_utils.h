@@ -29,6 +29,12 @@
 #ifndef ANTIOCH_EIGEN_UTILS_H
 #define ANTIOCH_EIGEN_UTILS_H
 
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  ifndef ANTIOCH_EIGEN_UTILS_DECL_H
+#    error eigen_utils_decl.h must be included before metaprogramming.h
+#  endif
+#endif
+
 #include "antioch_config.h"
 
 #ifdef ANTIOCH_HAVE_EIGEN
@@ -84,6 +90,17 @@ template <
 struct has_size<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
   static const bool value = true;
+};
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct size_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+{
+  typedef typename
+    _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>::Index
+      type;
 };
 
 template <

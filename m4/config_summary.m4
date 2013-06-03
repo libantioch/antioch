@@ -38,11 +38,18 @@ else
 fi
 if test "x$HAVE_METAPHYSICL" = "x1"; then
   echo '  'MetaPhysicL................. : yes
-  echo '  'METAPHYSICL_CPPFLAGS ....... : $METAPHYSICL_CPPFLAGS
-  echo '  'METAPHYSICL_LDFLAGS ........ : $METAPHYSICL_LDFLAGS
-  echo '  'METAPHYSICL_LIBS ........... : $METAPHYSICL_LIBS
+  echo '  '  METAPHYSICL_CPPFLAGS...... : $METAPHYSICL_CPPFLAGS
+  echo '  '  METAPHYSICL_LDFLAGS....... : $METAPHYSICL_LDFLAGS
+  echo '  '  METAPHYSICL_LIBS.......... : $METAPHYSICL_LIBS
 else
   echo '  'MetaPhysicL................. : no
+fi
+if test "x$HAVE_THRUST" = "x1"; then
+  echo '  'Thrust...................... : yes
+  echo '  '  THRUST_CPPFLAGS........... : $THRUST_CPPFLAGS
+  echo '  '  THRUST_LDFLAGS............ : $THRUST_LDFLAGS
+else
+  echo '  'Thrust...................... : no
 fi
 echo
 echo '-------------------------------------------------------------------------------'

@@ -31,10 +31,13 @@
 #include <limits>
 
 // Antioch
-#include "antioch/vector_utils.h"
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
+
+#include "antioch/vector_utils.h"
 
 template <typename Scalar>
 bool test_relative(const Scalar val, const Scalar truth, const Scalar tol)

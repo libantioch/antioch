@@ -125,7 +125,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       PairScalars sum = omega_dot[0];
@@ -133,7 +133,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 2.7e6; // 1.6e-10;
       const PairScalars abs_sum = abs(sum);
       if( Antioch::max(abs_sum) > sum_tol )
 	{

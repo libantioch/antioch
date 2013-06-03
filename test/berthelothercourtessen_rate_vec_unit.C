@@ -41,6 +41,10 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
+
 #include "antioch/berthelothercourtessen_rate.h"
 
 #include "antioch/eigen_utils.h"
@@ -72,10 +76,13 @@ int vectester(const PairScalars& example)
   
   const Scalar rate_exact0 = Cf*pow(Scalar(1500.1),eta)*exp(D*1500.1);
   const Scalar rate_exact1 = Cf*pow(Scalar(1600.1),eta)*exp(D*1600.1);
+  const Scalar derive_exact0 = Cf * pow(Scalar(1500.1),eta) * exp(D*Scalar(1500.1)) * (D + eta/Scalar(1500.1));
+  const Scalar derive_exact1 = Cf * pow(Scalar(1600.1),eta) * exp(D*Scalar(1600.1)) * (D + eta/Scalar(1600.1));
 
   int return_flag = 0;
 
   const PairScalars rate = berthelothercourtessen_rate(T);
+  const PairScalars deriveRate = berthelothercourtessen_rate.derivative(T);
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
 
@@ -95,6 +102,24 @@ int vectester(const PairScalars& example)
 		<< "rate(T1)   = " << rate[1] << std::endl
 		<< "rate_exact = " << rate_exact1 << std::endl
 		<< "difference = " << rate[1] - rate_exact1 << std::endl;
+
+      return_flag = 1;
+    }
+  if( abs( (deriveRate[0] - derive_exact0)/derive_exact0 ) > tol )
+    {
+      std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate derivative values." << std::endl
+		<< "drate_dT(T0) = " << deriveRate[0] << std::endl
+		<< "derive_exact = " << derive_exact0 << std::endl;
+
+      return_flag = 1;
+    }
+  if( abs( (deriveRate[1] - derive_exact1)/derive_exact1 ) > tol )
+    {
+      std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate derivative values." << std::endl
+		<< "drate_dT(T1) = " << deriveRate[1] << std::endl
+		<< "derive_exact = " << derive_exact1 << std::endl;
 
       return_flag = 1;
     }

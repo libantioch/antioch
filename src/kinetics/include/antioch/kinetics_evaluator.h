@@ -71,7 +71,6 @@ namespace Antioch
     //in \f$ \left(kg/sec/m^3\right)\f$
     template <typename VectorStateType>
     void compute_mass_sources( const StateType& T,
-                               const StateType& R_mix,
                                const VectorStateType& mass_fractions,
                                const VectorStateType& molar_densities,
                                const VectorStateType& h_RT_minus_s_R,
@@ -81,7 +80,6 @@ namespace Antioch
     //in \f$ \left(kg/sec/m^3\right)\f$
     template <typename VectorStateType>
     void compute_mass_sources_and_derivs( const StateType& T,
-                                          const StateType& R_mix,
                                           const VectorStateType& mass_fractions,
                                           const VectorStateType& molar_densities,
                                           const VectorStateType& h_RT_minus_s_R,
@@ -163,7 +161,6 @@ namespace Antioch
   template<typename VectorStateType>
   inline
   void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources( const StateType& T,
-                                                                     const StateType& R_mix,
                                                                      const VectorStateType& mass_fractions,
                                                                      const VectorStateType& molar_densities,
                                                                      const VectorStateType& h_RT_minus_s_R,
@@ -171,7 +168,6 @@ namespace Antioch
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
-    // antioch_assert_greater(R_mix, 0.0);
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
@@ -183,7 +179,7 @@ namespace Antioch
     Antioch::set_zero(mass_sources);
 
     // compute the requisite reaction rates
-    this->_reaction_set.compute_reaction_rates( T, R_mix, mass_fractions, molar_densities,
+    this->_reaction_set.compute_reaction_rates( T, mass_fractions, molar_densities,
 						h_RT_minus_s_R, _net_reaction_rates );
 
     // compute the actual mass sources in kmol/sec/m^3
@@ -225,7 +221,6 @@ namespace Antioch
   template <typename VectorStateType>
   inline
   void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources_and_derivs( const StateType& T,
-                                                                                const StateType& R_mix,
                                                                                 const VectorStateType& mass_fractions,
                                                                                 const VectorStateType& molar_densities,
                                                                                 const VectorStateType& h_RT_minus_s_R,
@@ -236,7 +231,6 @@ namespace Antioch
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
-    // antioch_assert_greater(R_mix, 0.0);
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
@@ -267,7 +261,7 @@ namespace Antioch
       }
 
     // compute the requisite reaction rates
-    this->_reaction_set.compute_reaction_rates_and_derivs( T, R_mix, mass_fractions, molar_densities, 
+    this->_reaction_set.compute_reaction_rates_and_derivs( T, mass_fractions, molar_densities, 
                                                            h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                                            _net_reaction_rates,
                                                            _dnet_rate_dT, 
@@ -330,8 +324,10 @@ namespace Antioch
     // finally scale by molar mass
     for (unsigned int s=0; s < this->n_species(); s++)
       {
+        std::cout << mass_sources[s] << " " << _chem_mixture.M(s) << std::endl;
 	mass_sources[s] *= _chem_mixture.M(s);
         dmass_dT[s] *= _chem_mixture.M(s);
+        std::cout << mass_sources[s] << " " << _chem_mixture.M(s) << std::endl;
 
 /*        for (unsigned int t=0; t < this->n_species(); t++)
           {

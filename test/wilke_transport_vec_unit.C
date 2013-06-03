@@ -45,6 +45,7 @@
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
+#include "antioch/vector_utils_decl.h"
 
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
@@ -57,6 +58,7 @@
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vector_utils.h"
 
 template <typename Scalar, typename PairScalars>
 int test_val( const PairScalars val, const PairScalars val_exact,

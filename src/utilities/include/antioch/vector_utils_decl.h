@@ -29,6 +29,10 @@
 #ifndef ANTIOCH_VECTOR_UTILS_DECL_H
 #define ANTIOCH_VECTOR_UTILS_DECL_H
 
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  error vector_utils_decl.h must be included before metaprogramming.h
+#endif
+
 // Antioch
 #include "antioch/metaprogramming_decl.h"
 
@@ -53,6 +57,9 @@ namespace Antioch
 
 template <typename T>
 struct has_size<std::vector<T> >;
+
+template <typename T>
+struct size_type<std::vector<T> >;
 
 template <typename T>
 struct value_type<std::vector<T> >;

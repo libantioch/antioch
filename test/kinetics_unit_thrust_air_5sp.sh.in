@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROG="@top_builddir@/test/kinetics_unit_thrust"
+
+INPUT="@top_srcdir@/test/input_files/air_5sp.xml"
+
+$PROG $INPUT
+

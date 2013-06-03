@@ -94,9 +94,11 @@ int tester(const std::string& input_name)
       domega_dot_drho_s[s].resize(n_species);
     }
   
-  kinetics.compute_mass_sources_and_derivs( T, R_mix, Y, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
+  kinetics.compute_mass_sources_and_derivs( T, Y, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                             omega_dot_2, domega_dot_dT, domega_dot_drho_s );
 
+  std::vector<std::vector<Scalar> > Mloss,Mprod,Mnet;
+  kinetics.reaction_set().print_chemical_scheme( T, Y, molar_densities, h_RT_minus_s_R,Mloss,Mprod,Mnet);
   for( unsigned int s = 0; s < n_species; s++)
     {
       std::cout << std::scientific << std::setprecision(16)
@@ -121,15 +123,15 @@ int tester(const std::string& input_name)
   
   // Regression values for omega_dot
   std::vector<Scalar> omega_dot_reg(n_species);
-  omega_dot_reg[0] =  7.9004530802650654e+04;
-  omega_dot_reg[1] = -3.4113853617637843e+05;
-  omega_dot_reg[2] = -1.8898881857838202e+05;
-  omega_dot_reg[3] =  2.1551399274321867e+05;
-  omega_dot_reg[4] =  2.3560883120889112e+05;
+  omega_dot_reg[0] =  9.1627505878744108e+04;
+  omega_dot_reg[1] = -3.3462516012726480e+05;
+  omega_dot_reg[2] = -2.1139750128059302e+05;
+  omega_dot_reg[3] =  1.9782333785216609e+05;
+  omega_dot_reg[4] =  2.5657181767694763e+05;
     
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error = abs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = std::fabs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
         {
           return_flag = 1;
@@ -138,7 +140,7 @@ int tester(const std::string& input_name)
  
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error = abs( (omega_dot_2[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = std::fabs( (omega_dot_2[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
         {
           return_flag = 1;
@@ -147,11 +149,11 @@ int tester(const std::string& input_name)
 
   // Regression values for domega_dot_dT
   std::vector<Scalar> domega_dot_reg_dT(n_species);
-  domega_dot_reg_dT[0] =  1.9573634782953712e+02;
-  domega_dot_reg_dT[1] = -5.1996539987130484e+02;
-  domega_dot_reg_dT[2] = -3.2528809609986996e+02;
-  domega_dot_reg_dT[3] =  3.7199081589605311e+02;
-  domega_dot_reg_dT[4] =  2.7752633224558451e+02;
+  domega_dot_reg_dT[0] =  1.8015258435766250e+02;
+  domega_dot_reg_dT[1] = -5.2724938565430807e+02;
+  domega_dot_reg_dT[2] = -3.0930274177637205e+02;
+  domega_dot_reg_dT[3] =  3.7973350053870610e+02;
+  domega_dot_reg_dT[4] =  2.7666604253431154e+02;
 
   for( unsigned int s = 0; s < n_species; s++)
     {
@@ -169,35 +171,35 @@ int tester(const std::string& input_name)
       domega_dot_reg_drhos[s].resize(n_species);
     }
 
-  domega_dot_reg_drhos[0][0] = 1.5777705018045012e+02;
-  domega_dot_reg_drhos[0][1] = 1.3813389268698828e+02;
-  domega_dot_reg_drhos[0][2] = 2.3115223534864103e+06;
-  domega_dot_reg_drhos[0][3] = 1.1840007503997479e+03;
-  domega_dot_reg_drhos[0][4] = 2.3043581130447080e+06;
+  domega_dot_reg_drhos[0][0] = 1.9677528466713775e+04;
+  domega_dot_reg_drhos[0][1] = 1.7227676257862015e+04;
+  domega_dot_reg_drhos[0][2] = 3.2160890543181915e+06;
+  domega_dot_reg_drhos[0][3] = 1.4766530417926086e+05;
+  domega_dot_reg_drhos[0][4] = 2.3225848421202623e+06;
 
-  domega_dot_reg_drhos[1][0] =  7.1306539959731154e+01;
-  domega_dot_reg_drhos[1][1] = -9.9638812606792040e+06;
-  domega_dot_reg_drhos[1][2] = -9.9632306241494343e+06;
-  domega_dot_reg_drhos[1][3] =  3.7459340498153397e+03;
-  domega_dot_reg_drhos[1][4] =  1.1289308740617102e+02;
+  domega_dot_reg_drhos[1][0] =  8.8931540715994815e+03;
+  domega_dot_reg_drhos[1][1] = -9.9561695971970223e+06;
+  domega_dot_reg_drhos[1][2] = -9.8750240128648076e+06;
+  domega_dot_reg_drhos[1][3] =  4.6145192628627969e+05;
+  domega_dot_reg_drhos[1][4] =  8.3491261619680736e+03;
 
-  domega_dot_reg_drhos[2][0] = -1.7978873571638729e+02;
-  domega_dot_reg_drhos[2][1] = -4.3618737551808357e+06;
-  domega_dot_reg_drhos[2][2] = -5.5244116479589976e+06;
-  domega_dot_reg_drhos[2][3] = -4.3214935810689167e+03;
-  domega_dot_reg_drhos[2][4] = -1.1526845416778582e+06;
+  domega_dot_reg_drhos[2][0] = -2.2422758857735978e+04;
+  domega_dot_reg_drhos[2][1] = -4.3813526690025711e+06;
+  domega_dot_reg_drhos[2][2] = -6.8345704383742884e+06;
+  domega_dot_reg_drhos[2][3] = -5.4147327282847988e+05;
+  domega_dot_reg_drhos[2][4] = -1.2268436930952054e+06;
 
-  domega_dot_reg_drhos[3][0] = -9.6448385232075168e+01;
-  domega_dot_reg_drhos[3][1] =  4.9818874042678401e+06;
-  domega_dot_reg_drhos[3][2] =  6.2934541598746339e+06;
-  domega_dot_reg_drhos[3][3] = -7.3295923372729849e+03;
-  domega_dot_reg_drhos[3][4] =  1.3153337903698755e+06;
+  domega_dot_reg_drhos[3][0] = -1.2028768453121129e+04;
+  domega_dot_reg_drhos[3][1] =  4.9714465900642881e+06;
+  domega_dot_reg_drhos[3][2] =  5.7419784571182663e+06;
+  domega_dot_reg_drhos[3][3] = -9.1126114233336027e+05;
+  domega_dot_reg_drhos[3][4] =  1.2432112953400959e+06;
 
-  domega_dot_reg_drhos[4][0] =  4.7153530808281197e+01;
-  domega_dot_reg_drhos[4][1] =  9.3437294776995126e+06;
-  domega_dot_reg_drhos[4][2] =  6.8826657587473867e+06;
-  domega_dot_reg_drhos[4][3] =  6.7211511181268143e+03;
-  domega_dot_reg_drhos[4][4] = -2.4671202548241317e+06;
+  domega_dot_reg_drhos[4][0] =  5.8808447725438464e+03;
+  domega_dot_reg_drhos[4][1] =  9.3488479998774435e+06;
+  domega_dot_reg_drhos[4][2] =  7.7515269398026383e+06;
+  domega_dot_reg_drhos[4][3] =  8.4361718469629961e+05;
+  domega_dot_reg_drhos[4][4] = -2.3473015705271205e+06;
 
   for( unsigned int s = 0; s < n_species; s++)
     {
@@ -240,7 +242,7 @@ int tester(const std::string& input_name)
                         << chem_mixture.chemical_species()[s]->species() 
                         << ", " << chem_mixture.chemical_species()[t]->species()
                         << ") = " << domega_dot_drho_s[s][t]
-                        << ", domega_dot_reg_dT("
+                        << ", domega_dot_reg_drho_s("
                         << chem_mixture.chemical_species()[s]->species()
                         << ", " << chem_mixture.chemical_species()[t]->species()
                         << ") = " << domega_dot_reg_drhos[s][t] << std::endl << std::endl;

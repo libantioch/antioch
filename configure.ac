@@ -2,7 +2,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([Antioch], [0.0.0], [pbauman@ices.utexas.edu], [antioch])
+AC_INIT([Antioch], [0.0.3], [pbauman@ices.utexas.edu], [antioch])
 PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
 AC_SUBST([PACKAGE_DESCRIPTION])
 PACKAGE_URL="http://red.ices.utexas.edu/projects/antioch/"
@@ -67,6 +67,12 @@ dnl--------------------------
 antioch_optional_INCLUDES=""
 antioch_optional_test_INCLUDES=""
 
+dnl Enable Thrust if found
+AX_CHECK_THRUST(0.0.0, no)
+if (test x$HAVE_THRUST = x1); then
+  antioch_optional_test_INCLUDES="$THRUST_CPPFLAGS $antioch_optional_test_INCLUDES"
+fi
+
 dnl Enable Eigen if a new enough version is found
 enableoptional=yes
 CONFIGURE_EIGEN(3.1.2, no)
@@ -118,6 +124,7 @@ dnl-----------------------------------------------
 dnl Generate files for unit and regression testing
 dnl-----------------------------------------------
 AC_CONFIG_FILES(test/kinetics_unit_air_5sp.sh,           [chmod +x test/kinetics_unit_air_5sp.sh])
+AC_CONFIG_FILES(test/kinetics_unit_thrust_air_5sp.sh,    [chmod +x test/kinetics_unit_thrust_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_vec_unit_air_5sp.sh,       [chmod +x test/kinetics_vec_unit_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_air_5sp.sh,     [chmod +x test/kinetics_regression_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_vec_air_5sp.sh, [chmod +x test/kinetics_regression_vec_air_5sp.sh])

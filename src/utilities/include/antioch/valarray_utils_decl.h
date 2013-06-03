@@ -29,6 +29,10 @@
 #ifndef ANTIOCH_VALARRAY_UTILS_DECL_H
 #define ANTIOCH_VALARRAY_UTILS_DECL_H
 
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  error valarray_utils_decl.h must be included before metaprogramming.h
+#endif
+
 // Antioch
 #include "antioch/metaprogramming_decl.h"
 
@@ -69,6 +73,9 @@ max (const std::valarray<T>& in);
 
 template <typename T>
 struct has_size<std::valarray<T> >;
+
+template <typename T>
+struct size_type<std::valarray<T> >;
 
 template <typename T>
 struct value_type<std::valarray<T> >;
