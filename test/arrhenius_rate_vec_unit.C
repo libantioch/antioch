@@ -41,6 +41,10 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
@@ -134,6 +138,11 @@ int main()
     vectester (MetaPhysicL::NumberArray<2, double> (0));
   returnval = returnval ||
     vectester (MetaPhysicL::NumberArray<2, long double> (0));
+#endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx (vex::Filter::DoublePrecision);
+
+  vex::vector<double> testvec(ctx, 2);
 #endif
 
   return returnval;
