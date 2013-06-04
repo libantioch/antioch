@@ -65,10 +65,10 @@ operator<< (std::ostream& output, const std::valarray<T>& a)
 
 template <typename T, typename T2>
 inline
-valarray<T>
-pow (const valarray<T>& in, const T2& n)
+std::valarray<T>
+pow (const std::valarray<T>& in, const T2& n)
 {
-  valarray<T> out=in;
+  std::valarray<T> out=in;
   const size_t size = in.size();
   for (size_t i=0; i != size; ++i)
     out[i] = pow(in[i], n);
