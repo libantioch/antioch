@@ -47,6 +47,8 @@ fi
 if test "x$HAVE_VEXCL" = "x1"; then
   echo '  'VexCL....................... : yes
   echo '  '  VEXCL_CPPFLAGS............ : $VEXCL_CPPFLAGS
+  echo '  '  VEXCL_LDFLAGS............. : $VEXCL_LDFLAGS
+  echo '  '  VEXCL_LIBS................ : $VEXCL_LIBS
 else
   echo '  'VexCL....................... : no
 fi

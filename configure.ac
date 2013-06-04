@@ -66,11 +66,15 @@ dnl Checks for third-party libraries
 dnl--------------------------
 antioch_optional_INCLUDES=""
 antioch_optional_test_INCLUDES=""
+antioch_optional_test_LDFLAGS=""
+antioch_optional_test_LIBS=""
 
 dnl Enable VexCL if found
 AX_PATH_VEXCL(0.0.0, no)
 if (test x$HAVE_VEXCL = x1); then
   antioch_optional_test_INCLUDES="$VEXCL_CPPFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LDFLAGS="$VEXCL_LDFLAGS $antioch_optional_test_LDFLAGS"
+  antioch_optional_test_LIBS="$VEXCL_LIBS $antioch_optional_test_LIBS"
 fi
 
 dnl Enable Eigen if a new enough version is found
@@ -89,6 +93,8 @@ fi
 
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
+AC_SUBST(antioch_optional_test_LDFLAGS)
+AC_SUBST(antioch_optional_test_LIBS)
 
 
 dnl--------------------------
