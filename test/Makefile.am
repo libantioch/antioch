@@ -27,10 +27,6 @@ check_PROGRAMS += wilke_transport_unit
 check_PROGRAMS += wilke_transport_vec_unit
 check_PROGRAMS += constant_lewis_unit
 
-if THRUST_ENABLED
-check_PROGRAMS += kinetics_unit_thrust
-endif
-
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
 endif
@@ -72,14 +68,6 @@ wilke_transport_unit_SOURCES = wilke_transport_unit.C
 wilke_transport_vec_unit_SOURCES = wilke_transport_vec_unit.C
 constant_lewis_unit_SOURCES = constant_lewis_unit.C
 
-if THRUST_ENABLED
-kinetics_unit_thrust_SOURCES = kinetics_unit_thrust.cu
-kinetics_unit_thrust_LDADD = $(THRUST_LIBS)
-kinetics_unit_thrust_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-        $(CXXFLAGS) $(THRUST_LDFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@ $(LDADD)
-endif
-
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
 endif
@@ -112,15 +100,6 @@ TESTS += constant_lewis_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
-endif
-
-if THRUST_ENABLED
-TESTS += kinetics_unit_thrust_air_5sp.sh
-
-SUFFIXES = .cu
-
-.cu.o:
-	$(THRUST_CXX) $(AM_CPPFLAGS) $(THRUST_CPPFLAGS) -c -o $@ $<
 endif
 
 CLEANFILES =
