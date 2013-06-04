@@ -44,12 +44,11 @@ if test "x$HAVE_METAPHYSICL" = "x1"; then
 else
   echo '  'MetaPhysicL................. : no
 fi
-if test "x$HAVE_THRUST" = "x1"; then
-  echo '  'Thrust...................... : yes
-  echo '  '  THRUST_CPPFLAGS........... : $THRUST_CPPFLAGS
-  echo '  '  THRUST_LDFLAGS............ : $THRUST_LDFLAGS
+if test "x$HAVE_VEXCL" = "x1"; then
+  echo '  'VexCL....................... : yes
+  echo '  '  VEXCL_CPPFLAGS............ : $VEXCL_CPPFLAGS
 else
-  echo '  'Thrust...................... : no
+  echo '  'VexCL....................... : no
 fi
 echo
 echo '-------------------------------------------------------------------------------'
