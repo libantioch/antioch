@@ -48,12 +48,14 @@
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/arrhenius_rate.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vexcl_utils.h"
 
 #include <cmath>
 #include <limits>
@@ -142,7 +144,10 @@ int main()
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
-  vex::vector<double> testvec(ctx, 2);
+  returnval = returnval ||
+    vectester (vex::vector<float> (ctx, 2));
+  returnval = returnval ||
+    vectester (vex::vector<double> (ctx, 2));
 #endif
 
   return returnval;
