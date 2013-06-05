@@ -38,6 +38,10 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
 // C++
 #include <limits>
 #include <string>
@@ -50,6 +54,7 @@
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
 #include "antioch/vector_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
@@ -63,6 +68,7 @@
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 #include "antioch/vector_utils.h"
+#include "antioch/vexcl_utils.h"
 
 template <typename PairScalars>
 int vectester(const std::string& input_name, const PairScalars& example)
@@ -195,6 +201,15 @@ int main(int argc, char* argv[])
   returnval = returnval ||
     vectester (argv[1], MetaPhysicL::NumberArray<2, long double>(0));
 #endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx (vex::Filter::DoublePrecision);
+
+  returnval +=
+    vectester (argv[1], vex::vector<float> (ctx, 2));
+  returnval +=
+    vectester (argv[1], vex::vector<double> (ctx, 2));
+#endif
+
 
   return returnval;
 }

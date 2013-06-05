@@ -40,12 +40,17 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
 // Antioch
 // Declare metaprogramming overloads before they're used
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
 #include "antioch/vector_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
@@ -59,6 +64,7 @@
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 #include "antioch/vector_utils.h"
+#include "antioch/vexcl_utils.h"
 
 template <typename Scalar, typename PairScalars>
 int test_val( const PairScalars val, const PairScalars val_exact,
@@ -155,11 +161,15 @@ int tester(const PairScalars& example)
     for( unsigned int r = 0; r < 5; r++ )
       {
         Scalar M_r = chem_mixture.M(r);
-        PairScalars dummy = 1.0L + sqrt(mu[N_index]/mu[r])*pow( M_r/M_N, Scalar(0.25L) );
-        phi_N_exact += chi[r]*dummy*dummy/sqrt(8.0L*( 1.0L + M_N/M_r ) );
+        PairScalars dummy = Scalar(1) + sqrt(mu[N_index]/mu[r])*pow( M_r/M_N, Scalar(0.25L) );
+        phi_N_exact += chi[r]*dummy*dummy/sqrt(Scalar(8)*( Scalar(1) + M_N/M_r ) );
       }
 
     const PairScalars phi_N = wilke.compute_phi( mu, chi, N_index );
+
+    std::cout << "mu =    " << mu << std::endl;
+    std::cout << "chi =   " << chi << std::endl;
+    std::cout << "phi_N = " << phi_N << std::endl;
 
     return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
@@ -213,6 +223,13 @@ int main()
   returnval = returnval ||
     tester (MetaPhysicL::NumberArray<2, long double> (0));
 #endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx (vex::Filter::DoublePrecision);
 
+  returnval = returnval ||
+    tester (vex::vector<float> (ctx, 2));
+  returnval = returnval ||
+    tester (vex::vector<double> (ctx, 2));
+#endif
   return returnval;
 }

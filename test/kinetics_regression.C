@@ -138,7 +138,7 @@ int tester(const std::string& input_name)
     
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error = std::fabs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = abs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
         {
           return_flag = 1;
@@ -147,7 +147,7 @@ int tester(const std::string& input_name)
  
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error = std::fabs( (omega_dot_2[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = abs( (omega_dot_2[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
         {
           return_flag = 1;

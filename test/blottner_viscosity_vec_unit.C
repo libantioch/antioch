@@ -38,10 +38,15 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
 // Declare metaprogramming overloads before they're used
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 // C++
 #include <cmath>
@@ -54,6 +59,7 @@
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vexcl_utils.h"
 
 template <typename Scalar, typename PairScalars>
 int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scalar tol )
@@ -146,6 +152,14 @@ int main()
     vectester (MetaPhysicL::NumberArray<2, double> (0));
   returnval = returnval ||
     vectester (MetaPhysicL::NumberArray<2, long double> (0));
+#endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx (vex::Filter::DoublePrecision);
+
+  returnval = returnval ||
+    vectester (vex::vector<float> (ctx, 2));
+  returnval = returnval ||
+    vectester (vex::vector<double> (ctx, 2));
 #endif
 
   return returnval;
