@@ -221,6 +221,8 @@ namespace Antioch
 									const VectorStateType& chi,
 									const unsigned int s ) const
   {
+    using std::sqrt;
+
     typedef typename
       Antioch::value_type<VectorStateType>::type StateType;
 
@@ -228,12 +230,12 @@ namespace Antioch
        since some StateTypes have a hard time initializing from
        a constant. */
     // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/sqrt(8*(1+Ms/Mr))
-    const StateType dummy = 1 + std::sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
+    const StateType dummy = 1 + sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
     StateType phi_s = chi[0]*dummy*dummy/_mixture.denominator(0,s);
 
     for(unsigned int r = 1; r < _mixture.chem_mixture().n_species(); r++ )
       {
-	const StateType numerator = 1 + std::sqrt(mu[s]/mu[r])*_mixture.Mr_Ms_to_the_one_fourth(r,s);
+	const StateType numerator = 1 + sqrt(mu[s]/mu[r])*_mixture.Mr_Ms_to_the_one_fourth(r,s);
 	phi_s += chi[r]*numerator*numerator/_mixture.denominator(r,s);
       }
 
