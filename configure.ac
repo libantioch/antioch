@@ -91,6 +91,13 @@ if (test x$HAVE_METAPHYSICL = x1); then
   antioch_optional_test_INCLUDES="$METAPHYSICL_CPPFLAGS $antioch_optional_test_INCLUDES"
 fi
 
+dnl Use GRVY timers if a new enough version is found
+AX_PATH_GRVY_NEW([0.30],[no])
+if (test x$HAVE_GRVY = x1); then
+  antioch_optional_test_INCLUDES="$GRVY_CFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LIBS="$GRVY_LIBS $antioch_optional_test_LIBS"
+fi
+
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
 AC_SUBST(antioch_optional_test_LDFLAGS)

@@ -38,17 +38,24 @@ else
 fi
 if test "x$HAVE_METAPHYSICL" = "x1"; then
   echo '  'MetaPhysicL................. : yes
-  echo '  '  METAPHYSICL_CPPFLAGS...... : $METAPHYSICL_CPPFLAGS
-  echo '  '  METAPHYSICL_LDFLAGS....... : $METAPHYSICL_LDFLAGS
-  echo '  '  METAPHYSICL_LIBS.......... : $METAPHYSICL_LIBS
+  echo '    'METAPHYSICL_CPPFLAGS...... : $METAPHYSICL_CPPFLAGS
+  echo '    'METAPHYSICL_LDFLAGS....... : $METAPHYSICL_LDFLAGS
+  echo '    'METAPHYSICL_LIBS.......... : $METAPHYSICL_LIBS
 else
   echo '  'MetaPhysicL................. : no
 fi
 if test "x$HAVE_VEXCL" = "x1"; then
   echo '  'VexCL....................... : yes
-  echo '  '  VEXCL_CPPFLAGS............ : $VEXCL_CPPFLAGS
-  echo '  '  VEXCL_LDFLAGS............. : $VEXCL_LDFLAGS
-  echo '  '  VEXCL_LIBS................ : $VEXCL_LIBS
+  echo '    'VEXCL_CPPFLAGS............ : $VEXCL_CPPFLAGS
+  echo '    'VEXCL_LDFLAGS............. : $VEXCL_LDFLAGS
+  echo '    'VEXCL_LIBS................ : $VEXCL_LIBS
+else
+  echo '  'VexCL....................... : no
+fi
+if test "x$HAVE_GRVY" = "x1"; then
+  echo '  'GRVY........................ : yes
+  echo '    'GRVY_CFLAGS............... : $GRVY_CFLAGS
+  echo '    'GRVY_LIBS................. : $GRVY_LIBS
 else
   echo '  'VexCL....................... : no
 fi
