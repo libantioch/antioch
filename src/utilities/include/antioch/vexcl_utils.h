@@ -82,7 +82,9 @@ inline
 vex::vector<T>
 zero_clone(const vex::vector<T>& example)
 {
-  return vex::vector<T>(example.queue_list(), example.size());
+  vex::vector<T> returnval(example.queue_list(), example.size());
+  returnval.clear();
+  return returnval;
 }
 
 
@@ -91,8 +93,8 @@ inline
 void
 init_clone(vex::vector<T>& output, const vex::vector<T>& example)
 {
-  // No resize method in VexCL!
-  antioch_not_implemented();
+  output.resize(example.size());
+  output = example;
 }
 
 
