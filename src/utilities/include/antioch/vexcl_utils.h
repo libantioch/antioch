@@ -39,10 +39,26 @@
 #include "antioch/metaprogramming.h"
 #include "antioch/antioch_asserts.h"
 
-// C++
-#include <cmath>
-#include <iostream>
-#include <valarray>
+
+#ifdef ANTIOCH_HAVE_VEXCL
+// Though the following implementations are all valid without
+// <vexcl/vexcl.hpp>, successfully using them with
+// VexCL types requires VexCL to be included first.
+// Configure-time VexCL support enforces this constraint but
+// header-only VexCL may be mixed with header-only Antioch
+// without configure-time flags.
+#include "vexcl/vexcl.hpp"
+#else
+// Forward declaration instead
+namespace vex {
+template <typename T> class vector;
+
+template<typename real, class RDC>
+class Reductor;
+
+class MAX;
+}
+#endif
 
 
 namespace Antioch
