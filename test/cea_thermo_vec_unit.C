@@ -42,10 +42,6 @@
 #include "vexcl/vexcl.hpp"
 #endif
 
-// C++
-#include <cmath>
-#include <limits>
-
 // Antioch
 // Declare metaprogramming overloads before they're used
 #include "antioch/eigen_utils_decl.h"
@@ -62,10 +58,21 @@
 #include "antioch/valarray_utils.h"
 #include "antioch/vexcl_utils.h"
 
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
+
+// C++
+#include <cmath>
+#include <limits>
+
 template <typename Scalar, typename TrioScalars>
 int test_cp( const std::string& species_name, unsigned int species,
 	     TrioScalars cp_exact, TrioScalars T,
-	     const Antioch::CEAThermodynamics<Scalar>& thermo )
+	     const Antioch::CEAThermodynamics<Scalar>& thermo,
+             const std::string& testname )
 {
   using std::abs;
 
@@ -76,7 +83,15 @@ int test_cp( const std::string& species_name, unsigned int species,
   typedef typename Antioch::CEAThermodynamics<Scalar>::
 		     template Cache<TrioScalars> Cache;
 
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
+
   const TrioScalars cp = thermo.cp(Cache(T), species);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
 
   // Workaround for a non-standard gcc definition of valarray binary operator-
   const TrioScalars diff = cp_exact - cp; 
@@ -110,7 +125,7 @@ Scalar cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
 
 
 template <typename TrioScalars>
-int vectester(const TrioScalars& example)
+int vectester(const TrioScalars& example, const std::string& testname)
 {
   typedef typename Antioch::value_type<TrioScalars>::type Scalar;
 
@@ -158,7 +173,7 @@ int vectester(const TrioScalars& example)
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
     int return_flag_temp = 0;
-    return_flag_temp = test_cp( species_name, index, cp_N2, T, thermo );
+    return_flag_temp = test_cp( species_name, index, cp_N2, T, thermo, testname );
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
@@ -179,7 +194,7 @@ int vectester(const TrioScalars& example)
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
     int return_flag_temp = 0;
-    return_flag_temp = test_cp( species_name, index, cp_O2, T, thermo );
+    return_flag_temp = test_cp( species_name, index, cp_O2, T, thermo, testname );
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
@@ -200,7 +215,7 @@ int vectester(const TrioScalars& example)
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
     int return_flag_temp = 0;
-    return_flag_temp = test_cp( species_name, index, cp_N, T, thermo );
+    return_flag_temp = test_cp( species_name, index, cp_N, T, thermo, testname );
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
@@ -222,7 +237,7 @@ int vectester(const TrioScalars& example)
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
     int return_flag_temp = 0;
-    return_flag_temp = test_cp( species_name, index, cp_O, T, thermo );
+    return_flag_temp = test_cp( species_name, index, cp_O, T, thermo, testname );
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
@@ -244,7 +259,7 @@ int vectester(const TrioScalars& example)
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
     int return_flag_temp = 0;
-    return_flag_temp = test_cp( species_name, index, cp_NO, T, thermo );
+    return_flag_temp = test_cp( species_name, index, cp_NO, T, thermo, testname );
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
@@ -257,36 +272,36 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(3));
+    vectester (std::valarray<float>(3), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(3));
+    vectester (std::valarray<double>(3), "valarray<double>");
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
 //    vectester<long double, std::valarray<long double> >
-//      (std::valarray<long double>(3));
+//      (std::valarray<long double>(3), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array3f());
+    vectester (Eigen::Array3f(), "Eigen::Array2f");
   returnval = returnval ||
-    vectester (Eigen::Array3d());
+    vectester (Eigen::Array3d(), "Eigen::Array2d");
 //  returnval = returnval ||
-//    vectester (Eigen::Array<long double, 3, 1>());
+//    vectester (Eigen::Array<long double, 3, 1>(), "Eigen::Array<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<3, float> (0));
+    vectester (MetaPhysicL::NumberArray<3, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<3, double> (0));
+    vectester (MetaPhysicL::NumberArray<3, double> (0), "NumberArray<double>");
 //  returnval = returnval ||
-//    vectester (MetaPhysicL::NumberArray<3, long double> (0));
+//    vectester (MetaPhysicL::NumberArray<3, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    vectester (vex::vector<float> (ctx, 3));
+    vectester (vex::vector<float> (ctx, 3), "vex::vector<float>");
   returnval = returnval ||
-    vectester (vex::vector<double> (ctx, 3));
+    vectester (vex::vector<double> (ctx, 3), "vex::vector<double>");
 #endif
 
   return returnval;

@@ -57,11 +57,17 @@
 #include "antioch/valarray_utils.h"
 #include "antioch/vexcl_utils.h"
 
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
+
 #include <cmath>
 #include <limits>
 
 template <typename PairScalars>
-int vectester(const PairScalars& example)
+int vectester(const PairScalars& example, const std::string& testname)
 {
   using std::abs;
   using std::exp;
@@ -85,7 +91,15 @@ int vectester(const PairScalars& example)
 
   int return_flag = 0;
 
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
+
   const PairScalars rate = arrhenius_rate(T);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
 
@@ -120,34 +134,39 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(2));
+    vectester (std::valarray<float>(2), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(2));
+    vectester (std::valarray<double>(2), "valarray<double>");
   returnval = returnval ||
-    vectester (std::valarray<long double>(2));
+    vectester (std::valarray<long double>(2), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array2f());
+    vectester (Eigen::Array2f(), "Eigen::Array2f");
   returnval = returnval ||
-    vectester (Eigen::Array2d());
+    vectester (Eigen::Array2d(), "Eigen::Array2d");
   returnval = returnval ||
-    vectester (Eigen::Array<long double, 2, 1>());
+    vectester (Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, float> (0));
+    vectester (MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, double> (0));
+    vectester (MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, long double> (0));
+    vectester (MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    vectester (vex::vector<float> (ctx, 2));
+    vectester (vex::vector<float> (ctx, 2), "vex::vector<float>");
   returnval = returnval ||
-    vectester (vex::vector<double> (ctx, 2));
+    vectester (vex::vector<double> (ctx, 2), "vex::vector<double>");
+#endif
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
 #endif
 
   return returnval;
