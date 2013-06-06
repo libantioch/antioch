@@ -94,11 +94,14 @@ int tester(const std::string& input_name)
       domega_dot_drho_s[s].resize(n_species);
     }
   
+  kinetics.compute_mass_sources( T, Y, molar_densities, h_RT_minus_s_R, omega_dot);
+
   kinetics.compute_mass_sources_and_derivs( T, Y, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                             omega_dot_2, domega_dot_dT, domega_dot_drho_s );
 
-  std::vector<std::vector<Scalar> > Mloss,Mprod,Mnet;
-  kinetics.reaction_set().print_chemical_scheme( T, Y, molar_densities, h_RT_minus_s_R,Mloss,Mprod,Mnet);
+  std::vector<std::vector<Scalar> > LM,PM,NM;
+  kinetics.reaction_set().print_chemical_scheme( T, Y, molar_densities, h_RT_minus_s_R, LM,PM,NM);
+
   for( unsigned int s = 0; s < n_species; s++)
     {
       std::cout << std::scientific << std::setprecision(16)

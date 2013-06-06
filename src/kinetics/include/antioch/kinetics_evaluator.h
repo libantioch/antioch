@@ -324,10 +324,8 @@ namespace Antioch
     // finally scale by molar mass
     for (unsigned int s=0; s < this->n_species(); s++)
       {
-        std::cout << mass_sources[s] << " " << _chem_mixture.M(s) << std::endl;
 	mass_sources[s] *= _chem_mixture.M(s);
         dmass_dT[s] *= _chem_mixture.M(s);
-        std::cout << mass_sources[s] << " " << _chem_mixture.M(s) << std::endl;
 
 /*        for (unsigned int t=0; t < this->n_species(); t++)
           {

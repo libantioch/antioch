@@ -130,7 +130,6 @@ namespace Antioch
 //dk_dT = dalpha_dT * [sum_s (eps_s * X_s)]
 //dk_dCi = alpha(T) * eps_i
     this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
-
     dkfwd_dX[0] = kfwd;
     StateType coef = (this->efficiency(0) * molar_densities[0]);
     for (unsigned int s=1; s<this->n_species(); s++)

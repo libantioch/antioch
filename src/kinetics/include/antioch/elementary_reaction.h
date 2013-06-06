@@ -121,6 +121,7 @@ namespace Antioch
   {
 //dk_dT = dalpha_dT(T)
      this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+
 //dk_dCi = 0.
     antioch_assert_equal_to(dkfwd_dX.size(),this->n_species());
     Antioch::set_zero(dkfwd_dX);

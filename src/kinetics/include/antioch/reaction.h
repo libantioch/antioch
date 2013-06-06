@@ -704,8 +704,10 @@ class TroeFalloff;
                                    StateType& net_reaction_rate) const
   {
     StateType kfwd_times_reactants = Antioch::zero_clone(kfwd);
-    StateType kbkwd_times_products = Antioch::zero_clone(kfwd);
+    StateType kbkwd_times_products = Antioch::zero_clone(kbkwd);
     // kfwd
+    kfwd_times_reactants = kfwd;
+    kbkwd_times_products = kbkwd;
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
         const StateType val = 
@@ -753,9 +755,9 @@ class TroeFalloff;
     // had better already match the input value sizes...
 
     StateType Rfwd = Antioch::zero_clone(kfwd);
-    StateType dRfwd_dT = Antioch::zero_clone(kfwd);
-    StateType Rbkwd = Antioch::zero_clone(kfwd);
-    StateType dRbkwd_dT = Antioch::zero_clone(kfwd);
+    StateType dRfwd_dT = Antioch::zero_clone(kbkwd);
+    StateType Rbkwd = Antioch::zero_clone(dkfwd_dT);
+    StateType dRbkwd_dT = Antioch::zero_clone(dkbkwd_dT);
 
     // We need to construct using an input StateType argument if we
     // want StateType==valarray to have the right sizes
@@ -778,7 +780,12 @@ class TroeFalloff;
       {
         dRbkwd_dX_s[this->product_id(p)] = kbkwd;
       }
-    
+    //init
+    Rfwd = kfwd;
+    dRfwd_dT = dkfwd_dT;
+    Rbkwd = kbkwd;
+    dRbkwd_dT = dkbkwd_dT;
+
     // Rfwd & derivatives
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
