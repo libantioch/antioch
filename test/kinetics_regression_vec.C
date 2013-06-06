@@ -38,6 +38,10 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
 // Antioch
 
 // Declare metaprogramming overloads before they're used
@@ -45,6 +49,7 @@
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
 #include "antioch/vector_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
@@ -58,6 +63,7 @@
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 #include "antioch/vector_utils.h"
+#include "antioch/vexcl_utils.h"
 
 #ifdef ANTIOCH_HAVE_GRVY
 #include "grvy.h"
@@ -93,8 +99,9 @@ int vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::st
       const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
       // Break this expression up to workaround bugs in my Eigen
-      // version - RHS
-      const StateType rel_error = (a[s] - b[s])/max(a[s],b[s]);
+      // and VexCL versions - RHS
+      const StateType as = a[s], bs = b[s];
+      const StateType rel_error = (as - bs)/max(as,bs);
       const StateType abs_rel_error = abs(rel_error);
 
       if( Antioch::max(abs_rel_error) > tol )
@@ -353,11 +360,11 @@ int vectester(const std::string& input_name,
   omega_dot_reg[2][0] = -2.1139750128059302e+05;
   omega_dot_reg[3][0] =  1.9782333785216609e+05;
   omega_dot_reg[4][0] =  2.5657181767694763e+05;
-  omega_dot_reg[0][1] = omega_dot_reg[0][0];
-  omega_dot_reg[1][1] = omega_dot_reg[1][0];
-  omega_dot_reg[2][1] = omega_dot_reg[2][0];
-  omega_dot_reg[3][1] = omega_dot_reg[3][0];
-  omega_dot_reg[4][1] = omega_dot_reg[4][0];
+  omega_dot_reg[0][1] = Scalar(omega_dot_reg[0][0]);
+  omega_dot_reg[1][1] = Scalar(omega_dot_reg[1][0]);
+  omega_dot_reg[2][1] = Scalar(omega_dot_reg[2][0]);
+  omega_dot_reg[3][1] = Scalar(omega_dot_reg[3][0]);
+  omega_dot_reg[4][1] = Scalar(omega_dot_reg[4][0]);
 
   return_flag +=
     vec_compare(omega_dot, omega_dot_reg, "omega_dot");
@@ -372,11 +379,11 @@ int vectester(const std::string& input_name,
   domega_dot_dT_reg[2][0] = -3.0930274177637205e+02;
   domega_dot_dT_reg[3][0] =  3.7973350053870610e+02;
   domega_dot_dT_reg[4][0] =  2.7666604253431154e+02;
-  domega_dot_dT_reg[0][1] = domega_dot_dT_reg[0][0];
-  domega_dot_dT_reg[1][1] = domega_dot_dT_reg[1][0];
-  domega_dot_dT_reg[2][1] = domega_dot_dT_reg[2][0];
-  domega_dot_dT_reg[3][1] = domega_dot_dT_reg[3][0];
-  domega_dot_dT_reg[4][1] = domega_dot_dT_reg[4][0];
+  domega_dot_dT_reg[0][1] = Scalar(domega_dot_dT_reg[0][0]);
+  domega_dot_dT_reg[1][1] = Scalar(domega_dot_dT_reg[1][0]);
+  domega_dot_dT_reg[2][1] = Scalar(domega_dot_dT_reg[2][0]);
+  domega_dot_dT_reg[3][1] = Scalar(domega_dot_dT_reg[3][0]);
+  domega_dot_dT_reg[4][1] = Scalar(domega_dot_dT_reg[4][0]);
 
   return_flag +=
     vec_compare(domega_dot_dT, domega_dot_dT_reg, "domega_dot_dT");
@@ -418,7 +425,7 @@ int vectester(const std::string& input_name,
   for (unsigned int i = 0; i != 5; ++i)
     for (unsigned int j = 0; j != 5; ++j)
       domega_dot_drhos_reg[i][j][1] = 
-        domega_dot_drhos_reg[i][j][0];
+        Scalar(domega_dot_drhos_reg[i][j][0]);
 
   char vecname[] = "domega_dot_drho_0";
   for (unsigned int i = 0; i != 5; ++i)
@@ -468,6 +475,14 @@ int main(int argc, char* argv[])
     vectester (argv[1], MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
 //  returnval = returnval ||
 //    vectester (argv[1], MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
+#endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx (vex::Filter::DoublePrecision);
+
+  returnval = returnval ||
+    vectester (argv[1], vex::vector<float> (ctx, 3), "vex::vector<float>");
+  returnval = returnval ||
+    vectester (argv[1], vex::vector<double> (ctx, 3), "vex::vector<double>");
 #endif
 
   std::cout << "Found " << returnval << " errors" << std::endl;
