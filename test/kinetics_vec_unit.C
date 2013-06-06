@@ -42,11 +42,6 @@
 #include "vexcl/vexcl.hpp"
 #endif
 
-// C++
-#include <limits>
-#include <string>
-#include <vector>
-
 // Antioch
 
 // Declare metaprogramming overloads before they're used
@@ -70,8 +65,22 @@
 #include "antioch/vector_utils.h"
 #include "antioch/vexcl_utils.h"
 
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
+
+// C++
+#include <limits>
+#include <string>
+#include <vector>
+
+
 template <typename PairScalars>
-int vectester(const std::string& input_name, const PairScalars& example)
+int vectester(const std::string& input_name, 
+	      const PairScalars& example,
+	      const std::string& testname)
 {
   using std::abs;
 
@@ -106,11 +115,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
   std::vector<PairScalars> Y(n_species,Y_vals);
   Y[4][1] = 0;
 
-  const PairScalars R_mix = chem_mixture.R(Y);
-
   const unsigned int n_T_samples = 10;
   const Scalar T0 = 500;
   const Scalar T_inc = 500;
+
+  const PairScalars R_mix = chem_mixture.R(Y);
 
   std::vector<PairScalars> molar_densities(n_species,example);
   std::vector<PairScalars> h_RT_minus_s_R(n_species, example);
@@ -123,6 +132,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
       T[0] = T0 + T_inc*static_cast<Scalar>(i);
       T[1] = T[0]+T_inc/2;
 
+#ifdef ANTIOCH_HAVE_GRVY
+  const std::string testnormal = testname + "-normal";
+  gt.BeginTimer(testnormal);
+#endif
+
       const PairScalars rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
 
@@ -132,6 +146,10 @@ int vectester(const std::string& input_name, const PairScalars& example)
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
       kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testnormal);
+#endif
 
       // Omega dot had better sum to 0.0
       PairScalars sum = omega_dot[0];
@@ -160,6 +178,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
   
 #ifdef ANTIOCH_HAVE_EIGEN
   {
+    // To do: tests with Eigen instead of std vectors
   }
 #endif // ANTIOCH_HAVE_EIGEN
 
@@ -180,34 +199,34 @@ int main(int argc, char* argv[])
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (argv[1], std::valarray<float>(2));
+    vectester (argv[1], std::valarray<float>(2), "valarray<float>");
   returnval = returnval ||
-    vectester (argv[1], std::valarray<double>(2));
+    vectester (argv[1], std::valarray<double>(2), "valarray<double>");
   returnval = returnval ||
-    vectester (argv[1], std::valarray<long double>(2));
+    vectester (argv[1], std::valarray<long double>(2), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (argv[1], Eigen::Array2f());
+    vectester (argv[1], Eigen::Array2f(), "Eigen::Array2f");
   returnval = returnval ||
-    vectester (argv[1], Eigen::Array2d());
+    vectester (argv[1], Eigen::Array2d(), "Eigen::Array2d");
   returnval = returnval ||
-    vectester (argv[1], Eigen::Array<long double, 2, 1>());
+    vectester (argv[1], Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (argv[1], MetaPhysicL::NumberArray<2, float>(0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2, float>(0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (argv[1], MetaPhysicL::NumberArray<2, double>(0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2, double>(0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (argv[1], MetaPhysicL::NumberArray<2, long double>(0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2, long double>(0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
+  returnval +
+    vectester (argv[1], vex::vector<float> (ctx, 2), "vex::vector<float>");
   returnval +=
-    vectester (argv[1], vex::vector<float> (ctx, 2));
-  returnval +=
-    vectester (argv[1], vex::vector<double> (ctx, 2));
+    vectester (argv[1], vex::vector<double> (ctx, 2), "vex::vector<double>");
 #endif
 
 
