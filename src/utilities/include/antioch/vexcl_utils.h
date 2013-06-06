@@ -61,6 +61,16 @@ class MAX;
 #endif
 
 
+namespace std {
+template <typename T>
+inline
+vex::vector<T>
+max(const vex::vector<T>& a,
+    const vex::vector<T>& b)
+  { return vex::max(a,b); }
+}
+
+
 namespace Antioch
 {
 

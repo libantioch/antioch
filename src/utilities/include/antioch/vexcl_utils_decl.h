@@ -52,6 +52,15 @@ template <typename T> class vector;
 #endif
 
 
+namespace std {
+template <typename T>
+inline
+vex::vector<T>
+max(const vex::vector<T>& a,
+    const vex::vector<T>& b);
+}
+
+
 namespace Antioch
 {
 
