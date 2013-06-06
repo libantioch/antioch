@@ -66,6 +66,16 @@
 #include "antioch/vexcl_utils.h"
 #include "antioch/vector_utils.h"
 
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
+
+// C++
+#include <cmath>
+#include <iomanip>
+#include <limits>
 
 template <typename Scalar>
 int test_species( const unsigned int species,
@@ -126,7 +136,7 @@ int test_species( const unsigned int species,
 
 
 template <typename PairScalars>
-int vectester(const PairScalars& example)
+int vectester(const PairScalars& example, const std::string& testname)
 {
   using std::abs;
 
@@ -280,31 +290,45 @@ int vectester(const PairScalars& example)
   X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
   X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
 
+#ifdef ANTIOCH_HAVE_GRVY
+  const std::string testnormal = testname + "-normal";
+  gt.BeginTimer(testnormal);
+#endif
+
+  std::vector<PairScalars> X;
+
+  const PairScalars R = chem_mixture.R(mass_fractions);
+  const PairScalars M = chem_mixture.M(mass_fractions);
+  chem_mixture.X( M, mass_fractions, X );
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testnormal);
+#endif
+
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+
   const PairScalars rel_R_error = 
-    abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact);
+    abs( (R - R_exact)/R_exact);
   if( Antioch::max(rel_R_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
 		<< std::setprecision(16) << std::scientific
-		<< "R       = " << chem_mixture.R(mass_fractions) << std::endl
+		<< "R       = " << R << std::endl
 		<< "R_exact = " << R_exact <<  std::endl;
       return_flag = 1;
     }
 
   const PairScalars rel_M_error = 
-    abs( (chem_mixture.M(mass_fractions) - M_exact)/M_exact);
+    abs( (M - M_exact)/M_exact);
   if( Antioch::max(rel_M_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
 		<< std::setprecision(16) << std::scientific
-		<< "M       = " << chem_mixture.M(mass_fractions) << std::endl
+		<< "M       = " << M << std::endl
 		<< "M_exact = " << M_exact << std::endl;
       return_flag = 1;
     }
   
-  std::vector<PairScalars> X;
-  chem_mixture.X( chem_mixture.M(mass_fractions), mass_fractions, X );
   for( unsigned int s = 0; s < n_species; s++ )
     {
       const PairScalars rel_X_error = 
@@ -341,32 +365,45 @@ int vectester(const PairScalars& example)
     eigen_X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
     eigen_X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
 
+#ifdef ANTIOCH_HAVE_GRVY
+    const std::string testeigenA = testname + "-eigenA";
+    gt.BeginTimer(testeigenA);
+#endif
+
+    const PairScalars R_eigen = chem_mixture.R(eigen_mass_fractions);
+    const PairScalars M_eigen = chem_mixture.M(eigen_mass_fractions);
+    SpeciesVecEigenType eigen_X;
+    Antioch::init_constant(eigen_X, example);
+    chem_mixture.X( M_eigen, eigen_mass_fractions, eigen_X );
+
+#ifdef ANTIOCH_HAVE_GRVY
+    gt.EndTimer(testeigenA);
+#endif
+
     Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+
     const PairScalars eigen_rel_R_error = 
-      abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
+      abs( (R_eigen - R_exact)/R_exact);
     if( Antioch::max(eigen_rel_R_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
 		  << std::setprecision(16) << std::scientific
-		  << "R_eigen = " << chem_mixture.R(eigen_mass_fractions) << std::endl
+		  << "R_eigen = " << R_eigen << std::endl
 		  << "R_exact = " << R_exact <<  std::endl;
         return_flag = 1;
       }
 
     const PairScalars eigen_rel_M_error = 
-      abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
+      abs( (M_eigen - M_exact)/M_exact);
     if( Antioch::max(eigen_rel_M_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
 		  << std::setprecision(16) << std::scientific
-		  << "M_eigen = " << chem_mixture.M(eigen_mass_fractions) << std::endl
+		  << "M_eigen = " << M_eigen << std::endl
 		  << "M_exact = " << M_exact << std::endl;
         return_flag = 1;
       }
   
-    SpeciesVecEigenType eigen_X;
-    Antioch::init_constant(eigen_X, example);
-    chem_mixture.X( chem_mixture.M(eigen_mass_fractions), eigen_mass_fractions, eigen_X );
     for( unsigned int s = 0; s < n_species; s++ )
       {
         const PairScalars eigen_rel_X_error = 
@@ -402,32 +439,45 @@ int vectester(const PairScalars& example)
     eigen_X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
     eigen_X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
 
+#ifdef ANTIOCH_HAVE_GRVY
+    const std::string testeigenV = testname + "-eigenV";
+    gt.BeginTimer(testeigenV);
+#endif
+
+    const PairScalars R_eigen = chem_mixture.R(eigen_mass_fractions);
+    const PairScalars M_eigen = chem_mixture.M(eigen_mass_fractions);
+    SpeciesVecEigenType eigen_X;
+    Antioch::init_constant(eigen_X, example);
+    chem_mixture.X( M_eigen, eigen_mass_fractions, eigen_X );
+
+#ifdef ANTIOCH_HAVE_GRVY
+    gt.EndTimer(testeigenV);
+#endif
+
     Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+
     const PairScalars eigen_rel_R_error = 
-      abs( (chem_mixture.R(eigen_mass_fractions) - R_exact)/R_exact);
+      abs( (R_eigen - R_exact)/R_exact);
     if( Antioch::max(eigen_rel_R_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
 		  << std::setprecision(16) << std::scientific
-		  << "R_eigen = " << chem_mixture.R(eigen_mass_fractions) << std::endl
+		  << "R_eigen = " << R_eigen << std::endl
 		  << "R_exact = " << R_exact <<  std::endl;
         return_flag = 1;
       }
 
     const PairScalars eigen_rel_M_error = 
-      abs( (chem_mixture.M(eigen_mass_fractions) - M_exact)/M_exact);
+      abs( (M_eigen - M_exact)/M_exact);
     if( Antioch::max(eigen_rel_M_error) > tol )
       {
         std::cerr << "Error: Mismatch in mixture molar mass." << std::endl
 		  << std::setprecision(16) << std::scientific
-		  << "M_eigen = " << chem_mixture.M(eigen_mass_fractions) << std::endl
+		  << "M_eigen = " << M_eigen << std::endl
 		  << "M_exact = " << M_exact << std::endl;
         return_flag = 1;
       }
   
-    SpeciesVecEigenType eigen_X(n_species,1);
-    Antioch::init_constant(eigen_X, example);
-    chem_mixture.X( chem_mixture.M(eigen_mass_fractions), eigen_mass_fractions, eigen_X );
     for( unsigned int s = 0; s < n_species; s++ )
       {
         const PairScalars eigen_rel_X_error = 
@@ -453,36 +503,35 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(2));
+    vectester (std::valarray<float>(2), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(2));
+    vectester (std::valarray<double>(2), "valarray<double>");
   returnval = returnval ||
-    vectester (std::valarray<long double>(2));
+    vectester (std::valarray<long double>(2), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array2f());
+    vectester (Eigen::Array2f(), "Eigen::Array2f");
   returnval = returnval ||
-    vectester (Eigen::Array2d());
+    vectester (Eigen::Array2d(), "Eigen::Array2d");
   returnval = returnval ||
-    vectester (Eigen::Array<long double, 2, 1>());
+    vectester (Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, float> (0));
+    vectester (MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, double> (0));
+    vectester (MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, long double> (0));
+    vectester (MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    vectester (vex::vector<float> (ctx, 2));
+    vectester (vex::vector<float> (ctx, 2), "vex::vector<float>");
   returnval = returnval ||
-    vectester (vex::vector<double> (ctx, 2));
+    vectester (vex::vector<double> (ctx, 2), "vex::vector<double>");
 #endif
-
 
   return returnval;
 }

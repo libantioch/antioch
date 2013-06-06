@@ -281,9 +281,9 @@ int main()
 //      (std::valarray<long double>(3), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array3f(), "Eigen::Array2f");
+    vectester (Eigen::Array3f(), "Eigen::Array3f");
   returnval = returnval ||
-    vectester (Eigen::Array3d(), "Eigen::Array2d");
+    vectester (Eigen::Array3d(), "Eigen::Array3d");
 //  returnval = returnval ||
 //    vectester (Eigen::Array<long double, 3, 1>(), "Eigen::Array<ld>");
 #endif

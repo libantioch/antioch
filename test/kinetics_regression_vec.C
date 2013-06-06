@@ -38,11 +38,6 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
-// C++
-#include <limits>
-#include <string>
-#include <vector>
-
 // Antioch
 
 // Declare metaprogramming overloads before they're used
@@ -63,6 +58,17 @@
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 #include "antioch/vector_utils.h"
+
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
+
+// C++
+#include <limits>
+#include <string>
+#include <vector>
 
 static const unsigned int n_species = 5;
 
@@ -114,7 +120,9 @@ int vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::st
 }
 
 template <typename PairScalars>
-int vectester(const std::string& input_name, const PairScalars& example)
+int vectester(const std::string& input_name,
+	      const PairScalars& example,
+	      const std::string& testname )
 {
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
@@ -143,22 +151,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
   PairScalars massfrac = example;
   massfrac[0] = 0.2;
   massfrac[1] = 0.2;
+
   const std::vector<PairScalars> Y(n_species,massfrac);
-
-  const PairScalars R_mix = chem_mixture.R(Y);
-
-  const PairScalars rho = P/(R_mix*T);
-
   std::vector<PairScalars> molar_densities(n_species, example);
-  chem_mixture.molar_densities(rho,Y,molar_densities);
-
   std::vector<PairScalars> h_RT_minus_s_R(n_species, example);
   std::vector<PairScalars> dh_RT_minus_s_R_dT(n_species, example);
-
-  typedef typename Antioch::CEAThermodynamics<Scalar>::
-    template Cache<PairScalars> Cache;
-  thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
-  thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
 
   Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set, example );
 
@@ -169,6 +166,22 @@ int vectester(const std::string& input_name, const PairScalars& example)
   std::vector<std::vector<PairScalars> > domega_dot_drhos
     (n_species, omega_dot); // omega_dot is a good example vec<Pair>
   
+#ifdef ANTIOCH_HAVE_GRVY
+  const std::string testnormal = testname + "-normal";
+  gt.BeginTimer(testnormal);
+#endif
+
+  const PairScalars R_mix = chem_mixture.R(Y);
+
+  const PairScalars rho = P/(R_mix*T);
+
+  chem_mixture.molar_densities(rho,Y,molar_densities);
+
+  typedef typename Antioch::CEAThermodynamics<Scalar>::
+    template Cache<PairScalars> Cache;
+  thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+  thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
+
   kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
   kinetics.compute_mass_sources_and_derivs ( T, rho, R_mix, Y,
@@ -179,58 +192,71 @@ int vectester(const std::string& input_name, const PairScalars& example)
 					     domega_dot_dT,
 					     domega_dot_drhos );
 
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testnormal);
+#endif
+
   int return_flag = 0;
 
 #ifdef ANTIOCH_HAVE_EIGEN
   {
     typedef Eigen::Array<PairScalars,n_species,1> SpeciesVecEigenType;
+
+#ifdef ANTIOCH_HAVE_GRVY
+    const std::string testeigenA = testname + "-eigenA";
+    gt.BeginTimer(testeigenA);
+#endif
+
     SpeciesVecEigenType eigen_Y;
     Antioch::init_constant(eigen_Y, massfrac);
-
-    const PairScalars eigen_R = chem_mixture.R(eigen_Y);
-
-    return_flag +=
-      vec_compare(eigen_R,R_mix,"eigen_R");
 
     SpeciesVecEigenType eigen_molar_densities;
     Antioch::init_constant(eigen_molar_densities, example);
 
+    SpeciesVecEigenType eigen_h_RT_minus_s_R;
+    Antioch::init_constant(eigen_h_RT_minus_s_R, example);
+
+    SpeciesVecEigenType eigen_dh_RT_minus_s_R_dT;
+    Antioch::init_constant(eigen_dh_RT_minus_s_R_dT, example);
+
+    SpeciesVecEigenType eigen_omega_dot;
+    Antioch::init_constant(eigen_omega_dot, example);
+  
+    SpeciesVecEigenType eigen_domega_dot_dT;
+    Antioch::init_constant(eigen_domega_dot_dT, example);
+
+    // FIXME: What to do for domega_dot_drhos type?
+  
+    const PairScalars eigen_R = chem_mixture.R(eigen_Y);
     chem_mixture.molar_densities(rho,eigen_Y,eigen_molar_densities);
+
+    thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
+
+    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
+
+    kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
+
+#ifdef ANTIOCH_HAVE_GRVY
+    gt.EndTimer(testeigenA);
+#endif
+
+    return_flag +=
+      vec_compare(eigen_R,R_mix,"eigen_R");
 
     return_flag +=
       vec_compare(eigen_molar_densities, molar_densities,
                   "eigen_molar_densities");
 
-    SpeciesVecEigenType eigen_h_RT_minus_s_R;
-    Antioch::init_constant(eigen_h_RT_minus_s_R, example);
-
-    thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
-
     return_flag +=
       vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
                   "eigen_h_RT_minus_s_R");
-
-    SpeciesVecEigenType eigen_dh_RT_minus_s_R_dT;
-    Antioch::init_constant(eigen_dh_RT_minus_s_R_dT, example);
-
-    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
 
     return_flag +=
       vec_compare(eigen_dh_RT_minus_s_R_dT, dh_RT_minus_s_R_dT,
                   "eigen_dh_RT_minus_s_R_dT");
 
-    SpeciesVecEigenType eigen_omega_dot;
-    Antioch::init_constant(eigen_omega_dot, example);
-  
-    kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
-
     return_flag +=
       vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
-
-    SpeciesVecEigenType eigen_domega_dot_dT;
-    Antioch::init_constant(eigen_domega_dot_dT, example);
-  
-    // FIXME: What to do for domega_dot_drhos type?
   }
 
   {
@@ -238,50 +264,59 @@ int vectester(const std::string& input_name, const PairScalars& example)
     SpeciesVecEigenType eigen_Y(n_species,1);
     Antioch::init_constant(eigen_Y, massfrac);
 
-    const PairScalars eigen_R = chem_mixture.R(eigen_Y);
-
-    return_flag +=
-      vec_compare(eigen_R,R_mix,"eigen_R");
-
     SpeciesVecEigenType eigen_molar_densities(n_species,1);
     Antioch::init_constant(eigen_molar_densities, example);
 
+    SpeciesVecEigenType eigen_h_RT_minus_s_R(n_species,1);
+    Antioch::init_constant(eigen_h_RT_minus_s_R, example);
+
+    SpeciesVecEigenType eigen_dh_RT_minus_s_R_dT(n_species,1);
+    Antioch::init_constant(eigen_dh_RT_minus_s_R_dT, example);
+
+    SpeciesVecEigenType eigen_omega_dot(n_species,1);
+    Antioch::init_constant(eigen_omega_dot, example);
+
+    SpeciesVecEigenType eigen_domega_dot_dT(n_species,1);
+    Antioch::init_constant(eigen_domega_dot_dT, example);
+
+    // FIXME: What to do for domega_dot_drhos type?
+  
+#ifdef ANTIOCH_HAVE_GRVY
+    const std::string testeigenV = testname + "-eigenV";
+    gt.BeginTimer(testeigenV);
+#endif
+
+    const PairScalars eigen_R = chem_mixture.R(eigen_Y);
+
     chem_mixture.molar_densities(rho,eigen_Y,eigen_molar_densities);
+
+    thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
+
+    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
+
+    kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
+
+#ifdef ANTIOCH_HAVE_GRVY
+    gt.EndTimer(testeigenV);
+#endif
+
+    return_flag +=
+      vec_compare(eigen_R,R_mix,"eigen_R");
 
     return_flag +=
       vec_compare(eigen_molar_densities, molar_densities,
                   "eigen_molar_densities");
 
-    SpeciesVecEigenType eigen_h_RT_minus_s_R(n_species,1);
-    Antioch::init_constant(eigen_h_RT_minus_s_R, example);
-
-    thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
-
     return_flag +=
       vec_compare(eigen_h_RT_minus_s_R, h_RT_minus_s_R,
                   "eigen_h_RT_minus_s_R");
-
-    SpeciesVecEigenType eigen_dh_RT_minus_s_R_dT(n_species,1);
-    Antioch::init_constant(eigen_dh_RT_minus_s_R_dT, example);
-
-    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
 
     return_flag +=
       vec_compare(eigen_dh_RT_minus_s_R_dT, dh_RT_minus_s_R_dT,
                   "eigen_dh_RT_minus_s_R_dT");
 
-    SpeciesVecEigenType eigen_omega_dot(n_species,1);
-    Antioch::init_constant(eigen_omega_dot, example);
-  
-    kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
-
     return_flag +=
       vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
-
-    SpeciesVecEigenType eigen_domega_dot_dT(n_species,1);
-    Antioch::init_constant(eigen_domega_dot_dT, example);
-  
-    // FIXME: What to do for domega_dot_drhos type?
   }
 
 #endif // ANTIOCH_HAVE_EIGEN
@@ -411,28 +446,28 @@ int main(int argc, char* argv[])
   int returnval = 0;
 
   returnval +=
-    vectester (argv[1], std::valarray<float>(2));
+    vectester (argv[1], std::valarray<float>(2), "valarray<float>");
   returnval +=
-    vectester (argv[1], std::valarray<double>(2));
+    vectester (argv[1], std::valarray<double>(2), "valarray<double>");
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
-//    vectester (argv[1], std::valarray<long double>(2));
+//    vectester (argv[1], std::valarray<long double>(2), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval +=
-    vectester (argv[1], Eigen::Array2f());
+    vectester (argv[1], Eigen::Array2f(), "Eigen::Array2f");
   returnval +=
-    vectester (argv[1], Eigen::Array2d());
+    vectester (argv[1], Eigen::Array2d(), "Eigen::Array2d");
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
-//    vectester (argv[1], Eigen::Array<long double, 2, 1>());
+//    vectester (argv[1], Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval +=
-    vectester (argv[1], MetaPhysicL::NumberArray<2, float> (0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
   returnval +=
-    vectester (argv[1], MetaPhysicL::NumberArray<2, double> (0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
 //  returnval = returnval ||
-//    vectester (argv[1], MetaPhysicL::NumberArray<2, long double> (0));
+//    vectester (argv[1], MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
 #endif
 
   std::cout << "Found " << returnval << " errors" << std::endl;
