@@ -67,7 +67,7 @@ AC_ARG_WITH([n_tuples],
 			   [number of tuples used in each vector test]),
 	    [n_tuples="$withval"],
 	    [n_tuples=2])
-AC_DEFINE(N_TUPLES, $n_tuples, [number of tuples used in each vector test])
+AC_DEFINE_UNQUOTED(N_TUPLES, $n_tuples, [number of tuples used in each vector test])
 
 dnl--------------------------
 dnl Checks for third-party libraries
