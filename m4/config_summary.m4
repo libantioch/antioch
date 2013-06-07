@@ -30,7 +30,8 @@ echo Configure date................ : $BUILD_DATE
 echo Build architecture............ : $BUILD_ARCH
 echo SVN revision number........... : $BUILD_VERSION
 echo
-echo Optional Packages for Testing:
+echo Testing Options:
+echo '  'Number of tuples............ : $n_tuples
 if test "x$HAVE_EIGEN" = "x1"; then
   echo '  'Eigen....................... : yes
 else
