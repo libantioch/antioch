@@ -67,7 +67,13 @@ inline
 vex::vector<T>
 max(const vex::vector<T>& a,
     const vex::vector<T>& b)
-  { return vex::max(a,b); }
+#ifdef VEXCL_OPERATIONS_HPP
+{
+  return vex::max(a,b);
+}
+#else
+;
+#endif
 }
 
 
