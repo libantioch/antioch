@@ -63,11 +63,20 @@ AX_CXXFLAGS_WARN_ALL
 
 dnl Allow users to make vectorized tests larger
 AC_ARG_WITH([n_tuples],
-	    AC_HELP_STRING([--n_tuples=<1...1000000000>],
+	    AC_HELP_STRING([--with-n_tuples=<1...1000000000>],
 			   [number of tuples used in each vector test]),
 	    [n_tuples="$withval"],
 	    [n_tuples=2])
 AC_DEFINE_UNQUOTED(N_TUPLES, $n_tuples, [number of tuples used in each vector test])
+
+dnl Allow users to make vectorized tests longer
+AC_ARG_WITH([n_runs],
+	    AC_HELP_STRING([--with-n_runs=<1...1000000000>],
+			   [number of runs done in each vector test]),
+	    [n_runs="$withval"],
+	    [n_runs=1])
+AC_DEFINE_UNQUOTED(N_RUNS, $n_runs, [number of runs done in each vector test])
+
 
 dnl--------------------------
 dnl Checks for third-party libraries
