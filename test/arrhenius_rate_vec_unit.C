@@ -83,8 +83,11 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;
-  T[0] = 1500.1;
-  T[1] = 1600.1;
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    {
+      T[2*tuple]   = 1500.1;
+      T[2*tuple+1] = 1600.1;
+    }
   
   const Scalar rate_exact0 = Cf*pow(Scalar(1500.1),eta)*exp(-Ea/1500.1);
   const Scalar rate_exact1 = Cf*pow(Scalar(1600.1),eta)*exp(-Ea/1600.1);
@@ -103,24 +106,29 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
 
-  if( abs( (rate[0] - rate_exact0)/rate_exact0 ) > tol )
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
     {
-      std::cout << "Error: Mismatch in rate values." << std::endl
-		<< "rate(T0)   = " << rate[0] << std::endl
-		<< "rate_exact = " << rate_exact0 << std::endl
-		<< "difference = " << rate[0] - rate_exact0 << std::endl;
+      if( abs( (rate[2*tuple] - rate_exact0)/rate_exact0 ) > tol )
+        {
+          std::cout << "Error: Mismatch in rate values." << std::endl
+		    << "rate(T0)   = " << rate[2*tuple] << std::endl
+		    << "rate_exact = " << rate_exact0 << std::endl
+		    << "difference = " << rate[2*tuple] - rate_exact0 << std::endl;
 
-      return_flag = 1;
-    }
+          return_flag = 1;
+	  break;
+        }
 
-  if( abs( (rate[1] - rate_exact1)/rate_exact1 ) > tol )
-    {
-      std::cout << "Error: Mismatch in rate values." << std::endl
-		<< "rate(T1)   = " << rate[1] << std::endl
-		<< "rate_exact = " << rate_exact1 << std::endl
-		<< "difference = " << rate[1] - rate_exact1 << std::endl;
+      if( abs( (rate[2*tuple+1] - rate_exact1)/rate_exact1 ) > tol )
+        {
+          std::cout << "Error: Mismatch in rate values." << std::endl
+		    << "rate(T1)   = " << rate[2*tuple+1] << std::endl
+		    << "rate_exact = " << rate_exact1 << std::endl
+		    << "difference = " << rate[2*tuple+1] - rate_exact1 << std::endl;
 
-      return_flag = 1;
+          return_flag = 1;
+	  break;
+        }
     }
 
   std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
@@ -134,34 +142,34 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(2), "valarray<float>");
+    vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(2), "valarray<double>");
+    vectester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
-    vectester (std::valarray<long double>(2), "valarray<ld>");
+    vectester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array2f(), "Eigen::Array2f");
+    vectester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    vectester (Eigen::Array2d(), "Eigen::Array2d");
+    vectester (Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
   returnval = returnval ||
-    vectester (Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
+    vectester (Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    vectester (vex::vector<float> (ctx, 2), "vex::vector<float>");
+    vectester (vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
   returnval = returnval ||
-    vectester (vex::vector<double> (ctx, 2), "vex::vector<double>");
+    vectester (vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
 #endif
 
 #ifdef ANTIOCH_HAVE_GRVY

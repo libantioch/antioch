@@ -148,16 +148,22 @@ int vectester(const std::string& input_name,
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
   PairScalars T = example;
-  T[0] = 1500.0;
-  T[1] = 1500.0;
   PairScalars P = example;
-  P[0] = 1.0e5;
-  P[1] = 1.0e5;
 
   // Mass fractions
   PairScalars massfrac = example;
-  massfrac[0] = 0.2;
-  massfrac[1] = 0.2;
+
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    {
+      T[2*tuple  ] = 1500.0;
+      T[2*tuple+1] = 1500.0;
+
+      P[2*tuple  ] = 1.0e5;
+      P[2*tuple+1] = 1.0e5;
+
+      massfrac[2*tuple  ] = 0.2;
+      massfrac[2*tuple+1] = 0.2;
+    }
 
   const std::vector<PairScalars> Y(n_species,massfrac);
   std::vector<PairScalars> molar_densities(n_species, example);
@@ -355,16 +361,73 @@ int vectester(const std::string& input_name,
 
   // Regression values for omega_dot
   std::vector<PairScalars> omega_dot_reg(n_species,example);
-  omega_dot_reg[0][0] =  9.1627505878744108e+04;
-  omega_dot_reg[1][0] = -3.3462516012726480e+05;
-  omega_dot_reg[2][0] = -2.1139750128059302e+05;
-  omega_dot_reg[3][0] =  1.9782333785216609e+05;
-  omega_dot_reg[4][0] =  2.5657181767694763e+05;
-  omega_dot_reg[0][1] = Scalar(omega_dot_reg[0][0]);
-  omega_dot_reg[1][1] = Scalar(omega_dot_reg[1][0]);
-  omega_dot_reg[2][1] = Scalar(omega_dot_reg[2][0]);
-  omega_dot_reg[3][1] = Scalar(omega_dot_reg[3][0]);
-  omega_dot_reg[4][1] = Scalar(omega_dot_reg[4][0]);
+
+  // Regression values for domega_dot_drhos
+  std::vector<std::vector<PairScalars> > domega_dot_drhos_reg
+    (n_species, omega_dot); // omega_dot is the right size for an example
+
+  // Regression values for domega_dot_dT
+  std::vector<PairScalars> domega_dot_dT_reg(n_species, example);
+
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    {
+      omega_dot_reg[0][2*tuple  ] =  9.1627505878744108e+04;
+      omega_dot_reg[1][2*tuple  ] = -3.3462516012726480e+05;
+      omega_dot_reg[2][2*tuple  ] = -2.1139750128059302e+05;
+      omega_dot_reg[3][2*tuple  ] =  1.9782333785216609e+05;
+      omega_dot_reg[4][2*tuple  ] =  2.5657181767694763e+05;
+      omega_dot_reg[0][2*tuple+1] = Scalar(omega_dot_reg[0][0]);
+      omega_dot_reg[1][2*tuple+1] = Scalar(omega_dot_reg[1][0]);
+      omega_dot_reg[2][2*tuple+1] = Scalar(omega_dot_reg[2][0]);
+      omega_dot_reg[3][2*tuple+1] = Scalar(omega_dot_reg[3][0]);
+      omega_dot_reg[4][2*tuple+1] = Scalar(omega_dot_reg[4][0]);
+
+      domega_dot_dT_reg[0][2*tuple  ] =  1.8015258435766250e+02;
+      domega_dot_dT_reg[1][2*tuple  ] = -5.2724938565430807e+02;
+      domega_dot_dT_reg[2][2*tuple  ] = -3.0930274177637205e+02;
+      domega_dot_dT_reg[3][2*tuple  ] =  3.7973350053870610e+02;
+      domega_dot_dT_reg[4][2*tuple  ] =  2.7666604253431154e+02;
+      domega_dot_dT_reg[0][2*tuple+1] = Scalar(domega_dot_dT_reg[0][0]);
+      domega_dot_dT_reg[1][2*tuple+1] = Scalar(domega_dot_dT_reg[1][0]);
+      domega_dot_dT_reg[2][2*tuple+1] = Scalar(domega_dot_dT_reg[2][0]);
+      domega_dot_dT_reg[3][2*tuple+1] = Scalar(domega_dot_dT_reg[3][0]);
+      domega_dot_dT_reg[4][2*tuple+1] = Scalar(domega_dot_dT_reg[4][0]);
+
+      domega_dot_drhos_reg[0][0][2*tuple  ] = 1.9677528466713775e+04;
+      domega_dot_drhos_reg[0][1][2*tuple  ] = 1.7227676257862015e+04;
+      domega_dot_drhos_reg[0][2][2*tuple  ] = 3.2160890543181915e+06;
+      domega_dot_drhos_reg[0][3][2*tuple  ] = 1.4766530417926086e+05;
+      domega_dot_drhos_reg[0][4][2*tuple  ] = 2.3225848421202623e+06;
+                                                           
+      domega_dot_drhos_reg[1][0][2*tuple  ] =  8.8931540715994815e+03;
+      domega_dot_drhos_reg[1][1][2*tuple  ] = -9.9561695971970223e+06;
+      domega_dot_drhos_reg[1][2][2*tuple  ] = -9.8750240128648076e+06;
+      domega_dot_drhos_reg[1][3][2*tuple  ] =  4.6145192628627969e+05;
+      domega_dot_drhos_reg[1][4][2*tuple  ] =  8.3491261619680736e+03;
+                                                           
+      domega_dot_drhos_reg[2][0][2*tuple  ] = -2.2422758857735978e+04;
+      domega_dot_drhos_reg[2][1][2*tuple  ] = -4.3813526690025711e+06;
+      domega_dot_drhos_reg[2][2][2*tuple  ] = -6.8345704383742884e+06;
+      domega_dot_drhos_reg[2][3][2*tuple  ] = -5.4147327282847988e+05;
+      domega_dot_drhos_reg[2][4][2*tuple  ] = -1.2268436930952054e+06;
+                                                           
+      domega_dot_drhos_reg[3][0][2*tuple  ] = -1.2028768453121129e+04;
+      domega_dot_drhos_reg[3][1][2*tuple  ] =  4.9714465900642881e+06;
+      domega_dot_drhos_reg[3][2][2*tuple  ] =  5.7419784571182663e+06;
+      domega_dot_drhos_reg[3][3][2*tuple  ] = -9.1126114233336027e+05;
+      domega_dot_drhos_reg[3][4][2*tuple  ] =  1.2432112953400959e+06;
+                                                           
+      domega_dot_drhos_reg[4][0][2*tuple  ] =  5.8808447725438464e+03;
+      domega_dot_drhos_reg[4][1][2*tuple  ] =  9.3488479998774435e+06;
+      domega_dot_drhos_reg[4][2][2*tuple  ] =  7.7515269398026383e+06;
+      domega_dot_drhos_reg[4][3][2*tuple  ] =  8.4361718469629961e+05;
+      domega_dot_drhos_reg[4][4][2*tuple  ] = -2.3473015705271205e+06;
+
+      for (unsigned int i = 0; i != 5; ++i)
+        for (unsigned int j = 0; j != 5; ++j)
+          domega_dot_drhos_reg[i][j][2*tuple+1] = 
+            Scalar(domega_dot_drhos_reg[i][j][2*tuple  ]);
+    }
 
   return_flag +=
     vec_compare(omega_dot, omega_dot_reg, "omega_dot");
@@ -372,60 +435,8 @@ int vectester(const std::string& input_name,
   return_flag +=
     vec_compare(omega_dot_2, omega_dot_reg, "omega_dot_2");
 
-  // Regression values for domega_dot_dT
-  std::vector<PairScalars> domega_dot_dT_reg(n_species, example);
-  domega_dot_dT_reg[0][0] =  1.8015258435766250e+02;
-  domega_dot_dT_reg[1][0] = -5.2724938565430807e+02;
-  domega_dot_dT_reg[2][0] = -3.0930274177637205e+02;
-  domega_dot_dT_reg[3][0] =  3.7973350053870610e+02;
-  domega_dot_dT_reg[4][0] =  2.7666604253431154e+02;
-  domega_dot_dT_reg[0][1] = Scalar(domega_dot_dT_reg[0][0]);
-  domega_dot_dT_reg[1][1] = Scalar(domega_dot_dT_reg[1][0]);
-  domega_dot_dT_reg[2][1] = Scalar(domega_dot_dT_reg[2][0]);
-  domega_dot_dT_reg[3][1] = Scalar(domega_dot_dT_reg[3][0]);
-  domega_dot_dT_reg[4][1] = Scalar(domega_dot_dT_reg[4][0]);
-
   return_flag +=
     vec_compare(domega_dot_dT, domega_dot_dT_reg, "domega_dot_dT");
-
-  // Regression values for domega_dot_drhos
-  std::vector<std::vector<PairScalars> > domega_dot_drhos_reg
-    (n_species, omega_dot); // omega_dot is the right size for an example
-
-  domega_dot_drhos_reg[0][0][0] = 1.9677528466713775e+04;
-  domega_dot_drhos_reg[0][1][0] = 1.7227676257862015e+04;
-  domega_dot_drhos_reg[0][2][0] = 3.2160890543181915e+06;
-  domega_dot_drhos_reg[0][3][0] = 1.4766530417926086e+05;
-  domega_dot_drhos_reg[0][4][0] = 2.3225848421202623e+06;
-                                                           
-  domega_dot_drhos_reg[1][0][0] =  8.8931540715994815e+03;
-  domega_dot_drhos_reg[1][1][0] = -9.9561695971970223e+06;
-  domega_dot_drhos_reg[1][2][0] = -9.8750240128648076e+06;
-  domega_dot_drhos_reg[1][3][0] =  4.6145192628627969e+05;
-  domega_dot_drhos_reg[1][4][0] =  8.3491261619680736e+03;
-                                                           
-  domega_dot_drhos_reg[2][0][0] = -2.2422758857735978e+04;
-  domega_dot_drhos_reg[2][1][0] = -4.3813526690025711e+06;
-  domega_dot_drhos_reg[2][2][0] = -6.8345704383742884e+06;
-  domega_dot_drhos_reg[2][3][0] = -5.4147327282847988e+05;
-  domega_dot_drhos_reg[2][4][0] = -1.2268436930952054e+06;
-                                                           
-  domega_dot_drhos_reg[3][0][0] = -1.2028768453121129e+04;
-  domega_dot_drhos_reg[3][1][0] =  4.9714465900642881e+06;
-  domega_dot_drhos_reg[3][2][0] =  5.7419784571182663e+06;
-  domega_dot_drhos_reg[3][3][0] = -9.1126114233336027e+05;
-  domega_dot_drhos_reg[3][4][0] =  1.2432112953400959e+06;
-                                                           
-  domega_dot_drhos_reg[4][0][0] =  5.8808447725438464e+03;
-  domega_dot_drhos_reg[4][1][0] =  9.3488479998774435e+06;
-  domega_dot_drhos_reg[4][2][0] =  7.7515269398026383e+06;
-  domega_dot_drhos_reg[4][3][0] =  8.4361718469629961e+05;
-  domega_dot_drhos_reg[4][4][0] = -2.3473015705271205e+06;
-
-  for (unsigned int i = 0; i != 5; ++i)
-    for (unsigned int j = 0; j != 5; ++j)
-      domega_dot_drhos_reg[i][j][1] = 
-        Scalar(domega_dot_drhos_reg[i][j][0]);
 
   char vecname[] = "domega_dot_drho_0";
   for (unsigned int i = 0; i != 5; ++i)
@@ -453,39 +464,44 @@ int main(int argc, char* argv[])
   int returnval = 0;
 
   returnval +=
-    vectester (argv[1], std::valarray<float>(2), "valarray<float>");
+    vectester (argv[1], std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval +=
-    vectester (argv[1], std::valarray<double>(2), "valarray<double>");
+    vectester (argv[1], std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
-//    vectester (argv[1], std::valarray<long double>(2), "valarray<ld>");
+//    vectester (argv[1], std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval +=
-    vectester (argv[1], Eigen::Array2f(), "Eigen::Array2f");
+    vectester (argv[1], Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval +=
-    vectester (argv[1], Eigen::Array2d(), "Eigen::Array2d");
+    vectester (argv[1], Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
 // We're not getting the full long double precision yet?
 //  returnval = returnval ||
-//    vectester (argv[1], Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
+//    vectester (argv[1], Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval +=
-    vectester (argv[1], MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
+    vectester (argv[1], MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> (0), "NumberArray<float>");
   returnval +=
-    vectester (argv[1], MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
+    vectester (argv[1], MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double> (0), "NumberArray<double>");
 //  returnval = returnval ||
-//    vectester (argv[1], MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
+//    vectester (argv[1], MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    vectester (argv[1], vex::vector<float> (ctx, 3), "vex::vector<float>");
+    vectester (argv[1], vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
   returnval = returnval ||
-    vectester (argv[1], vex::vector<double> (ctx, 3), "vex::vector<double>");
+    vectester (argv[1], vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
 #endif
 
   std::cout << "Found " << returnval << " errors" << std::endl;
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
+#endif
 
   return (returnval != 0) ? 1 : 0;
 }

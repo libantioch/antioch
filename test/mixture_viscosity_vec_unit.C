@@ -95,8 +95,11 @@ int vectester(const PairScalars& example, const std::string& testname)
   std::cout << b_mu_mixture << std::endl;
 
   PairScalars T = example;
-  T[0] = 1500.1;
-  T[1] = 1600.1;
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    {
+      T[2*tuple  ] = 1500.1;
+      T[2*tuple+1] = 1600.1;
+    }
 
   PairScalars mu = example;
 
@@ -144,36 +147,40 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(2), "valarray<float>");
+    vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(2), "valarray<double>");
+    vectester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
-    vectester (std::valarray<long double>(2), "valarray<ld>");
+    vectester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array2f(), "Eigen::Array2f");
+    vectester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    vectester (Eigen::Array2d(), "Eigen::Array2d");
+    vectester (Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
   returnval = returnval ||
-    vectester (Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
+    vectester (Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    vectester (vex::vector<float> (ctx, 2), "vex::vector<float>");
+    vectester (vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
   returnval = returnval ||
-    vectester (vex::vector<double> (ctx, 2), "vex::vector<double>");
+    vectester (vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
 #endif
 
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
+#endif
 
   return returnval;
 }

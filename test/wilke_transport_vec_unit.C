@@ -137,28 +137,32 @@ int tester(const PairScalars& example, const std::string& testname)
   // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/sqrt(8*(1+Ms/Mr))
   {
     std::vector<PairScalars> mu(5, example);
-    mu[0][0] = 0.1L;
-    mu[1][0] = 0.2L;
-    mu[2][0] = 0.3L;
-    mu[3][0] = 0.15L;
-    mu[4][0] = 0.25L;
-    mu[0][1] = 0.25L;
-    mu[1][1] = 0.15L;
-    mu[2][1] = 0.3L;
-    mu[3][1] = 0.2L;
-    mu[4][1] = 0.1L;
-
     std::vector<PairScalars> chi(5, example);
-    chi[0][0] = 0.1L;
-    chi[1][0] = 0.2L;
-    chi[2][0] = 0.3L;
-    chi[3][0] = 0.15L;
-    chi[4][0] = 0.25L;
-    chi[0][1] = 0.25L;
-    chi[1][1] = 0.15L;
-    chi[2][1] = 0.3L;
-    chi[3][1] = 0.2L;
-    chi[4][1] = 0.1L;
+
+    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+      {
+        mu[0][2*tuple  ] = 0.1L;
+        mu[1][2*tuple  ] = 0.2L;
+        mu[2][2*tuple  ] = 0.3L;
+        mu[3][2*tuple  ] = 0.15L;
+        mu[4][2*tuple  ] = 0.25L;
+        mu[0][2*tuple+1] = 0.25L;
+        mu[1][2*tuple+1] = 0.15L;
+        mu[2][2*tuple+1] = 0.3L;
+        mu[3][2*tuple+1] = 0.2L;
+        mu[4][2*tuple+1] = 0.1L;
+    
+        chi[0][2*tuple  ] = 0.1L;
+        chi[1][2*tuple  ] = 0.2L;
+        chi[2][2*tuple  ] = 0.3L;
+        chi[3][2*tuple  ] = 0.15L;
+        chi[4][2*tuple  ] = 0.25L;
+        chi[0][2*tuple+1] = 0.25L;
+        chi[1][2*tuple+1] = 0.15L;
+        chi[2][2*tuple+1] = 0.3L;
+        chi[3][2*tuple+1] = 0.2L;
+        chi[4][2*tuple+1] = 0.1L;
+      }
 
     PairScalars phi_N_exact = Antioch::zero_clone(example);
     unsigned int N_index = 2;
@@ -189,10 +193,12 @@ int tester(const PairScalars& example, const std::string& testname)
   }
   
 
-  PairScalars each_mass = example;
-  each_mass[0] = 0.2L;
-  each_mass[1] = 0.2L;
-  std::vector<PairScalars> mass_fractions( 5, each_mass); 
+  // PairScalars each_mass = example;
+
+  // each_mass[2*tuple  ] = 0.2L;
+  // each_mass[2*tuple+1] = 0.2L;
+
+  // std::vector<PairScalars> mass_fractions( 5, each_mass); 
 
   // Currently dummy
   //const Scalar mu_exact = ;
@@ -216,34 +222,40 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    tester (std::valarray<float>(2), "valarray<float>");
+    tester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval = returnval ||
-    tester (std::valarray<double>(2), "valarray<double>");
+    tester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
-    tester (std::valarray<long double>(2), "valarray<ld>");
+    tester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    tester (Eigen::Array2f(), "Eigen::Array2f");
+    tester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    tester (Eigen::Array2d(), "Eigen::Array2d");
+    tester (Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
   returnval = returnval ||
-    tester (Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
+    tester (Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    tester (MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
+    tester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    tester (MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
+    tester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    tester (MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
+    tester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    tester (vex::vector<float> (ctx, 2), "vex::vector<float>");
+    tester (vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
   returnval = returnval ||
-    tester (vex::vector<double> (ctx, 2), "vex::vector<double>");
+    tester (vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
 #endif
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
+#endif
+
   return returnval;
 }

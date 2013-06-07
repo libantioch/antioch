@@ -260,35 +260,40 @@ int vectester(const PairScalars& example, const std::string& testname)
   }
 
   std::vector<PairScalars> mass_fractions( n_species, example );
-  mass_fractions[0][0] = 0.25L;
-  mass_fractions[1][0] = 0.25L;
-  mass_fractions[2][0] = 0.25L;
-  mass_fractions[3][0] = 0.25L;
-  mass_fractions[4][0] = 0L;
-  mass_fractions[0][1] = 0.2L;
-  mass_fractions[1][1] = 0.2L;
-  mass_fractions[2][1] = 0.2L;
-  mass_fractions[3][1] = 0.2L;
-  mass_fractions[4][1] = 0.2L;
-
   PairScalars R_exact = example;
   PairScalars M_exact = example;
-  R_exact[0] = Antioch::Constants::R_universal<Scalar>()*( 0.25L/28.016L + 0.25L/32.0L + 0.25L/14.008L + 0.25L/16.0L);
-  R_exact[1] = Antioch::Constants::R_universal<Scalar>()*( 0.2L/28.016L + 0.2L/32.0L + 0.2L/14.008L + 0.2L/16.0L + 0.2L/30.008L );
-  M_exact[0] = 1.0L/( 0.25L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L) );
-  M_exact[1] = 1.0L/( 0.2L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L + 1.0L/30.008L) );
-  
   std::vector<PairScalars> X_exact(n_species, example);
-  X_exact[0][0] = 0.25L*M_exact[0]/28.016L;
-  X_exact[1][0] = 0.25L*M_exact[0]/32.0L;
-  X_exact[2][0] = 0.25L*M_exact[0]/14.008L;
-  X_exact[3][0] = 0.25L*M_exact[0]/16.0L;
-  X_exact[4][0] = 0L;
-  X_exact[0][1] = 0.2L*M_exact[1]/28.016L;
-  X_exact[1][1] = 0.2L*M_exact[1]/32.0L;
-  X_exact[2][1] = 0.2L*M_exact[1]/14.008L;
-  X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
-  X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
+
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    {
+      mass_fractions[0][2*tuple  ] = 0.25L;
+      mass_fractions[1][2*tuple  ] = 0.25L;
+      mass_fractions[2][2*tuple  ] = 0.25L;
+      mass_fractions[3][2*tuple  ] = 0.25L;
+      mass_fractions[4][2*tuple  ] = 0L;
+      mass_fractions[0][2*tuple+1] = 0.2L;
+      mass_fractions[1][2*tuple+1] = 0.2L;
+      mass_fractions[2][2*tuple+1] = 0.2L;
+      mass_fractions[3][2*tuple+1] = 0.2L;
+      mass_fractions[4][2*tuple+1] = 0.2L;
+
+      R_exact[2*tuple  ] = Antioch::Constants::R_universal<Scalar>()*( 0.25L/28.016L + 0.25L/32.0L + 0.25L/14.008L + 0.25L/16.0L);
+      R_exact[2*tuple+1] = Antioch::Constants::R_universal<Scalar>()*( 0.2L/28.016L + 0.2L/32.0L + 0.2L/14.008L + 0.2L/16.0L + 0.2L/30.008L );
+
+      M_exact[2*tuple  ] = 1.0L/( 0.25L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L) );
+      M_exact[2*tuple+1] = 1.0L/( 0.2L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L + 1.0L/30.008L) );
+  
+      X_exact[0][2*tuple  ] = 0.25L*M_exact[0]/28.016L;
+      X_exact[1][2*tuple  ] = 0.25L*M_exact[0]/32.0L;
+      X_exact[2][2*tuple  ] = 0.25L*M_exact[0]/14.008L;
+      X_exact[3][2*tuple  ] = 0.25L*M_exact[0]/16.0L;
+      X_exact[4][2*tuple  ] = 0L;
+      X_exact[0][2*tuple+1] = 0.2L*M_exact[1]/28.016L;
+      X_exact[1][2*tuple+1] = 0.2L*M_exact[1]/32.0L;
+      X_exact[2][2*tuple+1] = 0.2L*M_exact[1]/14.008L;
+      X_exact[3][2*tuple+1] = 0.2L*M_exact[1]/16.0L;
+      X_exact[4][2*tuple+1] = 0.2L*M_exact[1]/30.008L;
+    }
 
 #ifdef ANTIOCH_HAVE_GRVY
   const std::string testnormal = testname + "-normal";
@@ -350,20 +355,24 @@ int vectester(const PairScalars& example, const std::string& testname)
 
     SpeciesVecEigenType eigen_mass_fractions;
     Antioch::init_constant(eigen_mass_fractions, mass_fractions[0]);
-    eigen_mass_fractions[4][0] = 0L;
 
     SpeciesVecEigenType eigen_X_exact;
     Antioch::init_constant(eigen_X_exact, example);
-    eigen_X_exact[0][0] = 0.25L*M_exact[0]/28.016L;
-    eigen_X_exact[1][0] = 0.25L*M_exact[0]/32.0L;
-    eigen_X_exact[2][0] = 0.25L*M_exact[0]/14.008L;
-    eigen_X_exact[3][0] = 0.25L*M_exact[0]/16.0L;
-    eigen_X_exact[4][0] = 0L;
-    eigen_X_exact[0][1] = 0.2L*M_exact[1]/28.016L;
-    eigen_X_exact[1][1] = 0.2L*M_exact[1]/32.0L;
-    eigen_X_exact[2][1] = 0.2L*M_exact[1]/14.008L;
-    eigen_X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
-    eigen_X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
+    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+      {
+        eigen_mass_fractions[4][2*tuple] = 0L;
+
+        eigen_X_exact[0][2*tuple  ] = 0.25L*M_exact[0]/28.016L;
+        eigen_X_exact[1][2*tuple  ] = 0.25L*M_exact[0]/32.0L;
+        eigen_X_exact[2][2*tuple  ] = 0.25L*M_exact[0]/14.008L;
+        eigen_X_exact[3][2*tuple  ] = 0.25L*M_exact[0]/16.0L;
+        eigen_X_exact[4][2*tuple  ] = 0L;
+        eigen_X_exact[0][2*tuple+1] = 0.2L*M_exact[1]/28.016L;
+        eigen_X_exact[1][2*tuple+1] = 0.2L*M_exact[1]/32.0L;
+        eigen_X_exact[2][2*tuple+1] = 0.2L*M_exact[1]/14.008L;
+        eigen_X_exact[3][2*tuple+1] = 0.2L*M_exact[1]/16.0L;
+        eigen_X_exact[4][2*tuple+1] = 0.2L*M_exact[1]/30.008L;
+      }
 
 #ifdef ANTIOCH_HAVE_GRVY
     const std::string testeigenA = testname + "-eigenA";
@@ -424,20 +433,25 @@ int vectester(const PairScalars& example, const std::string& testname)
 
     SpeciesVecEigenType eigen_mass_fractions(n_species, 1);
     Antioch::init_constant(eigen_mass_fractions, mass_fractions[0]);
-    eigen_mass_fractions[4][0] = 0L;
 
     SpeciesVecEigenType eigen_X_exact(n_species, 1);
     Antioch::init_constant(eigen_X_exact, example);
-    eigen_X_exact[0][0] = 0.25L*M_exact[0]/28.016L;
-    eigen_X_exact[1][0] = 0.25L*M_exact[0]/32.0L;
-    eigen_X_exact[2][0] = 0.25L*M_exact[0]/14.008L;
-    eigen_X_exact[3][0] = 0.25L*M_exact[0]/16.0L;
-    eigen_X_exact[4][0] = 0L;
-    eigen_X_exact[0][1] = 0.2L*M_exact[1]/28.016L;
-    eigen_X_exact[1][1] = 0.2L*M_exact[1]/32.0L;
-    eigen_X_exact[2][1] = 0.2L*M_exact[1]/14.008L;
-    eigen_X_exact[3][1] = 0.2L*M_exact[1]/16.0L;
-    eigen_X_exact[4][1] = 0.2L*M_exact[1]/30.008L;
+
+    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+      {
+        eigen_mass_fractions[4][2*tuple] = 0L;
+
+        eigen_X_exact[0][2*tuple  ] = 0.25L*M_exact[0]/28.016L;
+        eigen_X_exact[1][2*tuple  ] = 0.25L*M_exact[0]/32.0L;
+        eigen_X_exact[2][2*tuple  ] = 0.25L*M_exact[0]/14.008L;
+        eigen_X_exact[3][2*tuple  ] = 0.25L*M_exact[0]/16.0L;
+        eigen_X_exact[4][2*tuple  ] = 0L;
+        eigen_X_exact[0][2*tuple+1] = 0.2L*M_exact[1]/28.016L;
+        eigen_X_exact[1][2*tuple+1] = 0.2L*M_exact[1]/32.0L;
+        eigen_X_exact[2][2*tuple+1] = 0.2L*M_exact[1]/14.008L;
+        eigen_X_exact[3][2*tuple+1] = 0.2L*M_exact[1]/16.0L;
+        eigen_X_exact[4][2*tuple+1] = 0.2L*M_exact[1]/30.008L;
+      }
 
 #ifdef ANTIOCH_HAVE_GRVY
     const std::string testeigenV = testname + "-eigenV";
@@ -503,34 +517,39 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(2), "valarray<float>");
+    vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(2), "valarray<double>");
+    vectester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
-    vectester (std::valarray<long double>(2), "valarray<ld>");
+    vectester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array2f(), "Eigen::Array2f");
+    vectester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    vectester (Eigen::Array2d(), "Eigen::Array2d");
+    vectester (Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
   returnval = returnval ||
-    vectester (Eigen::Array<long double, 2, 1>(), "Eigen::Array<ld>");
+    vectester (Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, float> (0), "NumberArray<float>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, double> (0), "NumberArray<double>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, long double> (0), "NumberArray<ld>");
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
   returnval = returnval ||
-    vectester (vex::vector<float> (ctx, 2), "vex::vector<float>");
+    vectester (vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
   returnval = returnval ||
-    vectester (vex::vector<double> (ctx, 2), "vex::vector<double>");
+    vectester (vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
+#endif
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
 #endif
 
   return returnval;
