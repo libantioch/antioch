@@ -94,6 +94,15 @@ if (test x$HAVE_VEXCL = x1); then
   antioch_optional_test_LIBS="$VEXCL_LIBS $antioch_optional_test_LIBS"
 fi
 
+dnl Enable ViennaCL if found
+AX_PATH_VIENNACL(0.0.0, no)
+if (test x$HAVE_VIENNACL = x1); then
+  antioch_optional_test_INCLUDES="$VIENNACL_CPPFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LDFLAGS="$VIENNACL_LDFLAGS $antioch_optional_test_LDFLAGS"
+  antioch_optional_test_LIBS="$VIENNACL_LIBS $antioch_optional_test_LIBS"
+fi
+
+
 dnl Enable Eigen if a new enough version is found
 enableoptional=yes
 CONFIGURE_EIGEN(3.1.2, no)

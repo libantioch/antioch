@@ -53,6 +53,14 @@ if test "x$HAVE_VEXCL" = "x1"; then
 else
   echo '  'VexCL....................... : no
 fi
+if test "x$HAVE_VIENNACL" = "x1"; then
+  echo '  'ViennaCL.................... : yes
+  echo '    'VIENNACL_CPPFLAGS......... : $VIENNACL_CPPFLAGS
+  echo '    'VIENNACL_LDFLAGS.......... : $VIENNACL_LDFLAGS
+  echo '    'VIENNACL_LIBS............. : $VIENNACL_LIBS
+else
+  echo '  'ViennaCL.................... : no
+fi
 if test "x$HAVE_GRVY" = "x1"; then
   echo '  'GRVY........................ : yes
   echo '    'GRVY_CFLAGS............... : $GRVY_CFLAGS
