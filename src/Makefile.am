@@ -21,6 +21,9 @@ libantioch_la_SOURCES += core/src/chemical_mixture.C
 libantioch_la_SOURCES += kinetics/src/reaction.C
 libantioch_la_SOURCES += kinetics/src/reaction_set.C
 libantioch_la_SOURCES += kinetics/src/kinetics_evaluator.C
+libantioch_la_SOURCES += kinetics/src/data_equilibrium.C
+libantioch_la_SOURCES += kinetics/src/data_equilibrium_TP.C
+libantioch_la_SOURCES += kinetics/src/equilibrium_evaluator.C
 
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
@@ -60,6 +63,9 @@ include_HEADERS += kinetics/include/antioch/reaction.h
 include_HEADERS += kinetics/include/antioch/reaction_enum.h
 include_HEADERS += kinetics/include/antioch/reaction_set.h
 include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
+include_HEADERS += kinetics/include/antioch/data_equilibrium.h
+include_HEADERS += kinetics/include/antioch/data_equilibrium_TP.h
+include_HEADERS += kinetics/include/antioch/equilibrium_evaluator.h
 
 # parsing
 include_HEADERS += parsing/include/antioch/tinyxml2.h
