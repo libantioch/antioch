@@ -230,26 +230,7 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-        const Reaction<CoeffType>* reaction = this->reaction(rxn);
-
-        StateType kfwd = reaction->compute_forward_rate_coefficient(molar_densities,T);
-
-        StateType keq = reaction->equilibrium_constant( P0_RT, h_RT_minus_s_R );
-
-        StateType kbkwd = kfwd/keq;
-
-        for (unsigned int r=0; r<reaction->n_reactants(); r++)
-        {
-           kfwd *= pow( molar_densities[reaction->reactant_id(r)],
-                   static_cast<int>(reaction->reactant_stoichiometric_coefficient(r)) );
-        }
-        for (unsigned int p=0; p<reaction->n_products(); p++)
-        {
-           kbkwd *= pow( molar_densities[reaction->product_id(p)],
-                        static_cast<int>(reaction->product_stoichiometric_coefficient(p)) );
-        }
-
-        net_reaction_rates[rxn] = kfwd - kbkwd;
+        net_reaction_rates[rxn] = this->reaction(rxn)->compute_rate_of_progress(molar_densities,T,P0_RT,h_RT_minus_s_R);
       }
     
     return;
@@ -291,34 +272,11 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-	const Reaction<CoeffType>* reaction = this->reaction(rxn);
-
-	StateType kfwd = Antioch::zero_clone(T);
-        StateType dkfwd_dT = Antioch::zero_clone(T);
-        VectorStateType dkfwd_dX = Antioch::zero_clone(molar_densities);
-        VectorStateType dkbkwd_dX = Antioch::zero_clone(molar_densities);
-        reaction->compute_forward_rate_coefficient_and_derivatives(molar_densities, T, kfwd, dkfwd_dT ,dkfwd_dX);
-
-	StateType keq = Antioch::zero_clone(T);
-        StateType dkeq_dT = Antioch::zero_clone(T);
-
-        reaction->equilibrium_constant_and_derivative( T, P0_RT, h_RT_minus_s_R,
-                                                      dh_RT_minus_s_R_dT,
-                                                      keq, dkeq_dT );
-
-	const StateType kbkwd = kfwd/keq;
-        const StateType dkbkwd_dT = (dkfwd_dT - kbkwd*dkeq_dT)/keq;
-        for(unsigned int s = 0; s < this->n_species(); s++)
-        {
-           dkbkwd_dX[s] = dkfwd_dX[s]/keq;
-        }
-
-	reaction->compute_rate_of_progress_and_derivatives( molar_densities, _chem_mixture, 
-                                                           kfwd, dkfwd_dT, dkbkwd_dX,
-                                                           kbkwd, dkbkwd_dT, dkbkwd_dX,
-                                                           net_reaction_rates[rxn], 
-                                                           dnet_rate_dT[rxn], 
-                                                           dnet_rate_dX_s[rxn] );
+	this->reaction(rxn)->compute_rate_of_progress_and_derivatives( molar_densities, _chem_mixture, 
+                                                                       T,P0_RT,h_RT_minus_s_R,dh_RT_minus_s_R_dT,
+                                                                       net_reaction_rates[rxn], 
+                                                                       dnet_rate_dT[rxn], 
+                                                                       dnet_rate_dX_s[rxn] );
       }
     
     return;

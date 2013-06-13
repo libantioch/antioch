@@ -289,7 +289,7 @@ namespace Antioch
             // d/dT rate contributions
             dmass_dT[r_id] -= (static_cast<CoeffType>(r_stoich)*drate_dT);
 
-            // d(.m)/drho_s rate contributions, = d(.x)/dX_s
+            // d(.m)/drho_s rate contributions, = d(.x)/dX_s *M_s/M.
             for (unsigned int s=0; s < this->n_species(); s++)
               {
                 dmass_drho_s[r_id][s] -= (static_cast<CoeffType>(r_stoich)*drate_dX_s[s]);
@@ -313,25 +313,25 @@ namespace Antioch
                 dmass_drho_s[p_id][s] += (static_cast<CoeffType>(p_stoich)*drate_dX_s[s]);
               }
 	  }
-//from _dnet_rate_dX_s to _dnet_rate_drho_s, no need for computations
+//from _dnet_rate_dX_s to _dnet_rate_drho_s
         for (unsigned int s=0; s < this->n_species(); s++)
           {
-             _dnet_rate_drho_s[rxn][s] /= _chem_mixture.M(s);
+             _dnet_rate_drho_s[rxn][s] *= _chem_mixture.M(s);
           }
       }
     
     
-    // finally scale by molar mass
+    // finally scale by molar masses
     for (unsigned int s=0; s < this->n_species(); s++)
       {
 	mass_sources[s] *= _chem_mixture.M(s);
         dmass_dT[s] *= _chem_mixture.M(s);
 
-/*        for (unsigned int t=0; t < this->n_species(); t++)
+        for (unsigned int t=0; t < this->n_species(); t++)
           {
-            dmass_drho_s[s][t] *= _chem_mixture.M(s);
+            dmass_drho_s[s][t] *= _chem_mixture.M(s)/_chem_mixture.M(t);
           }
-*/
+
       }
 
     return;

@@ -194,21 +194,18 @@ class TroeFalloff;
                                                            VectorStateType& dkfwd_dX) const;
 ////
     template <typename StateType, typename VectorStateType>
-    void compute_rate_of_progress( const VectorStateType& molar_densities,
-                                   const ChemicalMixture<CoeffType>& chem_mixture,
-                                   const StateType& kfwd,  
-                                   const StateType& kbkwd,
-                                   StateType& net_reaction_rate) const;
+    StateType compute_rate_of_progress( const VectorStateType& molar_densities,
+                                   const StateType& T,  
+                                   const StateType& P0_RT,  
+                                   const VectorStateType& h_RT_minus_s_R) const;
 
     template <typename StateType, typename VectorStateType>
     void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
                                                    const ChemicalMixture<CoeffType>& chem_mixture,
-                                                   const StateType& kfwd, 
-                                                   const StateType& dkfwd_dT,
-                                                   const VectorStateType& dkfwd_dX_s,
-                                                   const StateType& kbkwd,
-                                                   const StateType& dkbkwd_dT,
-                                                   const VectorStateType& dkbkwd_dX_s,
+                                                   const StateType& T,
+                                                   const StateType &P0_RT,
+                                                   const VectorStateType &h_RT_minus_s_R,
+                                                   const VectorStateType &dh_RT_minus_s_R_dT,
                                                    StateType& net_reaction_rate,
                                                    StateType& dnet_rate_dT,
                                                    VectorStateType& dnet_rate_dX_s ) const;
@@ -697,38 +694,32 @@ class TroeFalloff;
   template<typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void Reaction<CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
-                                   const ChemicalMixture<CoeffType>& chem_mixture,
-                                   const StateType& kfwd,  
-                                   const StateType& kbkwd,
-                                   StateType& net_reaction_rate) const
+  StateType Reaction<CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
+                                   const StateType& T,  
+                                   const StateType& P0_RT,  
+                                   const VectorStateType& h_RT_minus_s_R) const
   {
-    StateType kfwd_times_reactants = Antioch::zero_clone(kfwd);
-    StateType kbkwd_times_products = Antioch::zero_clone(kbkwd);
-    // kfwd
-    kfwd_times_reactants = kfwd;
-    kbkwd_times_products = kbkwd;
+    StateType kfwd_times_reactants = compute_forward_rate_coefficient(molar_densities,T);
+    StateType Keq = equilibrium_constant( P0_RT, h_RT_minus_s_R );
+    StateType kbkwd_times_products = kfwd_times_reactants/Keq;
+    // Rfwd
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
-        const StateType val = 
+        kfwd_times_reactants     *= 
           pow( molar_densities[this->reactant_id(ro)],
                static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
-          
-        kfwd_times_reactants     *= val;
-
       }
 
-    // Rbkwd & derivatives
+    // Rbkwd 
     for (unsigned int po=0; po< this->n_products(); po++)
       {
-        const StateType val = 
+        kbkwd_times_products     *= 
           pow( molar_densities[this->product_id(po)],
                static_cast<int>(this->product_stoichiometric_coefficient(po)) );
           
-        kbkwd_times_products     *= val;
       }
 
-      net_reaction_rate = kfwd_times_reactants - kbkwd_times_products;
+      return kfwd_times_reactants - kbkwd_times_products;
 
   }
 
@@ -737,12 +728,10 @@ class TroeFalloff;
   inline
   void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
                                                                       const ChemicalMixture<CoeffType>& chem_mixture,
-                                                                      const StateType& kfwd, 
-                                                                      const StateType& dkfwd_dT,
-                                                                      const VectorStateType& dkfwd_dX_s,
-                                                                      const StateType& kbkwd,
-                                                                      const StateType& dkbkwd_dT,
-                                                                      const VectorStateType& dkbkwd_dX_s,
+                                                                      const StateType& T,
+                                                                      const StateType &P0_RT,
+                                                                      const VectorStateType &h_RT_minus_s_R,
+                                                                      const VectorStateType &dh_RT_minus_s_R_dT,
                                                                       StateType& net_reaction_rate,
                                                                       StateType& dnet_rate_dT,
                                                                       VectorStateType& dnet_rate_dX_s ) const
@@ -750,6 +739,28 @@ class TroeFalloff;
     using std::pow;
 
     antioch_assert_equal_to (molar_densities.size(), this->n_species());
+
+
+    StateType kfwd = Antioch::zero_clone(T);
+    StateType dkfwd_dT = Antioch::zero_clone(T);
+    VectorStateType dkfwd_dX_s = Antioch::zero_clone(molar_densities);
+    VectorStateType dkbkwd_dX_s = Antioch::zero_clone(molar_densities);
+
+    compute_forward_rate_coefficient_and_derivatives(molar_densities, T, kfwd, dkfwd_dT ,dkfwd_dX_s);
+
+    StateType keq = Antioch::zero_clone(T);
+    StateType dkeq_dT = Antioch::zero_clone(T);
+
+    equilibrium_constant_and_derivative( T, P0_RT, h_RT_minus_s_R,
+                                         dh_RT_minus_s_R_dT,
+                                         keq, dkeq_dT );
+
+    const StateType kbkwd = kfwd/keq;
+    const StateType dkbkwd_dT = (dkfwd_dT - kbkwd*dkeq_dT)/keq;
+    for(unsigned int s = 0; s < this->n_species(); s++)
+    {
+      dkbkwd_dX_s[s] = dkfwd_dX_s[s]/keq;
+    }
 
     // If users want to use valarrays, then the output reference sizes
     // had better already match the input value sizes...
@@ -831,10 +842,10 @@ class TroeFalloff;
         Rbkwd     *= val;
         dRbkwd_dT *= val;
 
-	for (unsigned int pi=0; pi<this->n_products(); pi++)
-	  {
-	    dRbkwd_dX_s[this->product_id(pi)] *= (pi == po) ? dval : val;
-	  }
+        for (unsigned int pi=0; pi<this->n_products(); pi++)
+          {
+            dRbkwd_dX_s[this->product_id(pi)] *= (pi == po) ? dval : val;
+          }
         
       }
 
