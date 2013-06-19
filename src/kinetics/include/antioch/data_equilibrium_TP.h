@@ -49,14 +49,12 @@ namespace Antioch
           void fill_constrain(const std::vector<CoeffType> &molar_densities,
                               std::vector<CoeffType> &F,std::vector<std::vector<CoeffType> > &jacob);//constant pressure
 
-
-          const CoeffType local_pressure(const std::vector<CoeffType> &molar_densities) const {return loc_P;}
+          const CoeffType target_pressure() const {return this->_P;}
 
           const unsigned int n_constrain() const {return 1;}
-          void update_constrain(unsigned int icstr, const CoeffType & delta_cstr);//constrain on P
 
      private:
-     CoeffType loc_P;
+     CoeffType loc_sum;
 
 //I don't want it to be used, change it if you want
      DataEquilibriumTP(){}
@@ -67,8 +65,9 @@ namespace Antioch
   inline
   DataEquilibriumTP<CoeffType>::DataEquilibriumTP(const CoeffType &T_mix, const CoeffType &P_mix, 
                     const ReactionSet<CoeffType> &reac_set):
-     DataEquilibrium<CoeffType>(T_mix,P_mix,reac_set),loc_P(P_mix)
+     DataEquilibrium<CoeffType>(T_mix,P_mix,reac_set)
   {
+     loc_sum = this->_P/(Constants::R_universal<CoeffType>() * this->_T);
      return;
   }
 
@@ -91,9 +90,7 @@ namespace Antioch
        antioch_assert_equal_to(jacob[i].size(),this->_reac_set.n_species());
      }
 
-     CoeffType total_dens = Antioch::zero_clone(this->_P);
      CoeffType molar_sum  = Antioch::zero_clone(this->_P);
-     total_dens = loc_P/(Constants::R_universal<CoeffType>()*this->_T);
      jacob.push_back(std::vector<CoeffType>());
      jacob[this->_reac_set.n_species()].resize(this->_reac_set.n_species()+1);
      for(unsigned int i = 0; i < this->_reac_set.n_species(); i++)
@@ -103,15 +100,7 @@ namespace Antioch
         jacob[i].push_back(0.);
      }
      jacob[this->_reac_set.n_species()][this->_reac_set.n_species()] = -1.;
-     F.push_back(molar_sum - total_dens);
-  }
-
-  template<typename CoeffType>
-  inline
-  void DataEquilibriumTP<CoeffType>::update_constrain(unsigned int icstr, const CoeffType &delta_cstr)
-  {
-     antioch_assert_equal_to(icstr,0);
-     loc_P += delta_cstr * Constants::R_universal<CoeffType>() * this->_T;
+     F.push_back(molar_sum - loc_sum);
   }
 
 } // end namespace Antioch
