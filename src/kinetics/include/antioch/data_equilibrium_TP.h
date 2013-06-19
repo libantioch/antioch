@@ -67,7 +67,7 @@ namespace Antioch
   inline
   DataEquilibriumTP<CoeffType>::DataEquilibriumTP(const CoeffType &T_mix, const CoeffType &P_mix, 
                     const ReactionSet<CoeffType> &reac_set):
-     DataEquilibrium<CoeffType>(T_mix,P_mix,reac_set)
+     DataEquilibrium<CoeffType>(T_mix,P_mix,reac_set),loc_P(P_mix)
   {
      return;
   }
