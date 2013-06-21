@@ -30,7 +30,8 @@ echo Configure date................ : $BUILD_DATE
 echo Build architecture............ : $BUILD_ARCH
 echo SVN revision number........... : $BUILD_VERSION
 echo
-echo Optional Packages for Testing:
+echo Testing Options:
+echo '  'Number of tuples............ : $n_tuples
 if test "x$HAVE_EIGEN" = "x1"; then
   echo '  'Eigen....................... : yes
 else
@@ -38,18 +39,34 @@ else
 fi
 if test "x$HAVE_METAPHYSICL" = "x1"; then
   echo '  'MetaPhysicL................. : yes
-  echo '  '  METAPHYSICL_CPPFLAGS...... : $METAPHYSICL_CPPFLAGS
-  echo '  '  METAPHYSICL_LDFLAGS....... : $METAPHYSICL_LDFLAGS
-  echo '  '  METAPHYSICL_LIBS.......... : $METAPHYSICL_LIBS
+  echo '    'METAPHYSICL_CPPFLAGS...... : $METAPHYSICL_CPPFLAGS
+  echo '    'METAPHYSICL_LDFLAGS....... : $METAPHYSICL_LDFLAGS
+  echo '    'METAPHYSICL_LIBS.......... : $METAPHYSICL_LIBS
 else
   echo '  'MetaPhysicL................. : no
 fi
-if test "x$HAVE_THRUST" = "x1"; then
-  echo '  'Thrust...................... : yes
-  echo '  '  THRUST_CPPFLAGS........... : $THRUST_CPPFLAGS
-  echo '  '  THRUST_LDFLAGS............ : $THRUST_LDFLAGS
+if test "x$HAVE_VEXCL" = "x1"; then
+  echo '  'VexCL....................... : yes
+  echo '    'VEXCL_CPPFLAGS............ : $VEXCL_CPPFLAGS
+  echo '    'VEXCL_LDFLAGS............. : $VEXCL_LDFLAGS
+  echo '    'VEXCL_LIBS................ : $VEXCL_LIBS
 else
-  echo '  'Thrust...................... : no
+  echo '  'VexCL....................... : no
+fi
+if test "x$HAVE_VIENNACL" = "x1"; then
+  echo '  'ViennaCL.................... : yes
+  echo '    'VIENNACL_CPPFLAGS......... : $VIENNACL_CPPFLAGS
+  echo '    'VIENNACL_LDFLAGS.......... : $VIENNACL_LDFLAGS
+  echo '    'VIENNACL_LIBS............. : $VIENNACL_LIBS
+else
+  echo '  'ViennaCL.................... : no
+fi
+if test "x$HAVE_GRVY" = "x1"; then
+  echo '  'GRVY........................ : yes
+  echo '    'GRVY_CFLAGS............... : $GRVY_CFLAGS
+  echo '    'GRVY_LIBS................. : $GRVY_LIBS
+else
+  echo '  'VexCL....................... : no
 fi
 echo
 echo '-------------------------------------------------------------------------------'

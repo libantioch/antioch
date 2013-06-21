@@ -26,83 +26,111 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_METAPHYSICL_UTILS_H
-#define ANTIOCH_METAPHYSICL_UTILS_H
+#ifndef ANTIOCH_VEXCL_UTILS_H
+#define ANTIOCH_VEXCL_UTILS_H
 
 #ifdef ANTIOCH_METAPROGRAMMING_H
-#  ifndef ANTIOCH_METAPHYSICL_UTILS_DECL_H
-#    error metaphysicl_utils_decl.h must be included before metaprogramming.h
+#  ifndef ANTIOCH_VEXCL_UTILS_DECL_H
+#    error valarray_utils_decl.h must be included before metaprogramming.h
 #  endif
 #endif
 
-#include "antioch_config.h"
+// Antioch
+#include "antioch/metaprogramming.h"
+#include "antioch/antioch_asserts.h"
 
-#include <cstddef> // std::size_t
 
-#ifdef ANTIOCH_HAVE_METAPHYSICL
+#ifdef ANTIOCH_HAVE_VEXCL
 // Though the following implementations are all valid without
-// <metaphysicl/numberarray.h>, successfully using them with
-// MetaPhysicL types requires MetaPhysicL to be included first.
-// Configure-time MetaPhysicL support enforces this constraint but
-// header-only MetaPhysicL may be mixed with header-only Antioch
+// <vexcl/vexcl.hpp>, successfully using them with
+// VexCL types requires VexCL to be included first.
+// Configure-time VexCL support enforces this constraint but
+// header-only VexCL may be mixed with header-only Antioch
 // without configure-time flags.
-#include "metaphysicl/numberarray.h"
+#include "vexcl/vexcl.hpp"
 #else
 // Forward declaration instead
-namespace MetaPhysicL {
-template <std::size_t size, typename T> class NumberArray;
+namespace vex {
+template <typename T> class vector;
+
+template<typename real, class RDC>
+class Reductor;
+
+class MAX;
 }
 #endif
 
-#include "antioch/metaprogramming.h"
 
-// Specializations to match other Antioch workarounds
+namespace std {
+template <typename T>
+inline
+vex::vector<T>
+max(const vex::vector<T>& a,
+    const vex::vector<T>& b)
+#ifdef VEXCL_OPERATIONS_HPP
+{
+  return vex::max(a,b);
+}
+#else
+;
+#endif
+}
+
 
 namespace Antioch
 {
 
-template <std::size_t size, typename T>
+template <typename T>
 inline
 T
-max (const MetaPhysicL::NumberArray<size,T>& in)
+max (const vex::vector<T>& in)
 {
-  using std::max;
-
-  T maxval = in[0];
-  for (std::size_t i = 1; i < size; ++i)
-    maxval = max(maxval, in[i]);
-
-  return maxval;
+  vex::Reductor<double, vex::MAX> max(in.queue_list());
+  return max(in);
 }
 
-template <std::size_t size, typename T>
-struct has_size<MetaPhysicL::NumberArray<size,T> >
+template <typename T>
+struct has_size<vex::vector<T> >
 {
   static const bool value = true;
 };
 
-template <std::size_t size, typename T>
-struct size_type<MetaPhysicL::NumberArray<size,T> >
+template <typename T>
+struct size_type<vex::vector<T> >
 {
   typedef std::size_t type;
 };
 
-template <std::size_t size, typename T>
-struct value_type<MetaPhysicL::NumberArray<size,T> >
+template <typename T>
+struct value_type<vex::vector<T> >
 {
-  typedef MetaPhysicL::NumberArray<size,T> container_type;
+  typedef vex::vector<T> container_type;
   typedef T type;
   typedef typename value_type<T>::raw_type raw_type;
 };
 
-template <std::size_t size, typename T>
+template <typename T>
 inline
-MetaPhysicL::NumberArray<size,T>
-zero_clone(const MetaPhysicL::NumberArray<size,T>& example)
+vex::vector<T>
+zero_clone(const vex::vector<T>& example)
 {
-  return 0;
+  vex::vector<T> returnval(example.queue_list(), example.size());
+  returnval.clear();
+  return returnval;
 }
+
+
+template <typename T>
+inline
+void
+init_clone(vex::vector<T>& output, const vex::vector<T>& example)
+{
+  output.resize(example.size());
+  output = example;
+}
+
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_METAPHYSICL_UTILS_H
+
+#endif //ANTIOCH_VEXCL_UTILS_H

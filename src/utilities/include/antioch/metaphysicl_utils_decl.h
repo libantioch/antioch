@@ -35,6 +35,8 @@
 
 #include "antioch_config.h"
 
+#include <cstddef> // std::size_t
+
 #ifdef ANTIOCH_HAVE_METAPHYSICL
 // Though the following implementations are all valid without
 // <metaphysicl/numberarray.h>, successfully using them with

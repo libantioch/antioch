@@ -26,8 +26,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_VALARRAY_UTILS_DECL_H
-#define ANTIOCH_VALARRAY_UTILS_DECL_H
+#ifndef ANTIOCH_VEXCL_UTILS_DECL_H
+#define ANTIOCH_VEXCL_UTILS_DECL_H
 
 #ifdef ANTIOCH_METAPROGRAMMING_H
 #  error valarray_utils_decl.h must be included before metaprogramming.h
@@ -36,31 +36,29 @@
 // Antioch
 #include "antioch/metaprogramming_decl.h"
 
-// C++
-#include <iostream>
-#include <valarray>
+#ifdef ANTIOCH_HAVE_VEXCL
+// Though the following implementations are all valid without
+// <vexcl/vexcl.hpp>, successfully using them with
+// VexCL types requires VexCL to be included first.
+// Configure-time VexCL support enforces this constraint but
+// header-only VexCL may be mixed with header-only Antioch
+// without configure-time flags.
+#include "vexcl/vexcl.hpp"
+#else
+// Forward declaration instead
+namespace vex {
+template <typename T> class vector;
+}
+#endif
 
-// Add some overloads that are blatantly missing from the std:: namespace
 
-namespace std
-{
-
+namespace std {
 template <typename T>
 inline
-std::ostream&
-operator<< (std::ostream& output, const std::valarray<T>& a);
-
-template <typename T, typename T2>
-inline
-std::valarray<T>
-pow (const std::valarray<T>& in, const T2& n);
-
-template <typename T>
-inline
-std::valarray<T>
-max (const std::valarray<T>& a, const std::valarray<T>& b);
-
-} // end namespace std
+vex::vector<T>
+max(const vex::vector<T>& a,
+    const vex::vector<T>& b);
+}
 
 
 namespace Antioch
@@ -69,28 +67,28 @@ namespace Antioch
 template <typename T>
 inline
 T
-max (const std::valarray<T>& in);
+max (const vex::vector<T>& in);
 
 template <typename T>
-struct has_size<std::valarray<T> >;
+struct has_size<vex::vector<T> >;
 
 template <typename T>
-struct size_type<std::valarray<T> >;
+struct size_type<vex::vector<T> >;
 
 template <typename T>
-struct value_type<std::valarray<T> >;
+struct value_type<vex::vector<T> >;
 
 template <typename T>
 inline
-std::valarray<T>
-zero_clone(const std::valarray<T>& example);
+vex::vector<T>
+zero_clone(const vex::vector<T>& example);
 
 template <typename T>
 inline
 void
-init_clone(std::valarray<T>& output, const std::valarray<T>& example);
+init_clone(vex::vector<T>& output, const vex::vector<T>& example);
 
 } // end namespace Antioch
 
 
-#endif //ANTIOCH_VALARRAY_UTILS_DECL_H
+#endif //ANTIOCH_VEXCL_UTILS_DECL_H

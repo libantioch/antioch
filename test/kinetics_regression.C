@@ -99,8 +99,6 @@ int tester(const std::string& input_name)
   kinetics.compute_mass_sources_and_derivs( T, Y, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                             omega_dot_2, domega_dot_dT, domega_dot_drho_s );
 
-  std::vector<std::vector<Scalar> > LM,PM,NM;
-
   for( unsigned int s = 0; s < n_species; s++)
     {
       std::cout << std::scientific << std::setprecision(16)
@@ -133,7 +131,7 @@ int tester(const std::string& input_name)
     
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error = std::fabs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = abs( (omega_dot[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
         {
           return_flag = 1;
@@ -142,7 +140,7 @@ int tester(const std::string& input_name)
  
   for( unsigned int s = 0; s < n_species; s++)
     {
-      const Scalar rel_error = std::fabs( (omega_dot_2[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      const Scalar rel_error = abs( (omega_dot_2[s] - omega_dot_reg[s])/omega_dot_reg[s]);
       if( rel_error > tol )
         {
           return_flag = 1;

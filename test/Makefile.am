@@ -37,10 +37,6 @@ check_PROGRAMS += wilke_transport_unit
 check_PROGRAMS += wilke_transport_vec_unit
 check_PROGRAMS += constant_lewis_unit
 
-if THRUST_ENABLED
-check_PROGRAMS += kinetics_unit_thrust
-endif
-
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
 endif
@@ -54,6 +50,9 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
+
+AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
+LIBS = $(antioch_optional_test_LIBS)
 
 LDADD = $(top_builddir)/src/libantioch.la
 
@@ -91,14 +90,6 @@ eucken_thermal_cond_unit_SOURCES = eucken_thermal_cond_unit.C
 wilke_transport_unit_SOURCES = wilke_transport_unit.C
 wilke_transport_vec_unit_SOURCES = wilke_transport_vec_unit.C
 constant_lewis_unit_SOURCES = constant_lewis_unit.C
-
-if THRUST_ENABLED
-kinetics_unit_thrust_SOURCES = kinetics_unit_thrust.cu
-kinetics_unit_thrust_LDADD = $(THRUST_LIBS)
-kinetics_unit_thrust_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
-        $(CXXFLAGS) $(THRUST_LDFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@ $(LDADD)
-endif
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -142,15 +133,6 @@ TESTS += constant_lewis_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
-endif
-
-if THRUST_ENABLED
-TESTS += kinetics_unit_thrust_air_5sp.sh
-
-SUFFIXES = .cu
-
-.cu.o:
-	$(THRUST_CXX) $(AM_CPPFLAGS) $(THRUST_CPPFLAGS) -c -o $@ $<
 endif
 
 CLEANFILES =
