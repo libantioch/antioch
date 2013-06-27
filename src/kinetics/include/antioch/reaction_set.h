@@ -264,7 +264,7 @@ namespace Antioch
         StateType dkfwd_dT = Antioch::zero_clone(T);
         reaction.forward_rate().rate_and_derivative( T, kfwd, dkfwd_dT );
 
-	StateType keq = Antioch::zero_clone(T);
+  	StateType keq = Antioch::zero_clone(T);
         StateType dkeq_dT = Antioch::zero_clone(T);
 
         reaction.equilibrium_constant_and_derivative( T, P0_RT, h_RT_minus_s_R,
@@ -279,6 +279,7 @@ namespace Antioch
                                                            net_reaction_rates[rxn], 
                                                            dnet_rate_dT[rxn], 
                                                            dnet_rate_drho_s[rxn] );
+        
       }
     
     return;

@@ -29,6 +29,7 @@
 
 //C++
 #include <vector>
+#include <string>
 
 namespace Antioch
 {
@@ -42,19 +43,25 @@ namespace Antioch
   {
      public:
           DataEquilibrium(const CoeffType &T_mix, const CoeffType &P_mix, 
-                    const ReactionSet<CoeffType> &reac_set);
+                    const ReactionSet<CoeffType> &reac_set, const std::string &key = std::string());
           virtual ~DataEquilibrium();
 
-          virtual void fill_constrain(const std::vector<CoeffType> &molar_densities,
-                                        std::vector<CoeffType> &F,std::vector<std::vector<CoeffType> > &jacob){return;}// no constrain here
+          void fill_constrain(const std::vector<CoeffType> &molar_densities,
+                                        std::vector<CoeffType> &F,std::vector<std::vector<CoeffType> > &jacob);
+
+          void set_constrain(const std::string &key);
 
           const CoeffType T() const {return _T;}
           const CoeffType P() const {return _P;}
-          virtual const CoeffType local_pressure(const std::vector<CoeffType> &molar_densities) const; //no contrain on P, ideal gas
-          const ReactionSet<CoeffType> reaction_set() const {return _reac_set;}
+          const CoeffType local_pressure(const std::vector<CoeffType> &molar_densities) const; 
+          const ReactionSet<CoeffType> &reaction_set() const {return _reac_set;}
 
-          virtual const unsigned int n_constrain() const {return 0;}
-          virtual void update_constrain(unsigned int icstr, const CoeffType &delta_cstr) {return;} //no constrain
+          const unsigned int n_constrain() const {return _n_constrain;}
+          void update_constrain(unsigned int icstr, const CoeffType &delta_cstr);
+
+          void set_mass(const CoeffType &m) {_fixed_mass = m;}
+          void set_T(const CoeffType &t)    {_T = t;}
+          void set_P(const CoeffType &p)    {_P = p;}
 
 
      protected:
@@ -65,15 +72,26 @@ namespace Antioch
      private:
 //I don't want it to be used, change it if you want
      DataEquilibrium(){return;}
+
+
+     CoeffType _fixed_pressure;
+     CoeffType _fixed_mass;
+     unsigned int m_constrain;
+     unsigned int a_constrain;
+     unsigned int p_constrain;
+     unsigned int _n_constrain;
+
   };
 
 
   template<typename CoeffType>
   inline
   DataEquilibrium<CoeffType>::DataEquilibrium(const CoeffType &T_mix, const CoeffType &P_mix, 
-                    const ReactionSet<CoeffType> &reac_set):
-     _T(T_mix),_P(P_mix),_reac_set(reac_set)
+                    const ReactionSet<CoeffType> &reac_set, const std::string &key):
+     _T(T_mix),_P(P_mix),_reac_set(reac_set),m_constrain(0),a_constrain(0),p_constrain(0),_n_constrain(0)
   {
+     _fixed_pressure = this->_P/(Constants::R_universal<CoeffType>() * this->_T);
+     set_constrain(key);
      return;
   }
 
@@ -83,6 +101,19 @@ namespace Antioch
   {
     return;
   }
+
+
+  template<typename CoeffType>
+  inline
+  void DataEquilibrium<CoeffType>::set_constrain(const std::string &key)
+  {
+     if(key.find("m") != std::string::npos)m_constrain = 1;
+     if(key.find("a") != std::string::npos)a_constrain = 1;
+     if(key.find("p") != std::string::npos)p_constrain = 1;
+     _n_constrain = key.length();
+     return;
+  }
+
 
   template<typename CoeffType>
   inline
@@ -96,6 +127,50 @@ namespace Antioch
         sum_mol += molar_densities[i];
      }
      return (sum_mol * this->_T * Constants::R_universal<CoeffType>());
+  }
+
+  template<typename CoeffType>
+  inline
+  void DataEquilibrium<CoeffType>::fill_constrain(const std::vector<CoeffType> &molar_densities,std::vector<CoeffType> &F, std::vector<std::vector<CoeffType> > &jacob)
+  {
+     if(m_constrain)
+     {
+       antioch_assert_equal_to(F.size(),jacob.size());
+       for(unsigned int i = 0; i < F.size(); i++)
+       {
+         antioch_assert_equal_to(jacob[i].size(),F.size());
+       }
+
+       CoeffType mass_sum  = Antioch::zero_clone(this->_P);
+       jacob.push_back(std::vector<CoeffType>(F.size()+1,0.));
+       for(unsigned int i = 0; i < this->_reac_set.n_species(); i++)
+       {
+          mass_sum += molar_densities[i] * this->_reac_set.chemical_mixture().M(i);
+          jacob.back()[i] = 1.;
+          jacob[i].push_back(0.);
+       }
+       jacob.back().back() = -1.;
+       F.push_back(mass_sum - _fixed_mass);
+     }
+     if(p_constrain)
+     {
+       antioch_assert_equal_to(F.size(),jacob.size());
+       for(unsigned int i = 0; i < F.size(); i++)
+       {
+         antioch_assert_equal_to(jacob[i].size(),F.size());
+       }
+
+       CoeffType molar_sum  = Antioch::zero_clone(this->_P);
+       jacob.push_back(std::vector<CoeffType>(F.size()+1,0.));
+       for(unsigned int i = 0; i < this->_reac_set.n_species(); i++)
+       {
+          molar_sum += molar_densities[i];
+          jacob.back()[i] = 1./this->_reac_set.chemical_mixture().M(i);
+          jacob[i].push_back(0.);
+       }
+       jacob.back().back() = -1.;
+       F.push_back(molar_sum - _fixed_pressure);
+     }
   }
 
 } // end namespace Antioch

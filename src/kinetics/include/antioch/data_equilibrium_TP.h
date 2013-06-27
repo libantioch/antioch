@@ -83,23 +83,21 @@ namespace Antioch
   void DataEquilibriumTP<CoeffType>::fill_constrain(const std::vector<CoeffType> &molar_densities,std::vector<CoeffType> &F, std::vector<std::vector<CoeffType> > &jacob)
   {
 
-     antioch_assert_equal_to(F.size(),this->_reac_set.n_species());
-     antioch_assert_equal_to(jacob.size(),this->_reac_set.n_species());
-     for(unsigned int i = 0; i < this->_reac_set.n_species(); i++)
+     antioch_assert_equal_to(F.size(),jacob.size());
+     for(unsigned int i = 0; i < this->_reac_set.n_species()+1; i++)
      {
-       antioch_assert_equal_to(jacob[i].size(),this->_reac_set.n_species());
+       antioch_assert_equal_to(jacob[i].size(),F.size());
      }
 
      CoeffType molar_sum  = Antioch::zero_clone(this->_P);
-     jacob.push_back(std::vector<CoeffType>());
-     jacob[this->_reac_set.n_species()].resize(this->_reac_set.n_species()+1);
+     jacob.push_back(std::vector<CoeffType>(F.size()+1,0.));
      for(unsigned int i = 0; i < this->_reac_set.n_species(); i++)
      {
         molar_sum += molar_densities[i];
-        jacob[this->_reac_set.n_species()][i] = 1./this->_reac_set.chemical_mixture().M(i);
+        jacob.back()[i] = 1./this->_reac_set.chemical_mixture().M(i);
         jacob[i].push_back(0.);
      }
-     jacob[this->_reac_set.n_species()][this->_reac_set.n_species()] = -1.;
+     jacob.back().back() = -1.;
      F.push_back(molar_sum - loc_sum);
   }
 

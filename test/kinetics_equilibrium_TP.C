@@ -48,13 +48,10 @@ int tester(const std::string& input_name)
   using std::abs;
 
   std::vector<std::string> species_str_list;
-  const unsigned int n_species = 5;
+  const unsigned int n_species = 2;
   species_str_list.reserve(n_species);
   species_str_list.push_back( "N2" );
-  species_str_list.push_back( "O2" );
   species_str_list.push_back( "N" );
-  species_str_list.push_back( "O" );
-  species_str_list.push_back( "NO" );
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
@@ -67,15 +64,12 @@ int tester(const std::string& input_name)
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
 
 
-  Antioch::DataEquilibriumTP<Scalar> equil_TP(T, P,reaction_set);
+  Antioch::DataEquilibrium<Scalar> equil_TP(T, P,reaction_set,"p");
 
   std::vector<Scalar> first;
   first.push_back(0.79);
   first.push_back(0.21);
-  first.push_back(0.00);
-  first.push_back(0.00);
-  first.push_back(0.00);
-  Antioch::EquilibriumEvaluator<Scalar> eq_solver_TP(&equil_TP,kinetics,1e-9);
+  Antioch::EquilibriumEvaluator<Scalar> eq_solver_TP(equil_TP,kinetics,1e-9);
 
   eq_solver_TP.first_guess_molar_fraction(first);
   eq_solver_TP.equilibrium();

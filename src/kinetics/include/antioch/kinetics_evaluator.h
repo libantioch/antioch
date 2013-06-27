@@ -268,8 +268,11 @@ namespace Antioch
       {
         Antioch::set_zero(dmass_drho_s[s]);
 
+      for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+        {
         /*! \todo Do we need to really initialize this? */
-        Antioch::set_zero(_dnet_rate_drho_s[s]);
+        Antioch::set_zero(_dnet_rate_drho_s[rxn][s]);
+        }
       }
 
     // compute the requisite reaction rates
