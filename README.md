@@ -31,3 +31,10 @@ evaluation of thermochemistry quantities. In particular, Antioch currently can s
 Building Antioch
 ================
 
+Antioch uses an Autotools build system, so typical GNU build commands are used.
+
+1. ./bootstrap (generate configure script)
+2. ./configure --prefix=/path/to/install (for more options, do ./configure --help)
+3. make (note parallel builds are supported)
+4. make check (note parallel-tests are supported)
+5. make install
