@@ -69,11 +69,11 @@ int tester(const std::string& input_name)
   Antioch::DataEquilibrium<Scalar> equil(T, P,reaction_set);
 
   std::vector<Scalar> first;
-  first.push_back(0.2);
-  first.push_back(0.2);
-  first.push_back(0.2);
-  first.push_back(0.2);
-  first.push_back(0.2);
+  first.push_back(0.79);
+  first.push_back(0.21);
+  first.push_back(0.0);
+  first.push_back(0.0);
+  first.push_back(0.0);
 
   Antioch::EquilibriumEvaluator<Scalar> eq_solver(equil,kinetics);
 
