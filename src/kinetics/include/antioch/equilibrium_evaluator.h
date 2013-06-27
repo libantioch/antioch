@@ -46,7 +46,7 @@ namespace Antioch
   class EquilibriumEvaluator
   {
      public:
-      EquilibriumEvaluator(DataEquilibrium<CoeffType> &data_eq,KineticsEvaluator<CoeffType,StateType>&kin, const double tol = std::numeric_limits<double>::epsilon() * 1000);
+      EquilibriumEvaluator(DataEquilibrium<CoeffType> &data_eq,KineticsEvaluator<CoeffType,StateType>&kin, const double tol = 1e-10);
 
       ~EquilibriumEvaluator();
 
@@ -151,16 +151,17 @@ std::cout << "gives\n" << deltaX << std::endl;
      {
         thres += (deltaX(i) > 0.)?deltaX(i):-deltaX(i);
 
-std::cout << data_storage_and_constrain.reaction_set().chemical_mixture().chemical_species()[i]->species() << " (" << minus_function(i) << "): " 
-          << eq_mass[i] << " ** ";
+//std::cout << data_storage_and_constrain.reaction_set().chemical_mixture().chemical_species()[i]->species() << " (" << minus_function(i) << "): " 
+//          << eq_mass[i] << " ** ";
 
         eq_mass[i] += deltaX(i);
         if(eq_mass[i] < 0.)eq_mass[i] = -eq_mass[i];
         eq_molar_densities[i] = eq_mass[i]/data_storage_and_constrain.reaction_set().chemical_mixture().M(i);
-std::cout << eq_mass[i] <<  std::endl;
+//std::cout << eq_mass[i] <<  std::endl;
 /*
         eq_molar_densities[i] += deltaX(i);
         eq_mass[i] = eq_molar_densities[i] * data_storage_and_constrain.reaction_set().chemical_mixture().M(i);
+std::cout << eq_molar_densities[i] <<  std::endl;
 */
         mass_tot += eq_mass[i];
      }
@@ -209,13 +210,13 @@ void EquilibriumEvaluator<CoeffType, StateType>::calculate_function_and_jacobian
   thermo.h_RT_minus_s_R(Cache(data_storage_and_constrain.T()),h_RT_minus_s_R);
 
 //omega_dot & jacobian calculations
-std::cout << "T: " << data_storage_and_constrain.T()<< std::endl;
+/*std::cout << "T: " << data_storage_and_constrain.T()<< std::endl;
 std::cout << "local P: " << cur_P << std::endl;
 std::cout << "rho: " << rho << std::endl;
 std::cout << "R_mix: " << R_mix << std::endl;
 std::cout << "n_species: " << data_storage_and_constrain.reaction_set().n_species() << std::endl;
 std::cout << "n_reaction: " << data_storage_and_constrain.reaction_set().n_reactions() << std::endl;
-   kinetics_eval.compute_mass_sources_and_derivs(data_storage_and_constrain.T(),
+*/   kinetics_eval.compute_mass_sources_and_derivs(data_storage_and_constrain.T(),
                                        rho,
                                        R_mix,
                                        eq_mass_fraction,
@@ -226,23 +227,22 @@ std::cout << "n_reaction: " << data_storage_and_constrain.reaction_set().n_react
                                        dmass_dT,
                                        jacob);
 
-  std::cout << "F size " << F.size() << std::endl << "\t";
+/*  std::cout << "F size " << F.size() << std::endl << "\t";
   for(unsigned int i = 0; i < F.size(); i++)std::cout << F[i] << " ";
   std::cout << std::endl;
-
+*/
 /*
    for(unsigned int i = 0; i < jacob.size(); i++)
    {
-     F[i] /= data_storage_and_constrain->reaction_set().chemical_mixture().M(i);
+     F[i] /= data_storage_and_constrain.reaction_set().chemical_mixture().M(i);
      for(unsigned int j= 0; j < jacob[i].size(); j++)
      {
-         jacob[i][j] /= data_storage_and_constrain->reaction_set().chemical_mixture().M(i)/data_storage_and_constrain->reaction_set().chemical_mixture().M(j);
+         jacob[i][j] /= data_storage_and_constrain.reaction_set().chemical_mixture().M(i)/data_storage_and_constrain.reaction_set().chemical_mixture().M(j);
      }
    }
-
 */
+
    data_storage_and_constrain.fill_constrain(eq_molar_densities,F,jacob); //constrain added
-  std::cout << "filled" << std::endl;
 }
 
 template<typename CoeffType, typename StateType>

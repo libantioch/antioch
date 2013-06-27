@@ -69,7 +69,7 @@ int tester(const std::string& input_name)
   std::vector<Scalar> first;
   first.push_back(0.79);
   first.push_back(0.21);
-  Antioch::EquilibriumEvaluator<Scalar> eq_solver_TP(equil_TP,kinetics,1e-9);
+  Antioch::EquilibriumEvaluator<Scalar> eq_solver_TP(equil_TP,kinetics);
 
   eq_solver_TP.first_guess_molar_fraction(first);
   eq_solver_TP.equilibrium();

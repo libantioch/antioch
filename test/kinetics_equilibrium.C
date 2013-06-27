@@ -47,17 +47,20 @@ int tester(const std::string& input_name)
   using std::abs;
 
   std::vector<std::string> species_str_list;
-  const unsigned int n_species = 2;
+  const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
   species_str_list.push_back( "N2" );
+  species_str_list.push_back( "O2" );
+  species_str_list.push_back( "NO" );
   species_str_list.push_back( "N" );
+  species_str_list.push_back( "O" );
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  const Scalar T = 7000.0;
+  const Scalar T = 1500.0;
   const Scalar P = 1.0e5;
 
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
@@ -66,10 +69,13 @@ int tester(const std::string& input_name)
   Antioch::DataEquilibrium<Scalar> equil(T, P,reaction_set);
 
   std::vector<Scalar> first;
-  first.push_back(0.5);
-  first.push_back(0.5);
+  first.push_back(0.2);
+  first.push_back(0.2);
+  first.push_back(0.2);
+  first.push_back(0.2);
+  first.push_back(0.2);
 
-  Antioch::EquilibriumEvaluator<Scalar> eq_solver(equil,kinetics,1e-9);
+  Antioch::EquilibriumEvaluator<Scalar> eq_solver(equil,kinetics);
 
   eq_solver.first_guess_molar_fraction(first);
   eq_solver.equilibrium();
@@ -116,7 +122,11 @@ int tester(const std::string& input_name)
       sum_dot += (omega_dot[s] > 0.)?omega_dot[s]:-omega_dot[s];
     }
 
-   if(sum_dot > tol)return_flag = 1;
+   if(sum_dot > tol)
+   {
+      return_flag = 1;
+       std::cout << "tolerance is " << tol << " and it is " << sum_dot << std::endl;
+   }
 
    }else
    {

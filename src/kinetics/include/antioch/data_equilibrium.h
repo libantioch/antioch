@@ -88,7 +88,7 @@ namespace Antioch
   inline
   DataEquilibrium<CoeffType>::DataEquilibrium(const CoeffType &T_mix, const CoeffType &P_mix, 
                     const ReactionSet<CoeffType> &reac_set, const std::string &key):
-     _T(T_mix),_P(P_mix),_reac_set(reac_set),m_constrain(0),a_constrain(0),p_constrain(0),_n_constrain(0)
+     _T(T_mix),_P(P_mix),_reac_set(reac_set),m_constrain(1),a_constrain(0),p_constrain(0),_n_constrain(0)
   {
      _fixed_pressure = this->_P/(Constants::R_universal<CoeffType>() * this->_T);
      set_constrain(key);
@@ -142,15 +142,13 @@ namespace Antioch
        }
 
        CoeffType mass_sum  = Antioch::zero_clone(this->_P);
-       jacob.push_back(std::vector<CoeffType>(F.size()+1,0.));
-       for(unsigned int i = 0; i < this->_reac_set.n_species(); i++)
+       for(unsigned int i = 0; i < this->_reac_set.n_species()-1; i++)
        {
           mass_sum += molar_densities[i] * this->_reac_set.chemical_mixture().M(i);
           jacob.back()[i] = 1.;
-          jacob[i].push_back(0.);
        }
-       jacob.back().back() = -1.;
-       F.push_back(mass_sum - _fixed_mass);
+       jacob.back().back() = 1.;
+       F.back() = mass_sum - _fixed_mass;
      }
      if(p_constrain)
      {
