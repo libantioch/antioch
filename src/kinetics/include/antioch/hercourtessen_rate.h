@@ -40,7 +40,7 @@ namespace Antioch
    * \f$ C_f\times T^\eta \f$.
    */
   template<typename CoeffType=double>
-  class HercourtEssenRate:public KineticsType<CoeffType>
+  class HercourtEssenRate : public KineticsType<CoeffType>
   {
   
   public:
@@ -92,7 +92,9 @@ namespace Antioch
       _Tref(Tref)
   {
     using std::pow;
+
     _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+
     return;
   }
 
@@ -118,8 +120,10 @@ namespace Antioch
   void HercourtEssenRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
     using std::pow;
+
     _raw_Cf = Cf;
     _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+
     return;
   }
 
@@ -136,8 +140,10 @@ namespace Antioch
   void HercourtEssenRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
     using std::pow;
+
     _Tref = Tref;
     _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+
     return;
   }
 
@@ -186,8 +192,8 @@ namespace Antioch
   template<typename StateType>
   inline
   void HercourtEssenRate<CoeffType>::rate_and_derivative( const StateType& T,
-						      StateType& rate,
-						      StateType& drate_dT) const
+                                                          StateType& rate,
+                                                          StateType& drate_dT) const
   {
     rate     = (*this)(T);
     drate_dT = rate/T*(_eta);
