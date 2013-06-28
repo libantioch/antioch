@@ -90,14 +90,14 @@ namespace Antioch
         }
         break;
 
-      case KineticsModel::KOOIJ:
+      case(KineticsModel::KOOIJ):
         {
           antioch_assert_equal_to(5,data.size());
           rate = new KooijRate<CoeffType>(data[0],data[1],data[2],data[3],data[4]);//Cf,eta,Ea,Tref,scale
         }
         break;
 
-      case KineticsModel::VANTHOFF:
+      case(KineticsModel::VANTHOFF):
         {
           antioch_assert_equal_to(6,data.size());
           rate = new VantHoffRate<CoeffType>(data[0],data[1],data[2],data[3],data[4],data[5]);//Cf,eta,Ea,D,Tref,scale
