@@ -172,6 +172,8 @@ namespace Antioch
                                                                    StateType &dPr_dT,
                                                                    VectorStateType &dPr_dX ) const
   {
+    using std::pow;
+
     antioch_assert_equal_to(dPr_dX.size(),this->n_species());
 
     //k(T,[M]) = [M] * alpha_0(T) /(1 + [M] * alpha_0(T)/alpha_inf(T)) * F
@@ -201,7 +203,7 @@ namespace Antioch
   {
     StateType Pr = this->Pr(molar_densities,T);
 
-    StateType one(1.);
+    StateType one(1.0L);
 
     return (*this->_forward_rate[1])(T) * Pr /(one + Pr ) * _F(T,Pr);
   }
@@ -225,8 +227,7 @@ namespace Antioch
     this->_forward_rate[0]->compute_rate_and_derivative(T,k0,dk0_dT);
     this->_forward_rate[1]->compute_rate_and_derivative(T,kinf,dkinf_dT);
 
-    StateType one = Antioch::zero_clone(T);
-    one = 1.;
+    StateType one(1.0L);
 
     //Pr
     StateType Pr = Antioch::zero_clone(T);

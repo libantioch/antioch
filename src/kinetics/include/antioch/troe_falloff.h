@@ -203,38 +203,37 @@ namespace Antioch
     StateType ddownPart_dT = Antioch::zero_clone(T);
     StateType f = Antioch::zero_clone(T);
     StateType df_dT = Antioch::zero_clone(T);
+    StateType log10F = Antioch::zero_clone(T);
     StateType logF = Antioch::zero_clone(T);
     StateType dlogF_dT = Antioch::zero_clone(T);
-    //
-    StateType tmp = Antioch::zero_clone(T);
-    StateType tmp2 = Antioch::zero_clone(T);
-    StateType tmp3 = Antioch::zero_clone(T);
-    StateType tmp4 = Antioch::zero_clone(T);
 
     //params and change of variable
     this->Fcent_and_derivatives(T,Fcent,dFcent_dT);
 
     logFcent = Constants::log10_to_log<CoeffType>()*log(Fcent);
-    tmp = log(10.L);
-    dlogFcent_dT = dFcent_dT/(Fcent * tmp);
+    dlogFcent_dT = Constants::log10_to_log<CoeffType>()*dFcent_dT/Fcent;
     logPr = Constants::log10_to_log<CoeffType>()*log(Pr);
-    dlogPr_dT = dPr_dT/(Pr * tmp);
+    dlogPr_dT = Constants::log10_to_log<CoeffType>()*dPr_dT/Pr;
 
     for(unsigned int ip = 0; ip < dlogPr_dX.size(); ip++)
       {
-        dlogPr_dX[ip] = dPr_dX[ip]/(tmp*Pr);
+        dlogPr_dX[ip] = Constants::log10_to_log<CoeffType>()*dPr_dX[ip]/Pr;
       }
 
     //decomposing the equation
-    tmp = 0.67L;
-    upPart = -0.4L - tmp*logFcent + logPr;
-    dupPart_dT = -tmp*dlogFcent_dT + dlogPr_dT;
+    {
+      CoeffType tmp(0.67L);
+      upPart = -0.4L - tmp*logFcent + logPr;
+      dupPart_dT = -tmp*dlogFcent_dT + dlogPr_dT;
+    }
 
     //dupPart_dX = dlogPr_dX
-    tmp2 = 1.1761L;
-    tmp = 0.14L;
-    downPart = 0.806 - tmp2*logFcent - tmp*logPr;
-    ddownPart_dT = - tmp2*dlogFcent_dT - tmp*dlogPr_dT;
+    {
+      CoeffType tmp2(1.1761L);
+      CoeffType tmp(0.14L);
+      downPart = 0.806 - tmp2*logFcent - tmp*logPr;
+      ddownPart_dT = - tmp2*dlogFcent_dT - tmp*dlogPr_dT;
+    }
 
     //ddownPart_dX = -0.14*dlogPr_dX
     f = upPart/downPart;
@@ -242,20 +241,24 @@ namespace Antioch
     //df_dX = dlogPr_dX * f * [1./upPart + 0.14/downPart]
 
     //finally log10F
-    tmp = 2.0L;
-    tmp2 = 10.0L;
-    tmp3 = 1.0L;
-    tmp4 = 0.14L;
-    logF = logFcent / (1.L + f*f);
-    dlogF_dT = dlogFcent_dT / (1.L + f*f) - tmp * df_dT * f * logFcent/( (1.L + f*f) * (1.L + f*f) );
+    {
+      CoeffType tmp(2.0L);
+      CoeffType tmp2(10.0L);
+      CoeffType tmp3(1.0L);
+      CoeffType tmp4(0.14L);
+      
+      log10F = logFcent / (1.L + f*f);
+      logF = CoeffType(1.0/std::log10(std::exp(1.0)))*log10F;
+      dlogF_dT = dlogFcent_dT / (1.L + f*f) - tmp * df_dT * f * logFcent/( (1.L + f*f) * (1.L + f*f) );
 
-    //dlogF_dX = - 2. * df_dX * f * logFcent/( (1. + f*f) * (1. + f*f) );
-    F = pow(tmp,logF);
-    dF_dT = dlogF_dT * log(tmp2) * pow(tmp2,logF);
-    for(unsigned int ip = 0; ip < dF_dX.size(); ip++)
-      {
-        dF_dX[ip] = - tmp * dlogPr_dX[ip] * f * (tmp3/upPart + tmp4/downPart) * f * logFcent/( (1.L + f*f) * (1.L + f*f) );
-      }
+      //dlogF_dX = - 2. * df_dX * f * logFcent/( (1. + f*f) * (1. + f*f) );
+      F = exp(logF);
+      dF_dT = dlogF_dT * log(tmp2) * F;
+      for(unsigned int ip = 0; ip < dF_dX.size(); ip++)
+        {
+          dF_dX[ip] = - tmp * dlogPr_dX[ip] * f * (tmp3/upPart + tmp4/downPart) * f * logFcent/( (1.L + f*f) * (1.L + f*f) );
+        }
+    }
 
     return;
   }

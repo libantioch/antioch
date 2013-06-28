@@ -79,9 +79,12 @@ namespace Antioch{
                                                       VectorStateType &dF_dX) const
   {
     //all derived are 0
-    dF_dT = 0.;
+    set_zero(dF_dT);
     antioch_assert_equal_to(dF_dX.size(),n_spec);
-    std::fill( dF_dX.begin(),  dF_dX.end(),  0.);    
+    
+    set_zero(dF_dX);
+    //std::fill( dF_dX.begin(),  dF_dX.end(),  CoeffType(0.));
+
     return;
   }
 
