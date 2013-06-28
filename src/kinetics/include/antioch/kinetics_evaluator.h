@@ -185,23 +185,23 @@ namespace Antioch
     // compute the actual mass sources in kmol/sec/m^3
     for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-	const Reaction<CoeffType>* reaction = this->_reaction_set.reaction(rxn);
+	const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
 	const StateType rate = _net_reaction_rates[rxn];
 	
 	// reactant contributions
-	for (unsigned int r = 0; r < reaction->n_reactants(); r++)
+	for (unsigned int r = 0; r < reaction.n_reactants(); r++)
 	  {
-	    const unsigned int r_id = reaction->reactant_id(r);
-	    const unsigned int r_stoich = reaction->reactant_stoichiometric_coefficient(r);
+	    const unsigned int r_id = reaction.reactant_id(r);
+	    const unsigned int r_stoich = reaction.reactant_stoichiometric_coefficient(r);
 	    
 	    mass_sources[r_id] -= (static_cast<CoeffType>(r_stoich)*rate);
 	  }
 	
 	// product contributions
-	for (unsigned int p=0; p < reaction->n_products(); p++)
+	for (unsigned int p=0; p < reaction.n_products(); p++)
 	  {
-	    const unsigned int p_id = reaction->product_id(p);
-	    const unsigned int p_stoich = reaction->product_stoichiometric_coefficient(p);
+	    const unsigned int p_id = reaction.product_id(p);
+	    const unsigned int p_stoich = reaction.product_stoichiometric_coefficient(p);
 	    
 	    mass_sources[p_id] += (static_cast<CoeffType>(p_stoich)*rate);
 	  }
@@ -271,7 +271,7 @@ namespace Antioch
     for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
 
-	const Reaction<CoeffType>* reaction = this->_reaction_set.reaction(rxn);
+	const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
 
         /*! \todo Are these going to get optimized out? Should we remove them? */
 	const StateType rate = _net_reaction_rates[rxn];
@@ -279,10 +279,10 @@ namespace Antioch
         const VectorStateType drate_dX_s = _dnet_rate_drho_s[rxn];
 
 	// reactant contributions
-	for (unsigned int r = 0; r < reaction->n_reactants(); r++)
+	for (unsigned int r = 0; r < reaction.n_reactants(); r++)
 	  {
-	    const unsigned int r_id = reaction->reactant_id(r);
-	    const unsigned int r_stoich = reaction->reactant_stoichiometric_coefficient(r);
+	    const unsigned int r_id = reaction.reactant_id(r);
+	    const unsigned int r_stoich = reaction.reactant_stoichiometric_coefficient(r);
 	    
 	    mass_sources[r_id] -= (static_cast<CoeffType>(r_stoich)*rate);
 
@@ -297,10 +297,10 @@ namespace Antioch
 	  }
 	
 	// product contributions
-	for (unsigned int p=0; p < reaction->n_products(); p++)
+	for (unsigned int p=0; p < reaction.n_products(); p++)
 	  {
-	    const unsigned int p_id = reaction->product_id(p);
-	    const unsigned int p_stoich = reaction->product_stoichiometric_coefficient(p);
+	    const unsigned int p_id = reaction.product_id(p);
+	    const unsigned int p_stoich = reaction.product_stoichiometric_coefficient(p);
 	    
 	    mass_sources[p_id] += (static_cast<CoeffType>(p_stoich)*rate);
 

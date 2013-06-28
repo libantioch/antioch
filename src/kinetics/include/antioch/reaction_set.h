@@ -72,7 +72,7 @@ namespace Antioch
     void add_reaction(Reaction<CoeffType>* reaction);
 
     //! \returns a constant reference to reaction \p r.
-    const Reaction<CoeffType>* reaction(const unsigned int r) const;
+    const Reaction<CoeffType>& reaction(const unsigned int r) const;
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
@@ -173,10 +173,10 @@ namespace Antioch
   
   template<typename CoeffType>
   inline
-  const Reaction<CoeffType>* ReactionSet<CoeffType>::reaction(const unsigned int r) const      
+  const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const      
   {
     antioch_assert_less(r, this->n_reactions());
-    return _reactions[r];
+    return *_reactions[r];
   }
 
   template<typename CoeffType>
@@ -230,7 +230,7 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-        net_reaction_rates[rxn] = this->reaction(rxn)->compute_rate_of_progress(molar_densities,T,P0_RT,h_RT_minus_s_R);
+        net_reaction_rates[rxn] = this->reaction(rxn).compute_rate_of_progress(molar_densities, T, P0_RT, h_RT_minus_s_R);
       }
     
     return;
