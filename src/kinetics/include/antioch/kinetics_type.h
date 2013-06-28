@@ -34,29 +34,34 @@
 
 namespace Antioch{
 
-template <typename CoeffType>
-class HercourtEssenRate;
-template <typename CoeffType>
-class BerthelotRate;
-template <typename CoeffType>
-class ArrheniusRate;
-template <typename CoeffType>
-class BerthelotHercourtEssenRate;
-template <typename CoeffType>
-class KooijRate;
-template <typename CoeffType>
-class VantHoffRate;
+  template <typename CoeffType>
+  class HercourtEssenRate;
 
-/*!
- *
- * \class KineticsType
- * \brief base class for kinetics models
- */
-template <typename CoeffType>
-class KineticsType{
-   public:
-      KineticsType(const KineticsModel::KineticsModel type);
-      virtual ~KineticsType();
+  template <typename CoeffType>
+  class BerthelotRate;
+
+  template <typename CoeffType>
+  class ArrheniusRate;
+
+  template <typename CoeffType>
+  class BerthelotHercourtEssenRate;
+
+  template <typename CoeffType>
+  class KooijRate;
+
+  template <typename CoeffType>
+  class VantHoffRate;
+
+  /*!
+   *
+   * \class KineticsType
+   * \brief base class for kinetics models
+   */
+  template <typename CoeffType>
+  class KineticsType{
+  public:
+    KineticsType(const KineticsModel::KineticsModel type);
+    virtual ~KineticsType();
 
     //!\return error because I cannot make it pure virtual.
     template <typename StateType>
@@ -82,9 +87,9 @@ class KineticsType{
       return os;
     }
 
-   private:
-   KineticsModel::KineticsModel my_type;
-};
+  private:
+    KineticsModel::KineticsModel my_type;
+  };
 
   /* ------------------------- Inline Functions -------------------------*/
   template <typename CoeffType>
@@ -99,14 +104,14 @@ class KineticsType{
   KineticsType<CoeffType>::KineticsType(const KineticsModel::KineticsModel type):
     my_type(type)
   {
-      return;
+    return;
   }
 
   template <typename CoeffType>
   inline
   KineticsType<CoeffType>::~KineticsType()
   {
-     return;
+    return;
   }
 
   template <typename CoeffType>
@@ -114,7 +119,7 @@ class KineticsType{
   inline
   StateType KineticsType<CoeffType>::operator()(const StateType& T) const
   {
-      switch (my_type) 
+    switch (my_type) 
       {
       case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate(T);
@@ -145,7 +150,7 @@ class KineticsType{
   inline
   StateType KineticsType<CoeffType>::derivative( const StateType& T ) const
   {
-      switch (my_type) 
+    switch (my_type) 
       {
       case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::derivative(T);
@@ -176,7 +181,7 @@ class KineticsType{
   inline
   void KineticsType<CoeffType>::compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
   {
-      switch (my_type) 
+    switch (my_type) 
       {
       case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
