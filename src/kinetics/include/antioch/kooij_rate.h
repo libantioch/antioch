@@ -42,7 +42,7 @@ namespace Antioch
    * the \p FIN-S code and slightly reformatted for \p Antioch.
    */
   template<typename CoeffType=double>
-  class KooijRate: public KineticsType<CoeffType>
+  class KooijRate : public KineticsType<CoeffType>
   {
   
   public:
@@ -104,8 +104,10 @@ namespace Antioch
       _rscale(rscale)
   {
     using std::pow;
+
     _Ea = _raw_Ea / _rscale;
     _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+
     return;
   }
 
@@ -132,8 +134,10 @@ namespace Antioch
   void KooijRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
     using std::pow;
+
     _raw_Cf = Cf;
     _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+
     return;
   }
 
@@ -142,8 +146,10 @@ namespace Antioch
   void KooijRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
     using std::pow;
+
     _Tref = Tref;
     _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+
     return;
   }
 
@@ -215,6 +221,7 @@ namespace Antioch
   {
     using std::pow;
     using std::exp;
+
     return _Cf* (pow(T,_eta)*exp(-_Ea/T));
   }
 
@@ -230,11 +237,12 @@ namespace Antioch
   template<typename StateType>
   inline
   void KooijRate<CoeffType>::rate_and_derivative( const StateType& T,
-						      StateType& rate,
-						      StateType& drate_dT) const
+                                                  StateType& rate,
+                                                  StateType& drate_dT) const
   {
     rate     = (*this)(T);
     drate_dT = rate/T*(_eta + _Ea/T);
+
     return;
   }
 
