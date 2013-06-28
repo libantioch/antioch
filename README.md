@@ -1,7 +1,7 @@
 Antioch
 =======
 
-A New Templated Instantiation Of Chemistry for Hydrodynamics (Antioch) was initiated 
+A New Templated Implementation Of Chemistry for Hydrodynamics (Antioch) was initiated 
 to centralize work by some of the Antioch authors within the realm of hypersonic 
 aerodynamics, based on the [libMesh](https://github.com/libMesh/libmesh.git) finite 
 element library. In particular, although there exist C++ chemistry libraries, such 
