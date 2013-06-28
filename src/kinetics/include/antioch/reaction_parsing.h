@@ -41,53 +41,56 @@ namespace Antioch
 {
 
   template<typename CoeffType>
-  Reaction<CoeffType> * get_reaction_ptr( const unsigned int n_species, 
-                                          const std::string &equation, 
-                                          const ReactionType::ReactionType &type , 
-                                          const KineticsModel::KineticsModel &kin );
+  Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
+                                       const std::string& equation, 
+                                       const ReactionType::ReactionType& type , 
+                                       const KineticsModel::KineticsModel& kin );
 
   template<typename CoeffType>
   inline
-  Reaction<CoeffType> * get_reaction_ptr( const unsigned int n_species, 
-                                          const std::string &equation, 
-                                          const ReactionType::ReactionType &type , 
-                                          const KineticsModel::KineticsModel &kin )
+  Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
+                                       const std::string& equation, 
+                                       const ReactionType::ReactionType& type , 
+                                       const KineticsModel::KineticsModel& kin )
   {
-     switch(type)
-     {
-       case ReactionType::ELEMENTARY:
-       {
-        ElementaryReaction<CoeffType> * Ereac = new ElementaryReaction<CoeffType>(n_species,equation,kin);
-        return static_cast<Reaction<CoeffType>*> (Ereac);
+    Reaction<CoeffType>* reaction = NULL;
+
+    switch(type)
+      {
+      case(ReactionType::ELEMENTARY):
+        {
+          reaction = new ElementaryReaction<CoeffType>(n_species,equation,kin);
+        }
         break;
-       }
-       case ReactionType::DUPLICATE:
-       {
-        DuplicateReaction<CoeffType> * Dreac = new DuplicateReaction<CoeffType>(n_species,equation,kin);
-        return static_cast<Reaction<CoeffType>*> (Dreac);
+
+      case(ReactionType::DUPLICATE):
+        {
+          reaction = new DuplicateReaction<CoeffType>(n_species,equation,kin);
+        }
         break;
-       }
-       case ReactionType::THREE_BODY:
-       {
-        ThreeBodyReaction<CoeffType> * TBreac = new ThreeBodyReaction<CoeffType>(n_species,equation,kin);
-        return static_cast<Reaction<CoeffType>*> (TBreac);
+
+      case(ReactionType::THREE_BODY):
+        {
+          reaction = new ThreeBodyReaction<CoeffType>(n_species,equation,kin);
+        }
         break;
-       }
-       case ReactionType::LINDEMANN_FALLOFF:
-       {
-       case ReactionType::TROE_FALLOFF:
-       {
-        FalloffReaction<CoeffType> * Freac = new FalloffReaction<CoeffType>(n_species,equation,type,kin);
-        return static_cast<Reaction<CoeffType>*> (Freac);
+
+      case(ReactionType::LINDEMANN_FALLOFF):
+      case(ReactionType::TROE_FALLOFF):
+        {
+          reaction = new FalloffReaction<CoeffType>(n_species,equation,type,kin);
+        }
         break;
-       }
-       }
-       default:
-       {
-        antioch_error();
-        break;
-       }
-     }
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(type)
+    
+    // Dummy
+    return reaction;
   }
 
 } // end namespace Antioch

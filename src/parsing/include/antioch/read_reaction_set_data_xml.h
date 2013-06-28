@@ -117,7 +117,7 @@ namespace Antioch
 	  }
 	    
 	// construct a Reaction object	  
-	Reaction<NumericType> *my_rxn = get_reaction_ptr<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
+	Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
 
 	tinyxml2::XMLElement *Arrhenius = reaction->FirstChildElement("rateCoeff")->FirstChildElement("Arrhenius");
 
