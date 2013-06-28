@@ -47,7 +47,10 @@ namespace Antioch
   
   public:
 
-    VantHoffRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0., const CoeffType D=0., const CoeffType Tref = 1., const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
+    VantHoffRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0.,
+                  const CoeffType D=0., const CoeffType Tref = 1.,
+                  const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
+
     ~VantHoffRate();
     
     void set_Cf(    const CoeffType Cf );
@@ -107,6 +110,7 @@ namespace Antioch
       _rscale(rscale)
   {
     using std::pow;
+
     _Ea = _raw_Ea / _rscale;
     _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
@@ -135,6 +139,7 @@ namespace Antioch
   void VantHoffRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
     using std::pow;
+
     _raw_Cf = Cf;
     _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
@@ -145,6 +150,7 @@ namespace Antioch
   void VantHoffRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
     using std::pow;
+
     _Tref = Tref;
     _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
@@ -217,6 +223,7 @@ namespace Antioch
   {
     using std::pow;
     using std::exp;
+
     return _Cf* (pow(T,_eta)*exp(-_Ea/T + _D*T));
   }
 
@@ -227,6 +234,7 @@ namespace Antioch
   {
     using std::pow;
     using std::exp;
+
     return _Cf* (pow(T,_eta)*exp(-_Ea/T + _D*T));
   }
 
@@ -242,8 +250,8 @@ namespace Antioch
   template<typename StateType>
   inline
   void VantHoffRate<CoeffType>::rate_and_derivative( const StateType& T,
-						      StateType& rate,
-						      StateType& drate_dT) const
+                                                     StateType& rate,
+                                                     StateType& drate_dT) const
   {
     rate     = (*this)(T);
     drate_dT = rate*(_D + _eta/T + _Ea/(T*T));
