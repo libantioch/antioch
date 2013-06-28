@@ -305,11 +305,12 @@ namespace Antioch
     lossMatrix.resize(this->n_species());
     prodMatrix.resize(this->n_species());
     netMatrix.resize(this->n_species());
-    for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+
+    for(unsigned int s = 0; s < this->n_species(); s++)
       {
-        lossMatrix[rxn].resize(this->n_reactions(),0.);
-        prodMatrix[rxn].resize(this->n_reactions(),0.);
-        netMatrix[rxn].resize(this->n_reactions(),0.);
+        lossMatrix[s].resize(this->n_reactions(),0.);
+        prodMatrix[s].resize(this->n_reactions(),0.);
+        netMatrix[s].resize(this->n_reactions(),0.);
       }
     
 
