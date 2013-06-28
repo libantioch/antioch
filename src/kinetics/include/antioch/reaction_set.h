@@ -98,7 +98,8 @@ namespace Antioch
 
     //!
     template <typename StateType, typename VectorStateType>
-    void print_chemical_scheme( const StateType& T,
+    void print_chemical_scheme( std::ostream& output,
+                                const StateType& T,
                                 const VectorStateType& mass_fractions,
                                 const VectorStateType& molar_densities,
                                 const VectorStateType& h_RT_minus_s_R ,
@@ -285,17 +286,19 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void ReactionSet<CoeffType>::print_chemical_scheme( const StateType& T,
+  void ReactionSet<CoeffType>::print_chemical_scheme( std::ostream& output,
+                                                      const StateType& T,
                                                       const VectorStateType& mass_fractions,
                                                       const VectorStateType& molar_densities,
                                                       const VectorStateType& h_RT_minus_s_R,
-                                                      std::vector<VectorStateType> &lossMatrix,
-                                                      std::vector<VectorStateType> &prodMatrix,
-                                                      std::vector<VectorStateType> &netMatrix) const
+                                                      std::vector<VectorStateType>& lossMatrix,
+                                                      std::vector<VectorStateType>& prodMatrix,
+                                                      std::vector<VectorStateType>& netMatrix ) const
   {
 
     //filling matrixes
     VectorStateType netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC;
+
     //getting reaction infos
     get_reactive_scheme(T,mass_fractions,molar_densities,h_RT_minus_s_R,netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC);
 
@@ -328,129 +331,128 @@ namespace Antioch
           }
       }
 
-    std::ofstream meca("chemical_scheme.log");
     //explanation of header
-    meca << "# molar units considered for those budgets (kmol, m3, s)" << std::endl;
-    meca << "# formatted as follow:" << std::endl;
-    meca << "# rows: species, columns: reactions" << std::endl;
-    meca << "#" << std::endl;
-    meca << "#         |                        equation" << std::endl;
-    meca << "#         |  rate coefficient forward , rate coefficient backward" << std::endl;
-    meca << "#         |  forward concentrations   , backward concentrations" << std::endl;
-    meca << "#         |  rate forward             , rate backward" << std::endl;
-    meca << "# ------------------------------------------------------------------" << std::endl;
-    meca << "# species |  production term          ,  loss term" << std::endl;
-    meca << "# species |  net production/loss term" << std::endl;
-    meca << "#" << std::endl << std::endl;
+    output << "# molar units considered for those budgets (kmol, m3, s)" << std::endl;
+    output << "# formatted as follow:" << std::endl;
+    output << "# rows: species, columns: reactions" << std::endl;
+    output << "#" << std::endl;
+    output << "#         |                        equation" << std::endl;
+    output << "#         |  rate coefficient forward , rate coefficient backward" << std::endl;
+    output << "#         |  forward concentrations   , backward concentrations" << std::endl;
+    output << "#         |  rate forward             , rate backward" << std::endl;
+    output << "# ------------------------------------------------------------------" << std::endl;
+    output << "# species |  production term          ,  loss term" << std::endl;
+    output << "# species |  net production/loss term" << std::endl;
+    output << "#" << std::endl << std::endl;
 
 
     //header
     // // equation
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(31) << this->_reactions[rxn]->equation();
+        output << std::setw(31) << this->_reactions[rxn]->equation();
       }
-    meca << std::endl;
+    output << std::endl;
     // // coeffs
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(15) << kfwdCoeff[rxn] << "," << std::setw(15) << kbkwdCoeff[rxn];
+        output << std::setw(15) << kfwdCoeff[rxn] << "," << std::setw(15) << kbkwdCoeff[rxn];
       }
-    meca << std::endl;
+    output << std::endl;
     // // conc
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(15) << fwdC[rxn] << "," << std::setw(15) << bkwdC[rxn];
+        output << std::setw(15) << fwdC[rxn] << "," << std::setw(15) << bkwdC[rxn];
       }
-    meca << std::endl;
+    output << std::endl;
     // // rates
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(15) << kfwd[rxn] << "," << std::setw(15) << kbkwd[rxn];
+        output << std::setw(15) << kfwd[rxn] << "," << std::setw(15) << kbkwd[rxn];
       }
-    meca << std::endl;
-    meca << "----------------------------" << std::endl;
+    output << std::endl;
+    output << "----------------------------" << std::endl;
 
     //species
 
     for(unsigned int isp = 0; isp < this->n_species(); isp++)
       {
-        meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+        output << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
         for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
           {
-            meca << std::setw(15) << std::scientific << std::setprecision(6) << prodMatrix[isp][rxn] << "," 
-                 << std::setw(15) << std::scientific << std::setprecision(6) << lossMatrix[isp][rxn];
+            output << std::setw(15) << std::scientific << std::setprecision(6) << prodMatrix[isp][rxn] << "," 
+                   << std::setw(15) << std::scientific << std::setprecision(6) << lossMatrix[isp][rxn];
           }
-        meca << std::endl;
+        output << std::endl;
         // // net
-        meca << std::setw(10) << "";
+        output << std::setw(10) << "";
         for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
           {
-            meca << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
+            output << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
           }
-        meca << std::endl;
+        output << std::endl;
       }
-    meca << std::endl;
-    meca << std::endl;
-    meca << std::endl;
+    output << std::endl;
+    output << std::endl;
+    output << std::endl;
 
-    meca << "# production table" << std::endl << std::endl;
+    output << "# production table" << std::endl << std::endl;
     //header
     // // equation
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(31) << this->_reactions[rxn]->equation();
+        output << std::setw(31) << this->_reactions[rxn]->equation();
       }
-    meca << std::setw(31) << "Total" << std::endl;
+    output << std::setw(31) << "Total" << std::endl;
     for(unsigned int isp = 0; isp < this->n_species(); isp++)
       {
-        meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+        output << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
         CoeffType rowTotal(0.);
         for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
           {
-            meca << std::setw(31) << std::scientific << std::setprecision(16) << prodMatrix[isp][rxn];
+            output << std::setw(31) << std::scientific << std::setprecision(16) << prodMatrix[isp][rxn];
             rowTotal += prodMatrix[isp][rxn];
           }
-        meca << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
+        output << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
       }
-    meca << std::endl << std::endl;
+    output << std::endl << std::endl;
 
-    meca << "# loss table" << std::endl << std::endl;
+    output << "# loss table" << std::endl << std::endl;
     //header
     // // equation
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(31) << this->_reactions[rxn]->equation();
+        output << std::setw(31) << this->_reactions[rxn]->equation();
       }
-    meca << std::setw(31) << "Total" << std::endl;
+    output << std::setw(31) << "Total" << std::endl;
     for(unsigned int isp = 0; isp < this->n_species(); isp++)
       {
-        meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+        output << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
         CoeffType rowTotal(0.);
         for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
           {
-            meca << std::setw(31) << std::scientific << std::setprecision(16) << lossMatrix[isp][rxn];
+            output << std::setw(31) << std::scientific << std::setprecision(16) << lossMatrix[isp][rxn];
             rowTotal += lossMatrix[isp][rxn];
           }
-        meca << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
+        output << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
       }
-    meca << std::endl << std::endl;
+    output << std::endl << std::endl;
 
-    meca << "# net table" << std::endl << std::endl;
+    output << "# net table" << std::endl << std::endl;
     //header
     // // equation
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(31) << this->_reactions[rxn]->equation();
+        output << std::setw(31) << this->_reactions[rxn]->equation();
       }
-    meca << std::setw(31) << "Total" << std::endl;
+    output << std::setw(31) << "Total" << std::endl;
 
     CoeffType columnTotal(0.);
     std::vector<CoeffType> columnSum;
@@ -459,35 +461,35 @@ namespace Antioch
 
     for(unsigned int isp = 0; isp < this->n_species(); isp++)
       {
-        meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+        output << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
         CoeffType rowTotal(0.);
         for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
           {
-            meca << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
+            output << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
             rowTotal += netMatrix[isp][rxn];
             columnSum[rxn] += netMatrix[isp][rxn];
           }
-        meca << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
+        output << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
         netTotalRow += rowTotal;
       }
-    meca << std::setw(10) << "Total";
+    output << std::setw(10) << "Total";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(31) << std::scientific << std::setprecision(16) << columnSum[rxn];
+        output << std::setw(31) << std::scientific << std::setprecision(16) << columnSum[rxn];
         columnTotal += columnSum[rxn];
       }
-    meca << std::endl << std::endl;
-    meca << "sum of row sums:    " << std::scientific << std::setprecision(16) << netTotalRow << std::endl;
-    meca << "sum of column sums: " << std::scientific << std::setprecision(16) << columnTotal << std::endl << std::endl;
-    meca << "# net table, mass here (kg, m3, s)" << std::endl << std::endl;
+    output << std::endl << std::endl;
+    output << "sum of row sums:    " << std::scientific << std::setprecision(16) << netTotalRow << std::endl;
+    output << "sum of column sums: " << std::scientific << std::setprecision(16) << columnTotal << std::endl << std::endl;
+    output << "# net table, mass here (kg, m3, s)" << std::endl << std::endl;
     //header
     // // equation
-    meca << std::setw(10) << " ";
+    output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(31) << this->_reactions[rxn]->equation();
+        output << std::setw(31) << this->_reactions[rxn]->equation();
       }
-    meca << std::setw(31) << "Total" << std::endl;
+    output << std::setw(31) << "Total" << std::endl;
 
     columnTotal = 0.;
     columnSum.resize(this->n_reactions(),0.);
@@ -495,36 +497,35 @@ namespace Antioch
 
     for(unsigned int isp = 0; isp < this->n_species(); isp++)
       {
-        meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
+        output << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
         CoeffType rowTotal(0.);
         for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
           {
-            meca << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
+            output << std::setw(31) << std::scientific << std::setprecision(16) << netMatrix[isp][rxn];
             rowTotal += netMatrix[isp][rxn] * _chem_mixture.M(isp);
             columnSum[rxn] += netMatrix[isp][rxn] * _chem_mixture.M(isp);
           }
-        meca << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
+        output << std::setw(31) << std::scientific << std::setprecision(16) << rowTotal << std::endl;
         netTotalRow += rowTotal;
       }
-    meca << std::setw(10) << "Total";
+    output << std::setw(10) << "Total";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        meca << std::setw(31) << std::scientific << std::setprecision(16) << columnSum[rxn];
+        output << std::setw(31) << std::scientific << std::setprecision(16) << columnSum[rxn];
         columnTotal += columnSum[rxn];
       }
-    meca << std::endl << std::endl;
+    output << std::endl << std::endl;
 
-    meca << std::endl << std::endl;
-    meca << "# Mixture informations" << std::endl;
-    meca << "# species / concentration / molar mass" << std::endl;
+    output << std::endl << std::endl;
+    output << "# Mixture informations" << std::endl;
+    output << "# species / concentration / molar mass" << std::endl;
     for(unsigned int isp = 0; isp < this->n_species(); isp++)
       {
-        meca << std::setw(10) << _chem_mixture.chemical_species()[isp]->species()
-             << std::setw(31) << molar_densities[isp]
-             << std::setw(31) << _chem_mixture.M(isp) << std::endl;
+        output << std::setw(10) << _chem_mixture.chemical_species()[isp]->species()
+               << std::setw(31) << molar_densities[isp]
+               << std::setw(31) << _chem_mixture.M(isp) << std::endl;
       }
 
-    meca.close();
     return;
   }
 
