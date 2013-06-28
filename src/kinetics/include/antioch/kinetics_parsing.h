@@ -41,8 +41,8 @@ namespace Antioch
 {
 
   template<typename CoeffType>
-  KineticsType<CoeffType>* get_rate_ptr( const std::vector<CoeffType> &data,
-                                         const KineticsModel::KineticsModel &kin );
+  KineticsType<CoeffType>* build_rate( const std::vector<CoeffType> &data,
+                                       const KineticsModel::KineticsModel &kin );
 
 
   //! We take here the parameters as:
@@ -53,60 +53,65 @@ namespace Antioch
   //  We check the number of parameters then initialize.
   template<typename CoeffType>
   inline
-  KineticsType<CoeffType>* get_rate_ptr( const std::vector<CoeffType> &data,
-                                         const KineticsModel::KineticsModel &kin )
+  KineticsType<CoeffType>* build_rate( const std::vector<CoeffType> &data,
+                                       const KineticsModel::KineticsModel &kin )
   {
     using std::pow;
+
+    KineticsType<CoeffType>* rate = NULL;
+
     switch(kin)
       {
-      case KineticsModel::HERCOURT_ESSEN:
+      case(KineticsModel::HERCOURT_ESSEN):
         {
           antioch_assert_equal_to(3,data.size());
-          HercourtEssenRate<CoeffType> * HErate = new HercourtEssenRate<CoeffType>(data[0],data[1],data[2]);//Cf,eta,Tref
-          return static_cast<KineticsType<CoeffType>*> (HErate);
-          break;
+          rate = new HercourtEssenRate<CoeffType>(data[0],data[1],data[2]);//Cf,eta,Tref
         }
-      case KineticsModel::BERTHELOT:
+        break;
+
+      case(KineticsModel::BERTHELOT):
         {
           antioch_assert_equal_to(2,data.size());
-          BerthelotRate<CoeffType> * Brate = new BerthelotRate<CoeffType>(data[0],data[1]);// Cf, D
-          return static_cast<KineticsType<CoeffType>*> (Brate);
-          break;
+          rate = new BerthelotRate<CoeffType>(data[0],data[1]);// Cf, D
         }
-      case KineticsModel::ARRHENIUS:
+        break;
+
+      case(KineticsModel::ARRHENIUS):
         {
           antioch_assert_equal_to(3,data.size());
-          ArrheniusRate<CoeffType> * Arate = new ArrheniusRate<CoeffType>(data[0],data[1],data[2]);//Cf,Ea,scale
-          return static_cast<KineticsType<CoeffType>*> (Arate);
-          break;
+          rate = new ArrheniusRate<CoeffType>(data[0],data[1],data[2]);//Cf,Ea,scale
         }
-      case KineticsModel::BHE:
+        break;
+
+      case(KineticsModel::BHE):
         {
           antioch_assert_equal_to(4,data.size());
-          BerthelotHercourtEssenRate<CoeffType> * BHErate = new BerthelotHercourtEssenRate<CoeffType>(data[0],data[1],data[2],data[3]);//Cf,eta,D,Tref
-          return static_cast<KineticsType<CoeffType>*> (BHErate);
-          break;
+          rate = new BerthelotHercourtEssenRate<CoeffType>(data[0],data[1],data[2],data[3]);//Cf,eta,D,Tref
         }
+        break;
+
       case KineticsModel::KOOIJ:
         {
           antioch_assert_equal_to(5,data.size());
-          KooijRate<CoeffType> * Krate = new KooijRate<CoeffType>(data[0],data[1],data[2],data[3],data[4]);//Cf,eta,Ea,Tref,scale
-          return static_cast<KineticsType<CoeffType>*> (Krate);
-          break;
+          rate = new KooijRate<CoeffType>(data[0],data[1],data[2],data[3],data[4]);//Cf,eta,Ea,Tref,scale
         }
+        break;
+
       case KineticsModel::VANTHOFF:
         {
           antioch_assert_equal_to(6,data.size());
-          VantHoffRate<CoeffType> * VHrate = new VantHoffRate<CoeffType>(data[0],data[1],data[2],data[3],data[4],data[5]);//Cf,eta,Ea,D,Tref,scale
-          return static_cast<KineticsType<CoeffType>*> (VHrate);
-          break;
+          rate = new VantHoffRate<CoeffType>(data[0],data[1],data[2],data[3],data[4],data[5]);//Cf,eta,Ea,D,Tref,scale
         }
+        break;
+
       default:
         {
           antioch_error();
-          break;
         }
-      }
+
+      } // switch(kin)
+
+    return rate;
   }
 
 } // end namespace Antioch

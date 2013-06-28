@@ -148,7 +148,7 @@ namespace Antioch
 	    antioch_error();
 	  }
 
-        KineticsType<NumericType> *rate = get_rate_ptr<NumericType>(data,kineticsModel);
+        KineticsType<NumericType>* rate = build_rate<NumericType>(data,kineticsModel);
 
         my_rxn->add_forward_rate(rate);
 
