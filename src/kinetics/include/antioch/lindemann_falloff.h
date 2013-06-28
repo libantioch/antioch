@@ -29,25 +29,25 @@
 //C++
 
 namespace Antioch{
-/*!\class LindemannFalloff
- *
- * The Lindemann model is the simplest falloff
- * model:
- * \f[
- *     F = 1
- * \f]
- */
-template <typename CoeffType = double>
-class LindemannFalloff{
-     public:
-       LindemannFalloff(const unsigned int nspec);
-       ~LindemannFalloff();
+  /*!\class LindemannFalloff
+   *
+   * The Lindemann model is the simplest falloff
+   * model:
+   * \f[
+   *     F = 1
+   * \f]
+   */
+  template <typename CoeffType = double>
+  class LindemannFalloff{
+  public:
+    LindemannFalloff(const unsigned int nspec);
+    ~LindemannFalloff();
 
-     template <typename StateType>
-     StateType operator()(const StateType& T, const StateType &Pr) const;
+    template <typename StateType>
+    StateType operator()(const StateType& T, const StateType &Pr) const;
 
-     template <typename StateType, typename VectorStateType>
-     void F_and_derivatives(const StateType& T, 
+    template <typename StateType, typename VectorStateType>
+    void F_and_derivatives(const StateType& T, 
                            const StateType &Pr, 
                            const StateType &dPr_dT, 
                            const VectorStateType &dPr_dX,
@@ -55,10 +55,10 @@ class LindemannFalloff{
                            StateType &dF_dT,
                            VectorStateType &dF_dX) const;
 
-    private:
-     unsigned int n_spec;
+  private:
+    unsigned int n_spec;
 
-};
+  };
   template<typename CoeffType>
   template <typename StateType>
   inline
@@ -71,14 +71,14 @@ class LindemannFalloff{
   template <typename StateType, typename VectorStateType>
   inline
   void LindemannFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
-                        const StateType &Pr, 
-                        const StateType &dPr_dT, 
-                        const VectorStateType &dPr_dX,
-                        StateType &dF_dT,
-                        StateType &F,
-                        VectorStateType &dF_dX) const
+                                                      const StateType &Pr, 
+                                                      const StateType &dPr_dT, 
+                                                      const VectorStateType &dPr_dX,
+                                                      StateType &dF_dT,
+                                                      StateType &F,
+                                                      VectorStateType &dF_dX) const
   {
-//all derived are 0
+    //all derived are 0
     dF_dT = 0.;
     antioch_assert_equal_to(dF_dX.size(),n_spec);
     std::fill( dF_dX.begin(),  dF_dX.end(),  0.);    
