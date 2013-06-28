@@ -148,7 +148,7 @@ namespace Antioch
   StateType BerthelotRate<CoeffType>::operator()(const StateType& T) const
   {
     using std::exp;
-    return _Cf* (exp(_D*T));
+    return this->rate(T);
   }
 
   template<typename CoeffType>
