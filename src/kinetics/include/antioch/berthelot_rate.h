@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -24,9 +24,13 @@
 #ifndef ANTIOCH_BERTHELOT_RATE_H
 #define ANTIOCH_BERTHELOT_RATE_H
 
+//Antioch
+#include "antioch/kinetics_type.h"
+
 // C++
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 namespace Antioch
 {
@@ -36,7 +40,7 @@ namespace Antioch
    * \f$ C_f\times \exp(D*T) \f$. 
    */
   template<typename CoeffType=double>
-  class BerthelotRate
+  class BerthelotRate:public KineticsType<CoeffType>
   {
   
   public:
@@ -56,6 +60,10 @@ namespace Antioch
     template <typename StateType>
     StateType operator()(const StateType& T) const;
 
+    //! \return the rate evaluated at \p T.
+    template <typename StateType>
+    StateType rate(const StateType& T) const;
+
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     StateType derivative( const StateType& T ) const;
@@ -64,15 +72,8 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
-    //! Formatted print, by default to \p std::cout
-    void print(std::ostream& os = std::cout) const;
-
-    //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const BerthelotRate& rate)
-    {
-      rate.print(os);
-      return os;
-    }
+    //! print equation
+    const std::string numeric() const;
 
   private:
 
@@ -83,7 +84,8 @@ namespace Antioch
 
   template<typename CoeffType>
   BerthelotRate<CoeffType>::BerthelotRate(const CoeffType Cf, const CoeffType D)
-    : _Cf(Cf),
+    : KineticsType<CoeffType>(KineticsModel::BERTHELOT),
+      _Cf(Cf),
       _D(D)
   {
     return;
@@ -96,12 +98,13 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  void BerthelotRate<CoeffType>::print(std::ostream& os) const
+  const std::string BerthelotRate<CoeffType>::numeric() const
   {
+    std::stringstream os;
     os << _Cf;
     os << "*exp(" << _D << "*T)";
 
-    return;
+    return os.str();
   }
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -145,6 +148,15 @@ namespace Antioch
   StateType BerthelotRate<CoeffType>::operator()(const StateType& T) const
   {
     using std::exp;
+    return this->rate(T);
+  }
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  StateType BerthelotRate<CoeffType>::rate(const StateType& T) const
+  {
+    using std::exp;
     return _Cf* (exp(_D*T));
   }
 
@@ -160,8 +172,8 @@ namespace Antioch
   template<typename StateType>
   inline
   void BerthelotRate<CoeffType>::rate_and_derivative( const StateType& T,
-						      StateType& rate,
-						      StateType& drate_dT) const
+                                                      StateType& rate,
+                                                      StateType& drate_dT) const
   {
     rate     = (*this)(T);
     drate_dT = rate*_D;
@@ -170,4 +182,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_ARRHENIUS_RATE_H
+#endif // ANTIOCH_BERTHELOT_RATE_H

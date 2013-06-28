@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -31,27 +31,43 @@
 template <typename Scalar>
 int tester()
 {
+  using std::abs;
+  using std::exp;
+
   const Scalar Cf = 1.4;
-  const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,eta,Ea);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea,1.);
 
   const Scalar T = 1500.1;
   
-  const Scalar rate_exact = Cf*std::pow(T,eta)*std::exp(-Ea/T);
+  const Scalar rate_exact = Cf*exp(-Ea/T);
+  const Scalar derive_exact = Ea/(T*T) * Cf * exp(-Ea/T);
 
   int return_flag = 0;
 
-  Scalar rate = arrhenius_rate(T);
+  Scalar rate;
+  Scalar deriveRate;
 
   const Scalar tol = 1.0e-15;
 
-  if( std::fabs( (rate - rate_exact)/rate_exact ) > tol )
+  arrhenius_rate.rate_and_derivative(T,rate,deriveRate);
+
+  if( abs( (rate - rate_exact)/rate_exact ) > tol )
     {
-      std::cout << "Error: Mismatch in rate values." << std::endl
+	  std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate values." << std::endl
 		<< "rate(T) = " << rate << std::endl
 		<< "rate_exact = " << rate_exact << std::endl;
+
+      return_flag = 1;
+    }
+  if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
+    {
+	  std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate derivative values." << std::endl
+		<< "drate_dT(T) = " << deriveRate << std::endl
+		<< "derive_exact = " << derive_exact << std::endl;
 
       return_flag = 1;
     }

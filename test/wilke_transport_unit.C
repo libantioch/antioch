@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -31,6 +31,8 @@
 #include <cmath>
 
 // Antioch
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
 #include "antioch/eucken_thermal_conductivity.h"
@@ -39,12 +41,16 @@
 #include "antioch/wilke_evaluator.h"
 #include "antioch/blottner_parsing.h"
 
+#include "antioch/vector_utils.h"
+
 template <typename Scalar>
 int test_val( const Scalar val, const Scalar val_exact, const Scalar tol, const std::string& val_name )
 {
+  using std::abs;
+
   int return_flag = 0;
 
-  const Scalar rel_error = std::fabs( (val - val_exact)/val_exact);
+  const Scalar rel_error = abs( (val - val_exact)/val_exact);
 
   if( rel_error  > tol )
     {
@@ -62,6 +68,8 @@ int test_val( const Scalar val, const Scalar val_exact, const Scalar tol, const 
 template <typename Scalar>
 int tester()
 {
+  using std::pow;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -115,7 +123,7 @@ int tester()
     for( unsigned int r = 0; r < 5; r++ )
       {
         Scalar M_r = chem_mixture.M(r);
-        Scalar dummy = 1.0L + std::sqrt(mu[N_index]/mu[r])*std::pow( M_r/M_N, 0.25L );
+        Scalar dummy = 1.0L + std::sqrt(mu[N_index]/mu[r])*pow( M_r/M_N, Scalar(0.25L) );
         phi_N_exact += chi[r]*dummy*dummy/std::sqrt(8.0L*( 1.0L + M_N/M_r ) );
       }
 
@@ -126,15 +134,17 @@ int tester()
   }
   
 
-  const Scalar T = 1000.0L;
-
   std::vector<Scalar> mass_fractions( 5, 0.2L); 
 
   // Currently dummy
   //const Scalar mu_exact = ;
 
+  const Scalar T = 1000.0L;
+
   Scalar wilke_mu = wilke.mu(T, mass_fractions );
   Scalar wilke_k = wilke.k(T, mass_fractions );
+  
+  wilke.mu_and_k(T,mass_fractions,wilke_mu,wilke_k);
 
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );

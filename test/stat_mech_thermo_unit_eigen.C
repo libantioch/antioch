@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -41,16 +41,22 @@
 #include <Eigen/Core>
 
 // Antioch
-#include "antioch/vector_utils.h"
-#include "antioch/eigen_utils.h"
+#include "antioch/vector_utils_decl.h"
+#include "antioch/eigen_utils_decl.h"
+
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
 
+#include "antioch/vector_utils.h"
+#include "antioch/eigen_utils.h"
+
 template <typename Scalar>
 bool test_relative(const Scalar val, const Scalar truth, const Scalar tol)
 {
-  if( std::abs( (val-truth)/truth ) > tol )
+  using std::abs;
+
+  if( abs( (val-truth)/truth ) > tol )
     return false;
   else
     return true;
@@ -59,7 +65,9 @@ bool test_relative(const Scalar val, const Scalar truth, const Scalar tol)
 template <typename Scalar>
 bool test_zero(const Scalar val, const Scalar tol)
 {
-  if( std::abs(val) > tol )
+  using std::abs;
+
+  if( abs(val) > tol )
     return false;
   else
     return true;

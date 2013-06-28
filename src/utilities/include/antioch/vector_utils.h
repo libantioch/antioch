@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -28,6 +28,12 @@
 
 #ifndef ANTIOCH_VECTOR_UTILS_H
 #define ANTIOCH_VECTOR_UTILS_H
+
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  ifndef ANTIOCH_VECTOR_UTILS_DECL_H
+#    error vector_utils_decl.h must be included before metaprogramming.h
+#  endif
+#endif
 
 // Antioch
 #include "antioch/metaprogramming.h"
@@ -61,6 +67,18 @@ operator<< (std::ostream& output, const std::vector<T>& a)
 
 namespace Antioch
 {
+
+template <typename T>
+struct has_size<std::vector<T> >
+{
+  static const bool value = true;
+};
+
+template <typename T>
+struct size_type<std::vector<T> >
+{
+  typedef typename std::vector<T>::size_type type;
+};
 
 template <typename T>
 struct value_type<std::vector<T> >

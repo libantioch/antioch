@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -45,6 +45,8 @@
 template <typename Scalar>
 int tester_N2N(const std::string& input_name)
 {
+  using std::abs;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 2;
   species_str_list.reserve(n_species);
@@ -55,9 +57,9 @@ int tester_N2N(const std::string& input_name)
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
   Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
+  Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
 
   const Scalar P = 1.0e5;
@@ -86,7 +88,16 @@ int tester_N2N(const std::string& input_name)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      if( i == 0 )
+        {
+          std::vector<std::vector<Scalar> > loss_matrix;
+          std::vector<std::vector<Scalar> > prod_matrix;
+          std::vector<std::vector<Scalar> > net_matrix;
+
+          reaction_set.print_chemical_scheme( std::cout, T, molar_densities, h_RT_minus_s_R, loss_matrix, prod_matrix, net_matrix );
+        }
+      
+      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       Scalar sum = 0;
@@ -94,8 +105,8 @@ int tester_N2N(const std::string& input_name)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
-      if( std::fabs( sum ) > sum_tol )
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1.0e6; // 1.0e-10;
+      if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
 	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl
@@ -119,6 +130,8 @@ int tester_N2N(const std::string& input_name)
 template <typename Scalar>
 int tester(const std::string& input_name)
 {
+  using std::abs;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -132,9 +145,9 @@ int tester(const std::string& input_name)
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
   Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
+  Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
 
   const Scalar P = 1.0e5;
@@ -163,7 +176,7 @@ int tester(const std::string& input_name)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       Scalar sum = 0;
@@ -171,8 +184,8 @@ int tester(const std::string& input_name)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
-      if( std::fabs( sum ) > sum_tol )
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 2.7e6; // 1.6e-10;
+      if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
 	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl

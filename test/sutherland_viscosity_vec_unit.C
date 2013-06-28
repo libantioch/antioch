@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -38,6 +38,10 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
 // C++
 #include <iostream>
 #include <cmath>
@@ -50,18 +54,29 @@
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
 #include "antioch/vector_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
+
+#include "antioch/sutherland_viscosity.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
-#include "antioch/sutherland_viscosity.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vexcl_utils.h"
+
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
 
 template <typename Scalar, typename PairScalars>
 int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scalar tol )
 {
+  using std::abs;
+
   int return_flag = 0;
 
-  const PairScalars rel_error = std::abs( (mu - mu_exact)/mu_exact);
+  const PairScalars rel_error = abs( (mu - mu_exact)/mu_exact);
 
   if( Antioch::max(rel_error) > tol )
     {
@@ -78,7 +93,7 @@ int test_viscosity( const PairScalars mu, const PairScalars mu_exact, const Scal
 
 
 template <typename PairScalars>
-int vectester(const PairScalars& example)
+int vectester(const PairScalars& example, const std::string& testname)
 {
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
@@ -90,31 +105,54 @@ int vectester(const PairScalars& example)
   std::cout << mu << std::endl;
 
   PairScalars T = example;
-  T[0] = 1521.2L;
-  T[1] = 1721.2L;
-
-  // bc with scale=40 gives
   PairScalars mu_exact = example;
-  mu_exact[0] = .0325778060534850406481862157435995107036L;
-  mu_exact[1] = .0353295183373055195000058747316029365368L;
+  PairScalars mu_exact2 = example;
+
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    {
+      T[2*tuple  ] = 1521.2L;
+      T[2*tuple+1] = 1721.2L;
+
+      // bc with scale=40 gives
+      mu_exact[2*tuple  ] = .0325778060534850406481862157435995107036L;
+      mu_exact[2*tuple+1] = .0353295183373055195000058747316029365368L;
+
+      mu_exact2[2*tuple  ] = .0959985656417205050367745642313443587197L;
+      mu_exact2[2*tuple+1] = .1047500160115581483776648561664869285592L;
+    }
 
   int return_flag = 0;
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
 
-  return_flag = test_viscosity( mu(T), mu_exact, tol );
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
+
+  PairScalars muT = mu(T);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
+
+  return_flag = test_viscosity( muT, mu_exact, tol );
   
   const Scalar mu_ref2 = 3.14159e-3L;
   const Scalar T_ref2 = 420.42L;
 
   mu.reset_coeffs(mu_ref2,T_ref2);
 
-  // bc with scale=40 gives
-  PairScalars mu_exact2 = example;
-  mu_exact2[0] = .0959985656417205050367745642313443587197L;
-  mu_exact2[1] = .1047500160115581483776648561664869285592L;
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
 
-  return_flag = test_viscosity( mu(T), mu_exact2, tol );
+  muT = mu(T);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
+
+  return_flag = test_viscosity( muT, mu_exact2, tol );
 
   return return_flag;
 }
@@ -125,26 +163,39 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(2));
+    vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(2));
+    vectester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
-    vectester (std::valarray<long double>(2));
+    vectester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array2f());
+    vectester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    vectester (Eigen::Array2d());
+    vectester (Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
   returnval = returnval ||
-    vectester (Eigen::Array<long double, 2, 1>());
+    vectester (Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, float> (0));
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, double> (0));
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, long double> (0));
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
+#endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx (vex::Filter::DoublePrecision);
+
+  returnval = returnval ||
+    vectester (vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
+  returnval = returnval ||
+    vectester (vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
+#endif
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
 #endif
 
   return returnval;

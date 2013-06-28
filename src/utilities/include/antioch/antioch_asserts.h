@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -40,6 +40,8 @@
 
 // The antioch_assert() macro acts like C's assert(), but throws a
 // antioch_error() (including stack trace, etc) instead of just exiting
+
+// When not debugging, we don't test any asserts
 #ifdef NDEBUG
 #define antioch_assert(asserted)  ((void) 0)
 #define antioch_assert_msg(asserted, msg)  ((void) 0)
@@ -50,14 +52,32 @@
 #define antioch_assert_less_equal(expr1,expr2)  ((void) 0)
 #define antioch_assert_greater_equal(expr1,expr2)  ((void) 0)
 #else
+
 #define antioch_assert(asserted)  do { if (!(asserted)) { std::cerr << "Assertion `" #asserted "' failed." << std::endl; antioch_error(); } } while(0)
+
+// When using C++11, we can test asserts comparing two different types
+// robustly
+#if __cplusplus > 199711L
+#define antioch_assert_equal_to(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((expr1 == static_cast<type1>(expr2)) && static_cast<type2>(expr1) == expr2)) { std::cerr << "Assertion `" #expr1 " == " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
+#define antioch_assert_not_equal_to(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((expr1 != static_cast<type1>(expr2)) && (static_cast<type2>(expr1) != expr2))) { std::cerr << "Assertion `" #expr1 " != " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
+#define antioch_assert_less(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((static_cast<type2>(expr1) < expr2) && (expr1 < static_cast<type1>(expr2)))) { std::cerr << "Assertion `" #expr1 " < " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
+#define antioch_assert_greater(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((static_cast<type2>(expr1) > expr2) && (expr1 > static_cast<type1>(expr2)))) { std::cerr << "Assertion `" #expr1 " > " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
+#define antioch_assert_less_equal(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((static_cast<type2>(expr1) <= expr2) && (expr1 <= static_cast<type2>(expr2)))) { std::cerr << "Assertion `" #expr1 " <= " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
+#define antioch_assert_greater_equal(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((static_cast<type2>(expr1) >= expr2) && (expr1 >= static_cast<type1>(expr2)))) { std::cerr << "Assertion `" #expr1 " >= " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
+
+// When using C++98, we let the compiler pick the type conversion and
+// hope for the best.
+#else
 #define antioch_assert_equal_to(expr1,expr2)  do { if (!(expr1 == expr2)) { std::cerr << "Assertion `" #expr1 " == " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
 #define antioch_assert_not_equal_to(expr1,expr2)  do { if (!(expr1 != expr2)) { std::cerr << "Assertion `" #expr1 " != " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
 #define antioch_assert_less(expr1,expr2)  do { if (!(expr1 < expr2)) { std::cerr << "Assertion `" #expr1 " < " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
 #define antioch_assert_greater(expr1,expr2)  do { if (!(expr1 > expr2)) { std::cerr << "Assertion `" #expr1 " > " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
 #define antioch_assert_less_equal(expr1,expr2)  do { if (!(expr1 <= expr2)) { std::cerr << "Assertion `" #expr1 " <= " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
 #define antioch_assert_greater_equal(expr1,expr2)  do { if (!(expr1 >= expr2)) { std::cerr << "Assertion `" #expr1 " >= " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
-#endif
+
+#endif // C++11
+
+#endif // NDEBUG
 
 
 #define antioch_error()    do { antioch_here(); ANTIOCH_THROW(Antioch::LogicError()); } while(0)

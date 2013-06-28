@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -49,7 +49,7 @@ namespace Antioch
   // while resizing them to match the example input
   template <typename T>
   inline
-  T zero_clone(const T& example) { return 0; }
+  T zero_clone(const T& /* example */) { return 0; }
 
   // A function for initializing vectorized numeric types
   // while resizing them to match the example input
@@ -70,7 +70,8 @@ namespace Antioch
   void init_constant(Vector& output, const Scalar& example)
   {
     // We can't just use setZero here with arbitrary Scalar types
-    for (std::size_t i=0; i != output.size(); ++i)
+    for (typename Antioch::size_type<Vector>::type i=0;
+	 i != output.size(); ++i)
       init_clone(output[i], example);
   }
 } // end namespace Antioch

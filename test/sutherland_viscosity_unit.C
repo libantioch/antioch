@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -38,9 +38,11 @@
 template <typename Scalar>
 int test_viscosity( const Scalar mu, const Scalar mu_exact, const Scalar tol )
 {
+  using std::abs;
+
   int return_flag = 0;
 
-  const Scalar rel_error = std::fabs( (mu - mu_exact)/mu_exact);
+  const Scalar rel_error = abs( (mu - mu_exact)/mu_exact);
 
   if( rel_error  > tol )
     {

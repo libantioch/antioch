@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -37,9 +37,11 @@
 template <typename Scalar>
 int test_val( const Scalar val, const Scalar val_exact, const Scalar tol, const std::string& val_name )
 {
+  using std::abs;
+
   int return_flag = 0;
 
-  const Scalar rel_error = std::fabs( (val - val_exact)/val_exact);
+  const Scalar rel_error = abs( (val - val_exact)/val_exact);
 
   if( rel_error  > tol )
     {

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -24,9 +24,14 @@
 #ifndef ANTIOCH_VAN_T_HOFF_RATE_H
 #define ANTIOCH_VAN_T_HOFF_RATE_H
 
+//Antioch
+#include "antioch/kinetics_type.h"
+#include "antioch/physical_constants.h"
+
 // C++
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 namespace Antioch
 {
@@ -37,30 +42,38 @@ namespace Antioch
    * \f$ C_f\times T^\eta\times \exp(-E_a/T + DT) \f$.
    */
   template<typename CoeffType=double>
-  class VantHoffRate
+  class VantHoffRate:public KineticsType<CoeffType>
   {
   
   public:
 
-    VantHoffRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0., const CoeffType D=0.);
+    VantHoffRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0.,
+                  const CoeffType D=0., const CoeffType Tref = 1.,
+                  const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
+
     ~VantHoffRate();
     
-    void set_Cf( const CoeffType Cf );
-    void set_eta( const CoeffType eta );
-    void set_Ea( const CoeffType Ea );
-    void set_D( const CoeffType D );
+    void set_Cf(    const CoeffType Cf );
+    void set_eta(   const CoeffType eta );
+    void set_Ea(    const CoeffType Ea );
+    void set_D(     const CoeffType D );
+    void set_Tref(  const CoeffType Tref );
+    void set_rscale(const CoeffType rscale );
 
-    void scale_Ea( const CoeffType scale );
-    void scale_D( const CoeffType scale );
-
-    CoeffType Cf()  const;
-    CoeffType eta() const;
-    CoeffType Ea()  const;
-    CoeffType D()   const;
+    CoeffType Cf()     const;
+    CoeffType eta()    const;
+    CoeffType Ea()     const;
+    CoeffType D()      const;
+    CoeffType Tref()   const;
+    CoeffType rscale() const;
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     StateType operator()(const StateType& T) const;
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType>
+    StateType rate(const StateType& T) const;
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
@@ -70,32 +83,39 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
-    //! Formatted print, by default to \p std::cout
-    void print(std::ostream& os = std::cout) const;
-
-    //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const VantHoffRate& rate)
-    {
-      rate.print(os);
-      return os;
-    }
+    //! print equation
+    const std::string numeric() const;
 
   private:
 
+    void compute_cf();
+
+    CoeffType _raw_Cf;
     CoeffType _Cf;
     CoeffType _eta;
+    CoeffType _raw_Ea;
     CoeffType _Ea;
     CoeffType _D;
+    CoeffType _Tref;
+    CoeffType _rscale;
     
   };
 
   template<typename CoeffType>
-  VantHoffRate<CoeffType>::VantHoffRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea, const CoeffType D)
-    : _Cf(Cf),
+  VantHoffRate<CoeffType>::VantHoffRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea, const CoeffType D, const CoeffType Tref, const CoeffType rscale)
+    : KineticsType<CoeffType>(KineticsModel::VANTHOFF),
+      _raw_Cf(Cf),
       _eta(eta),
-      _Ea(Ea),
-      _D(D)
+      _raw_Ea(Ea),
+      _D(D),
+      _Tref(Tref),
+      _rscale(rscale)
   {
+    using std::pow;
+
+    _Ea = _raw_Ea / _rscale;
+    this->compute_cf();
+
     return;
   }
 
@@ -106,13 +126,14 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  void VantHoffRate<CoeffType>::print(std::ostream& os) const
+  const std::string VantHoffRate<CoeffType>::numeric() const
   {
-    os << _Cf;
-    if (_eta != 0.) os << "*T^" << _eta;
-    os << "*exp(-" << _Ea << "/T + " << _D << "*T)";
+    std::stringstream os;
+    os << _raw_Cf;
+    if (_eta != 0.) os << "*(T/" << _Tref << ")^" << _eta;
+    os << "*exp(-" << _raw_Ea << "/(R*T) + " << _D << "*T)";
 
-    return;
+    return os.str();
   }
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -120,7 +141,23 @@ namespace Antioch
   inline
   void VantHoffRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    _Cf = Cf;
+    using std::pow;
+
+    _raw_Cf = Cf;
+    this->compute_cf();
+
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void VantHoffRate<CoeffType>::set_Tref( const CoeffType Tref )
+  {
+    using std::pow;
+
+    _Tref = Tref;
+    this->compute_cf();
+
     return;
   }
 
@@ -136,7 +173,17 @@ namespace Antioch
   inline
   void VantHoffRate<CoeffType>::set_Ea( const CoeffType Ea )
   {
-    _Ea = Ea;
+    _raw_Ea = Ea;
+    _Ea = _raw_Ea / _rscale;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void VantHoffRate<CoeffType>::set_rscale( const CoeffType rscale )
+  {
+    _rscale = rscale;
+    _Ea = _raw_Ea / _rscale;
     return;
   }
 
@@ -148,21 +195,6 @@ namespace Antioch
     return;
   }
 
-  template<typename CoeffType>
-  inline
-  void VantHoffRate<CoeffType>::scale_Ea( const CoeffType scale )
-  {
-    _Ea *= scale;
-    return;
-  }
-
-  template<typename CoeffType>
-  inline
-  void VantHoffRate<CoeffType>::scale_D( const CoeffType scale )
-  {
-    _D *= scale;
-    return;
-  }
 
   template<typename CoeffType>
   inline
@@ -185,12 +217,29 @@ namespace Antioch
   { return _D; }
 
   template<typename CoeffType>
+  inline
+  CoeffType VantHoffRate<CoeffType>::rscale() const
+  { return _rscale; }
+
+  template<typename CoeffType>
   template<typename StateType>
   inline
   StateType VantHoffRate<CoeffType>::operator()(const StateType& T) const
   {
     using std::pow;
     using std::exp;
+
+    return _Cf* (pow(T,_eta)*exp(-_Ea/T + _D*T));
+  }
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  StateType VantHoffRate<CoeffType>::rate(const StateType& T) const
+  {
+    using std::pow;
+    using std::exp;
+
     return _Cf* (pow(T,_eta)*exp(-_Ea/T + _D*T));
   }
 
@@ -206,14 +255,22 @@ namespace Antioch
   template<typename StateType>
   inline
   void VantHoffRate<CoeffType>::rate_and_derivative( const StateType& T,
-						      StateType& rate,
-						      StateType& drate_dT) const
+                                                     StateType& rate,
+                                                     StateType& drate_dT) const
   {
     rate     = (*this)(T);
     drate_dT = rate*(_D + _eta/T + _Ea/(T*T));
     return;
   }
 
+  template<typename CoeffType>
+  inline
+  void VantHoffRate<CoeffType>::compute_cf()
+  {
+    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+    return;
+  }
+
 } // end namespace Antioch
 
-#endif // ANTIOCH_VAN-T-HOFF_RATE_H
+#endif // ANTIOCH_VAN_T_HOFF_RATE_H

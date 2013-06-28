@@ -2,7 +2,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([Antioch], [0.0.0], [pbauman@ices.utexas.edu], [antioch])
+AC_INIT([Antioch], [0.0.4], [pbauman@ices.utexas.edu], [antioch])
 PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
 AC_SUBST([PACKAGE_DESCRIPTION])
 PACKAGE_URL="http://red.ices.utexas.edu/projects/antioch/"
@@ -61,11 +61,47 @@ AC_PROG_FC
 dnl -Wall warnings, -Wall the time.
 AX_CXXFLAGS_WARN_ALL
 
+dnl Allow users to make vectorized tests larger
+AC_ARG_WITH([n_tuples],
+	    AC_HELP_STRING([--with-n_tuples=<1...1000000000>],
+			   [number of tuples used in each vector test]),
+	    [n_tuples="$withval"],
+	    [n_tuples=2])
+AC_DEFINE_UNQUOTED(N_TUPLES, $n_tuples, [number of tuples used in each vector test])
+
+dnl Allow users to make vectorized tests longer
+AC_ARG_WITH([n_runs],
+	    AC_HELP_STRING([--with-n_runs=<1...1000000000>],
+			   [number of runs done in each vector test]),
+	    [n_runs="$withval"],
+	    [n_runs=1])
+AC_DEFINE_UNQUOTED(N_RUNS, $n_runs, [number of runs done in each vector test])
+
+
 dnl--------------------------
 dnl Checks for third-party libraries
 dnl--------------------------
 antioch_optional_INCLUDES=""
 antioch_optional_test_INCLUDES=""
+antioch_optional_test_LDFLAGS=""
+antioch_optional_test_LIBS=""
+
+dnl Enable VexCL if found
+AX_PATH_VEXCL(0.0.0, no)
+if (test x$HAVE_VEXCL = x1); then
+  antioch_optional_test_INCLUDES="$VEXCL_CPPFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LDFLAGS="$VEXCL_LDFLAGS $antioch_optional_test_LDFLAGS"
+  antioch_optional_test_LIBS="$VEXCL_LIBS $antioch_optional_test_LIBS"
+fi
+
+dnl Enable ViennaCL if found
+AX_PATH_VIENNACL(0.0.0, no)
+if (test x$HAVE_VIENNACL = x1); then
+  antioch_optional_test_INCLUDES="$VIENNACL_CPPFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LDFLAGS="$VIENNACL_LDFLAGS $antioch_optional_test_LDFLAGS"
+  antioch_optional_test_LIBS="$VIENNACL_LIBS $antioch_optional_test_LIBS"
+fi
+
 
 dnl Enable Eigen if a new enough version is found
 enableoptional=yes
@@ -81,8 +117,17 @@ if (test x$HAVE_METAPHYSICL = x1); then
   antioch_optional_test_INCLUDES="$METAPHYSICL_CPPFLAGS $antioch_optional_test_INCLUDES"
 fi
 
+dnl Use GRVY timers if a new enough version is found
+AX_PATH_GRVY_NEW([0.30],[no])
+if (test x$HAVE_GRVY = x1); then
+  antioch_optional_test_INCLUDES="$GRVY_CFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LIBS="$GRVY_LIBS $antioch_optional_test_LIBS"
+fi
+
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
+AC_SUBST(antioch_optional_test_LDFLAGS)
+AC_SUBST(antioch_optional_test_LIBS)
 
 
 dnl--------------------------
@@ -110,14 +155,15 @@ DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(ON)
 DX_PS_FEATURE(OFF)
 
-DX_INIT_DOXYGEN(ANTIOCH, doxygen/antioch.dox, docs/doxygen)
+DX_INIT_DOXYGEN(antioch, doxygen/antioch.dox, docs/doxygen)
 
-AC_CONFIG_FILES(doxygen/txt_common/about.page)
+AC_CONFIG_FILES(doxygen/txt_common/about_vpath.page)
 
 dnl-----------------------------------------------
 dnl Generate files for unit and regression testing
 dnl-----------------------------------------------
 AC_CONFIG_FILES(test/kinetics_unit_air_5sp.sh,           [chmod +x test/kinetics_unit_air_5sp.sh])
+AC_CONFIG_FILES(test/kinetics_unit_thrust_air_5sp.sh,    [chmod +x test/kinetics_unit_thrust_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_vec_unit_air_5sp.sh,       [chmod +x test/kinetics_vec_unit_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_air_5sp.sh,     [chmod +x test/kinetics_regression_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_vec_air_5sp.sh, [chmod +x test/kinetics_regression_vec_air_5sp.sh])
@@ -133,6 +179,7 @@ dnl-----------------------------------------------
 AC_CONFIG_FILES([
   antioch.pc
   doxygen/Makefile
+  doxygen/antioch.dox
   Makefile
   src/Makefile
   test/Makefile

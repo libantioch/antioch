@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -38,10 +38,9 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
-// C++
-#include <limits>
-#include <string>
-#include <vector>
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
 
 // Antioch
 
@@ -50,6 +49,7 @@
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
 #include "antioch/vector_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
@@ -63,10 +63,27 @@
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 #include "antioch/vector_utils.h"
+#include "antioch/vexcl_utils.h"
+
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
+
+// C++
+#include <limits>
+#include <string>
+#include <vector>
+
 
 template <typename PairScalars>
-int vectester(const std::string& input_name, const PairScalars& example)
+int vectester(const std::string& input_name, 
+	      const PairScalars& example,
+	      const std::string& testname)
 {
+  using std::abs;
+
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   std::vector<std::string> species_str_list;
@@ -84,25 +101,33 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set );
+  Antioch::KineticsEvaluator<Scalar,PairScalars> kinetics( reaction_set, example );
   std::vector<PairScalars> omega_dot(n_species, example);
 
   PairScalars P = example;
-  P[0] = 1.0e5;
-  P[1] = 1.2e5;
 
   // Mass fractions
   PairScalars Y_vals = example;
-  Y_vals[0] = 0.2;
-  Y_vals[1] = 0.25;
-  std::vector<PairScalars> Y(n_species,Y_vals);
-  Y[4][1] = 0;
 
-  const PairScalars R_mix = chem_mixture.R(Y);
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    {
+      P[2*tuple  ] = 1.0e5;
+      P[2*tuple+1] = 1.2e5;
+
+      Y_vals[2*tuple  ] = 0.2;
+      Y_vals[2*tuple+1] = 0.25;
+    }
+
+  std::vector<PairScalars> Y(n_species,Y_vals);
+
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+    Y[4][2*tuple+1] = 0;
 
   const unsigned int n_T_samples = 10;
   const Scalar T0 = 500;
   const Scalar T_inc = 500;
+
+  const PairScalars R_mix = chem_mixture.R(Y);
 
   std::vector<PairScalars> molar_densities(n_species,example);
   std::vector<PairScalars> h_RT_minus_s_R(n_species, example);
@@ -112,8 +137,17 @@ int vectester(const std::string& input_name, const PairScalars& example)
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
       PairScalars T = example;
-      T[0] = T0 + T_inc*static_cast<Scalar>(i);
-      T[1] = T[0]+T_inc/2;
+
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          T[2*tuple  ] = T0 + T_inc*static_cast<Scalar>(i);
+          T[2*tuple+1] = T[0]+T_inc/2;
+	}
+
+#ifdef ANTIOCH_HAVE_GRVY
+  const std::string testnormal = testname + "-normal";
+  gt.BeginTimer(testnormal);
+#endif
 
       const PairScalars rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
@@ -123,7 +157,11 @@ int vectester(const std::string& input_name, const PairScalars& example)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testnormal);
+#endif
 
       // Omega dot had better sum to 0.0
       PairScalars sum = omega_dot[0];
@@ -131,8 +169,8 @@ int vectester(const std::string& input_name, const PairScalars& example)
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1e6; // 1.0e-10;
-      const PairScalars abs_sum = std::abs(sum);
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 5e6; // 5e-10;
+      const PairScalars abs_sum = abs(sum);
       if( Antioch::max(abs_sum) > sum_tol )
 	{
 	  return_flag = 1;
@@ -152,6 +190,7 @@ int vectester(const std::string& input_name, const PairScalars& example)
   
 #ifdef ANTIOCH_HAVE_EIGEN
   {
+    // To do: tests with Eigen instead of std vectors
   }
 #endif // ANTIOCH_HAVE_EIGEN
 
@@ -172,26 +211,39 @@ int main(int argc, char* argv[])
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (argv[1], std::valarray<float>(2));
+    vectester (argv[1], std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval = returnval ||
-    vectester (argv[1], std::valarray<double>(2));
+    vectester (argv[1], std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
-    vectester (argv[1], std::valarray<long double>(2));
+    vectester (argv[1], std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (argv[1], Eigen::Array2f());
+    vectester (argv[1], Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    vectester (argv[1], Eigen::Array2d());
+    vectester (argv[1], Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
   returnval = returnval ||
-    vectester (argv[1], Eigen::Array<long double, 2, 1>());
+    vectester (argv[1], Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (argv[1], MetaPhysicL::NumberArray<2, float>(0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float>(0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (argv[1], MetaPhysicL::NumberArray<2, double>(0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double>(0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (argv[1], MetaPhysicL::NumberArray<2, long double>(0));
+    vectester (argv[1], MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double>(0), "NumberArray<ld>");
+#endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx (vex::Filter::DoublePrecision);
+
+  returnval +
+    vectester (argv[1], vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
+  returnval +=
+    vectester (argv[1], vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
+#endif
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
 #endif
 
   return returnval;

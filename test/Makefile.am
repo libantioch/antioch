@@ -1,12 +1,26 @@
 BUILT_SOURCES   = .license.stamp
 
+EXTRA_DIST = input_files
+
 check_PROGRAMS  =
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
+check_PROGRAMS += cea_evaluator_unit
+check_PROGRAMS += cea_evaluator_vec_unit
 check_PROGRAMS += cea_thermo_unit
 check_PROGRAMS += cea_thermo_vec_unit
+check_PROGRAMS += hercourtessen_rate_unit
+check_PROGRAMS += hercourtessen_rate_vec_unit
+check_PROGRAMS += berthelot_rate_unit
+check_PROGRAMS += berthelot_rate_vec_unit
 check_PROGRAMS += arrhenius_rate_unit
 check_PROGRAMS += arrhenius_rate_vec_unit
+check_PROGRAMS += kooij_rate_unit
+check_PROGRAMS += kooij_rate_vec_unit
+check_PROGRAMS += berthelothercourtessen_rate_unit
+check_PROGRAMS += berthelothercourtessen_rate_vec_unit
+check_PROGRAMS += vanthoff_rate_unit
+check_PROGRAMS += vanthoff_rate_vec_unit
 check_PROGRAMS += kinetics_unit
 check_PROGRAMS += kinetics_vec_unit
 check_PROGRAMS += kinetics_regression
@@ -37,15 +51,30 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
 
-AM_LDFLAGS = $(top_builddir)/src/libantioch.la
+AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
+LIBS = $(antioch_optional_test_LIBS)
+
+LDADD = $(top_builddir)/src/libantioch.la
 
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
 chem_mixture_vec_unit_SOURCES = chem_mixture_vec_unit.C
+cea_evaluator_unit_SOURCES = cea_evaluator_unit.C
+cea_evaluator_vec_unit_SOURCES = cea_evaluator_vec_unit.C
 cea_thermo_unit_SOURCES = cea_thermo_unit.C
 cea_thermo_vec_unit_SOURCES = cea_thermo_vec_unit.C
+hercourtessen_rate_unit_SOURCES = hercourtessen_rate_unit.C
+hercourtessen_rate_vec_unit_SOURCES = hercourtessen_rate_vec_unit.C
+berthelot_rate_unit_SOURCES = berthelot_rate_unit.C
+berthelot_rate_vec_unit_SOURCES = berthelot_rate_vec_unit.C
 arrhenius_rate_unit_SOURCES = arrhenius_rate_unit.C
 arrhenius_rate_vec_unit_SOURCES = arrhenius_rate_vec_unit.C
+berthelothercourtessen_rate_unit_SOURCES = berthelothercourtessen_rate_unit.C
+berthelothercourtessen_rate_vec_unit_SOURCES = berthelothercourtessen_rate_vec_unit.C
+kooij_rate_unit_SOURCES = kooij_rate_unit.C
+kooij_rate_vec_unit_SOURCES = kooij_rate_vec_unit.C
+vanthoff_rate_unit_SOURCES = vanthoff_rate_unit.C
+vanthoff_rate_vec_unit_SOURCES = vanthoff_rate_vec_unit.C
 kinetics_unit_SOURCES = kinetics_unit.C
 kinetics_vec_unit_SOURCES = kinetics_vec_unit.C
 kinetics_regression_SOURCES = kinetics_regression.C
@@ -70,10 +99,22 @@ endif
 TESTS  =
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
+TESTS += cea_evaluator_unit
+TESTS += cea_evaluator_vec_unit
 TESTS += cea_thermo_unit
 TESTS += cea_thermo_vec_unit
+TESTS += hercourtessen_rate_unit
+TESTS += hercourtessen_rate_unit
+TESTS += berthelot_rate_vec_unit
+TESTS += berthelot_rate_vec_unit
 TESTS += arrhenius_rate_unit
 TESTS += arrhenius_rate_vec_unit
+TESTS += berthelothercourtessen_rate_unit
+TESTS += berthelothercourtessen_rate_vec_unit
+TESTS += kooij_rate_unit
+TESTS += kooij_rate_vec_unit
+TESTS += vanthoff_rate_unit
+TESTS += vanthoff_rate_vec_unit
 TESTS += kinetics_unit_air_5sp.sh
 TESTS += kinetics_vec_unit_air_5sp.sh
 TESTS += kinetics_regression_air_5sp.sh
@@ -94,15 +135,17 @@ if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
 endif
 
-
+CLEANFILES =
 if CODE_COVERAGE_ENABLED
-  CLEANFILES = *.gcda *.gcno
+  CLEANFILES += *.gcda *.gcno
 endif
 
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE \
 	$(top_srcdir)/test/*.C
 	echo 'updated source license headers' >$@
+
+CLEANFILES += .license.stamp
 
 # Required for AX_AM_MACROS
 ###@INC_AMINCLUDE@

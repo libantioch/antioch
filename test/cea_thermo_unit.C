@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -39,6 +39,8 @@ template <typename Scalar>
 int test_cp( const std::string& species_name, unsigned int species, Scalar cp_exact, Scalar T,
 	     const Antioch::CEAThermodynamics<Scalar>& thermo )
 {
+  using std::abs;
+
   int return_flag = 0;
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
@@ -47,7 +49,7 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
 
   const Scalar cp = thermo.cp(Cache(T), species);
 
-  if( std::fabs( (cp_exact - cp)/cp_exact ) > tol )
+  if( abs( (cp_exact - cp)/cp_exact ) > tol )
     {
       std::cerr << "Error: Mismatch in species specific heat."
 		<< "\nspecies    = " << species_name

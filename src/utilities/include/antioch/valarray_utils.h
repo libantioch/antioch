@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -28,6 +28,12 @@
 
 #ifndef ANTIOCH_VALARRAY_UTILS_H
 #define ANTIOCH_VALARRAY_UTILS_H
+
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  ifndef ANTIOCH_VALARRAY_UTILS_DECL_H
+#    error valarray_utils_decl.h must be included before metaprogramming.h
+#  endif
+#endif
 
 // Antioch
 #include "antioch/metaprogramming.h"
@@ -59,10 +65,10 @@ operator<< (std::ostream& output, const std::valarray<T>& a)
 
 template <typename T, typename T2>
 inline
-valarray<T>
-pow (const valarray<T>& in, const T2& n)
+std::valarray<T>
+pow (const std::valarray<T>& in, const T2& n)
 {
-  valarray<T> out=in;
+  std::valarray<T> out=in;
   const size_t size = in.size();
   for (size_t i=0; i != size; ++i)
     out[i] = pow(in[i], n);
@@ -96,6 +102,18 @@ max (const std::valarray<T>& in)
 {
   return in.max();
 }
+
+template <typename T>
+struct has_size<std::valarray<T> >
+{
+  static const bool value = true;
+};
+
+template <typename T>
+struct size_type<std::valarray<T> >
+{
+  typedef std::size_t type;
+};
 
 template <typename T>
 struct value_type<std::valarray<T> >

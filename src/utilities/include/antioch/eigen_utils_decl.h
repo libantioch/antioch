@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -29,77 +29,79 @@
 #ifndef ANTIOCH_EIGEN_UTILS_DECL_H
 #define ANTIOCH_EIGEN_UTILS_DECL_H
 
+#ifdef ANTIOCH_METAPROGRAMMING_H
+#  error eigen_utils_decl.h must be included before metaprogramming.h
+#endif
+
 #include "antioch_config.h"
 
 #ifdef ANTIOCH_HAVE_EIGEN
+// While this logic is Eigen-specific, these forward declarations deliberately
+// do not require <Eigen/Dense> to be included.  This choice permits mixing
+// header-only Eigen with header-only Antioch without configure-time flags.
+#endif
 
 #include "antioch/metaprogramming_decl.h"
 
-#include <Eigen/Dense>
+namespace std
+{
 
-namespace std {
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
-Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-max (const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
-     const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b);
+_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
+    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b);
 
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-max (const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
-     const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b);
-
-}
+} // end namespace std
 
 
 namespace Antioch
 {
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
 _Scalar
-max (const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in);
+max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in);
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-struct value_type<Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct has_size<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
 
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct size_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
 
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
-Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-zero_clone(const Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example);
+_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex);
 
-// A function for zero-setting vectorized numeric types
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
-void set_zero(Eigen::Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
-
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-_Scalar
-max (const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in);
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-struct value_type<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
-
-
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-zero_clone(const Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& example);
-
-// A function for zero-setting vectorized numeric types
-template <typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
-inline
-void set_zero(Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
-
+void set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
 
 } // end namespace Antioch
-
-#endif // ANTIOCH_HAVE_EIGEN
 
 #endif //ANTIOCH_EIGEN_UTILS_DECL_H

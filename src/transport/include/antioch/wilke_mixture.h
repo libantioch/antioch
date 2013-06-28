@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-// 
+//
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -74,6 +74,7 @@ namespace Antioch
       _Mr_Ms_to_the_one_fourth(chem_mixture.n_species()),
       _denom(chem_mixture.n_species())
   {
+    using std::pow;
 
     for( unsigned int r = 0; r < chem_mixture.n_species(); r++ )
       {
@@ -85,7 +86,7 @@ namespace Antioch
             const CoeffType Mr = chem_mixture.M(r);
             const CoeffType Ms = chem_mixture.M(s);
 
-            _Mr_Ms_to_the_one_fourth[r][s] = std::pow( Mr/Ms, 0.25 );
+            _Mr_Ms_to_the_one_fourth[r][s] = pow( Mr/Ms, CoeffType(0.25) );
             _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
           }
       }
