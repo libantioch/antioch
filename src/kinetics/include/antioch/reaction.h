@@ -31,8 +31,14 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/reaction_enum.h"
+#include "antioch/kinetics_type.h"
+#include "antioch/hercourtessen_rate.h"
+#include "antioch/berthelot_rate.h"
 #include "antioch/arrhenius_rate.h"
+#include "antioch/berthelothercourtessen_rate.h"
+#include "antioch/kooij_rate.h"
+#include "antioch/vanthoff_rate.h"
+#include "antioch/reaction_enum.h"
 #include "antioch/chemical_mixture.h"
 
 //C++
@@ -42,12 +48,46 @@
 
 namespace Antioch
 {
+  // Forward declarations
+  template <typename CoeffType>
+  class ElementaryReaction;
+
+  template <typename CoeffType>
+  class DuplicateReaction;
+
+  template <typename CoeffType>
+  class ThreeBodyReaction;
+
+  template <typename CoeffType>
+  class ElementaryReaction;
+
+  template <typename CoeffType,typename FalloffType>
+  class FalloffReaction;
+
+  template <typename CoeffType>
+  class LindemannFalloff;
+
+  template <typename CoeffType>
+  class TroeFalloff;
+
   //!A single reaction mechanism. 
-  /*!
-    This class encapsulates a single reaction mechanism.  The mechanism could be 
-    an elementary reaction, or a three-body reaction.  All reactions are assumed
-    to be reversible. This class was originally taken from \p FIN-S.
-    \todo{Do we want to template this class around the rate type?}
+  /*!\class Reaction
+   *
+   This virtual base is derived for the following processes:
+   - elementary process,
+   - duplicate process,
+   - falloff processes with:
+   - Lindemann falloff,
+   - Troe falloff.
+   This class encapsulates a kinetics model.  The choosable kinetics models are
+   - Hercourt Hessen \f$\alpha(T) = A T^\beta\f$
+   - Berthelot \f$\alpha(T) = A \exp\left(D T\right)\f$
+   - Arrhenius \f$\alpha(T) = A \exp\left(-\frac{E_a}{T}\right)\f$
+   - Berthelot Hercourt Hessen \f$\alpha(T) = A T^\beta \exp\left(D T\right)\f$
+   - Kooij \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T}\right)\f$
+   - Van't Hoff \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T} + D T\right)\f$
+   All reactions are assumed to be reversible. 
+   By default, we choose an elementary process with a Kooij equation.
   */
   template<typename CoeffType=double>
   class Reaction
@@ -55,27 +95,33 @@ namespace Antioch
   public:
 
     //! Construct a single reaction mechanism.
-    Reaction( const unsigned int n_species, const std::string &equation );
+    Reaction( const unsigned int n_species, const std::string &equation,
+              const ReactionType::ReactionType type = ReactionType::ELEMENTARY,
+              const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
-    ~Reaction();
+    virtual ~Reaction();
 
     unsigned int n_species() const;
     
     //! \returns the equation for this reaction.
     std::string equation() const;
-    
-    //! Type of reaction. 
-    /*! Type of reaction. Presently only ELEMENTARY or THREE_BODY
+
+    /*! Type of reaction.
      *  reversible reactions are considered.
      */
     ReactionType::ReactionType type() const;
 
-    //! Set the type of reaction. 
-    /*! Set the type of reaction. Presently only ELEMENTARY or THREE_BODY
+    /*! Set the type of reaction.
      * reversible reactions are considered.
      */
     void set_type( const ReactionType::ReactionType type);
 
+    //! Model of kinetics.
+    KineticsModel::KineticsModel kinetics_model() const;
+
+    //! Set the model of kinetics.
+    void set_kinetics_model( const KineticsModel::KineticsModel kin);
+    
     bool initialized() const;
 
     //! \returns the number of reactants.
@@ -104,18 +150,18 @@ namespace Antioch
 
     //!
     void add_reactant( const std::string &name,
-		       const unsigned int r_id,
-		       const unsigned int stoichiometric_coeff);
+                       const unsigned int r_id,
+                       const unsigned int stoichiometric_coeff);
 
     //!
     void add_product( const std::string &name,
-		      const unsigned int p_id,
-		      const unsigned int stoichiometric_coeff);
+                      const unsigned int p_id,
+                      const unsigned int stoichiometric_coeff);
 
     //!
     void set_efficiency( const std::string &,
-			 const unsigned int s,
-			 const CoeffType efficiency);
+                         const unsigned int s,
+                         const CoeffType efficiency);
 
     //!
     CoeffType efficiency( const unsigned int s) const;
@@ -129,40 +175,58 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     StateType equilibrium_constant( const StateType& P0_RT,
-				    const VectorStateType& h_RT_minus_s_R ) const;
+                                    const VectorStateType& h_RT_minus_s_R ) const;
 
     //!
     template <typename StateType, typename VectorStateType>
     void equilibrium_constant_and_derivative( const StateType& T,
-					      const StateType& P0_RT,
-					      const VectorStateType& h_RT_minus_s_R,
-					      const VectorStateType& ddT_h_RT_minus_s_R,
-					      StateType& keq,
-					      StateType& dkeq_dT) const;
+                                              const StateType& P0_RT,
+                                              const VectorStateType& h_RT_minus_s_R,
+                                              const VectorStateType& ddT_h_RT_minus_s_R,
+                                              StateType& keq,
+                                              StateType& dkeq_dT) const;
+
+
+    //// in reaction set
 
     //!
     template <typename StateType, typename VectorStateType>
-    StateType compute_rate_of_progress( const VectorStateType& molar_densities,
-					const StateType& kfwd, 
-					const StateType& kbkwd ) const;
+    StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+                                                const StateType& T) const;
     
     //!
     template <typename StateType, typename VectorStateType>
-    void compute_rate_of_progress_and_derivatives( const VectorStateType& molar_densities,
-						   const ChemicalMixture<CoeffType>& chem_mixture,
-						   const StateType& kfwd,  
-						   const StateType& dkfwd_dT, 
-						   const StateType& kbkwd,
-						   const StateType& dkbkwd_dT,
-						   StateType& net_reaction_rate,
+    void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
+                                                           const StateType& T, 
+                                                           StateType& kfwd, 
+                                                           StateType& dkfwd_dT,
+                                                           VectorStateType& dkfwd_dX) const;
+    ////
+    template <typename StateType, typename VectorStateType>
+    StateType compute_rate_of_progress( const VectorStateType& molar_densities,
+                                        const StateType& T,  
+                                        const StateType& P0_RT,  
+                                        const VectorStateType& h_RT_minus_s_R) const;
+
+    template <typename StateType, typename VectorStateType>
+    void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
+                                                   const ChemicalMixture<CoeffType>& chem_mixture,
+                                                   const StateType& T,
+                                                   const StateType &P0_RT,
+                                                   const VectorStateType &h_RT_minus_s_R,
+                                                   const VectorStateType &dh_RT_minus_s_R_dT,
+                                                   StateType& net_reaction_rate,
                                                    StateType& dnet_rate_dT,
-                                                   VectorStateType& dnet_rate_drho_s ) const;
+                                                   VectorStateType& dnet_rate_dX_s ) const;
 
     //! Return const reference to the forward rate object
-    const ArrheniusRate<CoeffType>& forward_rate() const;
+    const KineticsType<CoeffType>& forward_rate(unsigned int ir = 0) const;
 
     //! Return writeable reference to the forward rate object
-    ArrheniusRate<CoeffType>& forward_rate();
+    KineticsType<CoeffType>& forward_rate(unsigned int ir = 0);
+
+    //! Return const reference to the forward rate object
+    void add_forward_rate(KineticsType<CoeffType> *rate);
 
     //! Formatted print, by default to \p std::cout.
     void print(std::ostream& os = std::cout) const;
@@ -174,10 +238,9 @@ namespace Antioch
       return os;
     }
 
-  private:
+  protected:
     
     unsigned int _n_species;
-    ReactionType::ReactionType _type;
     std::string _equation;
     std::vector<std::string> _reactant_names;
     std::vector<std::string> _product_names;
@@ -191,9 +254,11 @@ namespace Antioch
     std::vector<int>          _species_delta_stoichiometry;
     int _gamma;
     bool _initialized;
+    ReactionType::ReactionType _type;
+    KineticsModel::KineticsModel _kintype;
 
     //! The forward reaction rate modified Arrhenius form.
-    ArrheniusRate<CoeffType> _forward_rate;
+    std::vector<KineticsType<CoeffType>* > _forward_rate;
 
   };
 
@@ -229,9 +294,33 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  KineticsModel::KineticsModel Reaction<CoeffType>::kinetics_model() const
+  {
+    return _kintype;
+  }
+
+  template<typename CoeffType>
+  inline
+  void Reaction<CoeffType>::set_kinetics_model( const KineticsModel::KineticsModel kin)
+  {
+    _kintype = kin;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
   bool Reaction<CoeffType>::initialized() const
   {
     return _initialized;
+  }
+
+
+  template<typename CoeffType>
+  inline
+  void Reaction<CoeffType>::add_forward_rate(KineticsType<CoeffType> *rate)
+  {
+    _forward_rate.push_back(rate);
+    return;
   }
 
   template<typename CoeffType>
@@ -309,8 +398,8 @@ namespace Antioch
   template<typename CoeffType>
   inline
   void Reaction<CoeffType>::add_reactant (const std::string &name,
-			                  const unsigned int r_id,
-			                  const unsigned int stoichiometric_coeff)
+                                          const unsigned int r_id,
+                                          const unsigned int stoichiometric_coeff)
   {
     antioch_assert_less(r_id, this->n_species());
     _reactant_names.push_back(name);
@@ -322,8 +411,8 @@ namespace Antioch
   template<typename CoeffType>
   inline
   void Reaction<CoeffType>::add_product (const std::string &name,
-			                 const unsigned int p_id,
-			                 const unsigned int stoichiometric_coeff)
+                                         const unsigned int p_id,
+                                         const unsigned int stoichiometric_coeff)
   {
     antioch_assert_less(p_id, this->n_species());
     _product_names.push_back(name);
@@ -335,8 +424,8 @@ namespace Antioch
   template<typename CoeffType>
   inline
   void Reaction<CoeffType>::set_efficiency (const std::string &,
-				            const unsigned int s,
-				            const CoeffType efficiency)
+                                            const unsigned int s,
+                                            const CoeffType efficiency)
   {
     antioch_assert_less(s, this->n_species());
     antioch_assert_less(s, _efficiencies.size());
@@ -363,28 +452,31 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  const ArrheniusRate<CoeffType>& Reaction<CoeffType>::forward_rate() const
+  const KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir) const
   {
-    return _forward_rate;
+    return *_forward_rate[ir];
   }
 
   template<typename CoeffType>
   inline
-  ArrheniusRate<CoeffType>& Reaction<CoeffType>::forward_rate()
+  KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir)
   {
-    return _forward_rate;
+    return *_forward_rate[ir];
   }
 
 
   template<typename CoeffType>
   inline
   Reaction<CoeffType>::Reaction( const unsigned int n_species,
-				 const std::string &equation ) 
+                                 const std::string &equation, 
+                                 const ReactionType::ReactionType type,
+                                 const KineticsModel::KineticsModel kin) 
     : _n_species(n_species),
-      _type(ReactionType::ELEMENTARY),
       _equation(equation),
       _gamma(0),
-      _initialized(false)
+      _initialized(false),
+      _type(type),
+      _kintype(kin)
   {
     _efficiencies.resize(_n_species); 
     std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
@@ -395,6 +487,11 @@ namespace Antioch
   inline
   Reaction<CoeffType>::~Reaction()
   {
+    for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
+      {
+        delete _forward_rate[ir];
+      }
+
     return;
   }
 
@@ -410,24 +507,24 @@ namespace Antioch
       _species_delta_stoichiometry.resize(this->n_species());
 
       std::fill( _species_reactant_stoichiometry.begin(),
-		 _species_reactant_stoichiometry.end(),
-		 0 );
+                 _species_reactant_stoichiometry.end(),
+                 0 );
 
       std::fill( _species_product_stoichiometry.begin(),
-		 _species_product_stoichiometry.end(),
-		 0);
+                 _species_product_stoichiometry.end(),
+                 0);
     }
     
     for (unsigned int r=0; r< this->n_reactants(); r++)
       {
-	_species_reactant_stoichiometry[this->reactant_id(r)] =
-	  this->reactant_stoichiometric_coefficient(r);
+        _species_reactant_stoichiometry[this->reactant_id(r)] =
+          this->reactant_stoichiometric_coefficient(r);
       }
     
     for (unsigned int p=0; p < this->n_products(); p++)
       {
-	_species_product_stoichiometry[this->product_id(p)] =
-	  this->product_stoichiometric_coefficient(p);
+        _species_product_stoichiometry[this->product_id(p)] =
+          this->product_stoichiometric_coefficient(p);
       }
     
     // find the delta stoichiometric coefficient for each species,
@@ -435,11 +532,11 @@ namespace Antioch
     _gamma = 0;
     for (unsigned int s=0; s<this->n_species(); s++)
       {
-	_species_delta_stoichiometry[s] =
-	  ( _species_product_stoichiometry[s] -
-	    _species_reactant_stoichiometry[s] );
-	
-	_gamma += _species_delta_stoichiometry[s];
+        _species_delta_stoichiometry[s] =
+          ( _species_product_stoichiometry[s] -
+            _species_reactant_stoichiometry[s] );
+        
+        _gamma += _species_delta_stoichiometry[s];
       }
    
     // set initialization flag
@@ -451,7 +548,7 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType>::equilibrium_constant( const StateType& P0_RT,
-						       const VectorStateType& h_RT_minus_s_R ) const
+                                                       const VectorStateType& h_RT_minus_s_R ) const
   {
     using std::exp;
     using std::pow;
@@ -464,12 +561,12 @@ namespace Antioch
     antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
 
     StateType exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
-		            h_RT_minus_s_R[0] );
+                            h_RT_minus_s_R[0] );
 
     for (unsigned int s=1; s < this->n_species(); s++)
       {
-	exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
-		       h_RT_minus_s_R[s] );
+        exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
+                       h_RT_minus_s_R[s] );
       }
 
     return pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*exp(exppower);
@@ -480,11 +577,11 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   void Reaction<CoeffType>::equilibrium_constant_and_derivative( const StateType& T,
-								 const StateType& P0_RT,
-								 const VectorStateType& h_RT_minus_s_R,
-								 const VectorStateType& ddT_h_RT_minus_s_R,
-								 StateType& keq,
-								 StateType& dkeq_dT) const
+                                                                 const StateType& P0_RT,
+                                                                 const VectorStateType& h_RT_minus_s_R,
+                                                                 const VectorStateType& ddT_h_RT_minus_s_R,
+                                                                 StateType& keq,
+                                                                 StateType& dkeq_dT) const
   {
     antioch_assert(this->initialized());
 
@@ -500,269 +597,14 @@ namespace Antioch
     keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
     StateType ddT_exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
-			        ddT_h_RT_minus_s_R[0] );
+                                ddT_h_RT_minus_s_R[0] );
 
     for (unsigned int s=1; s<this->n_species(); s++)
       ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
-			 ddT_h_RT_minus_s_R[s] );
+                         ddT_h_RT_minus_s_R[s] );
 
     // compute its derivative
     dkeq_dT = keq*(-static_cast<CoeffType>(this->gamma())/T + ddT_exppower);
-
-    return;
-  }
-
-
-  template<typename CoeffType>
-  template<typename StateType, typename VectorStateType>
-  inline
-  StateType Reaction<CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
-							   const StateType& kfwd, 
-							   const StateType& kbkwd ) const
-  {
-    using std::pow;
-
-    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
-
-    StateType kfwd_times_reactants = kfwd;
-    StateType kbkwd_times_products = kbkwd;
-
-    for (unsigned int r=0; r<this->n_reactants(); r++)
-      {
-	kfwd_times_reactants *= pow( molar_densities[this->reactant_id(r)],
-				     static_cast<int>(this->reactant_stoichiometric_coefficient(r)) );
-      }
-      
-    for (unsigned int p=0; p<this->n_products(); p++)
-      {
-	kbkwd_times_products *= pow( molar_densities[this->product_id(p)],
-				     static_cast<int>(this->product_stoichiometric_coefficient(p)) );
-      }
-      
-    switch (this->type())
-      {
-	// for elementary reactions the forward and backward
-	// rates of progress are simply the rates times
-	// the product of the reactants, products respectively.
-      case(ReactionType::ELEMENTARY):
-	{
-	  return kfwd_times_reactants - kbkwd_times_products;
-	}
-	break;
-	
-	// for threebody reactions we need to include the
-	// contrbution from each collision partner
-      case(ReactionType::THREE_BODY):
-	{
-	  StateType Rfwd = ( kfwd_times_reactants * 
-		             this->efficiency(0) *
-		             molar_densities[0] );
-
-	  StateType Rbkwd = ( kbkwd_times_products *
-		              this->efficiency(0) *
-		              molar_densities[0] );
-
-	  for (unsigned int s=1; s<this->n_species(); s++)
-	    {	     
-	      Rfwd += ( kfwd_times_reactants * 
-			this->efficiency(s) *
-			molar_densities[s] );
-
-	      Rbkwd += ( kbkwd_times_products *
-			 this->efficiency(s) *
-			 molar_densities[s] );
-	    }
-
-	  return Rfwd - Rbkwd;
-	}
-	break;
-	
-      default:
-	{
-	  std::cerr << "Error: Invalid reaction type " << this->type() << std::endl;
-	  antioch_error();
-	}
-	break;
-      }
-
-    // We should have returned by now
-    antioch_error();
-    return kfwd;
-  }
-
-
-  template<typename CoeffType>
-  template<typename StateType, typename VectorStateType>
-  inline
-  void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
-								      const ChemicalMixture<CoeffType>& chem_mixture,
-								      const StateType& kfwd, 
-								      const StateType& dkfwd_dT,
-								      const StateType& kbkwd,
-								      const StateType& dkbkwd_dT,
-								      StateType& net_reaction_rate,
-								      StateType& dnet_rate_dT,
-								      VectorStateType& dnet_rate_drho_s ) const
-  {
-    using std::pow;
-
-    antioch_assert_equal_to (molar_densities.size(), this->n_species());
-
-    // If users want to use valarrays, then the output reference sizes
-    // had better already match the input value sizes...
-
-    StateType Rfwd = Antioch::zero_clone(kfwd);
-    StateType dRfwd_dT = Antioch::zero_clone(kfwd);
-    StateType Rbkwd = Antioch::zero_clone(kfwd);
-    StateType dRbkwd_dT = Antioch::zero_clone(kfwd);
-
-    // We need to construct using an input StateType argument if we
-    // want StateType==valarray to have the right sizes
-    // valarray compatibility makes this a bit redundant, but not much
-    // worse than the previous version
-    /*! \todo Should we make this work arrays that get passed in so we aren't allocating/deallocating here? */
-    VectorStateType dRfwd_drho_s(this->n_species(), kfwd);
-    VectorStateType dRbkwd_drho_s(this->n_species(), kbkwd);
-
-    Antioch::set_zero(dRfwd_drho_s);
-    Antioch::set_zero(dRbkwd_drho_s);
-
-    StateType kfwd_times_reactants = kfwd;
-    StateType kbkwd_times_products = kbkwd;
-    StateType dkfwd_times_reactants_dT = dkfwd_dT;
-    StateType dkbkwd_times_products_dT = dkbkwd_dT;
-      
-    // pre-fill the participating species partials with the rates
-    for (unsigned int r=0; r< this->n_reactants(); r++)
-      {
-	dRfwd_drho_s[this->reactant_id(r)] = kfwd;
-      }
-    
-    for (unsigned int p=0; p < this->n_products(); p++)
-      {
-	dRbkwd_drho_s[this->product_id(p)] = kbkwd;
-      }
-    
-    // Rfwd & derivatives
-    for (unsigned int ro=0; ro < this->n_reactants(); ro++)
-      {
-	const StateType val = 
-	  pow( molar_densities[this->reactant_id(ro)],
-	       static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
-	  
-	const StateType dval = 
-	  ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
-	    pow( molar_densities[this->reactant_id(ro)],
-		 static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
-	    / chem_mixture.M(this->reactant_id(ro)) );
-	  	  
-	kfwd_times_reactants     *= val;
-	dkfwd_times_reactants_dT *= val;
-
-	for (unsigned int ri=0; ri<this->n_reactants(); ri++)
-	  {
-	    dRfwd_drho_s[this->reactant_id(ri)] *= (ri == ro) ? dval : val;
-	  }
-      }
-
-    // Rbkwd & derivatives
-    for (unsigned int po=0; po< this->n_products(); po++)
-      {
-	const StateType val = 
-	  pow( molar_densities[this->product_id(po)],
-	       static_cast<int>(this->product_stoichiometric_coefficient(po)) );
-	  
-	const StateType dval = 
-	  ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
-	    pow( molar_densities[this->product_id(po)],
-		 static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
-	    / chem_mixture.M(this->product_id(po)) );
-	
-	kbkwd_times_products     *= val;
-	dkbkwd_times_products_dT *= val;
-	
-	for (unsigned int pi=0; pi<this->n_products(); pi++)
-	  {
-	    dRbkwd_drho_s[this->product_id(pi)] *= (pi == po) ? dval : val;
-	  }
-      }
-
-    switch (this->type())
-      {
-	// for elementary reactions the forward and backward
-	// rates of progress are simply the rates times
-	// the product of the reactants, products respectively.
-      case(ReactionType::ELEMENTARY):
-	{
-	  Rfwd  = kfwd_times_reactants;
-	  Rbkwd = kbkwd_times_products;
-
-	  dRfwd_dT  = dkfwd_times_reactants_dT;
-	  dRbkwd_dT = dkbkwd_times_products_dT;
-
-          net_reaction_rate = Rfwd - Rbkwd;
-
-          dnet_rate_dT = dRfwd_dT - dRbkwd_dT;
-          
-          for (unsigned int s=0; s<this->n_species(); s++)
-	    {
-              dnet_rate_drho_s[s] = dRfwd_drho_s[s] - dRbkwd_drho_s[s];
-            }
-
-	  // and the derivatives are already handled.
-	}
-	break;
-	
-	// for threebody reactions we need to include the
-	// contrbution from each collision partner
-      case(ReactionType::THREE_BODY):
-	{
-	  StateType summed_value = this->efficiency(0) * molar_densities[0];
-
-	  for (unsigned int s=1; s < this->n_species(); s++)
-	    {
-	      summed_value += this->efficiency(s) * molar_densities[s];
-	    }
-	  
-	  Rfwd = kfwd_times_reactants * summed_value;
-	  
-	  dRfwd_dT = dkfwd_times_reactants_dT * summed_value;
-	  
-	  Rbkwd = kbkwd_times_products * summed_value;
-	  
-	  dRbkwd_dT = dkbkwd_times_products_dT * summed_value;
-	  
-	  for (unsigned int s=0; s<this->n_species(); s++)
-	    {
-	      dRfwd_drho_s[s]  *= summed_value;
-	      dRbkwd_drho_s[s] *= summed_value;
-	      
-	      // and the efficiency contribution derivative
-	      dRfwd_drho_s[s]  += 
-		this->efficiency(s) / chem_mixture.M(s) * kfwd_times_reactants;
-
-	      dRbkwd_drho_s[s] +=
-		this->efficiency(s) / chem_mixture.M(s) * kbkwd_times_products;
-	    }
-
-          net_reaction_rate = Rfwd - Rbkwd;
-
-          dnet_rate_dT = dRfwd_dT - dRbkwd_dT;
-
-          for (unsigned int s=0; s<this->n_species(); s++)
-	    {
-              dnet_rate_drho_s[s] = dRfwd_drho_s[s] - dRbkwd_drho_s[s];
-            }
-	}
-	break;
-	
-      default:
-	{
-	  std::cerr << "Error: Invalid reaction type " << this->type() << std::endl;
-	  antioch_error();
-	}
-	break;
-      }
 
     return;
   }
@@ -775,28 +617,311 @@ namespace Antioch
     os << "# Gas-Phase Reaction \"" << _equation << "\":\n";
     if (this->n_species())
       {
-	os << "#   reactants: ";
-	for (unsigned int r=0; r<this->n_reactants(); r++)
-	  os << this->reactant_name(r) << ":"
-	     << this->reactant_stoichiometric_coefficient(r) << " ";
-	os << "\n"
-	   << "#   products:  ";
-	for (unsigned int p=0; p<this->n_products(); p++)
-	  os << this->product_name(p) << ":"
-	     << this->product_stoichiometric_coefficient(p) << " ";
+        os << "#   reactants: ";
+        for (unsigned int r=0; r<this->n_reactants(); r++)
+          os << this->reactant_name(r) << ":"
+             << this->reactant_stoichiometric_coefficient(r) << " ";
+        os << "\n"
+           << "#   products:  ";
+        for (unsigned int p=0; p<this->n_products(); p++)
+          os << this->product_name(p) << ":"
+             << this->product_stoichiometric_coefficient(p) << " ";
       }
-    os << "\n#   forward rate eqn: " << _forward_rate;
-    
+    for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
+      {
+        os << "\n#   forward rate eqn: " << *_forward_rate[ir];
+      }
+
     if (_type == ReactionType::THREE_BODY)
       {
-	os << "\n#   efficiencies: ";
-	for (unsigned int s=0; s<this->n_species(); s++)
-	  os << s << ":" << this->efficiency(s) << " ";
+        os << "\n#   efficiencies: ";
+        for (unsigned int s=0; s<this->n_species(); s++)
+          os << s << ":" << this->efficiency(s) << " ";
       }
     os << "\n#";
     return;
   }
-  
+
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  StateType Reaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+                                                                   const StateType& T) const
+  {
+    switch(_type)
+      {
+      case(ReactionType::ELEMENTARY):
+        {
+          return (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
+        break;
+
+      case(ReactionType::DUPLICATE):
+        {
+          return (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
+        break;
+
+      case(ReactionType::THREE_BODY):
+        {
+          return (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
+        break;
+
+      case(ReactionType::LINDEMANN_FALLOFF):
+        {
+          return (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
+        break;
+
+      case(ReactionType::TROE_FALLOFF):
+        {
+          return (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+      } // switch(_type)
+
+    // Dummy
+    return zero_clone(T);
+  }
+
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void Reaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
+                                                                              const StateType& T, 
+                                                                              StateType& kfwd, 
+                                                                              StateType& dkfwd_dT,
+                                                                              VectorStateType& dkfwd_dX) const
+  {
+    switch(_type)
+      {
+      case(ReactionType::ELEMENTARY):
+        {
+          (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
+        break;
+
+      case(ReactionType::DUPLICATE):
+        {
+          (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
+        break;
+
+      case(ReactionType::THREE_BODY):
+        {
+          (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
+        break;
+
+      case(ReactionType::LINDEMANN_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
+        break;
+
+      case(ReactionType::TROE_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(type)
+
+    return;
+  }
+
+  //kfwd *prod_r [R]^nu_r - kbkwd * prod_p [P]^nu_p ( = - 1/nu_r d[R]/dt)
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  StateType Reaction<CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
+                                                           const StateType& T,  
+                                                           const StateType& P0_RT,  
+                                                           const VectorStateType& h_RT_minus_s_R) const
+  {
+    using std::pow;
+
+    StateType kfwd_times_reactants = compute_forward_rate_coefficient(molar_densities,T);
+    StateType Keq = equilibrium_constant( P0_RT, h_RT_minus_s_R );
+    StateType kbkwd_times_products = kfwd_times_reactants/Keq;
+    // Rfwd
+    for (unsigned int ro=0; ro < this->n_reactants(); ro++)
+      {
+        kfwd_times_reactants     *= 
+          pow( molar_densities[this->reactant_id(ro)],
+               static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+      }
+
+    // Rbkwd 
+    for (unsigned int po=0; po< this->n_products(); po++)
+      {
+        kbkwd_times_products     *= 
+          pow( molar_densities[this->product_id(po)],
+               static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+          
+      }
+
+    return kfwd_times_reactants - kbkwd_times_products;
+
+  }
+
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void Reaction<CoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
+                                                                      const ChemicalMixture<CoeffType>& chem_mixture,
+                                                                      const StateType& T,
+                                                                      const StateType &P0_RT,
+                                                                      const VectorStateType &h_RT_minus_s_R,
+                                                                      const VectorStateType &dh_RT_minus_s_R_dT,
+                                                                      StateType& net_reaction_rate,
+                                                                      StateType& dnet_rate_dT,
+                                                                      VectorStateType& dnet_rate_dX_s ) const
+  {
+    using std::pow;
+
+    antioch_assert_equal_to (molar_densities.size(), this->n_species());
+
+
+    StateType kfwd = Antioch::zero_clone(T);
+    StateType dkfwd_dT = Antioch::zero_clone(T);
+    VectorStateType dkfwd_dX_s = Antioch::zero_clone(molar_densities);
+    VectorStateType dkbkwd_dX_s = Antioch::zero_clone(molar_densities);
+
+    compute_forward_rate_coefficient_and_derivatives(molar_densities, T, kfwd, dkfwd_dT ,dkfwd_dX_s);
+
+    StateType keq = Antioch::zero_clone(T);
+    StateType dkeq_dT = Antioch::zero_clone(T);
+
+    equilibrium_constant_and_derivative( T, P0_RT, h_RT_minus_s_R,
+                                         dh_RT_minus_s_R_dT,
+                                         keq, dkeq_dT );
+
+    const StateType kbkwd = kfwd/keq;
+    const StateType dkbkwd_dT = (dkfwd_dT - kbkwd*dkeq_dT)/keq;
+    for(unsigned int s = 0; s < this->n_species(); s++)
+      {
+        dkbkwd_dX_s[s] = dkfwd_dX_s[s]/keq;
+      }
+
+    // If users want to use valarrays, then the output reference sizes
+    // had better already match the input value sizes...
+
+    StateType Rfwd = Antioch::zero_clone(kfwd);
+    StateType dRfwd_dT = Antioch::zero_clone(kbkwd);
+    StateType Rbkwd = Antioch::zero_clone(dkfwd_dT);
+    StateType dRbkwd_dT = Antioch::zero_clone(dkbkwd_dT);
+
+    // We need to construct using an input StateType argument if we
+    // want StateType==valarray to have the right sizes
+    // valarray compatibility makes this a bit redundant, but not much
+    // worse than the previous version
+    /*! \todo Should we make this work arrays that get passed in so we aren't allocating/deallocating here? */
+    VectorStateType dRfwd_dX_s(this->n_species(), kfwd);
+    VectorStateType dRbkwd_dX_s(this->n_species(), kbkwd);
+
+    Antioch::set_zero(dRfwd_dX_s);
+    Antioch::set_zero(dRbkwd_dX_s);
+
+    // pre-fill the participating species partials with the rates
+    for (unsigned int r=0; r< this->n_reactants(); r++)
+      {
+        dRfwd_dX_s[this->reactant_id(r)] = kfwd;
+      }
+    
+    for (unsigned int p=0; p < this->n_products(); p++)
+      {
+        dRbkwd_dX_s[this->product_id(p)] = kbkwd;
+      }
+
+    //init
+    Rfwd = kfwd;
+    dRfwd_dT = dkfwd_dT;
+    Rbkwd = kbkwd;
+    dRbkwd_dT = dkbkwd_dT;
+
+    // Rfwd & derivatives
+    for (unsigned int ro=0; ro < this->n_reactants(); ro++)
+      {
+        const StateType val = 
+          pow( molar_densities[this->reactant_id(ro)],
+               static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+          
+        const StateType dval = 
+          ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
+            pow( molar_densities[this->reactant_id(ro)],
+                 static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
+            );
+
+        Rfwd     *= val;
+        dRfwd_dT *= val;
+
+        for (unsigned int ri=0; ri<this->n_reactants(); ri++)
+          {
+            dRfwd_dX_s[this->reactant_id(ri)] *= (ri == ro) ? dval : val;
+          }
+      }
+
+    const StateType facfwd = Rfwd/kfwd;
+    for (unsigned int s = 0; s < this->n_species(); s++)
+      {
+        dRfwd_dX_s[s] += facfwd * dkfwd_dX_s[s];
+      }
+
+
+    // Rbkwd & derivatives
+    for (unsigned int po=0; po< this->n_products(); po++)
+      {
+        const StateType val = 
+          pow( molar_densities[this->product_id(po)],
+               static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+          
+        const StateType dval = 
+          ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
+            pow( molar_densities[this->product_id(po)],
+                 static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
+            );
+        
+        Rbkwd     *= val;
+        dRbkwd_dT *= val;
+
+        for (unsigned int pi=0; pi<this->n_products(); pi++)
+          {
+            dRbkwd_dX_s[this->product_id(pi)] *= (pi == po) ? dval : val;
+          }
+        
+      }
+
+    const StateType facbkwd = Rbkwd/kbkwd;
+
+    for (unsigned int s = 0; s < this->n_species(); s++)
+      {
+        dRbkwd_dX_s[s] += facbkwd * dkbkwd_dX_s[s];
+      }
+
+    net_reaction_rate = Rfwd - Rbkwd;
+
+    dnet_rate_dT = dRfwd_dT - dRbkwd_dT;
+
+    for (unsigned int s = 0; s < this->n_species(); s++)
+      {
+        dnet_rate_dX_s[s] = dRfwd_dX_s[s] - dRbkwd_dX_s[s];
+      }
+
+    return;
+  }
+    
 } // namespace Antioch
 
 #endif // ANTIOCH_REACTION_H

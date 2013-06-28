@@ -20,28 +20,8 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_REACTION_ENUM_H
-#define ANTIOCH_REACTION_ENUM_H
 
 namespace Antioch
 {
-  namespace ReactionType
-  {
-
-    enum ReactionType { ELEMENTARY = 0,
-                        DUPLICATE,
-                        THREE_BODY, 
-                        LINDEMANN_FALLOFF,
-                        TROE_FALLOFF};
-
-  } // end namespace ReactionType
-
 } // end namespace Antioch
-
-#endif // ANTIOCH_REACTION_ENUM_H

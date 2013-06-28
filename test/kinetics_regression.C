@@ -62,15 +62,15 @@ int tester(const std::string& input_name)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  const Scalar T = 1500.0;
-  const Scalar P = 1.0e5;
+  const Scalar T = 1500.0; // K
+  const Scalar P = 1.0e5; // Pa
 
   // Mass fractions
   std::vector<Scalar> Y(n_species,0.2);
 
-  const Scalar R_mix = chem_mixture.R(Y);
+  const Scalar R_mix = chem_mixture.R(Y); // get R_tot in J.kg-1.K-1
 
-  const Scalar rho = P/(R_mix*T);
+  const Scalar rho = P/(R_mix*T); // kg.m-3
 
   std::vector<Scalar> molar_densities(n_species,0.0);
   chem_mixture.molar_densities(rho,Y,molar_densities);
@@ -94,17 +94,10 @@ int tester(const std::string& input_name)
       domega_dot_drho_s[s].resize(n_species);
     }
   
-  kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+  kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot);
 
-  kinetics.compute_mass_sources_and_derivs( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
+  kinetics.compute_mass_sources_and_derivs( T, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                             omega_dot_2, domega_dot_dT, domega_dot_drho_s );
-
-  for( unsigned int s = 0; s < n_species; s++)
-    {
-      std::cout << std::scientific << std::setprecision(16)
-		<< "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = "
-		<< omega_dot[s] << std::endl;
-    }
 
   for( unsigned int s = 0; s < n_species; s++)
     {

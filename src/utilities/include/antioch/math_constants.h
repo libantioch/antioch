@@ -20,28 +20,25 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_REACTION_ENUM_H
-#define ANTIOCH_REACTION_ENUM_H
+#ifndef ANTIOCH_MATH_CONSTANTS_H
+#define ANTIOCH_MATH_CONSTANTS_H
 
 namespace Antioch
 {
-  namespace ReactionType
+  namespace Constants
   {
+    /*!
+     * Universal Gas Constant, R, expressed in J/(kmol-K)
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType log10_to_log()
+    {
+      return 1.0L/std::log(10.0L);
+    }
 
-    enum ReactionType { ELEMENTARY = 0,
-                        DUPLICATE,
-                        THREE_BODY, 
-                        LINDEMANN_FALLOFF,
-                        TROE_FALLOFF};
-
-  } // end namespace ReactionType
-
+  } // end namespace Constants
 } // end namespace Antioch
 
-#endif // ANTIOCH_REACTION_ENUM_H
+#endif //ANTIOCH_MATH_CONSTANTS_H

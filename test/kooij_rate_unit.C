@@ -21,28 +21,30 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id$
+// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#include "antioch/arrhenius_rate.h"
+#include "antioch/kooij_rate.h"
 
 template <typename Scalar>
 int tester()
 {
   using std::abs;
   using std::exp;
+  using std::pow;
 
   const Scalar Cf = 1.4;
+  const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea,1.);
+  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea,1.,1.);
 
   const Scalar T = 1500.1;
   
-  const Scalar rate_exact = Cf*exp(-Ea/T);
-  const Scalar derive_exact = Ea/(T*T) * Cf * exp(-Ea/T);
+  const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
+  const Scalar derive_exact = exp(-Ea/T) * pow(T,eta) * Cf/T * (Ea/T + eta );
 
   int return_flag = 0;
 
@@ -51,7 +53,7 @@ int tester()
 
   const Scalar tol = 1.0e-15;
 
-  arrhenius_rate.rate_and_derivative(T,rate,deriveRate);
+  kooij_rate.rate_and_derivative(T,rate,deriveRate);
 
   if( abs( (rate - rate_exact)/rate_exact ) > tol )
     {
@@ -64,7 +66,7 @@ int tester()
     }
   if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
     {
-	  std::cout << std::scientific << std::setprecision(16)
+      std::cout << std::scientific << std::setprecision(16)
                 << "Error: Mismatch in rate derivative values." << std::endl
 		<< "drate_dT(T) = " << deriveRate << std::endl
 		<< "derive_exact = " << derive_exact << std::endl;
@@ -72,7 +74,7 @@ int tester()
       return_flag = 1;
     }
 
-  std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
+  std::cout << "Kooij rate: " << kooij_rate << std::endl;
 
   return return_flag;
 }
