@@ -48,39 +48,46 @@
 
 namespace Antioch
 {
-template <typename CoeffType>
-class ElementaryReaction;
-template <typename CoeffType>
-class DuplicateReaction;
-template <typename CoeffType>
-class ThreeBodyReaction;
-template <typename CoeffType>
-class ElementaryReaction;
-template <typename CoeffType,typename FalloffType>
-class FalloffReaction;
-template <typename CoeffType>
-class LindemannFalloff;
-template <typename CoeffType>
-class TroeFalloff;
+  // Forward declarations
+  template <typename CoeffType>
+  class ElementaryReaction;
+
+  template <typename CoeffType>
+  class DuplicateReaction;
+
+  template <typename CoeffType>
+  class ThreeBodyReaction;
+
+  template <typename CoeffType>
+  class ElementaryReaction;
+
+  template <typename CoeffType,typename FalloffType>
+  class FalloffReaction;
+
+  template <typename CoeffType>
+  class LindemannFalloff;
+
+  template <typename CoeffType>
+  class TroeFalloff;
 
   //!A single reaction mechanism. 
   /*!\class Reaction
- *
-    This virtual base is derived for the following processes:
-        - elementary process,
-        - duplicate process,
-        - falloff processes with:
-                - Lindemann falloff,
-                - Troe falloff.
-    This class encapsulates a kinetics model.  The choosable kinetics models are
-        - Hercourt Hessen \f$\alpha(T) = A T^\beta\f$
-        - Berthelot \f$\alpha(T) = A \exp\left(D T\right)\f$
-        - Arrhenius \f$\alpha(T) = A \exp\left(-\frac{E_a}{T}\right)\f$
-        - Berthelot Hercourt Hessen \f$\alpha(T) = A T^\beta \exp\left(D T\right)\f$
-        - Kooij \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T}\right)\f$
-        - Van't Hoff \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T} + D T\right)\f$
-    All reactions are assumed to be reversible. 
-    By default, we choose an elementary process with a Kooij equation.
+   *
+   This virtual base is derived for the following processes:
+   - elementary process,
+   - duplicate process,
+   - falloff processes with:
+   - Lindemann falloff,
+   - Troe falloff.
+   This class encapsulates a kinetics model.  The choosable kinetics models are
+   - Hercourt Hessen \f$\alpha(T) = A T^\beta\f$
+   - Berthelot \f$\alpha(T) = A \exp\left(D T\right)\f$
+   - Arrhenius \f$\alpha(T) = A \exp\left(-\frac{E_a}{T}\right)\f$
+   - Berthelot Hercourt Hessen \f$\alpha(T) = A T^\beta \exp\left(D T\right)\f$
+   - Kooij \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T}\right)\f$
+   - Van't Hoff \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T} + D T\right)\f$
+   All reactions are assumed to be reversible. 
+   By default, we choose an elementary process with a Kooij equation.
   */
   template<typename CoeffType=double>
   class Reaction
@@ -88,7 +95,9 @@ class TroeFalloff;
   public:
 
     //! Construct a single reaction mechanism.
-    Reaction( const unsigned int n_species, const std::string &equation, const ReactionType::ReactionType type = ReactionType::ELEMENTARY, const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
+    Reaction( const unsigned int n_species, const std::string &equation,
+              const ReactionType::ReactionType type = ReactionType::ELEMENTARY,
+              const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
     virtual ~Reaction();
 
@@ -178,12 +187,12 @@ class TroeFalloff;
                                               StateType& dkeq_dT) const;
 
 
-//// in reaction set
+    //// in reaction set
 
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                        const StateType& T) const;
+                                                const StateType& T) const;
     
     //!
     template <typename StateType, typename VectorStateType>
@@ -192,12 +201,12 @@ class TroeFalloff;
                                                            StateType& kfwd, 
                                                            StateType& dkfwd_dT,
                                                            VectorStateType& dkfwd_dX) const;
-////
+    ////
     template <typename StateType, typename VectorStateType>
     StateType compute_rate_of_progress( const VectorStateType& molar_densities,
-                                   const StateType& T,  
-                                   const StateType& P0_RT,  
-                                   const VectorStateType& h_RT_minus_s_R) const;
+                                        const StateType& T,  
+                                        const StateType& P0_RT,  
+                                        const VectorStateType& h_RT_minus_s_R) const;
 
     template <typename StateType, typename VectorStateType>
     void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
@@ -294,8 +303,8 @@ class TroeFalloff;
   inline
   void Reaction<CoeffType>::set_kinetics_model( const KineticsModel::KineticsModel kin)
   {
-     _kintype = kin;
-     return;
+    _kintype = kin;
+    return;
   }
 
   template<typename CoeffType>
@@ -478,7 +487,11 @@ class TroeFalloff;
   inline
   Reaction<CoeffType>::~Reaction()
   {
-    for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)delete _forward_rate[ir];
+    for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
+      {
+        delete _forward_rate[ir];
+      }
+
     return;
   }
 
@@ -615,9 +628,9 @@ class TroeFalloff;
              << this->product_stoichiometric_coefficient(p) << " ";
       }
     for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
-    {
-      os << "\n#   forward rate eqn: " << *_forward_rate[ir];
-    }
+      {
+        os << "\n#   forward rate eqn: " << *_forward_rate[ir];
+      }
 
     if (_type == ReactionType::THREE_BODY)
       {
@@ -633,71 +646,109 @@ class TroeFalloff;
   template <typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                        const StateType& T) const
+                                                                   const StateType& T) const
   {
-     switch(_type)
-     {
-       case(ReactionType::ELEMENTARY):
-        return static_cast<const ElementaryReaction<CoeffType>*>(this)->ElementaryReaction<CoeffType>::compute_forward_rate_coefficient(molar_densities,T);
+    switch(_type)
+      {
+      case(ReactionType::ELEMENTARY):
+        {
+          return (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
         break;
-       case(ReactionType::DUPLICATE):
-        return static_cast<const DuplicateReaction<CoeffType>*>(this)->DuplicateReaction<CoeffType>::compute_forward_rate_coefficient(molar_densities,T);
+
+      case(ReactionType::DUPLICATE):
+        {
+          return (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
         break;
-       case(ReactionType::THREE_BODY):
-        return static_cast<const ThreeBodyReaction<CoeffType>*>(this)->ThreeBodyReaction<CoeffType>::compute_forward_rate_coefficient(molar_densities,T);
+
+      case(ReactionType::THREE_BODY):
+        {
+          return (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
         break;
-       case(ReactionType::LINDEMANN_FALLOFF):
-        return static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >::compute_forward_rate_coefficient(molar_densities,T);
+
+      case(ReactionType::LINDEMANN_FALLOFF):
+        {
+          return (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
         break;
-       case(ReactionType::TROE_FALLOFF):
-        return static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,TroeFalloff<CoeffType> >::compute_forward_rate_coefficient(molar_densities,T);
+
+      case(ReactionType::TROE_FALLOFF):
+        {
+          return (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
         break;
-       default:
-        antioch_error();
-        break;
-     }
+
+      default:
+        {
+          antioch_error();
+        }
+      } // switch(_type)
+
+    // Dummy
+    return zero_clone(T);
   }
 
   template<typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
   void Reaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const StateType& T, 
-                                                           StateType& kfwd, 
-                                                           StateType& dkfwd_dT,
-                                                           VectorStateType& dkfwd_dX) const
+                                                                              const StateType& T, 
+                                                                              StateType& kfwd, 
+                                                                              StateType& dkfwd_dT,
+                                                                              VectorStateType& dkfwd_dX) const
   {
-     switch(_type)
-     {
-       case(ReactionType::ELEMENTARY):
-        return static_cast<const ElementaryReaction<CoeffType>*>(this)->ElementaryReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+    switch(_type)
+      {
+      case(ReactionType::ELEMENTARY):
+        {
+          (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
         break;
-       case(ReactionType::DUPLICATE):
-        return static_cast<const DuplicateReaction<CoeffType>*>(this)->DuplicateReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+
+      case(ReactionType::DUPLICATE):
+        {
+          (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
         break;
-       case(ReactionType::THREE_BODY):
-        return static_cast<const ThreeBodyReaction<CoeffType>*>(this)->ThreeBodyReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+
+      case(ReactionType::THREE_BODY):
+        {
+          (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
         break;
-       case(ReactionType::LINDEMANN_FALLOFF):
-        return static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+
+      case(ReactionType::LINDEMANN_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
         break;
-       case(ReactionType::TROE_FALLOFF):
-        return static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this)->FalloffReaction<CoeffType,TroeFalloff<CoeffType> >::compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+
+      case(ReactionType::TROE_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
         break;
-       default:
-        antioch_error();
-        break;
-     }
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(type)
+
+    return;
   }
 
-//kfwd *prod_r [R]^nu_r - kbkwd * prod_p [P]^nu_p ( = - 1/nu_r d[R]/dt)
+  //kfwd *prod_r [R]^nu_r - kbkwd * prod_p [P]^nu_p ( = - 1/nu_r d[R]/dt)
   template<typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
-                                   const StateType& T,  
-                                   const StateType& P0_RT,  
-                                   const VectorStateType& h_RT_minus_s_R) const
+                                                           const StateType& T,  
+                                                           const StateType& P0_RT,  
+                                                           const VectorStateType& h_RT_minus_s_R) const
   {
     StateType kfwd_times_reactants = compute_forward_rate_coefficient(molar_densities,T);
     StateType Keq = equilibrium_constant( P0_RT, h_RT_minus_s_R );
@@ -719,7 +770,7 @@ class TroeFalloff;
           
       }
 
-      return kfwd_times_reactants - kbkwd_times_products;
+    return kfwd_times_reactants - kbkwd_times_products;
 
   }
 
@@ -758,9 +809,9 @@ class TroeFalloff;
     const StateType kbkwd = kfwd/keq;
     const StateType dkbkwd_dT = (dkfwd_dT - kbkwd*dkeq_dT)/keq;
     for(unsigned int s = 0; s < this->n_species(); s++)
-    {
-      dkbkwd_dX_s[s] = dkfwd_dX_s[s]/keq;
-    }
+      {
+        dkbkwd_dX_s[s] = dkfwd_dX_s[s]/keq;
+      }
 
     // If users want to use valarrays, then the output reference sizes
     // had better already match the input value sizes...
@@ -791,6 +842,7 @@ class TroeFalloff;
       {
         dRbkwd_dX_s[this->product_id(p)] = kbkwd;
       }
+
     //init
     Rfwd = kfwd;
     dRfwd_dT = dkfwd_dT;
@@ -808,7 +860,7 @@ class TroeFalloff;
           ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
             pow( molar_densities[this->reactant_id(ro)],
                  static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
-           );
+            );
 
         Rfwd     *= val;
         dRfwd_dT *= val;
@@ -822,7 +874,7 @@ class TroeFalloff;
     const StateType facfwd = Rfwd/kfwd;
     for (unsigned int s = 0; s < this->n_species(); s++)
       {
-         dRfwd_dX_s[s] += facfwd * dkfwd_dX_s[s];
+        dRfwd_dX_s[s] += facfwd * dkfwd_dX_s[s];
       }
 
 
@@ -837,7 +889,7 @@ class TroeFalloff;
           ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
             pow( molar_densities[this->product_id(po)],
                  static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
-           );
+            );
         
         Rbkwd     *= val;
         dRbkwd_dT *= val;
@@ -850,9 +902,10 @@ class TroeFalloff;
       }
 
     const StateType facbkwd = Rbkwd/kbkwd;
+
     for (unsigned int s = 0; s < this->n_species(); s++)
       {
-         dRbkwd_dX_s[s] += facbkwd * dkbkwd_dX_s[s];
+        dRbkwd_dX_s[s] += facbkwd * dkbkwd_dX_s[s];
       }
 
     net_reaction_rate = Rfwd - Rbkwd;
@@ -861,7 +914,7 @@ class TroeFalloff;
 
     for (unsigned int s = 0; s < this->n_species(); s++)
       {
-         dnet_rate_dX_s[s] = dRfwd_dX_s[s] - dRbkwd_dX_s[s];
+        dnet_rate_dX_s[s] = dRfwd_dX_s[s] - dRbkwd_dX_s[s];
       }
 
     return;
