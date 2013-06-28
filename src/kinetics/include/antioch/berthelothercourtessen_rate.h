@@ -79,6 +79,8 @@ namespace Antioch
 
   private:
 
+    void compute_cf();
+
     CoeffType _raw_Cf;
     CoeffType _Cf;
     CoeffType _eta;
@@ -96,7 +98,7 @@ namespace Antioch
       _Tref(Tref)
   {
     using std::pow;
-    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+    this->compute_cf();
     return;
   }
 
@@ -124,7 +126,7 @@ namespace Antioch
   {
     using std::pow;
     _raw_Cf = Cf;
-    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+    this->compute_cf();
     return;
   }
 
@@ -134,7 +136,7 @@ namespace Antioch
   {
     using std::pow;
     _Tref = Tref;
-    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+    this->compute_cf();
     return;
   }
 
@@ -211,6 +213,14 @@ namespace Antioch
   {
     rate     = (*this)(T);
     drate_dT = rate*(_eta/T + _D);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::compute_cf()
+  {
+    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
     return;
   }
 
