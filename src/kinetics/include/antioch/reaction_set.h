@@ -313,18 +313,18 @@ namespace Antioch
     //filling matrixes
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        const Reaction<CoeffType>* reaction = this->reaction(rxn);
-        for (unsigned int r=0; r<reaction->n_reactants(); r++)
+        const Reaction<CoeffType>& reaction = this->reaction(rxn);
+        for (unsigned int r=0; r<reaction.n_reactants(); r++)
           {
-            lossMatrix[reaction->reactant_id(r)][rxn] += - static_cast<CoeffType>(reaction->reactant_stoichiometric_coefficient(r)) * kfwd[rxn];
-            prodMatrix[reaction->reactant_id(r)][rxn] +=   static_cast<CoeffType>(reaction->reactant_stoichiometric_coefficient(r)) * kbkwd[rxn];
-            netMatrix[reaction->reactant_id(r)][rxn]  +=   lossMatrix[reaction->reactant_id(r)][rxn] + prodMatrix[reaction->reactant_id(r)][rxn];
+            lossMatrix[reaction.reactant_id(r)][rxn] += - static_cast<CoeffType>(reaction.reactant_stoichiometric_coefficient(r)) * kfwd[rxn];
+            prodMatrix[reaction.reactant_id(r)][rxn] +=   static_cast<CoeffType>(reaction.reactant_stoichiometric_coefficient(r)) * kbkwd[rxn];
+            netMatrix[reaction.reactant_id(r)][rxn]  +=   lossMatrix[reaction.reactant_id(r)][rxn] + prodMatrix[reaction.reactant_id(r)][rxn];
           }
-        for (unsigned int p=0; p<reaction->n_products(); p++)
+        for (unsigned int p=0; p<reaction.n_products(); p++)
           {
-            lossMatrix[reaction->product_id(p)][rxn] += - static_cast<CoeffType>(reaction->product_stoichiometric_coefficient(p)) * kbkwd[rxn];
-            prodMatrix[reaction->product_id(p)][rxn] +=   static_cast<CoeffType>(reaction->product_stoichiometric_coefficient(p)) * kfwd[rxn];
-            netMatrix[reaction->product_id(p)][rxn]  +=   lossMatrix[reaction->product_id(p)][rxn] + prodMatrix[reaction->product_id(p)][rxn];
+            lossMatrix[reaction.product_id(p)][rxn] += - static_cast<CoeffType>(reaction.product_stoichiometric_coefficient(p)) * kbkwd[rxn];
+            prodMatrix[reaction.product_id(p)][rxn] +=   static_cast<CoeffType>(reaction.product_stoichiometric_coefficient(p)) * kfwd[rxn];
+            netMatrix[reaction.product_id(p)][rxn]  +=   lossMatrix[reaction.product_id(p)][rxn] + prodMatrix[reaction.product_id(p)][rxn];
           }
       }
 
@@ -564,24 +564,24 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-        const Reaction<CoeffType>* reaction = this->reaction(rxn);
-        kfwdCoeff[rxn] = reaction->compute_forward_rate_coefficient(molar_densities,T);
+        const Reaction<CoeffType>& reaction = this->reaction(rxn);
+        kfwdCoeff[rxn] = reaction.compute_forward_rate_coefficient(molar_densities,T);
         kfwd[rxn] = kfwdCoeff[rxn];
-        StateType keq = reaction->equilibrium_constant( P0_RT, h_RT_minus_s_R );
+        StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
         kbkwdCoeff[rxn] = kfwdCoeff[rxn]/keq;
         kbkwd[rxn] = kbkwdCoeff[rxn];
 
-        for (unsigned int r=0; r<reaction->n_reactants(); r++)
+        for (unsigned int r=0; r<reaction.n_reactants(); r++)
           {
-            fwdC[rxn] *= pow( molar_densities[reaction->reactant_id(r)],
-                              static_cast<int>(reaction->reactant_stoichiometric_coefficient(r)) );
+            fwdC[rxn] *= pow( molar_densities[reaction.reactant_id(r)],
+                              static_cast<int>(reaction.reactant_stoichiometric_coefficient(r)) );
           }
         kfwd[rxn] *= fwdC[rxn];
-        for (unsigned int p=0; p<reaction->n_products(); p++)
+        for (unsigned int p=0; p<reaction.n_products(); p++)
           {
-            bkwdC[rxn] *= pow( molar_densities[reaction->product_id(p)],
-                               static_cast<int>(reaction->product_stoichiometric_coefficient(p)) );
+            bkwdC[rxn] *= pow( molar_densities[reaction.product_id(p)],
+                               static_cast<int>(reaction.product_stoichiometric_coefficient(p)) );
           }
         kbkwd[rxn] *= bkwdC[rxn];
 
