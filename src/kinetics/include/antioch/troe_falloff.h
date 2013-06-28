@@ -33,7 +33,7 @@ namespace Antioch{
  *
  * The Troe falloff model is defined by:
  * \f[
- *     \log_{10}\left(F\left) = \log_{10}\left(F_{\text{cent}}\right) / 
+ *     \log_{10}\left(F\right) = \log_{10}\left(F_{\text{cent}}\right) / 
  *                               \left[ 
  *                                      1 + \left(
  *                                                 \frac{\log_{10}\left(P_r\right) + c}
