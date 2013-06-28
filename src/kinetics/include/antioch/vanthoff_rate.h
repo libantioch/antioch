@@ -108,7 +108,7 @@ namespace Antioch
   {
     using std::pow;
     _Ea = _raw_Ea / _rscale;
-    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 
@@ -136,7 +136,7 @@ namespace Antioch
   {
     using std::pow;
     _raw_Cf = Cf;
-    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 
@@ -146,7 +146,7 @@ namespace Antioch
   {
     using std::pow;
     _Tref = Tref;
-    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 

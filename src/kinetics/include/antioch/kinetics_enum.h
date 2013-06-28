@@ -58,7 +58,11 @@ namespace Antioch
                          KOOIJ,       // A * T^beta * exp(-Ea/T)
                          VANTHOFF };  // A * T^beta * exp(-Ea/T + D*T)
 
-    const double Tref(1.);// this HAS to stay this way because it is hard-coded for performances (see eq. above)
+    template<typename CoeffType>
+    CoeffType Tref()
+    {
+      return 1.0; // this HAS to stay this way because it is hard-coded for performances (see eq. above)
+    }
 
   } // end namespace KineticsModel
 

@@ -220,7 +220,7 @@ namespace Antioch
   inline
   void BerthelotHercourtEssenRate<CoeffType>::compute_cf()
   {
-    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 
