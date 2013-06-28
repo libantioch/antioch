@@ -44,14 +44,14 @@ namespace Antioch
   Reaction<CoeffType> * get_reaction_ptr( const unsigned int n_species, 
                                           const std::string &equation, 
                                           const ReactionType::ReactionType &type , 
-                                          const KinMod::KinMod &kin );
+                                          const KineticsModel::KineticsModel &kin );
 
   template<typename CoeffType>
   inline
   Reaction<CoeffType> * get_reaction_ptr( const unsigned int n_species, 
                                           const std::string &equation, 
                                           const ReactionType::ReactionType &type , 
-                                          const KinMod::KinMod &kin )
+                                          const KineticsModel::KineticsModel &kin )
   {
      switch(type)
      {

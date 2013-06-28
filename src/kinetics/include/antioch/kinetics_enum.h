@@ -48,10 +48,10 @@
  */
 namespace Antioch
 {
-  namespace KinMod
+  namespace KineticsModel
   {
 
-    enum KinMod { HERCOURT_ESSEN = 0,// A * T^beta
+    enum KineticsModel { HERCOURT_ESSEN = 0,// A * T^beta
 			BERTHELOT,   // A * exp(D*T)
                         ARRHENIUS,   // A * exp(-Ea/T)
                         BHE,         // A * T^beta * exp(D*T)
@@ -60,7 +60,7 @@ namespace Antioch
 
     const double Tref(1.);// this HAS to stay this way because it is hard-coded for performances (see eq. above)
 
-  } // end namespace KinMod
+  } // end namespace KineticsModel
 
 } // end namespace Antioch
 

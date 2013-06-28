@@ -42,22 +42,22 @@ namespace Antioch
   {
       switch (my_type) 
       {
-      case KinMod::HERCOURT_ESSEN:
+      case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate(T);
         break;
-      case KinMod::BERTHELOT:
+      case KineticsModel::BERTHELOT:
         return (static_cast<BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::rate(T);
         break;
-      case KinMod::ARRHENIUS:
+      case KineticsModel::ARRHENIUS:
         return (static_cast<ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::rate(T);
         break;
-      case KinMod::BHE:
+      case KineticsModel::BHE:
         return (static_cast<BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::rate(T);
         break;
-      case KinMod::KOOIJ:
+      case KineticsModel::KOOIJ:
         return (static_cast<KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::rate(T);
         break;
-      case KinMod::VANTHOFF:
+      case KineticsModel::VANTHOFF:
         return (static_cast<VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::rate(T);
         break;
       default:
@@ -73,22 +73,22 @@ namespace Antioch
   {
       switch (my_type) 
       {
-      case KinMod::HERCOURT_ESSEN:
+      case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::derivative(T);
         break;
-      case KinMod::BERTHELOT:
+      case KineticsModel::BERTHELOT:
         return (static_cast<BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::derivative(T);
         break;
-      case KinMod::ARRHENIUS:
+      case KineticsModel::ARRHENIUS:
         return (static_cast<ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::derivative(T);
         break;
-      case KinMod::BHE:
+      case KineticsModel::BHE:
         return (static_cast<BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::derivative(T);
         break;
-      case KinMod::KOOIJ:
+      case KineticsModel::KOOIJ:
         return (static_cast<KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::derivative(T);
         break;
-      case KinMod::VANTHOFF:
+      case KineticsModel::VANTHOFF:
         return (static_cast<VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::derivative(T);
         break;
       default:
@@ -104,22 +104,22 @@ namespace Antioch
   {
       switch (my_type) 
       {
-      case KinMod::HERCOURT_ESSEN:
+      case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::BERTHELOT:
+      case KineticsModel::BERTHELOT:
         return (static_cast<BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::ARRHENIUS:
+      case KineticsModel::ARRHENIUS:
         return (static_cast<ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::BHE:
+      case KineticsModel::BHE:
         return (static_cast<BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::KOOIJ:
+      case KineticsModel::KOOIJ:
         return (static_cast<KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::VANTHOFF:
+      case KineticsModel::VANTHOFF:
         return (static_cast<VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
       default:

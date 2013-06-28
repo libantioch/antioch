@@ -55,7 +55,7 @@ class VantHoffRate;
 template <typename CoeffType>
 class KineticsType{
    public:
-      KineticsType(const KinMod::KinMod type);
+      KineticsType(const KineticsModel::KineticsModel type);
       virtual ~KineticsType();
 
     //!\return error because I cannot make it pure virtual.
@@ -83,7 +83,7 @@ class KineticsType{
     }
 
    private:
-   KinMod::KinMod my_type;
+   KineticsModel::KineticsModel my_type;
 };
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -96,7 +96,7 @@ class KineticsType{
 
   template <typename CoeffType>
   inline
-  KineticsType<CoeffType>::KineticsType(const KinMod::KinMod type):
+  KineticsType<CoeffType>::KineticsType(const KineticsModel::KineticsModel type):
     my_type(type)
   {
       return;
@@ -116,22 +116,22 @@ class KineticsType{
   {
       switch (my_type) 
       {
-      case KinMod::HERCOURT_ESSEN:
+      case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate(T);
         break;
-      case KinMod::BERTHELOT:
+      case KineticsModel::BERTHELOT:
         return (static_cast<const BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::rate(T);
         break;
-      case KinMod::ARRHENIUS:
+      case KineticsModel::ARRHENIUS:
         return (static_cast<const ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::rate(T);
         break;
-      case KinMod::BHE:
+      case KineticsModel::BHE:
         return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::rate(T);
         break;
-      case KinMod::KOOIJ:
+      case KineticsModel::KOOIJ:
         return (static_cast<const KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::rate(T);
         break;
-      case KinMod::VANTHOFF:
+      case KineticsModel::VANTHOFF:
         return (static_cast<const VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::rate(T);
         break;
       default:
@@ -147,22 +147,22 @@ class KineticsType{
   {
       switch (my_type) 
       {
-      case KinMod::HERCOURT_ESSEN:
+      case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::derivative(T);
         break;
-      case KinMod::BERTHELOT:
+      case KineticsModel::BERTHELOT:
         return (static_cast<const BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::derivative(T);
         break;
-      case KinMod::ARRHENIUS:
+      case KineticsModel::ARRHENIUS:
         return (static_cast<const ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::derivative(T);
         break;
-      case KinMod::BHE:
+      case KineticsModel::BHE:
         return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::derivative(T);
         break;
-      case KinMod::KOOIJ:
+      case KineticsModel::KOOIJ:
         return (static_cast<const KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::derivative(T);
         break;
-      case KinMod::VANTHOFF:
+      case KineticsModel::VANTHOFF:
         return (static_cast<const VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::derivative(T);
         break;
       default:
@@ -178,22 +178,22 @@ class KineticsType{
   {
       switch (my_type) 
       {
-      case KinMod::HERCOURT_ESSEN:
+      case KineticsModel::HERCOURT_ESSEN:
         return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->HercourtEssenRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::BERTHELOT:
+      case KineticsModel::BERTHELOT:
         return (static_cast<const BerthelotRate<CoeffType>*>(this))->BerthelotRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::ARRHENIUS:
+      case KineticsModel::ARRHENIUS:
         return (static_cast<const ArrheniusRate<CoeffType>*>(this))->ArrheniusRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::BHE:
+      case KineticsModel::BHE:
         return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->BerthelotHercourtEssenRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::KOOIJ:
+      case KineticsModel::KOOIJ:
         return (static_cast<const KooijRate<CoeffType>*>(this))->KooijRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
-      case KinMod::VANTHOFF:
+      case KineticsModel::VANTHOFF:
         return (static_cast<const VantHoffRate<CoeffType>*>(this))->VantHoffRate<CoeffType>::rate_and_derivative(T,rate,drate_dT);
         break;
       default:

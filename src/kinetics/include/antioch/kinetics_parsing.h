@@ -42,7 +42,7 @@ namespace Antioch
 
   template<typename CoeffType>
   KineticsType<CoeffType> * get_rate_ptr(const std::vector<CoeffType> &data,
-                                         const KinMod::KinMod &kin);
+                                         const KineticsModel::KineticsModel &kin);
 
 
 //! We take here the parameters as:
@@ -54,47 +54,47 @@ namespace Antioch
   template<typename CoeffType>
   inline
   KineticsType<CoeffType> * get_rate_ptr(const std::vector<CoeffType> &data,
-                                         const KinMod::KinMod &kin)
+                                         const KineticsModel::KineticsModel &kin)
   {
      using std::pow;
      switch(kin)
      {
-       case KinMod::HERCOURT_ESSEN:
+       case KineticsModel::HERCOURT_ESSEN:
        {
          antioch_assert_equal_to(3,data.size());
          HercourtEssenRate<CoeffType> * HErate = new HercourtEssenRate<CoeffType>(data[0],data[1],data[2]);//Cf,eta,Tref
          return static_cast<KineticsType<CoeffType>*> (HErate);
          break;
        }
-       case KinMod::BERTHELOT:
+       case KineticsModel::BERTHELOT:
        {
          antioch_assert_equal_to(2,data.size());
          BerthelotRate<CoeffType> * Brate = new BerthelotRate<CoeffType>(data[0],data[1]);// Cf, D
          return static_cast<KineticsType<CoeffType>*> (Brate);
          break;
        }
-       case KinMod::ARRHENIUS:
+       case KineticsModel::ARRHENIUS:
        {
          antioch_assert_equal_to(3,data.size());
          ArrheniusRate<CoeffType> * Arate = new ArrheniusRate<CoeffType>(data[0],data[1],data[2]);//Cf,Ea,scale
          return static_cast<KineticsType<CoeffType>*> (Arate);
          break;
        }
-       case KinMod::BHE:
+       case KineticsModel::BHE:
        {
          antioch_assert_equal_to(4,data.size());
          BerthelotHercourtEssenRate<CoeffType> * BHErate = new BerthelotHercourtEssenRate<CoeffType>(data[0],data[1],data[2],data[3]);//Cf,eta,D,Tref
          return static_cast<KineticsType<CoeffType>*> (BHErate);
          break;
        }
-       case KinMod::KOOIJ:
+       case KineticsModel::KOOIJ:
        {
          antioch_assert_equal_to(5,data.size());
          KooijRate<CoeffType> * Krate = new KooijRate<CoeffType>(data[0],data[1],data[2],data[3],data[4]);//Cf,eta,Ea,Tref,scale
          return static_cast<KineticsType<CoeffType>*> (Krate);
          break;
        }
-       case KinMod::VANTHOFF:
+       case KineticsModel::VANTHOFF:
        {
          antioch_assert_equal_to(6,data.size());
          VantHoffRate<CoeffType> * VHrate = new VantHoffRate<CoeffType>(data[0],data[1],data[2],data[3],data[4],data[5]);//Cf,eta,Ea,D,Tref,scale

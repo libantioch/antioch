@@ -96,7 +96,7 @@ namespace Antioch
 
   template<typename CoeffType>
   KooijRate<CoeffType>::KooijRate(const CoeffType Cf, const CoeffType eta, const CoeffType Ea, const CoeffType Tref, const CoeffType rscale)
-    : KineticsType<CoeffType>(KinMod::KOOIJ),
+    : KineticsType<CoeffType>(KineticsModel::KOOIJ),
       _raw_Cf(Cf),
       _eta(eta),
       _raw_Ea(Ea),
@@ -105,7 +105,7 @@ namespace Antioch
   {
     using std::pow;
     _Ea = _raw_Ea / _rscale;
-    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
     return;
   }
 
@@ -133,7 +133,7 @@ namespace Antioch
   {
     using std::pow;
     _raw_Cf = Cf;
-    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
     return;
   }
 
@@ -143,7 +143,7 @@ namespace Antioch
   {
     using std::pow;
     _Tref = Tref;
-    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
     return;
   }
 

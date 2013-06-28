@@ -84,7 +84,7 @@ namespace Antioch
 
   template<typename CoeffType>
   BerthelotRate<CoeffType>::BerthelotRate(const CoeffType Cf, const CoeffType D)
-    : KineticsType<CoeffType>(KinMod::BERTHELOT),
+    : KineticsType<CoeffType>(KineticsModel::BERTHELOT),
       _Cf(Cf),
       _D(D)
   {

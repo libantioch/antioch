@@ -88,7 +88,7 @@ class TroeFalloff;
   public:
 
     //! Construct a single reaction mechanism.
-    Reaction( const unsigned int n_species, const std::string &equation, const ReactionType::ReactionType type = ReactionType::ELEMENTARY, const KinMod::KinMod kin = KinMod::KOOIJ);
+    Reaction( const unsigned int n_species, const std::string &equation, const ReactionType::ReactionType type = ReactionType::ELEMENTARY, const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
     virtual ~Reaction();
 
@@ -108,10 +108,10 @@ class TroeFalloff;
     void set_type( const ReactionType::ReactionType type);
 
     //! Model of kinetics.
-    KinMod::KinMod kinetics_model() const;
+    KineticsModel::KineticsModel kinetics_model() const;
 
     //! Set the model of kinetics.
-    void set_kinetics_model( const KinMod::KinMod kin);
+    void set_kinetics_model( const KineticsModel::KineticsModel kin);
     
     bool initialized() const;
 
@@ -246,7 +246,7 @@ class TroeFalloff;
     int _gamma;
     bool _initialized;
     ReactionType::ReactionType _type;
-    KinMod::KinMod _kintype;
+    KineticsModel::KineticsModel _kintype;
 
     //! The forward reaction rate modified Arrhenius form.
     std::vector<KineticsType<CoeffType>* > _forward_rate;
@@ -285,14 +285,14 @@ class TroeFalloff;
 
   template<typename CoeffType>
   inline
-  KinMod::KinMod Reaction<CoeffType>::kinetics_model() const
+  KineticsModel::KineticsModel Reaction<CoeffType>::kinetics_model() const
   {
     return _kintype;
   }
 
   template<typename CoeffType>
   inline
-  void Reaction<CoeffType>::set_kinetics_model( const KinMod::KinMod kin)
+  void Reaction<CoeffType>::set_kinetics_model( const KineticsModel::KineticsModel kin)
   {
      _kintype = kin;
      return;
@@ -461,7 +461,7 @@ class TroeFalloff;
   Reaction<CoeffType>::Reaction( const unsigned int n_species,
                                  const std::string &equation, 
                                  const ReactionType::ReactionType type,
-                                 const KinMod::KinMod kin) 
+                                 const KineticsModel::KineticsModel kin) 
     : _n_species(n_species),
       _equation(equation),
       _gamma(0),

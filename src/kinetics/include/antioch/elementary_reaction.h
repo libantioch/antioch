@@ -57,7 +57,7 @@ namespace Antioch
     //! Construct a single reaction mechanism.
     ElementaryReaction( const unsigned int n_species, 
                         const std::string &equation,
-                        const KinMod::KinMod kin = KinMod::KOOIJ);
+                        const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
     ~ElementaryReaction();
 
@@ -83,7 +83,7 @@ namespace Antioch
   inline
   ElementaryReaction<CoeffType>::ElementaryReaction( const unsigned int n_species,
 				 const std::string &equation,
-                                 const KinMod::KinMod kin)
+                                 const KineticsModel::KineticsModel kin)
     :Reaction<CoeffType>(n_species,equation,ReactionType::ELEMENTARY,kin)
   {
     return;

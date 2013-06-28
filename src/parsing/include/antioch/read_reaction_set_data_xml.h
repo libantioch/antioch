@@ -107,7 +107,7 @@ namespace Antioch
 			       << std::endl;
 
         ReactionType::ReactionType typeReaction(ReactionType::ELEMENTARY);
-        KinMod::KinMod kineticsModel(KinMod::KOOIJ);
+        KineticsModel::KineticsModel kineticsModel(KineticsModel::KOOIJ);
 
 	if (reaction->Attribute("type"))
 	  {

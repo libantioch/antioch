@@ -89,14 +89,14 @@ namespace Antioch
 
   template<typename CoeffType>
   BerthelotHercourtEssenRate<CoeffType>::BerthelotHercourtEssenRate(const CoeffType Cf, const CoeffType eta, const CoeffType D, const CoeffType Tref)
-    : KineticsType<CoeffType>(KinMod::BHE),
+    : KineticsType<CoeffType>(KineticsModel::BHE),
       _raw_Cf(Cf),
       _eta(eta),
       _D(D),
       _Tref(Tref)
   {
     using std::pow;
-    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
     return;
   }
 
@@ -124,7 +124,7 @@ namespace Antioch
   {
     using std::pow;
     _raw_Cf = Cf;
-    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
     return;
   }
 
@@ -134,7 +134,7 @@ namespace Antioch
   {
     using std::pow;
     _Tref = Tref;
-    _Cf = _raw_Cf * pow(KinMod::Tref/_Tref,_eta);
+    _Cf = _raw_Cf * pow(KineticsModel::Tref/_Tref,_eta);
     return;
   }
 

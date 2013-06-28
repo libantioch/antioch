@@ -93,7 +93,7 @@ namespace Antioch
 
   template<typename CoeffType>
   ArrheniusRate<CoeffType>::ArrheniusRate(const CoeffType Cf, const CoeffType Ea, const CoeffType rscale)
-    : KineticsType<CoeffType>(KinMod::ARRHENIUS),
+    : KineticsType<CoeffType>(KineticsModel::ARRHENIUS),
       _Cf(Cf),
       _raw_Ea(Ea),
       _rscale(rscale)

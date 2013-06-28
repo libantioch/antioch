@@ -57,7 +57,7 @@ namespace Antioch
     //! Construct a single reaction mechanism.
     ThreeBodyReaction( const unsigned int n_species, 
                        const std::string &equation,
-                       const KinMod::KinMod kin = KinMod::KOOIJ);
+                       const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
     ~ThreeBodyReaction();
 
@@ -83,7 +83,7 @@ namespace Antioch
   inline
   ThreeBodyReaction<CoeffType>::ThreeBodyReaction( const unsigned int n_species,
                                  const std::string &equation ,
-                                 const KinMod::KinMod kin) 
+                                 const KineticsModel::KineticsModel kin) 
     :Reaction<CoeffType>(n_species,equation,ReactionType::THREE_BODY,kin)
   {
     return;

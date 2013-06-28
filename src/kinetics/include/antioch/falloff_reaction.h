@@ -64,7 +64,7 @@ namespace Antioch
     FalloffReaction( const unsigned int n_species,
                      const std::string &equation, 
                      const ReactionType::ReactionType &falloffType = ReactionType::LINDEMANN_FALLOFF,
-                     const KinMod::KinMod kin = KinMod::KOOIJ);
+                     const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
     virtual ~FalloffReaction();
 
@@ -114,7 +114,7 @@ namespace Antioch
   FalloffReaction<CoeffType,FalloffType>::FalloffReaction( const unsigned int n_species,
                                  const std::string &equation,
                                  const ReactionType::ReactionType &falloffType, 
-                                 const KinMod::KinMod kin)
+                                 const KineticsModel::KineticsModel kin)
     :Reaction<CoeffType>(n_species,equation,falloffType,kin),
      _F(n_species)
      
