@@ -79,7 +79,6 @@ namespace Antioch
     //! Compute the rates of progress for each reaction
     template <typename StateType, typename VectorStateType, typename VectorReactionsType>
     void compute_reaction_rates( const StateType& T,
-                                 const VectorStateType& mass_fractions,
                                  const VectorStateType& molar_densities,
                                  const VectorStateType& h_RT_minus_s_R,
                                  VectorReactionsType& net_reaction_rates ) const;
@@ -87,7 +86,6 @@ namespace Antioch
     //! Compute the rates of progress and derivatives for each reaction
     template <typename StateType, typename VectorStateType, typename VectorReactionsType, typename MatrixReactionsType>
     void compute_reaction_rates_and_derivs( const StateType& T,
-                                            const VectorStateType& mass_fractions,
                                             const VectorStateType& molar_densities,
                                             const VectorStateType& h_RT_minus_s_R,
                                             const VectorStateType& dh_RT_minus_s_R_dT,
@@ -100,7 +98,6 @@ namespace Antioch
     template <typename StateType, typename VectorStateType>
     void print_chemical_scheme( std::ostream& output,
                                 const StateType& T,
-                                const VectorStateType& mass_fractions,
                                 const VectorStateType& molar_densities,
                                 const VectorStateType& h_RT_minus_s_R ,
                                 std::vector<VectorStateType> &lossMatrix,
@@ -110,7 +107,6 @@ namespace Antioch
     //!
     template<typename StateType, typename VectorStateType>
     void get_reactive_scheme( const StateType& T,
-                              const VectorStateType& mass_fractions,
                               const VectorStateType& molar_densities,
                               const VectorStateType& h_RT_minus_s_R,
                               VectorStateType& netRates,
@@ -211,7 +207,6 @@ namespace Antioch
   template<typename StateType, typename VectorStateType, typename VectorReactionsType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates ( const StateType& T,
-                                                        const VectorStateType& mass_fractions,
                                                         const VectorStateType& molar_densities,
                                                         const VectorStateType& h_RT_minus_s_R,
                                                         VectorReactionsType& net_reaction_rates ) const
@@ -221,7 +216,6 @@ namespace Antioch
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
 
-    antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
@@ -241,7 +235,6 @@ namespace Antioch
   template<typename StateType, typename VectorStateType, typename VectorReactionsType, typename MatrixReactionsType>
   inline
   void ReactionSet<CoeffType>::compute_reaction_rates_and_derivs( const StateType& T,
-                                                                  const VectorStateType& mass_fractions,
                                                                   const VectorStateType& molar_densities,
                                                                   const VectorStateType& h_RT_minus_s_R,
                                                                   const VectorStateType& dh_RT_minus_s_R_dT,
@@ -263,7 +256,6 @@ namespace Antioch
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
 
-    antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
@@ -288,7 +280,6 @@ namespace Antioch
   inline
   void ReactionSet<CoeffType>::print_chemical_scheme( std::ostream& output,
                                                       const StateType& T,
-                                                      const VectorStateType& mass_fractions,
                                                       const VectorStateType& molar_densities,
                                                       const VectorStateType& h_RT_minus_s_R,
                                                       std::vector<VectorStateType>& lossMatrix,
@@ -300,7 +291,7 @@ namespace Antioch
     VectorStateType netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC;
 
     //getting reaction infos
-    get_reactive_scheme(T,mass_fractions,molar_densities,h_RT_minus_s_R,netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC);
+    get_reactive_scheme(T,molar_densities,h_RT_minus_s_R,netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC);
 
     lossMatrix.resize(this->n_species());
     prodMatrix.resize(this->n_species());
@@ -534,7 +525,6 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   void ReactionSet<CoeffType>::get_reactive_scheme( const StateType& T,
-                                                    const VectorStateType& mass_fractions,
                                                     const VectorStateType& molar_densities,
                                                     const VectorStateType& h_RT_minus_s_R,
                                                     VectorStateType& netRates,
@@ -548,7 +538,6 @@ namespace Antioch
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
 
-    antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 

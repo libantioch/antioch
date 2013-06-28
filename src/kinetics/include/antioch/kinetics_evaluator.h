@@ -71,7 +71,6 @@ namespace Antioch
     //in \f$ \left(kg/sec/m^3\right)\f$
     template <typename VectorStateType>
     void compute_mass_sources( const StateType& T,
-                               const VectorStateType& mass_fractions,
                                const VectorStateType& molar_densities,
                                const VectorStateType& h_RT_minus_s_R,
                                VectorStateType& mass_sources );
@@ -80,7 +79,6 @@ namespace Antioch
     //in \f$ \left(kg/sec/m^3\right)\f$
     template <typename VectorStateType>
     void compute_mass_sources_and_derivs( const StateType& T,
-                                          const VectorStateType& mass_fractions,
                                           const VectorStateType& molar_densities,
                                           const VectorStateType& h_RT_minus_s_R,
                                           const VectorStateType& dh_RT_minus_s_R_dT,
@@ -161,14 +159,12 @@ namespace Antioch
   template<typename VectorStateType>
   inline
   void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources( const StateType& T,
-                                                                     const VectorStateType& mass_fractions,
                                                                      const VectorStateType& molar_densities,
                                                                      const VectorStateType& h_RT_minus_s_R,
                                                                      VectorStateType& mass_sources )
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
-    antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( mass_sources.size(), this->n_species() );
@@ -179,7 +175,7 @@ namespace Antioch
     Antioch::set_zero(mass_sources);
 
     // compute the requisite reaction rates
-    this->_reaction_set.compute_reaction_rates( T, mass_fractions, molar_densities,
+    this->_reaction_set.compute_reaction_rates( T, molar_densities,
 						h_RT_minus_s_R, _net_reaction_rates );
 
     // compute the actual mass sources in kmol/sec/m^3
@@ -221,7 +217,6 @@ namespace Antioch
   template <typename VectorStateType>
   inline
   void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources_and_derivs( const StateType& T,
-                                                                                const VectorStateType& mass_fractions,
                                                                                 const VectorStateType& molar_densities,
                                                                                 const VectorStateType& h_RT_minus_s_R,
                                                                                 const VectorStateType& dh_RT_minus_s_R_dT,
@@ -231,7 +226,6 @@ namespace Antioch
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
-    antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( dh_RT_minus_s_R_dT.size(), this->n_species() );
@@ -261,7 +255,7 @@ namespace Antioch
       }
 
     // compute the requisite reaction rates
-    this->_reaction_set.compute_reaction_rates_and_derivs( T, mass_fractions, molar_densities, 
+    this->_reaction_set.compute_reaction_rates_and_derivs( T, molar_densities, 
                                                            h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                                            _net_reaction_rates,
                                                            _dnet_rate_dT, 

@@ -157,7 +157,7 @@ int vectester(const std::string& input_name,
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testnormal);

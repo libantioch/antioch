@@ -94,9 +94,9 @@ int tester(const std::string& input_name)
       domega_dot_drho_s[s].resize(n_species);
     }
   
-  kinetics.compute_mass_sources( T, Y, molar_densities, h_RT_minus_s_R, omega_dot);
+  kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot);
 
-  kinetics.compute_mass_sources_and_derivs( T, Y, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
+  kinetics.compute_mass_sources_and_derivs( T, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                             omega_dot_2, domega_dot_dT, domega_dot_drho_s );
 
   for( unsigned int s = 0; s < n_species; s++)
