@@ -505,7 +505,7 @@ FILE_VERSION_FILTER    =
 # file name after the option, if omitted DoxygenLayout.xml will be used as the name 
 # of the layout file.
 
-LAYOUT_FILE            = /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/docs.layout
+LAYOUT_FILE            = @abs_top_srcdir@/doxygen/docs.layout
 
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
@@ -567,13 +567,13 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/src                  \
-                         /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/test                 \
-		       	 /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/antioch.page \
-			 /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/txt_common/about_vpath.page \
-			 /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/txt_common/acknowledgement.page \
-			 /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/txt_common/lgpl.page \
-			 /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/txt_common/noop.page
+INPUT                  = @abs_top_srcdir@/src                  \
+                         @abs_top_srcdir@/test                 \
+		       	 @abs_top_srcdir@/doxygen/antioch.page \
+			 @abs_top_builddir@/doxygen/txt_common/about_vpath.page \
+			 @abs_top_srcdir@/doxygen/txt_common/acknowledgement.page \
+			 @abs_top_srcdir@/doxygen/txt_common/lgpl.page \
+			 @abs_top_srcdir@/doxygen/txt_common/noop.page
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
@@ -630,7 +630,7 @@ EXCLUDE_SYMBOLS        =
 # directories that contain example code fragments that are included (see 
 # the \include command).
 
-EXAMPLE_PATH           = examples /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/fig_common /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/txt_common
+EXAMPLE_PATH           = examples @abs_top_srcdir@/doxygen/fig_common @abs_top_srcdir@/doxygen/txt_common
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the 
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -650,7 +650,7 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see 
 # the \image command).
 
-IMAGE_PATH             = /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/images /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/fig_common
+IMAGE_PATH             = @abs_top_srcdir@/doxygen/images @abs_top_srcdir@/doxygen/fig_common
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 
@@ -791,7 +791,7 @@ HTML_HEADER            =
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard footer.
 
-HTML_FOOTER            = /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/txt_common/footer.html
+HTML_FOOTER            = @abs_top_srcdir@/doxygen/txt_common/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 
@@ -1023,7 +1023,7 @@ PAPER_TYPE             = $(PAPER_SIZE)
 # The EXTRA_PACKAGES tag can be to specify one or more names of LaTeX 
 # packages that should be included in the LaTeX output.
 
-EXTRA_PACKAGES         = 
+EXTRA_PACKAGES         = amsmath array
 
 # The LATEX_HEADER tag can be used to specify a personal LaTeX header for 
 # the generated latex document. The header should contain everything until 
@@ -1246,7 +1246,7 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by 
 # the preprocessor.
 
-INCLUDE_PATH           = /workspace/sylvain/work/lib/antioch/branches/ReactionFactory/doxygen/txt_common/
+INCLUDE_PATH           = @abs_top_srcdir@/doxygen/txt_common/
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard 
 # patterns (like *.h and *.hpp) to filter out the header-files in the 
