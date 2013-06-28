@@ -88,6 +88,15 @@ int tester_N2N(const std::string& input_name)
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
+      if( i == 0 )
+        {
+          std::vector<std::vector<Scalar> > loss_matrix;
+          std::vector<std::vector<Scalar> > prod_matrix;
+          std::vector<std::vector<Scalar> > net_matrix;
+
+          reaction_set.print_chemical_scheme( std::cout, T, Y, molar_densities, h_RT_minus_s_R, loss_matrix, prod_matrix, net_matrix );
+        }
+      
       kinetics.compute_mass_sources( T, Y, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
