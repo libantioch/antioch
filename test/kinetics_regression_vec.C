@@ -179,6 +179,7 @@ int vectester(const std::string& input_name,
   std::vector<std::vector<PairScalars> > domega_dot_drhos
     (n_species, omega_dot); // omega_dot is a good example vec<Pair>
   
+
 #ifdef ANTIOCH_HAVE_GRVY
   const std::string testnormal = testname + "-normal";
   gt.BeginTimer(testnormal);
@@ -195,9 +196,9 @@ int vectester(const std::string& input_name,
   thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
   thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
 
-  kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+  kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
 
-  kinetics.compute_mass_sources_and_derivs ( T, rho, R_mix, Y,
+  kinetics.compute_mass_sources_and_derivs ( T,
 					     molar_densities,
 					     h_RT_minus_s_R,
 					     dh_RT_minus_s_R_dT,
@@ -247,7 +248,7 @@ int vectester(const std::string& input_name,
 
     thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
 
-    kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
+    kinetics.compute_mass_sources( T, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
     gt.EndTimer(testeigenA);
@@ -307,7 +308,7 @@ int vectester(const std::string& input_name,
 
     thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
 
-    kinetics.compute_mass_sources( T, rho, eigen_R, eigen_Y, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
+    kinetics.compute_mass_sources( T, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
     gt.EndTimer(testeigenV);

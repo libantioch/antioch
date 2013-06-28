@@ -157,7 +157,7 @@ int vectester(const std::string& input_name,
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, rho, R_mix, Y, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testnormal);
@@ -169,7 +169,7 @@ int vectester(const std::string& input_name,
 	{
 	  sum += omega_dot[s];
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 2.7e6; // 1.6e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 5e6; // 5e-10;
       const PairScalars abs_sum = abs(sum);
       if( Antioch::max(abs_sum) > sum_tol )
 	{
