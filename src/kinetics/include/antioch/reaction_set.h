@@ -272,11 +272,11 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-	this->reaction(rxn)->compute_rate_of_progress_and_derivatives( molar_densities, _chem_mixture, 
-                                                                       T,P0_RT,h_RT_minus_s_R,dh_RT_minus_s_R_dT,
-                                                                       net_reaction_rates[rxn], 
-                                                                       dnet_rate_dT[rxn], 
-                                                                       dnet_rate_dX_s[rxn] );
+        this->reaction(rxn).compute_rate_of_progress_and_derivatives( molar_densities, _chem_mixture, 
+                                                                      T, P0_RT, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
+                                                                      net_reaction_rates[rxn], 
+                                                                      dnet_rate_dT[rxn], 
+                                                                      dnet_rate_dX_s[rxn] );
       }
     
     return;
