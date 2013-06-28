@@ -25,8 +25,7 @@
 #define ANTIOCH_TROE_FALLOFF_H
 
 //Antioch
-
-//C++
+#include "antioch/math_constants.h"
 
 namespace Antioch
 {
@@ -89,6 +88,14 @@ namespace Antioch
     CoeffType _T1;
     CoeffType _T2;
 
+    //! Precompute coefficient for log conversion.
+    /*! This is needed because Eigen doesn't understand log10. */
+    CoeffType _c_coeff;
+
+    //! Precompute coefficient for log conversion
+    /*! This is needed because Eigen doesn't understand log10. */
+    CoeffType _n_coeff;
+
     template <typename StateType>
     StateType Fcent(const StateType &T) const;
 
@@ -105,20 +112,22 @@ namespace Antioch
   StateType TroeFalloff<CoeffType>::operator()(const StateType& T, const StateType &Pr) const
   {
     StateType Fcent = this->Fcent(T);
-    using std::log10;
+    using std::log;
 
     // c = -0.4 - 0.67 * log10(Fcent)
-    StateType  c = -0.4 - 0.67 * log10(Fcent);
+    // Note log10(x) = (1.0/log(10))*log(x)
+    StateType  c = -0.4 - _c_coeff*log(Fcent);
 
     // n = 0.75 - 1.27 * log10(Fcent)
-    StateType  n = 0.75 - 1.27 * log10(Fcent);
+    // Note log10(x) = (1.0/log(10))*log(x)
+    StateType  n = 0.75 - _n_coeff*log(Fcent);
 
     // Pr = [M] * k0/kinf
-    StateType logPr = log10(Pr);
+    StateType logPr = Constants::log10_to_log<CoeffType>()*log(Pr);
 
     using std::pow;
     //logF =  log10(Fcent) / [1+((log10(Pr) + c)/(n - 0.14*(log10(Pr) + c) ))^2]
-    StateType logF = log10(Fcent)/(1. + pow(((logPr + c)/(n - 0.14*(logPr + c) )),2) );
+    StateType logF = Constants::log10_to_log<CoeffType>()*log(Fcent)/(1. + pow(((logPr + c)/(n - 0.14*(logPr + c) )),2) );
 
     return exp(logF);
   }
@@ -175,10 +184,11 @@ namespace Antioch
                                                  VectorStateType &dF_dX) const
   {
     using std::exp;
-    using std::log10;
     using std::log;
     using std::pow;
+
     antioch_assert_equal_to(dF_dX.size(),this->n_spec);
+
     //declarations
     VectorStateType dlogPr_dX = Antioch::zero_clone(dF_dX);
     StateType Fcent = Antioch::zero_clone(T);
@@ -204,10 +214,10 @@ namespace Antioch
     //params and change of variable
     this->Fcent_and_derivatives(T,Fcent,dFcent_dT);
 
-    logFcent = log10(Fcent);
+    logFcent = Constants::log10_to_log<CoeffType>()*log(Fcent);
     tmp = log(10.L);
     dlogFcent_dT = dFcent_dT/(Fcent * tmp);
-    logPr = log10(Pr);
+    logPr = Constants::log10_to_log<CoeffType>()*log(Pr);
     dlogPr_dT = dPr_dT/(Pr * tmp);
 
     for(unsigned int ip = 0; ip < dlogPr_dX.size(); ip++)
@@ -253,12 +263,15 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  TroeFalloff<CoeffType>::TroeFalloff(const unsigned int nspec, const CoeffType alpha, const CoeffType T3, const CoeffType T1, const CoeffType T2):
+  TroeFalloff<CoeffType>::TroeFalloff(const unsigned int nspec, const CoeffType alpha,
+                                      const CoeffType T3, const CoeffType T1, const CoeffType T2):
     n_spec(nspec),
     _alpha(alpha),
     _T3(T3),
     _T1(T1),
-    _T2(T2)
+    _T2(T2),
+    _c_coeff( 0.67L*Constants::log10_to_log<CoeffType>() ),
+    _n_coeff( 1.27L*Constants::log10_to_log<CoeffType>() )
   {
     return;
   }
