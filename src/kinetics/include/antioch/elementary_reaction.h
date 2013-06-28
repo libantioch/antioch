@@ -38,7 +38,7 @@ namespace Antioch
   /*!
     This class encapsulates an elementary reaction process. An elementary process
     rate constant is defined by the equation
-        \f[k(T,[M]) = \alpha(T)\f]
+    \f[k(T,[M]) = \alpha(T)\f]
     with \f$\alpha(T)\f$ being a kinetics model (see base class Reaction), and \f$[M]\f$
     the mixture concentration (or pressure, it's equivalent, \f$[M] = \frac{P}{\mathrm{R}T}\f$
     in ideal gas model).  All reactions are assumed to be reversible. By default, the kinetisc model
@@ -59,15 +59,15 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-					const StateType& T ) const; 
+                                                const StateType& T ) const; 
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
                                                            const StateType& T, 
-						   StateType& kfwd,  
-						   StateType& dkfwd_dT, 
-						   VectorStateType& dkfwd_dX) const;
+                                                           StateType& kfwd,  
+                                                           StateType& dkfwd_dT, 
+                                                           VectorStateType& dkfwd_dX) const;
 
   private:
     
@@ -77,8 +77,8 @@ namespace Antioch
   template<typename CoeffType>
   inline
   ElementaryReaction<CoeffType>::ElementaryReaction( const unsigned int n_species,
-				 const std::string &equation,
-                                 const KineticsModel::KineticsModel kin)
+                                                     const std::string &equation,
+                                                     const KineticsModel::KineticsModel kin)
     :Reaction<CoeffType>(n_species,equation,ReactionType::ELEMENTARY,kin)
   {
     return;
@@ -98,10 +98,11 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   StateType ElementaryReaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-							   const StateType& T) const
+                                                                             const StateType& T) const
   {
     antioch_assert_equal_to(1, Reaction<CoeffType>::_forward_rate.size());
-//k(T,[M]) = alpha(T)
+
+    //k(T,[M]) = alpha(T)
     return (*this->_forward_rate[0])(T);
   }
 
@@ -109,17 +110,18 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   void ElementaryReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
-                                                                      const StateType& T, 
-								      StateType& kfwd, 
-								      StateType& dkfwd_dT,
-								      VectorStateType& dkfwd_dX) const 
+                                                                                        const StateType& T, 
+                                                                                        StateType& kfwd, 
+                                                                                        StateType& dkfwd_dT,
+                                                                                        VectorStateType& dkfwd_dX) const 
   {
-//dk_dT = dalpha_dT(T)
-     this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+    //dk_dT = dalpha_dT(T)
+    this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
 
-//dk_dCi = 0.
+    //dk_dCi = 0.
     antioch_assert_equal_to(dkfwd_dX.size(),this->n_species());
     Antioch::set_zero(dkfwd_dX);
+
     return;
   }
   
