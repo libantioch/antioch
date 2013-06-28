@@ -52,11 +52,11 @@ namespace Antioch
   {
 
     enum KineticsModel { HERCOURT_ESSEN = 0,// A * T^beta
-			BERTHELOT,   // A * exp(D*T)
-                        ARRHENIUS,   // A * exp(-Ea/T)
-                        BHE,         // A * T^beta * exp(D*T)
-                        KOOIJ,       // A * T^beta * exp(-Ea/T)
-                        VANTHOFF };  // A * T^beta * exp(-Ea/T + D*T)
+                         BERTHELOT,   // A * exp(D*T)
+                         ARRHENIUS,   // A * exp(-Ea/T)
+                         BHE,         // A * T^beta * exp(D*T)
+                         KOOIJ,       // A * T^beta * exp(-Ea/T)
+                         VANTHOFF };  // A * T^beta * exp(-Ea/T + D*T)
 
     const double Tref(1.);// this HAS to stay this way because it is hard-coded for performances (see eq. above)
 
