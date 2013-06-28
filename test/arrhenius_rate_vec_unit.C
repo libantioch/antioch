@@ -71,15 +71,13 @@ int vectester(const PairScalars& example, const std::string& testname)
 {
   using std::abs;
   using std::exp;
-  using std::pow;
 
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   const Scalar Cf = 1.4;
-  const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,eta,Ea);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea,1.);
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;
@@ -89,8 +87,10 @@ int vectester(const PairScalars& example, const std::string& testname)
       T[2*tuple+1] = 1600.1;
     }
   
-  const Scalar rate_exact0 = Cf*pow(Scalar(1500.1),eta)*exp(-Ea/1500.1);
-  const Scalar rate_exact1 = Cf*pow(Scalar(1600.1),eta)*exp(-Ea/1600.1);
+  const Scalar rate_exact0 = Cf*exp(-Ea/1500.1);
+  const Scalar rate_exact1 = Cf*exp(-Ea/1600.1);
+  const Scalar derive_exact0 = Ea/(Scalar(1500.1)*Scalar(1500.1)) * Cf * exp(-Ea/Scalar(1500.1));
+  const Scalar derive_exact1 = Ea/(Scalar(1600.1)*Scalar(1600.1)) * Cf * exp(-Ea/Scalar(1600.1));
 
   int return_flag = 0;
 
@@ -99,6 +99,7 @@ int vectester(const PairScalars& example, const std::string& testname)
 #endif
 
   const PairScalars rate = arrhenius_rate(T);
+  const PairScalars deriveRate = arrhenius_rate.derivative(T);
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testname);
@@ -129,6 +130,24 @@ int vectester(const PairScalars& example, const std::string& testname)
           return_flag = 1;
 	  break;
         }
+    }
+  if( abs( (deriveRate[0] - derive_exact0)/derive_exact0 ) > tol )
+    {
+      std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate derivative values." << std::endl
+		<< "drate_dT(T0) = " << deriveRate[0] << std::endl
+		<< "derive_exact = " << derive_exact0 << std::endl;
+
+      return_flag = 1;
+    }
+  if( abs( (deriveRate[1] - derive_exact1)/derive_exact1 ) > tol )
+    {
+      std::cout << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in rate derivative values." << std::endl
+		<< "drate_dT(T1) = " << deriveRate[1] << std::endl
+		<< "derive_exact = " << derive_exact1 << std::endl;
+
+      return_flag = 1;
     }
 
   std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;

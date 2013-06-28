@@ -60,7 +60,7 @@ int tester(const std::string& input_name)
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
-  const Scalar T = 1500.0;
+  const Scalar T = 2500.0;
   const Scalar P = 1.0e5;
 
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
@@ -69,11 +69,11 @@ int tester(const std::string& input_name)
   Antioch::DataEquilibrium<Scalar> equil(T, P,reaction_set);
 
   std::vector<Scalar> first;
-  first.push_back(0.79);
-  first.push_back(0.21);
-  first.push_back(0.0);
-  first.push_back(0.0);
-  first.push_back(0.0);
+  first.push_back(0.7);
+  first.push_back(0.2);
+  first.push_back(0.03);
+  first.push_back(0.03);
+  first.push_back(0.04);
 
   Antioch::EquilibriumEvaluator<Scalar> eq_solver(equil,kinetics);
 
@@ -81,10 +81,6 @@ int tester(const std::string& input_name)
   eq_solver.equilibrium();
 
   // solution testing
-  std::vector<Scalar> Y_eq = eq_solver.mass_fraction_equilibrium();
-
-  const Scalar R_mix = chem_mixture.R(Y_eq);
-
   std::vector<Scalar> molar_densities = eq_solver.molar_densities_equilibrium();
 
   Scalar TotDens(0.);
@@ -92,10 +88,6 @@ int tester(const std::string& input_name)
   {
      TotDens += molar_densities[nsp];
   }
-
-  const Scalar Peq = eq_solver.Peq();
-
-  const Scalar rho = Peq/(R_mix*T);
 
   std::vector<Scalar> h_RT_minus_s_R(n_species);
   std::vector<Scalar> dh_RT_minus_s_R_dT(n_species);
@@ -107,7 +99,7 @@ int tester(const std::string& input_name)
 
   std::vector<Scalar> omega_dot(n_species);
   
-  kinetics.compute_mass_sources( T, rho, R_mix, Y_eq, molar_densities, h_RT_minus_s_R, omega_dot );
+  kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
 
   int return_flag = 0;
 
@@ -128,10 +120,11 @@ int tester(const std::string& input_name)
        std::cout << "tolerance is " << tol << " and it is " << sum_dot << std::endl;
    }
 
-   }else
+   }//else
    {
      return_flag = 1;
-     std::cout << "equilibrium failed:\n\tsum " << eq_solver.residual()<< ", threshold: " << eq_solver.conv_threshold() << std::endl;
+     std::cout << "equilibrium failed (" << eq_solver.max_loop_tol() << "):\n\tsum " 
+               << eq_solver.residual() << ", threshold: " << eq_solver.conv_threshold() << std::endl;
    }
 
   if(return_flag == 1)
@@ -140,9 +133,7 @@ int tester(const std::string& input_name)
       {
         std::cout << std::scientific << std::setprecision(16)
   		  << "omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = "
-		  << omega_dot[s] << "\t"
-  		  << "mass_fraction(" << chem_mixture.chemical_species()[s]->species() << ") = "
-		  << Y_eq[s] << std::endl;
+		  << omega_dot[s] << std::endl;
       }
    }
 
@@ -160,8 +151,10 @@ int main(int argc, char* argv[])
       antioch_error();
     }
 
-  return (tester<float>(std::string(argv[1])) ||
-          tester<double>(std::string(argv[1])) /*||
+  int fl = (tester<float>(std::string(argv[1])));// ||
+      fl = tester<double>(std::string(argv[1])); /*||
           tester<long double>(std::string(argv[1])) || */
-          );
+        //  );
+
+  return fl;
 }

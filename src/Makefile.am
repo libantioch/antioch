@@ -23,6 +23,7 @@ libantioch_la_SOURCES += kinetics/src/reaction_set.C
 libantioch_la_SOURCES += kinetics/src/kinetics_evaluator.C
 libantioch_la_SOURCES += kinetics/src/data_equilibrium.C
 libantioch_la_SOURCES += kinetics/src/equilibrium_evaluator.C
+libantioch_la_SOURCES += kinetics/src/kinetics_type.C
 
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
@@ -56,11 +57,28 @@ include_HEADERS += core/include/antioch/chemical_species.h
 include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
-# kinetics
+# kinetics-kinetics models
+include_HEADERS += kinetics/include/antioch/kinetics_enum.h
+include_HEADERS += kinetics/include/antioch/kinetics_type.h
+include_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
+include_HEADERS += kinetics/include/antioch/berthelot_rate.h
 include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
-include_HEADERS += kinetics/include/antioch/reaction.h
+include_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
+include_HEADERS += kinetics/include/antioch/kooij_rate.h
+include_HEADERS += kinetics/include/antioch/vanthoff_rate.h
+# kinetics-chemical process
 include_HEADERS += kinetics/include/antioch/reaction_enum.h
+include_HEADERS += kinetics/include/antioch/reaction.h
+include_HEADERS += kinetics/include/antioch/elementary_reaction.h
+include_HEADERS += kinetics/include/antioch/duplicate_reaction.h
+include_HEADERS += kinetics/include/antioch/threebody_reaction.h
+include_HEADERS += kinetics/include/antioch/falloff_reaction.h
+include_HEADERS += kinetics/include/antioch/lindemann_falloff.h
+include_HEADERS += kinetics/include/antioch/troe_falloff.h
+# kinetics-other
 include_HEADERS += kinetics/include/antioch/reaction_set.h
+include_HEADERS += kinetics/include/antioch/reaction_parsing.h
+include_HEADERS += kinetics/include/antioch/kinetics_parsing.h
 include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 include_HEADERS += kinetics/include/antioch/data_equilibrium.h
 include_HEADERS += kinetics/include/antioch/equilibrium_evaluator.h
@@ -97,6 +115,7 @@ include_HEADERS += utilities/include/antioch/antioch_asserts.h
 include_HEADERS += utilities/include/antioch/eigen_utils.h
 include_HEADERS += utilities/include/antioch/eigen_utils_decl.h
 include_HEADERS += utilities/include/antioch/input_utils.h
+include_HEADERS += utilities/include/antioch/math_constants.h
 include_HEADERS += utilities/include/antioch/metaprogramming.h
 include_HEADERS += utilities/include/antioch/metaprogramming_decl.h
 include_HEADERS += utilities/include/antioch/metaphysicl_utils.h
