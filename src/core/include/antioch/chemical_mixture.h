@@ -124,6 +124,10 @@ namespace Antioch
 		 const StateType& mass_fraction ) const;
 
     //! All species mole fractions
+    /*!
+      The output argument mole_fractions should already be properly
+      sized to hold the output.
+    */
     template<typename VectorStateType>
     void X( typename Antioch::value_type<VectorStateType>::type M,
 	    const VectorStateType& mass_fractions, 
@@ -385,7 +389,10 @@ namespace Antioch
 
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
 
-    mole_fractions.resize( mass_fractions.size() );
+    // Require output size to be correct.  This is more efficient and
+    // works around the difficulty of resizing Eigen containers of
+    // types which may lack default constructors.
+    antioch_assert_equal_to( mass_fractions.size(), mole_fractions.size() );
 
     for( unsigned int s = 0; s < mass_fractions.size(); s++ )
       {

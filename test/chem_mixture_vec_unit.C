@@ -300,7 +300,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.BeginTimer(testnormal);
 #endif
 
-  std::vector<PairScalars> X;
+  std::vector<PairScalars> X(n_species, example);
 
   const PairScalars R = chem_mixture.R(mass_fractions);
   const PairScalars M = chem_mixture.M(mass_fractions);
@@ -460,7 +460,7 @@ int vectester(const PairScalars& example, const std::string& testname)
 
     const PairScalars R_eigen = chem_mixture.R(eigen_mass_fractions);
     const PairScalars M_eigen = chem_mixture.M(eigen_mass_fractions);
-    SpeciesVecEigenType eigen_X;
+    SpeciesVecEigenType eigen_X(n_species, 1);
     Antioch::init_constant(eigen_X, example);
     chem_mixture.X( M_eigen, eigen_mass_fractions, eigen_X );
 

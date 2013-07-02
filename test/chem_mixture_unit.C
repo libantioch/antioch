@@ -251,7 +251,7 @@ int tester()
       return_flag = 1;
     }
   
-  std::vector<Scalar> X;
+  std::vector<Scalar> X(5, 0);
   chem_mixture.X( chem_mixture.M(mass_fractions), mass_fractions, X );
   for( unsigned int s = 0; s < 5; s++ )
     {
