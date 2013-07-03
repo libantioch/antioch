@@ -69,6 +69,11 @@ inline
 std::vector<T>
 zero_clone(const std::vector<T>& example);
 
+template <typename T, typename Scalar>
+inline
+std::vector<T>
+constant_clone(const std::vector<T>& example, const Scalar& value);
+
 // A function for zero-setting vectorized numeric types
 template <typename T>
 inline

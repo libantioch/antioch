@@ -83,6 +83,11 @@ inline
 vex::vector<T>
 zero_clone(const vex::vector<T>& example);
 
+template <typename T, typename Scalar>
+inline
+vex::vector<T>
+constant_clone(const vex::vector<T>& example, const Scalar& value);
+
 template <typename T>
 inline
 void

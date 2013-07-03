@@ -134,6 +134,18 @@ zero_clone(const std::valarray<T>& example)
     return std::valarray<T>();
 }
 
+template <typename T, typename Scalar>
+inline
+std::valarray<T>
+constant_clone(const std::valarray<T>& example, const Scalar& value)
+{
+  if (example.size())
+    return std::valarray<T>(value,example.size());
+  else
+    return std::valarray<T>();
+}
+
+
 
 template <typename T>
 inline

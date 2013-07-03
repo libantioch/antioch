@@ -119,6 +119,15 @@ zero_clone(const vex::vector<T>& example)
   return returnval;
 }
 
+template <typename T, typename Scalar>
+inline
+vex::vector<T>
+constant_clone(const vex::vector<T>& example, const Scalar& value)
+{
+  vex::vector<T> returnval(example.queue_list(), example.size());
+  returnval = value;
+  return returnval;
+}
 
 template <typename T>
 inline

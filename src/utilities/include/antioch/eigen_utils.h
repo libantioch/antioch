@@ -135,6 +135,26 @@ zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& e
 
 template <
   template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols,
+  typename Scalar
+>
+inline
+_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex,
+	   const Scalar& value)
+{
+  // We can't just use setZero here with arbitrary _Scalar types
+  if (ex.size())
+    return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
+        ex.rows(), ex.cols()).setConstant(value);
+
+  return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
+      ex.rows(), ex.cols());
+}
+
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
 inline

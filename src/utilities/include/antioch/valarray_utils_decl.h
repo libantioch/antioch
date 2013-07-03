@@ -85,6 +85,11 @@ inline
 std::valarray<T>
 zero_clone(const std::valarray<T>& example);
 
+template <typename T, typename Scalar>
+inline
+std::valarray<T>
+constant_clone(const std::valarray<T>& example, const Scalar& value);
+
 template <typename T>
 inline
 void

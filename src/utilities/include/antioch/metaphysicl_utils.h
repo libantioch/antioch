@@ -95,14 +95,6 @@ struct value_type<MetaPhysicL::NumberArray<size,T> >
   typedef typename value_type<T>::raw_type raw_type;
 };
 
-template <std::size_t size, typename T>
-inline
-MetaPhysicL::NumberArray<size,T>
-zero_clone(const MetaPhysicL::NumberArray<size,T>& example)
-{
-  return 0;
-}
-
 } // end namespace Antioch
 
 #endif // ANTIOCH_METAPHYSICL_UTILS_H

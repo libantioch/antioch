@@ -99,6 +99,17 @@ zero_clone(const std::vector<T>& example)
   return std::vector<T>();
 }
 
+template <typename T, typename Scalar>
+inline
+std::vector<T>
+zero_clone(const std::vector<T>& example, const Scalar& value)
+{
+  if (example.size())
+    return std::vector<T>(example.size(),value);
+
+  return std::vector<T>();
+}
+
 // A function for zero-setting vectorized numeric types
 template <typename T>
 inline

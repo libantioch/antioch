@@ -51,6 +51,12 @@ namespace Antioch
   inline
   T zero_clone(const T& /* example */) { return 0; }
 
+  // A function for initializing vectorized numeric types to a
+  // constant // while resizing them to match the example input
+  template <typename T, typename Scalar>
+  inline
+  T constant_clone(const T& example, const Scalar& value) { return value; }
+
   // A function for initializing vectorized numeric types
   // while resizing them to match the example input
   template <typename T>
