@@ -66,7 +66,7 @@ if test "x$HAVE_GRVY" = "x1"; then
   echo '    'GRVY_CFLAGS............... : $GRVY_CFLAGS
   echo '    'GRVY_LIBS................. : $GRVY_LIBS
 else
-  echo '  'VexCL....................... : no
+  echo '  'GRVY........................ : no
 fi
 echo
 echo '-------------------------------------------------------------------------------'
