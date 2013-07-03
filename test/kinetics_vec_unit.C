@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
 #ifdef ANTIOCH_HAVE_VEXCL
   vex::Context ctx (vex::Filter::DoublePrecision);
 
-  returnval +
+  returnval +=
     vectester (argv[1], vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
   returnval +=
     vectester (argv[1], vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
