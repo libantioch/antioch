@@ -112,7 +112,9 @@ namespace Antioch
   StateType TroeFalloff<CoeffType>::operator()(const StateType& T, const StateType &Pr) const
   {
     StateType Fcent = this->Fcent(T);
+    using std::exp;
     using std::log;
+    using std::pow;
 
     // c = -0.4 - 0.67 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
@@ -125,7 +127,6 @@ namespace Antioch
     // Pr = [M] * k0/kinf
     StateType logPr = Constants::log10_to_log<CoeffType>()*log(Pr);
 
-    using std::pow;
     //logF =  log10(Fcent) / [1+((log10(Pr) + c)/(n - 0.14*(log10(Pr) + c) ))^2]
     StateType logF = Constants::log10_to_log<CoeffType>()*log(Fcent)/(1. + pow(((logPr + c)/(n - 0.14*(logPr + c) )),2) );
 
