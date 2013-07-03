@@ -64,7 +64,9 @@ namespace Antioch{
   inline
   StateType LindemannFalloff<CoeffType>::operator()(const StateType &T, const StateType &Pr) const
   {
-    return StateType(1.);
+    StateType F = Antioch::zero_clone(T);
+    F = 1;
+    return F;
   }
 
   template <typename CoeffType>
