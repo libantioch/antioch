@@ -59,8 +59,6 @@ int test_val( const Scalar val, const Scalar val_exact, const Scalar tol, const 
 template <typename Scalar>
 int tester()
 {
-  int return_flag = 0;
-  
   const Scalar Le = 1.4;
 
   Antioch::ConstantLewisDiffusivity<Scalar> diff( Le );
