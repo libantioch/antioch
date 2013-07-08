@@ -31,6 +31,7 @@
 
 // Antioch
 #include "antioch/antioch_exceptions.h"
+#include "antioch_config.h" // for ANTIOCH_HAVE_CXX11
 
 // C++
 #include <iostream>
@@ -57,7 +58,8 @@
 
 // When using C++11, we can test asserts comparing two different types
 // robustly
-#if __cplusplus > 199711L
+// #if __cplusplus > 199711L // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=1773
+#ifdef ANTIOCH_HAVE_CXX
 #define antioch_assert_equal_to(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((expr1 == static_cast<type1>(expr2)) && static_cast<type2>(expr1) == expr2)) { std::cerr << "Assertion `" #expr1 " == " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
 #define antioch_assert_not_equal_to(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((expr1 != static_cast<type1>(expr2)) && (static_cast<type2>(expr1) != expr2))) { std::cerr << "Assertion `" #expr1 " != " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
 #define antioch_assert_less(expr1,expr2)  do { typedef decltype(expr1) type1; typedef decltype(expr2) type2; if (!((static_cast<type2>(expr1) < expr2) && (expr1 < static_cast<type1>(expr2)))) { std::cerr << "Assertion `" #expr1 " < " #expr2 "' failed.\n" #expr1 " = " << (expr1) << "\n" #expr2 " = " << (expr2) << std::endl; antioch_error(); } } while(0)
