@@ -86,7 +86,8 @@ int vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::st
   typedef typename Antioch::value_type<SpeciesVector1>::type StateType;
   typedef typename Antioch::value_type<StateType>::type Scalar;
 
-  if (a.size() != b.size())
+  if (static_cast<std::size_t>(a.size()) != 
+      static_cast<std::size_t>(b.size()))
     {
       std::cerr << "Error: Mismatch in vector sizes " << name << std::endl;
     }
