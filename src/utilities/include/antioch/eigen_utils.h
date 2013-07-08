@@ -140,8 +140,8 @@ template <
 >
 inline
 _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex,
-	   const Scalar& value)
+constant_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex,
+	       const Scalar& value)
 {
   // We can't just use setZero here with arbitrary _Scalar types
   if (ex.size())
