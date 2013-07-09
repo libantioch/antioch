@@ -139,6 +139,23 @@ init_clone(vex::vector<T>& output, const vex::vector<T>& example)
 }
 
 
+template <typename BoolInput,
+	  typename IfValue, typename ElseValue>
+inline
+typename boost::proto::result_of::make_expr<
+  boost::proto::tag::if_else_,
+  boost::proto::deduce_domain,
+  const vex::vector_expression<BoolInput>&,
+  const IfValue&,
+  const ElseValue&
+>::type const
+if_else(const vex::vector_expression<BoolInput> &condition,
+	const IfValue   &if_true,
+	const ElseValue &if_false)
+{
+  return boost::proto::if_else(condition, if_true, if_false);
+}
+
 } // end namespace Antioch
 
 

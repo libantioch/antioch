@@ -95,6 +95,12 @@ inline
 void
 init_clone(std::valarray<T>& output, const std::valarray<T>& example);
 
+template <typename T>
+inline
+std::valarray<T>
+if_else(const std::valarray<bool>& condition,
+        const std::valarray<T>& if_true,
+        const std::valarray<T>& if_false);
 } // end namespace Antioch
 
 

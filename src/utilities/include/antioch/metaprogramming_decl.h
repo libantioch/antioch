@@ -106,6 +106,21 @@ namespace Antioch
   template <typename Vector, typename Scalar>
   inline
   void init_constant(Vector& output, const Scalar& example);
+
+  // A function for replicating the effect of the ternary operator on
+  // numeric types.
+  //
+  // The first argument should be a boolean for a scalar type, or a
+  // vector of booleans or an expression type for vector types.
+  //
+  // The second and third arguments should be expression types or
+  // vector types.
+  template <typename T>
+  inline
+  T if_else(bool condition,
+	    T if_true,
+	    T if_false);
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_DECL_H

@@ -41,6 +41,18 @@
 // header-only Eigen with header-only Antioch without configure-time flags.
 #endif
 
+// Forward declarations
+namespace Eigen {
+template<typename Derived>
+class ArrayBase;
+
+template<typename Derived>
+class EigenBase;
+
+template<typename Derived, typename ThenDerived, typename ElseDerived>
+class Select;
+}
+
 #include "antioch/metaprogramming_decl.h"
 
 namespace std
@@ -112,6 +124,20 @@ template <
 >
 inline
 void set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
+
+
+template <typename Derived, typename ThenDerived, typename ElseDerived>
+inline
+const Eigen::Select<
+  typename Eigen::ArrayBase<Derived>::PlainObject,
+  typename Eigen::ArrayBase<ThenDerived>::PlainObject,
+  typename Eigen::ArrayBase<ElseDerived>::PlainObject
+>
+if_else(
+const Eigen::EigenBase<Derived>& condition,
+const Eigen::EigenBase<ThenDerived>& if_true,
+const Eigen::EigenBase<ElseDerived>& if_false);
+
 
 } // end namespace Antioch
 

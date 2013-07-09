@@ -159,6 +159,25 @@ init_clone(std::valarray<T>& output, const std::valarray<T>& example)
 }
 
 
+template <typename T>
+inline
+std::valarray<T>
+if_else(const std::valarray<bool>& condition,
+        const std::valarray<T>& if_true,
+        const std::valarray<T>& if_false)
+{
+  antioch_assert_equal_to(condition.size(), if_true.size());
+  antioch_assert_equal_to(condition.size(), if_false.size());
+
+  const std::size_t size = condition.size();
+  std::valarray<T> returnval(size);
+
+  for (std::size_t i=0; i != size; ++i)
+    returnval[i] = condition[i] ? if_true[i] : if_false[i];
+
+  return returnval;
+}
+
 } // end namespace Antioch
 
 

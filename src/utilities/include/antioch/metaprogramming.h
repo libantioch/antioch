@@ -80,6 +80,22 @@ namespace Antioch
 	 i != output.size(); ++i)
       init_clone(output[i], example);
   }
+
+  // A default implementation for built-in types
+  template <typename T>
+  inline
+  T if_else(bool condition,
+	    T if_true,
+	    T if_false)
+  {
+    if (condition)
+      return if_true;
+    else
+      return if_false;
+  }
+
+
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_H

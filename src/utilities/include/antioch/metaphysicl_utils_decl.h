@@ -73,6 +73,13 @@ struct size_type<MetaPhysicL::NumberArray<size,T> >;
 template <std::size_t size, typename T>
 struct value_type<MetaPhysicL::NumberArray<size,T> >;
 
+template <std::size_t size, typename T>
+inline
+MetaPhysicL::NumberArray<size, T>
+if_else(const MetaPhysicL::NumberArray<size, bool>& condition,
+        const MetaPhysicL::NumberArray<size, bool>& if_true,
+        const MetaPhysicL::NumberArray<size, bool>& if_false);
+
 } // end namespace Antioch
 
 #endif // ANTIOCH_METAPHYSICL_UTILS_DECL_H
