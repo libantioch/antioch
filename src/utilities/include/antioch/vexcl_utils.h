@@ -58,6 +58,19 @@ class Reductor;
 
 class MAX;
 }
+namespace boost {
+  namespace proto {
+    template<typename A0, typename A1, typename A2> 
+      typename result_of::make_expr<
+        tag::if_else_, 
+        deduce_domain,
+        A0 const &, 
+        A1 const &, 
+        A2 const &
+      >::type const 
+      if_else(A0 const & a0, A1 const & a1, A2 const & a2);
+  }
+}
 #endif
 
 

@@ -47,7 +47,20 @@
 #else
 // Forward declaration instead
 namespace vex {
-template <typename T> class vector;
+  template <typename T> class vector;
+  template <typename T> class vector_expression;
+}
+namespace boost {
+  namespace proto {
+    namespace result_of {
+      template <typename T1, typename T2, typename T3, typename T4, typename T5>
+      class make_expr;
+    }
+    namespace tag {
+      class if_else_;
+    }
+    class deduce_domain;
+  }
 }
 #endif
 
