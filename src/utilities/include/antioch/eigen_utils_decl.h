@@ -43,12 +43,6 @@
 
 // Forward declarations
 namespace Eigen {
-template<typename Derived>
-class ArrayBase;
-
-template<typename Derived>
-class EigenBase;
-
 template<typename Derived, typename ThenDerived, typename ElseDerived>
 class Select;
 }
@@ -154,17 +148,24 @@ inline
 void set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
 
 
-template <typename Derived, typename ThenDerived, typename ElseDerived>
-inline
-const Eigen::Select<
-  typename Eigen::ArrayBase<Derived>::PlainObject,
-  typename Eigen::ArrayBase<ThenDerived>::PlainObject,
-  typename Eigen::ArrayBase<ElseDerived>::PlainObject
+template <
+  typename Condition,
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
+inline
+/*
+Eigen::Select<
+  _Matrix<bool, _Rows, _Cols, _Options, _MaxRows, _MaxCols>,
+  _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>,
+  _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+>
+*/
+_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
 if_else(
-const Eigen::EigenBase<Derived>& condition,
-const Eigen::EigenBase<ThenDerived>& if_true,
-const Eigen::EigenBase<ElseDerived>& if_false);
+const Condition& condition,
+const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_true,
+const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_false);
 
 
 } // end namespace Antioch
