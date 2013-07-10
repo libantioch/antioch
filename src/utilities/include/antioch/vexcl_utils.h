@@ -98,8 +98,17 @@ inline
 T
 max (const vex::vector<T>& in)
 {
-  vex::Reductor<double, vex::MAX> max(in.queue_list());
-  return max(in);
+  vex::Reductor<double, vex::MAX> vex_max(in.queue_list());
+  return vex_max(in);
+}
+
+template <typename T>
+inline
+T
+min (const vex::vector<T>& in)
+{
+  vex::Reductor<double, vex::MIN> vex_min(in.queue_list());
+  return vex_min(in);
 }
 
 template <typename T>
@@ -132,6 +141,15 @@ zero_clone(const vex::vector<T>& example)
   return returnval;
 }
 
+template <typename T1, typename T2>
+inline
+void
+zero_clone(vex::vector<T1>& output, const vex::vector<T2>& example)
+{
+  output.resize(example.size());
+  output = 0;
+}
+
 template <typename T, typename Scalar>
 inline
 vex::vector<T>
@@ -150,7 +168,6 @@ init_clone(vex::vector<T>& output, const vex::vector<T>& example)
   output.resize(example.size());
   output = example;
 }
-
 
 template <typename BoolInput,
 	  typename IfValue, typename ElseValue>

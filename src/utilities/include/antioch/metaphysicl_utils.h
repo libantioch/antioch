@@ -76,6 +76,20 @@ max (const MetaPhysicL::NumberArray<size,T>& in)
 }
 
 template <std::size_t size, typename T>
+inline
+T
+min (const MetaPhysicL::NumberArray<size,T>& in)
+{
+  using std::min;
+
+  T minval = in[0];
+  for (std::size_t i = 1; i < size; ++i)
+    minval = min(minval, in[i]);
+
+  return minval;
+}
+
+template <std::size_t size, typename T>
 struct has_size<MetaPhysicL::NumberArray<size,T> >
 {
   static const bool value = true;

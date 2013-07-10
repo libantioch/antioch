@@ -54,6 +54,11 @@ operator<< (std::ostream& output, const std::vector<T>& a);
 
 namespace Antioch
 {
+template <typename T, typename NewScalar>
+struct rebind<std::vector<T>, NewScalar>
+{
+  typedef std::vector<NewScalar> type;
+};
 
 template <typename T>
 struct has_size<std::vector<T> >;
@@ -68,6 +73,11 @@ template <typename T>
 inline
 std::vector<T>
 zero_clone(const std::vector<T>& example);
+
+template <typename T1, typename T2>
+inline
+void
+zero_clone(std::vector<T1>& output, const std::vector<T2>& example);
 
 template <typename T, typename Scalar>
 inline

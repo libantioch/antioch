@@ -99,6 +99,17 @@ zero_clone(const std::vector<T>& example)
   return std::vector<T>();
 }
 
+template <typename T1, typename T2>
+inline
+void
+zero_clone(std::vector<T1>& output, const std::vector<T2>& example)
+{
+  const std::size_t sz = example.size();
+  output.resize(sz);
+  for (std::size_t i=0; i != sz; ++i)
+    Antioch::zero_clone(output[i], example[i]);
+}
+
 template <typename T, typename Scalar>
 inline
 std::vector<T>

@@ -64,10 +64,29 @@ namespace Antioch
     typedef T raw_type;
   };
 
+  // A class for generating "int" from "float" or "valarray<int>" from
+  // "valarray<float>" etc.
+  template <typename Vector, typename NewScalar>
+  struct rebind
+  {
+    typedef NewScalar type;
+  };
+
+  template <typename Vector, typename NewScalar>
+  struct rebind<const Vector, NewScalar>
+  {
+    typedef const typename rebind<Vector, NewScalar>::type type;
+  };
+
   template <typename T>
   inline
   T
   max (const T& in);
+
+  template <typename T>
+  inline
+  T
+  min (const T& in);
 
   template <typename T>
   struct value_type<const T>
@@ -82,6 +101,12 @@ namespace Antioch
   template <typename T>
   inline
   T zero_clone(const T& example);
+
+  // A function for zero-initializing vectorized numeric types
+  // while resizing them to match the example input
+  template <typename T1, typename T2>
+  inline
+  void zero_clone(T1& output, const T2& example);
 
   // A function for initializing vectorized numeric types to a
   // constant // while resizing them to match the example input

@@ -76,11 +76,21 @@ max(const vex::vector<T>& a,
 
 namespace Antioch
 {
+template <typename T, typename NewScalar>
+struct rebind<vex::vector<T>, NewScalar>
+{
+  typedef vex::vector<NewScalar> type;
+};
 
 template <typename T>
 inline
 T
 max (const vex::vector<T>& in);
+
+template <typename T>
+inline
+T
+min (const vex::vector<T>& in);
 
 template <typename T>
 struct has_size<vex::vector<T> >;
@@ -95,6 +105,11 @@ template <typename T>
 inline
 vex::vector<T>
 zero_clone(const vex::vector<T>& example);
+
+template <typename T1, typename T2>
+inline
+void
+zero_clone(vex::vector<T1>& output, const vex::vector<T2>& example);
 
 template <typename T, typename Scalar>
 inline

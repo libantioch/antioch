@@ -104,6 +104,14 @@ max (const std::valarray<T>& in)
 }
 
 template <typename T>
+inline
+T
+min (const std::valarray<T>& in)
+{
+  return in.min();
+}
+
+template <typename T>
 struct has_size<std::valarray<T> >
 {
   static const bool value = true;
@@ -132,6 +140,17 @@ zero_clone(const std::valarray<T>& example)
     return std::valarray<T>(zero_clone(example[0]),example.size());
   else
     return std::valarray<T>();
+}
+
+template <typename T1, typename T2>
+inline
+void
+zero_clone(std::valarray<T1>& output, const std::valarray<T2>& example)
+{
+  const std::size_t sz = example.size();
+  output.resize(sz);
+  for (std::size_t i=0; i != sz; ++i)
+    Antioch::zero_clone(output[i], example[i]);
 }
 
 template <typename T, typename Scalar>

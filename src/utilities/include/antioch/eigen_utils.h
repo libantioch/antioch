@@ -87,6 +87,17 @@ template <
   template <typename, int, int, int, int, int> class _Matrix,
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
+inline
+_Scalar
+min(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in)
+{
+  return in.minCoeff();
+}
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 struct has_size<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
   static const bool value = true;
@@ -132,6 +143,22 @@ zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& e
   return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
       ex.rows(), ex.cols());
 }
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols,
+  typename Scalar2
+>
+inline
+void
+zero_clone(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& output,
+           const _Matrix<Scalar2, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex)
+{
+  // We can't just use setZero here with arbitrary _Scalar types
+  output.resize(ex.rows(), ex.cols());
+  output.setConstant(zero_clone(ex[0]));
+}
+
 
 template <
   template <typename, int, int, int, int, int> class _Matrix,
