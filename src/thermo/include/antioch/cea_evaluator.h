@@ -186,7 +186,6 @@ namespace Antioch
   CEAEvaluator<CoeffType>::cp( const TempCache<StateType>& cache, unsigned int species ) const
   {
     typedef typename Antioch::value_type<StateType>::type ScalarType;
-    typedef typename Antioch::rebind<StateType,bool>::type BoolType;
     // T < 200.1 ? cp_at_200p1 : R * cp_over_R
     return
       Antioch::if_else
@@ -252,13 +251,14 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEAEvaluator<CoeffType>::cp_over_R( const TempCache<StateType>& cache, unsigned int species ) const
+  StateType
+  CEAEvaluator<CoeffType>::cp_over_R( const TempCache<StateType>& cache, unsigned int species ) const
   {
     antioch_assert_less( species, this->n_species() );
     // FIXME - we need assert_less to be vectorizable
     // antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
     //                      _cea_mixture.curve_fit(species).n_intervals() );
-    
+
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
     const UIntType interval = this->_cea_mixture.curve_fit(species).interval(cache.T);
