@@ -212,12 +212,7 @@ const Condition& condition,
 const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_true,
 const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_false)
 {
-  // Work around for current Eigen version bug in which we can't
-  // call select() with expressions, only full objects.
-  _Matrix<bool, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-    condition_array = condition;
-
-  return condition_array.select(if_true, if_false);
+  return condition.select(if_true, if_false);
 }
 
 
