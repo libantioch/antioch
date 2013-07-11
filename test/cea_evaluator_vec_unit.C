@@ -304,7 +304,7 @@ int main()
   returnval = returnval ||
     vectester (Eigen::Array<float, 3*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    vectester (Eigen::Array<float, 3*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
+    vectester (Eigen::Array<double, 3*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
 //  returnval = returnval ||
 //    vectester (Eigen::Array<long double, 3*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
