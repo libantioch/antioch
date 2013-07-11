@@ -31,6 +31,7 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/metaprogramming_decl.h" // Antioch::rebind
 
 // C++
 #include <vector>
@@ -55,7 +56,8 @@ namespace Antioch
       [200-1,000], [1,000-6,000], [6,000-20,000] K
      */
     template <typename StateType>
-    unsigned int interval(const StateType& T) const;
+    typename Antioch::rebind<StateType, unsigned int>::type
+    interval(const StateType& T) const;
 
     
     //! @returns a pointer to the coefficients in the interval specified.
@@ -103,26 +105,26 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  unsigned int CEACurveFit<CoeffType>::interval(const StateType& T) const
+  typename Antioch::rebind<StateType, unsigned int>::type
+  CEACurveFit<CoeffType>::interval(const StateType& T) const
   {
-    unsigned int interval = -1;
+    typedef typename 
+      Antioch::rebind<StateType, unsigned int>::type UIntType;
+    UIntType interval;
+    Antioch::zero_clone(interval, T);
+
+    typedef typename Antioch::value_type<StateType>::type ScalarType;
 
     /* CEA thermodynamic intervals are:
        [200-1,000], [1,000-6,000], [6,000-20,000] K */
-    /*! \todo This could be generalized */
-    /*! \todo This needs to be vectorizable */
-    if (T > 6000.)	  
-      {
-	interval = 2;
-      }
-    else if (T > 1000.)
-      {
-	interval =  1;
-      }
-    else
-      {
-	interval = 0;
-      }
+    interval = Antioch::if_else
+      (T > ScalarType(6000.),
+       Antioch::constant_clone(interval,2),
+       UIntType
+         (Antioch::if_else
+            (T > ScalarType(1000.),
+	     Antioch::constant_clone(interval,1),
+	     Antioch::constant_clone(interval,0))));
 
     return interval;
   }

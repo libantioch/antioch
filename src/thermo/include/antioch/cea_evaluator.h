@@ -51,15 +51,7 @@ namespace Antioch
 
     //! We currently need different specializations for scalar vs vector inputs here
     template<typename StateType>
-    typename enable_if_c<
-      !has_size<StateType>::value, StateType
-      >::type 
-    cp( const TempCache<StateType>& cache, unsigned int species ) const;
-
-    template<typename StateType>
-    typename enable_if_c<
-      has_size<StateType>::value, StateType
-      >::type 
+    StateType
     cp( const TempCache<StateType>& cache, unsigned int species ) const;
 
     template<typename StateType, typename VectorStateType>
@@ -104,7 +96,6 @@ namespace Antioch
       has_size<VectorStateType>::value, void
       >::type 
     h_RT_minus_s_R( const TempCache<StateType>& cache, VectorStateType& h_RT_minus_s_R ) const;
-
 
     template<typename StateType>
     typename enable_if_c<
@@ -191,48 +182,22 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  typename enable_if_c<
-    !has_size<StateType>::value, StateType
-    >::type 
-    CEAEvaluator<CoeffType>::cp( const TempCache<StateType>& cache, unsigned int species ) const
-    {
-      StateType cp = 0.0;
-
-      if( cache.T < 200.1 )
-        {
-          cp =  _cea_mixture.cp_at_200p1(species);
-        }
-      else
-        {
-          cp = this->chem_mixture().R(species)*this->cp_over_R(cache, species);
-        }
-    
-      return cp;
-    }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  typename enable_if_c<
-    has_size<StateType>::value, StateType
-    >::type 
+  StateType
   CEAEvaluator<CoeffType>::cp( const TempCache<StateType>& cache, unsigned int species ) const
   {
-    // Use an input datum to make sure we get the size right
-    StateType cp = Antioch::zero_clone(cache.T);
-    
-    const std::size_t size = cache.T.size();
-    for (std::size_t i = 0; i != size; ++i)
-      {
-        typedef TempCache<typename Antioch::value_type<StateType>::type> SubCache;
-        cp[i] = this->cp
-          (SubCache(cache.T[i],cache.T2[i],cache.T3[i],cache.T4[i],cache.lnT[i]),
-           species);
-      }
-    
-    return cp;
+    typedef typename Antioch::value_type<StateType>::type ScalarType;
+    typedef typename Antioch::rebind<StateType,bool>::type BoolType;
+    // T < 200.1 ? cp_at_200p1 : R * cp_over_R
+    return
+      Antioch::if_else
+        (cache.T < ScalarType(200.1),
+         Antioch::constant_clone
+	   (cache.T,_cea_mixture.cp_at_200p1(species)),
+	 StateType
+	   (this->chem_mixture().R(species) * 
+	    this->cp_over_R(cache, species)));
   }
-  
+
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
@@ -290,15 +255,32 @@ namespace Antioch
   StateType CEAEvaluator<CoeffType>::cp_over_R( const TempCache<StateType>& cache, unsigned int species ) const
   {
     antioch_assert_less( species, this->n_species() );
-    antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
-                         _cea_mixture.curve_fit(species).n_intervals() );
+    // FIXME - we need assert_less to be vectorizable
+    // antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
+    //                      _cea_mixture.curve_fit(species).n_intervals() );
     
-    const unsigned int interval = this->_cea_mixture.curve_fit(species).interval(cache.T);
+    typedef typename
+      Antioch::rebind<StateType, unsigned int>::type UIntType;
+    const UIntType interval = this->_cea_mixture.curve_fit(species).interval(cache.T);
+    const unsigned int begin_interval = Antioch::min(interval);
+    const unsigned int end_interval = Antioch::max(interval)+1;
     
-    const CoeffType *a = this->_cea_mixture.curve_fit(species).coefficients(interval);
-    
-    /* cp/R =  a0*T^-2   + a1*T^-1     + a2     + a3*T   + a4*T^2   + a5*T^3  + a6*T^4 */
-    return a[0]/cache.T2 + a[1]/cache.T + a[2] + a[3]*cache.T + a[4]*cache.T2 + a[5]*cache.T3 + a[6]*cache.T4;
+    // FIXME - this needs expression templates to be faster...
+
+    StateType returnval = Antioch::zero_clone(cache.T);
+
+    for (unsigned int i=begin_interval; i != end_interval; ++i)
+      {
+        const CoeffType * const a =
+          this->_cea_mixture.curve_fit(species).coefficients(i);
+	returnval = Antioch::if_else
+	  (interval == i,
+	   StateType(a[0]/cache.T2 + a[1]/cache.T + a[2] + a[3]*cache.T +
+	             a[4]*cache.T2 + a[5]*cache.T3 + a[6]*cache.T4),
+	   returnval);
+      }
+
+    return returnval;
   }
 
 
