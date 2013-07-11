@@ -78,7 +78,7 @@ int test_cp( const std::string& species_name, unsigned int species,
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 20;
 
   typedef typename Antioch::CEAThermodynamics<Scalar>::
 		     template Cache<TrioScalars> Cache;
@@ -100,10 +100,13 @@ int test_cp( const std::string& species_name, unsigned int species,
   if( Antioch::max(rel_cp_error) > tol )
     {
       std::cerr << "Error: Mismatch in species specific heat."
+		<< std::setprecision
+		     (std::numeric_limits<Scalar>::digits10 + 1)
 		<< "\nspecies    = " << species_name
 		<< "\ncp         = " << cp
 		<< "\ncp_exact   = " << cp_exact
 		<< "\ndifference = " << diff
+		<< "\nrelative   = " << rel_cp_error
 		<< "\ntolerance  = " << tol
 		<< "\nT = " << T << std::endl;
       return_flag = 1;
