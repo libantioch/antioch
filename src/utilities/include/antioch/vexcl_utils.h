@@ -57,6 +57,7 @@ template<typename real, class RDC>
 class Reductor;
 
 class MAX;
+class MIN;
 }
 namespace boost {
   namespace proto {
