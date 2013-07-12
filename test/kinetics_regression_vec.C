@@ -92,12 +92,12 @@ int vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::st
       std::cerr << "Error: Mismatch in vector sizes " << name << std::endl;
     }
 
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 200;
+
   for (unsigned int s=0; s != a.size(); s++)
     {
       using std::abs;
       using std::max;
-
-      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
       // Break this expression up to workaround bugs in my Eigen
       // and VexCL versions - RHS
@@ -113,13 +113,20 @@ int vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::st
 
   if (found_errors)
     {
+      using std::max;
+
       std::cerr << "Error: Mismatch in vectors " << name << std::endl;
       for( unsigned int s = 0; s < n_species; s++)
 	{
+          const StateType as = a[s], bs = b[s];
+          const StateType rel_error = (as - bs)/max(as,bs);
 	  std::cout << std::scientific << std::setprecision(16)
-		    << "a(" << s << ") = " << a[s]
-		    << ", b(" << s << ") = " << b[s]
-		    << ", a-b(" << s << ") = " << StateType(a[s]-b[s])
+		    << "a(" << s << ") = " << as << std::endl
+		    << "b(" << s << ") = " << bs << std::endl
+		    << "a-b(" << s << ") = " << StateType(as-bs)
+		    << std::endl <<
+		    "a-b/(max(a,b)) = " << rel_error << std::endl
+		    << "tol =" << tol
 		    << std::endl;
 	}
     }
