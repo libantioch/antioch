@@ -1,5 +1,9 @@
 Version 0.1.0 (In progress)
 
+Version 0.0.5
+* Full support for VexCL
+* Additional reaction types supported
+
 Version 0.0.4
 https://github.com/libantioch/antioch
 * Moving repo to GitHub. Required explicitly adding
