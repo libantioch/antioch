@@ -37,6 +37,7 @@ check_PROGRAMS += wilke_transport_unit
 check_PROGRAMS += wilke_transport_vec_unit
 check_PROGRAMS += constant_lewis_unit
 check_PROGRAMS += elementary_process_unit
+check_PROGRAMS += duplicate_process_unit
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -92,6 +93,7 @@ wilke_transport_unit_SOURCES = wilke_transport_unit.C
 wilke_transport_vec_unit_SOURCES = wilke_transport_vec_unit.C
 constant_lewis_unit_SOURCES = constant_lewis_unit.C
 elementary_process_unit_SOURCES = elementary_process_unit.C
+duplicate_process_unit_SOURCES = duplicate_process_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -133,6 +135,7 @@ TESTS += wilke_transport_unit
 TESTS += wilke_transport_vec_unit
 TESTS += constant_lewis_unit
 TESTS += elementary_process_unit
+TESTS += duplicate_process_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen

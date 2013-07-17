@@ -130,7 +130,10 @@ namespace Antioch
 
     //dk_dCi = 0
     antioch_assert_equal_to(dkfwd_dX.size(),this->n_species());
-    Antioch::set_zero(dkfwd_dX);
+    for(unsigned int i = 0; i < dkfwd_dX.size(); i++)
+    {
+      Antioch::set_zero(dkfwd_dX[i]);
+    }
 
     return;
   }
