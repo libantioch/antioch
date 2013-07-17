@@ -71,73 +71,59 @@ HAVE_VEXCL=0
     if test -e "${VEXCL_PREFIX}/vexcl/vexcl.hpp" ; then
        VEXCL_CPPFLAGS="-I${VEXCL_PREFIX}"
        AX_CXX_COMPILE_STDCXX_11(noext)
+    else
+       AC_MSG_NOTICE([${VEXCL_PREFIX}/vexcl/vexcl.hpp not found])
     fi
 
     # Make sure we have OpenCL support                                                                                                                                                                                                     
     AX_CHECK_CL([C++])
 
-    ac_VEXCL_save_CPPFLAGS="$CPPFLAGS"
-
-    CPPFLAGS="${VEXCL_CPPFLAGS} ${OPENCL_CPPFLAGS} ${CPPFLAGS}"
-
-    AC_LANG_PUSH([C++])
-    AC_CHECK_HEADER([vexcl/vexcl.hpp],[found_header=yes],[found_header=no])
-    AC_LANG_POP([C++])
+    found_boost=yes
+    BOOST_REQUIRE([1.47],[found_boost=no]) # Chrono introduced in 1.47
+    BOOST_CHRONO
+    BOOST_DATE_TIME
+    BOOST_FILESYSTEM
+    BOOST_SYSTEM
+    BOOST_THREADS
 
     # Make sure we have OpenCL support
     AX_CHECK_CL([C++])
 
-    # Newer VexCL requires new Boost linkage.
-    # There doesn't seem to be any way to simply *test* for Boost with
-    # boost.m4, so at this point we'll assume that if we've seen VexCL
-    # then you really wanted to use VexCL.
-    if test x$found_header = xyes; then
-      BOOST_REQUIRE([1.47]) # Chrono introduced in 1.47
-      BOOST_CHRONO
-      BOOST_DATE_TIME
-      BOOST_FILESYSTEM
-      BOOST_SYSTEM
-      BOOST_THREADS
-
-      VEXCL_CPPFLAGS="$VEXCL_CPPFLAGS $OPENCL_CPPFLAGS $BOOST_CPPFLAGS"
-      VEXCL_LDFLAGS="$VEXCL_LDFLAGS $BOOST_CHRONO_LDFLAGS $BOOST_DATE_TIME_LDFLAGS $BOOST_FILESYSTEM_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
-      VEXCL_LIBS="$VEXCL_LIBS $BOOST_CHRONO_LIBS $BOOST_DATE_TIME_LIBS $BOOST_FILESYSTEM_LIBS $BOOST_SYSTEM_LIBS"
-    fi
+    AC_LANG_PUSH([C++])
+    ac_VEXCL_save_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS $VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS"
+    AC_CHECK_HEADER([vexcl/vexcl.hpp],[found_header=yes],[found_header=no])
+    CPPFLAGS="$ac_VEXCL_save_CPPFLAGS"
+    AC_LANG_POP([C++])
 
     #-----------------------
     # Minimum version check skipped - there's no versioning
     # information in vexcl headers as of 0.7.0
     #----------------------
 
-    CPPFLAGS="$ac_VEXCL_save_CPPFLAGS"
-
     succeeded=yes
-    if test "$found_header" != yes; then
-       succeeded=no
-    fi
-    if test "$no_cl" = yes; then
-       succeeded=no
-    else
-       VEXCL_CPPFLAGS="$VEXCL_CPPFLAGS $CL_CFLAGS"
-       VEXCL_LIBS="$VEXCL_LIBS $CL_LIBS"
-    fi
+    if test x$found_header = xyes -a x"$no_cl" != xyes; then
+      VEXCL_CPPFLAGS="$VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS"
+      VEXCL_LDFLAGS="$BOOST_CHRONO_LDFLAGS $BOOST_DATE_TIME_LDFLAGS $BOOST_FILESYSTEM_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
+      VEXCL_LIBS="$BOOST_CHRONO_LIBS $BOOST_DATE_TIME_LIBS $BOOST_FILESYSTEM_LIBS $BOOST_SYSTEM_LIBS $CL_LIBS"
 
-    if test "$succeeded" = no; then
-       if test "$is_package_required" = yes; then
-          AC_MSG_ERROR([VEXCL not found.  Try either --with-vexcl or setting VEXCL_DIR.])
-       else
-          AC_MSG_NOTICE([optional VEXCL library not found])
-          VEXCL_CPPFLAGS="" # VEXCL_CPPFLAGS empty on failure
-          VEXCL_LDFLAGS="" # VEXCL_LDFLAGS empty on failure
-          VEXCL_LIBS="" # VEXCL_LIBS empty on failure
-       fi
+      HAVE_VEXCL=1
+      AC_DEFINE(HAVE_VEXCL,1,[Define if VEXCL is available])
+      AC_SUBST(VEXCL_CPPFLAGS)
+      AC_SUBST(VEXCL_LDFLAGS)
+      AC_SUBST(VEXCL_LIBS)
+      AC_SUBST(VEXCL_PREFIX)
     else
-        HAVE_VEXCL=1
-        AC_DEFINE(HAVE_VEXCL,1,[Define if VEXCL is available])
-        AC_SUBST(VEXCL_CPPFLAGS)
-        AC_SUBST(VEXCL_LDFLAGS)
-        AC_SUBST(VEXCL_LIBS)
-        AC_SUBST(VEXCL_PREFIX)
+      succeeded=no
+
+      if test "$is_package_required" = yes; then
+        AC_MSG_ERROR([VEXCL not found.  Try either --with-vexcl or setting VEXCL_DIR.])
+      else
+        AC_MSG_NOTICE([optional VEXCL library not found])
+        VEXCL_CPPFLAGS="" # VEXCL_CPPFLAGS empty on failure
+        VEXCL_LDFLAGS="" # VEXCL_LDFLAGS empty on failure
+        VEXCL_LIBS="" # VEXCL_LIBS empty on failure
+      fi
     fi
 
     AC_SUBST(HAVE_VEXCL)
