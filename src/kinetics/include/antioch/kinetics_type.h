@@ -25,8 +25,9 @@
 #define _ANTIOCH_KINETICS_TYPE_H
 
 //Antioch
-#include "antioch/kinetics_enum.h"
 #include "antioch/antioch_asserts.h"
+#include "antioch/kinetics_enum.h"
+#include "antioch/metaprogramming.h"
 
 //C++
 #include <string>
