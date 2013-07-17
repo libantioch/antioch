@@ -26,6 +26,9 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+// C++
+#include <limits>
+// Antioch
 #include "antioch/kooij_rate.h"
 
 template <typename Scalar>
@@ -41,40 +44,65 @@ int tester()
 
   Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea,1.,1.);
 
-  const Scalar T = 1500.1;
-  
-  const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
-  const Scalar derive_exact = exp(-Ea/T) * pow(T,eta) * Cf/T * (Ea/T + eta );
-
   int return_flag = 0;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
-  Scalar rate;
-  Scalar deriveRate;
+  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+  {
+  
+    const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
+    const Scalar derive_exact = exp(-Ea/T) * pow(T,eta) * Cf/T * (Ea/T + eta );
 
-  const Scalar tol = 1.0e-15;
+    Scalar rate1 = kooij_rate(T);
+    Scalar deriveRate1 = kooij_rate.derivative(T);
+    Scalar rate;
+    Scalar deriveRate;
 
-  kooij_rate.rate_and_derivative(T,rate,deriveRate);
+    kooij_rate.rate_and_derivative(T,rate,deriveRate);
 
-  if( abs( (rate - rate_exact)/rate_exact ) > tol )
-    {
-	  std::cout << std::scientific << std::setprecision(16)
-                << "Error: Mismatch in rate values." << std::endl
-		<< "rate(T) = " << rate << std::endl
-		<< "rate_exact = " << rate_exact << std::endl;
+    if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
+      {
+          std::cout << std::scientific << std::setprecision(16)
+                    << "Error: Mismatch in rate values." << std::endl
+                    << "T = " << T << " K" << std::endl
+                    << "rate(T) = " << rate1 << std::endl
+                    << "rate_exact = " << rate_exact << std::endl;
 
-      return_flag = 1;
-    }
-  if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
-    {
-      std::cout << std::scientific << std::setprecision(16)
-                << "Error: Mismatch in rate derivative values." << std::endl
-		<< "drate_dT(T) = " << deriveRate << std::endl
-		<< "derive_exact = " << derive_exact << std::endl;
+          return_flag = 1;
+      }
+    if( abs( (rate - rate_exact)/rate_exact ) > tol )
+      {
+          std::cout << std::scientific << std::setprecision(16)
+                    << "Error: Mismatch in rate values." << std::endl
+                    << "T = " << T << " K" << std::endl
+                    << "rate(T) = " << rate << std::endl
+                    << "rate_exact = " << rate_exact << std::endl;
 
-      return_flag = 1;
-    }
+          return_flag = 1;
+      }
+    if( abs( (deriveRate1 - derive_exact)/derive_exact ) > tol )
+      {
+          std::cout << std::scientific << std::setprecision(16)
+                    << "Error: Mismatch in rate derivative values." << std::endl
+                    << "T = " << T << " K" << std::endl
+                    << "drate_dT(T) = " << deriveRate1 << std::endl
+                    << "derive_exact = " << derive_exact << std::endl;
 
-  std::cout << "Kooij rate: " << kooij_rate << std::endl;
+          return_flag = 1;
+     }
+    if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
+      {
+          std::cout << std::scientific << std::setprecision(16)
+                    << "Error: Mismatch in rate derivative values." << std::endl
+                    << "T = " << T << " K" << std::endl
+                    << "drate_dT(T) = " << deriveRate << std::endl
+                    << "derive_exact = " << derive_exact << std::endl;
+
+          return_flag = 1;
+     }
+
+     if(return_flag)break;
+  }
 
   return return_flag;
 }

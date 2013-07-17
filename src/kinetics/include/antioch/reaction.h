@@ -752,8 +752,8 @@ namespace Antioch
   {
     using std::pow;
 
-    StateType kfwd_times_reactants = compute_forward_rate_coefficient(molar_densities,T);
-    StateType Keq = equilibrium_constant( P0_RT, h_RT_minus_s_R );
+    StateType kfwd_times_reactants = this->compute_forward_rate_coefficient(molar_densities,T);
+    StateType Keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
     StateType kbkwd_times_products = kfwd_times_reactants/Keq;
     // Rfwd
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
