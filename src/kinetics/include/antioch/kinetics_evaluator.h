@@ -63,7 +63,7 @@ namespace Antioch
     const ReactionSet<CoeffType>& reaction_set() const;
 
     //! Compute species production/destruction rates per unit volume
-    //in \f$ \left(kg/sec/m^3\right)\f$
+    /*! \f$ \left(kg/sec/m^3\right)\f$ */
     template <typename VectorStateType>
     void compute_mass_sources( const StateType& T,
                                const VectorStateType& molar_densities,
@@ -71,7 +71,7 @@ namespace Antioch
                                VectorStateType& mass_sources );
     
     //! Compute species production/destruction rates per unit volume
-    //in \f$ \left(kg/sec/m^3\right)\f$
+    /*! \f$ \left(kg/sec/m^3\right)\f$ */
     template <typename VectorStateType>
     void compute_mass_sources_and_derivs( const StateType& T,
                                           const VectorStateType& molar_densities,
@@ -80,6 +80,14 @@ namespace Antioch
                                           VectorStateType& mass_sources,
                                           VectorStateType& dmass_dT,
                                           std::vector<VectorStateType>& dmass_drho_s );
+
+    //! Compute species molar production/destruction rates per unit volume
+    /*! \f$ \left(mole/sec/m^3\right)\f$ */
+    template <typename VectorStateType>
+    void compute_mole_sources( const StateType& T,
+                               const VectorStateType& molar_densities,
+                               const VectorStateType& h_RT_minus_s_R,
+                               VectorStateType& mole_sources );
 
     unsigned int n_species() const;
 
@@ -149,31 +157,30 @@ namespace Antioch
     return;
   }
 
-
   template<typename CoeffType, typename StateType>
   template<typename VectorStateType>
   inline
-  void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources( const StateType& T,
+  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources( const StateType& T,
                                                                      const VectorStateType& molar_densities,
                                                                      const VectorStateType& h_RT_minus_s_R,
-                                                                     VectorStateType& mass_sources )
+                                                                     VectorStateType& mole_sources )
   {
     //! \todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
     antioch_assert_equal_to( molar_densities.size(), this->n_species() );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
-    antioch_assert_equal_to( mass_sources.size(), this->n_species() );
+    antioch_assert_equal_to( mole_sources.size(), this->n_species() );
 
     /*! \todo Do we need to really initialize this? */
     Antioch::set_zero(_net_reaction_rates);
 
-    Antioch::set_zero(mass_sources);
+    Antioch::set_zero(mole_sources);
 
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates( T, molar_densities,
                                                 h_RT_minus_s_R, _net_reaction_rates );
 
-    // compute the actual mass sources in kmol/sec/m^3
+    // compute the actual mole sources in kmol/sec/m^3
     for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
         const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
@@ -185,7 +192,7 @@ namespace Antioch
             const unsigned int r_id = reaction.reactant_id(r);
             const unsigned int r_stoich = reaction.reactant_stoichiometric_coefficient(r);
             
-            mass_sources[r_id] -= (static_cast<CoeffType>(r_stoich)*rate);
+            mole_sources[r_id] -= (static_cast<CoeffType>(r_stoich)*rate);
           }
         
         // product contributions
@@ -194,9 +201,24 @@ namespace Antioch
             const unsigned int p_id = reaction.product_id(p);
             const unsigned int p_stoich = reaction.product_stoichiometric_coefficient(p);
             
-            mass_sources[p_id] += (static_cast<CoeffType>(p_stoich)*rate);
+            mole_sources[p_id] += (static_cast<CoeffType>(p_stoich)*rate);
           }
       }
+
+    return;
+  }
+
+
+  template<typename CoeffType, typename StateType>
+  template<typename VectorStateType>
+  inline
+  void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources( const StateType& T,
+                                                                     const VectorStateType& molar_densities,
+                                                                     const VectorStateType& h_RT_minus_s_R,
+                                                                     VectorStateType& mass_sources )
+  {
+    // Quantities asserted in compute_mole_sources call
+    this->compute_mole_sources( T, molar_densities, h_RT_minus_s_R, mass_sources );
 
     // finally scale by molar mass
     for (unsigned int s=0; s < this->n_species(); s++)
