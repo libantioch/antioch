@@ -70,8 +70,9 @@ namespace Antioch
                                const VectorStateType& h_RT_minus_s_R,
                                VectorStateType& mass_sources );
     
-    //! Compute species production/destruction rates per unit volume
-    /*! \f$ \left(kg/sec/m^3\right)\f$ */
+    //! Compute species production/destruction rate derivatives
+    /*! In mass units, e.g. \f$ \frac{\parital \dot{\omega}}{dT}
+      [\left(kg/sec/m^3/K\right)]\f$ */
     template <typename VectorStateType>
     void compute_mass_sources_and_derivs( const StateType& T,
                                           const VectorStateType& molar_densities,
@@ -89,6 +90,18 @@ namespace Antioch
                                const VectorStateType& h_RT_minus_s_R,
                                VectorStateType& mole_sources );
 
+    //! Compute species production/destruction rate derivatives
+    /*! In mass units, e.g. \f$ \frac{\parital \dot{\omega}}{dT}
+      [\left(mole/sec/m^3/K\right)]\f$ */
+    template <typename VectorStateType>
+    void compute_mole_sources_and_derivs( const StateType& T,
+                                          const VectorStateType& molar_densities,
+                                          const VectorStateType& h_RT_minus_s_R,
+                                          const VectorStateType& dh_RT_minus_s_R_dT,
+                                          VectorStateType& mole_sources,
+                                          VectorStateType& dmole_dT,
+                                          std::vector<VectorStateType>& dmole_dX_s );
+
     unsigned int n_species() const;
 
     unsigned int n_reactions() const;
@@ -103,7 +116,7 @@ namespace Antioch
 
     std::vector<StateType> _dnet_rate_dT;
 
-    std::vector<std::vector<StateType> > _dnet_rate_drho_s;
+    std::vector<std::vector<StateType> > _dnet_rate_dX_s;
   };
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -138,12 +151,12 @@ namespace Antioch
       _chem_mixture( reaction_set.chemical_mixture() ),
       _net_reaction_rates( reaction_set.n_reactions(), example ),
       _dnet_rate_dT( reaction_set.n_reactions(), example ),
-      _dnet_rate_drho_s( reaction_set.n_reactions() )
+      _dnet_rate_dX_s( reaction_set.n_reactions() )
   {
 
     for( unsigned int r = 0; r < reaction_set.n_reactions(); r++ )
       {
-        _dnet_rate_drho_s[r].resize( reaction_set.n_species(), example );
+        _dnet_rate_dX_s[r].resize( reaction_set.n_species(), example );
       }
 
     return;
@@ -268,7 +281,7 @@ namespace Antioch
         Antioch::set_zero(dmass_drho_s[s]);
 
         /*! \todo Do we need to really initialize this? */
-        Antioch::set_zero(_dnet_rate_drho_s[s]);
+        Antioch::set_zero(_dnet_rate_dX_s[s]);
       }
 
     // compute the requisite reaction rates
@@ -276,8 +289,7 @@ namespace Antioch
                                                            h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                                            _net_reaction_rates,
                                                            _dnet_rate_dT, 
-                                                           _dnet_rate_drho_s );//this is _dnet_rate_dX_s
-
+                                                           _dnet_rate_dX_s );
     // compute the actual mass sources in kmol/sec/m^3
     for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
@@ -287,7 +299,7 @@ namespace Antioch
         /*! \todo Are these going to get optimized out? Should we remove them? */
         const StateType rate = _net_reaction_rates[rxn];
         const StateType drate_dT = _dnet_rate_dT[rxn];
-        const VectorStateType drate_dX_s = _dnet_rate_drho_s[rxn];
+        const VectorStateType drate_dX_s = _dnet_rate_dX_s[rxn];
 
         // reactant contributions
         for (unsigned int r = 0; r < reaction.n_reactants(); r++)
@@ -327,7 +339,7 @@ namespace Antioch
         //from _dnet_rate_dX_s to _dnet_rate_drho_s
         for (unsigned int s=0; s < this->n_species(); s++)
           {
-            _dnet_rate_drho_s[rxn][s] *= _chem_mixture.M(s);
+            _dnet_rate_dX_s[rxn][s] *= _chem_mixture.M(s);
           }
       }
     
