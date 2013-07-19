@@ -33,26 +33,71 @@ namespace Antioch
    *
    * The Troe falloff model is defined by:
    * \f[
-   *     \log_{10}\left(F\right) = \log_{10}\left(F_{\text{cent}}\right) / 
-   *                               \left[ 
-   *                                      1 + \left(
-   *                                                 \frac{\log_{10}\left(P_r\right) + c}
-   *                                                      {n - d * \left[\log_{10}\left(P_r\right) + c\right]}
-   *                                          \right)^2
-   *                               \right]
+   *     \log_{10}\left(F\right) = \frac{\log_{10}\left(F_{\text{cent}}\right)}
+   *                               {1 + \left[
+   *                                          \frac{\log_{10}\left(P_r\right) + c}
+   *                                               {n - d \cdot \left[\log_{10}\left(P_r\right) + c\right]}
+   *                                     \right]^2}
    * \f]
    * with
    * \f[
-   *     \begin{array}{r@{\,=\,}l}\toprule
-   *     P_r   &   [M] \frac{k_0}{k_\infty}                          \\ 
-   *     n     &   0.75 - 1.27 \log_{10}\left(F_{\text{cent}}\right) \\
-   *     c     &   0.40 - 0.67 \log_{10}\left(F_{\text{cent}}\right) \\
-   *     d     &   0.14                                              \\\bottomrule
-   *     \end{array}
+   * \begin{split}
+   *     P_r   & =  [\mathrm{M}] \frac{k_0}{k_\infty} \\ 
+   *     n     & =  0.75 - 1.27 \log_{10}\left(F_{\text{cent}}\right) \\
+   *     c     & = - 0.40 - 0.67 \log_{10}\left(F_{\text{cent}}\right) \\
+   *     d     & =  0.14                                              \\
+   *     F_{\text{cent}} & = (1 - \alpha) \cdot \exp\left(-\frac{T}{T^{***}}\right) + \alpha \cdot \exp\left(-\frac{T}{T^*}\right) + \exp\left(-\frac{T^{**}}{T}\right)
+   * \end{split}
    * \f]
-   * and
+   * The derivatives are therefore:
    * \f[
-   *     F_{\text{cent}} = (1. - \alpha) * \exp\left(-\frac{T}{T^{***}}\right) + \alpha * \exp\left(-\frac{T}{T^*}\right) + \exp\left(-\frac{T^{**}}{T}\right)
+   * \begin{split}
+   *     \frac{\partial F_{\text{cent}}}{\partial T} 
+   *                           & = \frac{\alpha - 1}{T^{***}} \cdot \exp\left(-\frac{T}{T^{***}}\right) 
+   *                            - \frac{\alpha}{T^{*}} \cdot \exp\left(-\frac{T}{T^*}\right) 
+   *                            + \frac{T^{**}}{T^{2}} \exp\left(-\frac{T^{**}}{T}\right) \\
+   *     \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} & = \frac{1}{\ln(10) F_\text{cent}}\frac{\partial F_\text{cent}}{\partial T} \\
+   *     \frac{\partial n}{\partial T} & = - 1.27 \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} \\
+   *     \frac{\partial c}{\partial T} & = - 0.67 \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} \\\\
+   *     \frac{\partial P_r}{\partial T} & = P_r \left(\frac{\partial k_0}{\partial T} \frac{1}{k_0} - \frac{\partial k_\infty}{\partial T} \frac{1}{k_\infty} \right)\\
+   *     \frac{\partial \log_{10}(P_r)}{\partial T} & = \frac{1}{\ln(10) P_r} \frac{\partial P_r}{\partial T} \\\\
+   *     \frac{\partial \log_{10}(F)}{\partial T} & = \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T}
+   *                                                    \frac{1}{1 + \left[\frac{\log_{10}\left(P_r\right) + c}
+   *                                                                            {n - d\left(\log_{10}\left(P_r\right) + c\right)}\right]^2}
+   *                                                - \log_{10}\left(F_\text{cent}\right)
+   *                                                  2\left[\frac{\log_{10}\left(P_r\right) + c}{n - d \left[\log_{10}\left(P_r\right) + c\right]}\right]^2
+   *                                                  \left[\frac{\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}}
+   *                                                             {\log_{10}\left(P_r\right) + c}
+   *                                                       - \frac{\frac{\partial n}{\partial T} 
+   *                                                            - d \left[\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}\right]}
+   *                                                              {n - d \left[\log_{10}\left(P_r\right) + c\right]}
+   *                                                 \right]
+   *                                                          \frac{1}{\left[1 + \left[\frac{\log_{10}\left(P_r\right) + c}
+   *                                                                                        {n - d\left(\log_{10}\left(P_r\right) + c\right)}
+   *                                                                             \right]^2
+   *                                                                  \right]^2}
+   *     \\
+   *     & = \log_{10}\left(F\right) \left[\frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} \frac{1}{F_\text{cent}}
+   *                                      - 2\left[\frac{\log_{10}\left(P_r\right) + c}{n - d \left[\log_{10}\left(P_r\right) + c\right]}\right]^2
+   *                                                  \left[\frac{\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}}
+   *                                                             {\log_{10}\left(P_r\right) + c}
+   *                                                       - \frac{\frac{\partial n}{\partial T} 
+   *                                                            - d \left[\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}\right]}
+   *                                                              {n - d \left[\log_{10}\left(P_r\right) + c\right]}
+   *                                                 \right]
+   *                                                          \frac{1}{1 + \left[\frac{\log_{10}\left(P_r\right) + c}
+   *                                                                                        {n - d\left(\log_{10}\left(P_r\right) + c\right)}
+   *                                                                             \right]^2}
+   *       \right] \\
+   *     \frac{\partial F}{\partial T} & = \ln(10) F  \frac{\partial \log_{10}\left(F\right)}{\partial T} \\\\\\\\
+   *     \frac{\partial P_r}{\partial c_i} & = \frac{k_0}{k_\infty} \\
+   *     \frac{\partial \log_{10}(P_r)}{\partial c_i} & = \frac{1}{\ln(10) P_r} \frac{\partial P_r}{\partial c_i} = \frac{1}{\ln(10) [\mathrm{M}]}\\\\
+   *     \frac{\partial \log_{10}\left(F\right)}{\partial c_i} & = -\frac{\log_{10}^2\left(F\right)}{\log_{10}\left(F_\text{cent}\right)}
+   *                                                               \frac{\partial \log_{10}\left(P_r\right)}{\partial c_i}
+   *                                                               \left(1 - \frac{1}{n - d\left[\log_{10}\left(P_r\right) + c\right]}\right)
+   *                                                               \left(\log_{10}\left(P_r\right) + c\right) \\
+   *     \frac{\partial F}{\partial c_i} & = \ln(10) F \frac{\partial \log_{10}\left(F\right)}{\partial c_i} 
+   * \end{split}
    * \f]
    * 
    * \f$\alpha\f$, \f$T^{*}\f$, \f$T^{**}\f$, \f$T^{***}\f$ being the parameters of the falloff.
@@ -67,18 +112,27 @@ namespace Antioch
 
     ~TroeFalloff();
 
-    template<typename StateType>
-    StateType operator()(const StateType& T, const StateType &Pr) const;
+    void set_alpha(const CoeffType &al);
+    void set_T1(const CoeffType &T);
+    void set_T2(const CoeffType &T);
+    void set_T3(const CoeffType &T);
+
+    template <typename StateType, typename VectorStateType>
+    StateType operator()(const StateType &T,
+                         const VectorStateType &molar_densities,
+                         const StateType &k0, 
+                         const StateType &kinf) const;
 
     template <typename StateType, typename VectorStateType>
     void F_and_derivatives(const StateType& T, 
-                           const StateType &Pr, 
-                           const StateType &dPr_dT, 
-                           const VectorStateType &dPr_dX,
+                           const VectorStateType &molar_densities,
+                           const StateType &k0, 
+                           const StateType &dk0_dT, 
+                           const StateType &kinf, 
+                           const StateType &dkinf_dT, 
                            StateType &F,
                            StateType &dF_dT,
                            VectorStateType &dF_dX) const;
-
 
   private:
 
@@ -107,28 +161,74 @@ namespace Antioch
   };
 
   template<typename CoeffType>
-  template<typename StateType>
   inline
-  StateType TroeFalloff<CoeffType>::operator()(const StateType& T, const StateType &Pr) const
+  void TroeFalloff<CoeffType>::set_alpha(const CoeffType& al)
   {
-    StateType Fcent = this->Fcent(T);
+    _alpha = al;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void TroeFalloff<CoeffType>::set_T1(const CoeffType& T)
+  {
+    _T1 = T;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void TroeFalloff<CoeffType>::set_T2(const CoeffType& T)
+  {
+    _T2 = T;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void TroeFalloff<CoeffType>::set_T3(const CoeffType& T)
+  {
+    _T3 = T;
+    return;
+  }
+
+  template<typename CoeffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  StateType TroeFalloff<CoeffType>::operator()(const StateType& T,
+                                               const VectorStateType &molar_densities,
+                                               const StateType &k0, 
+                                               const StateType &kinf) const
+  {
     using std::exp;
     using std::log;
     using std::pow;
 
+    //Fcent
+    StateType Fcent = this->Fcent(T);
+    //[M] 
+    StateType M = Antioch::zero_clone(T);
+    for(unsigned int i = 0; i < molar_densities.size(); i++)
+    {
+        M += molar_densities[i];
+    }
+
+    // Pr = [M] * k0/kinf
+    StateType Pr = M * k0/kinf;
     // c = -0.4 - 0.67 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    StateType  c = -0.4 - _c_coeff*log(Fcent);
+    StateType  c = - 0.4L - _c_coeff*log(Fcent);
 
     // n = 0.75 - 1.27 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    StateType  n = 0.75 - _n_coeff*log(Fcent);
+    StateType  n = 0.75L - _n_coeff*log(Fcent);
+    StateType  d(0.14L);
 
-    // Pr = [M] * k0/kinf
-    StateType logPr = Constants::log10_to_log<CoeffType>()*log(Pr);
+    StateType log10Pr = Constants::log10_to_log<CoeffType>()*log(Pr);
 
-    //logF =  log10(Fcent) / [1+((log10(Pr) + c)/(n - 0.14*(log10(Pr) + c) ))^2]
-    StateType logF = Constants::log10_to_log<CoeffType>()*log(Fcent)/(1. + pow(((logPr + c)/(n - 0.14*(logPr + c) )),2) );
+    //log10F =  log10(Fcent) / [1+((log10(Pr) + c)/(n - d*(log10(Pr) + c) ))^2]
+    //logF =  log(Fcent) / [1+((log10(Pr) + c)/(n - d*(log10(Pr) + c) ))^2]
+    StateType logF = log(Fcent)/(1.L + pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2) );
 
     return exp(logF);
   }
@@ -142,7 +242,7 @@ namespace Antioch
     using std::exp;
      
     // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
-    StateType Fc = (1 - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
+    StateType Fc = (1.L - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
 
     if(_T2 != 1e50)Fc += exp(-_T2/T);
 
@@ -157,8 +257,8 @@ namespace Antioch
     using std::exp;
     
     // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
-    Fc = (1 - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
-    dFc_dT = -(1 - _alpha)/_T3 * exp(-T/_T3) - _alpha/_T1 * exp(-T/_T1);
+    Fc = (1.L - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
+    dFc_dT = (_alpha - 1.L)/_T3 * exp(-T/_T3) - _alpha/_T1 * exp(-T/_T1);
 
     if(_T2 != 1e50)
       {
@@ -173,9 +273,11 @@ namespace Antioch
   template <typename StateType, typename VectorStateType>
   inline
   void TroeFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
-                                                 const StateType &Pr, 
-                                                 const StateType &dPr_dT, 
-                                                 const VectorStateType &dPr_dX,
+                                                 const VectorStateType &molar_densities,
+                                                 const StateType &k0, 
+                                                 const StateType &dk0_dT, 
+                                                 const StateType &kinf, 
+                                                 const StateType &dkinf_dT, 
                                                  StateType &F,
                                                  StateType &dF_dT,
                                                  VectorStateType &dF_dX) const
@@ -187,76 +289,55 @@ namespace Antioch
     antioch_assert_equal_to(dF_dX.size(),this->n_spec);
 
     //declarations
-    VectorStateType dlogPr_dX = Antioch::zero_clone(dF_dX);
+    //M
+    StateType M = Antioch::zero_clone(T);
+    for(unsigned int i = 0; i < molar_densities.size(); i++)
+    {
+        M += molar_densities[i];
+    }
+    // Pr and derivatives
+    StateType Pr = M * k0/kinf;
+    StateType dPr_dT = Pr * (dk0_dT/k0 - dkinf_dT/kinf);
+    StateType log10Pr = Constants::log10_to_log<CoeffType>()*log(Pr);
+    StateType dlog10Pr_dT = Constants::log10_to_log<CoeffType>()*dPr_dT/Pr;
+    VectorStateType dlog10Pr_dX = Antioch::zero_clone(molar_densities);
+    for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
+      {//dlog10Pr_dX = 1/(ln(10)*Pr) * dPr_dX
+        dlog10Pr_dX[ip] = Constants::log10_to_log<CoeffType>()/M; //dPr_dX = k0/kinf, Pr = M k0/kinf => dlog10Pr_dX = 1/(ln(10)*M)
+      }
+    // Fcent and derivatives
     StateType Fcent = Antioch::zero_clone(T);
     StateType dFcent_dT = Antioch::zero_clone(T);
-    StateType logFcent = Antioch::zero_clone(T);
-    StateType dlogFcent_dT = Antioch::zero_clone(T);
-    StateType logPr = Antioch::zero_clone(T);
-    StateType dlogPr_dT = Antioch::zero_clone(T);
-    StateType upPart = Antioch::zero_clone(T);
-    StateType dupPart_dT = Antioch::zero_clone(T);
-    StateType downPart = Antioch::zero_clone(T);
-    StateType ddownPart_dT = Antioch::zero_clone(T);
-    StateType f = Antioch::zero_clone(T);
-    StateType df_dT = Antioch::zero_clone(T);
-    StateType log10F = Antioch::zero_clone(T);
-    StateType logF = Antioch::zero_clone(T);
-    StateType dlogF_dT = Antioch::zero_clone(T);
-
-    //params and change of variable
     this->Fcent_and_derivatives(T,Fcent,dFcent_dT);
+    StateType dlog10Fcent_dT = Constants::log10_to_log<CoeffType>()*dFcent_dT/Fcent;
+    // n and c and derivatives
+    StateType  d(0.14L);
+    StateType  c = - 0.4L - _c_coeff * log(Fcent);
+    StateType  n = 0.75L - _n_coeff * log(Fcent);
+    StateType dc_dT = - _c_coeff * dFcent_dT/Fcent;
+    StateType dn_dT = - _n_coeff * dFcent_dT/Fcent;
 
-    logFcent = Constants::log10_to_log<CoeffType>()*log(Fcent);
-    dlogFcent_dT = Constants::log10_to_log<CoeffType>()*dFcent_dT/Fcent;
-    logPr = Constants::log10_to_log<CoeffType>()*log(Pr);
-    dlogPr_dT = Constants::log10_to_log<CoeffType>()*dPr_dT/Pr;
-
-    for(unsigned int ip = 0; ip < dlogPr_dX.size(); ip++)
-      {
-        dlogPr_dX[ip] = Constants::log10_to_log<CoeffType>()*dPr_dX[ip]/Pr;
+    //log10F
+    StateType logF = log(Fcent)/(1.L + pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2));
+    StateType dlogF_dT = logF * (dlog10Fcent_dT / Fcent 
+                                     - 2.L * pow((log10Pr + c)/(n - d * (log10Pr + c)),2)
+                                       * ((dlog10Pr_dT + dc_dT)/(log10Pr + c) -
+                                          (dn_dT - d * (dlog10Pr_dT + dc_dT))/(n - d * (log10Pr + c))
+                                         )
+                                       / (1.L + pow((log10Pr + c)/(n - d * (log10Pr + c)),2))
+                                    );
+    VectorStateType dlogF_dX = Antioch::zero_clone(molar_densities);
+    for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
+      {//dlogF_dX = - logF^2/log(Fcent) * dlog10Pr_dX * (1 - 1/(n - d * (log10Pr + c))) * (log10Pr + c)
+        dlogF_dX[ip] = -pow(logF,2)/log(Fcent) * dlog10Pr_dX[ip] *(1.L - 1.L/(n - d * (log10Pr + c))) * (log10Pr + c);
       }
 
-    //decomposing the equation
-    {
-      const CoeffType tmp(0.67L);
-      const CoeffType tmp2(-0.4L);
-      upPart = tmp2 - tmp*logFcent + logPr;
-      dupPart_dT = -tmp*dlogFcent_dT + dlogPr_dT;
-    }
-
-    //dupPart_dX = dlogPr_dX
-    {
-      const CoeffType tmp(0.14L);
-      const CoeffType tmp2(1.1761L);
-      downPart = 0.806 - tmp2*logFcent - tmp*logPr;
-      ddownPart_dT = - tmp2*dlogFcent_dT - tmp*dlogPr_dT;
-    }
-
-    //ddownPart_dX = -0.14*dlogPr_dX
-    f = upPart/downPart;
-    df_dT = f * (dupPart_dT/upPart - ddownPart_dT/downPart);
-    //df_dX = dlogPr_dX * f * [1./upPart + 0.14/downPart]
-
-    //finally log10F
-    {
-      CoeffType tmp(2);
-      CoeffType tmp2(10);
-      CoeffType tmp3(1);
-      CoeffType tmp4(0.14L);
-      
-      log10F = logFcent / (1 + f*f);
-      logF = CoeffType(1/std::log10(std::exp(tmp3)))*log10F;
-      dlogF_dT = dlogFcent_dT / (1 + f*f) - tmp * df_dT * f * logFcent/( (1 + f*f) * (1 + f*f) );
-
-      //dlogF_dX = - 2. * df_dX * f * logFcent/( (1. + f*f) * (1. + f*f) );
-      F = exp(logF);
-      dF_dT = dlogF_dT * log(tmp2) * F;
-      for(unsigned int ip = 0; ip < dF_dX.size(); ip++)
-        {
-          dF_dX[ip] = - tmp * dlogPr_dX[ip] * f * (tmp3/upPart + tmp4/downPart) * f * logFcent/( (1 + f*f) * (1 + f*f) );
-        }
-    }
+    F = exp(logF);
+    dF_dT = F * dlogF_dT;
+    for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
+      {//dF_dX =  F * dlogF_dX
+        dF_dX[ip] = F * dlogF_dX[ip];
+      }
 
     return;
   }

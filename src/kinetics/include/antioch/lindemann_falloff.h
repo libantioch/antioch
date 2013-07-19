@@ -43,14 +43,19 @@ namespace Antioch{
     LindemannFalloff(const unsigned int nspec);
     ~LindemannFalloff();
 
-    template <typename StateType>
-    StateType operator()(const StateType& T, const StateType &Pr) const;
+    template <typename StateType, typename VectorStateType>
+    StateType operator()(const StateType &T,
+                         const VectorStateType &molar_densities,
+                         const StateType &k0, 
+                         const StateType &kinf) const;
 
     template <typename StateType, typename VectorStateType>
     void F_and_derivatives(const StateType& T, 
-                           const StateType &Pr, 
-                           const StateType &dPr_dT, 
-                           const VectorStateType &dPr_dX,
+                           const VectorStateType &molar_densities,
+                           const StateType &k0, 
+                           const StateType &dk0_dT, 
+                           const StateType &kinf, 
+                           const StateType &dkinf_dT, 
                            StateType &F,
                            StateType &dF_dT,
                            VectorStateType &dF_dX) const;
@@ -60,9 +65,12 @@ namespace Antioch{
 
   };
   template<typename CoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   inline
-  StateType LindemannFalloff<CoeffType>::operator()(const StateType &T, const StateType &Pr) const
+  StateType LindemannFalloff<CoeffType>::operator()(const StateType &T,
+                                                    const VectorStateType &molar_densities,
+                                                    const StateType &k0, 
+                                                    const StateType &kinf) const
   {
     return Antioch::constant_clone(T, 1);
   }
@@ -71,20 +79,22 @@ namespace Antioch{
   template <typename StateType, typename VectorStateType>
   inline
   void LindemannFalloff<CoeffType>::F_and_derivatives(const StateType& T, 
-                                                      const StateType &Pr, 
-                                                      const StateType &dPr_dT, 
-                                                      const VectorStateType &dPr_dX,
-                                                      StateType &dF_dT,
+                                                      const VectorStateType &molar_densities,
+                                                      const StateType &k0, 
+                                                      const StateType &dk0_dT, 
+                                                      const StateType &kinf, 
+                                                      const StateType &dkinf_dT, 
                                                       StateType &F,
+                                                      StateType &dF_dT,
                                                       VectorStateType &dF_dX) const
   {
     //all derived are 0
-    set_zero(dF_dT);
+    Antioch::set_zero(dF_dT);
     antioch_assert_equal_to(dF_dX.size(),n_spec);
+    Antioch::set_zero(dF_dX);
+    // F = 1
+    F = Antioch::constant_clone(T,1);
     
-    set_zero(dF_dX);
-    //std::fill( dF_dX.begin(),  dF_dX.end(),  CoeffType(0.));
-
     return;
   }
 
