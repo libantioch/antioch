@@ -71,7 +71,7 @@ namespace Antioch
                                VectorStateType& mass_sources );
     
     //! Compute species production/destruction rate derivatives
-    /*! In mass units, e.g. \f$ \frac{\parital \dot{\omega}}{dT}
+    /*! In mass units, e.g. \f$ \frac{\partial \dot{\omega}}{dT}
       [\left(kg/sec/m^3/K\right)]\f$ */
     template <typename VectorStateType>
     void compute_mass_sources_and_derivs( const StateType& T,
@@ -91,7 +91,7 @@ namespace Antioch
                                VectorStateType& mole_sources );
 
     //! Compute species production/destruction rate derivatives
-    /*! In mass units, e.g. \f$ \frac{\parital \dot{\omega}}{dT}
+    /*! In mass units, e.g. \f$ \frac{\partial \dot{\omega}}{dT}
       [\left(mole/sec/m^3/K\right)]\f$ */
     template <typename VectorStateType>
     void compute_mole_sources_and_derivs( const StateType& T,

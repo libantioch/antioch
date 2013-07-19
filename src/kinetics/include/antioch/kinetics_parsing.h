@@ -35,10 +35,10 @@
 #include "antioch/vanthoff_rate.h"
 #include "antioch/reaction_enum.h"
 
-/*! cross-road to kinetics model
- */
 namespace Antioch
 {
+/*! cross-road to kinetics model
+ */
 
   template<typename CoeffType>
   KineticsType<CoeffType>* build_rate( const std::vector<CoeffType> &data,

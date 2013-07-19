@@ -29,7 +29,7 @@ namespace Antioch
   namespace Constants
   {
     /*!
-     * Universal Gas Constant, R, expressed in J/(kmol-K)
+     * 1/ln(10)
      */
     template<typename CoeffType>
     inline
