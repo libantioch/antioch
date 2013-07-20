@@ -78,9 +78,10 @@ namespace boost {
 namespace std {
 template <typename T>
 inline
-vex::vector<T>
+auto
 max(const vex::vector<T>& a,
     const vex::vector<T>& b)
+-> decltype(vex::max(a,b))
 #ifdef VEXCL_OPERATIONS_HPP
 {
   return vex::max(a,b);
