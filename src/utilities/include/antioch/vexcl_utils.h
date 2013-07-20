@@ -161,7 +161,7 @@ inline
 void
 zero_clone(vex::vector<T1>& output, const vex::vector<T2>& example)
 {
-  output.resize(example.size());
+  output.resize(example.queue_list(), example.size());
   output = 0;
 }
 
@@ -180,7 +180,7 @@ inline
 void
 init_clone(vex::vector<T>& output, const vex::vector<T>& example)
 {
-  output.resize(example.size());
+  output.resize(example.queue_list(), example.size());
   output = example;
 }
 
