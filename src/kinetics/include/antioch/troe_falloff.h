@@ -222,7 +222,7 @@ namespace Antioch
     // n = 0.75 - 1.27 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
     StateType  n = 0.75 - _n_coeff*log(Fcent);
-    StateType  d(0.14L);
+    StateType  d = Antioch::constant_clone(T, 0.14);
 
     StateType log10Pr = Constants::log10_to_log<CoeffType>()*log(Pr);
 
@@ -311,7 +311,7 @@ namespace Antioch
     this->Fcent_and_derivatives(T,Fcent,dFcent_dT);
     StateType dlog10Fcent_dT = Constants::log10_to_log<CoeffType>()*dFcent_dT/Fcent;
     // n and c and derivatives
-    StateType  d(0.14L);
+    StateType  d = Antioch::constant_clone(T, 0.14);
     StateType  c = - 0.4 - _c_coeff * log(Fcent);
     StateType  n = 0.75 - _n_coeff * log(Fcent);
     StateType dc_dT = - _c_coeff * dFcent_dT/Fcent;
