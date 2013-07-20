@@ -522,7 +522,7 @@ LIBS="$LIBS $BOOST_SYSTEM_LIBS"
 LDFLAGS="$LDFLAGS $BOOST_SYSTEM_LDFLAGS"
 BOOST_FIND_LIB([chrono], [$1],
                 [boost/chrono.hpp],
-                [boost::chrono::thread_clock d;])
+                [boost::chrono::high_resolution_clock d;])
 if test $enable_static_boost = yes && test $boost_major_version -ge 135; then
     AC_SUBST([BOOST_FILESYSTEM_LIBS], ["$BOOST_FILESYSTEM_LIBS $BOOST_SYSTEM_LIBS"])
 fi
