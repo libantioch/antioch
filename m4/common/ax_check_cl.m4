@@ -93,7 +93,7 @@ if test "$disable_opencl" = 'yes'; then
                  [ax_check_cl_nvidia_flags="-L/usr/$ax_check_cl_libdir/nvidia" LIBS="$ax_try_lib $ax_check_cl_nvidia_flags $CL_LIBS $ax_save_LIBS"
                  AC_LINK_IFELSE([AX_CHECK_CL_PROGRAM],
                                 [ax_cv_check_cl_libcl="$ax_try_lib $ax_check_cl_nvidia_flags"; break],
-                                [ax_check_cl_dylib_flag='-framework OpenCL -L/System/Library/Frameworks/OpenCL.framework/Versions/A/Libraries' LIBS="$ax_try_lib $ax_check_cl_dylib_flag $CL_LIBS $ax_save_LIBS"
+                                [ax_check_cl_dylib_flag='-framework OpenCL' LIBS="$ax_check_cl_dylib_flag"
                                 AC_LINK_IFELSE([AX_CHECK_CL_PROGRAM],
                                                [ax_cv_check_cl_libcl="$ax_try_lib $ax_check_cl_dylib_flag"; break])])])
   done
