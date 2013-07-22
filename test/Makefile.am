@@ -39,7 +39,7 @@ check_PROGRAMS += constant_lewis_unit
 check_PROGRAMS += elementary_process_unit
 check_PROGRAMS += duplicate_process_unit
 check_PROGRAMS += threebody_process_unit
-# check_PROGRAMS += lindemann_falloff_unit
+check_PROGRAMS += lindemann_falloff_unit
 check_PROGRAMS += troe_falloff_unit
 
 if ANTIOCH_ENABLE_EIGEN
@@ -98,7 +98,7 @@ constant_lewis_unit_SOURCES = constant_lewis_unit.C
 elementary_process_unit_SOURCES = elementary_process_unit.C
 duplicate_process_unit_SOURCES = duplicate_process_unit.C
 threebody_process_unit_SOURCES = threebody_process_unit.C
-#lindemann_falloff_unit_SOURCES = lindemann_falloff_unit.C
+lindemann_falloff_unit_SOURCES = lindemann_falloff_unit.C
 troe_falloff_unit_SOURCES = troe_falloff_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
@@ -143,7 +143,7 @@ TESTS += constant_lewis_unit
 TESTS += elementary_process_unit
 TESTS += duplicate_process_unit
 TESTS += threebody_process_unit
-#TESTS += lindemann_falloff_unit
+TESTS += lindemann_falloff_unit
 TESTS += troe_falloff_unit
 
 if ANTIOCH_ENABLE_EIGEN
