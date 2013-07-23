@@ -120,8 +120,15 @@ namespace Antioch
       \f$ w_i = x_i \frac{M_i}{M} \f$ 
     */
     template<typename StateType>
-    StateType X( const unsigned int species, const StateType& M,
-		 const StateType& mass_fraction ) const;
+   // ANTIOCH_AUTO(StateType) 
+    auto
+//StateType
+    X( const unsigned int species, const StateType& M,
+       const StateType& mass_fraction ) const
+//    -> decltype(mass_fraction*M/((((ChemicalMixture*)   0)->*((CoeffType (ChemicalMixture::*)(unsigned int) const)&ChemicalMixture::M))(species)))
+//      -> StateType
+    -> decltype (mass_fraction*M/((((ChemicalMixture*)   0)->*((CoeffType (ChemicalMixture::*)(const unsigned int) const)&ChemicalMixture::M))(species)))
+    ;
 
     //! All species mole fractions
     /*!
@@ -240,11 +247,21 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType ChemicalMixture<CoeffType>::X( const unsigned int species,
-					   const StateType& M,
-					   const StateType& mass_fraction ) const
+  // ANTIOCH_AUTO(StateType) 
+    auto
+//  StateType
+  ChemicalMixture<CoeffType>::X( const unsigned int species,
+				 const StateType& M,
+				 const StateType& mass_fraction ) const
+//    -> decltype(mass_fraction*M/((((ChemicalMixture*)   0)->*((CoeffType (ChemicalMixture::*)(unsigned int) const)&ChemicalMixture::M))(species)))
+//    -> StateType
+    -> decltype (mass_fraction*M/((((ChemicalMixture*)   0)->*((CoeffType (ChemicalMixture::*)(const unsigned int) const)&ChemicalMixture::M))(species)))
+  //ANTIOCH_RETURNEXPR(mass_fraction*M/(((ChemicalMixture*)0)->*(&ChemicalMixture::M)(species)))
   {
-    return mass_fraction*M/this->M(species);
+      return (mass_fraction*M/((((ChemicalMixture*)this)->*((CoeffType (ChemicalMixture::*)(const unsigned int) const)&ChemicalMixture::M))(species)));
+//    CoeffType (ChemicalMixture::*methodptr)(unsigned int) const = &ChemicalMixture::M;
+//    return (this->*methodptr)(species);
+    //return mass_fraction*M/this->M(species);
   }
 
   template<typename CoeffType>
