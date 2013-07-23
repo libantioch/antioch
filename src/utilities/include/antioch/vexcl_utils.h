@@ -75,20 +75,16 @@ namespace boost {
 #endif
 
 
+#ifdef VEXCL_OPERATIONS_HPP
 namespace std {
 template <typename T>
 inline
-vex::vector<T>
+ANTIOCH_AUTO(vex::vector<T>)
 max(const vex::vector<T>& a,
     const vex::vector<T>& b)
-#ifdef VEXCL_OPERATIONS_HPP
-{
-  return vex::max(a,b);
+ANTIOCH_AUTOFUNC(vex::max(a,b))
 }
-#else
-;
 #endif
-}
 
 
 namespace Antioch
