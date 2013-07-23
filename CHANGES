@@ -1,5 +1,11 @@
 Version 0.1.0 (In progress)
 
+Version 0.0.6
+* More test coverage for newer reaction types
+* Better OpenCL detection for OS X
+* Better support for VexCL, including commits
+  from VexCL author Denis Demidov
+
 Version 0.0.5
 * Full support for VexCL
 * Additional reaction types supported
