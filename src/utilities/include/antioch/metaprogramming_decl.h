@@ -31,6 +31,18 @@
 
 namespace Antioch
 {
+  // Allow us to use auto when C++11 is available while falling back
+  // on preselected types when C++11 is not available.
+#ifdef ANTIOCH_HAVE_CXX11
+#define ANTIOCH_AUTO(Type) auto
+#define ANTIOCH_RETURNEXPR(Expr) -> decltype(Expr)
+#define ANTIOCH_AUTOFUNC(Expr) -> decltype(Expr) { return Expr; }
+#else
+#define ANTIOCH_AUTO(Type) Type
+#define ANTIOCH_RETURNEXPR(Expr) 
+#define ANTIOCH_AUTOFUNC(Expr) { return Expr; }
+#endif
+
   // Helper metafunctions
   template <bool B, class T = void>
   struct enable_if_c {
