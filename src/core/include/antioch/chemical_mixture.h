@@ -384,9 +384,6 @@ namespace Antioch
 				      const VectorStateType& mass_fractions, 
 				      VectorStateType& mole_fractions ) const
   {
-    typedef typename 
-      Antioch::value_type<VectorStateType>::type StateType;
-
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
 
     // Require output size to be correct.  This is more efficient and
