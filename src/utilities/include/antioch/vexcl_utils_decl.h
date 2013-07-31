@@ -72,13 +72,24 @@ inline
 ANTIOCH_AUTO(vex::vector<T>)
 max(const vex::vector<T>& a,
     const vex::vector<T>& b)
-ANTIOCH_RETURNEXPR(vex::max(a,b));
+ANTIOCH_RETURNEXPR(vex::vector<T>, vex::max(a,b));
+
+template <typename T>
+inline
+ANTIOCH_AUTO(vex::vector<T>)
+min(const vex::vector<T>& a,
+    const vex::vector<T>& b)
+ANTIOCH_RETURNEXPR(vex::vector<T>, vex::min(a,b));
 }
 #endif
 
 
 namespace Antioch
 {
+
+// Class to allow tag dispatching to VexCL specializations
+struct vexcl_library_tag : public numeric_library_tag {};
+
 template <typename T, typename NewScalar>
 struct rebind<vex::vector<T>, NewScalar>
 {

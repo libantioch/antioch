@@ -34,6 +34,7 @@
 #endif
 
 #include "antioch_config.h"
+#include "metaprogramming_decl.h"
 
 #ifdef ANTIOCH_HAVE_EIGEN
 // While this logic is Eigen-specific, these forward declarations deliberately
@@ -47,6 +48,38 @@ template<typename Derived, typename ThenDerived, typename ElseDerived>
 class Select;
 }
 
+// We want this code to apply to Eigen matrices, arrays, and
+// expression templates
+
+namespace Antioch {
+
+template <typename T>
+struct is_eigen {
+  static const bool value = false;
+};
+
+// FIXME: need to add specializations for expression template types
+template <typename T>
+struct state_type<T, typename enable_if_c<is_eigen<T>::value,void>::type> {
+  typedef T type;
+};
+
+// Class to allow tag dispatching to Eigen specializations
+struct eigen_library_tag : public numeric_library_tag {};
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct is_eigen 
+<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+{
+  static const bool value = true;
+};
+
+
+}
+
 #include "antioch/metaprogramming_decl.h"
 
 namespace std
@@ -57,9 +90,22 @@ template <
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
 inline
-_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
-    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b);
+ANTIOCH_AUTO(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>)
+max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & a,
+    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & b)
+ANTIOCH_RETURNEXPR(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>,
+a.array().max(b.array()));
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+ANTIOCH_AUTO(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>)
+min(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & a,
+    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & b)
+ANTIOCH_RETURNEXPR(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>,
+a.array().min(b.array()));
 
 } // end namespace std
 
@@ -77,39 +123,41 @@ struct rebind<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>, NewS
   typedef _Matrix<NewScalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> type;
 };
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
-inline
-_Scalar
-max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in);
+template <typename T>
+struct has_size<T, typename Antioch::enable_if_c<is_eigen<T>::value,void>::type>;
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
-inline
-_Scalar
-min(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in);
+template <typename T>
+struct return_auto<T, typename Antioch::enable_if_c<is_eigen<T>::value,void>::type>;
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
-struct has_size<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
+template <typename T>
+struct size_type<T, typename Antioch::enable_if_c<is_eigen<T>::value,void>::type>;
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
-struct size_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
-
+// FIXME - we need value_type defined for expression templates too
 template <
   template <typename, int, int, int, int, int> class _Matrix,
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
 struct value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct raw_value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >;
+
+template <typename T>
+inline
+typename Antioch::enable_if_c<is_eigen<T>::value, 
+  typename value_type<T>::type
+  >::type
+max(const T& in);
+
+template <typename T>
+inline
+typename Antioch::enable_if_c<is_eigen<T>::value, 
+  typename value_type<T>::type
+  >::type
+min(const T& in);
 
 template <
   template <typename, int, int, int, int, int> class _Matrix,
@@ -127,7 +175,7 @@ template <
 inline
 void
 zero_clone(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& output,
-           const _Matrix<Scalar2, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex);
+	   const _Matrix<Scalar2, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex);
 
 template <
   template <typename, int, int, int, int, int> class _Matrix,
@@ -137,7 +185,7 @@ template <
 inline
 _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
 constant_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options,
-	       _MaxRows, _MaxCols>& example,
+	       _MaxRows, _MaxCols>& ex,
 	       const Scalar& value);
 
 template <
@@ -145,27 +193,21 @@ template <
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
 inline
-void set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
+void
+set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
 
 
-template <
-  typename Condition,
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename Condition, typename T1, typename T2>
 inline
-/*
-Eigen::Select<
-  _Matrix<bool, _Rows, _Cols, _Options, _MaxRows, _MaxCols>,
-  _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>,
-  _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
->
-*/
-_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+typename enable_if_c<
+  is_eigen<T1>::value &&
+  is_eigen<T2>::value,
+  typename state_type<T1>::type
+>::type
 if_else(
 const Condition& condition,
-const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_true,
-const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_false);
+const T1& if_true,
+const T2& if_false);
 
 
 } // end namespace Antioch

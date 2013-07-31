@@ -123,7 +123,7 @@ namespace Antioch
     ANTIOCH_AUTO(StateType) 
     X( const unsigned int species, const StateType& M,
        const StateType& mass_fraction ) const
-    ANTIOCH_RETURNEXPR(mass_fraction*M/this->M(species)) ;
+    ANTIOCH_RETURNEXPR(StateType, mass_fraction*M/this->M(species)) ;
 
     //! All species mole fractions
     /*!
@@ -145,7 +145,7 @@ namespace Antioch
     molar_density( const unsigned int species,
 		   const StateType& rho,
 		   const StateType& mass_fraction ) const
-    ANTIOCH_RETURNEXPR(rho*mass_fraction/this->M(species));
+    ANTIOCH_RETURNEXPR(StateType, rho*mass_fraction/this->M(species));
 
     //! Species molar densities
     /*! 
@@ -248,7 +248,7 @@ namespace Antioch
   ChemicalMixture<CoeffType>::X( const unsigned int species,
 				 const StateType& M,
 				 const StateType& mass_fraction ) const
-  ANTIOCH_AUTOFUNC(mass_fraction*M/this->M(species))
+  ANTIOCH_AUTOFUNC(StateType, mass_fraction*M/this->M(species))
 
   template<typename CoeffType>
   template<typename StateType>
@@ -257,7 +257,7 @@ namespace Antioch
   ChemicalMixture<CoeffType>::molar_density( const unsigned int species,
 					     const StateType& rho,
 					     const StateType& mass_fraction ) const
-  ANTIOCH_AUTOFUNC(rho*mass_fraction/this->M(species))
+  ANTIOCH_AUTOFUNC(StateType, rho*mass_fraction/this->M(species))
 
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>

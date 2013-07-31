@@ -54,20 +54,27 @@ operator<< (std::ostream& output, const std::vector<T>& a);
 
 namespace Antioch
 {
+
+// Class to allow tag dispatching to std::vector specializations
+struct vector_library_tag : public numeric_library_tag {};
+
 template <typename T, typename NewScalar>
-struct rebind<std::vector<T>, NewScalar>
-{
-  typedef std::vector<NewScalar> type;
-};
+struct rebind<std::vector<T>, NewScalar>;
 
 template <typename T>
 struct has_size<std::vector<T> >;
+
+template <typename T>
+struct return_auto<std::vector<T> >;
 
 template <typename T>
 struct size_type<std::vector<T> >;
 
 template <typename T>
 struct value_type<std::vector<T> >;
+
+template <typename T>
+struct raw_value_type<std::vector<T> >;
 
 template <typename T>
 inline

@@ -82,8 +82,16 @@ inline
 ANTIOCH_AUTO(vex::vector<T>)
 max(const vex::vector<T>& a,
     const vex::vector<T>& b)
-ANTIOCH_AUTOFUNC(vex::max(a,b))
+ANTIOCH_AUTOFUNC(vex::vector<T>, vex::max(a,b))
+
+template <typename T>
+inline
+ANTIOCH_AUTO(vex::vector<T>)
+min(const vex::vector<T>& a,
+    const vex::vector<T>& b)
+ANTIOCH_AUTOFUNC(vex::vector<T>, vex::min(a,b))
 }
+
 #endif
 
 

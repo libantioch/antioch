@@ -540,7 +540,7 @@ namespace Antioch
 
     for (unsigned int level=0; level<ndg_v.size(); level++)
       {
-        typedef typename Antioch::value_type<StateType>::raw_type raw_type;
+        typedef typename Antioch::raw_value_type<StateType>::type raw_type;
         const StateType expval = exp(theta_v[level]/Tv);
         const StateType expvalminusone = expval - raw_type(1);
       
@@ -594,7 +594,7 @@ namespace Antioch
     // species_ascii_parsing.h
     if (theta_e.size() < 2) return cv_el;
     
-    typedef typename Antioch::value_type<StateType>::raw_type raw_type;
+    typedef typename Antioch::raw_value_type<StateType>::type raw_type;
     const raw_type one = static_cast<raw_type>(1);
 
     const StateType Teinv = one/Te;

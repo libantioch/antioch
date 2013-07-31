@@ -50,8 +50,10 @@ namespace std
 
 template <typename T>
 inline
-std::ostream&
-operator<< (std::ostream& output, const std::valarray<T>& a)
+typename Antioch::enable_if_c<
+  Antioch::is_valarray<T>::value,
+  std::ostream&>::type
+operator<< (std::ostream& output, const T& a)
 {
   output << '{';
   const std::size_t size = a.size();
@@ -65,10 +67,12 @@ operator<< (std::ostream& output, const std::valarray<T>& a)
 
 template <typename T, typename T2>
 inline
-std::valarray<T>
-pow (const std::valarray<T>& in, const T2& n)
+typename Antioch::enable_if_c<
+  Antioch::is_valarray<T>::value,
+  typename Antioch::state_type<T>::type>::type
+pow (const T& in, const T2& n)
 {
-  std::valarray<T> out=in;
+  typename Antioch::state_type<T>::type out=in;
   const size_t size = in.size();
   for (size_t i=0; i != size; ++i)
     out[i] = pow(in[i], n);
@@ -82,12 +86,28 @@ max (const std::valarray<T>& a, const std::valarray<T>& b)
 {
   using std::max;
 
-  std::valarray<T> out=a;
   const size_t size = a.size();
+  std::valarray<T> out(size);
   for (size_t i=0; i != size; ++i)
     out[i] = max(a[i], b[i]);
   return out;
 }
+
+
+template <typename T>
+inline
+std::valarray<T>
+min (const std::valarray<T>& a, const std::valarray<T>& b)
+{
+  using std::min;
+
+  const size_t size = a.size();
+  std::valarray<T> out(size);
+  for (size_t i=0; i != size; ++i)
+    out[i] = min(a[i], b[i]);
+  return out;
+}
+
 
 } // end namespace std
 
@@ -112,6 +132,12 @@ min (const std::valarray<T>& in)
 }
 
 template <typename T>
+struct return_auto<T, typename Antioch::enable_if_c<is_valarray<T>::value,void>::type>
+{
+  static const bool value = false;
+};
+
+template <typename T>
 struct has_size<std::valarray<T> >
 {
   static const bool value = true;
@@ -126,9 +152,13 @@ struct size_type<std::valarray<T> >
 template <typename T>
 struct value_type<std::valarray<T> >
 {
-  typedef std::valarray<T> container_type;
   typedef T type;
-  typedef typename value_type<T>::raw_type raw_type;
+};
+
+template <typename T>
+struct raw_value_type<std::valarray<T> >
+{
+  typedef typename raw_value_type<T>::type type;
 };
 
 template <typename T>

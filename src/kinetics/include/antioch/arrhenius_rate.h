@@ -76,19 +76,19 @@ namespace Antioch
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     operator()(const StateType& T) const
-    ANTIOCH_RETURNEXPR(_Cf* (ant_exp(-_Ea/T)));
+    ANTIOCH_RETURNEXPR(StateType, _Cf* (ant_exp(-_Ea/T)));
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
-    ANTIOCH_RETURNEXPR(_Cf* (ant_exp(-_Ea/T)));
+    ANTIOCH_RETURNEXPR(StateType, _Cf* (ant_exp(-_Ea/T)));
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
-    ANTIOCH_RETURNEXPR((*this)(T)*(_Ea/(T*T)));
+    ANTIOCH_RETURNEXPR(StateType, (*this)(T)*(_Ea/(T*T)));
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
@@ -173,21 +173,21 @@ namespace Antioch
   inline
   ANTIOCH_AUTO(StateType) 
   ArrheniusRate<CoeffType>::operator()(const StateType& T) const
-  ANTIOCH_AUTOFUNC(_Cf* (ant_exp(-_Ea/T)))
+  ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(-_Ea/T)))
 
   template<typename CoeffType>
   template<typename StateType>
   inline
   ANTIOCH_AUTO(StateType) 
   ArrheniusRate<CoeffType>::rate(const StateType& T) const
-  ANTIOCH_AUTOFUNC(_Cf* (ant_exp(-_Ea/T)))
+  ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(-_Ea/T)))
 
   template<typename CoeffType>
   template<typename StateType>
   inline
   ANTIOCH_AUTO(StateType) 
   ArrheniusRate<CoeffType>::derivative( const StateType& T ) const
-  ANTIOCH_AUTOFUNC((*this)(T)*(_Ea/(T*T)))
+  ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_Ea/(T*T)))
 
   template<typename CoeffType>
   template<typename StateType>

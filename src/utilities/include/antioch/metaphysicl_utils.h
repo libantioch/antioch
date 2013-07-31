@@ -61,64 +61,86 @@ template <std::size_t size, typename T> class NumberArray;
 namespace Antioch
 {
 
-template <std::size_t size, typename T>
+template <typename T>
 inline
-T
-max (const MetaPhysicL::NumberArray<size,T>& in)
+typename Antioch::enable_if_c<
+  is_metaphysicl<T>::value,
+  typename value_type<T>::type>::type
+max (const T& in)
 {
   using std::max;
 
-  T maxval = in[0];
+  typename value_type<T>::type maxval = in[0];
+  const std::size_t size = in.size();
   for (std::size_t i = 1; i < size; ++i)
     maxval = max(maxval, in[i]);
 
   return maxval;
 }
 
-template <std::size_t size, typename T>
+template <typename T>
 inline
-T
-min (const MetaPhysicL::NumberArray<size,T>& in)
+typename Antioch::enable_if_c<
+  is_metaphysicl<T>::value,
+  typename value_type<T>::type>::type
+min (const T& in)
 {
   using std::min;
 
-  T minval = in[0];
+  typename value_type<T>::type minval = in[0];
+  const std::size_t size = in.size();
   for (std::size_t i = 1; i < size; ++i)
     minval = min(minval, in[i]);
 
   return minval;
 }
 
-template <std::size_t size, typename T>
-struct has_size<MetaPhysicL::NumberArray<size,T> >
+template <typename T>
+struct has_size<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>
 {
   static const bool value = true;
 };
 
-template <std::size_t size, typename T>
-struct size_type<MetaPhysicL::NumberArray<size,T> >
+template <typename T>
+struct return_auto<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>
+{
+  static const bool value = true;
+};
+
+template <typename T>
+struct size_type<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>
 {
   typedef std::size_t type;
 };
 
-template <std::size_t size, typename T>
-struct value_type<MetaPhysicL::NumberArray<size,T> >
+template <typename T>
+struct value_type<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>
 {
-  typedef MetaPhysicL::NumberArray<size,T> container_type;
-  typedef T type;
-  typedef typename value_type<T>::raw_type raw_type;
+  typedef typename T::value_type type;
 };
 
-template <std::size_t size, typename T>
-inline
-MetaPhysicL::NumberArray<size, T>
-if_else(const MetaPhysicL::NumberArray<size, bool>& condition,
-        const MetaPhysicL::NumberArray<size, T>& if_true,
-        const MetaPhysicL::NumberArray<size, T>& if_false)
+template <typename T>
+struct raw_value_type<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>
 {
-  MetaPhysicL::NumberArray<size, T> returnval;
+  typedef typename raw_value_type<T>::type type;
+};
 
-  for (std::size_t i=0; i != size; ++i)
+template <typename Tbool, typename Ttrue, typename Tfalse>
+inline
+typename Antioch::enable_if_c<
+  is_metaphysicl<Tbool>::value &&
+  is_metaphysicl<Ttrue>::value &&
+  is_metaphysicl<Tfalse>::value,
+  typename state_type<Ttrue>::type>::type
+if_else(const Tbool& condition,
+        const Ttrue& if_true,
+        const Tfalse& if_false)
+{
+  typename state_type<Ttrue>::type returnval;
+  antioch_assert_equal_to(condition.size(), if_true.size());
+  antioch_assert_equal_to(condition.size(), if_false.size());
+
+  for (std::size_t i=0; i != condition.size(); ++i)
     returnval[i] = condition[i] ? if_true[i] : if_false[i];
 
   return returnval;

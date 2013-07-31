@@ -31,16 +31,26 @@
 
 namespace Antioch
 {
+  // A workaround for trying to use commas in arguments to macros
+#define ANTIOCH_COMMA ,
+
   // Allow us to use auto when C++11 is available while falling back
   // on preselected types when C++11 is not available.
 #ifdef ANTIOCH_HAVE_CXX11
 #define ANTIOCH_AUTO(Type) auto
-#define ANTIOCH_RETURNEXPR(Expr) -> decltype(Expr)
-#define ANTIOCH_AUTOFUNC(Expr) -> decltype(Expr) { return Expr; }
+#define ANTIOCH_RETURNEXPR(Type, Expr) \
+  -> typename Antioch::if_else_type<Antioch::return_auto<Type>::value, \
+     decltype(Expr), \
+     Type>::type
+#define ANTIOCH_AUTOFUNC(Type, Expr) \
+  -> typename Antioch::if_else_type<Antioch::return_auto<Type>::value, \
+     decltype(Expr), \
+     Type>::type \
+  { return Expr; }
 #else
 #define ANTIOCH_AUTO(Type) Type
-#define ANTIOCH_RETURNEXPR(Expr) 
-#define ANTIOCH_AUTOFUNC(Expr) { return Expr; }
+#define ANTIOCH_RETURNEXPR(Type, Expr) 
+#define ANTIOCH_AUTOFUNC(Type, Expr) { return Expr; }
 #endif
 
   // Helper metafunctions
@@ -52,60 +62,77 @@ namespace Antioch
   template <class T>
   struct enable_if_c<false, T> {};
 
-  // True for vector classes with size() methods
-  template <typename T>
-  struct has_size
-  {
-    const static bool value = false;
+  template <bool B, class T1, class T2>
+  struct if_else_type {
+    typedef T1 type;
   };
+
+  template <class T1, class T2>
+  struct if_else_type<false, T1, T2> {
+    typedef T2 type;
+  };
+
+  // Base class to allow tag dispatching
+  // http://www.generic-programming.org/languages/cpp/techniques.php
+  struct numeric_library_tag {};
+
+  // ::value == true for vector classes with size() methods
+  template <typename T, typename Enable=void>
+  struct has_size;
+
+  // ::value == true for classes with expression templates that can be
+  // safely returned via auto user functions
+  template <typename T, typename Enable=void>
+  struct return_auto;
 
   // size_type<T>::size is defined to be the result type of the size()
   // method for vector classes
-  template <typename T>
-  struct size_type { };
+  template <typename T, typename Enable=void>
+  struct size_type;
 
+  // A class to identify the underlying value type value_type<T>::type
+  // of a numeric container type T.
+  template <typename T, typename Enable=void>
+  struct value_type;
 
-  // A class for uniformly assigning third-party vectorized numeric
-  // types from scalar numeric types.  First-party vectorized numeric
-  // types should correctly implement operator=(scalar)...
-  template <typename T>
-  struct value_type
-  {
-    typedef T type;
+  // A class to identify the concrete state type state_type<T>::type
+  // of a (possibly template expression) type T.
+  template <typename T, typename Enable=void>
+  struct state_type;
 
-    typedef T raw_type;
-  };
+  // A class to identify the underlying value type
+  // raw_value_type<T>::type of
+  // container-of-container types.
+  template <typename T, typename Enable=void>
+  struct raw_value_type;
 
   // A class for generating "int" from "float" or "valarray<int>" from
   // "valarray<float>" etc.
-  template <typename Vector, typename NewScalar>
-  struct rebind
-  {
-    typedef NewScalar type;
-  };
+  template <typename Vector, typename NewScalar, typename Enable=void>
+  struct rebind;
 
-  template <typename Vector, typename NewScalar>
-  struct rebind<const Vector, NewScalar>
-  {
-    typedef const typename rebind<Vector, NewScalar>::type type;
-  };
-
+  /*
   template <typename T>
   inline
-  T
+  typename value_type<T>::type
   max (const T& in);
 
   template <typename T>
   inline
-  T
+  typename value_type<T>::type
   min (const T& in);
+  */
 
   template <typename T>
   struct value_type<const T>
   {
     typedef const typename value_type<T>::type type;
+  };
 
-    typedef const typename value_type<T>::raw_type raw_type;
+  template <typename T>
+  struct raw_value_type<const T>
+  {
+    typedef const typename raw_value_type<T>::type type;
   };
 
   // A function for zero-initializing vectorized numeric types

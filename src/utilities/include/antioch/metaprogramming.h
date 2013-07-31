@@ -37,78 +37,95 @@
 
 namespace Antioch
 {
-  template <typename T>
-  inline
-  T
-  max (const T& in)
-  {
-    return in;
-  }
+#define ANTIOCH_PLAIN_SCALAR(Type) \
+template <> \
+struct has_size<Type> \
+{ \
+  const static bool value = false; \
+}; \
+ \
+template <> \
+struct return_auto<Type> \
+{ \
+  const static bool value = false; \
+}; \
+ \
+template <> \
+struct value_type<Type> \
+{ \
+  typedef Type type; \
+}; \
+ \
+template <> \
+struct raw_value_type<Type> \
+{ \
+  typedef Type type; \
+}; \
+ \
+template <typename NewScalar> \
+struct rebind<Type, NewScalar> \
+{ \
+  typedef NewScalar type; \
+}; \
+ \
+inline \
+Type \
+max (const Type& in) { return in; } \
+ \
+inline \
+Type \
+min (const Type& in) { return in; } \
+ \
+template <> \
+inline \
+Type if_else(bool condition, \
+             Type if_true, \
+             Type if_false) \
+{ \
+  if (condition) \
+    return if_true; \
+  else \
+    return if_false; \
+}
 
-  template <typename T>
-  inline
-  T
-  min (const T& in)
-  {
-    return in;
-  }
+ANTIOCH_PLAIN_SCALAR(float);
+ANTIOCH_PLAIN_SCALAR(double);
+ANTIOCH_PLAIN_SCALAR(long double);
+ANTIOCH_PLAIN_SCALAR(short);
+ANTIOCH_PLAIN_SCALAR(int);
+ANTIOCH_PLAIN_SCALAR(long);
+ANTIOCH_PLAIN_SCALAR(unsigned short);
+ANTIOCH_PLAIN_SCALAR(unsigned int);
+ANTIOCH_PLAIN_SCALAR(unsigned long);
 
-  // A function for zero-initializing vectorized numeric types
-  // while resizing them to match the example input
-  template <typename T>
-  inline
-  T zero_clone(const T& /* example */) { return 0; }
+template <typename T>
+inline
+void set_zero(T& output) { output = 0; }
 
-  // A function for zero-initializing vectorized numeric types
-  // while resizing them to match the example input
-  template <typename T1, typename T2>
-  inline
-  void zero_clone(T1& output, const T2& /* example */) { output = 0; }
+template <typename T>
+inline
+T zero_clone(const T& /* example */) { return 0; }
 
-  // A function for initializing vectorized numeric types to a
-  // constant // while resizing them to match the example input
-  template <typename T, typename Scalar>
-  inline
-  T constant_clone(const T& example, const Scalar& value) { return value; }
+template <typename T, typename T2>
+inline
+void zero_clone(T& output, const T2& /* example */) { output = 0; }
 
-  // A function for initializing vectorized numeric types
-  // while resizing them to match the example input
-  template <typename T>
-  inline
-  void init_clone(T& output, const T& example) { output = example; }
+template <typename T>
+inline
+void init_clone(T& output, const T& example) { output = example; }
 
-  // A function for zero-setting vectorized numeric types
-  template <typename T>
-  inline
-  void set_zero(T& output) { output = 0; }
+template <typename Vector, typename Scalar>
+inline
+void init_constant(Vector& output, const Scalar& example)
+{
+  for (typename Antioch::size_type<Vector>::type i=0;
+       i != output.size(); ++i)
+    init_clone(output[i], example);
+}
 
-  // A function for initializing numeric vector types.  Resizes the
-  // contents of vector-of-vector types but does not resize the outer
-  // vector.
-  template <typename Vector, typename Scalar>
-  inline
-  void init_constant(Vector& output, const Scalar& example)
-  {
-    // We can't just use setZero here with arbitrary Scalar types
-    for (typename Antioch::size_type<Vector>::type i=0;
-	 i != output.size(); ++i)
-      init_clone(output[i], example);
-  }
-
-  // A default implementation for built-in types
-  template <typename T>
-  inline
-  T if_else(bool condition,
-	    T if_true,
-	    T if_false)
-  {
-    if (condition)
-      return if_true;
-    else
-      return if_false;
-  }
-
-
+template <typename T, typename Scalar>
+inline
+T constant_clone(const T& example, const Scalar& value) { return value; }
 
 } // end namespace Antioch
 
