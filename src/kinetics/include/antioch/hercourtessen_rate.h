@@ -26,6 +26,7 @@
 
 //Antioch
 #include "antioch/kinetics_type.h"
+#include "antioch/cmath_shims.h"
 
 // C++
 #include <cmath>
@@ -42,7 +43,14 @@ namespace Antioch
   template<typename CoeffType=double>
   class HercourtEssenRate : public KineticsType<CoeffType>
   {
+
+  private:
   
+    CoeffType _raw_Cf;
+    CoeffType _Cf;
+    CoeffType _eta;
+    CoeffType _Tref;
+    
   public:
 
     HercourtEssenRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Tref = 1.);
@@ -58,15 +66,21 @@ namespace Antioch
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
-    StateType operator()(const StateType& T) const;
+    ANTIOCH_AUTO(StateType) 
+    rate(const StateType& T) const
+    ANTIOCH_RETURNEXPR(StateType, _Cf* (ant_pow(T,_eta)));
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
-    StateType rate(const StateType& T) const;
+    ANTIOCH_AUTO(StateType) 
+    operator()(const StateType& T) const
+    ANTIOCH_RETURNEXPR(StateType, this->rate(T));
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
-    StateType derivative( const StateType& T ) const;
+    ANTIOCH_AUTO(StateType) 
+    derivative( const StateType& T ) const
+    ANTIOCH_RETURNEXPR(StateType, (*this)(T)/T*(_eta));
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
@@ -79,11 +93,6 @@ namespace Antioch
 
     void compute_cf();
 
-    CoeffType _raw_Cf;
-    CoeffType _Cf;
-    CoeffType _eta;
-    CoeffType _Tref;
-    
   };
 
   template<typename CoeffType>
@@ -93,8 +102,6 @@ namespace Antioch
       _eta(eta),
       _Tref(Tref)
   {
-    using std::pow;
-
     this->compute_cf();
 
     return;
@@ -121,8 +128,6 @@ namespace Antioch
   inline
   void HercourtEssenRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    using std::pow;
-
     _raw_Cf = Cf;
     this->compute_cf();
 
@@ -141,8 +146,6 @@ namespace Antioch
   inline
   void HercourtEssenRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
-    using std::pow;
-
     _Tref = Tref;
     this->compute_cf();
 
@@ -167,28 +170,23 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType HercourtEssenRate<CoeffType>::operator()(const StateType& T) const
-  {
-    using std::pow;
-    return _Cf * (pow(T,_eta));
-  }
+  ANTIOCH_AUTO(StateType) 
+  HercourtEssenRate<CoeffType>::rate(const StateType& T) const
+  ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)))
 
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType HercourtEssenRate<CoeffType>::rate(const StateType& T) const
-  {
-    using std::pow;
-    return _Cf* (pow(T,_eta));
-  }
+  ANTIOCH_AUTO(StateType) 
+  HercourtEssenRate<CoeffType>::operator()(const StateType& T) const
+  ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType HercourtEssenRate<CoeffType>::derivative( const StateType& T ) const
-  {
-    return (*this)(T)/T*(_eta);
-  }
+  ANTIOCH_AUTO(StateType) 
+  HercourtEssenRate<CoeffType>::derivative( const StateType& T ) const
+  ANTIOCH_AUTOFUNC(StateType, (*this)(T)/T*(_eta))
 
   template<typename CoeffType>
   template<typename StateType>
