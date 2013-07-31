@@ -117,6 +117,12 @@ min (const vex::vector<T>& in)
 }
 
 template <typename T>
+struct return_auto<vex::vector<T> >
+{
+  static const bool value = true;
+};
+
+template <typename T>
 struct has_size<vex::vector<T> >
 {
   static const bool value = true;
@@ -131,9 +137,13 @@ struct size_type<vex::vector<T> >
 template <typename T>
 struct value_type<vex::vector<T> >
 {
-  typedef vex::vector<T> container_type;
   typedef T type;
-  typedef typename value_type<T>::raw_type raw_type;
+};
+
+template <typename T>
+struct raw_value_type<vex::vector<T> >
+{
+  typedef typename raw_value_type<T>::type type;
 };
 
 template <typename T>

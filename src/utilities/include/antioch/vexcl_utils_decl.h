@@ -107,6 +107,9 @@ T
 min (const vex::vector<T>& in);
 
 template <typename T>
+struct return_auto<vex::vector<T> >;
+
+template <typename T>
 struct has_size<vex::vector<T> >;
 
 template <typename T>
@@ -114,6 +117,9 @@ struct size_type<vex::vector<T> >;
 
 template <typename T>
 struct value_type<vex::vector<T> >;
+
+template <typename T>
+struct raw_value_type<vex::vector<T> >;
 
 template <typename T>
 inline
