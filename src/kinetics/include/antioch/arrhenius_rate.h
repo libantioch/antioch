@@ -99,6 +99,7 @@ namespace Antioch
 
   };
 
+  /* ------------------------- Inline Functions -------------------------*/
   template<typename CoeffType>
   ArrheniusRate<CoeffType>::ArrheniusRate(const CoeffType Cf, const CoeffType Ea, const CoeffType rscale)
     : KineticsType<CoeffType>(KineticsModel::ARRHENIUS),
@@ -126,7 +127,6 @@ namespace Antioch
     return os.str();
   }
 
-  /* ------------------------- Inline Functions -------------------------*/
   template<typename CoeffType>
   inline
   void ArrheniusRate<CoeffType>::set_Cf( const CoeffType Cf )
