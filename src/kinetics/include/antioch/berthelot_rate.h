@@ -66,19 +66,19 @@ namespace Antioch
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
-    ANTIOCH_RETURNEXPR(StateType, _Cf* (ant_exp(_D*T)));
+    ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(_D*T)))
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     operator()(const StateType& T) const
-    ANTIOCH_RETURNEXPR(StateType, this->rate(T));
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
-    ANTIOCH_RETURNEXPR(StateType, (*this)(T)*_D);
+    ANTIOCH_AUTOFUNC(StateType, (*this)(T)*_D)
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
@@ -147,27 +147,6 @@ namespace Antioch
   inline
   CoeffType BerthelotRate<CoeffType>::D() const
   { return _D; }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  ANTIOCH_AUTO(StateType) 
-  BerthelotRate<CoeffType>::operator()(const StateType& T) const
-  ANTIOCH_AUTOFUNC(StateType, this->rate(T))
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  ANTIOCH_AUTO(StateType) 
-  BerthelotRate<CoeffType>::rate(const StateType& T) const
-  ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(_D*T)))
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  ANTIOCH_AUTO(StateType) 
-  BerthelotRate<CoeffType>::derivative( const StateType& T ) const
-  ANTIOCH_AUTOFUNC(StateType, (*this)(T)*_D)
 
   template<typename CoeffType>
   template<typename StateType>

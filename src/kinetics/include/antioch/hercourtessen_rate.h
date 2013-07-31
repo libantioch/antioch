@@ -68,19 +68,19 @@ namespace Antioch
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
-    ANTIOCH_RETURNEXPR(StateType, _Cf* (ant_pow(T,_eta)));
+    ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)))
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     operator()(const StateType& T) const
-    ANTIOCH_RETURNEXPR(StateType, this->rate(T));
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
-    ANTIOCH_RETURNEXPR(StateType, (*this)(T)/T*(_eta));
+    ANTIOCH_AUTOFUNC(StateType, (*this)(T)/T*(_eta))
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
@@ -166,27 +166,6 @@ namespace Antioch
   inline
   CoeffType HercourtEssenRate<CoeffType>::Tref() const
   { return _Tref; }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  ANTIOCH_AUTO(StateType) 
-  HercourtEssenRate<CoeffType>::rate(const StateType& T) const
-  ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)))
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  ANTIOCH_AUTO(StateType) 
-  HercourtEssenRate<CoeffType>::operator()(const StateType& T) const
-  ANTIOCH_AUTOFUNC(StateType, this->rate(T))
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  ANTIOCH_AUTO(StateType) 
-  HercourtEssenRate<CoeffType>::derivative( const StateType& T ) const
-  ANTIOCH_AUTOFUNC(StateType, (*this)(T)/T*(_eta))
 
   template<typename CoeffType>
   template<typename StateType>
