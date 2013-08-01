@@ -2,7 +2,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([Antioch], [0.0.6], [pbauman@ices.utexas.edu], [antioch])
+AC_INIT([Antioch], [0.0.7], [pbauman@ices.utexas.edu], [antioch])
 PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
 AC_SUBST([PACKAGE_DESCRIPTION])
 PACKAGE_URL="http://red.ices.utexas.edu/projects/antioch/"
