@@ -34,9 +34,10 @@ namespace Antioch
   // A workaround for trying to use commas in arguments to macros
 #define ANTIOCH_COMMA ,
 
-  // Allow us to use auto when C++11 is available while falling back
-  // on preselected types when C++11 is not available.
-#ifdef ANTIOCH_HAVE_CXX11
+  // Allow us to use auto when sufficiently complete C++11 support is
+  // available, while falling back on preselected types when C++11
+  // is not available.
+#ifdef ANTIOCH_HAVE_AUTO_THIS
 #define ANTIOCH_AUTO(Type) auto
 #define ANTIOCH_RETURNEXPR(Type, Expr) \
   -> typename Antioch::if_else_type<Antioch::return_auto<Type>::value, \
