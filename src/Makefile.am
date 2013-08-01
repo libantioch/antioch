@@ -108,6 +108,7 @@ include_HEADERS += transport/include/antioch/constant_lewis_diffusivity.h
 # utilities
 include_HEADERS += utilities/include/antioch/antioch_exceptions.h
 include_HEADERS += utilities/include/antioch/antioch_asserts.h
+include_HEADERS += utilities/include/antioch/cmath_shims.h
 include_HEADERS += utilities/include/antioch/eigen_utils.h
 include_HEADERS += utilities/include/antioch/eigen_utils_decl.h
 include_HEADERS += utilities/include/antioch/input_utils.h

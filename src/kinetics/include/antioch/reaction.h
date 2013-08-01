@@ -31,6 +31,7 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/cmath_shims.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/hercourtessen_rate.h"
 #include "antioch/berthelot_rate.h"
@@ -551,7 +552,6 @@ namespace Antioch
                                                        const VectorStateType& h_RT_minus_s_R ) const
   {
     using std::exp;
-    using std::pow;
 
     antioch_assert( this->initialized() );
     //!\todo Make this assertion vector-compatible
@@ -569,7 +569,7 @@ namespace Antioch
                        h_RT_minus_s_R[s] );
       }
 
-    return pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*exp(exppower);
+    return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*exp(exppower);
   }
 
 
@@ -750,8 +750,6 @@ namespace Antioch
                                                            const StateType& P0_RT,  
                                                            const VectorStateType& h_RT_minus_s_R) const
   {
-    using std::pow;
-
     StateType kfwd_times_reactants = this->compute_forward_rate_coefficient(molar_densities,T);
     StateType Keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
     StateType kbkwd_times_products = kfwd_times_reactants/Keq;
@@ -759,16 +757,16 @@ namespace Antioch
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
         kfwd_times_reactants     *= 
-          pow( molar_densities[this->reactant_id(ro)],
-               static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+          ant_pow( molar_densities[this->reactant_id(ro)],
+            static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
       }
 
     // Rbkwd 
     for (unsigned int po=0; po< this->n_products(); po++)
       {
         kbkwd_times_products     *= 
-          pow( molar_densities[this->product_id(po)],
-               static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+          ant_pow( molar_densities[this->product_id(po)],
+            static_cast<int>(this->product_stoichiometric_coefficient(po)) );
           
       }
 
@@ -789,8 +787,6 @@ namespace Antioch
                                                                       StateType& dnet_rate_dT,
                                                                       VectorStateType& dnet_rate_dX_s ) const
   {
-    using std::pow;
-
     antioch_assert_equal_to (molar_densities.size(), this->n_species());
 
 
@@ -855,13 +851,13 @@ namespace Antioch
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
         const StateType val = 
-          pow( molar_densities[this->reactant_id(ro)],
-               static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+          ant_pow( molar_densities[this->reactant_id(ro)],
+            static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
           
         const StateType dval = 
           ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
-            pow( molar_densities[this->reactant_id(ro)],
-                 static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
+            ant_pow( molar_densities[this->reactant_id(ro)],
+              static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
             );
 
         Rfwd     *= val;
@@ -884,13 +880,13 @@ namespace Antioch
     for (unsigned int po=0; po< this->n_products(); po++)
       {
         const StateType val = 
-          pow( molar_densities[this->product_id(po)],
-               static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+          ant_pow( molar_densities[this->product_id(po)],
+            static_cast<int>(this->product_stoichiometric_coefficient(po)) );
           
         const StateType dval = 
           ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
-            pow( molar_densities[this->product_id(po)],
-                 static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
+            ant_pow( molar_densities[this->product_id(po)],
+              static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
             );
         
         Rbkwd     *= val;

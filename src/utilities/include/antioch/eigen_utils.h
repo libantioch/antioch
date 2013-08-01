@@ -59,12 +59,22 @@ template <
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
 inline
-_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
-    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& b)
-{
-  return a.array().max(b.array());
-}
+ANTIOCH_AUTO(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>)
+max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & a,
+    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & b)
+ANTIOCH_AUTOFUNC(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>,
+a.array().max(b.array()))
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+ANTIOCH_AUTO(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>)
+min(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & a,
+    const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & b)
+ANTIOCH_AUTOFUNC(_Matrix<_Scalar ANTIOCH_COMMA  _Rows ANTIOCH_COMMA  _Cols ANTIOCH_COMMA  _Options ANTIOCH_COMMA  _MaxRows ANTIOCH_COMMA  _MaxCols>,
+a.array().min(b.array()))
 
 } // end namespace std
 
@@ -72,46 +82,42 @@ max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a,
 namespace Antioch
 {
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename T>
 inline
-_Scalar
-max(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in)
+typename Antioch::enable_if_c<is_eigen<T>::value, 
+  typename value_type<T>::type
+  >::type
+max(const T& in)
 {
   return in.maxCoeff();
 }
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename T>
 inline
-_Scalar
-min(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& in)
+typename Antioch::enable_if_c<is_eigen<T>::value, 
+  typename value_type<T>::type
+  >::type
+min(const T& in)
 {
   return in.minCoeff();
 }
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
-struct has_size<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+template <typename T>
+struct has_size<T, typename Antioch::enable_if_c<is_eigen<T>::value,void>::type>
 {
-  static const bool value = true;
+  const static bool value = true;
 };
 
-template <
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
-struct size_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+template <typename T>
+struct return_auto<T, typename Antioch::enable_if_c<is_eigen<T>::value,void>::type>
 {
-  typedef typename
-    _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>::Index
-      type;
+  const static bool value = true;
+};
+
+template <typename T>
+struct size_type<T, typename Antioch::enable_if_c<is_eigen<T>::value,void>::type>
+{
+  typedef typename T::Index type;
 };
 
 template <
@@ -120,11 +126,16 @@ template <
 >
 struct value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
-  typedef _Matrix<
-      _Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols
-    > container_type;
   typedef _Scalar type;
-  typedef typename value_type<_Scalar>::raw_type raw_type;
+};
+
+template <
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+struct raw_value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
+{
+  typedef typename raw_value_type<_Scalar>::type raw_type;
 };
 
 template <
@@ -137,11 +148,13 @@ zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& e
 {
   // We can't just use setZero here with arbitrary _Scalar types
   if (ex.size())
-    return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
-        ex.rows(), ex.cols()).setConstant(zero_clone(ex[0]));
+    return 
+      _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+        (ex.rows(), ex.cols()).setConstant(zero_clone(ex[0]));
 
-  return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
-      ex.rows(), ex.cols());
+  return
+    _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+      (ex.rows(), ex.cols());
 }
 
 template <
@@ -152,7 +165,7 @@ template <
 inline
 void
 zero_clone(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& output,
-           const _Matrix<Scalar2, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex)
+	   const _Matrix<Scalar2, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex)
 {
   // We can't just use setZero here with arbitrary _Scalar types
   output.resize(ex.rows(), ex.cols());
@@ -167,16 +180,19 @@ template <
 >
 inline
 _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
-constant_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& ex,
+constant_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options,
+	       _MaxRows, _MaxCols>& ex,
 	       const Scalar& value)
 {
   // We can't just use setZero here with arbitrary _Scalar types
   if (ex.size())
-    return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
-        ex.rows(), ex.cols()).setConstant(value);
+    return 
+      _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+        (ex.rows(), ex.cols()).setConstant(value);
 
-  return _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>(
-      ex.rows(), ex.cols());
+  return 
+    _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+      (ex.rows(), ex.cols());
 }
 
 
@@ -185,32 +201,26 @@ template <
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
 inline
-void set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
+void
+set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
 {
-  // We can't just use setZero here with arbitrary _Scalar types
+  // We can't just use setZero here with arbitrary value_types
   if (a.size())
     a.setConstant (zero_clone(a[0]));
 }
 
 
-template <
-  typename Condition,
-  template <typename, int, int, int, int, int> class _Matrix,
-  typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename Condition, typename T1, typename T2>
 inline
-/*
-Eigen::Select<
-  _Matrix<bool, _Rows, _Cols, _Options, _MaxRows, _MaxCols>,
-  _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>,
-  _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
->
-*/
-_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
+typename enable_if_c<
+  is_eigen<T1>::value &&
+  is_eigen<T2>::value,
+  typename state_type<T1>::type
+>::type
 if_else(
 const Condition& condition,
-const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_true,
-const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& if_false)
+const T1& if_true,
+const T2& if_false)
 {
   return condition.select(if_true, if_false);
 }
