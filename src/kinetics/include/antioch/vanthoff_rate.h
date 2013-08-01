@@ -25,6 +25,7 @@
 #define ANTIOCH_VAN_T_HOFF_RATE_H
 
 //Antioch
+#include "antioch/cmath_shims.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/physical_constants.h"
 
@@ -44,6 +45,17 @@ namespace Antioch
   template<typename CoeffType=double>
   class VantHoffRate:public KineticsType<CoeffType>
   {
+
+  private:
+ 
+    CoeffType _raw_Cf;
+    CoeffType _Cf;
+    CoeffType _eta;
+    CoeffType _raw_Ea;
+    CoeffType _Ea;
+    CoeffType _D;
+    CoeffType _Tref;
+    CoeffType _rscale;
   
   public:
 
@@ -69,15 +81,21 @@ namespace Antioch
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
-    StateType operator()(const StateType& T) const;
+    ANTIOCH_AUTO(StateType) 
+    rate(const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)*ant_exp(-_Ea/T + _D*T)))
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
-    StateType rate(const StateType& T) const;
+    ANTIOCH_AUTO(StateType) 
+    operator()(const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
-    StateType derivative( const StateType& T ) const;
+    ANTIOCH_AUTO(StateType) 
+    derivative( const StateType& T ) const
+    ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_D + _eta/T + _Ea/(T*T)))
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
@@ -89,16 +107,7 @@ namespace Antioch
   private:
 
     void compute_cf();
-
-    CoeffType _raw_Cf;
-    CoeffType _Cf;
-    CoeffType _eta;
-    CoeffType _raw_Ea;
-    CoeffType _Ea;
-    CoeffType _D;
-    CoeffType _Tref;
-    CoeffType _rscale;
-    
+   
   };
 
   template<typename CoeffType>
@@ -220,36 +229,6 @@ namespace Antioch
   inline
   CoeffType VantHoffRate<CoeffType>::rscale() const
   { return _rscale; }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType VantHoffRate<CoeffType>::operator()(const StateType& T) const
-  {
-    using std::pow;
-    using std::exp;
-
-    return _Cf* (pow(T,_eta)*exp(-_Ea/T + _D*T));
-  }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType VantHoffRate<CoeffType>::rate(const StateType& T) const
-  {
-    using std::pow;
-    using std::exp;
-
-    return _Cf* (pow(T,_eta)*exp(-_Ea/T + _D*T));
-  }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType VantHoffRate<CoeffType>::derivative( const StateType& T ) const
-  {
-    return (*this)(T)*(_D + _eta/T + _Ea/(T*T));
-  }
 
   template<typename CoeffType>
   template<typename StateType>

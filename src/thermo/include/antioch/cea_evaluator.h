@@ -61,7 +61,11 @@ namespace Antioch
     cp( const TempCache<StateType>& cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
-    StateType cv( const TempCache<StateType>& cache, unsigned int species ) const;
+    ANTIOCH_AUTO(StateType)
+    cv( const TempCache<StateType>& cache, unsigned int species ) const
+    ANTIOCH_AUTOFUNC(StateType,
+		     this->cp(cache,species) -
+		     this->chem_mixture().R(species))
 
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
@@ -70,7 +74,11 @@ namespace Antioch
     cv( const TempCache<StateType>& cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
-    StateType h( const TempCache<StateType>& cache, unsigned int species ) const;
+    ANTIOCH_AUTO(StateType)
+    h( const TempCache<StateType>& cache, unsigned int species ) const
+    ANTIOCH_AUTOFUNC(StateType,
+		     this->chem_mixture().R(species) * cache.T *
+		     this->h_over_RT(cache,species))
 
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
@@ -201,15 +209,6 @@ namespace Antioch
       }
     
     return cp;
-  }
-
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType CEAEvaluator<CoeffType>::h( const TempCache<StateType>& cache, unsigned int species ) const
-  {
-    return this->chem_mixture().R(species)*cache.T*this->h_over_RT(cache,species);
   }
 
 
@@ -425,14 +424,6 @@ namespace Antioch
     return;
   }
   
-  
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType CEAEvaluator<CoeffType>::cv( const TempCache<StateType>& cache, unsigned int species ) const
-  {
-    return this->cp(cache,species) - this->chem_mixture().R(species);
-  }
   
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
