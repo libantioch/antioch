@@ -75,20 +75,24 @@ namespace boost {
 #endif
 
 
+#ifdef VEXCL_OPERATIONS_HPP
 namespace std {
 template <typename T>
 inline
-vex::vector<T>
+ANTIOCH_AUTO(vex::vector<T>)
 max(const vex::vector<T>& a,
     const vex::vector<T>& b)
-#ifdef VEXCL_OPERATIONS_HPP
-{
-  return vex::max(a,b);
+ANTIOCH_AUTOFUNC(vex::vector<T>, vex::max(a,b))
+
+template <typename T>
+inline
+ANTIOCH_AUTO(vex::vector<T>)
+min(const vex::vector<T>& a,
+    const vex::vector<T>& b)
+ANTIOCH_AUTOFUNC(vex::vector<T>, vex::min(a,b))
 }
-#else
-;
+
 #endif
-}
 
 
 namespace Antioch
@@ -113,6 +117,12 @@ min (const vex::vector<T>& in)
 }
 
 template <typename T>
+struct return_auto<vex::vector<T> >
+{
+  static const bool value = true;
+};
+
+template <typename T>
 struct has_size<vex::vector<T> >
 {
   static const bool value = true;
@@ -127,9 +137,13 @@ struct size_type<vex::vector<T> >
 template <typename T>
 struct value_type<vex::vector<T> >
 {
-  typedef vex::vector<T> container_type;
   typedef T type;
-  typedef typename value_type<T>::raw_type raw_type;
+};
+
+template <typename T>
+struct raw_value_type<vex::vector<T> >
+{
+  typedef typename raw_value_type<T>::type type;
 };
 
 template <typename T>

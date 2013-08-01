@@ -65,17 +65,31 @@ namespace boost {
 #endif
 
 
+#ifdef VEXCL_OPERATIONS_HPP
 namespace std {
 template <typename T>
 inline
-vex::vector<T>
+ANTIOCH_AUTO(vex::vector<T>)
 max(const vex::vector<T>& a,
-    const vex::vector<T>& b);
+    const vex::vector<T>& b)
+ANTIOCH_RETURNEXPR(vex::vector<T>, vex::max(a,b));
+
+template <typename T>
+inline
+ANTIOCH_AUTO(vex::vector<T>)
+min(const vex::vector<T>& a,
+    const vex::vector<T>& b)
+ANTIOCH_RETURNEXPR(vex::vector<T>, vex::min(a,b));
 }
+#endif
 
 
 namespace Antioch
 {
+
+// Class to allow tag dispatching to VexCL specializations
+struct vexcl_library_tag : public numeric_library_tag {};
+
 template <typename T, typename NewScalar>
 struct rebind<vex::vector<T>, NewScalar>
 {
@@ -93,6 +107,9 @@ T
 min (const vex::vector<T>& in);
 
 template <typename T>
+struct return_auto<vex::vector<T> >;
+
+template <typename T>
 struct has_size<vex::vector<T> >;
 
 template <typename T>
@@ -100,6 +117,9 @@ struct size_type<vex::vector<T> >;
 
 template <typename T>
 struct value_type<vex::vector<T> >;
+
+template <typename T>
+struct raw_value_type<vex::vector<T> >;
 
 template <typename T>
 inline

@@ -68,8 +68,20 @@ operator<< (std::ostream& output, const std::vector<T>& a)
 namespace Antioch
 {
 
+template <typename T, typename NewScalar>
+struct rebind<std::vector<T>, NewScalar>
+{
+  typedef std::vector<NewScalar> type;
+};
+
 template <typename T>
 struct has_size<std::vector<T> >
+{
+  static const bool value = true;
+};
+
+template <typename T>
+struct return_auto<std::vector<T> >
 {
   static const bool value = true;
 };
@@ -83,9 +95,13 @@ struct size_type<std::vector<T> >
 template <typename T>
 struct value_type<std::vector<T> >
 {
-  typedef std::vector<T> container_type;
   typedef T type;
-  typedef typename value_type<T>::raw_type raw_type;
+};
+
+template <typename T>
+struct raw_value_type<std::vector<T> >
+{
+  typedef typename raw_value_type<T>::type type;
 };
 
 template <typename T>

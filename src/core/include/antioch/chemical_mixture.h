@@ -120,8 +120,10 @@ namespace Antioch
       \f$ w_i = x_i \frac{M_i}{M} \f$ 
     */
     template<typename StateType>
-    StateType X( const unsigned int species, const StateType& M,
-		 const StateType& mass_fraction ) const;
+    ANTIOCH_AUTO(StateType) 
+    X( const unsigned int species, const StateType& M,
+       const StateType& mass_fraction ) const
+    ANTIOCH_AUTOFUNC(StateType, mass_fraction*M/this->M(species))
 
     //! All species mole fractions
     /*!
@@ -139,9 +141,11 @@ namespace Antioch
       compute species moles per unit volume
     */
     template<typename StateType>
-    StateType molar_density( const unsigned int species,
-			     const StateType& rho,
-			     const StateType& mass_fraction ) const;
+    ANTIOCH_AUTO(StateType)
+    molar_density( const unsigned int species,
+		   const StateType& rho,
+		   const StateType& mass_fraction ) const
+    ANTIOCH_AUTOFUNC(StateType, rho*mass_fraction/this->M(species))
 
     //! Species molar densities
     /*! 
@@ -235,28 +239,6 @@ namespace Antioch
   CoeffType ChemicalMixture<CoeffType>::M( const unsigned int s ) const
   {
     return (_chemical_species[s])->molar_mass();
-  }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType ChemicalMixture<CoeffType>::X( const unsigned int species,
-					   const StateType& M,
-					   const StateType& mass_fraction ) const
-  {
-    return mass_fraction*M/this->M(species);
-  }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType ChemicalMixture<CoeffType>::molar_density( const unsigned int species,
-						       const StateType& rho,
-						       const StateType& mass_fraction ) const
-  {
-    // !\todo Figure out how to make this assert vector-compatible
-    // antioch_assert_greater( rho, 0.0 );
-    return rho*mass_fraction/this->M(species);
   }
 
   template<typename CoeffType>
