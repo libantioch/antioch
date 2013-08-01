@@ -29,48 +29,30 @@
 #ifndef ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
 #define ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
 
+#include "antioch/metaprogramming_decl.h" // ANTIOCH_AUTO*
+
 namespace Antioch
 {
 
   template<typename CoeffType=double>
   class ConstantLewisDiffusivity
   {
-  public:
-    
-    ConstantLewisDiffusivity( const CoeffType Le );
-
-    ~ConstantLewisDiffusivity();
-    
-    template<typename StateType>
-    StateType D( const StateType& rho, const StateType& cp, const StateType& k ) const;
-
   protected:
 
     CoeffType _Le;
     
+  public:
+    
+    ConstantLewisDiffusivity( const CoeffType Le ) : _Le(Le) {}
+
+    ~ConstantLewisDiffusivity() {}
+    
+    template<typename StateType>
+    ANTIOCH_AUTO(StateType)
+    D( const StateType& rho, const StateType& cp, const StateType& k ) const
+    ANTIOCH_AUTOFUNC(StateType, _Le*k/(rho*cp))
+
   };
-
-  template<typename CoeffType>
-  ConstantLewisDiffusivity<CoeffType>::ConstantLewisDiffusivity( const CoeffType Le )
-    : _Le(Le)
-  {
-    return;
-  }
-
-  template<typename CoeffType>
-  ConstantLewisDiffusivity<CoeffType>::~ConstantLewisDiffusivity()
-  {
-    return;
-  }
-
-  template<typename CoeffType>
-  template<typename StateType>
-  StateType ConstantLewisDiffusivity<CoeffType>::D( const StateType& rho,
-                                                    const StateType& cp,
-                                                    const StateType& k ) const
-  {
-    return _Le*k/(rho*cp);
-  }
 
 } // end namespace Antioch
 

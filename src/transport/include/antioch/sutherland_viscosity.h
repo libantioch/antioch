@@ -31,6 +31,7 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/cmath_shims.h"
 
 // C++
 #include <cmath>
@@ -42,16 +43,23 @@ namespace Antioch
   template<typename CoeffType=double>
   class SutherlandViscosity
   {
+  protected:
+
+    CoeffType _mu_ref;
+    CoeffType _T_ref;
+    
   public:
 
     SutherlandViscosity( const CoeffType mu_ref, const CoeffType T_ref );
 
     SutherlandViscosity( const std::vector<CoeffType>& coeffs );
 
-    ~SutherlandViscosity();
+    ~SutherlandViscosity() {}
 
     template <typename StateType>
-    StateType operator()( StateType& T ) const;
+    ANTIOCH_AUTO(StateType)
+    operator()( StateType& T ) const
+    ANTIOCH_AUTOFUNC(StateType, _mu_ref*ant_pow(T,CoeffType(1.5))/(T+_T_ref))
     
     void reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref );
     void reset_coeffs( const std::vector<CoeffType> coeffs );
@@ -66,11 +74,6 @@ namespace Antioch
       return os;
     }
 
-  protected:
-
-    CoeffType _mu_ref;
-    CoeffType _T_ref;
-    
   private:
     
     SutherlandViscosity();
@@ -99,24 +102,9 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  SutherlandViscosity<CoeffType>::~SutherlandViscosity()
-  {
-  }
-
-  template<typename CoeffType>
   void SutherlandViscosity<CoeffType>::print(std::ostream& os) const
   {
     os << _mu_ref << "*T^(3/2)/(T + " << _T_ref << ")" << std::endl;
-  }
-
-  /* ------------------------- Inline Functions ------------------------- */
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  StateType SutherlandViscosity<CoeffType>::operator()( StateType& T ) const
-  {
-    using std::pow;
-    return _mu_ref*pow(T,CoeffType(1.5))/(T+_T_ref);
   }
 
   template<typename CoeffType>
