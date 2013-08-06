@@ -539,12 +539,15 @@ int main()
     vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
-  vex::Context ctx (vex::Filter::DoublePrecision);
+  vex::Context ctx_f (vex::Filter::All);
+  if (!ctx_f.empty())
+    returnval = returnval ||
+      vectester (vex::vector<float> (ctx_f, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
 
-  returnval = returnval ||
-    vectester (vex::vector<float> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
-  returnval = returnval ||
-    vectester (vex::vector<double> (ctx, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
+  vex::Context ctx_d (vex::Filter::DoublePrecision);
+  if (!ctx_d.empty())
+    returnval = returnval ||
+      vectester (vex::vector<double> (ctx_d, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
 #endif
 
 #ifdef ANTIOCH_HAVE_GRVY
