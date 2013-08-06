@@ -61,18 +61,22 @@ is_package_required=ifelse([$2], ,no, $2 )
 
 HAVE_VEXCL=0
 
-# logic change: if the user called the macro, check for package,
-# decide what to do based on whether the package is required or not.
+VEXCL_INCLUDE="$VEXCL_PREFIX"
 
-# if test "${with_vexcl}" != no ; then
+if test "${with_vexcl}" != no ; then
 
     # If we can see the vexcl headers, then we know where to get them
     # and we'll need C++11 to compile them
     if test -e "${VEXCL_PREFIX}/vexcl/vexcl.hpp" ; then
        VEXCL_CPPFLAGS="-I${VEXCL_PREFIX}"
        AX_CXX_COMPILE_STDCXX_11(noext)
+    elif test -e "${VEXCL_PREFIX}/include/vexcl/vexcl.hpp" ; then
+       VEXCL_INCLUDE="${VEXCL_PREFIX}/include"
+       VEXCL_CPPFLAGS="-I${VEXCL_PREFIX}/include"
+       AX_CXX_COMPILE_STDCXX_11(noext)
     else
        AC_MSG_NOTICE([${VEXCL_PREFIX}/vexcl/vexcl.hpp not found])
+       AC_MSG_NOTICE([${VEXCL_PREFIX}/include/vexcl/vexcl.hpp not found])
     fi
 
     # Make sure we have OpenCL support                                                                                                                                                                                                     
@@ -91,7 +95,7 @@ HAVE_VEXCL=0
 
     AC_LANG_PUSH([C++])
     ac_VEXCL_save_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS $VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS $CL_CPPFLAGS"
     AC_CHECK_HEADER([vexcl/vexcl.hpp],[found_header=yes],[found_header=no])
     CPPFLAGS="$ac_VEXCL_save_CPPFLAGS"
     AC_LANG_POP([C++])
@@ -103,8 +107,8 @@ HAVE_VEXCL=0
 
     succeeded=yes
     if test x$found_header = xyes -a x"$no_cl" != xyes; then
-      VEXCL_CPPFLAGS="$VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS"
-      VEXCL_LDFLAGS="$BOOST_CHRONO_LDFLAGS $BOOST_DATE_TIME_LDFLAGS $BOOST_FILESYSTEM_LDFLAGS $BOOST_SYSTEM_LDFLAGS"
+      VEXCL_CPPFLAGS="$VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS $CL_CPPFLAGS"
+      VEXCL_LDFLAGS="$BOOST_CHRONO_LDFLAGS $BOOST_DATE_TIME_LDFLAGS $BOOST_FILESYSTEM_LDFLAGS $BOOST_SYSTEM_LDFLAGS $CL_LDFLAGS"
       VEXCL_LIBS="$BOOST_CHRONO_LIBS $BOOST_DATE_TIME_LIBS $BOOST_FILESYSTEM_LIBS $BOOST_SYSTEM_LIBS $CL_LIBS"
 
       HAVE_VEXCL=1
@@ -113,6 +117,7 @@ HAVE_VEXCL=0
       AC_SUBST(VEXCL_LDFLAGS)
       AC_SUBST(VEXCL_LIBS)
       AC_SUBST(VEXCL_PREFIX)
+      AC_SUBST(VEXCL_INCLUDE)
     else
       succeeded=no
 
@@ -128,7 +133,7 @@ HAVE_VEXCL=0
 
     AC_SUBST(HAVE_VEXCL)
 
-# fi
+fi
 
 AM_CONDITIONAL(VEXCL_ENABLED,test x$HAVE_VEXCL = x1)
 
