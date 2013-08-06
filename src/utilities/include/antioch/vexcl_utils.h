@@ -103,7 +103,7 @@ inline
 T
 max (const vex::vector<T>& in)
 {
-  vex::Reductor<double, vex::MAX> vex_max(in.queue_list());
+  vex::Reductor<T, vex::MAX> vex_max(in.queue_list());
   return vex_max(in);
 }
 
@@ -112,7 +112,7 @@ inline
 T
 min (const vex::vector<T>& in)
 {
-  vex::Reductor<double, vex::MIN> vex_min(in.queue_list());
+  vex::Reductor<T, vex::MIN> vex_min(in.queue_list());
   return vex_min(in);
 }
 
