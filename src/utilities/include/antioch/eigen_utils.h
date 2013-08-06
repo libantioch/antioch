@@ -135,7 +135,7 @@ template <
 >
 struct raw_value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
-  typedef typename raw_value_type<_Scalar>::type raw_type;
+  typedef typename raw_value_type<_Scalar>::type type;
 };
 
 template <
