@@ -119,7 +119,7 @@ int tester(const std::string& input_name)
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 500;
   
   // Regression values for omega_dot
   std::vector<Scalar> omega_dot_reg(n_species);
