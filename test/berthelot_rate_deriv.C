@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
-//
+// 
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
 // Copyright (C) 2013 The PECOS Development Team
@@ -20,37 +20,28 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#include "antioch/arrhenius_rate.h"
+#include "antioch/berthelot_rate.h"
 
 template <typename Scalar>
 int tester()
 {
-  using std::abs;
-  using std::exp;
-  using std::pow;
-
   const Scalar Cf = 1.4;
-  const Scalar Ea = 5.0;
+  const Scalar D = -5.0;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
+  Antioch::BerthelotRate<Scalar> berthelot_rate(Cf,D);
 
   const Scalar T = 1500.1;
   
-  const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
+  const Scalar rate_exact = Cf*std::exp(D*T);
 
   int return_flag = 0;
 
-  Scalar rate = arrhenius_rate(T);
+  Scalar rate = berthelot_rate(T);
 
   const Scalar tol = 1.0e-15;
 
-  if( abs( (rate - rate_exact)/rate_exact ) > tol )
+  if( std::fabs( (rate - rate_exact)/rate_exact ) > tol )
     {
       std::cout << "Error: Mismatch in rate values." << std::endl
 		<< "rate(T) = " << rate << std::endl
@@ -59,7 +50,7 @@ int tester()
       return_flag = 1;
     }
 
-  std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
+  std::cout << "Berthelot rate: " << berthelot_rate << std::endl;
 
   return return_flag;
 }

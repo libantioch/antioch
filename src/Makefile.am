@@ -17,6 +17,43 @@ libantioch_la_SOURCES =
 libantioch_la_SOURCES += core/src/chemical_species.C
 libantioch_la_SOURCES += core/src/chemical_mixture.C
 
+# preproc/core
+libantioch_la_SOURCES += preproc/core/src/Error.cpp
+libantioch_la_SOURCES += preproc/core/src/SIPrefix.cpp
+libantioch_la_SOURCES += preproc/core/src/Converter.cpp
+libantioch_la_SOURCES += preproc/core/src/InSI.cpp
+libantioch_la_SOURCES += preproc/core/src/Units.cpp
+libantioch_la_SOURCES += preproc/core/src/CoreUnc.cpp
+libantioch_la_SOURCES += preproc/core/src/AtomicParameter.cpp
+libantioch_la_SOURCES += preproc/core/src/PDF.cpp
+libantioch_la_SOURCES += preproc/core/src/ParameterPhy.cpp
+libantioch_la_SOURCES += preproc/core/src/phymath.cpp
+libantioch_la_SOURCES += preproc/core/src/PhyFunct.cpp
+libantioch_la_SOURCES += preproc/core/src/PhyHarmFunct.cpp
+# preproc/chemistry
+libantioch_la_SOURCES += preproc/chemistry/src/allKineticsProcesses.cpp
+libantioch_la_SOURCES += preproc/chemistry/src/kineticsCrossRoad.cpp
+libantioch_la_SOURCES += preproc/chemistry/src/SimpleChem.cpp
+libantioch_la_SOURCES += preproc/chemistry/src/KineticsChem.cpp
+libantioch_la_SOURCES += preproc/chemistry/src/ReactionChem.cpp
+# preproc/kinetics/process
+libantioch_la_SOURCES += preproc/kinetics/process/src/Process.cpp
+libantioch_la_SOURCES += preproc/kinetics/process/src/ElementaryProcess.cpp
+libantioch_la_SOURCES += preproc/kinetics/process/src/DuplicateProcess.cpp
+libantioch_la_SOURCES += preproc/kinetics/process/src/ThreeBody.cpp
+libantioch_la_SOURCES += preproc/kinetics/process/src/FalloffProcess.cpp
+libantioch_la_SOURCES += preproc/kinetics/process/src/LindemannFalloff.cpp
+libantioch_la_SOURCES += preproc/kinetics/process/src/TroeFalloff.cpp
+# preproc/kinetics/model
+libantioch_la_SOURCES += preproc/kinetics/model/src/KineticsModel.cpp
+libantioch_la_SOURCES += preproc/kinetics/model/src/Arrhenius.cpp
+libantioch_la_SOURCES += preproc/kinetics/model/src/HercourtEssen.cpp
+libantioch_la_SOURCES += preproc/kinetics/model/src/Berthelot.cpp
+libantioch_la_SOURCES += preproc/kinetics/model/src/BerthelotHercourtEssen.cpp
+libantioch_la_SOURCES += preproc/kinetics/model/src/MultHercourtEssen.cpp
+libantioch_la_SOURCES += preproc/kinetics/model/src/Kooij.cpp
+libantioch_la_SOURCES += preproc/kinetics/model/src/VantHoff.cpp
+
 # kinetics
 libantioch_la_SOURCES += kinetics/src/reaction.C
 libantioch_la_SOURCES += kinetics/src/reaction_set.C
@@ -55,12 +92,52 @@ include_HEADERS += core/include/antioch/chemical_species.h
 include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
+# preproc/core
+include_HEADERS += preproc/core/include/antioch/Error.hpp
+include_HEADERS += preproc/core/include/antioch/SIPrefix.hpp
+include_HEADERS += preproc/core/include/antioch/Converter.hpp
+include_HEADERS += preproc/core/include/antioch/InSI.hpp
+include_HEADERS += preproc/core/include/antioch/Units.hpp
+include_HEADERS += preproc/core/include/antioch/unit_defs.hpp
+include_HEADERS += preproc/core/include/antioch/CoreUnc.hpp
+include_HEADERS += preproc/core/include/antioch/AtomicParameter.hpp
+include_HEADERS += preproc/core/include/antioch/PDF.hpp
+include_HEADERS += preproc/core/include/antioch/ParameterPhy.hpp
+include_HEADERS += preproc/core/include/antioch/phymath.hpp
+include_HEADERS += preproc/core/include/antioch/PhyFunct.hpp
+include_HEADERS += preproc/core/include/antioch/PhyHarmFunct.hpp
+# preproc/chemistry
+include_HEADERS += preproc/chemistry/include/antioch/SimpleChem.hpp
+include_HEADERS += preproc/chemistry/include/antioch/KineticsChem.hpp
+include_HEADERS += preproc/chemistry/include/antioch/ReactionChem.hpp
+include_HEADERS += preproc/chemistry/include/antioch/allKineticsProcesses.hpp
+include_HEADERS += preproc/chemistry/include/antioch/kineticsCrossRoad.hpp
+include_HEADERS += preproc/chemistry/include/antioch/kineticsCrossRoad.hpp
+# preproc/kinetics/process
+include_HEADERS += preproc/kinetics/process/include/antioch/Process.hpp
+include_HEADERS += preproc/kinetics/process/include/antioch/ElementaryProcess.hpp
+include_HEADERS += preproc/kinetics/process/include/antioch/DuplicateProcess.hpp
+include_HEADERS += preproc/kinetics/process/include/antioch/ThreeBody.hpp
+include_HEADERS += preproc/kinetics/process/include/antioch/FalloffProcess.hpp
+include_HEADERS += preproc/kinetics/process/include/antioch/LindemannFalloff.hpp
+include_HEADERS += preproc/kinetics/process/include/antioch/TroeFalloff.hpp
+# preproc/kinetics/model
+include_HEADERS += preproc/kinetics/model/include/antioch/KineticsModel.hpp
+include_HEADERS += preproc/kinetics/model/include/antioch/HercourtEssen.hpp
+include_HEADERS += preproc/kinetics/model/include/antioch/Arrhenius.hpp
+include_HEADERS += preproc/kinetics/model/include/antioch/Berthelot.hpp
+include_HEADERS += preproc/kinetics/model/include/antioch/BerthelotHercourtEssen.hpp
+include_HEADERS += preproc/kinetics/model/include/antioch/Kooij.hpp
+include_HEADERS += preproc/kinetics/model/include/antioch/VantHoff.hpp
+# preproc/constants
+include_HEADERS += preproc/constants/include/antioch/physical_constants.hpp
+
 # kinetics-kinetics models
 include_HEADERS += kinetics/include/antioch/kinetics_enum.h
 include_HEADERS += kinetics/include/antioch/kinetics_type.h
+include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
 include_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
 include_HEADERS += kinetics/include/antioch/berthelot_rate.h
-include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
 include_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
 include_HEADERS += kinetics/include/antioch/kooij_rate.h
 include_HEADERS += kinetics/include/antioch/vanthoff_rate.h
@@ -142,6 +219,11 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/preproc/core/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/preproc/chemistry/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/preproc/kinetics/model/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/preproc/kinetics/process/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/preproc/constants/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_INCLUDES)
@@ -161,7 +243,18 @@ endif
 STAMPED_FILES = $(libantioch_la_SOURCES) $(include_HEADERS) $(antioch_version_SOURCES)
 
 .license.stamp: $(top_srcdir)/LICENSE
-	$(top_srcdir)/src/common/lic_utils/update_license.pl -S=$(top_srcdir)/src $(top_srcdir)/LICENSE $(STAMPED_FILES) 
+	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE \
+        $(top_srcdir)/src/core/include/antioch/*.h $(top_srcdir)/src/core/src/*.C \
+        $(top_srcdir)/src/kinetics/include/antioch/*.h $(top_srcdir)/src/kinetics/src/*.C \
+        $(top_srcdir)/src/thermo/include/antioch/*.h $(top_srcdir)/src/thermo/src/*.C \
+        $(top_srcdir)/src/preproc/core/include/antioch/*.hpp $(top_srcdir)/src/preproc/core/src/*.cpp \
+        $(top_srcdir)/src/preproc/chemistry/include/antioch/*.hpp $(top_srcdir)/src/preproc/chemistry/src/*.cpp \
+        $(top_srcdir)/src/preproc/kinetics/process/include/antioch/*.hpp $(top_srcdir)/src/preproc/kinetics/process/src/*.cpp \
+        $(top_srcdir)/src/preproc/kinetics/model/include/antioch/*.hpp $(top_srcdir)/src/preproc/kinetics/model/src/*.cpp \
+        $(top_srcdir)/src/transport/include/antioch/*.h \
+	$(top_srcdir)/src/utilities/include/antioch/*.h \
+        $(top_srcdir)/src/utilities/src/*.C \
+        $(top_srcdir)/src/apps/*.C
 	echo 'updated source license headers' >$@
 
 CLEANFILES += .license.stamp
