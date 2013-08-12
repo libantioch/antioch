@@ -28,8 +28,14 @@
 
 // C++
 #include <limits>
+#include <string>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+
 // Antioch
 #include "antioch/photochemical_rate.h"
+#include "antioch/antioch_asserts.h"
 
 template <typename Scalar>
 int tester(std::string path_to_files)
@@ -39,8 +45,8 @@ int tester(std::string path_to_files)
 
   std::string first_line;
 
-  CH4 >> first_line;
-  hv  >> first_line;
+  getline(CH4,first_line);
+  getline(hv,first_line);
 
   std::vector<Scalar> CH4_cs;
   std::vector<Scalar> CH4_lambda;
@@ -60,16 +66,20 @@ int tester(std::string path_to_files)
   {
     Scalar w,l;
     hv >> l >> w;
-    hv_lambda.push_back(l*10.L); //in Angström
-    hv_irr.push_back(w);
+    hv_lambda.push_back(l*10.L); //nm -> Angström
+    hv_irr.push_back(w * 1e4 * 6.62606957e-17*2.99792458 / l);//m-2 -> cm-2 and times h*c/lamdba energy -> number of protons
   }
   hv.close();
 
-  Antioch::PhotoRate<Scalar, std::vector<Scalar> > rate(CH4_cs,CH4_lambda);
 
-  Scalar rate = rate.forward_rate_constant();
-  Scalar rate_exact;
-  Antioch::set_zero(rate_exact);
+  Antioch::PhotoRate<Scalar, std::vector<Scalar> > rate_hv(CH4_cs,CH4_lambda);
+
+  Scalar rate = rate_hv.forward_rate_constant(hv_irr,hv_lambda);
+  Scalar rate_exact(-1.);
+
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+
+  int return_flag = 0;
 
   if( abs( (rate - rate_exact)/rate_exact ) > tol )
   {
@@ -84,7 +94,7 @@ int tester(std::string path_to_files)
   return return_flag;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
   if( argc < 2 )
     {

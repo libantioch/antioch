@@ -147,7 +147,7 @@ TESTS += duplicate_process_unit
 TESTS += threebody_process_unit
 TESTS += lindemann_falloff_unit
 TESTS += troe_falloff_unit
-TESTS += photochemical_rate_unit
+TESTS += photochemical_rate_unit.sh
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
