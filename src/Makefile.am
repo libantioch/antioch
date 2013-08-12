@@ -64,6 +64,7 @@ include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
 include_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
 include_HEADERS += kinetics/include/antioch/kooij_rate.h
 include_HEADERS += kinetics/include/antioch/vanthoff_rate.h
+include_HEADERS += kinetics/include/antioch/photochemical_rate.h
 # kinetics-chemical process
 include_HEADERS += kinetics/include/antioch/reaction_enum.h
 include_HEADERS += kinetics/include/antioch/reaction.h
