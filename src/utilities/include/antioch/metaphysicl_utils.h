@@ -122,7 +122,7 @@ struct value_type<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void
 template <typename T>
 struct raw_value_type<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>
 {
-  typedef typename raw_value_type<T>::type type;
+  typedef typename raw_value_type<typename value_type<T>::type>::type type;
 };
 
 template <typename Tbool, typename Ttrue, typename Tfalse>
