@@ -26,7 +26,14 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+#include "metaphysicl/dualnumber.h"
+
 #include "antioch/arrhenius_rate.h"
+
+#include <iomanip>
 
 template <typename Scalar>
 int tester()
@@ -34,40 +41,48 @@ int tester()
   using std::abs;
   using std::exp;
   using std::pow;
+  using MetaPhysicL::DualNumber;
 
   const Scalar Cf = 1.4;
   const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
 
   Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,eta,Ea);
+  Antioch::ArrheniusRate<DualNumber<Scalar> > arrhenius_T_sensitivity(Cf,eta,Ea);
 
   const Scalar T = 1500.1;
+  const DualNumber<Scalar> T_DN(T, 1);
   
-  const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
-
   int return_flag = 0;
 
-  Scalar rate = arrhenius_rate(T);
+  Scalar rate, deriveRate;
 
-  const Scalar tol = 1.0e-15;
+  arrhenius_rate.rate_and_derivative(T,rate,deriveRate);
+  DualNumber<Scalar> rate_DN_T = arrhenius_T_sensitivity(T_DN);
 
-  if( abs( (rate - rate_exact)/rate_exact ) > tol )
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+
+  if( abs( (deriveRate - rate_DN_T.derivatives())/deriveRate) > tol )
     {
-      std::cout << "Error: Mismatch in rate values." << std::endl
-		<< "rate(T) = " << rate << std::endl
-		<< "rate_exact = " << rate_exact << std::endl;
+      std::cout << "Error: Mismatch in rate derivatives." << std::endl
+                << std::setprecision(25)
+		<< "deriveRate(T) = " << deriveRate << std::endl
+		<< "rate_DN_T' =    " << rate_DN_T.derivatives() << std::endl;
 
       return_flag = 1;
     }
 
-  std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
-
   return return_flag;
 }
+#endif
 
 int main()
 {
+#ifdef ANTIOCH_HAVE_METAPHYSICL
   return (tester<double>() ||
           tester<long double>() ||
           tester<float>());
+#else
+  return 77; // automake code for a skipped test
+#endif
 }
