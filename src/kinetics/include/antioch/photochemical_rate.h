@@ -33,32 +33,35 @@
 
 namespace Antioch{
 
-template<typename StateType, typename VectorStateType>
+template<typename CoeffType, typename VectorCoeffType>
 class PhotoRate{
-     public:
-       PhotoRate(const VectorStateType &cs, const VectorStateType &lambda):
-                _cross_section(cs),_lambda_grid(lambda){}
-       ~PhotoRate(){}
-       StateType forward_rate_constant(const VectorStateType &hv, const VectorStateType &lambda);
-
-       void set_cross_section(const VectorStateType &cs) {_cross_section = cs;}
-       void set_lambda_grid(const VectorStateType &l)    {_lambda_grid = l;}
 
      private:
-       VectorStateType _cross_section;
-       VectorStateType _lambda_grid;
+       VectorCoeffType _cross_section;
+       VectorCoeffType _lambda_grid;
 
-       VectorStateType make_grid_cool(const VectorStateType &hv, const VectorStateType &lambda);
+       VectorCoeffType harmonize_grid(const VectorCoeffType &hv, const VectorCoeffType &lambda);
+
+     public:
+       PhotoRate(const VectorCoeffType &cs, const VectorCoeffType &lambda):
+                _cross_section(cs),_lambda_grid(lambda){}
+       ~PhotoRate(){}
+
+
+       CoeffType forward_rate_constant(const VectorCoeffType &hv, const VectorCoeffType &lambda);
+
+       void set_cross_section(const VectorCoeffType &cs) {_cross_section = cs;}
+       void set_lambda_grid(const VectorCoeffType &l)    {_lambda_grid = l;}
 
 };
 
-template<typename StateType, typename VectorStateType>
-StateType PhotoRate<StateType,VectorStateType>::forward_rate_constant(const VectorStateType &hv, const VectorStateType &lambda)
+template<typename CoeffType, typename VectorCoeffType>
+CoeffType PhotoRate<CoeffType,VectorCoeffType>::forward_rate_constant(const VectorCoeffType &hv, const VectorCoeffType &lambda)
 {
 // lambda grid
-  VectorStateType hvgrid = this->make_grid_cool(hv,lambda);
+  VectorCoeffType hvgrid = this->harmonize_grid(hv,lambda);
 // integration, those are bins => just multiply
-  StateType rfwd;
+  CoeffType rfwd;
   Antioch::set_zero(rfwd);
   for(unsigned int i = 0; i < hvgrid.size(); i++)
   {
@@ -68,10 +71,10 @@ StateType PhotoRate<StateType,VectorStateType>::forward_rate_constant(const Vect
   return rfwd;
 }
 
-template <typename StateType, typename VectorStateType>
-VectorStateType PhotoRate<StateType,VectorStateType>::make_grid_cool(const VectorStateType &hv, const VectorStateType &lambda)
+template <typename CoeffType, typename VectorCoeffType>
+VectorCoeffType PhotoRate<CoeffType,VectorCoeffType>::harmonize_grid(const VectorCoeffType &hv, const VectorCoeffType &lambda)
 {
-  VectorStateType out_hv_on_grid;
+  VectorCoeffType out_hv_on_grid;
   out_hv_on_grid.resize(_lambda_grid.size(),0.L);
   unsigned int j(1);
 
@@ -82,10 +85,10 @@ VectorStateType PhotoRate<StateType,VectorStateType>::make_grid_cool(const Vecto
        j++;
        if(j >= lambda.size())return out_hv_on_grid;
      }
-     StateType bin;
+     CoeffType bin;
      Antioch::set_zero(bin);
-     StateType diff_min = lambda[j] - _lambda_grid[i];
-     StateType diff_max = _lambda_grid[i+1] - lambda[j];
+     CoeffType diff_min = lambda[j] - _lambda_grid[i];
+     CoeffType diff_max = _lambda_grid[i+1] - lambda[j];
      bin += hv[j]   * (diff_min)/(lambda[j] - lambda[j-1]);
      if(j < lambda.size() - 1)bin += hv[j+1] * (diff_max)/(lambda[j+1] - lambda[j]);
      out_hv_on_grid[i] = bin;
