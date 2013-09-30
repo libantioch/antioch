@@ -118,6 +118,10 @@ namespace Antioch
      */
     void set_type( const ReactionType::ReactionType type);
 
+    /*! Set the reversibility of reaction.
+     */
+    void set_reversibility( const bool reversible);
+
     //! Model of kinetics.
     KineticsModel::KineticsModel kinetics_model() const;
 
@@ -292,6 +296,14 @@ namespace Antioch
   void Reaction<CoeffType>::set_type( const ReactionType::ReactionType type)
   {
     _type = type;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void Reaction<CoeffType>::set_reversibility( const bool reversible)
+  {
+    _reversible = reversible;
     return;
   }
 
