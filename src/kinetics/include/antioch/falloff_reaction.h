@@ -61,6 +61,7 @@ namespace Antioch
     //! Construct a single reaction mechanism.
     FalloffReaction( const unsigned int n_species,
                      const std::string &equation, 
+                     const bool &reversible = true,
                      const ReactionType::ReactionType &falloffType = ReactionType::LINDEMANN_FALLOFF,
                      const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
@@ -96,9 +97,10 @@ namespace Antioch
   inline
   FalloffReaction<CoeffType,FalloffType>::FalloffReaction( const unsigned int n_species,
                                                            const std::string &equation,
+                                                           const bool &reversible,
                                                            const ReactionType::ReactionType &falloffType, 
                                                            const KineticsModel::KineticsModel kin)
-    :Reaction<CoeffType>(n_species,equation,falloffType,kin),
+    :Reaction<CoeffType>(n_species,equation,reversible,falloffType,kin),
      _F(n_species)
      
   {}

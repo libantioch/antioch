@@ -108,6 +108,7 @@ namespace Antioch
 
         ReactionType::ReactionType typeReaction(ReactionType::ELEMENTARY);
         KineticsModel::KineticsModel kineticsModel(KineticsModel::KOOIJ);
+        bool reversible(true);
 
 	if (reaction->Attribute("type"))
 	  {
@@ -115,9 +116,15 @@ namespace Antioch
 	    if (std::string(reaction->Attribute("type")) == "threeBody")
 	      typeReaction = ReactionType::THREE_BODY;
 	  }
+
+	if (reaction->Attribute("reversible"))
+	  {
+	    if (verbose) std::cout << "\n reversible: " << reaction->Attribute("reversible");
+	    if(std::string(reaction->Attribute("reversible")) == "no")reversible = false;
+	  }
 	    
 	// construct a Reaction object	  
-	Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
+	Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),reversible,typeReaction,kineticsModel);
 
 	tinyxml2::XMLElement* Arrhenius = reaction->FirstChildElement("rateCoeff")->FirstChildElement("Arrhenius");
 

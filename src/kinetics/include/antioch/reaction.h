@@ -97,6 +97,7 @@ namespace Antioch
 
     //! Construct a single reaction mechanism.
     Reaction( const unsigned int n_species, const std::string &equation,
+              const bool &reversible = true,
               const ReactionType::ReactionType type = ReactionType::ELEMENTARY,
               const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
@@ -255,6 +256,7 @@ namespace Antioch
     std::vector<int>          _species_delta_stoichiometry;
     int _gamma;
     bool _initialized;
+    bool _reversible;
     ReactionType::ReactionType _type;
     KineticsModel::KineticsModel _kintype;
 
@@ -469,13 +471,15 @@ namespace Antioch
   template<typename CoeffType>
   inline
   Reaction<CoeffType>::Reaction( const unsigned int n_species,
-                                 const std::string &equation, 
+                                 const std::string &equation,
+                                 const bool &reversible,
                                  const ReactionType::ReactionType type,
-                                 const KineticsModel::KineticsModel kin) 
+                                 const KineticsModel::KineticsModel kin)
     : _n_species(n_species),
       _equation(equation),
       _gamma(0),
       _initialized(false),
+      _reversible(reversible),
       _type(type),
       _kintype(kin)
   {

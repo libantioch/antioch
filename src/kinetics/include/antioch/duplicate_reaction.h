@@ -52,6 +52,7 @@ namespace Antioch
     //! Construct a single reaction mechanism.
     DuplicateReaction( const unsigned int n_species, 
                        const std::string &equation,
+                       const bool &reversible = true,
                        const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
     ~DuplicateReaction();
@@ -78,8 +79,9 @@ namespace Antioch
   inline
   DuplicateReaction<CoeffType>::DuplicateReaction( const unsigned int n_species,
                                                    const std::string &equation,
+                                                   const bool &reversible,
                                                    const KineticsModel::KineticsModel kin)
-    :Reaction<CoeffType>(n_species,equation,ReactionType::DUPLICATE,kin){}
+    :Reaction<CoeffType>(n_species,equation,reversible,ReactionType::DUPLICATE,kin){}
 
 
   template <typename CoeffType>
