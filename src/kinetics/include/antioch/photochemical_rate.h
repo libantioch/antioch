@@ -26,6 +26,7 @@
 
 //Antioch
 #include "antioch/kinetics_enum.h"
+#include "antioch/sigma_bin_converter.h"
 
 //C++
 #include <vector>
