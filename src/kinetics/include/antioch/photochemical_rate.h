@@ -21,82 +21,163 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef _PHOTOCHEMICAL_RATE_
-#define _PHOTOCHEMICAL_RATE_
+#ifndef ANTIOCH_PHOTOCHEMICAL_RATE_H
+#define ANTIOCH_PHOTOCHEMICAL_RATE_H
+
+//Antioch
+#include "antioch/kinetics_enum.h"
 
 //C++
 #include <vector>
 
-//Antioch
-#include "antioch/cmath_shims.h"
-#include "antioch/metaprogramming.h"
-
 namespace Antioch{
 
-template<typename CoeffType, typename VectorCoeffType>
-class PhotoRate{
+  template<typename CoeffType, typename VectorCoeffType = std::vector<CoeffType> >
+  class PhotochemicalRate:public KineticsType<CoeffType>
+  {
 
      private:
        VectorCoeffType _cross_section;
        VectorCoeffType _lambda_grid;
-
-       VectorCoeffType harmonize_grid(const VectorCoeffType &hv, const VectorCoeffType &lambda);
+       Coefftype _k;
+       SigmaBinConverter<VectorCoeffType> _converter;
 
      public:
-       PhotoRate(const VectorCoeffType &cs, const VectorCoeffType &lambda):
-                _cross_section(cs),_lambda_grid(lambda){}
-       ~PhotoRate(){}
+       PhotochemicalRate(const VectorCoeffType &cs, const VectorCoeffType &lambda);
+       PhotochemicalRate();
+       ~PhotochemicalRate();
 
+       //!
+       void set_cross_section(const VectorCoeffType &cs);
 
-       CoeffType forward_rate_constant(const VectorCoeffType &hv, const VectorCoeffType &lambda);
+       //!
+       void set_lambda_grid(const VectorCoeffType &l);
 
-       void set_cross_section(const VectorCoeffType &cs) {_cross_section = cs;}
-       void set_lambda_grid(const VectorCoeffType &l)    {_lambda_grid = l;}
+       //! calculate _k for a given photon flux
+       template<typename VectorStateType>
+       void calculate_rate_constant(const VectorStateType &hv_flux, const VectorStateType &hv_lambda);
+       
+       //! \return the rate
+       CoeffType rate() const;
 
-};
+       //! \return the rate evaluated at \p T.
+       CoeffType operator() const;
 
-template<typename CoeffType, typename VectorCoeffType>
-CoeffType PhotoRate<CoeffType,VectorCoeffType>::forward_rate_constant(const VectorCoeffType &hv, const VectorCoeffType &lambda)
-{
-// lambda grid
-  VectorCoeffType hvgrid = this->harmonize_grid(hv,lambda);
-// integration, those are bins => just multiply
-  CoeffType rfwd;
-  Antioch::set_zero(rfwd);
-  for(unsigned int i = 0; i < hvgrid.size(); i++)
+       //! \return the derivative with respect to temperature.
+       CoeffType derivative() const;
+
+       //! Simultaneously evaluate the rate and its derivative at \p T.
+       template <typename StateType>
+       void rate_and_derivative(StateType& rate, StateType& drate_dT) const;
+
+       //! print equation
+       const std::string numeric() const;
+
+  };
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  PhotochemicalRate<CoeffType,VectorCoeffType>::PhotochemicalRate(const VectorCoeffType &cs, 
+                                                                  const VectorCoeffType &lambda):
+    KineticsType<CoeffType>(KineticsModel::CONSTANT),
+    _cross_section(cs),
+    _lambda_grid(lambda),
+    _k(-1.)
   {
-    rfwd += _cross_section[i] * hvgrid[i];
+    return;
   }
 
-  return rfwd;
-}
-
-template <typename CoeffType, typename VectorCoeffType>
-VectorCoeffType PhotoRate<CoeffType,VectorCoeffType>::harmonize_grid(const VectorCoeffType &hv, const VectorCoeffType &lambda)
-{
-  VectorCoeffType out_hv_on_grid;
-  out_hv_on_grid.resize(_lambda_grid.size(),0.L);
-  unsigned int j(1);
-
-  for(unsigned int i = 0; i < _lambda_grid.size()-1; i++)//bin per bin, bin hv[j] between lambda[j] and lambda[j+1]
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  PhotochemicalRate<CoeffType,VectorCoeffType>::PhotochemicalRate():
+    KineticsType<CoeffType>(KineticsModel::CONSTANT),
+    _k(-1.)
   {
-     while(lambda[j] < _lambda_grid[i])
-     {
-       j++;
-       if(j >= lambda.size())return out_hv_on_grid;
-     }
-     CoeffType bin;
-     Antioch::set_zero(bin);
-     CoeffType diff_min = lambda[j] - _lambda_grid[i];
-     CoeffType diff_max = _lambda_grid[i+1] - lambda[j];
-     bin += hv[j]   * (diff_min)/(lambda[j] - lambda[j-1]);
-     if(j < lambda.size() - 1)bin += hv[j+1] * (diff_max)/(lambda[j+1] - lambda[j]);
-     out_hv_on_grid[i] = bin;
+    return;
   }
 
-  return out_hv_on_grid;
-}
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  PhotochemicalRate<CoeffType,VectorCoeffType>::~PhotochemicalRate()
+  {
+    return;
+  }
 
-}
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::set_cross_section(const VectorCoeffType &cs)
+  {
+    _cross_section = cs;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::set_lambda_grid(const VectorCoeffType &l)
+  {
+     _lambda_grid = l;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template<typename VectorStateType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::calculate_rate_constant(const VectorStateType &hv_flux, 
+                                                                             const VectorStateType &hv_lambda)
+  {
+//cross-section and lambda exists
+     antioch_assert_greater(_cross_section.size(),0);
+     antioch_assert_greater(_lambda_grid.size(),0);
+
+     VectorCoeffType cross_section_on_hv;
+      _converter.y_on_custom_old_grid(_lambda_grid,_cross_section,hv_lambda,cross_section_on_hv);
+      Antioch::set_zero(_k);
+      for(unsigned int ibin = 0; ibin < hv_lambda.size(); ibin++)
+      {
+          _k += cross_section_on_hv[ibin] * hv_flux[ibin];
+      }
+      return;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  const std::string PhotochemicalRate<CoeffType,VectorCoeffType>::numeric() const
+  {
+    std::stringstream os;
+    os << "int_0^infty sigma(lambda) * hv(lambda) * dlambda";
+
+    return os.str();
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::rate() const
+  {
+     return _k;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::operator() const
+  {
+     this->rate();
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::derivative() const
+  {
+     return 0.L;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType>
+  inline
+  void rate_and_derivative(StateType& rate, StateType& drate_dT) const
+  {
+    rate = _k;
+    Antioch::set_zero(drate_dT);
+    return;
+  }
+
+} //end namespace Antioch
 
 #endif

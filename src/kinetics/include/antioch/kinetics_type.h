@@ -53,6 +53,9 @@ namespace Antioch{
   template <typename CoeffType>
   class VantHoffRate;
 
+  template <typename CoeffType>
+  class PhotochemicalRate;
+
   /*!
    *
    * \class KineticsType
@@ -158,6 +161,12 @@ namespace Antioch{
         }
         break;
 
+      case(KineticsModel::PHOTOCHEM):
+        {
+          (static_cast<const PhotochemicalRate<CoeffType>*>(this))->rate();
+        }
+        break;
+
       default:
         {
           antioch_error();
@@ -212,6 +221,12 @@ namespace Antioch{
         }
         break;
 
+      case(KineticsModel::PHOTOCHEM):
+        {
+          (static_cast<const PhotochemicalRate<CoeffType>*>(this))->derivative();
+        }
+        break;
+
       default:
         {
           antioch_error();
@@ -263,6 +278,12 @@ namespace Antioch{
       case(KineticsModel::VANTHOFF):
         {
           (static_cast<const VantHoffRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+        }
+        break;
+
+      case(KineticsModel::PHOTOCHEM):
+        {
+          (static_cast<const PhotochemicalRate<CoeffType>*>(this))->rate_and_derivative(rate,drate_dT);
         }
         break;
 
