@@ -59,9 +59,6 @@ namespace Antioch
   template <typename CoeffType>
   class ThreeBodyReaction;
 
-  template <typename CoeffType>
-  class ElementaryReaction;
-
   template <typename CoeffType,typename FalloffType>
   class FalloffReaction;
 
