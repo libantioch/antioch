@@ -38,6 +38,27 @@
 namespace Antioch
 {
 #define ANTIOCH_PLAIN_SCALAR(Type) \
+ \
+inline \
+Type \
+max (const Type& in) { return in; } \
+ \
+inline \
+Type \
+min (const Type& in) { return in; } \
+ \
+template <> \
+inline \
+Type if_else(bool condition, \
+             Type if_true, \
+             Type if_false) \
+{ \
+  if (condition) \
+    return if_true; \
+  else \
+    return if_false; \
+} \
+ \
 template <> \
 struct has_size<Type> \
 { \
@@ -66,27 +87,8 @@ template <typename NewScalar> \
 struct rebind<Type, NewScalar> \
 { \
   typedef NewScalar type; \
-}; \
- \
-inline \
-Type \
-max (const Type& in) { return in; } \
- \
-inline \
-Type \
-min (const Type& in) { return in; } \
- \
-template <> \
-inline \
-Type if_else(bool condition, \
-             Type if_true, \
-             Type if_false) \
-{ \
-  if (condition) \
-    return if_true; \
-  else \
-    return if_false; \
 }
+
 
 ANTIOCH_PLAIN_SCALAR(float);
 ANTIOCH_PLAIN_SCALAR(double);
