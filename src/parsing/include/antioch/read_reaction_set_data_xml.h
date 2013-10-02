@@ -160,18 +160,39 @@ namespace Antioch
           {
             std::cout << "\n rates: " << kin_keyword[kineticsModel] << " model\n"
                       << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
-            if(rate_constant->FirstChildElement("b") != NULL)std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
-            if(rate_constant->FirstChildElement("E") != NULL)std::cout << "   E: " << rate_constant->FirstChildElement("E")->GetText() << "\n";
-            if(rate_constant->FirstChildElement("D") != NULL)std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText() << "\n";
+            if(rate_constant->FirstChildElement("b") != NULL)
+            {
+                std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
+            }
+            if(rate_constant->FirstChildElement("E") != NULL)
+            {
+                std::cout << "   E: " << rate_constant->FirstChildElement("E")->GetText() << "\n";
+            }
+            if(rate_constant->FirstChildElement("D") != NULL)
+            {
+                std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText() << "\n";
+            }
           }
 
         // typically Cantera files list activation energy in cal/mol, but we want it in K.
         std::vector<NumericType> data;
         data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()));
-        if(rate_constant->FirstChildElement("b") != NULL)data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
-        if(data.back() == 0.)data.pop_back();//if ARRHENIUS parameterized as KOOIJ
-        if(rate_constant->FirstChildElement("E") != NULL)data.push_back(std::atof(rate_constant->FirstChildElement("E")->GetText()));
-        if(rate_constant->FirstChildElement("D") != NULL)data.push_back(std::atof(rate_constant->FirstChildElement("D")->GetText()));
+        if(rate_constant->FirstChildElement("b") != NULL)
+        {
+           data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
+        }
+        if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
+        {
+           data.pop_back();
+        }
+        if(rate_constant->FirstChildElement("E") != NULL)
+        {
+           data.push_back(std::atof(rate_constant->FirstChildElement("E")->GetText()));
+        }
+        if(rate_constant->FirstChildElement("D") != NULL)
+        {
+           data.push_back(std::atof(rate_constant->FirstChildElement("D")->GetText()));
+        }
         //Tref
         if(kineticsModel == KineticsModel::HERCOURT_ESSEN ||
            kineticsModel == KineticsModel::BHE            ||
@@ -179,7 +200,10 @@ namespace Antioch
            kineticsModel == KineticsModel::VANTHOFF) 
         {
           data.push_back(1.);
-          if(rate_constant->FirstChildElement("Tref"))data.back() = std::atof(rate_constant->FirstChildElement("Tref")->GetText());
+          if(rate_constant->FirstChildElement("Tref"))
+          {
+              data.back() = std::atof(rate_constant->FirstChildElement("Tref")->GetText());
+          }
         }
         //scale E -> E/R
         if(kineticsModel == KineticsModel::ARRHENIUS ||
