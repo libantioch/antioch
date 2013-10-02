@@ -85,5 +85,10 @@
 #define antioch_error()    do { antioch_here(); ANTIOCH_THROW(Antioch::LogicError()); } while(0)
 #define antioch_not_implemented()    do { antioch_here(); ANTIOCH_THROW(Antioch::NotImplemented()); } while(0)
 #define antioch_file_error(filename)    do { antioch_here(); ANTIOCH_THROW(Antioch::FileError(filename)); } while(0)
+// The antioch_deprecated macro warns that you are using obsoleted code,
+// savagely copy/pasted from libmesh
+#define antioch_deprecated() \
+          do  {std::cerr << "\n*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
+                         << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;} while(0)
 
 #endif // ANTIOCH_ASSERTS_H

@@ -454,11 +454,11 @@
     <reaction reversible="yes" type="threeBody" id="0029">
       <equation>CO2 + M [=] CO + O + M</equation>
       <rateCoeff>
-        <Kooij>
+        <Arrhenius>
            <A>6.9e+18</A>
            <b>-1.5</b>
            <E units="cal/mol">125656.4</E>
-        </Kooij>
+        </Arrhenius>
         <efficiencies default="1.0">C:2.029 N:2.029 O:2.029 </efficiencies>
       </rateCoeff>
       <reactants>CO2:1</reactants>
@@ -469,11 +469,11 @@
     <reaction reversible="yes" type="threeBody" id="0030">
       <equation>CO + M [=] C + O + M</equation>
       <rateCoeff>
-        <Kooij>
+        <ModifiedArrhenius>
            <A>2.3e+17</A>
            <b>-1.0</b>
            <E units="cal/mol">256178.2</E>
-        </Kooij>
+        </ModifiedArrhenius>
         <efficiencies default="1.0">N:1.478 O:1.478 H:1.478 C:1.478 </efficiencies>
       </rateCoeff>
       <reactants>CO:1</reactants>

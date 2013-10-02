@@ -102,21 +102,23 @@ namespace Antioch
     
     tinyxml2::XMLElement* reaction = element->FirstChildElement("reaction");
 
-    std::map<KineticsModel::KineticsModel,std::string> kin_keyword;
-    kin_keyword[KineticsModel::HERCOURT_ESSEN] = "HercourtEssen";
-    kin_keyword[KineticsModel::BERTHELOT]      = "Berthelot";
-    kin_keyword[KineticsModel::ARRHENIUS]      = "Arrhenius";
-    kin_keyword[KineticsModel::BHE]            = "BerthelotHercourtEssen";
-    kin_keyword[KineticsModel::KOOIJ]          = "Kooij";
-    kin_keyword[KineticsModel::VANTHOFF]       = "VantHoff";
+    std::map<std::string,KineticsModel::KineticsModel> kin_keyword;
+    kin_keyword["HercourtEssen"]          = KineticsModel::HERCOURT_ESSEN;
+    kin_keyword["Berthelot"]              = KineticsModel::BERTHELOT;
+    kin_keyword["Arrhenius"]              = KineticsModel::ARRHENIUS;
+    kin_keyword["BerthelotHercourtEssen"] = KineticsModel::BHE;
+    kin_keyword["Kooij"]                  = KineticsModel::KOOIJ;
+    kin_keyword["ModifiedArrhenius"]      = KineticsModel::KOOIJ;  //for Arrhenius fans
+    kin_keyword["VantHoff"]               = KineticsModel::VANTHOFF;
 
-    std::vector<KineticsModel::KineticsModel> models; 
-    models.push_back(KineticsModel::HERCOURT_ESSEN);
-    models.push_back(KineticsModel::BERTHELOT);
-    models.push_back(KineticsModel::ARRHENIUS);
-    models.push_back(KineticsModel::BHE);
-    models.push_back(KineticsModel::KOOIJ);
-    models.push_back(KineticsModel::VANTHOFF);
+    std::vector<std::string> models; 
+    models.push_back("HercourtEssen");
+    models.push_back("Berthelot");
+    models.push_back("Arrhenius");
+    models.push_back("BerthelotHercourtEssen");
+    models.push_back("Kooij");
+    models.push_back("ModifiedArrhenius");
+    models.push_back("VantHoff");
 
     while (reaction)
       {
@@ -137,15 +139,15 @@ namespace Antioch
         // construct a Reaction object    
         Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
 
-        tinyxml2::XMLElement* rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(kin_keyword[kineticsModel].c_str());
         unsigned int imod(0);
+        tinyxml2::XMLElement* rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
         while(!rate_constant)
         {
           if(imod == models.size())antioch_not_implemented();
           imod++;
-          rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(kin_keyword[models[imod]].c_str());
+          rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
         }
-        kineticsModel = models[imod];
+        kineticsModel = kin_keyword[models[imod]];
 
         // usually Kooij is called Arrhenius, check here
         if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
@@ -153,12 +155,17 @@ namespace Antioch
           if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
           {
               kineticsModel = KineticsModel::KOOIJ;
+              antioch_deprecated();
+              std::cerr << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
+                        << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
+                        << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
+                        << "thanks and a good day to you, user." << std::endl;
           }
         }
 
         if(verbose) 
           {
-            std::cout << "\n rates: " << kin_keyword[kineticsModel] << " model\n"
+            std::cout << "\n rates: " << models[imod] << " model\n"
                       << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
             if(rate_constant->FirstChildElement("b") != NULL)
             {
