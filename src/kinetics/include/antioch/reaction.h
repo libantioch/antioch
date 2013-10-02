@@ -452,6 +452,7 @@ namespace Antioch
   inline
   const KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir) const
   {
+    antioch_assert_less(ir,_forward_rate.size());
     return *_forward_rate[ir];
   }
 
@@ -459,6 +460,7 @@ namespace Antioch
   inline
   KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir)
   {
+    antioch_assert_less(ir,_forward_rate.size());
     return *_forward_rate[ir];
   }
 
