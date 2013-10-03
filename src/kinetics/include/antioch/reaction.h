@@ -223,8 +223,14 @@ namespace Antioch
     //! Return writeable reference to the forward rate object
     KineticsType<CoeffType>& forward_rate(unsigned int ir = 0);
 
-    //! Return const reference to the forward rate object
+    //! Add a forward rate object
     void add_forward_rate(KineticsType<CoeffType> *rate);
+
+    //! Swap two forward rates object
+    void swap_forward_rates(unsigned int irate, unsigned int jrate);
+
+    //! Return the number of rate constant objects
+    unsigned int n_rate_constants() const;
 
     //! Formatted print, by default to \p std::cout.
     void print(std::ostream& os = std::cout) const;
@@ -318,6 +324,27 @@ namespace Antioch
   void Reaction<CoeffType>::add_forward_rate(KineticsType<CoeffType> *rate)
   {
     _forward_rate.push_back(rate);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  unsigned int Reaction<CoeffType>::n_rate_constants() const
+  {
+    return _forward_rate.size();
+  }
+    
+  template<typename CoeffType>
+  inline
+  void Reaction<CoeffType>::swap_forward_rates(unsigned int irate, unsigned int jrate)
+  {
+    antioch_assert_less(irate,_forward_rate.size());
+    antioch_assert_less(jrate,_forward_rate.size());
+    
+    KineticsType<CoeffType>* rate_tmp = _forward_rate[jrate];
+    _forward_rate[jrate] = _forward_rate[irate];
+    _forward_rate[irate] = rate_tmp;
+
     return;
   }
 
