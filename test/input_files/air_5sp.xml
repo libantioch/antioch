@@ -30,14 +30,14 @@
   <!-- park_jaffe_partridge_JTHT_2001 - Park, Jaffe, Partridge "Chemical-Kinetic Parameters of Hyperbolic Earth Entry," JTHT, Vol 15, No 1, pp 76-90, 2001. -->
   <reactionData id="park_jaffe_partridge_JTHT_2001">
     <!-- reaction 0001    -->
-    <reaction reversible="yes" type="threeBody" id="0001">
+    <reaction reversible="yes" type="ThreeBody" id="0001">
       <equation>N2 + M [=] 2 N + M</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>7.e+18</A>
            <b>-1.6</b>
            <E units="cal/mol">224801.3</E>
-        </Arrhenius>
+        </Kooij>
         <efficiencies default="1.0">N:4.2857 O:4.2857 </efficiencies>
       </rateCoeff>
       <reactants>N2:1.0</reactants>
@@ -45,14 +45,14 @@
     </reaction>
 
     <!-- reaction 0002    -->
-    <reaction reversible="yes" type="threeBody" id="0002">
+    <reaction reversible="yes" type="ThreeBody" id="0002">
       <equation>O2 + M [=] 2 O + M</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>2.e+18</A>
            <b>-1.5</b>
            <E units="cal/mol">117881.7</E>
-        </Arrhenius>
+        </Kooij>
         <efficiencies default="1.0">N:5.0 O:5.0</efficiencies>
       </rateCoeff>
       <reactants>O2:1.0</reactants>
@@ -60,7 +60,7 @@
     </reaction>
 
     <!-- reaction 0003    -->
-    <reaction reversible="yes" type="threeBody" id="0003">
+    <reaction reversible="yes" type="ThreeBody" id="0003">
       <equation>NO + M [=] N + O + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -78,11 +78,11 @@
     <reaction reversible="yes" id="0004">
       <equation>N2 + O [=] NO + N</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>5.7e+9</A>
            <b>0.42</b>
            <E units="cal/mol">85269.6</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>N2:1 O:1</reactants>
       <products>NO:1 N:1</products>
@@ -103,7 +103,7 @@
     </reaction>
     
     <!-- reaction 0006    -->
-    <reaction reversible="yes" type="threeBody" id="0006">
+    <reaction reversible="yes" type="ThreeBody" id="0006">
       <equation>C2 + M [=] 2 C + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -118,7 +118,7 @@
     </reaction>
 
     <!-- reaction 0007    -->
-    <reaction reversible="yes" type="threeBody" id="0007">
+    <reaction reversible="yes" type="ThreeBody" id="0007">
       <equation>CN + M [=] C + N + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -133,7 +133,7 @@
     </reaction>
 
     <!-- reaction 0008    -->
-    <reaction reversible="yes" type="threeBody" id="0008">
+    <reaction reversible="yes" type="ThreeBody" id="0008">
       <equation>H2 + M [=] 2 H + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -151,11 +151,11 @@
     <reaction reversible="yes" id="0009">
       <equation>CO + C [=] C2 + O</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>2.0e+14</A>
            <b>-1.0</b>
            <E units="cal/mol">115180.9</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>CO:1 C:1</reactants>
       <products>C2:1 O:1</products>
@@ -165,11 +165,11 @@
     <reaction reversible="yes" id="0010">
       <equation>CO + O [=] O2 + C</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>3.9e+10</A>
            <b>-0.18</b>
            <E units="cal/mol">137422.7</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>CO:1 O:1</reactants>
       <products>O2:1 C:1</products>
@@ -193,11 +193,11 @@
     <reaction reversible="yes" id="0012">
       <equation>N2 + C [=] CN + N</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>1.1e+11</A>
            <b>-0.11</b>
            <E units="cal/mol">46072.4</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>N2:1 C:1</reactants>
       <products>CN:1 N:1</products>
@@ -207,11 +207,11 @@
     <reaction reversible="yes" id="0013">
       <equation>CN + O [=] NO + C</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>1.6e+10</A>
            <b>0.1</b>
            <E units="cal/mol">28993.8</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>CN:1 O:1</reactants>
       <products>NO:1 C:1</products>
@@ -314,11 +314,11 @@
     <reaction reversible="yes" id="0019">
       <equation>N2 + e- [=] N + N + e-</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>3.0e+21</A>
            <b>-1.6</b>
            <E units="cal/mol">224801.3</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>N2:1 e-:1</reactants>
       <products>N:2 e-:1</products>
@@ -328,11 +328,11 @@
     <reaction reversible="yes" id="0020">
       <equation>O + e- [=] O+ + e- + e-</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>3.9e+30</A>
            <b>-3.78</b>
            <E units="cal/mol">314761.6</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>O:1 e-:1</reactants>
       <products>O+:1 e-:2</products>
@@ -342,11 +342,11 @@
     <reaction reversible="yes" id="0021">
       <equation>N + e- [=] N+ + e- + e-</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>2.5e+31</A>
            <b>-3.82</b>
            <E units="cal/mol">334024.6</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>N:1 e-:1</reactants>
       <products>N+:1 e-:2</products>
@@ -356,11 +356,11 @@
     <reaction reversible="yes" id="0022">
       <equation>C + e- [=] C+ + e- + e-</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>3.7e+28</A>
            <b>-3.0</b>
            <E units="cal/mol">259593.9</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>C:1 e-:1</reactants>
       <products>C+:1 e-:2</products>
@@ -370,11 +370,11 @@
     <reaction reversible="yes" id="0023">
       <equation>H + e- [=] H+ + e- + e-</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>2.2e+27</A>
            <b>-2.8</b>
            <E units="cal/mol">313371.5</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>H:1 e-:1</reactants>
       <products>H+:1 e-:2</products>
@@ -398,11 +398,11 @@
     <reaction reversible="yes" id="0025">
       <equation>N + N [=] N2+ + e-</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>4.4e+3</A>
            <b>1.5</b>
            <E units="cal/mol">134046.7</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>N:2</reactants>
       <products>N2+:1 e-:1</products>
@@ -412,11 +412,11 @@
     <reaction reversible="yes" id="0026">
       <equation>CO + CO [=] CO2 + C</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>2.33e+6</A>
            <b>-0.5</b>
            <E units="cal/mol">130492.0</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>CO:2</reactants>
       <products>CO2:1 C:1</products>
@@ -426,11 +426,11 @@
     <reaction reversible="yes" id="0027">
       <equation>NO + CO [=] CO2 + N</equation>
       <rateCoeff>
-        <Arrhenius>
+        <Kooij>
            <A>4.59e+5</A>
            <b>-0.5</b>
            <E units="cal/mol">23969.5</E>
-        </Arrhenius>
+        </Kooij>
       </rateCoeff>
       <reactants>NO:1 CO:1</reactants>
       <products>CO2:1 N:1</products>
@@ -451,7 +451,7 @@
     </reaction>
 
     <!-- reaction 0029 -->
-    <reaction reversible="yes" type="threeBody" id="0029">
+    <reaction reversible="yes" type="ThreeBody" id="0029">
       <equation>CO2 + M [=] CO + O + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -466,14 +466,14 @@
     </reaction>
 
     <!-- reaction 0030 -->
-    <reaction reversible="yes" type="threeBody" id="0030">
+    <reaction reversible="yes" type="ThreeBody" id="0030">
       <equation>CO + M [=] C + O + M</equation>
       <rateCoeff>
-        <Arrhenius>
+        <ModifiedArrhenius>
            <A>2.3e+17</A>
            <b>-1.0</b>
            <E units="cal/mol">256178.2</E>
-        </Arrhenius>
+        </ModifiedArrhenius>
         <efficiencies default="1.0">N:1.478 O:1.478 H:1.478 C:1.478 </efficiencies>
       </rateCoeff>
       <reactants>CO:1</reactants>
