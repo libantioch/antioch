@@ -30,7 +30,7 @@
   <!-- park_jaffe_partridge_JTHT_2001 - Park, Jaffe, Partridge "Chemical-Kinetic Parameters of Hyperbolic Earth Entry," JTHT, Vol 15, No 1, pp 76-90, 2001. -->
   <reactionData id="park_jaffe_partridge_JTHT_2001">
     <!-- reaction 0001    -->
-    <reaction reversible="yes" type="threeBody" id="0001">
+    <reaction reversible="yes" type="ThreeBody" id="0001">
       <equation>N2 + M [=] 2 N + M</equation>
       <rateCoeff>
         <Kooij>
@@ -45,7 +45,7 @@
     </reaction>
 
     <!-- reaction 0002    -->
-    <reaction reversible="yes" type="threeBody" id="0002">
+    <reaction reversible="yes" type="ThreeBody" id="0002">
       <equation>O2 + M [=] 2 O + M</equation>
       <rateCoeff>
         <Kooij>
@@ -60,7 +60,7 @@
     </reaction>
 
     <!-- reaction 0003    -->
-    <reaction reversible="yes" type="threeBody" id="0003">
+    <reaction reversible="yes" type="ThreeBody" id="0003">
       <equation>NO + M [=] N + O + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -103,7 +103,7 @@
     </reaction>
     
     <!-- reaction 0006    -->
-    <reaction reversible="yes" type="threeBody" id="0006">
+    <reaction reversible="yes" type="ThreeBody" id="0006">
       <equation>C2 + M [=] 2 C + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -118,7 +118,7 @@
     </reaction>
 
     <!-- reaction 0007    -->
-    <reaction reversible="yes" type="threeBody" id="0007">
+    <reaction reversible="yes" type="ThreeBody" id="0007">
       <equation>CN + M [=] C + N + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -133,7 +133,7 @@
     </reaction>
 
     <!-- reaction 0008    -->
-    <reaction reversible="yes" type="threeBody" id="0008">
+    <reaction reversible="yes" type="ThreeBody" id="0008">
       <equation>H2 + M [=] 2 H + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -451,7 +451,7 @@
     </reaction>
 
     <!-- reaction 0029 -->
-    <reaction reversible="yes" type="threeBody" id="0029">
+    <reaction reversible="yes" type="ThreeBody" id="0029">
       <equation>CO2 + M [=] CO + O + M</equation>
       <rateCoeff>
         <Arrhenius>
@@ -466,7 +466,7 @@
     </reaction>
 
     <!-- reaction 0030 -->
-    <reaction reversible="yes" type="threeBody" id="0030">
+    <reaction reversible="yes" type="ThreeBody" id="0030">
       <equation>CO + M [=] C + O + M</equation>
       <rateCoeff>
         <ModifiedArrhenius>

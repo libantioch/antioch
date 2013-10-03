@@ -30,6 +30,7 @@
 #define ANTIOCH_REACTION_SET_DATA_XML_H
 
 // Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/string_utils.h"
 #include "antioch/reaction_set.h"
 #include "antioch/kinetics_parsing.h"
@@ -60,7 +61,16 @@ namespace Antioch
                                    ReactionSet<NumericType>& reaction_set )
   {
     tinyxml2::XMLDocument doc;
-    doc.LoadFile(filename.c_str());
+    if(doc.LoadFile(filename.c_str()))
+      {
+        std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
+        std::cerr << "Error of tinyxml2 library:\n"
+                  << "\tID = " << doc.ErrorID() << "\n"
+                  << "\tError String1 = " << doc.GetErrorStr1() << "\n"
+                  << "\tError String2 = " << doc.GetErrorStr2() << std::endl;
+        antioch_error();
+      }
+
 
     tinyxml2::XMLElement* element = doc.FirstChildElement("ctml");
     if (!element) 
@@ -120,6 +130,13 @@ namespace Antioch
     models.push_back("ModifiedArrhenius");
     models.push_back("VantHoff");
 
+    std::map<std::string,ReactionType::ReactionType> proc_keyword;
+    proc_keyword["Elementary"]        = ReactionType::ELEMENTARY;
+    proc_keyword["Duplicate"]         = ReactionType::DUPLICATE;
+    proc_keyword["ThreeBody"]         = ReactionType::THREE_BODY;
+    proc_keyword["LindemannFalloff"]  = ReactionType::LINDEMANN_FALLOFF;
+    proc_keyword["TroeFalloff"]       = ReactionType::TROE_FALLOFF;
+
     while (reaction)
       {
         if (verbose) std::cout << "Reaction #" << reaction->IntAttribute("id") << ":\n"
@@ -131,9 +148,20 @@ namespace Antioch
 
         if (reaction->Attribute("type"))
           {
-            if (verbose) std::cout << " type: " << reaction->Attribute("type");
-            if (std::string(reaction->Attribute("type")) == "threeBody")
-              typeReaction = ReactionType::THREE_BODY;
+            if (verbose) std::cout << " type: " << reaction->Attribute("type") << std::endl;
+            if(!proc_keyword.count(reaction->Attribute("type")))
+            {
+                std::cerr << "Implemented chemical processes are:\n"
+                          << "  Elementary (default)\n"
+                          << "  Duplicate\n"
+                          << "  ThreeBody\n"
+                          << "  LindemannFalloff\n"
+                          << "  TroeFalloff\n" 
+                          << "See Antioch documentation for more details."
+                          << std::endl;
+                antioch_not_implemented();
+            }
+            typeReaction = proc_keyword[reaction->Attribute("type")];
           }
             
         // construct a Reaction object    
@@ -143,94 +171,140 @@ namespace Antioch
         tinyxml2::XMLElement* rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
         while(!rate_constant)
         {
-          if(imod == models.size())antioch_not_implemented();
+          if(imod == models.size() - 1)
+          {
+                std::cerr << "Could not find a suitable kinetics model.\n"
+                          << "Implemented kinetics models are:\n"
+                          << "  HercourtEssen\n"
+                          << "  Berthelot\n"
+                          << "  Arrhenius\n"
+                          << "  BerthelotHercourtEssen\n"
+                          << "  Kooij (default)\n"
+                          << "  ModifiedArrhenius (= Kooij)\n"
+                          << "  VantHoff\n"
+                          << "See Antioch documentation for more details."
+                          << std::endl;
+                antioch_not_implemented();
+          }
           imod++;
           rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
         }
         kineticsModel = kin_keyword[models[imod]];
 
-        // usually Kooij is called Arrhenius, check here
-        if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
-        {
-          if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
-          {
-              kineticsModel = KineticsModel::KOOIJ;
-              antioch_deprecated();
-              std::cerr << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
-                        << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
-                        << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
-                        << "thanks and a good day to you, user." << std::endl;
-          }
-        }
 
-        if(verbose) 
+        while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        {
+
+          // usually Kooij is called Arrhenius, check here
+          if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
           {
-            std::cout << "\n rates: " << models[imod] << " model\n"
-                      << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
-            if(rate_constant->FirstChildElement("b") != NULL)
+            if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
             {
-                std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
-            }
-            if(rate_constant->FirstChildElement("E") != NULL)
-            {
-                std::cout << "   E: " << rate_constant->FirstChildElement("E")->GetText() << "\n";
-            }
-            if(rate_constant->FirstChildElement("D") != NULL)
-            {
-                std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText() << "\n";
+               kineticsModel = KineticsModel::KOOIJ;
+               antioch_deprecated();
+               std::cerr << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
+                         << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
+                         << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
+                         << "thanks and a good day to you, user." << std::endl;
             }
           }
 
-        // typically Cantera files list activation energy in cal/mol, but we want it in K.
-        std::vector<NumericType> data;
-        data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()));
-        if(rate_constant->FirstChildElement("b") != NULL)
-        {
-           data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
-        }
-        if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
-        {
-           data.pop_back();
-        }
-        if(rate_constant->FirstChildElement("E") != NULL)
-        {
-           data.push_back(std::atof(rate_constant->FirstChildElement("E")->GetText()));
-        }
-        if(rate_constant->FirstChildElement("D") != NULL)
-        {
-           data.push_back(std::atof(rate_constant->FirstChildElement("D")->GetText()));
-        }
-        //Tref
-        if(kineticsModel == KineticsModel::HERCOURT_ESSEN ||
-           kineticsModel == KineticsModel::BHE            ||
-           kineticsModel == KineticsModel::KOOIJ          ||
-           kineticsModel == KineticsModel::VANTHOFF) 
-        {
-          data.push_back(1.);
-          if(rate_constant->FirstChildElement("Tref"))
-          {
-              data.back() = std::atof(rate_constant->FirstChildElement("Tref")->GetText());
-          }
-        }
-        //scale E -> E/R
-        if(kineticsModel == KineticsModel::ARRHENIUS ||
-           kineticsModel == KineticsModel::KOOIJ     ||
-           kineticsModel == KineticsModel::VANTHOFF)
-        {
-          data.push_back(Constants::R_universal<NumericType>()/1000.L);
-          if( std::string(rate_constant->FirstChildElement("E")->Attribute("units")) == "cal/mol" )
+          if(verbose) 
             {
-              data.back() = 1.9858775L;
+              std::cout << " rate: " << models[imod] << " model\n"
+                        << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
+              if(rate_constant->FirstChildElement("b") != NULL)
+              {
+                  std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
+              }
+              if(rate_constant->FirstChildElement("E") != NULL)
+              {
+                  std::cout << "   E: " << rate_constant->FirstChildElement("E")->GetText() << "\n";
+              }
+              if(rate_constant->FirstChildElement("D") != NULL)
+              {
+                  std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText() << "\n";
+              }
             }
+
+          // typically Cantera files list activation energy in cal/mol, but we want it in K.
+          std::vector<NumericType> data;
+          data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()));
+          if(rate_constant->FirstChildElement("b") != NULL)
+          {
+             data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
+          }
+          if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
+          {
+             data.pop_back();
+          }
+          if(rate_constant->FirstChildElement("E") != NULL)
+          {
+             data.push_back(std::atof(rate_constant->FirstChildElement("E")->GetText()));
+          }
+          if(rate_constant->FirstChildElement("D") != NULL)
+          {
+             data.push_back(std::atof(rate_constant->FirstChildElement("D")->GetText()));
+          }
+          //Tref
+          if(kineticsModel == KineticsModel::HERCOURT_ESSEN ||
+             kineticsModel == KineticsModel::BHE            ||
+             kineticsModel == KineticsModel::KOOIJ          ||
+             kineticsModel == KineticsModel::VANTHOFF) 
+          {
+            data.push_back(1.);
+            if(rate_constant->FirstChildElement("Tref"))
+            {
+                data.back() = std::atof(rate_constant->FirstChildElement("Tref")->GetText());
+            }
+          }
+          //scale E -> E/R
+          if(kineticsModel == KineticsModel::ARRHENIUS ||
+             kineticsModel == KineticsModel::KOOIJ     ||
+             kineticsModel == KineticsModel::VANTHOFF)
+          {
+            data.push_back(Constants::R_universal<NumericType>()/1000.L);
+            if( rate_constant->FirstChildElement("E")->Attribute("units"))//if there's the attribute
+              {
+              if( std::string(rate_constant->FirstChildElement("E")->Attribute("units")) == "cal/mol" )
+                {
+                  data.back() = 1.9858775L;
+                }
+              }
+          }
+
+          KineticsType<NumericType>* rate = build_rate<NumericType>(data,kineticsModel);
+
+          my_rxn->add_forward_rate(rate);
+
+          rate_constant = rate_constant->NextSiblingElement(models[imod].c_str());
+
+        } //end of duplicate/falloff kinetics description loop
+
+        // for falloff, we need a way to know which rate constant is the low pressure limit 
+        // and which is the high pressure limit
+        // usually by calling the low pressure limite "k0". If nothing given, by default
+        // the first rate constant encountered is the low limit,
+        // so we need to change something only if the second rate constant has a "name" attribute
+        // of value "k0"
+        if(typeReaction == ReactionType::LINDEMANN_FALLOFF ||
+           typeReaction == ReactionType::TROE_FALLOFF)
+        {
+           antioch_assert_equal_to(my_rxn->n_rate_constants(),2);
+           rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str())->NextSiblingElement(models[imod].c_str());
+           if(rate_constant->Attribute("name")) //if attribute exists
+           { 
+             if(std::string(rate_constant->Attribute("name")) == "k0") //and is indeed k0
+             {
+               my_rxn->swap_forward_rates(0,1);
+             }
+           }
         }
-
-        KineticsType<NumericType>* rate = build_rate<NumericType>(data,kineticsModel);
-
-        my_rxn->add_forward_rate(rate);
 
         tinyxml2::XMLElement *efficiencies = 
           reaction->FirstChildElement("rateCoeff")->FirstChildElement("efficiencies");
 
+        //efficiencies are only for three body reactions
         if(efficiencies)
           {
             if(efficiencies->GetText())
@@ -268,7 +342,40 @@ namespace Antioch
                   }
               }
           }
-        
+
+        //F parameters only for Troe falloff
+        tinyxml2::XMLElement *troe = 
+          reaction->FirstChildElement("rateCoeff")->FirstChildElement("Troe");
+        if(troe)
+        {
+std::cout << "0" << std::endl;
+           antioch_assert_equal_to (ReactionType::TROE_FALLOFF, my_rxn->type());
+           FalloffReaction<NumericType,TroeFalloff<NumericType> > *my_fall_rxn =
+                static_cast<FalloffReaction<NumericType,TroeFalloff<NumericType> > *> (my_rxn);
+
+           if(!troe->FirstChildElement("alpha"))
+           {
+                std::cerr << "alpha parameter of Troe falloff missing!" << std::endl;
+                antioch_error();
+           }
+           my_fall_rxn->F().set_alpha(std::atof(troe->FirstChildElement("alpha")->GetText()));
+           if(!troe->FirstChildElement("T3"))
+           {
+                std::cerr << "T*** parameter of Troe falloff missing!" << std::endl;
+                antioch_error();
+           }
+           my_fall_rxn->F().set_T3(std::atof(troe->FirstChildElement("T3")->GetText()));
+           if(!troe->FirstChildElement("T1"))
+           {
+                std::cerr << "T* parameter of Troe falloff missing!" << std::endl;
+                antioch_error();
+           }
+           my_fall_rxn->F().set_T1(std::atof(troe->FirstChildElement("T1")->GetText()));
+           if(troe->FirstChildElement("T2"))//T2 is optional
+           {
+             my_fall_rxn->F().set_T2(std::atof(troe->FirstChildElement("T2")->GetText()));
+           }
+        }
 
         tinyxml2::XMLElement* reactants = reaction->FirstChildElement("reactants");
         tinyxml2::XMLElement* products  = reaction->FirstChildElement("products");
