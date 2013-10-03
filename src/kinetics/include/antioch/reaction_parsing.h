@@ -78,9 +78,12 @@ namespace Antioch
         break;
 
       case(ReactionType::LINDEMANN_FALLOFF):
+        {
+          reaction = new FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
+        }
       case(ReactionType::TROE_FALLOFF):
         {
-          reaction = new FalloffReaction<CoeffType>(n_species,equation,reversible,type,kin);
+          reaction = new FalloffReaction<CoeffType,TroeFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
         }
         break;
 
