@@ -36,6 +36,7 @@
 #include "antioch/kinetics_parsing.h"
 #include "antioch/reaction_parsing.h"
 #include "antioch/physical_constants.h"
+#include "antioch/units.h"
 
 // XML
 #include "antioch/tinyxml2.h"
@@ -47,6 +48,37 @@
 
 namespace Antioch
 {
+
+ /*!\file read_reaction_set_data_xml.h
+  *
+  * We parse the XML file here, with an exhaustive
+  * unit management. The starting point is the kinetics
+  * equation:
+  * \f[
+  *     \frac{\partial c}{\partial t} = k \prod_{s \in \text{reactants}} c_s^{l_s}
+  * \f]
+  * with \f$l\f$ the partial order of the reaction with respect to reactants \f$s\f$.
+  * We obtain thus
+  * \f[
+  *     \unit{[k] = [M]^{m - 1} s^{-1}}
+  * \f]
+  * with \f$m\f$ the order of the reaction. By definition
+  * \f[
+  *     m = \sum_{s \in \text{reactants}} l_s
+  * \f]
+  * We are in an elementary processes paradigm, thus for a reactant species \f$s\f$,
+  * \f$l_s = -\nu_s\f$ with \f$\nu_s\f$ the stoichiometric coefficient of reactant
+  * species \f$s\f$.
+  *
+  * Example:
+  * \f[
+  *   \begin{array}{c}
+  *      \ce{a A + b B -> c C + d D} \\
+  *      m = a + b
+  *   \end{array}
+  * \f]
+  *
+  */
   template<class NumericType>
   void read_reaction_set_data_xml( const std::string& filename,
                                    const bool verbose,

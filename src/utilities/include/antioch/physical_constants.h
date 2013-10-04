@@ -29,18 +29,21 @@
 #ifndef ANTIOCH_PHYSICAL_CONSTANTS_H
 #define ANTIOCH_PHYSICAL_CONSTANTS_H
 
+//Antioch
+#include "antioch/units.h"
+
 namespace Antioch
 {
   namespace Constants
   {
     /*!
-     * Universal Gas Constant, R, expressed in J/(kmol-K)
+     * Universal Gas Constant, R, expressed in J/(mol-K)
      */
     template<typename CoeffType>
     inline
     CoeffType R_universal()
     {
-      return 8314.4621L;
+      return 8.3144621L;
     }
 
     /*!
@@ -51,6 +54,26 @@ namespace Antioch
     CoeffType Avogadro()
     {
       return 6.02214129e23L;
+    }
+
+    /*!
+     * Universal Gas Constant unit
+     */
+    template<typename CoeffType>
+    inline
+    Units<CoeffType> R_universal_unit()
+    {
+        return Units<CoeffType>("J/mol/K");
+    }
+
+    /*!
+     * Avogadro's number unit
+     */
+    template<typename CoeffType>
+    inline
+    Units<CoeffType> Avogadro_unit()
+    {
+        return Units<CoeffType>("mol-1");
     }
 
   } // end namespace Constants
