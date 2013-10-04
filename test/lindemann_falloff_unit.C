@@ -135,7 +135,7 @@ int tester()
         break;
       }
     }
-    rate_exact = k0 / (1./M + k0/kinf);
+    rate_exact = k0 / (1.L/M + k0/kinf);
     derive_exact = rate_exact * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + dkinf_dT/(pow(kinf,2)/M + k0*kinf));
                   
     for(unsigned int i = 0; i < n_species; i++)
@@ -143,8 +143,8 @@ int tester()
       derive_dX_exact[i] = rate_exact/(M + pow(M,2)*k0/kinf);
     }
 
-    Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> > * fall_reaction = 
-        new Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> >(n_species,equation,Antioch::ReactionType::LINDEMANN_FALLOFF,kin_mod);
+    Antioch::FalloffReaction<Scalar,Antioch::LindemannFalloff<Scalar> > * fall_reaction = 
+        new Antioch::FalloffReaction<Scalar,Antioch::LindemannFalloff<Scalar> >(n_species,equation,Antioch::ReactionType::LINDEMANN_FALLOFF,kin_mod);
     fall_reaction->add_forward_rate(rate_kinetics1);
     fall_reaction->add_forward_rate(rate_kinetics2);
     Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
@@ -200,6 +200,7 @@ int tester()
 
         return_flag = 1;
       }
+
     delete fall_reaction;
     if(return_flag)return return_flag;
     }
