@@ -18,7 +18,7 @@ libantioch_la_SOURCES += core/src/chemical_species.C
 libantioch_la_SOURCES += core/src/chemical_mixture.C
 
 #unit
-libantioch_la_SOURCES += unit/src/unit_defs.C
+libantioch_la_SOURCES += units/src/unit_defs.C
 
 # kinetics
 libantioch_la_SOURCES += kinetics/src/reaction.C
@@ -59,13 +59,13 @@ include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
 # unit
-include_HEADERS += unit/include/antioch/converter.h
-include_HEADERS += unit/include/antioch/insi.h
-include_HEADERS += unit/include/antioch/siprefix.h
-include_HEADERS += unit/include/antioch/unit_base.h
-include_HEADERS += unit/include/antioch/unit_defs.h
-include_HEADERS += unit/include/antioch/units.h
-include_HEADERS += unit/include/antioch/unit_store.h
+include_HEADERS += units/include/antioch/converter.h
+include_HEADERS += units/include/antioch/insi.h
+include_HEADERS += units/include/antioch/siprefix.h
+include_HEADERS += units/include/antioch/unit_base.h
+include_HEADERS += units/include/antioch/unit_defs.h
+include_HEADERS += units/include/antioch/units.h
+include_HEADERS += units/include/antioch/unit_store.h
 
 # kinetics-kinetics models
 include_HEADERS += kinetics/include/antioch/kinetics_enum.h
@@ -150,7 +150,7 @@ antioch_version_LDADD = libantioch.la
 #--------------------------------------
 AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
-AM_CPPFLAGS += -I$(top_srcdir)/src/unit/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/units/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
