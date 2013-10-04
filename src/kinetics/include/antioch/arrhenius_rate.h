@@ -42,10 +42,18 @@
 namespace Antioch
 {
   //! Arrhenius rate equation.
-  /*!
-   * Arrhenius rate equation.  Computes rates of the form
-   * \f$ C_f\times \exp(-E_a/T) \f$. This class copied from
-   * the \p FIN-S code and slightly reformatted for \p Antioch.
+  /*!\class ArrheniusRate
+ *
+   * The Arrhenius kinetics model is of the form:
+   * \f[
+   *   \alpha(T) = A  \exp\left(-\frac{E_a}{\mathrm{R}T}\right) 
+   * \f]
+   * with \f$\mathrm{R}\f$ the ideal gas constant. We have:
+   * \f[
+   *   \frac{\partial\alpha(T)}{\partial T} = \alpha(T) \frac{E_a}{\mathrm{R}T^2}
+   * \f]
+   *
+   * Internally, we use the reduced activation energy \f$e = \frac{E_a}{\mathrm{R}}\f$
    */
   template<typename CoeffType=double>
   class ArrheniusRate: public KineticsType<CoeffType>

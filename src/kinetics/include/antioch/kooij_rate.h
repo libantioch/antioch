@@ -37,10 +37,19 @@
 namespace Antioch
 {
   //! Kooij rate equation.
-  /*!
-   * Kooij rate equation.  Computes rates of the form
-   * \f$ C_f\times T^\eta\times \exp(-E_a/T) \f$. This class copied from
-   * the \p FIN-S code and slightly reformatted for \p Antioch.
+  /*!\class KooijRate
+ *
+   * The Kooij kinetics model is of the form:
+   * \f[
+   *   \alpha(T) =  A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \exp\left(-\frac{E_a}{\mathrm{R}T}\right)
+   * \f]
+   * thus
+   * \f[
+   *   \frac{\partial\alpha(T)}{\partial T} =  \alpha(T) \left(\frac{\beta}{T} + \frac{E_a}{\mathrm{R}T^2}\right)
+   * \f]
+   *
+   * Internally, we use the reduced pre-exponential parameter \f$a = \frac{A}{\mathrm{T_\text{ref}}^\beta}\f$ and
+   * the reduced activation energy \f$e = \frac{E_a}{\mathrm{R}}\f$
    */
   template<typename CoeffType=double>
   class KooijRate : public KineticsType<CoeffType>

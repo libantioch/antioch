@@ -35,14 +35,26 @@
 namespace Antioch
 {
   //!A single reaction mechanism. 
-  /*!
+  /*!\class ElementaryReaction
+ *
     This class encapsulates an elementary reaction process. An elementary process
     rate constant is defined by the equation
-    \f[k(T,[M]) = \alpha(T)\f]
-    with \f$\alpha(T)\f$ being a kinetics model (see base class Reaction), and \f$[M]\f$
+    \f[
+        k(T,[M]) = \alpha(T)
+    \f]
+    with \f$\alpha(T)\f$ being a kinetics model (see base classes Reaction and KineticsType), and \f$[M]\f$
     the mixture concentration (or pressure, it's equivalent, \f$[M] = \frac{P}{\mathrm{R}T}\f$
-    in ideal gas model).  All reactions are assumed to be reversible. By default, the kinetisc model
-    is Kooij. 
+    in an ideal gas model).  All reactions are assumed to be reversible. By default, the kinetics model
+    is a KooijRate.
+
+    We have:
+    \f[
+        \begin{split}
+           \frac{\partial k(T,[M])}{\partial T}   & = \frac{\partial \alpha(T)}{\partial T} \\[10pt]
+           \frac{\partial k(T,[M])}{\partial c_i} & = 0
+        \end{split}
+    \f]
+    with \f$c_i\f$ the concentration of species \f$i\f$.
   */
   template<typename CoeffType=double>
   class ElementaryReaction: public Reaction<CoeffType>

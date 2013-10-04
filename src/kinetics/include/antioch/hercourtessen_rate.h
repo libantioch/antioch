@@ -36,9 +36,18 @@
 namespace Antioch
 {
   //! Hercourt-Essen rate equation.
-  /*!
-   * Hercourt-Essen rate equation.  Computes rates of the form
-   * \f$ C_f\times T^\eta \f$.
+  /*!\class HercourtEssenRate
+ *
+   * Hercourt-Essen is a kinetics model of the form:
+   * \f[
+   *  \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta
+   * \f]
+   * Thus
+   * \f[
+   *  \frac{\partial \alpha(T)}{\partial T} = \alpha(T) \frac{\beta}{T}
+   * \f]
+   *
+   * Internally, we use the reduced pre-exponential factor \f$a = \frac{A}{\mathrm{T_\text{ref}}^{\beta}}\f$
    */
   template<typename CoeffType=double>
   class HercourtEssenRate : public KineticsType<CoeffType>

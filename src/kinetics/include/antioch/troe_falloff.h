@@ -26,6 +26,7 @@
 
 //Antioch
 #include "antioch/math_constants.h"
+#include "antioch/cmath_shims.h"
 
 namespace Antioch
 {
@@ -200,12 +201,9 @@ namespace Antioch
                                                const StateType &k0, 
                                                const StateType &kinf) const
   {
-    using std::exp;
-    using std::log;
-    using std::pow;
 
     //compute log(Fcent) once
-    StateType logFcent = log(this->Fcent(T));
+    StateType logFcent = ant_log(this->Fcent(T));
     //[M] 
     StateType M = Antioch::zero_clone(T);
     for(unsigned int i = 0; i < molar_densities.size(); i++)
@@ -224,14 +222,14 @@ namespace Antioch
     ANTIOCH_AUTO(StateType) n = 0.75 - _n_coeff*logFcent;
     ANTIOCH_AUTO(StateType) d = Antioch::constant_clone(T, 0.14);
 
-    StateType log10Pr = Constants::log10_to_log<CoeffType>()*log(Pr);
+    StateType log10Pr = Constants::log10_to_log<CoeffType>() * ant_log(Pr);
 
     //log10F =  log10(Fcent) / [1+((log10(Pr) + c)/(n - d*(log10(Pr) + c) ))^2]
     //logF =  log(Fcent) / [1+((log10(Pr) + c)/(n - d*(log10(Pr) + c) ))^2]
     ANTIOCH_AUTO(StateType) logF =
-      logFcent/(1. + pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2) );
+      logFcent/(1. + ant_pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2) );
 
-    return exp(logF);
+    return ant_exp(logF);
   }
 
 
@@ -240,12 +238,11 @@ namespace Antioch
   inline
   StateType TroeFalloff<CoeffType>::Fcent(const StateType &T) const
   {
-    using std::exp;
      
     // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
-    StateType Fc = (1. - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
+    StateType Fc = (1. - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
 
-    if(_T2 != 1e50)Fc += exp(-_T2/T);
+    if(_T2 != 1e50)Fc += ant_exp(-_T2/T);
 
     return Fc;
   }
@@ -255,16 +252,15 @@ namespace Antioch
   inline
   void TroeFalloff<CoeffType>::Fcent_and_derivatives(const StateType &T, StateType &Fc, StateType &dFc_dT) const
   {
-    using std::exp;
     
     // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
-    Fc = (1. - _alpha) * exp(-T/_T3) + _alpha * exp(-T/_T1);
-    dFc_dT = (_alpha - 1.)/_T3 * exp(-T/_T3) - _alpha/_T1 * exp(-T/_T1);
+    Fc = (1. - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
+    dFc_dT = (_alpha - 1.)/_T3 * ant_exp(-T/_T3) - _alpha/_T1 * ant_exp(-T/_T1);
 
     if(_T2 != 1e50)
       {
-        Fc += exp(-_T2/T);
-        dFc_dT += _T2/(T*T) * exp(-_T2/T);
+        Fc += ant_exp(-_T2/T);
+        dFc_dT += _T2/(T*T) * ant_exp(-_T2/T);
       }
 
     return;
@@ -283,9 +279,6 @@ namespace Antioch
                                                  StateType &dF_dT,
                                                  VectorStateType &dF_dX) const
   {
-    using std::exp;
-    using std::log;
-    using std::pow;
 
     antioch_assert_equal_to(dF_dX.size(),this->n_spec);
 
@@ -299,7 +292,7 @@ namespace Antioch
     // Pr and derivatives
     StateType Pr = M * k0/kinf;
     StateType dPr_dT = Pr * (dk0_dT/k0 - dkinf_dT/kinf);
-    StateType log10Pr = Constants::log10_to_log<CoeffType>()*log(Pr);
+    StateType log10Pr = Constants::log10_to_log<CoeffType>() * ant_log(Pr);
     StateType dlog10Pr_dT = Constants::log10_to_log<CoeffType>()*dPr_dT/Pr;
     VectorStateType dlog10Pr_dX = Antioch::zero_clone(molar_densities);
     for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
@@ -312,7 +305,7 @@ namespace Antioch
     this->Fcent_and_derivatives(T,Fcent,dFcent_dT);
     StateType dlog10Fcent_dT = Constants::log10_to_log<CoeffType>()*dFcent_dT/Fcent;
     // Compute log(Fcent) once
-    StateType logFcent = log(Fcent);
+    StateType logFcent = ant_log(Fcent);
     // n and c and derivatives
     StateType  d = Antioch::constant_clone(T, 0.14);
     StateType  c = - 0.4 - _c_coeff * logFcent;
@@ -321,21 +314,21 @@ namespace Antioch
     ANTIOCH_AUTO(StateType) dn_dT = - _n_coeff * dFcent_dT/Fcent;
 
     //log10F
-    StateType logF = logFcent/(1. + pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2));
+    StateType logF = logFcent/(1. + ant_pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2));
     StateType dlogF_dT = logF * (dlog10Fcent_dT / Fcent 
-                                     - 2. * pow((log10Pr + c)/(n - d * (log10Pr + c)),2)
+                                     - 2. * ant_pow((log10Pr + c)/(n - d * (log10Pr + c)),2)
                                        * ((dlog10Pr_dT + dc_dT)/(log10Pr + c) -
                                           (dn_dT - d * (dlog10Pr_dT + dc_dT))/(n - d * (log10Pr + c))
                                          )
-                                       / (1. + pow((log10Pr + c)/(n - d * (log10Pr + c)),2))
+                                       / (1. + ant_pow((log10Pr + c)/(n - d * (log10Pr + c)),2))
                                     );
     VectorStateType dlogF_dX = Antioch::zero_clone(molar_densities);
     for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
       {//dlogF_dX = - logF^2/log(Fcent) * dlog10Pr_dX * (1 - 1/(n - d * (log10Pr + c))) * (log10Pr + c)
-        dlogF_dX[ip] = -pow(logF,2)/logFcent * dlog10Pr_dX[ip] *(1. - 1./(n - d * (log10Pr + c))) * (log10Pr + c);
+        dlogF_dX[ip] = - ant_pow(logF,2)/logFcent * dlog10Pr_dX[ip] *(1. - 1./(n - d * (log10Pr + c))) * (log10Pr + c);
       }
 
-    F = exp(logF);
+    F = ant_exp(logF);
     dF_dT = F * dlogF_dT;
     for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
       {//dF_dX =  F * dlogF_dX

@@ -135,16 +135,17 @@ int tester()
         break;
       }
     }
-    rate_exact = k0 / (1./M + k0/kinf);
-    derive_exact = rate_exact * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + dkinf_dT/(pow(kinf,2)/M + k0*kinf));
+    rate_exact = k0 / (1.L/M + k0/kinf);
+    derive_exact = rate_exact * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + k0 * dkinf_dT/(pow(kinf,2)/M + k0*kinf));
                   
     for(unsigned int i = 0; i < n_species; i++)
     {
       derive_dX_exact[i] = rate_exact/(M + pow(M,2)*k0/kinf);
     }
 
-    Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> > * fall_reaction = 
-        new Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> >(n_species,equation,true,Antioch::ReactionType::LINDEMANN_FALLOFF,kin_mod);
+    Antioch::FalloffReaction<Scalar,Antioch::LindemannFalloff<Scalar> > * fall_reaction = 
+        new Antioch::FalloffReaction<Scalar,Antioch::LindemannFalloff<Scalar> >(n_species,equation,Antioch::ReactionType::LINDEMANN_FALLOFF,kin_mod);
+
     fall_reaction->add_forward_rate(rate_kinetics1);
     fall_reaction->add_forward_rate(rate_kinetics2);
     Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
@@ -163,7 +164,9 @@ int tester()
                     << "Kinetics model (see enum) " << kin_mod << std::endl
                     << "species " << i << std::endl
                     << "drate_dc(T) = " << drate_dx[i] << std::endl
-                    << "drate_dc_exact = " << derive_dX_exact[i] << std::endl;
+                    << "drate_dc_exact = " << derive_dX_exact[i] << std::endl
+                    << "relative error = " << abs((drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i]) << std::endl
+                    << "tolerance = " << tol << std::endl;
           return_flag = 1;
       }
     }
@@ -174,7 +177,9 @@ int tester()
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate1 << std::endl
-                  << "rate_exact = " << rate_exact << std::endl;
+                  << "rate_exact = " << rate_exact << std::endl
+                  << "relative error = " << abs((rate1 - rate_exact)/rate_exact) << std::endl
+                  << "tolerance = " << tol << std::endl;
 
         return_flag = 1;
       }
@@ -185,7 +190,9 @@ int tester()
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate << std::endl
-                  << "rate_exact = " << rate_exact << std::endl;
+                  << "rate_exact = " << rate_exact << std::endl
+                  << "relative error = " << abs((rate - rate_exact)/rate_exact) << std::endl
+                  << "tolerance = " << tol << std::endl;
 
         return_flag = 1;
       }
@@ -196,10 +203,13 @@ int tester()
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "drate_dT(T) = " << drate_dT << std::endl
-                  << "derive_exact = " << derive_exact << std::endl;
+                  << "derive_exact = " << derive_exact << std::endl
+                  << "relative error = " << abs((drate_dT - derive_exact)/derive_exact) << std::endl
+                  << "tolerance = " << tol << std::endl;
 
         return_flag = 1;
       }
+
     delete fall_reaction;
     if(return_flag)return return_flag;
     }
