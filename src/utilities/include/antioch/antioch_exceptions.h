@@ -80,6 +80,17 @@ namespace Antioch
     {}
   };
 
+  /*!
+   * A class representing error in units
+   */
+  class UnitError : public std::runtime_error
+  {
+  public:
+    UnitError(const std::string &description) 
+      : std::runtime_error (description)
+    {}
+  };
+
 } // end namespace Antioch
 
 #define ANTIOCH_THROW(e) do { throw e; } while (0)

@@ -43,6 +43,7 @@ check_PROGRAMS += threebody_process_unit
 check_PROGRAMS += lindemann_falloff_unit
 check_PROGRAMS += troe_falloff_unit
 check_PROGRAMS += parsing_xml
+check_PROGRAMS += units_unit
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -50,6 +51,7 @@ endif
 
 AM_CPPFLAGS  = 
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/unit/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
@@ -104,6 +106,7 @@ threebody_process_unit_SOURCES = threebody_process_unit.C
 lindemann_falloff_unit_SOURCES = lindemann_falloff_unit.C
 troe_falloff_unit_SOURCES = troe_falloff_unit.C
 parsing_xml_SOURCES = parsing_xml.C
+units_unit_SOURCES = units_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -151,6 +154,7 @@ TESTS += threebody_process_unit
 TESTS += lindemann_falloff_unit
 TESTS += troe_falloff_unit
 TESTS += parsing_xml.sh
+TESTS += units_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
