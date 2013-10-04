@@ -71,21 +71,31 @@ namespace Antioch
   //!A single reaction mechanism. 
   /*!\class Reaction
    *
+   * A reaction is characterized by the rate constant \f$k(T,[M])\f$, which can
+   * be decomposed into a chemical process and a kinetics model:
+   * \f[
+   *  k(T,[M]) = \chi([M],\alpha(T))
+   * \f]
+   * with \f$\chi\f$ the chemical process and \f$\alpha\f$ the kinetics model.
+   *
    This virtual base is derived for the following processes:
-   - elementary process,
-   - duplicate process,
-   - falloff processes with:
-   - Lindemann falloff,
-   - Troe falloff.
+   - elementary process (ElementaryReaction),
+   - duplicate process (DuplicateReaction),
+   - three body process (ThreeBodyReaction)
+   - falloff processes (FalloffReaction) with:
+      - Lindemann falloff (LindemannFalloff),
+      - Troe falloff (TroeFalloff).
+
    This class encapsulates a kinetics model.  The choosable kinetics models are
-   - Hercourt Hessen \f$\alpha(T) = A T^\beta\f$
-   - Berthelot \f$\alpha(T) = A \exp\left(D T\right)\f$
-   - Arrhenius \f$\alpha(T) = A \exp\left(-\frac{E_a}{T}\right)\f$
-   - Berthelot Hercourt Hessen \f$\alpha(T) = A T^\beta \exp\left(D T\right)\f$
-   - Kooij \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T}\right)\f$
-   - Van't Hoff \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T} + D T\right)\f$
+   - Hercourt Hessen (HercourtEssenRate),
+   - Berthelot  (BerthelotRate),
+   - Arrhenius  (ArrheniusRate),
+   - Berthelot Hercourt Hessen  (BerthelotHercourtEssenRate),
+   - Kooij, or modified Arrhenius  (KooijRate),
+   - Van't Hoff  (VantHoffRate).
+
    All reactions are assumed to be reversible. 
-   By default, we choose an elementary process with a Kooij equation.
+   By default, we choose an ElementaryReaction with a KooijRate kinetics model.
   */
   template<typename CoeffType=double>
   class Reaction

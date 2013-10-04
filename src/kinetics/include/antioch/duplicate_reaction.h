@@ -35,14 +35,26 @@
 namespace Antioch
 {
   //!A single reaction mechanism. 
-  /*!
+  /*!\class DuplicateReaction
+ *
     This class encapsulates a duplicate reaction process. A duplicate process
     rate constant is defined by the equation
-    \f[k(T,[M]) = \sum_i\alpha_i(T)\f]
-    with \f$\alpha_i(T)\f$ being the \f$ith\f$ kinetics model (see base class Reaction), and \f$[M]\f$
+    \f[
+        k(T,[M]) = \sum_n\alpha_n(T)
+    \f]
+    with \f$\alpha_i(T)\f$ being the \f$ith\f$ kinetics model (see base classes Reaction and KineticsType), and \f$[M]\f$
     the mixture concentration (or pressure, it's equivalent, \f$[M] = \frac{P}{\mathrm{R}T}\f$
-    in ideal gas model).  It is assumed that all the \f$\alpha_i\f$ are the same kinetisc model.
-    All reactions are assumed to be reversible. By default, the kinetics model used is the Kooij equation.
+    in an ideal gas model).  It is assumed that all the \f$\alpha_i\f$ are the same kinetics model.
+    All reactions are assumed to be reversible. By default, the kinetics model used is the KooijRate.
+
+    We have:
+    \f[
+        \begin{split}
+           \frac{\partial k(T,[M])}{\partial T}   & = \sum_n\frac{\partial \alpha_n(T)}{\partial T} \\[10pt]
+           \frac{\partial k(T,[M])}{\partial c_i} & = 0
+        \end{split}
+    \f]
+    with \f$c_i\f$ the concentration of species \f$i\f$.
   */
   template <typename CoeffType=double>
   class DuplicateReaction: public Reaction<CoeffType>
