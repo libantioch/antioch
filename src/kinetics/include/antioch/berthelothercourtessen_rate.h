@@ -36,9 +36,18 @@
 namespace Antioch
 {
   //! Berthelot Hercourt-Essen rate equation.
-  /*!
-   * Berthelot Hercourt-Essen rate equation.  Computes rates of the form
-   * \f$ C_f\times T^\eta\times \exp(D*T) \f$.
+  /*!\class BerthelotHercourtEssenRate
+ *
+   * The Berthelot Hercourt Essen kinetics model is of the form:
+   * \f[
+   *    \alpha(T) =  A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta  \exp\left(D T\right) 
+   * \f]
+   * thus
+   * \f[
+   *    \frac{\partial \alpha(T)}{\partial T} = \alpha(T) \left(\frac{\beta}{T} + D\right)
+   * \f]
+   *
+   * Internally, we use the reduced temperature \f$t = \frac{T}{\mathrm{T_\text{ref}}}\f$.
    */
   template<typename CoeffType=double>
   class BerthelotHercourtEssenRate: public KineticsType<CoeffType>

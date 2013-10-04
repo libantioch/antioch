@@ -1,0 +1,689 @@
+<?xml version="1.0"?>
+<!-- Reaction rate parameters from: -->
+<!-- Park, Chul. "Review of Chemical-Kinetic Problems of Future NASA Missions, I : Earth Entries." -->
+<!-- AIAA Journal of Thermophysics and Heat Transfer, Vol. 7, No. 3, July-Sept 1993, pp. 385-397. -->
+
+<!-- park_jaffe_partridge_JTHT_2001 - Park, Jaffe, Partridge "Chemical-Kinetic Parameters of Hyperbolic Earth Entry," JTHT, Vol 15, No 1, pp 76-90, 2001. -->
+<!-- Olynick_Chen_Tauber_SRC_Sizing - Olynick, Chen, Tauber, "Forebody TPS Sizing with Radiation and Ablation for the Stardust Sample Return Capsule," AIAA-1997-2474  -->
+
+<ctml>
+  <validate reactions="yes" species="yes"/>
+
+  <!-- phase air5sp     -->
+  <phase dim="3" id="air5sp">
+    <elementArray datasrc="elements.xml">N O</elementArray>
+    <speciesArray datasrc="#FINS_r13324">N2 O2 NO N O</speciesArray>
+    <reactionArray datasrc="#park_jaffe_partridge_JTHT_2001">
+      <skip species="undeclared"/>
+    </reactionArray>
+    <state>
+      <temperature units="K">300.0</temperature>
+      <pressure units="Pa">101325.0</pressure>
+      <moleFractions>O2:0.22, N2:0.78</moleFractions>
+    </state>
+    <thermo model="IdealGas"/>
+    <kinetics model="GasKinetics"/>
+    <transport model="Pecos"/>
+  </phase>
+
+
+  <!-- park_jaffe_partridge_JTHT_2001 - Park, Jaffe, Partridge "Chemical-Kinetic Parameters of Hyperbolic Earth Entry," JTHT, Vol 15, No 1, pp 76-90, 2001. -->
+  <reactionData id="park_jaffe_partridge_JTHT_2001">
+
+<!--Elementary reactions-->
+    <!-- reaction 0001    -->
+    <reaction reversible="yes" type="Elementary" id="0001">
+      <equation>N2 [=] 2 N </equation>
+      <rateCoeff>
+        <HercourtEssen>
+           <A>7.e+18</A>
+           <b>-1.6</b>
+        </HercourtEssen>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
+    <!-- reaction 0002    -->
+    <reaction reversible="yes" type="Elementary" id="0002">
+      <equation>O2 [=] 2 O </equation>
+      <rateCoeff>
+        <Berthelot>
+           <A>2.e+18</A>
+           <D>-5e-3</D>
+        </Berthelot>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
+    <!-- reaction 0003    -->
+    <reaction reversible="yes" type="Elementary" id="0003">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0004    -->
+    <reaction reversible="yes" id="0004">
+      <equation>N2 + O [=] NO + N</equation>
+      <rateCoeff>
+        <BerthelotHercourtEssen>
+           <A>5.7e+9</A>
+           <b>0.42</b>
+           <D>-5e-3</D>
+        </BerthelotHercourtEssen>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0005    -->
+    <reaction reversible="yes" id="0005">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>8.4e+09</A>
+           <b>0.40</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+    
+    <!-- reaction 0006    -->
+    <reaction reversible="yes" type="Elementary" id="0006">
+      <equation>C2 [=] 2 C </equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>3.7e+11</A>
+           <b>-0.42</b>
+           <E units="cal/mol">138812.8</E>
+        </ModifiedArrhenius>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
+    <!-- reaction 0007    -->
+    <reaction reversible="yes" type="Elementary" id="0007">
+      <equation>CN [=] C + N </equation>
+      <rateCoeff>
+        <VantHoff>
+           <A>2.5e+11</A>
+           <b>0.40</b>
+           <D>0.050</D>
+           <E units="cal/mol">174240.9</E>
+        </VantHoff>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+
+<!--Duplicate reactions-->
+    <!-- reaction 0008    -->
+    <reaction reversible="yes" type="Duplicate" id="0008">
+      <equation>N2 [=] 2 N </equation>
+      <rateCoeff>
+        <HercourtEssen>
+           <A>7.e+18</A>
+           <b>-1.6</b>
+        </HercourtEssen>
+        <HercourtEssen>
+           <A>5.e+17</A>
+           <b>0.5</b>
+        </HercourtEssen>
+        <HercourtEssen>
+           <A>3.e+18</A>
+           <b>-0.6</b>
+        </HercourtEssen>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
+    <!-- reaction 0009    -->
+    <reaction reversible="yes" type="Duplicate" id="0009">
+      <equation>O2 [=] 2 O </equation>
+      <rateCoeff>
+        <Berthelot>
+           <A>2.e+18</A>
+           <D>-5e-2</D>
+        </Berthelot>
+        <Berthelot>
+           <A>2.e+16</A>
+           <D>0.003</D>
+        </Berthelot>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
+    <!-- reaction 0010    -->
+    <reaction reversible="yes" type="Duplicate" id="0010">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>3.5e+10</A>
+           <E units="cal/mol">1943.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>1.5e+8</A>
+           <E units="cal/mol">149.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>5.5e+8</A>
+           <E units="cal/mol">943.0</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0011    -->
+    <reaction reversible="yes" type="Duplicate" id="0011">
+      <equation>N2 + O [=] NO + N</equation>
+      <rateCoeff>
+        <BerthelotHercourtEssen>
+           <A>5.7e+9</A>
+           <b>0.42</b>
+           <D>-5e-3</D>
+        </BerthelotHercourtEssen>
+        <BerthelotHercourtEssen>
+           <A>7e+7</A>
+           <b>0.5</b>
+           <D>2.5e-5</D>
+        </BerthelotHercourtEssen>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0012    -->
+    <reaction reversible="yes" type="Duplicate" id="0012">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>8.4e+09</A>
+           <b>0.40</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+        <Kooij>
+           <A>4e+07</A>
+           <b>0.50</b>
+           <E units="cal/mol">40500.0</E>
+        </Kooij>
+        <Kooij>
+           <A>5e+10</A>
+           <b>0.10</b>
+           <E units="cal/mol">15000.0</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+    
+    <!-- reaction 0013    -->
+    <reaction reversible="yes" type="Duplicate" id="0013">
+      <equation>C2 [=] 2 C </equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>3.7e+11</A>
+           <b>-0.42</b>
+           <E units="cal/mol">138812.8</E>
+        </ModifiedArrhenius>
+        <ModifiedArrhenius>
+           <A>5.0e+10</A>
+           <b>1.32</b>
+           <E units="cal/mol">150500.8</E>
+        </ModifiedArrhenius>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
+    <!-- reaction 0014    -->
+    <reaction reversible="yes" type="Duplicate" id="0014">
+      <equation>CN [=] C + N </equation>
+      <rateCoeff>
+        <VantHoff>
+           <A>2.5e+11</A>
+           <b>0.40</b>
+           <D>-5e-3</D>
+           <E units="cal/mol">174240.9</E>
+        </VantHoff>
+        <VantHoff>
+           <A>5e+10</A>
+           <b>0.50</b>
+           <D>-1.5e-2</D>
+           <E units="cal/mol">4240.9</E>
+        </VantHoff>
+        <VantHoff>
+           <A>3.2e+10</A>
+           <b>1.20</b>
+           <D>-2.5e-5</D>
+           <E units="cal/mol">174.9</E>
+        </VantHoff>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+
+<!-- ThreeBody -->
+    <!-- reaction 0014    -->
+    <reaction reversible="yes" type="ThreeBody" id="0014">
+      <equation>N2 + M [=] 2 N + M </equation>
+      <rateCoeff>
+        <HercourtEssen>
+           <A>7.e+18</A>
+           <b>-1.6</b>
+        </HercourtEssen>
+        <efficiencies default="1.0">N:4.2857 O:4.2857 </efficiencies>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
+    <!-- reaction 0015    -->
+    <reaction reversible="yes" type="ThreeBody" id="0015">
+      <equation>O2 + M [=] 2 O + M </equation>
+      <rateCoeff>
+        <Berthelot>
+           <A>2.e+18</A>
+           <D>-5e-3</D>
+        </Berthelot>
+        <efficiencies default="1.0">N:5.0 O:5.0</efficiencies>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
+    <!-- reaction 0016    -->
+    <reaction reversible="yes" type="ThreeBody" id="0016">
+      <equation>NO + M [=] N + O + M </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <efficiencies default="1.0">NO:22 N:22 O:22</efficiencies>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0017    -->
+    <reaction reversible="yes" type="ThreeBody" id="0017">
+      <equation>N2 + O + M [=] NO + N + M</equation>
+      <rateCoeff>
+        <BerthelotHercourtEssen>
+           <A>5.7e+9</A>
+           <b>0.42</b>
+           <D>-5e-3</D>
+        </BerthelotHercourtEssen>
+        <efficiencies default="1.0">NO:22 N:22 O:22</efficiencies>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0018    -->
+    <reaction reversible="yes" type="ThreeBody" id="0018">
+      <equation>NO + O + M [=] O2 + N + M</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>8.4e+09</A>
+           <b>0.40</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+        <efficiencies default="1.0">NO:22 N:22 O:22</efficiencies>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+    
+    <!-- reaction 0019    -->
+    <reaction reversible="yes" type="ThreeBody" id="0019">
+      <equation>C2 + M [=] 2 C + M </equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>3.7e+11</A>
+           <b>-0.42</b>
+           <E units="cal/mol">138812.8</E>
+        </ModifiedArrhenius>
+        <efficiencies default="1.0"></efficiencies>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
+    <!-- reaction 0020    -->
+    <reaction reversible="yes" type="ThreeBody" id="0020">
+      <equation>CN + M [=] C + N + M </equation>
+      <rateCoeff>
+        <VantHoff>
+           <A>2.5e+11</A>
+           <b>0.40</b>
+           <D>0.005</D>
+           <E>729372.4</E>
+        </VantHoff>
+        <efficiencies default="1.0"></efficiencies>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+
+<!-- Lindemann Falloff -->
+    <!-- reaction 0021    -->
+    <reaction reversible="yes" type="LindemannFalloff" id="0021">
+      <equation>N2 [=] 2 N </equation>
+      <rateCoeff>
+        <HercourtEssen>
+           <A>7.e+18</A>
+           <b>-1.6</b>
+        </HercourtEssen>
+        <HercourtEssen>
+           <A>5.e+15</A>
+           <b>0.5</b>
+        </HercourtEssen>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
+    <!-- reaction 0022    -->
+    <reaction reversible="yes" type="LindemannFalloff" id="0022">
+      <equation>O2 [=] 2 O </equation>
+      <rateCoeff>
+        <Berthelot>
+           <A>2.e+18</A>
+           <D>-5e-3</D>
+        </Berthelot>
+        <Berthelot name="k0">
+           <A>5.e+17</A>
+           <D>-2.5e-5</D>
+        </Berthelot>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
+    <!-- reaction 0023    -->
+    <reaction reversible="yes" type="LindemannFalloff" id="0023">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>3e+15</A>
+           <E units="cal/mol">200000.0</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0024    -->
+    <reaction reversible="yes" type="LindemannFalloff" id="0024">
+      <equation>N2 + O [=] NO + N</equation>
+      <rateCoeff>
+        <BerthelotHercourtEssen>
+           <A>5.7e+9</A>
+           <b>-0.42</b>
+           <D>-5e-3</D>
+        </BerthelotHercourtEssen>
+        <BerthelotHercourtEssen name="k0">
+           <A>5e+9</A>
+           <b>0.6</b>
+           <D>-5e-4</D>
+        </BerthelotHercourtEssen>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0025    -->
+    <reaction reversible="yes" type="LindemannFalloff" id="0025">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>8.4e+09</A>
+           <b>0.40</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+        <Kooij>
+           <A>8.4e+05</A>
+           <b>0.02</b>
+           <E units="cal/mol">3526.0</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+    
+    <!-- reaction 0026    -->
+    <reaction reversible="yes" type="LindemannFalloff" id="0026">
+      <equation>C2 [=] 2 C </equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>3.7e+11</A>
+           <b>-0.42</b>
+           <E units="cal/mol">138812.8</E>
+        </ModifiedArrhenius>
+        <ModifiedArrhenius>
+           <A>3.7e+12</A>
+           <b>-0.52</b>
+           <E units="cal/mol">135000.8</E>
+        </ModifiedArrhenius>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
+    <!-- reaction 0027    -->
+    <reaction reversible="yes" type="LindemannFalloff" id="0027">
+      <equation>CN [=] C + N </equation>
+      <rateCoeff>
+        <VantHoff>
+           <A>2.5e+11</A>
+           <b>0.40</b>
+           <D>-0.005</D>
+           <E units="cal/mol">174240.9</E>
+        </VantHoff>
+        <VantHoff name="k0">
+           <A>5e+10</A>
+           <b>-0.10</b>
+           <D>1.5e-3</D>
+           <E units="cal/mol">150240.9</E>
+        </VantHoff>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+
+<!-- Troe Falloff -->
+    <!-- reaction 0028    -->
+    <reaction reversible="yes" type="TroeFalloff" id="0028">
+      <equation>N2 [=] 2 N </equation>
+      <rateCoeff>
+        <HercourtEssen>
+           <A>7.e+18</A>
+           <b>-1.6</b>
+        </HercourtEssen>
+        <HercourtEssen>
+           <A>5.e+15</A>
+           <b>0.5</b>
+        </HercourtEssen>
+        <Troe>
+          <alpha> 0.562</alpha> 
+          <T1> 5836 </T1> 
+          <T2> 8552 </T2> 
+          <T3> 91   </T3> 
+        </Troe>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
+    <!-- reaction 0029    -->
+    <reaction reversible="yes" type="TroeFalloff" id="0029">
+      <equation>O2 [=] 2 O </equation>
+      <rateCoeff>
+        <Berthelot>
+           <A>2.e+18</A>
+           <D>-5e-3</D>
+        </Berthelot>
+        <Berthelot name="k0">
+           <A>5.e+17</A>
+           <D>-2.5e-5</D>
+        </Berthelot>
+        <Troe>
+          <alpha> 0.562</alpha> 
+          <T1> 5836 </T1> 
+          <T2> 8552 </T2> 
+          <T3> 91   </T3> 
+        </Troe>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
+    <!-- reaction 0030    -->
+    <reaction reversible="yes" type="TroeFalloff" id="0030">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>3e+15</A>
+           <E units="cal/mol">200000.0</E>
+        </Arrhenius>
+        <Troe>
+          <alpha> 0.562</alpha> 
+          <T1> 5836 </T1> 
+          <T2> 8552 </T2> 
+          <T3> 91   </T3> 
+        </Troe>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0031    -->
+    <reaction reversible="yes" type="TroeFalloff" id="0031">
+      <equation>N2 + O [=] NO + N</equation>
+      <rateCoeff>
+        <BerthelotHercourtEssen>
+           <A>5.7e+9</A>
+           <b>-0.42</b>
+           <D>-5e-3</D>
+        </BerthelotHercourtEssen>
+        <BerthelotHercourtEssen name="k0">
+           <A>5e+9</A>
+           <b>0.6</b>
+           <D>-5e-4</D>
+        </BerthelotHercourtEssen>
+        <Troe>
+          <alpha> 0.562</alpha> 
+          <T1> 5836 </T1> 
+          <T2> 8552 </T2> 
+          <T3> 91   </T3> 
+        </Troe>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0032    -->
+    <reaction reversible="yes" type="TroeFalloff" id="0032">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>8.4e+09</A>
+           <b>0.40</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+        <Kooij>
+           <A>8.4e+05</A>
+           <b>0.02</b>
+           <E units="cal/mol">3526.0</E>
+        </Kooij>
+        <Troe>
+          <alpha> 0.562</alpha> 
+          <T1> 5836 </T1> 
+          <T2> 8552 </T2> 
+          <T3> 91   </T3> 
+        </Troe>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+    
+    <!-- reaction 0033    -->
+    <reaction reversible="yes" type="TroeFalloff" id="0033">
+      <equation>C2 [=] 2 C </equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>3.7e+11</A>
+           <b>-0.42</b>
+           <E units="cal/mol">138812.8</E>
+        </ModifiedArrhenius>
+        <ModifiedArrhenius>
+           <A>3.7e+12</A>
+           <b>-0.52</b>
+           <E units="cal/mol">135000.8</E>
+        </ModifiedArrhenius>
+        <Troe>
+          <alpha> 0.562</alpha> 
+          <T1> 5836 </T1> 
+          <T2> 8552 </T2> 
+          <T3> 91   </T3> 
+        </Troe>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
+    <!-- reaction 0034    -->
+    <reaction reversible="yes" type="TroeFalloff" id="0034">
+      <equation>CN [=] C + N </equation>
+      <rateCoeff>
+        <VantHoff>
+           <A>2.5e+11</A>
+           <b>0.40</b>
+           <D>-0.005</D>
+           <E units="cal/mol">174240.9</E>
+        </VantHoff>
+        <VantHoff name="k0">
+           <A>5e+10</A>
+           <b>-0.10</b>
+           <D>1.5e-3</D>
+           <E units="cal/mol">150240.9</E>
+        </VantHoff>
+        <Troe>
+          <alpha> 0.562</alpha> 
+          <T1> 5836 </T1> 
+          <T2> 8552 </T2> 
+          <T3> 91   </T3> 
+        </Troe>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+  </reactionData>
+</ctml>

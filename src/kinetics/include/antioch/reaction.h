@@ -71,21 +71,31 @@ namespace Antioch
   //!A single reaction mechanism. 
   /*!\class Reaction
    *
+   * A reaction is characterized by the rate constant \f$k(T,[M])\f$, which can
+   * be decomposed into a chemical process and a kinetics model:
+   * \f[
+   *  k(T,[M]) = \chi([M],\alpha(T))
+   * \f]
+   * with \f$\chi\f$ the chemical process and \f$\alpha\f$ the kinetics model.
+   *
    This virtual base is derived for the following processes:
-   - elementary process,
-   - duplicate process,
-   - falloff processes with:
-   - Lindemann falloff,
-   - Troe falloff.
+   - elementary process (ElementaryReaction),
+   - duplicate process (DuplicateReaction),
+   - three body process (ThreeBodyReaction)
+   - falloff processes (FalloffReaction) with:
+      - Lindemann falloff (LindemannFalloff),
+      - Troe falloff (TroeFalloff).
+
    This class encapsulates a kinetics model.  The choosable kinetics models are
-   - Hercourt Hessen \f$\alpha(T) = A T^\beta\f$
-   - Berthelot \f$\alpha(T) = A \exp\left(D T\right)\f$
-   - Arrhenius \f$\alpha(T) = A \exp\left(-\frac{E_a}{T}\right)\f$
-   - Berthelot Hercourt Hessen \f$\alpha(T) = A T^\beta \exp\left(D T\right)\f$
-   - Kooij \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T}\right)\f$
-   - Van't Hoff \f$\alpha(T) = A T^\beta \exp\left(- \frac{E_a}{T} + D T\right)\f$
+   - Hercourt Hessen (HercourtEssenRate),
+   - Berthelot  (BerthelotRate),
+   - Arrhenius  (ArrheniusRate),
+   - Berthelot Hercourt Hessen  (BerthelotHercourtEssenRate),
+   - Kooij, or modified Arrhenius  (KooijRate),
+   - Van't Hoff  (VantHoffRate).
+
    All reactions are assumed to be reversible. 
-   By default, we choose an elementary process with a Kooij equation.
+   By default, we choose an ElementaryReaction with a KooijRate kinetics model.
   */
   template<typename CoeffType=double>
   class Reaction
@@ -223,8 +233,14 @@ namespace Antioch
     //! Return writeable reference to the forward rate object
     KineticsType<CoeffType>& forward_rate(unsigned int ir = 0);
 
-    //! Return const reference to the forward rate object
+    //! Add a forward rate object
     void add_forward_rate(KineticsType<CoeffType> *rate);
+
+    //! Swap two forward rates object
+    void swap_forward_rates(unsigned int irate, unsigned int jrate);
+
+    //! Return the number of rate constant objects
+    unsigned int n_rate_constants() const;
 
     //! Formatted print, by default to \p std::cout.
     void print(std::ostream& os = std::cout) const;
@@ -318,6 +334,27 @@ namespace Antioch
   void Reaction<CoeffType>::add_forward_rate(KineticsType<CoeffType> *rate)
   {
     _forward_rate.push_back(rate);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  unsigned int Reaction<CoeffType>::n_rate_constants() const
+  {
+    return _forward_rate.size();
+  }
+    
+  template<typename CoeffType>
+  inline
+  void Reaction<CoeffType>::swap_forward_rates(unsigned int irate, unsigned int jrate)
+  {
+    antioch_assert_less(irate,_forward_rate.size());
+    antioch_assert_less(jrate,_forward_rate.size());
+    
+    KineticsType<CoeffType>* rate_tmp = _forward_rate[jrate];
+    _forward_rate[jrate] = _forward_rate[irate];
+    _forward_rate[irate] = rate_tmp;
+
     return;
   }
 
@@ -452,6 +489,7 @@ namespace Antioch
   inline
   const KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir) const
   {
+    antioch_assert_less(ir,_forward_rate.size());
     return *_forward_rate[ir];
   }
 
@@ -459,6 +497,7 @@ namespace Antioch
   inline
   KineticsType<CoeffType>& Reaction<CoeffType>::forward_rate(unsigned int ir)
   {
+    antioch_assert_less(ir,_forward_rate.size());
     return *_forward_rate[ir];
   }
 

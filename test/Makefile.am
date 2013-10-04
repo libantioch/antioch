@@ -43,6 +43,7 @@ check_PROGRAMS += threebody_process_unit
 check_PROGRAMS += lindemann_falloff_unit
 check_PROGRAMS += troe_falloff_unit
 check_PROGRAMS += photochemical_rate_unit
+check_PROGRAMS += parsing_xml
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -104,6 +105,7 @@ threebody_process_unit_SOURCES = threebody_process_unit.C
 lindemann_falloff_unit_SOURCES = lindemann_falloff_unit.C
 troe_falloff_unit_SOURCES = troe_falloff_unit.C
 photochemical_rate_unit_SOURCES = photochemical_rate_unit.C
+parsing_xml_SOURCES = parsing_xml.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -151,6 +153,7 @@ TESTS += threebody_process_unit
 TESTS += lindemann_falloff_unit
 TESTS += troe_falloff_unit
 TESTS += photochemical_rate_unit.sh
+TESTS += parsing_xml.sh
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen

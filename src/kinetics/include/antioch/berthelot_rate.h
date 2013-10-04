@@ -36,9 +36,16 @@
 namespace Antioch
 {
   //! Berthelot rate equation.
-  /*!
-   * Berthelot rate equation.  Computes rates of the form
-   * \f$ C_f\times \exp(D*T) \f$. 
+  /*!\class BerthelotRate
+ *
+   * The Berthelot kinetics model is of the form:
+   * \f[
+   *    \alpha(T) =  A \exp\left(D T\right)
+   * \f] 
+   * thus
+   * \f[
+   *    \frac{\partial\alpha(T)}{\partial T} = \alpha(T) D
+   * \f] 
    */
   template<typename CoeffType=double>
   class BerthelotRate:public KineticsType<CoeffType>

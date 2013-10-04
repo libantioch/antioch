@@ -179,7 +179,7 @@ int tester()
 
     rate_exact = k0 / (1.L/M + k0/kinf);
 
-    derive_exact = rate_exact * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + dkinf_dT/(kinf*(kinf/M + k0))) * F 
+    derive_exact = rate_exact * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + k0 * dkinf_dT/(kinf*(kinf/M + k0))) * F 
                  + dF_dT * rate_exact;
 
     for(unsigned int i = 0; i < n_species; i++)
