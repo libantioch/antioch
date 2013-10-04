@@ -31,6 +31,7 @@
 
 //C++
 #include <string>
+#include <vector>
 #include <iostream>
 
 namespace Antioch{
@@ -53,7 +54,7 @@ namespace Antioch{
   template <typename CoeffType>
   class VantHoffRate;
 
-  template <typename CoeffType>
+  template <typename CoeffType, typename VectorCoeffType>
   class PhotochemicalRate;
 
   /*!
@@ -163,7 +164,7 @@ namespace Antioch{
 
       case(KineticsModel::PHOTOCHEM):
         {
-          (static_cast<const PhotochemicalRate<CoeffType>*>(this))->rate();
+          return (static_cast<const PhotochemicalRate<CoeffType, std::vector<CoeffType> >*>(this))->rate();
         }
         break;
 
@@ -223,7 +224,7 @@ namespace Antioch{
 
       case(KineticsModel::PHOTOCHEM):
         {
-          (static_cast<const PhotochemicalRate<CoeffType>*>(this))->derivative();
+          return (static_cast<const PhotochemicalRate<CoeffType, std::vector<CoeffType> >*>(this))->derivative();
         }
         break;
 
@@ -283,7 +284,7 @@ namespace Antioch{
 
       case(KineticsModel::PHOTOCHEM):
         {
-          (static_cast<const PhotochemicalRate<CoeffType>*>(this))->rate_and_derivative(rate,drate_dT);
+          (static_cast<const PhotochemicalRate<CoeffType, std::vector<CoeffType> >*>(this))->rate_and_derivative(rate,drate_dT);
         }
         break;
 

@@ -80,7 +80,7 @@ namespace Antioch{
   inline
   PhotochemicalRate<CoeffType,VectorCoeffType>::PhotochemicalRate(const VectorCoeffType &cs, 
                                                                   const VectorCoeffType &lambda):
-    KineticsType<CoeffType>(KineticsModel::CONSTANT),
+    KineticsType<CoeffType>(KineticsModel::PHOTOCHEM),
     _cross_section(cs),
     _lambda_grid(lambda),
     _k(-1.)
@@ -91,7 +91,7 @@ namespace Antioch{
   template<typename CoeffType, typename VectorCoeffType>
   inline
   PhotochemicalRate<CoeffType,VectorCoeffType>::PhotochemicalRate():
-    KineticsType<CoeffType>(KineticsModel::CONSTANT),
+    KineticsType<CoeffType>(KineticsModel::PHOTOCHEM),
     _k(-1.)
   {
     return;
