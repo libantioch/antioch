@@ -68,13 +68,19 @@ int tester()
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
+  const Scalar Mm_N = 14.008e-3L;
+  const Scalar Mm_O = 16.000e-3L;
+  const Scalar Mm_N2 = 2.L * Mm_N;
+  const Scalar Mm_O2 = 2.L * Mm_O;
+  const Scalar Mm_NO = Mm_N + Mm_O;
+
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/Mm_N2;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/Mm_O2;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/Mm_N;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/Mm_O;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/Mm_NO;
 
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
 

@@ -64,6 +64,12 @@ bool test_zero(const Scalar val, const Scalar tol)
 template <typename Scalar>
 int test_cv_tr()
 {
+  const Scalar Mm_N  = 14.008e-3;   //in SI kg/mol
+  const Scalar Mm_O  = 16e-3;       //in SI kg/mol
+  const Scalar Mm_N2 = 2.L * Mm_N;  //in SI kg/mol
+  const Scalar Mm_O2 = 2.L * Mm_O;  //in SI kg/mol
+  const Scalar Mm_NO = Mm_O + Mm_N; //in SI kg/mol
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -88,11 +94,11 @@ int test_cv_tr()
 
   Scalar cv_tr_mix = 0.0;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>() / Mm_N2;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>() / Mm_O2;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()  / Mm_N;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()  / Mm_O;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>() / Mm_NO;
 
   int return_flag = 0;
 
@@ -212,6 +218,12 @@ int test_cv_vib()
 {
   using std::exp;
 
+  const Scalar Mm_N  = 14.008e-3;   //in SI kg/mol
+  const Scalar Mm_O  = 16e-3;       //in SI kg/mol
+  const Scalar Mm_N2 = 2.L * Mm_N;  //in SI kg/mol
+  const Scalar Mm_O2 = 2.L * Mm_O;  //in SI kg/mol
+  const Scalar Mm_NO = Mm_O + Mm_N; //in SI kg/mol
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -234,9 +246,9 @@ int test_cv_vib()
   mass_fractions[3] = 0.1;
   mass_fractions[4] = 0.1;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>() / Mm_N2;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>() / Mm_O2;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>() / Mm_NO;
 
   const Scalar th0_N2 = 3.39500e+03; // degeneracy = 1
   const Scalar th0_O2 = 2.23900e+03; // degeneracy = 1
@@ -401,6 +413,8 @@ template <typename Scalar>
 int test_cv_el()
 {
   using std::exp;
+  const Scalar Mm_O  = 16.e-3L;    // SI kg/mol
+  const Scalar Mm_O2 = 2.L * Mm_O; // SI kg/mol
 
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 2;
@@ -418,8 +432,8 @@ int test_cv_el()
   mass_fractions[0] = 0.9;
   mass_fractions[1] = 0.1;
 
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>() / Mm_O2;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()  / Mm_O;
 
   // Data taken from read_species_electronic_data_ascii_default
   unsigned int g_O[5] = {5, 3, 1, 5, 1};
@@ -440,7 +454,7 @@ int test_cv_el()
   // Te
   const Scalar Te = 1000.0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 7;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 8;
 
   Scalar cv_el_mix_true = 0.0;
 
