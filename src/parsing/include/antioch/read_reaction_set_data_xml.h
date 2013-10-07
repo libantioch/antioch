@@ -78,6 +78,27 @@ namespace Antioch
   *   \end{array}
   * \f]
   *
+  * To this, we consider the kinetics model (they're all included in the
+  * Van't Hoff equation):
+  * \f[
+  *   \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta\exp\left(-\frac{E_a}{\mathrm{R}T} + D T\right)
+  * \f]
+  *
+  * We derive from this all the tests and default units:
+  * \f[
+  *  \begin{array}{lcccc}\toprule
+  *                            & A                                           & \beta & E_a                & D \\\midrule
+  *   \text{Elementary}        & \unit{\left(m^3mol^{-1}\right)^{m-1}s^{-1}} & -     & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\
+  *   \text{Duplicate}         & \unit{\left(m^3mol^{-1}\right)^{m-1}s^{-1}} & -     & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\
+  *   \text{Three body}        & \unit{\left(m^3mol^{-1}\right)^{m-2}s^{-1}} & -     & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\
+  *   \text{Falloff}\: k_0     & \unit{\left(m^3mol^{-1}\right)^{m-2}s^{-1}} & -     & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\
+  *   \text{Falloff}\:k_\infty & \unit{\left(m^3mol^{-1}\right)^{m-1}s^{-1}} & -     & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\\bottomrule
+  *  \end{array}
+  * \f]
+  *
+  * Thus the reading is made in this fashion:
+  *   - read reactants and products, get \f$m\f$
+  *   - find default unit of \f$A\f$
   */
   template<class NumericType>
   void read_reaction_set_data_xml( const std::string& filename,
