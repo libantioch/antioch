@@ -72,6 +72,8 @@ namespace Antioch
 	in >> h_form;    // heat of formation at Ok (J/kg)
 	in >> n_tr_dofs; // number of translational/rotational DOFs
 	in >> charge;    // charge number
+
+        mol_wght *= 1e-3L; // to SI (kg/mol)
 	
 	// If we are still good, we have a valid set of thermodynamic
 	// data for this species. Otherwise, we read past end-of-file 
