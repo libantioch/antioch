@@ -167,13 +167,10 @@ namespace Antioch
             
         if(reaction->Attribute("reversible"))
         {
-          if (verbose) std::cout << "\n reversible: " << reaction->Attribute("reversible") << std::endl;
+          if (verbose) std::cout << "reversible: " << reaction->Attribute("reversible") << std::endl;
           if(std::string(reaction->Attribute("reversible")) == "no")reversible = false;
         }
 
-        // construct a Reaction object    
-        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),
-                                                                               reversible,typeReaction,kineticsModel);
 
         unsigned int imod(0);
         tinyxml2::XMLElement* rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
@@ -200,11 +197,10 @@ namespace Antioch
         kineticsModel = kin_keyword[models[imod]];
 
 
-        while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        // usually Kooij is called Arrhenius, check here
+        if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
         {
-
-          // usually Kooij is called Arrhenius, check here
-          if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
+          if(rate_constant->FirstChildElement("b"))
           {
             if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
             {
@@ -216,11 +212,22 @@ namespace Antioch
                          << "thanks and a good day to you, user." << std::endl;
             }
           }
+        }
 
+        // construct a Reaction object    
+        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),
+                                                                               reversible,typeReaction,kineticsModel);
+
+        while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        {
           if(verbose) 
             {
-              std::cout << " rate: " << models[imod] << " model\n"
-                        << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
+              std::cout << " rate: " << models[imod] << " model\n";
+              if(!rate_constant->FirstChildElement("A"))
+              {
+                 antioch_error();
+              }
+              std::cout << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
               if(rate_constant->FirstChildElement("b") != NULL)
               {
                   std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
@@ -465,6 +472,7 @@ namespace Antioch
                   }
               }
           }
+
         if(verbose) std::cout << "\n\n";
 
         if(relevant_reaction) 
