@@ -69,7 +69,7 @@ namespace Antioch
     
   public:
 
-    ArrheniusRate (const CoeffType Cf=0., const CoeffType Ea=0., const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
+    ArrheniusRate (const CoeffType Cf=0., const CoeffType Ea=0., const CoeffType rscale = Constants::R_universal<CoeffType>());
     ~ArrheniusRate();
     
     void set_Cf(     const CoeffType Cf );
