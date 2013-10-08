@@ -266,7 +266,7 @@ class Units{
  * Thus this method merely compares the power vectors, if they're equal
  * the units are homogeneous, if not, they're not.
  */
-        const bool is_homogeneous(const Units<T> &rhs)    const {return (power == rhs.get_power());}
+        const bool is_homogeneous(const Units<T> &rhs) const;
 /*!\brief Homogenity testing with a std::string.
  *
  * Testing homogeneity with a std::string needs to build
@@ -297,9 +297,9 @@ class Units{
  * given above. factor_to_some_unit(unit\f$_2\f$) will provide the factor \f$\frac{f_1}{f_2}\f$
  * while translator_to_some_unit(unit\f$_2\f$) will provide the translationnal term \f$\frac{t_1 - t_2}{f_2}\f$.
  */
-        T factor_to_some_unit(const Units<T> & target)  const;
+        T factor_to_some_unit(const Units<T> & target)     const;
 /*!\brief Calculates the factor to any given unit, uses factor_to_some_unit(const Units&).*/
-        T factor_to_some_unit(const std::string &target)         const {return factor_to_some_unit(Units<T>(target));}
+        T factor_to_some_unit(const std::string &target)    const;
 /*!\brief Calculates the translator to any given unit, see factor_to_some_unit(const Units&) for the equations.*/
         T translator_to_some_unit(const Units<T> & target)  const;
 /*!\brief Calculates the translator to any given unit, uses translator_to_some_unit(const Units&).*/
@@ -754,6 +754,12 @@ T Units<T>::factor_to_some_unit(const Units<T> &target) const
   }
 }
 
+template<typename T>
+T Units<T>::factor_to_some_unit(const std::string &target) const 
+{
+  return factor_to_some_unit(Units<T>(target));
+}
+
 template <typename T>
 T Units<T>::translator_to_some_unit(const Units<T> & target)  const
 {
@@ -868,6 +874,12 @@ int Units<T>::parse_power(std::string unit,int &nc) const
   if(ip == 0)antioch_unit_error("Invalid power found: " + unit);
 
   return ip;
+}
+
+template <typename T>
+const bool Units<T>::is_homogeneous(const Units<T> &rhs) const 
+{
+  return (power == rhs.get_power());
 }
 
 template <typename T>
