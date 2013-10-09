@@ -55,6 +55,9 @@ include_HEADERS += core/include/antioch/chemical_species.h
 include_HEADERS += core/include/antioch/chemical_mixture.h
 include_HEADERS += core/include/antioch/species_enum.h
 
+# particles_flux
+include_HEADERS += particles_flux/include/antioch/sigma_bin_converter.h
+
 # kinetics-kinetics models
 include_HEADERS += kinetics/include/antioch/kinetics_enum.h
 include_HEADERS += kinetics/include/antioch/kinetics_type.h
@@ -139,6 +142,7 @@ antioch_version_LDADD = libantioch.la
 #--------------------------------------
 AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/particles_flux/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
