@@ -164,9 +164,6 @@ namespace Antioch
             typeReaction = proc_keyword[reaction->Attribute("type")];
           }
             
-        // construct a Reaction object    
-        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
-
         unsigned int imod(0);
         tinyxml2::XMLElement* rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
         while(!rate_constant)
@@ -191,6 +188,8 @@ namespace Antioch
         }
         kineticsModel = kin_keyword[models[imod]];
 
+        // construct a Reaction object    
+        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
 
         while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
         {
