@@ -109,18 +109,6 @@ int tester(const std::string& testname)
 
       return_flag = 1;
     }
-  else
-    {
-      std::cout << "Error: Mismatch in " << testname << " rate derivatives." << std::endl
-                << std::setprecision(25)
-		<< "perturb =      " << perturb << std::endl
-		<< "dR_dEa =      " << dR_dEa << std::endl
-		<< "rate_DN_Ea' = " << rate_DN_Ea.derivatives() << std::endl;
-
-      return_flag = 1;
-    }
-
-
 
   return return_flag;
 }
