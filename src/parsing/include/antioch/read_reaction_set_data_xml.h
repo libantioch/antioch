@@ -233,24 +233,27 @@ namespace Antioch
               }
               if(rate_constant->FirstChildElement("lambda") != NULL)
               {
-                  std::cout << "   lambda: " << rate_constant->FirstChildElement("lambda")->GetText() << "\n";
+                  std::cout << "   lambda:\n" << rate_constant->FirstChildElement("lambda")->GetText() << "\n";
               }
               if(rate_constant->FirstChildElement("cross_section") != NULL)
               {
-                  std::cout << "   cross section: " << rate_constant->FirstChildElement("cross_section")->GetText() << "\n";
+                  std::cout << "   cross section:\n" << rate_constant->FirstChildElement("cross_section")->GetText() << "\n";
               }
             }
 
           // typically Cantera files list activation energy in cal/mol, but we want it in K.
           std::vector<NumericType> data;
-          data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()));
+          if(rate_constant->FirstChildElement("A") != NULL)
+          {
+            data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()));
+          }
           if(rate_constant->FirstChildElement("b") != NULL)
           {
              data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
-          }
-          if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
-          {
-             data.pop_back();
+            if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
+            {
+               data.pop_back();
+            }
           }
           if(rate_constant->FirstChildElement("E") != NULL)
           {
@@ -296,20 +299,24 @@ namespace Antioch
                           " ",
                           sigma,
                           /* include_empties = */ false );
+
+             data.clear();
              for(unsigned int ics = 0; ics < sigma.size(); ics++)
              {
                 data.push_back(std::atof(sigma[ics].c_str()));
              }
 
-             if(!rate_constant->FirstChildElement("lamdba"))
+             if(!rate_constant->FirstChildElement("lambda"))
              {
                 antioch_error();
              }
              std::vector<std::string> lambda;
+
              SplitString( std::string(rate_constant->FirstChildElement("lambda")->GetText()),
                           " ",
                           lambda,
                           /* include_empties = */ false );
+
              if(sigma.size() != lambda.size())
              {
                 antioch_error();
@@ -396,7 +403,7 @@ namespace Antioch
           reaction->FirstChildElement("rateCoeff")->FirstChildElement("Troe");
         if(troe)
         {
-std::cout << "0" << std::endl;
+
            antioch_assert_equal_to (ReactionType::TROE_FALLOFF, my_rxn->type());
            FalloffReaction<NumericType,TroeFalloff<NumericType> > *my_fall_rxn =
                 static_cast<FalloffReaction<NumericType,TroeFalloff<NumericType> > *> (my_rxn);
