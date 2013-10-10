@@ -55,7 +55,7 @@ namespace Antioch
     //used as inputs.  For scalar-valued inputs, "0" is a valid
     //example input.  For vector-valued inputs, an appropriately-sized
     //vector should be used.
-    KineticsEvaluator( const ReactionSet<CoeffType>& reaction_set,
+    KineticsEvaluator( ReactionSet<CoeffType>& reaction_set,
                        const StateType& example );
 
     ~KineticsEvaluator();
@@ -108,7 +108,7 @@ namespace Antioch
 
   protected:
 
-    const ReactionSet<CoeffType>& _reaction_set;
+    ReactionSet<CoeffType>& _reaction_set;
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
@@ -145,7 +145,7 @@ namespace Antioch
   template<typename CoeffType, typename StateType>
   inline
   KineticsEvaluator<CoeffType,StateType>::KineticsEvaluator
-  ( const ReactionSet<CoeffType>& reaction_set,
+  ( ReactionSet<CoeffType>& reaction_set,
     const StateType& example )
     : _reaction_set( reaction_set ),
       _chem_mixture( reaction_set.chemical_mixture() ),
@@ -188,6 +188,9 @@ namespace Antioch
     Antioch::set_zero(_net_reaction_rates);
 
     Antioch::set_zero(mole_sources);
+
+    // deal with any particle flux rate constant
+    this->_reaction_set.update_particle_flux_chemistry();
 
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates( T, molar_densities,
@@ -282,6 +285,9 @@ namespace Antioch
         /*! \todo Do we need to really initialize this? */
         Antioch::set_zero(_dnet_rate_dX_s[s]);
       }
+
+    // deal with any particle flux rate constant
+    this->_reaction_set.update_particle_flux_chemistry();
 
     // compute the requisite reaction rates
     this->_reaction_set.compute_reaction_rates_and_derivs( T, molar_densities, 

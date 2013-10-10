@@ -1,14 +1,31 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
+//
+// Antioch - A Gas Dynamics Thermochemistry Library
+//
+// Copyright (C) 2013 The PECOS Development Team
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the Version 2.1 GNU Lesser General
+// Public License as published by the Free Software Foundation.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc. 51 Franklin Street, Fifth Floor,
+// Boston, MA  02110-1301  USA
+//
 //-----------------------------------------------------------------------el-
 
 #ifndef ANTIOCH_SIGMA_BIN_MANAGER_H
 #define ANTIOCH_SIGMA_BIN_MANAGER_H
 
 //Antioch
-#include "antioch/vector_utils.h"
-
-//Planet
+#include "antioch/metaprogramming.h"
 
 //C++
 #include <vector>
@@ -23,7 +40,8 @@ class SigmaBinConverter
         SigmaBinConverter();
         ~SigmaBinConverter();
 
-        void y_on_custom_grid(const VectorCoeffType &x_old, const VectorCoeffType &y_old,  const VectorCoeffType &x_new);
+        void y_on_custom_grid(const VectorCoeffType &x_old, const VectorCoeffType &y_old, 
+                              const VectorCoeffType &x_new,       VectorCoeffType &y_new);
 
      private:
 };
@@ -57,12 +75,12 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
   unsigned int j(1);
   for(unsigned int i = ilow; i < x_custom.size() - 1; i++)//bin per bin, right stairs: y_old[i] from x_old[i] to x_old[i+1]
   {
-     while(x_old[j] < x[i]) //find lowest j / x_old[j] > x[i]
+     while(x_old[j] < x_custom[i]) //find lowest j / x_old[j] > x_custom[i]
      {
        j++;
       if(j >= x_old.size() - 1)return;
      }
-     typedef typename value_type<VectorCoeffType>::type CoeffType bin;
+     typename Antioch::value_type<VectorCoeffType>::type bin;
      Antioch::set_zero(bin);
 
 //here we are: x_old[j-1] =< x_custom[i] < x_old[j] with j-1 >= 0

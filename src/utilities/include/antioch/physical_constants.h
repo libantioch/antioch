@@ -53,6 +53,26 @@ namespace Antioch
       return 6.02214129e23L;
     }
 
+    /*!
+     * Planck's constant, m2.kg/s (J.s)
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType Planck_constant()
+    {
+      return 6.62606957e-34;
+    }
+
+    /*!
+     * light celerity, m/s
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType light_celerity()
+    {
+      return 2.99792458e8;
+    }
+
   } // end namespace Constants
 } // end namespace Antioch
 

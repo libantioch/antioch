@@ -57,6 +57,7 @@ include_HEADERS += core/include/antioch/species_enum.h
 
 # particles_flux
 include_HEADERS += particles_flux/include/antioch/sigma_bin_converter.h
+include_HEADERS += particles_flux/include/antioch/particle_flux.h
 
 # kinetics-kinetics models
 include_HEADERS += kinetics/include/antioch/kinetics_enum.h

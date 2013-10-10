@@ -25,22 +25,25 @@
 #define ANTIOCH_PHOTOCHEMICAL_RATE_H
 
 //Antioch
-#include "antioch/kinetics_enum.h"
+#include "antioch/metaprogramming.h"
 #include "antioch/sigma_bin_converter.h"
+#include "antioch/kinetics_type.h"
 
 //C++
 #include <vector>
+#include <string>
+#include <sstream>
 
 namespace Antioch{
 
   template<typename CoeffType, typename VectorCoeffType = std::vector<CoeffType> >
-  class PhotochemicalRate:public KineticsType<CoeffType>
+  class PhotochemicalRate:public KineticsType<CoeffType,VectorCoeffType>
   {
 
      private:
        VectorCoeffType _cross_section;
        VectorCoeffType _lambda_grid;
-       Coefftype _k;
+       CoeffType _k;
        SigmaBinConverter<VectorCoeffType> _converter;
 
      public:
@@ -59,17 +62,26 @@ namespace Antioch{
        void calculate_rate_constant(const VectorStateType &hv_flux, const VectorStateType &hv_lambda);
        
        //! \return the rate
-       CoeffType rate() const;
+       template <typename StateType>
+       ANTIOCH_AUTO(StateType) 
+       operator()(const StateType& T) const
+       ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
        //! \return the rate evaluated at \p T.
-       CoeffType operator() const;
+       template <typename StateType>
+       ANTIOCH_AUTO(StateType) 
+       rate(const StateType& T) const
+       ANTIOCH_AUTOFUNC(StateType, StateType(_k))
 
        //! \return the derivative with respect to temperature.
-       CoeffType derivative() const;
+       template <typename StateType>
+       ANTIOCH_AUTO(StateType) 
+       derivative( const StateType& T ) const
+       ANTIOCH_AUTOFUNC(StateType, Antioch::zero_clone(T))
 
        //! Simultaneously evaluate the rate and its derivative at \p T.
        template <typename StateType>
-       void rate_and_derivative(StateType& rate, StateType& drate_dT) const;
+       void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
        //! print equation
        const std::string numeric() const;
@@ -80,7 +92,7 @@ namespace Antioch{
   inline
   PhotochemicalRate<CoeffType,VectorCoeffType>::PhotochemicalRate(const VectorCoeffType &cs, 
                                                                   const VectorCoeffType &lambda):
-    KineticsType<CoeffType>(KineticsModel::PHOTOCHEM),
+    KineticsType<CoeffType,VectorCoeffType>(KineticsModel::PHOTOCHEM),
     _cross_section(cs),
     _lambda_grid(lambda),
     _k(-1.)
@@ -91,7 +103,7 @@ namespace Antioch{
   template<typename CoeffType, typename VectorCoeffType>
   inline
   PhotochemicalRate<CoeffType,VectorCoeffType>::PhotochemicalRate():
-    KineticsType<CoeffType>(KineticsModel::PHOTOCHEM),
+    KineticsType<CoeffType,VectorCoeffType>(KineticsModel::PHOTOCHEM),
     _k(-1.)
   {
     return;
@@ -129,7 +141,7 @@ namespace Antioch{
      antioch_assert_greater(_lambda_grid.size(),0);
 
      VectorCoeffType cross_section_on_hv;
-      _converter.y_on_custom_old_grid(_lambda_grid,_cross_section,hv_lambda,cross_section_on_hv);
+      _converter.y_on_custom_grid(_lambda_grid,_cross_section,hv_lambda,cross_section_on_hv);
       Antioch::set_zero(_k);
       for(unsigned int ibin = 0; ibin < hv_lambda.size(); ibin++)
       {
@@ -148,33 +160,13 @@ namespace Antioch{
     return os.str();
   }
 
-  template<typename CoeffType, typename VectorCoeffType>
-  inline
-  CoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::rate() const
-  {
-     return _k;
-  }
-
-  template<typename CoeffType, typename VectorCoeffType>
-  inline
-  CoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::operator() const
-  {
-     this->rate();
-  }
-
-  template<typename CoeffType, typename VectorCoeffType>
-  inline
-  CoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::derivative() const
-  {
-     return 0.L;
-  }
 
   template<typename CoeffType, typename VectorCoeffType>
   template <typename StateType>
   inline
-  void rate_and_derivative(StateType& rate, StateType& drate_dT) const
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::rate_and_derivative(const StateType &T, StateType& rate, StateType& drate_dT) const
   {
-    rate = _k;
+    Antioch::constant_clone(rate,_k);
     Antioch::set_zero(drate_dT);
     return;
   }

@@ -34,8 +34,13 @@
 #include <fstream>
 
 // Antioch
+#include "antioch/vector_utils_decl.h"
+
+#include "antioch/particle_flux.h"
 #include "antioch/photochemical_rate.h"
-#include "antioch/antioch_asserts.h"
+#include "antioch/physical_constants.h"
+
+#include "antioch/vector_utils.h"
 
 template <typename Scalar>
 int tester(std::string path_to_files)
@@ -64,19 +69,25 @@ int tester(std::string path_to_files)
 
   while(!hv.eof())
   {
-    Scalar w,l;
-    hv >> l >> w;
+    Scalar w,l,dw;
+    hv >> l >> w >> dw;
     hv_lambda.push_back(l*10.L); //nm -> Angström
-    hv_irr.push_back(w * 1e4 * 6.62606957e-17*2.99792458 / l);//m-2 -> cm-2 and times h*c/lamdba energy -> number of protons
+    hv_irr.push_back(w * 1e4 * Antioch::Constants::Planck_constant<Scalar>() 
+                             * Antioch::Constants::light_celerity<Scalar>());//m-2 -> cm-2 and times h*c/lamdba energy -> number of photons
   }
   hv.close();
 
+  Scalar T(1500.);
+  Antioch::ParticleFlux<std::vector<Scalar> > hv_flux(hv_lambda,hv_irr);
 
-  Antioch::PhotoRate<Scalar, std::vector<Scalar> > rate_hv(CH4_cs,CH4_lambda);
+  Antioch::PhotochemicalRate<Scalar, std::vector<Scalar> > rate_hv(CH4_cs,CH4_lambda);
 
-  Scalar rate = rate_hv.forward_rate_constant(hv_irr,hv_lambda);
-  Scalar rate_exact(-1.);
+  Scalar rate_exact = 2.5838962773224599416e-40;
+  Antioch::SigmaBinConverter<std::vector<Scalar> > youpi;
+  std::vector<Scalar> irr_rescaled,sigma_rescaled;
 
+  rate_hv.calculate_rate_constant(hv_flux.flux(), hv_flux.abscissa());
+  Scalar rate = rate_hv.rate(T);
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
   int return_flag = 0;

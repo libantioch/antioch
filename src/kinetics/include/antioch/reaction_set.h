@@ -93,6 +93,8 @@ namespace Antioch
                                             VectorReactionsType& dnet_rate_dT,
                                             MatrixReactionsType& dnet_rate_dX_s ) const;
 
+    //!
+    void update_particle_flux_chemistry();
 
     //!
     template <typename StateType, typename VectorStateType>
@@ -202,6 +204,16 @@ namespace Antioch
     return;
   }
   
+
+  template<typename CoeffType>
+  inline
+  void ReactionSet<CoeffType>::update_particle_flux_chemistry()
+  {
+      for(unsigned int ir = 0; ir < _reactions.size(); ir++)
+      {
+         _reactions[ir]->update_particles_flux();
+      }
+  }
 
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType, typename VectorReactionsType>
