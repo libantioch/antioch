@@ -47,6 +47,7 @@
 
 namespace Antioch
 {
+
   /*!
    * This class encapsulates all the reaction mechanisms considered in a
    * chemical nonequilibrium simulation.
@@ -70,6 +71,10 @@ namespace Antioch
      
     //! Add a reaction to the system.
     void add_reaction(Reaction<CoeffType>* reaction);
+
+    //!
+    template<typename VectorStateType>
+    void set_particle_flux(ParticleFlux<VectorStateType> *pf, int r = -1);
 
     //! \returns a constant reference to reaction \p r.
     const Reaction<CoeffType>& reaction(const unsigned int r) const;
@@ -204,6 +209,29 @@ namespace Antioch
     return;
   }
   
+  template<typename CoeffType>
+  template<typename VectorStateType>
+  inline
+  void ReactionSet<CoeffType>::set_particle_flux(ParticleFlux<VectorStateType> *pf, int r)
+  {
+     //in that case, everyone gets the same particle flux
+     if(r < 0)
+     {
+        for(unsigned int ir = 0; ir < _reactions.size(); ir++)
+        {
+    std::cout << _reactions[ir]->kinetics_model() << " " << KineticsModel::PHOTOCHEM << std::endl;
+          if(_reactions[ir]->kinetics_model() == KineticsModel::PHOTOCHEM)
+          {
+             _reactions[ir]->set_particle_flux(pf);
+          }
+        }
+     }else
+     {
+        _reactions[r]->set_particle_flux(pf);
+     }
+
+     return;
+  }
 
   template<typename CoeffType>
   inline

@@ -2,7 +2,7 @@
 
 PROG="@top_builddir@/test/parsing_xml"
 
-INPUT="@top_srcdir@/test/input_files/test_parsing.xml"
+INPUT="@top_srcdir@/test/input_files"
 
 $PROG $INPUT
 

@@ -177,7 +177,8 @@ namespace Antioch
     CoeffType efficiency( const unsigned int s) const;
 
     //! Sets the particle flux
-    void set_particle_flux(ParticleFlux<VectorCoeffType> *pf);
+    template <typename VectorStateType>
+    void set_particle_flux(ParticleFlux<VectorStateType> *pf);
 
     //! Computes derived quantities.
     void initialize();    
@@ -259,7 +260,7 @@ namespace Antioch
     }
 
   protected:
-    
+
     unsigned int _n_species;
     std::string _equation;
     std::vector<std::string> _reactant_names;
@@ -281,6 +282,9 @@ namespace Antioch
 
     //! The forward reaction rate modified Arrhenius form.
     std::vector<KineticsType<CoeffType,VectorCoeffType>* > _forward_rate;
+
+  private:
+    Reaction();
 
   };
 
@@ -487,7 +491,9 @@ namespace Antioch
   }
 
   template<typename CoeffType, typename VectorCoeffType>
-  void Reaction<CoeffType,VectorCoeffType>::set_particle_flux(ParticleFlux<VectorCoeffType> *pf)
+  template<typename VectorStateType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::set_particle_flux(ParticleFlux<VectorStateType> *pf)
   {
     _particle_flux = pf;
     return;
@@ -529,8 +535,9 @@ namespace Antioch
       _initialized(false),
       _type(type),
       _kintype(kin),
-       _particle_flux(NULL)
+      _particle_flux(NULL)
   {
+std::cout << "bon sang ! " << _kintype << std::endl;
     _efficiencies.resize(_n_species); 
     std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
   }

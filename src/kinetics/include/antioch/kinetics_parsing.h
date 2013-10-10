@@ -33,6 +33,7 @@
 #include "antioch/berthelothercourtessen_rate.h"
 #include "antioch/kooij_rate.h"
 #include "antioch/vanthoff_rate.h"
+#include "antioch/photochemical_rate.h"
 #include "antioch/reaction_enum.h"
 
 namespace Antioch
@@ -40,9 +41,9 @@ namespace Antioch
 /*! cross-road to kinetics model
  */
 
-  template<typename CoeffType>
-  KineticsType<CoeffType>* build_rate( const std::vector<CoeffType> &data,
-                                       const KineticsModel::KineticsModel &kin );
+  template<typename CoeffType, typename VectorCoeffType>
+  KineticsType<CoeffType, VectorCoeffType>* build_rate( const VectorCoeffType &data,
+                                                        const KineticsModel::KineticsModel &kin );
 
 
   //! We take here the parameters as:
@@ -51,14 +52,14 @@ namespace Antioch
   //  to K.
   //
   //  We check the number of parameters then initialize.
-  template<typename CoeffType>
+  template<typename CoeffType, typename VectorCoeffType>
   inline
-  KineticsType<CoeffType>* build_rate( const std::vector<CoeffType> &data,
-                                       const KineticsModel::KineticsModel &kin )
+  KineticsType<CoeffType, VectorCoeffType>* build_rate( const VectorCoeffType &data,
+                                                        const KineticsModel::KineticsModel &kin )
   {
     using std::pow;
 
-    KineticsType<CoeffType>* rate = NULL;
+    KineticsType<CoeffType,VectorCoeffType>* rate = NULL;
 
     switch(kin)
       {
@@ -101,6 +102,20 @@ namespace Antioch
         {
           antioch_assert_equal_to(6,data.size());
           rate = new VantHoffRate<CoeffType>(data[0],data[1],data[2],data[3],data[4],data[5]);//Cf,eta,Ea,D,Tref,scale
+        }
+        break;
+
+      case(KineticsModel::PHOTOCHEM):
+        {
+          antioch_assert_equal_to(0,data.size()%2); //two vectors in one: cross-section then lambda
+          VectorCoeffType cs;
+          VectorCoeffType lambda;
+          for(unsigned int i = 0; i < data.size()/2; i++)
+          {
+             cs.push_back(data[i]); 
+             lambda.push_back(data[i + data.size()/2]); 
+          }
+          rate = new PhotochemicalRate<CoeffType,VectorCoeffType>(cs,lambda);//cs,lambda
         }
         break;
 
