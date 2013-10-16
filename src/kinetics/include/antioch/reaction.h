@@ -713,7 +713,7 @@ namespace Antioch
       antioch_assert_equal_to(_type,ReactionType::ELEMENTARY);//elementary reaction
       if(_particle_flux->updated())
       {
-        _forward_rate[0]->calculate_rate_constant(_particle_flux->flux(),_particle_flux->abscissa());
+        _forward_rate[0]->calculate_rate_constant(_particle_flux->flux(),_particle_flux->abscissa(),_particle_flux->x_updated());
         _particle_flux->update_done();
       }
     }

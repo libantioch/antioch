@@ -38,6 +38,7 @@ namespace Antioch
         VectorCoeffType _abscissa;
         VectorCoeffType _flux;
         bool _updated;
+        bool _x_updated;
 
      public:
         ParticleFlux();
@@ -46,6 +47,9 @@ namespace Antioch
 
         //!
         bool updated() const;
+
+        //!
+        bool x_updated() const;
 
         //!
         const VectorCoeffType &abscissa() const;
@@ -88,9 +92,17 @@ namespace Antioch
 
   template<typename VectorCoeffType>
   inline
+  bool ParticleFlux<VectorCoeffType>::x_updated() const
+  {
+     return _x_updated;
+  }
+
+  template<typename VectorCoeffType>
+  inline
   void ParticleFlux<VectorCoeffType>::update_done()
   {
-     _updated = false;
+     _updated   = false;
+     _x_updated = false;
      return;
   }
 
@@ -101,6 +113,7 @@ namespace Antioch
   {
      _abscissa = x;
      _updated = true;
+     _x_updated = true;
   }
 
   template<typename VectorCoeffType>
@@ -115,7 +128,8 @@ namespace Antioch
   template<typename VectorCoeffType>
   inline
   ParticleFlux<VectorCoeffType>::ParticleFlux():
-  _updated(false)
+  _updated(false),
+  _x_updated(false)
   {
     return;
   }
@@ -132,7 +146,8 @@ namespace Antioch
   ParticleFlux<VectorCoeffType>::ParticleFlux(const VectorCoeffType &x, const VectorCoeffType &flux):
   _abscissa(x),
   _flux(flux),
-  _updated(true)
+  _updated(true),
+  _x_updated(true)
   {
     return;
   }

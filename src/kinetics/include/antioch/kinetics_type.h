@@ -89,7 +89,7 @@ namespace Antioch{
     void compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
     //!Particles flux supports
-    void calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux);
+    void calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux, bool x_update);
 
     virtual const std::string numeric() const = 0;
 
@@ -133,13 +133,13 @@ namespace Antioch{
 
   template <typename CoeffType, typename VectorCoeffType>
   inline
-  void KineticsType<CoeffType,VectorCoeffType>::calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux)
+  void KineticsType<CoeffType,VectorCoeffType>::calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux, bool x_update)
   {
     switch(my_type) 
       {
       case(KineticsModel::PHOTOCHEM):
         {
-          (static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->calculate_rate_constant(abs,flux);
+          (static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->calculate_rate_constant(abs,flux,x_update);
         }
       break;
       default:

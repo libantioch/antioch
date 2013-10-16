@@ -43,6 +43,7 @@ namespace Antioch{
      private:
        VectorCoeffType _cross_section;
        VectorCoeffType _lambda_grid;
+       VectorCoeffType _cross_section_on_flux_grid;
        CoeffType _k;
        SigmaBinConverter<VectorCoeffType> _converter;
 
@@ -59,7 +60,7 @@ namespace Antioch{
 
        //! calculate _k for a given photon flux
        template<typename VectorStateType>
-       void calculate_rate_constant(const VectorStateType &hv_flux, const VectorStateType &hv_lambda);
+       void calculate_rate_constant(const VectorStateType &hv_flux, const VectorStateType &hv_lambda, bool x_update = true);
        
        //! \return the rate
        template <typename StateType>
@@ -134,18 +135,22 @@ namespace Antioch{
   template<typename VectorStateType>
   inline
   void PhotochemicalRate<CoeffType,VectorCoeffType>::calculate_rate_constant(const VectorStateType &hv_flux, 
-                                                                             const VectorStateType &hv_lambda)
+                                                                             const VectorStateType &hv_lambda,
+                                                                             bool x_update)
   {
 //cross-section and lambda exists
      antioch_assert_greater(_cross_section.size(),0);
      antioch_assert_greater(_lambda_grid.size(),0);
 
-     VectorCoeffType cross_section_on_hv;
-      _converter.y_on_custom_grid(_lambda_grid,_cross_section,hv_lambda,cross_section_on_hv);
+      if(x_update || _cross_section_on_flux_grid.empty())
+      {
+        _cross_section_on_flux_grid.clear();
+        _converter.y_on_custom_grid(_lambda_grid,_cross_section,hv_lambda,_cross_section_on_flux_grid);
+      }
       Antioch::set_zero(_k);
       for(unsigned int ibin = 0; ibin < hv_lambda.size(); ibin++)
       {
-          _k += cross_section_on_hv[ibin] * hv_flux[ibin];
+          _k += _cross_section_on_flux_grid[ibin] * hv_flux[ibin];
       }
       return;
   }
