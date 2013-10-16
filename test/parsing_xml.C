@@ -22,11 +22,15 @@
 //-----------------------------------------------------------------------el-
 
 //Antioch
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/physical_constants.h"
 #include "antioch/reaction_set.h"
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/read_reaction_set_data_xml.h"
+
+#include "antioch/vector_utils.h"
 
 //C++
 #include <cmath>
@@ -107,8 +111,25 @@ Scalar FTroe(const Scalar &Fcent, const Scalar &Pr)
                                 ( nTroe(Fcent) - d * (std::log10(Pr) + cTroe(Fcent)) ),2)));
 }
 
+template<typename VectorScalar>
+typename Antioch::value_type<VectorScalar>::type k_photo(const VectorScalar &solar_lambda, const VectorScalar &solar_irr, 
+                                                         const VectorScalar &sigma_lambda, const VectorScalar &sigma_sigma)
+{
+  Antioch::SigmaBinConverter<VectorScalar> bin;
+  VectorScalar sigma_rescaled;
+  bin.y_on_custom_grid(sigma_lambda,sigma_sigma,solar_lambda,sigma_rescaled);
+
+  typename Antioch::value_type<VectorScalar>::type _k(0.L);
+  for(unsigned int il = 0; il < solar_irr.size(); il++)
+  {
+     _k += sigma_rescaled[il] * solar_irr[il];
+  }
+
+  return _k;
+}
+
 template<typename Scalar>
-int tester(const std::string &input_name)
+int tester(const std::string &root_name)
 {
 
   std::vector<std::string> species_str_list;
@@ -120,18 +141,59 @@ int tester(const std::string &input_name)
   species_str_list.push_back( "C" );
   species_str_list.push_back( "C2" );
   species_str_list.push_back( "CN" );
+  species_str_list.push_back( "CH4" );
+  species_str_list.push_back( "CH3" );
+  species_str_list.push_back( "H" );
   unsigned int n_species = species_str_list.size();
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
+  Antioch::read_reaction_set_data_xml<Scalar>( root_name + "/test_parsing.xml", true, reaction_set );
 
+//photochemistry set here
+  std::vector<Scalar> hv,lambda;
+  std::ifstream solar_flux(root_name + "/solar_flux.dat");
+  std::string line;
 
-  Scalar T = 2000.L;
-  Scalar Tr = 1.;
-  Scalar Rcal = 1.9858775;
+  getline(solar_flux,line);
+
+  while(!solar_flux.eof())
+  {
+     Scalar l,i,di;
+     solar_flux >> l >> i >> di;
+     hv.push_back(i * 1e-4L  // * 1e-4: m-2 -> cm-2 
+                  / (Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l)// /(h*c/lambda): energy -> number of photons
+                  / 10.); // by Angström
+     lambda.push_back(l * 10.L);//nm -> Angström
+     if(lambda.size() == 796)break;
+  }
+  solar_flux.close();
+
+  std::vector<Scalar> CH4_s,CH4_lambda;
+  std::ifstream CH4_file(root_name + "/CH4_hv_cs.dat");
+
+  getline(CH4_file,line);
+
+  while(!CH4_file.eof())
+  {
+     Scalar l,s;
+     CH4_file >> l >> s;
+     CH4_s.push_back(s);
+     CH4_lambda.push_back(l);
+     if(CH4_s.size() == 137)break;
+  }
+  CH4_file.close();
+
+  Antioch::ParticleFlux<std::vector<Scalar> > photons(lambda,hv);
+  reaction_set.set_particle_flux(&photons);
+
+//
+  Scalar T = 1500.L;
+  Scalar Tr = 1.L;
+  Scalar Rcal = 1.9858775L;
   // Molar densities
   std::vector<Scalar> molar_densities(n_species,5e-4);
+  Scalar tot_dens((Scalar)n_species * 5e-4);
 
 ///convenient storage for error output
   std::vector<std::string> kinetics_model;
@@ -272,38 +334,38 @@ int tester(const std::string &input_name)
   beta  = -1.6;
   A2    = 5e15;
   beta2 = 0.5;
-  k.push_back(HE(T,A,beta) / (1./4e-3 + HE(T,A,beta)/HE(T,A2,beta2)) );
+  k.push_back(HE(T,A,beta) / (1./tot_dens + HE(T,A,beta)/HE(T,A2,beta2)) );
   A  = 5e17;
   D  = -2.5e-5;
   A2 = 2e18;
   D2 = -5e-3;
-  k.push_back(Bert(T,A,D) / (1./4e-3 + Bert(T,A,D)/Bert(T,A2,D2)) );
+  k.push_back(Bert(T,A,D) / (1./tot_dens + Bert(T,A,D)/Bert(T,A2,D2)) );
   A   = 5.e+12;
   Ea  = 149943.0;
   A2  = 3e+15;
   Ea2 =  200000.0;
-  k.push_back(Arrh(T,A,Ea,Rcal) / (1./4e-3 + Arrh(T,A,Ea,Rcal)/Arrh(T,A2,Ea2,Rcal)) );
+  k.push_back(Arrh(T,A,Ea,Rcal) / (1./tot_dens + Arrh(T,A,Ea,Rcal)/Arrh(T,A2,Ea2,Rcal)) );
   A     = 5e+9;
   beta  = 0.6;
   D     = -5e-4;
   A2    = 5.7e+9;
   beta2 = -0.42;
   D2    = -5e-3;
-  k.push_back(BHE(T,A,beta,D) / (1./4e-3 + BHE(T,A,beta,D)/BHE(T,A2,beta2,D2)) );
+  k.push_back(BHE(T,A,beta,D) / (1./tot_dens + BHE(T,A,beta,D)/BHE(T,A2,beta2,D2)) );
   A     = 8.4e+09;
   beta  = 0.40;
   Ea    = 38526.0;
   A2    = 8.4e+05;
   beta2 = 0.02;
   Ea2   = 3526.0;
-  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./4e-3 + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) );
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./tot_dens + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) );
   A     = 3.7e+11;
   beta  = -0.42;
   Ea    = 138812.8;
   A2    = 3.7e+12;
   beta2 = -0.52;
   Ea2   = 135000.8;
-  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./4e-3 + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) );
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./tot_dens + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) );
   A     = 5e+10;
   beta  = -0.10;
   D     = 1.5e-3;
@@ -312,7 +374,7 @@ int tester(const std::string &input_name)
   beta2 = 0.40;
   D2    = -0.005;
   Ea2   = 174240.9;
-  k.push_back(VH(T,A,beta,Ea,D,Tr,Rcal) / (1./4e-3 + VH(T,A,beta,Ea,D,Tr,Rcal)/VH(T,A2,beta2,Ea2,D2,Tr,Rcal)) );
+  k.push_back(VH(T,A,beta,Ea,D,Tr,Rcal) / (1./tot_dens + VH(T,A,beta,Ea,D,Tr,Rcal)/VH(T,A2,beta2,Ea2,D2,Tr,Rcal)) );
 //Troe falloff
 //falloff is k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
 // F is complicated...
@@ -330,24 +392,24 @@ int tester(const std::string &input_name)
   beta2 = 0.5;
   k0   = HE(T,A,beta);
   kinf = HE(T,A2,beta2);
-  Pr = 4e-3 * k0/kinf;
-  k.push_back(k0 / (1./4e-3 + k0/kinf)  * FTroe(Fc,Pr));
+  Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   A  = 5e17;
   D  = -2.5e-5;
   A2 = 2e18;
   D2 = -5e-3;
   k0   = Bert(T,A,D);
   kinf = Bert(T,A2,D2);
-  Pr = 4e-3 * k0/kinf;
-  k.push_back(k0 / (1./4e-3 + k0/kinf)  * FTroe(Fc,Pr));
+  Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   A   = 5.e+12;
   Ea  = 149943.0;
   A2  = 3e+15;
   Ea2 =  200000.0;
   k0    = Arrh(T,A,Ea,Rcal);
   kinf  = Arrh(T,A2,Ea2,Rcal);
-  Pr = 4e-3 * k0/kinf;
-  k.push_back(k0 / (1./4e-3 + k0/kinf)  * FTroe(Fc,Pr));
+  Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   A     = 5e+9;
   beta  = 0.6;
   D     = -5e-4;
@@ -356,8 +418,8 @@ int tester(const std::string &input_name)
   D2    = -5e-3;
   k0    = BHE(T,A,beta,D); 
   kinf  = BHE(T,A2,beta2,D2);
-  Pr = 4e-3 * k0/kinf;
-  k.push_back(k0 / (1./4e-3 + k0/kinf)  * FTroe(Fc,Pr));
+  Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   A     = 8.4e+09;
   beta  = 0.40;
   Ea    = 38526.0;
@@ -366,8 +428,8 @@ int tester(const std::string &input_name)
   Ea2   = 3526.0;
   k0    = Kooij(T,A,beta,Ea,Tr,Rcal);
   kinf  = Kooij(T,A2,beta2,Ea2,Tr,Rcal);
-  Pr = 4e-3 * k0/kinf;
-  k.push_back(k0 / (1./4e-3 + k0/kinf)  * FTroe(Fc,Pr));
+  Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   A     = 3.7e+11;
   beta  = -0.42;
   Ea    = 138812.8;
@@ -376,8 +438,8 @@ int tester(const std::string &input_name)
   Ea2   = 135000.8;
   k0    = Kooij(T,A,beta,Ea,Tr,Rcal); 
   kinf  = Kooij(T,A2,beta2,Ea2,Tr,Rcal);
-  Pr = 4e-3 * k0/kinf;
-  k.push_back(k0 / (1./4e-3 + k0/kinf)  * FTroe(Fc,Pr));
+  Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   A     = 5e+10;
   beta  = -0.10;
   D     = 1.5e-3;
@@ -388,29 +450,51 @@ int tester(const std::string &input_name)
   Ea2   = 174240.9;
   k0    = VH(T,A,beta,Ea,D,Tr,Rcal); 
   kinf  = VH(T,A2,beta2,Ea2,D2,Tr,Rcal);
-  Pr = 4e-3 * k0/kinf;
-  k.push_back(k0 / (1./4e-3 + k0/kinf)  * FTroe(Fc,Pr));
+  Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+//
+//photochemistry
+  k.push_back(k_photo(lambda,hv,CH4_lambda,CH4_s));
+  
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
   int return_flag(0);
-  for(unsigned int ir = 0; ir < k.size(); ir++)
+  for(unsigned int ir = 0; ir < k.size() - 1; ir++)
   {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
      if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] > tol)
      {
+        std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
                   << "Error in kinetics comparison\n"
+                  << "temperature: " << T << " K" << "\n"
                   << "chemical process: " << chem_proc[ir/kinetics_model.size()] << "\n"
                   << "kinetics model: " << kinetics_model[ir%kinetics_model.size()] << "\n"
                   << "theory: " << k[ir] << "\n"
                   << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
                   << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] << "\n"
-                  <<  "tolerance = " <<  tol
+                  << "tolerance = " <<  tol
                   << std::endl;
         return_flag = 1;
      }
   }
 
+  const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(k.size() - 1);
+  if(std::abs(k.back() - reac->compute_forward_rate_coefficient(molar_densities,T))/k.back() > tol)
+     {
+        std::cout << *reac << std::endl;
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error in kinetics comparison\n"
+                  << "temperature: " << T << " K" << "\n"
+                  << "chemical process: Elementary\n" 
+                  << "kinetics model: photochemistry\n" 
+                  << "theory: " << k.back() << "\n"
+                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
+                  << "relative error = " << std::abs(k.back() - reac->compute_forward_rate_coefficient(molar_densities,T))/k.back() << "\n"
+                  << "tolerance = " <<  tol
+                  << std::endl;
+        return_flag = 1;
+     }
 
   return return_flag;
 }

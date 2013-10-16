@@ -48,10 +48,10 @@ namespace Antioch
         bool updated() const;
 
         //!
-        const VectorCoeffType abscissa() const;
+        const VectorCoeffType &abscissa() const;
 
         //!
-        const VectorCoeffType flux() const;
+        const VectorCoeffType &flux() const;
 
         //!
         template<typename VectorStateType>
@@ -67,14 +67,14 @@ namespace Antioch
 
   template<typename VectorCoeffType>
   inline
-  const VectorCoeffType ParticleFlux<VectorCoeffType>::abscissa() const
+  const VectorCoeffType &ParticleFlux<VectorCoeffType>::abscissa() const
   {
      return _abscissa;
   }
 
   template<typename VectorCoeffType>
   inline
-  const VectorCoeffType ParticleFlux<VectorCoeffType>::flux() const
+  const VectorCoeffType &ParticleFlux<VectorCoeffType>::flux() const
   {
      return _flux;
   }

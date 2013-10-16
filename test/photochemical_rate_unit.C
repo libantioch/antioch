@@ -46,7 +46,7 @@ template <typename Scalar>
 int tester(std::string path_to_files)
 {
   std::ifstream CH4(path_to_files + "/CH4_hv_cs.dat");
-  std::ifstream hv(path_to_files + "/solar_flux.dat");
+  std::ifstream  hv(path_to_files + "/solar_flux.dat");
 
   std::string first_line;
 
@@ -64,6 +64,7 @@ int tester(std::string path_to_files)
     CH4 >> l >> cs;
     CH4_lambda.push_back(l);
     CH4_cs.push_back(cs);
+    if(CH4_lambda.size() == 137)break;
   }
   CH4.close();
 
@@ -71,33 +72,42 @@ int tester(std::string path_to_files)
   {
     Scalar w,l,dw;
     hv >> l >> w >> dw;
-    hv_lambda.push_back(l*10.L); //nm -> Angström
-    hv_irr.push_back(w * 1e4 * Antioch::Constants::Planck_constant<Scalar>() 
-                             * Antioch::Constants::light_celerity<Scalar>());//m-2 -> cm-2 and times h*c/lamdba energy -> number of photons
+    hv_lambda.push_back(l * 10.L); //nm -> Angström
+    hv_irr.push_back(w * 1e-4L  // * 1e-4: m-2 -> cm-2 
+                       / (Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l)// /(h*c/lambda): energy -> number of photons
+                       / 10.); // by Angström
+    if(hv_lambda.size() == 796)break;
   }
   hv.close();
 
-  Scalar T(1500.);
-  Antioch::ParticleFlux<std::vector<Scalar> > hv_flux(hv_lambda,hv_irr);
+  Scalar T(1500.L);
 
   Antioch::PhotochemicalRate<Scalar, std::vector<Scalar> > rate_hv(CH4_cs,CH4_lambda);
 
-  Scalar rate_exact = 2.5838962773224599416e-40;
-  Antioch::SigmaBinConverter<std::vector<Scalar> > youpi;
-  std::vector<Scalar> irr_rescaled,sigma_rescaled;
+  Antioch::SigmaBinConverter<std::vector<Scalar> > bin;
+  std::vector<Scalar> sigma_rescaled;
+  bin.y_on_custom_grid(CH4_lambda,CH4_cs,hv_lambda,sigma_rescaled);
 
-  rate_hv.calculate_rate_constant(hv_flux.flux(), hv_flux.abscissa());
+  rate_hv.calculate_rate_constant(hv_irr, hv_lambda);
   Scalar rate = rate_hv.rate(T);
+
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  Scalar rate_exact(0.L);
+
+  for(unsigned int il = 0; il < hv_lambda.size(); il++)
+  {
+      rate_exact += sigma_rescaled[il] * hv_irr[il];
+  }
 
   int return_flag = 0;
-
-  if( abs( (rate - rate_exact)/rate_exact ) > tol )
+  if( std::abs( (rate - rate_exact)/rate_exact ) > tol )
   {
     std::cout << std::scientific << std::setprecision(16)
-              << "Error: Mismatch in rate values." << std::endl
-              << "rate = "       << rate           << std::endl
-              << "rate_exact = " << rate_exact     << std::endl;
+              << "Error: Mismatch in rate values."     << std::endl
+              << "rate = "           << rate           << std::endl
+              << "rate_exact = "     << rate_exact     << std::endl
+              << "relative error = " << std::abs(rate_exact - rate)/rate_exact << std::endl
+              << "tolerance = "      << tol            << std::endl;
 
     return_flag = 1;
   }
@@ -114,8 +124,8 @@ int main(int argc, char* argv[])
       antioch_error();
     }
 
-  return (tester<float>(std::string(argv[1])) ||
-          tester<double>(std::string(argv[1])) ||
-          tester<long double>(std::string(argv[1]))
+   return (tester<float>(std::string(argv[1]))  ||
+           tester<double>(std::string(argv[1])) ||
+           tester<long double>(std::string(argv[1]))
           );
 }

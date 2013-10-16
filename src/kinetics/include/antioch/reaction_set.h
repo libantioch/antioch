@@ -219,15 +219,16 @@ namespace Antioch
      {
         for(unsigned int ir = 0; ir < _reactions.size(); ir++)
         {
-    std::cout << _reactions[ir]->kinetics_model() << " " << KineticsModel::PHOTOCHEM << std::endl;
           if(_reactions[ir]->kinetics_model() == KineticsModel::PHOTOCHEM)
           {
              _reactions[ir]->set_particle_flux(pf);
+             _reactions[ir]->update_particles_flux();
           }
         }
      }else
      {
         _reactions[r]->set_particle_flux(pf);
+        _reactions[r]->update_particles_flux();
      }
 
      return;

@@ -537,7 +537,6 @@ namespace Antioch
       _kintype(kin),
       _particle_flux(NULL)
   {
-std::cout << "bon sang ! " << _kintype << std::endl;
     _efficiencies.resize(_n_species); 
     std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
   }
@@ -686,6 +685,8 @@ std::cout << "bon sang ! " << _kintype << std::endl;
           os << this->product_name(p) << ":"
              << this->product_stoichiometric_coefficient(p) << " ";
       }
+    os << "\n#   Chemical process: " << _type;
+    os << "\n#   Kinetics model: "   << _kintype;
     for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
       {
         os << "\n#   forward rate eqn: " << *_forward_rate[ir];
@@ -712,7 +713,7 @@ std::cout << "bon sang ! " << _kintype << std::endl;
       antioch_assert_equal_to(_type,ReactionType::ELEMENTARY);//elementary reaction
       if(_particle_flux->updated())
       {
-        _forward_rate[0]->calculate_rate_constant(_particle_flux->abscissa(),_particle_flux->flux());
+        _forward_rate[0]->calculate_rate_constant(_particle_flux->flux(),_particle_flux->abscissa());
         _particle_flux->update_done();
       }
     }
