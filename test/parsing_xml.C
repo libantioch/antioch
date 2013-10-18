@@ -120,9 +120,9 @@ typename Antioch::value_type<VectorScalar>::type k_photo(const VectorScalar &sol
   bin.y_on_custom_grid(sigma_lambda,sigma_sigma,solar_lambda,sigma_rescaled);
 
   typename Antioch::value_type<VectorScalar>::type _k(0.L);
-  for(unsigned int il = 0; il < solar_irr.size(); il++)
+  for(unsigned int il = 0; il < solar_irr.size() - 1; il++)
   {
-     _k += sigma_rescaled[il] * solar_irr[il];
+     _k += sigma_rescaled[il] * solar_irr[il] * (solar_lambda[il+1] - solar_lambda[il]);
   }
 
   return _k;

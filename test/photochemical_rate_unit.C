@@ -94,9 +94,9 @@ int tester(std::string path_to_files)
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
   Scalar rate_exact(0.L);
 
-  for(unsigned int il = 0; il < hv_lambda.size(); il++)
+  for(unsigned int il = 0; il < hv_lambda.size() - 1; il++)
   {
-      rate_exact += sigma_rescaled[il] * hv_irr[il];
+      rate_exact += sigma_rescaled[il] * hv_irr[il] * (hv_lambda[il+1] - hv_lambda[il]);
   }
 
   int return_flag = 0;

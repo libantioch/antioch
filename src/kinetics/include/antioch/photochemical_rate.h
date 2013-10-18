@@ -148,9 +148,9 @@ namespace Antioch{
         _converter.y_on_custom_grid(_lambda_grid,_cross_section,hv_lambda,_cross_section_on_flux_grid);
       }
       Antioch::set_zero(_k);
-      for(unsigned int ibin = 0; ibin < hv_lambda.size(); ibin++)
+      for(unsigned int ibin = 0; ibin < hv_lambda.size() - 1; ibin++)
       {
-          _k += _cross_section_on_flux_grid[ibin] * hv_flux[ibin];
+          _k += _cross_section_on_flux_grid[ibin] * hv_flux[ibin] * (hv_lambda[ibin+1] - hv_lambda[ibin]); //right stairs
       }
       return;
   }
