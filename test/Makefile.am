@@ -42,6 +42,7 @@ check_PROGRAMS += duplicate_process_unit
 check_PROGRAMS += threebody_process_unit
 check_PROGRAMS += lindemann_falloff_unit
 check_PROGRAMS += troe_falloff_unit
+check_PROGRAMS += kinetics_reversibility_unit
 check_PROGRAMS += parsing_xml
 
 if ANTIOCH_ENABLE_EIGEN
@@ -103,6 +104,7 @@ duplicate_process_unit_SOURCES = duplicate_process_unit.C
 threebody_process_unit_SOURCES = threebody_process_unit.C
 lindemann_falloff_unit_SOURCES = lindemann_falloff_unit.C
 troe_falloff_unit_SOURCES = troe_falloff_unit.C
+kinetics_reversibility_unit_SOURCES = kinetics_reversibility_unit.C
 parsing_xml_SOURCES = parsing_xml.C
 
 if ANTIOCH_ENABLE_EIGEN
@@ -150,6 +152,7 @@ TESTS += duplicate_process_unit
 TESTS += threebody_process_unit
 TESTS += lindemann_falloff_unit
 TESTS += troe_falloff_unit
+TESTS += kinetics_reversibility_unit
 TESTS += parsing_xml.sh
 
 if ANTIOCH_ENABLE_EIGEN

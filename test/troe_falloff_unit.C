@@ -190,7 +190,7 @@ int tester()
     rate_exact *= F;
 
     Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> > * fall_reaction = 
-        new Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> >(n_species,equation,Antioch::ReactionType::TROE_FALLOFF,kin_mod);
+        new Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> >(n_species,equation,true,Antioch::ReactionType::TROE_FALLOFF,kin_mod);
     fall_reaction->add_forward_rate(rate_kinetics1);
     fall_reaction->add_forward_rate(rate_kinetics2);
     fall_reaction->F().set_alpha(alpha);

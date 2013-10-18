@@ -115,7 +115,7 @@ int tester()
       }
     }
 
-    Antioch::ElementaryReaction<Scalar> * elem_reaction = new Antioch::ElementaryReaction<Scalar>(n_species,equation,kin_mod);
+    Antioch::ElementaryReaction<Scalar> * elem_reaction = new Antioch::ElementaryReaction<Scalar>(n_species,equation,true,kin_mod);
     elem_reaction->add_forward_rate(rate_kinetics);
     Scalar rate1 = elem_reaction->compute_forward_rate_coefficient(mol_densities,T);
     Scalar rate;

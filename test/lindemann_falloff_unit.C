@@ -144,7 +144,8 @@ int tester()
     }
 
     Antioch::FalloffReaction<Scalar,Antioch::LindemannFalloff<Scalar> > * fall_reaction = 
-        new Antioch::FalloffReaction<Scalar,Antioch::LindemannFalloff<Scalar> >(n_species,equation,Antioch::ReactionType::LINDEMANN_FALLOFF,kin_mod);
+        new Antioch::FalloffReaction<Scalar,Antioch::LindemannFalloff<Scalar> >(n_species,equation,true,Antioch::ReactionType::LINDEMANN_FALLOFF,kin_mod);
+
     fall_reaction->add_forward_rate(rate_kinetics1);
     fall_reaction->add_forward_rate(rate_kinetics2);
     Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
