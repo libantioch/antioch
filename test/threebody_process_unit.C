@@ -153,7 +153,7 @@ int tester()
       }
     }
 
-    Antioch::ThreeBodyReaction<Scalar> * TB_reaction = new Antioch::ThreeBodyReaction<Scalar>(n_species,equation,kin_mod);
+    Antioch::ThreeBodyReaction<Scalar> * TB_reaction = new Antioch::ThreeBodyReaction<Scalar>(n_species,equation,true,kin_mod);
     TB_reaction->add_forward_rate(rate_kinetics);
     for(unsigned int i = 0; i < n_species; i++)
     {

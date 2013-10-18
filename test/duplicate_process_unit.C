@@ -128,7 +128,7 @@ int tester()
       }
     }
 
-    Antioch::DuplicateReaction<Scalar> * dupl_reaction = new Antioch::DuplicateReaction<Scalar>(n_species,equation,kin_mod);
+    Antioch::DuplicateReaction<Scalar> * dupl_reaction = new Antioch::DuplicateReaction<Scalar>(n_species,equation,true,kin_mod);
     dupl_reaction->add_forward_rate(rate_kinetics1);
     dupl_reaction->add_forward_rate(rate_kinetics2);
     Scalar rate1 = dupl_reaction->compute_forward_rate_coefficient(mol_densities,T);

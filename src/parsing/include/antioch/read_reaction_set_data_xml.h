@@ -147,6 +147,7 @@ namespace Antioch
 
         ReactionType::ReactionType typeReaction(ReactionType::ELEMENTARY);
         KineticsModel::KineticsModel kineticsModel(KineticsModel::HERCOURT_ESSEN); // = 0
+        bool reversible(true);
 
         if (reaction->Attribute("type"))
           {
@@ -166,6 +167,13 @@ namespace Antioch
             typeReaction = proc_keyword[reaction->Attribute("type")];
           }
             
+        if(reaction->Attribute("reversible"))
+        {
+          if (verbose) std::cout << "reversible: " << reaction->Attribute("reversible") << std::endl;
+          if(std::string(reaction->Attribute("reversible")) == "no")reversible = false;
+        }
+
+
         unsigned int imod(0);
         tinyxml2::XMLElement* rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
         while(!rate_constant)
@@ -191,14 +199,10 @@ namespace Antioch
         }
         kineticsModel = kin_keyword[models[imod]];
 
-        // construct a Reaction object    
-        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),typeReaction,kineticsModel);
-
-        while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        // usually Kooij is called Arrhenius, check here
+        if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
         {
-
-          // usually Kooij is called Arrhenius, check here
-          if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
+          if(rate_constant->FirstChildElement("b"))
           {
             if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
             {
@@ -210,7 +214,14 @@ namespace Antioch
                          << "thanks and a good day to you, user." << std::endl;
             }
           }
+        }
 
+        // construct a Reaction object    
+        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),
+                                                                               reversible,typeReaction,kineticsModel);
+
+        while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        {
           if(verbose) 
             {
               std::cout << " rate: " << models[imod] << " model\n" << "\n";
@@ -402,7 +413,6 @@ namespace Antioch
           reaction->FirstChildElement("rateCoeff")->FirstChildElement("Troe");
         if(troe)
         {
-
            antioch_assert_equal_to (ReactionType::TROE_FALLOFF, my_rxn->type());
            FalloffReaction<NumericType,TroeFalloff<NumericType> > *my_fall_rxn =
                 static_cast<FalloffReaction<NumericType,TroeFalloff<NumericType> > *> (my_rxn);
@@ -512,6 +522,7 @@ namespace Antioch
                   }
               }
           }
+
         if(verbose) std::cout << "\n\n";
 
         if(relevant_reaction) 
