@@ -43,6 +43,7 @@ namespace Antioch
   template<typename CoeffType>
   Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
                                        const std::string& equation, 
+                                       const bool &reversible,
                                        const ReactionType::ReactionType& type , 
                                        const KineticsModel::KineticsModel& kin );
 
@@ -50,6 +51,7 @@ namespace Antioch
   inline
   Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
                                        const std::string& equation, 
+                                       const bool &reversible,
                                        const ReactionType::ReactionType& type , 
                                        const KineticsModel::KineticsModel& kin )
   {
@@ -59,29 +61,29 @@ namespace Antioch
       {
       case(ReactionType::ELEMENTARY):
         {
-          reaction = new ElementaryReaction<CoeffType>(n_species,equation,kin);
+          reaction = new ElementaryReaction<CoeffType>(n_species,equation,reversible,kin);
         }
         break;
 
       case(ReactionType::DUPLICATE):
         {
-          reaction = new DuplicateReaction<CoeffType>(n_species,equation,kin);
+          reaction = new DuplicateReaction<CoeffType>(n_species,equation,reversible,kin);
         }
         break;
 
       case(ReactionType::THREE_BODY):
         {
-          reaction = new ThreeBodyReaction<CoeffType>(n_species,equation,kin);
+          reaction = new ThreeBodyReaction<CoeffType>(n_species,equation,reversible,kin);
         }
         break;
 
       case(ReactionType::LINDEMANN_FALLOFF):
         {
-          reaction = new FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >(n_species,equation,type,kin);
+          reaction = new FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
         }
       case(ReactionType::TROE_FALLOFF):
         {
-          reaction = new FalloffReaction<CoeffType,TroeFalloff<CoeffType> >(n_species,equation,type,kin);
+          reaction = new FalloffReaction<CoeffType,TroeFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
         }
         break;
 

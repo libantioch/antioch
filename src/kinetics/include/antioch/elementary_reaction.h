@@ -64,6 +64,7 @@ namespace Antioch
     //! Construct a single reaction mechanism.
     ElementaryReaction( const unsigned int n_species, 
                         const std::string &equation,
+                        const bool &reversible = true,
                         const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
     ~ElementaryReaction();
@@ -90,8 +91,9 @@ namespace Antioch
   inline
   ElementaryReaction<CoeffType>::ElementaryReaction( const unsigned int n_species,
                                                      const std::string &equation,
+                                                     const bool &reversible,
                                                      const KineticsModel::KineticsModel kin)
-    :Reaction<CoeffType>(n_species,equation,ReactionType::ELEMENTARY,kin)
+    :Reaction<CoeffType>(n_species,equation,reversible,ReactionType::ELEMENTARY,kin)
   {
     return;
   }
@@ -109,8 +111,9 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  StateType ElementaryReaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                                             const StateType& T) const
+  StateType ElementaryReaction<CoeffType>::compute_forward_rate_coefficient
+    ( const VectorStateType& /* molar_densities */,
+      const StateType& T) const
   {
     antioch_assert_equal_to(1, Reaction<CoeffType>::_forward_rate.size());
 
@@ -121,11 +124,12 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void ElementaryReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
-                                                                                        const StateType& T, 
-                                                                                        StateType& kfwd, 
-                                                                                        StateType& dkfwd_dT,
-                                                                                        VectorStateType& dkfwd_dX) const 
+  void ElementaryReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives
+    ( const VectorStateType& /* molar_densities */,
+      const StateType& T,
+      StateType& kfwd,
+      StateType& dkfwd_dT,
+      VectorStateType& dkfwd_dX) const
   {
     //dk_dT = dalpha_dT(T)
     this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
