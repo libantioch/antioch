@@ -108,8 +108,9 @@ namespace Antioch
   template <typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  StateType DuplicateReaction<CoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                                            const StateType& T  ) const
+  StateType DuplicateReaction<CoeffType>::compute_forward_rate_coefficient
+    ( const VectorStateType& /* molar_densities */,
+      const StateType& T  ) const
   {
     StateType kfwd = (*this->_forward_rate[0])(T);
     for(unsigned int ir = 1; ir < this->_forward_rate.size(); ir++)
@@ -123,11 +124,12 @@ namespace Antioch
   template <typename CoeffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void DuplicateReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
-                                                                                       const StateType& T, 
-                                                                                       StateType& kfwd, 
-                                                                                       StateType& dkfwd_dT,
-                                                                                       VectorStateType& dkfwd_dX) const
+  void DuplicateReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives
+    ( const VectorStateType& /* molar_densities */,
+      const StateType& T,
+      StateType& kfwd,
+      StateType& dkfwd_dT,
+      VectorStateType& dkfwd_dX) const
   {
     //dk_dT = sum_p dalpha_p_dT
     StateType kfwd_tmp = Antioch::zero_clone(T);

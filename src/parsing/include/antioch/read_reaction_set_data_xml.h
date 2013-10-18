@@ -196,7 +196,6 @@ namespace Antioch
         }
         kineticsModel = kin_keyword[models[imod]];
 
-
         // usually Kooij is called Arrhenius, check here
         if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
         {

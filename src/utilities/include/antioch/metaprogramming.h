@@ -127,7 +127,7 @@ void init_constant(Vector& output, const Scalar& example)
 
 template <typename T, typename Scalar>
 inline
-T constant_clone(const T& example, const Scalar& value) { return value; }
+T constant_clone(const T& /* example */, const Scalar& value) { return value; }
 
 } // end namespace Antioch
 
