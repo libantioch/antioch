@@ -27,6 +27,7 @@
 // Antioch
 #include "antioch/metaprogramming.h"
 #include "antioch/reaction.h"
+#include "antioch/particle_flux.h"
 
 // C++
 #include <vector>
@@ -61,6 +62,10 @@ namespace Antioch
     ~KineticsEvaluator();
 
     const ReactionSet<CoeffType>& reaction_set() const;
+
+    //!sets the particle flux
+    template<typename VectorStateType>
+    void set_particle_flux(ParticleFlux<VectorStateType> *pf, int r = -1);
 
     //! Compute species production/destruction rates per unit volume
     /*! \f$ \left(kg/sec/m^3\right)\f$ */
@@ -168,6 +173,14 @@ namespace Antioch
   KineticsEvaluator<CoeffType,StateType>::~KineticsEvaluator()
   {
     return;
+  }
+
+  template<typename CoeffType, typename StateType>
+  template<typename VectorStateType>
+  inline
+  void KineticsEvaluator<CoeffType,StateType>::set_particle_flux(ParticleFlux<VectorStateType> *pf, int r)
+  {
+    _reaction_set.set_particle_flux(pf,r);
   }
 
   template<typename CoeffType, typename StateType>
