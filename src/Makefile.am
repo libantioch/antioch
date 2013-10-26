@@ -17,7 +17,6 @@ libantioch_la_SOURCES =
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
 
 # utilities
-libantioch_la_SOURCES += utilities/src/antioch_version.C
 libantioch_la_SOURCES += utilities/src/input_utils.C
 
 
