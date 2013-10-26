@@ -13,31 +13,8 @@ lib_LTLIBRARIES = libantioch.la
 #----------------------------------------------
 libantioch_la_SOURCES =
 
-# core
-libantioch_la_SOURCES += core/src/chemical_species.C
-libantioch_la_SOURCES += core/src/chemical_mixture.C
-
-# kinetics
-libantioch_la_SOURCES += kinetics/src/reaction.C
-libantioch_la_SOURCES += kinetics/src/reaction_set.C
-libantioch_la_SOURCES += kinetics/src/kinetics_evaluator.C
-libantioch_la_SOURCES += kinetics/src/kinetics_type.C
-
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
-libantioch_la_SOURCES += parsing/src/read_reaction_set_data_xml.C
-libantioch_la_SOURCES += parsing/src/blottner_parsing.C
-libantioch_la_SOURCES += parsing/src/sutherland_parsing.C
-libantioch_la_SOURCES += parsing/src/cea_thermo_ascii_parsing.C
-libantioch_la_SOURCES += parsing/src/species_ascii_parsing.C
-
-# thermo
-libantioch_la_SOURCES += thermo/src/cea_curve_fit.C
-libantioch_la_SOURCES += thermo/src/cea_thermo.C
-libantioch_la_SOURCES += thermo/src/stat_mech_thermo.C
-
-# transport
-libantioch_la_SOURCES += transport/src/wilke_mixture.C
 
 # utilities
 libantioch_la_SOURCES += utilities/src/antioch_version.C
