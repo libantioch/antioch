@@ -16,9 +16,6 @@ libantioch_la_SOURCES =
 # parsing
 libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
 
-# utilities
-libantioch_la_SOURCES += utilities/src/input_utils.C
-
 
 #----------------------------
 # INCLUDES we want distributed
