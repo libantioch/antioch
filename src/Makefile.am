@@ -6,16 +6,6 @@ BUILT_SOURCES   = .license.stamp
 
 bin_PROGRAMS    = antioch_version 
 
-lib_LTLIBRARIES = libantioch.la
-
-#----------------------------------------------
-# List of source files to build dynamic library
-#----------------------------------------------
-libantioch_la_SOURCES =
-
-# parsing
-libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
-
 
 #----------------------------
 # INCLUDES we want distributed
@@ -53,6 +43,7 @@ pkginclude_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
 # parsing
 pkginclude_HEADERS += parsing/include/antioch/tinyxml2.h
+pkginclude_HEADERS += parsing/include/antioch/tinyxml2_imp.h
 pkginclude_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
 pkginclude_HEADERS += parsing/include/antioch/blottner_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/sutherland_parsing.h
@@ -103,7 +94,6 @@ pkginclude_HEADERS += $(top_builddir)/src/utilities/include/antioch/antioch_vers
 
 # Version app
 antioch_version_SOURCES = apps/version.C
-antioch_version_LDADD = libantioch.la
 
 #--------------------------------------
 #Local Directories to include for build
@@ -130,7 +120,7 @@ endif
 #---------------------------------
 # Embedded license header support
 #---------------------------------
-STAMPED_FILES = $(libantioch_la_SOURCES) $(pkginclude_HEADERS) $(antioch_version_SOURCES)
+STAMPED_FILES = $(pkginclude_HEADERS) $(antioch_version_SOURCES)
 
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl -S=$(top_srcdir)/src $(top_srcdir)/LICENSE $(STAMPED_FILES) 
