@@ -50,13 +50,12 @@ libantioch_la_SOURCES += utilities/src/input_utils.C
 #----------------------------
 # INCLUDES we want distributed
 #----------------------------
-includedir = $(prefix)/include/antioch
-include_HEADERS =
+pkginclude_HEADERS  =
 
 # core
-include_HEADERS += core/include/antioch/chemical_species.h
-include_HEADERS += core/include/antioch/chemical_mixture.h
-include_HEADERS += core/include/antioch/species_enum.h
+pkginclude_HEADERS += core/include/antioch/chemical_species.h
+pkginclude_HEADERS += core/include/antioch/chemical_mixture.h
+pkginclude_HEADERS += core/include/antioch/species_enum.h
 
 # unit
 include_HEADERS += units/include/antioch/converter.h
@@ -68,78 +67,78 @@ include_HEADERS += units/include/antioch/units.h
 include_HEADERS += units/include/antioch/unit_store.h
 
 # kinetics-kinetics models
-include_HEADERS += kinetics/include/antioch/kinetics_enum.h
-include_HEADERS += kinetics/include/antioch/kinetics_type.h
-include_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
-include_HEADERS += kinetics/include/antioch/berthelot_rate.h
-include_HEADERS += kinetics/include/antioch/arrhenius_rate.h
-include_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
-include_HEADERS += kinetics/include/antioch/kooij_rate.h
-include_HEADERS += kinetics/include/antioch/vanthoff_rate.h
+pkginclude_HEADERS += kinetics/include/antioch/kinetics_enum.h
+pkginclude_HEADERS += kinetics/include/antioch/kinetics_type.h
+pkginclude_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
+pkginclude_HEADERS += kinetics/include/antioch/berthelot_rate.h
+pkginclude_HEADERS += kinetics/include/antioch/arrhenius_rate.h
+pkginclude_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
+pkginclude_HEADERS += kinetics/include/antioch/kooij_rate.h
+pkginclude_HEADERS += kinetics/include/antioch/vanthoff_rate.h
 # kinetics-chemical process
-include_HEADERS += kinetics/include/antioch/reaction_enum.h
-include_HEADERS += kinetics/include/antioch/reaction.h
-include_HEADERS += kinetics/include/antioch/elementary_reaction.h
-include_HEADERS += kinetics/include/antioch/duplicate_reaction.h
-include_HEADERS += kinetics/include/antioch/threebody_reaction.h
-include_HEADERS += kinetics/include/antioch/falloff_reaction.h
-include_HEADERS += kinetics/include/antioch/lindemann_falloff.h
-include_HEADERS += kinetics/include/antioch/troe_falloff.h
+pkginclude_HEADERS += kinetics/include/antioch/reaction_enum.h
+pkginclude_HEADERS += kinetics/include/antioch/reaction.h
+pkginclude_HEADERS += kinetics/include/antioch/elementary_reaction.h
+pkginclude_HEADERS += kinetics/include/antioch/duplicate_reaction.h
+pkginclude_HEADERS += kinetics/include/antioch/threebody_reaction.h
+pkginclude_HEADERS += kinetics/include/antioch/falloff_reaction.h
+pkginclude_HEADERS += kinetics/include/antioch/lindemann_falloff.h
+pkginclude_HEADERS += kinetics/include/antioch/troe_falloff.h
 # kinetics-other
-include_HEADERS += kinetics/include/antioch/reaction_set.h
-include_HEADERS += kinetics/include/antioch/reaction_parsing.h
-include_HEADERS += kinetics/include/antioch/kinetics_parsing.h
-include_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
+pkginclude_HEADERS += kinetics/include/antioch/reaction_set.h
+pkginclude_HEADERS += kinetics/include/antioch/reaction_parsing.h
+pkginclude_HEADERS += kinetics/include/antioch/kinetics_parsing.h
+pkginclude_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
 # parsing
-include_HEADERS += parsing/include/antioch/tinyxml2.h
-include_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
-include_HEADERS += parsing/include/antioch/blottner_parsing.h
-include_HEADERS += parsing/include/antioch/sutherland_parsing.h
-include_HEADERS += parsing/include/antioch/cea_thermo_ascii_parsing.h
-include_HEADERS += parsing/include/antioch/cea_mixture_ascii_parsing.h
-include_HEADERS += parsing/include/antioch/species_ascii_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/tinyxml2.h
+pkginclude_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
+pkginclude_HEADERS += parsing/include/antioch/blottner_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/sutherland_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/cea_thermo_ascii_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/cea_mixture_ascii_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/species_ascii_parsing.h
 
 # thermo
-include_HEADERS += thermo/include/antioch/cea_curve_fit.h
-include_HEADERS += thermo/include/antioch/cea_mixture.h
-include_HEADERS += thermo/include/antioch/temp_cache.h
-include_HEADERS += thermo/include/antioch/cea_evaluator.h
-include_HEADERS += thermo/include/antioch/cea_thermo.h
-include_HEADERS += thermo/include/antioch/stat_mech_thermo.h
+pkginclude_HEADERS += thermo/include/antioch/cea_curve_fit.h
+pkginclude_HEADERS += thermo/include/antioch/cea_mixture.h
+pkginclude_HEADERS += thermo/include/antioch/temp_cache.h
+pkginclude_HEADERS += thermo/include/antioch/cea_evaluator.h
+pkginclude_HEADERS += thermo/include/antioch/cea_thermo.h
+pkginclude_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 
 # transport
-include_HEADERS += transport/include/antioch/blottner_viscosity.h
-include_HEADERS += transport/include/antioch/sutherland_viscosity.h
-include_HEADERS += transport/include/antioch/mixture_viscosity.h
-include_HEADERS += transport/include/antioch/wilke_mixture.h
-include_HEADERS += transport/include/antioch/eucken_thermal_conductivity.h
-include_HEADERS += transport/include/antioch/wilke_evaluator.h
-include_HEADERS += transport/include/antioch/constant_lewis_diffusivity.h
+pkginclude_HEADERS += transport/include/antioch/blottner_viscosity.h
+pkginclude_HEADERS += transport/include/antioch/sutherland_viscosity.h
+pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
+pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
+pkginclude_HEADERS += transport/include/antioch/eucken_thermal_conductivity.h
+pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
+pkginclude_HEADERS += transport/include/antioch/constant_lewis_diffusivity.h
 
 # utilities
-include_HEADERS += utilities/include/antioch/antioch_exceptions.h
-include_HEADERS += utilities/include/antioch/antioch_asserts.h
-include_HEADERS += utilities/include/antioch/cmath_shims.h
-include_HEADERS += utilities/include/antioch/eigen_utils.h
-include_HEADERS += utilities/include/antioch/eigen_utils_decl.h
-include_HEADERS += utilities/include/antioch/input_utils.h
-include_HEADERS += utilities/include/antioch/math_constants.h
-include_HEADERS += utilities/include/antioch/metaprogramming.h
-include_HEADERS += utilities/include/antioch/metaprogramming_decl.h
-include_HEADERS += utilities/include/antioch/metaphysicl_utils.h
-include_HEADERS += utilities/include/antioch/metaphysicl_utils_decl.h
-include_HEADERS += utilities/include/antioch/physical_constants.h
-include_HEADERS += utilities/include/antioch/string_utils.h
-include_HEADERS += utilities/include/antioch/valarray_utils.h
-include_HEADERS += utilities/include/antioch/valarray_utils_decl.h
-include_HEADERS += utilities/include/antioch/vector_utils.h
-include_HEADERS += utilities/include/antioch/vector_utils_decl.h
-include_HEADERS += utilities/include/antioch/vexcl_utils.h
-include_HEADERS += utilities/include/antioch/vexcl_utils_decl.h
+pkginclude_HEADERS += utilities/include/antioch/antioch_exceptions.h
+pkginclude_HEADERS += utilities/include/antioch/antioch_asserts.h
+pkginclude_HEADERS += utilities/include/antioch/cmath_shims.h
+pkginclude_HEADERS += utilities/include/antioch/eigen_utils.h
+pkginclude_HEADERS += utilities/include/antioch/eigen_utils_decl.h
+pkginclude_HEADERS += utilities/include/antioch/input_utils.h
+pkginclude_HEADERS += utilities/include/antioch/math_constants.h
+pkginclude_HEADERS += utilities/include/antioch/metaprogramming.h
+pkginclude_HEADERS += utilities/include/antioch/metaprogramming_decl.h
+pkginclude_HEADERS += utilities/include/antioch/metaphysicl_utils.h
+pkginclude_HEADERS += utilities/include/antioch/metaphysicl_utils_decl.h
+pkginclude_HEADERS += utilities/include/antioch/physical_constants.h
+pkginclude_HEADERS += utilities/include/antioch/string_utils.h
+pkginclude_HEADERS += utilities/include/antioch/valarray_utils.h
+pkginclude_HEADERS += utilities/include/antioch/valarray_utils_decl.h
+pkginclude_HEADERS += utilities/include/antioch/vector_utils.h
+pkginclude_HEADERS += utilities/include/antioch/vector_utils_decl.h
+pkginclude_HEADERS += utilities/include/antioch/vexcl_utils.h
+pkginclude_HEADERS += utilities/include/antioch/vexcl_utils_decl.h
 
 # Needs to be builddir since this is generated by configure
-include_HEADERS += $(top_builddir)/src/utilities/include/antioch/antioch_version.h
+pkginclude_HEADERS += $(top_builddir)/src/utilities/include/antioch/antioch_version.h
 
 # Version app
 antioch_version_SOURCES = apps/version.C
@@ -171,7 +170,7 @@ endif
 #---------------------------------
 # Embedded license header support
 #---------------------------------
-STAMPED_FILES = $(libantioch_la_SOURCES) $(include_HEADERS) $(antioch_version_SOURCES)
+STAMPED_FILES = $(libantioch_la_SOURCES) $(pkginclude_HEADERS) $(antioch_version_SOURCES)
 
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl -S=$(top_srcdir)/src $(top_srcdir)/LICENSE $(STAMPED_FILES) 
