@@ -58,13 +58,13 @@ pkginclude_HEADERS += core/include/antioch/chemical_mixture.h
 pkginclude_HEADERS += core/include/antioch/species_enum.h
 
 # unit
-include_HEADERS += units/include/antioch/converter.h
-include_HEADERS += units/include/antioch/insi.h
-include_HEADERS += units/include/antioch/siprefix.h
-include_HEADERS += units/include/antioch/unit_base.h
-include_HEADERS += units/include/antioch/unit_defs.h
-include_HEADERS += units/include/antioch/units.h
-include_HEADERS += units/include/antioch/unit_store.h
+pkginclude_HEADERS += units/include/antioch/converter.h
+pkginclude_HEADERS += units/include/antioch/insi.h
+pkginclude_HEADERS += units/include/antioch/siprefix.h
+pkginclude_HEADERS += units/include/antioch/unit_base.h
+pkginclude_HEADERS += units/include/antioch/unit_defs.h
+pkginclude_HEADERS += units/include/antioch/units.h
+pkginclude_HEADERS += units/include/antioch/unit_store.h
 
 # kinetics-kinetics models
 pkginclude_HEADERS += kinetics/include/antioch/kinetics_enum.h
