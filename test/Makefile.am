@@ -44,6 +44,7 @@ check_PROGRAMS += lindemann_falloff_unit
 check_PROGRAMS += troe_falloff_unit
 check_PROGRAMS += kinetics_reversibility_unit
 check_PROGRAMS += parsing_xml
+check_PROGRAMS += kinetics_reactive_scheme_unit
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -106,6 +107,7 @@ lindemann_falloff_unit_SOURCES = lindemann_falloff_unit.C
 troe_falloff_unit_SOURCES = troe_falloff_unit.C
 kinetics_reversibility_unit_SOURCES = kinetics_reversibility_unit.C
 parsing_xml_SOURCES = parsing_xml.C
+kinetics_reactive_scheme_unit_SOURCES = kinetics_reactive_scheme_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -154,6 +156,7 @@ TESTS += lindemann_falloff_unit
 TESTS += troe_falloff_unit
 TESTS += kinetics_reversibility_unit
 TESTS += parsing_xml.sh
+TESTS += kinetics_reactive_scheme_unit.sh
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
