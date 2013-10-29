@@ -136,6 +136,11 @@ namespace Antioch
     
     bool initialized() const;
 
+
+    /*! \return the reversibility state of reaction.
+     */
+    bool reversible() const;
+
     //! \returns the number of reactants.
     unsigned int n_reactants() const;
 
@@ -341,6 +346,12 @@ namespace Antioch
     return _initialized;
   }
 
+  template<typename CoeffType>
+  inline
+  bool Reaction<CoeffType>::reversible() const
+  {
+    return _reversible;
+  }
 
   template<typename CoeffType>
   inline

@@ -558,10 +558,6 @@ namespace Antioch
         const Reaction<CoeffType>& reaction = this->reaction(rxn);
         kfwdCoeff[rxn] = reaction.compute_forward_rate_coefficient(molar_densities,T);
         kfwd[rxn] = kfwdCoeff[rxn];
-        StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
-
-        kbkwdCoeff[rxn] = kfwdCoeff[rxn]/keq;
-        kbkwd[rxn] = kbkwdCoeff[rxn];
 
         for (unsigned int r=0; r<reaction.n_reactants(); r++)
           {
@@ -569,12 +565,20 @@ namespace Antioch
                               static_cast<int>(reaction.reactant_stoichiometric_coefficient(r)) );
           }
         kfwd[rxn] *= fwdC[rxn];
-        for (unsigned int p=0; p<reaction.n_products(); p++)
-          {
-            bkwdC[rxn] *= pow( molar_densities[reaction.product_id(p)],
+
+        if(reaction.reversible())
+        {
+          StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
+
+          kbkwdCoeff[rxn] = kfwdCoeff[rxn]/keq;
+          kbkwd[rxn] = kbkwdCoeff[rxn];
+          for (unsigned int p=0; p<reaction.n_products(); p++)
+            {
+              bkwdC[rxn] *= pow( molar_densities[reaction.product_id(p)],
                                static_cast<int>(reaction.product_stoichiometric_coefficient(p)) );
-          }
-        kbkwd[rxn] *= bkwdC[rxn];
+            }
+          kbkwd[rxn] *= bkwdC[rxn];
+        }
 
         netRates[rxn] = kfwd[rxn] - kbkwd[rxn];
 
