@@ -358,9 +358,9 @@ namespace Antioch
     return _initialized;
   }
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename VectorCoeffType>
   inline
-  bool Reaction<CoeffType>::reversible() const
+  bool Reaction<CoeffType,VectorCoeffType>::reversible() const
   {
     return _reversible;
   }
