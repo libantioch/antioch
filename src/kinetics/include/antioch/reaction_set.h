@@ -116,13 +116,13 @@ namespace Antioch
     void get_reactive_scheme( const StateType& T,
                               const VectorStateType& molar_densities,
                               const VectorStateType& h_RT_minus_s_R,
-                              VectorStateType& netRates,
-                              VectorStateType& kfwdCoeff,
-                              VectorStateType& kbkwdCoeff,
+                              VectorStateType& net_rates,
+                              VectorStateType& kfwd_const,
+                              VectorStateType& kbkwd_const,
                               VectorStateType& kfwd,
                               VectorStateType& kbkwd,
-                              VectorStateType& fwdC,
-                              VectorStateType& bkwdC) const;
+                              VectorStateType& fwd_conc,
+                              VectorStateType& bkwd_conc) const;
 
 
     //! Formatted print, by default to \p std::cout.
@@ -329,10 +329,10 @@ namespace Antioch
   {
 
     //filling matrixes
-    VectorStateType netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC;
+    VectorStateType netRate,kfwd_const,kbkwd_const,kfwd,kbkwd,fwd_conc,bkwd_conc;
 
     //getting reaction infos
-    get_reactive_scheme(T,molar_densities,h_RT_minus_s_R,netRate,kfwdCoeff,kbkwdCoeff,kfwd,kbkwd,fwdC,bkwdC);
+    get_reactive_scheme(T,molar_densities,h_RT_minus_s_R,netRate,kfwd_const,kbkwd_const,kfwd,kbkwd,fwd_conc,bkwd_conc);
 
     lossMatrix.resize(this->n_species());
     prodMatrix.resize(this->n_species());
@@ -391,14 +391,14 @@ namespace Antioch
     output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        output << std::setw(15) << kfwdCoeff[rxn] << "," << std::setw(15) << kbkwdCoeff[rxn];
+        output << std::setw(15) << kfwd_const[rxn] << "," << std::setw(15) << kbkwd_const[rxn];
       }
     output << std::endl;
     // // conc
     output << std::setw(10) << " ";
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
       {
-        output << std::setw(15) << fwdC[rxn] << "," << std::setw(15) << bkwdC[rxn];
+        output << std::setw(15) << fwd_conc[rxn] << "," << std::setw(15) << bkwd_conc[rxn];
       }
     output << std::endl;
     // // rates
@@ -568,13 +568,13 @@ namespace Antioch
   void ReactionSet<CoeffType>::get_reactive_scheme( const StateType& T,
                                                     const VectorStateType& molar_densities,
                                                     const VectorStateType& h_RT_minus_s_R,
-                                                    VectorStateType& netRates,
-                                                    VectorStateType& kfwdCoeff,
-                                                    VectorStateType& kbkwdCoeff,
+                                                    VectorStateType& net_rates,
+                                                    VectorStateType& kfwd_const,
+                                                    VectorStateType& kbkwd_const,
                                                     VectorStateType& kfwd,
                                                     VectorStateType& kbkwd,
-                                                    VectorStateType& fwdC,
-                                                    VectorStateType& bkwdC) const
+                                                    VectorStateType& fwd_conc,
+                                                    VectorStateType& bkwd_conc) const
   {
     //!\todo Make these assertions vector-compatible
     // antioch_assert_greater(T, 0.0);
@@ -585,39 +585,43 @@ namespace Antioch
     // useful constants
     const StateType P0_RT = _P0_R/T; // used to transform equilibrium constant from pressure units
 
-    netRates.resize(this->n_reactions(),0.);
-    kfwdCoeff.resize(this->n_reactions(),0.);
+    net_rates.resize(this->n_reactions(),0.);
+    kfwd_const.resize(this->n_reactions(),0.);
     kfwd.resize(this->n_reactions(),0.);
-    kbkwdCoeff.resize(this->n_reactions(),0.);
+    kbkwd_const.resize(this->n_reactions(),0.);
     kbkwd.resize(this->n_reactions(),0.);
-    fwdC.resize(this->n_reactions(),1.);
-    bkwdC.resize(this->n_reactions(),1.);
+    fwd_conc.resize(this->n_reactions(),1.);
+    bkwd_conc.resize(this->n_reactions(),1.);
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
         const Reaction<CoeffType>& reaction = this->reaction(rxn);
-        kfwdCoeff[rxn] = reaction.compute_forward_rate_coefficient(molar_densities,T);
-        kfwd[rxn] = kfwdCoeff[rxn];
-        StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
-
-        kbkwdCoeff[rxn] = kfwdCoeff[rxn]/keq;
-        kbkwd[rxn] = kbkwdCoeff[rxn];
+        kfwd_const[rxn] = reaction.compute_forward_rate_coefficient(molar_densities,T);
+        kfwd[rxn] = kfwd_const[rxn];
 
         for (unsigned int r=0; r<reaction.n_reactants(); r++)
           {
-            fwdC[rxn] *= pow( molar_densities[reaction.reactant_id(r)],
+            fwd_conc[rxn] *= pow( molar_densities[reaction.reactant_id(r)],
                               static_cast<int>(reaction.reactant_stoichiometric_coefficient(r)) );
           }
-        kfwd[rxn] *= fwdC[rxn];
-        for (unsigned int p=0; p<reaction.n_products(); p++)
-          {
-            bkwdC[rxn] *= pow( molar_densities[reaction.product_id(p)],
-                               static_cast<int>(reaction.product_stoichiometric_coefficient(p)) );
-          }
-        kbkwd[rxn] *= bkwdC[rxn];
+        kfwd[rxn] *= fwd_conc[rxn];
 
-        netRates[rxn] = kfwd[rxn] - kbkwd[rxn];
+        if(reaction.reversible())
+        {
+          StateType keq = reaction.equilibrium_constant( P0_RT, h_RT_minus_s_R );
+
+          kbkwd_const[rxn] = kfwd_const[rxn]/keq;
+          kbkwd[rxn] = kbkwd_const[rxn];
+          for (unsigned int p=0; p<reaction.n_products(); p++)
+            {
+              bkwd_conc[rxn] *= pow( molar_densities[reaction.product_id(p)],
+                               static_cast<int>(reaction.product_stoichiometric_coefficient(p)) );
+            }
+          kbkwd[rxn] *= bkwd_conc[rxn];
+        }
+
+        net_rates[rxn] = kfwd[rxn] - kbkwd[rxn];
 
       }
 

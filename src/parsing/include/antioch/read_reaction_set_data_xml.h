@@ -136,6 +136,7 @@ namespace Antioch
     proc_keyword["Elementary"]        = ReactionType::ELEMENTARY;
     proc_keyword["Duplicate"]         = ReactionType::DUPLICATE;
     proc_keyword["ThreeBody"]         = ReactionType::THREE_BODY;
+    proc_keyword["threeBody"]         = ReactionType::THREE_BODY; // Cantera/backward compatiblity
     proc_keyword["LindemannFalloff"]  = ReactionType::LINDEMANN_FALLOFF;
     proc_keyword["TroeFalloff"]       = ReactionType::TROE_FALLOFF;
 
