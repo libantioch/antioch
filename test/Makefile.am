@@ -63,8 +63,6 @@ AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
 AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
 LIBS = $(antioch_optional_test_LIBS)
 
-LDADD = $(top_builddir)/src/libantioch.la
-
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
 chem_mixture_vec_unit_SOURCES = chem_mixture_vec_unit.C
