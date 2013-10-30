@@ -1,4 +1,6 @@
 Version 0.1.0 (In progress)
+* Expanding transport to include S3D models
+* Patched to support header only implementation of ANTIOCH	
 
 Version 0.0.6
 * More test coverage for newer reaction types
