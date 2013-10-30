@@ -54,24 +54,32 @@ namespace Antioch
   void antioch_version_stdout();
   int  get_antioch_version();
 
+  template< typename CharT, typename Traits >
+  std::basic_ostream<CharT,Traits>&
+  antioch_version(std::basic_ostream<CharT,Traits> &os)
+  {
+    // A little automatic C-style string concatenation goes a long way.
+    // It also lets using strings(1) on a binary show something useful.
+    return
+    os << "--------------------------------------------------------\n"
+          "antioch Package: Version = " ANTIOCH_LIB_VERSION " ("
+       << get_antioch_version() << ")\n"
+          "\n"
+          ANTIOCH_LIB_RELEASE "\n"
+          "\n"
+          "Build Date   = " ANTIOCH_BUILD_DATE     "\n"
+          "Build Host   = " ANTIOCH_BUILD_HOST     "\n"
+          "Build User   = " ANTIOCH_BUILD_USER     "\n"
+          "Build Arch   = " ANTIOCH_BUILD_ARCH     "\n"
+          "Build Rev    = " ANTIOCH_BUILD_VERSION  "\n"
+          "\n"
+          "C++ Config   = " ANTIOCH_CXX " " ANTIOCH_CXXFLAGS "\n"
+          "--------------------------------------------------------\n";
+  }
+
   void antioch_version_stdout()
   {
-    std::cout << "--------------------------------------------------------" << std::endl;
-    std::cout << "antioch Package: Version = " << ANTIOCH_LIB_VERSION;
-    std::cout << " (" << get_antioch_version() << ")" << std::endl << std::endl;
-
-    std::cout << ANTIOCH_LIB_RELEASE << std::endl << std::endl;
-
-    std::cout << "Build Date   = " << ANTIOCH_BUILD_DATE     << std::endl;
-    std::cout << "Build Host   = " << ANTIOCH_BUILD_HOST     << std::endl;
-    std::cout << "Build User   = " << ANTIOCH_BUILD_USER     << std::endl;
-    std::cout << "Build Arch   = " << ANTIOCH_BUILD_ARCH     << std::endl;
-    std::cout << "Build Rev    = " << ANTIOCH_BUILD_VERSION  << std::endl << std::endl;
-
-    std::cout << "C++ Config   = " << ANTIOCH_CXX << " " << ANTIOCH_CXXFLAGS << std::endl;
-    std::cout << "--------------------------------------------------------" << std::endl;
-
-    return;
+    antioch_version(std::cout).flush();
   }
 
   int get_antioch_version()
