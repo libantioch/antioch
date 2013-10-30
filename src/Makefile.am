@@ -6,47 +6,6 @@ BUILT_SOURCES   = .license.stamp
 
 bin_PROGRAMS    = antioch_version 
 
-lib_LTLIBRARIES = libantioch.la
-
-#----------------------------------------------
-# List of source files to build dynamic library
-#----------------------------------------------
-libantioch_la_SOURCES =
-
-# core
-libantioch_la_SOURCES += core/src/chemical_species.C
-libantioch_la_SOURCES += core/src/chemical_mixture.C
-
-#unit
-libantioch_la_SOURCES += units/src/unit_defs.C
-
-# kinetics
-libantioch_la_SOURCES += kinetics/src/reaction.C
-libantioch_la_SOURCES += kinetics/src/reaction_set.C
-libantioch_la_SOURCES += kinetics/src/kinetics_evaluator.C
-libantioch_la_SOURCES += kinetics/src/kinetics_type.C
-
-# parsing
-libantioch_la_SOURCES += parsing/src/tinyxml2.cpp
-libantioch_la_SOURCES += parsing/src/read_reaction_set_data_xml.C
-libantioch_la_SOURCES += parsing/src/blottner_parsing.C
-libantioch_la_SOURCES += parsing/src/sutherland_parsing.C
-libantioch_la_SOURCES += parsing/src/cea_thermo_ascii_parsing.C
-libantioch_la_SOURCES += parsing/src/species_ascii_parsing.C
-
-# thermo
-libantioch_la_SOURCES += thermo/src/cea_curve_fit.C
-libantioch_la_SOURCES += thermo/src/cea_thermo.C
-libantioch_la_SOURCES += thermo/src/stat_mech_thermo.C
-
-# transport
-libantioch_la_SOURCES += transport/src/wilke_mixture.C
-
-# utilities
-libantioch_la_SOURCES += utilities/src/antioch_version.C
-libantioch_la_SOURCES += utilities/src/input_utils.C
-
-
 #----------------------------
 # INCLUDES we want distributed
 #----------------------------
@@ -92,6 +51,7 @@ pkginclude_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
 # parsing
 pkginclude_HEADERS += parsing/include/antioch/tinyxml2.h
+pkginclude_HEADERS += parsing/include/antioch/tinyxml2_imp.h
 pkginclude_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
 pkginclude_HEADERS += parsing/include/antioch/blottner_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/sutherland_parsing.h
@@ -142,7 +102,6 @@ pkginclude_HEADERS += $(top_builddir)/src/utilities/include/antioch/antioch_vers
 
 # Version app
 antioch_version_SOURCES = apps/version.C
-antioch_version_LDADD = libantioch.la
 
 #--------------------------------------
 #Local Directories to include for build
@@ -170,7 +129,7 @@ endif
 #---------------------------------
 # Embedded license header support
 #---------------------------------
-STAMPED_FILES = $(libantioch_la_SOURCES) $(pkginclude_HEADERS) $(antioch_version_SOURCES)
+STAMPED_FILES = $(pkginclude_HEADERS) $(antioch_version_SOURCES)
 
 .license.stamp: $(top_srcdir)/LICENSE
 	$(top_srcdir)/src/common/lic_utils/update_license.pl -S=$(top_srcdir)/src $(top_srcdir)/LICENSE $(STAMPED_FILES) 

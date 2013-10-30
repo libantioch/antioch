@@ -39,7 +39,7 @@
 #include "antioch/units.h"
 
 // XML
-#include "antioch/tinyxml2.h"
+#include "antioch/tinyxml2_imp.h"
 
 // C++
 #include <string>
