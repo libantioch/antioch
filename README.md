@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/libantioch/antioch.png)](https://travis-ci.org/libantioch/antioch.png)
+
 Antioch
 =======
 
