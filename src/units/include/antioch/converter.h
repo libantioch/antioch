@@ -20,8 +20,8 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-#ifndef _UNITS_CONVERTER_
-#define _UNITS_CONVERTER_
+#ifndef ANTIOCH_CONVERTER_H
+#define ANTIOCH_CONVERTER_H
 
 //Antioch
 #include "antioch/metaprogramming.h"

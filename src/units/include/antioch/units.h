@@ -20,8 +20,8 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-#ifndef _UNITS_MANAGER_
-#define _UNITS_MANAGER_
+#ifndef ANTIOCH_UNITS_H
+#define ANTIOCH_UNITS_H
 
 //Antioch
 #include "antioch/metaprogramming.h"

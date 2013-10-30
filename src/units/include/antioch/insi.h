@@ -20,8 +20,8 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-#ifndef _IN_SI_
-#define _IN_SI_
+#ifndef ANTIOCH_IN_SI_H
+#define ANTIOCH_IN_SI_H
 
 //Antioch
 #include "antioch/antioch_asserts.h"

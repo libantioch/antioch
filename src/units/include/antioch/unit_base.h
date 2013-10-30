@@ -21,8 +21,8 @@
 //
 //-----------------------------------------------------------------------el-
 //
-#ifndef _ANTIOCH_BASE_UNIT_
-#define _ANTIOCH_BASE_UNIT_
+#ifndef ANTIOCH_UNIT_BASE_H
+#define ANTIOCH_UNIT_BASE_H
 
 //Antioch
 #include "antioch/antioch_asserts.h"

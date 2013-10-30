@@ -20,8 +20,8 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-#ifndef _SI_PREFIX_
-#define _SI_PREFIX_
+#ifndef ANTIOCH_SI_PREFIX_H
+#define ANTIOCH_SI_PREFIX_H
 
 //Antioch
 #include "antioch/metaprogramming.h"

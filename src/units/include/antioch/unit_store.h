@@ -20,8 +20,8 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-#ifndef _UNITS_STORAGE_
-#define _UNITS_STORAGE_
+#ifndef ANTIOCH_UNITS_STORE_H
+#define ANTIOCH_UNITS_STORE_H
 
 /*!\file unit_store.hpp
  * \brief Provided units and prefixes
