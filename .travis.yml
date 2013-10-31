@@ -5,4 +5,4 @@ compiler:
 before_script:
   - sudo apt-get update -qq
   - sudo apt-get install -qq libeigen3-dev
-script: ./bootstrap && ./configure && make && make check || (cat test-suite.log && false)
+script: ./bootstrap && ./configure && make && make check || (cat test/test-suite.log && false)
