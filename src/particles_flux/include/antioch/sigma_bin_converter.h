@@ -72,13 +72,22 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
   Antioch::set_zero(y_custom);
 
   unsigned int ilow(0);
-  while(x_custom[ilow] <= x_old[0])ilow++; //skipping too low bins
+  while(x_custom[ilow] < x_old[0])ilow++; //skipping too low bins
 
   unsigned int j(1);
   for(unsigned int i = ilow; i < x_custom.size() - 1; i++)//bin per bin, right stairs: y_old[i] from x_old[i] to x_old[i+1]
   {
+//equality check here
+     while(x_old[j-1] == x_custom[i] && x_old[j] == x_custom[i+1])
+     {
+        y_custom[i] = y_old[j-1];
+        j++;
+        i++;
+        if(i == x_custom.size() - 1)return;
+     }
+
      if(x_old.back() < x_custom[i])return;
-     while(x_old[j] <= x_custom[i]) //find lowest j / x_old[j] > x_custom[i]
+     while(x_old[j] <= x_custom[i]) //find lowest j / x_custom[i] < x_old[j]
      {
        j++;
        if(!(j < x_old.size()))return;
