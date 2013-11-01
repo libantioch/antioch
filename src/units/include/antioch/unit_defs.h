@@ -55,8 +55,8 @@ namespace Antioch{
 
 namespace UnitBaseStorage{
 
-extern const UnitBaseConstant::UnitBaseStore<long double> storage_unit;
-extern const UnitBaseConstant::SIPrefixeStore<long double> storage_prefixe;
+const UnitBaseConstant::UnitBaseStore<long double> storage_unit;
+const UnitBaseConstant::SIPrefixeStore<long double> storage_prefixe;
 
 inline
 const UnitBaseConstant::UnitBaseStore<long double>  known_units()
@@ -70,21 +70,6 @@ const UnitBaseConstant::SIPrefixeStore<long double> known_prefixes()
   return storage_prefixe;
 }
 
-/*
-template <typename T>
-inline
-void allKnownUnitBase(std::ostream &out = std::cout);
-
-template <typename Statetype>
-inline
-void allKnownPrefixes(std::ostream &out = std::cout);
-
-template <typename T>
-void check_unit_consistency();
-
-template <T>
-void allKnownHomogeneousUnitBase(const std::string &target, std::ostream &out = std::cout);
-*/
 }//end namespace UnitBaseStorage
 
 
