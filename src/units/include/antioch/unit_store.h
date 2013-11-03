@@ -94,7 +94,7 @@ store.push_back(UnitBase<T>("rad","radian",  1.0L,0.,0,0,0,0,0,0,0,1));
  * int m, int kg=0, int s=0, int A=0, int K=0, int mol=0, int cd=0, int rad=0)
  */
 //length
-store.push_back(UnitBase<T>("in", "inche",            0.0254L,          0.,1));
+store.push_back(UnitBase<T>("in", "inch",             0.0254L,          0.,1));
 store.push_back(UnitBase<T>("ft", "foot",             0.3048L,          0.,1));
 store.push_back(UnitBase<T>("ua", "astronomical unit",1.49597870700e11L,0.,1)); //~ Sun-Earth distance, BIPM symbol
 store.push_back(UnitBase<T>("ang","angstrom",         1e-10L,           0.,1)); 
