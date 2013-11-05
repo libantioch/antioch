@@ -43,6 +43,7 @@ namespace Antioch
   */
   void skip_comment_lines( std::istream &in, const char comment_start);
 
+  inline
   void skip_comment_lines( std::istream &in, const char comment_start)
   {
     char c, line[256];
