@@ -39,6 +39,8 @@ namespace Antioch
         VectorCoeffType _flux;
         bool _updated;
         bool _x_updated;
+        unsigned int _n_coupled;
+        unsigned int _n_updated;
 
      public:
         ParticleFlux();
@@ -65,8 +67,15 @@ namespace Antioch
         template<typename VectorStateType>
         void set_flux(const VectorStateType &flux);
 
+        //!
         void update_done();
-        
+
+        //!
+        void add_a_reaction();
+
+        //!
+        void remove_a_reaction();
+
   };
 
   template<typename VectorCoeffType>
@@ -81,6 +90,23 @@ namespace Antioch
   const VectorCoeffType &ParticleFlux<VectorCoeffType>::flux() const
   {
      return _flux;
+  }
+
+  template<typename VectorCoeffType>
+  inline
+  void ParticleFlux<VectorCoeffType>::remove_a_reaction()
+  {
+     _n_coupled--;
+     return;
+  }
+
+  template<typename VectorCoeffType>
+  inline
+  void ParticleFlux<VectorCoeffType>::add_a_reaction()
+  {
+     _n_coupled++;
+     _updated = true;
+     return;
   }
 
   template<typename VectorCoeffType>
@@ -101,8 +127,13 @@ namespace Antioch
   inline
   void ParticleFlux<VectorCoeffType>::update_done()
   {
-     _updated   = false;
-     _x_updated = false;
+     _n_updated++;
+     if(_n_updated == _n_coupled)
+     {
+        _updated   = false;
+        _x_updated = false;
+        _n_updated = 0;
+     }
      return;
   }
 
@@ -129,7 +160,9 @@ namespace Antioch
   inline
   ParticleFlux<VectorCoeffType>::ParticleFlux():
   _updated(false),
-  _x_updated(false)
+  _x_updated(false),
+  _n_coupled(0),
+  _n_updated(0)
   {
     return;
   }
@@ -147,7 +180,9 @@ namespace Antioch
   _abscissa(x),
   _flux(flux),
   _updated(true),
-  _x_updated(true)
+  _x_updated(true),
+  _n_coupled(0),
+  _n_updated(0)
   {
     return;
   }

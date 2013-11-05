@@ -519,7 +519,18 @@ namespace Antioch
   inline
   void Reaction<CoeffType,VectorCoeffType>::set_particle_flux(ParticleFlux<VectorStateType> *pf)
   {
+///first deal with the particle_flux pointer, if there was another, tell him it loses a reaction
+    if(_particle_flux)_particle_flux->remove_a_reaction();
+//then we set it and tell the new one it's got a new reaction
     _particle_flux = pf;
+    _particle_flux->add_a_reaction();
+
+    antioch_assert_equal_to(_type,ReactionType::ELEMENTARY);//elementary reaction
+    if(_particle_flux->updated())
+    {
+      _forward_rate[0]->calculate_rate_constant(_particle_flux->flux(),_particle_flux->abscissa(),true);
+      _particle_flux->update_done();
+    }
     return;
   }
 
