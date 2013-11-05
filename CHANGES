@@ -1,5 +1,22 @@
 Version 0.1.0 (In progress)
 
+Version 0.0.8
+* Bugfixes when using VexCL
+* Better OpenCL, VexCL detection
+* Added ANTIOCH_VERSION_AT_LEAST macro (thansk to @RhysU)
+* Initial support for automatic differentation
+  using MetaPhysicL
+* XML parsing support of new reaction types
+* Support irreversible reactions
+* Use Automake's pkginclude feature (thanks to @RhysU)
+* Travis-CI support added (with help from @RhysU and @ddemidov)
+* Converted to header only, no library is generated during
+  the build now
+* Don't distribute the docs in the tarball
+
+Version 0.0.7
+* Auto-function optimizations, when compiler is new enough.
+
 Version 0.0.6
 * More test coverage for newer reaction types
 * Better OpenCL detection for OS X
