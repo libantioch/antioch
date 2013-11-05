@@ -5,7 +5,7 @@ AC_PREREQ(2.61)
 AC_INIT([Antioch], [0.0.7], [pbauman@ices.utexas.edu], [antioch])
 PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
 AC_SUBST([PACKAGE_DESCRIPTION])
-PACKAGE_URL="http://red.ices.utexas.edu/projects/antioch/"
+PACKAGE_URL="https://github.com/libantioch/antioch/"
 AC_SUBST([PACKAGE_URL])
 AC_CONFIG_MACRO_DIR([m4])
 
