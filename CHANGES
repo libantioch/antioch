@@ -12,6 +12,7 @@ Version 0.0.8
 * Travis-CI support added (with help from @RhysU and @ddemidov)
 * Converted to header only, no library is generated during
   the build now
+* Don't distribute the docs in the tarball
 
 Version 0.0.7
 * Auto-function optimizations, when compiler is new enough.
