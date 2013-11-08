@@ -43,7 +43,7 @@ namespace Antioch{
  * To add prefixes, one needs to add a SIPrefixes instance in the
  * const SIPrefixes Prefixes[] variable in the unit_defs.hpp file:
  *
- * SIPrefixes("prefixe",value)
+ * SIPrefixes("prefix",value)
  */
 template <typename T = double>
 class SIPrefixes{

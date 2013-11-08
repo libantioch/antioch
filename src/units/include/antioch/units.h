@@ -89,8 +89,8 @@ namespace Antioch{
  *                                                   \end{array}\right.
  *   \f]
  *
- * At each unit parsing level, the unit is parsed between a prefixe, a symbol and a power.
- * The symbol "cm-3" will be parsed as a prefixe "c", a symbol "m" and a power "-3". To this
+ * At each unit parsing level, the unit is parsed between a prefix, a symbol and a power.
+ * The symbol "cm-3" will be parsed as a prefix "c", a symbol "m" and a power "-3". To this
  * parsing, the symbol before the unit is considered. If there is none or it is a dot, nothing
  * to do, but if this is a slash, the power has to be multiplied by -1. Thus
  * the Converter object will have the corresponding SIPrefixes values (Prefixe[6] is this case,
@@ -99,7 +99,7 @@ namespace Antioch{
  * the value 3 if this character is a slash. The correspondancies between the index in the power vector and
  * the unit is done explicitely.
  *
- * A special treatment is reserved for the kg unit, as it contains a prefixe.
+ * A special treatment is reserved for the kg unit, as it contains a prefix.
  *
  * This method supports a wide variety of symbol writing, like the use of parenthesises. The
  * used symbol is a fully developped one. 
@@ -414,13 +414,13 @@ class Units{
  * \param bool doConv. Switch to perform or not the coefficient calculation.
  *
  * The method works in two times:
- *   - first parsing the symbol into prefixe + symbol + power
+ *   - first parsing the symbol into prefix + symbol + power
  *   - second update the power vector and, if doConv is true, the coefficient.
  * 
  * The parsing uses the methods int parse_power(std::string,int&) and parse_prefix_unit(int&,int&,std::string).
  * The idea is to scan the knownUnits[] and Prefixes[] array and find the corresponding unit
- * and prefixe. The method int parse_power returns the power, while
- * the integer iPre and iUnit characterize the prefixe and unit, with a value of -1 if
+ * and prefix. The method int parse_power returns the power, while
+ * the integer iPre and iUnit characterize the prefix and unit, with a value of -1 if
  * not found. An unknown unit will return an error.
  *
  * The update then is twofold. Adding to the power vector the power vector of
@@ -434,7 +434,7 @@ class Units{
  *
  * If the conversion is to be done, multiplying the coefficient by the coefficient 
  * of the known unit found, multiplied by the
- * coefficient of the prefixe, raise to the power by the parsed power, updated by the signe:
+ * coefficient of the prefix, raise to the power by the parsed power, updated by the signe:
  * \f[
  *      (c) = (c) \times \left( pr_{iPre} \times (c)_{iUnit}\right)^{s_u \times p_u}
  * \f]
@@ -463,7 +463,7 @@ class Units{
  * is tested to be a knownUnits[].
  *
  * This method relies on the hypothesis that all possible pairs of Prefixes[] and knownUnits[]
- * (including no prefixe) are different.
+ * (including no prefix) are different.
  */
         void parse_prefix_unit(int &iUnit,int &iPre, const std::string &unit)  const;
 /*!\brief Scanner of knownUnits[], sends back the corresponding iUnit, -1 if not found.*/
@@ -779,7 +779,7 @@ void Units<T>::parse_prefix_unit(int &iUnit,int &iPre,const std::string& unit) c
 {
   iPre = -1;
   iUnit = UnitBaseStorage::known_units().stored_index(unit);
-//prefixe, if exists, is one or two character
+//prefix, if exists, is one or two character
    if(iUnit == -1 && unit.size() > 1)
    {
      std::string pre = unit.substr(0,1);
@@ -806,7 +806,7 @@ bool Units<T>::parse_single_unit(int signe,std::string unit,bool doConv)
 
   unit = unit.substr(0,unit.length()-nc); //unit without power
 
-  parse_prefix_unit(iUnit,iPre,unit);//find prefixe and unit
+  parse_prefix_unit(iUnit,iPre,unit);//find prefix and unit
 
   if(iUnit == -1)return false; //not found
 
