@@ -468,12 +468,13 @@ namespace Antioch
             {
                Units<NumericType> read_unit;
                read_unit.set_unit(rate_constant->FirstChildElement("E")->Attribute("units"));
-               if(!read_unit.is_homogeneous(def_unit))
+               if(!read_unit.is_homogeneous(def_unit) &&
+                  !read_unit.is_homogeneous("K")) //K directly given
                {
-                 std::string errorstring("Error in reaction " + my_rxn->equation());
-                 errorstring += "\n E units should be homogeneous to " + def_unit.get_symbol() + 
-                                " and you provided " + read_unit.get_symbol();
-                 antioch_unit_error(errorstring);
+                   std::string errorstring("Error in reaction " + my_rxn->equation());
+                   errorstring += "\n E units should be homogeneous to " + def_unit.get_symbol() + 
+                                  " or K, and you provided " + read_unit.get_symbol();
+                   antioch_unit_error(errorstring);
                }
                def_unit = read_unit;
             }
