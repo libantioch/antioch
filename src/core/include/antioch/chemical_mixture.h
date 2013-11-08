@@ -97,10 +97,10 @@ namespace Antioch
     >::type
     R( const VectorStateType& mass_fractions ) const;
     
-    //! Molecular weight (molar mass) for species s in [g/mol] or [kg/kmol]
+    //! Molecular weight (molar mass) for species s in kg/mol
     CoeffType M( const unsigned int s ) const;
 
-    //! Molecular weight (molar mass) for mixture in [g/mol] or [kg/kmol]
+    //! Molecular weight (molar mass) for mixture in kg/mol
     /*!
       \f$ \frac{1}{M} = \sum_s \frac{w_s}{M_s}\f$ where
       \f$ w_s \f$ is the mass fraction of species \f$ s \f$ and
