@@ -126,8 +126,10 @@ store.push_back(UnitBase<T>("atm", "atmosphere",           1.01325e5L,      0.,-
 store.push_back(UnitBase<T>("Torr","Torr",                 101325.0L/760.0L,0.,-1,1,-2)); // 1 atm / 760 by def
 store.push_back(UnitBase<T>("psi", "pound per square inch",6.895e3L,        0.,-1,1,-2));
 store.push_back(UnitBase<T>("mmHg","millimeter of mercury",133.322387415L,  0.,-1,1,-2));
+//viscosity Pa.s (m-1.kg.s-1)
+store.push_back(UnitBase<T>("P","poise",0.1L,0.,-1,1,-1));
 //Power W (m2.kg.s-3)
-store.push_back(UnitBase<T>("W","watt",1.0L,0.,2,1,-3));
+store.push_back(UnitBase<T>("W","watt" ,1.0L,0.,2 ,1,-3));
 //Energy N.m (m2.kg.s-2)
 store.push_back(UnitBase<T>("J",    "joule",       1.0L,            0.,2,1,-2));
 store.push_back(UnitBase<T>("cal",  "calorie",     4.1868L,         0.,2,1,-2));//International table
