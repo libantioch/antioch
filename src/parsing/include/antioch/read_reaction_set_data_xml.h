@@ -252,6 +252,12 @@ namespace Antioch
           if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
           {
              data.pop_back();
+             antioch_deprecated();
+             std::cerr << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
+                       << "and most certainly not a Kooij one\n"
+                       << "it has been corrected, but please, change that in your file.\n"
+                       << "Thanks and a good day to you, user." << std::endl;
+             kineticsModel = KineticsModel::ARRHENIUS;
           }
           if(rate_constant->FirstChildElement("E") != NULL)
           {
