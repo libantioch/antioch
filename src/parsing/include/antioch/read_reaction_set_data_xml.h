@@ -205,7 +205,7 @@ namespace Antioch
             if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
             {
                kineticsModel = KineticsModel::KOOIJ;
-               std::cerr << "In reaction " << reaction->Attribute(id) << "\n"
+               std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
                          << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
                          << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
                          << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
@@ -252,7 +252,7 @@ namespace Antioch
           if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
           {
              data.pop_back();
-             std::cerr << "In reaction " << reaction->Attribute(id) << "\n"
+             std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
                        << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
                        << "and most certainly not a Kooij one\n"
                        << "it has been corrected, but please, change that in your file.\n"
