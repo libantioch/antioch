@@ -136,24 +136,7 @@ int tester(const std::string &input_name)
   // Molar densities
   std::vector<Scalar> molar_densities(n_species,5e-4);
 
-///convenient storage for error output
-  std::vector<std::string> kinetics_model;
-  kinetics_model.push_back("Hercourt Essen");
-  kinetics_model.push_back("Berthelot");
-  kinetics_model.push_back("Arrhenius");
-  kinetics_model.push_back("Berthelot Hercourt Essen");
-  kinetics_model.push_back("Kooij");
-  kinetics_model.push_back("Modified Arrhenius");
-  kinetics_model.push_back("Van't Hoff");
-
-  std::vector<std::string> chem_proc;
-  chem_proc.push_back("Elementary");
-  chem_proc.push_back("Duplicate");
-  chem_proc.push_back("Three body");
-  chem_proc.push_back("Lindemann falloff");
-  chem_proc.push_back("Troe falloff");
-
-///Elementary
+///Elementary, + Kooij - Arrhenius conversion tested
   std::vector<Scalar> k;
   Scalar A,beta,Ea,D;
 
@@ -171,6 +154,8 @@ int tester(const std::string &input_name)
   A  = 5e12 * unitA_0.get_SI_factor();
   Ea = 149943.0;
   k.push_back(Arrh(T,A,Ea,Rcal));
+  beta = 0.42;
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal));
 
 //N2 + O -> NO + N
   A = 5.7e9 * unitA_1.get_SI_factor();
@@ -182,6 +167,7 @@ int tester(const std::string &input_name)
   beta = 0.4;
   Ea = 38526.0;
   k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal));
+  k.push_back(Arrh(T,A,Ea,Rcal));
 
 //C2 -> 2 C
   A = 3.7e11 * unitA_0.get_SI_factor();
@@ -473,8 +459,7 @@ int tester(const std::string &input_name)
      {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error in kinetics comparison\n"
-                  << "chemical process: " << chem_proc[ir/kinetics_model.size()] << "\n"
-                  << "kinetics model: " << kinetics_model[ir%kinetics_model.size()] << "\n"
+                  << "reaction #: " << ir << "\n"
                   << "theory: " << k[ir] << "\n"
                   << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
                   << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] << "\n"
