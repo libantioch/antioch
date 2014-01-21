@@ -550,12 +550,7 @@ namespace Antioch
   inline
   Reaction<CoeffType>::~Reaction()
   {
-    for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
-      {
-        delete _forward_rate[ir];
-      }
-
-    return;
+   return;
   }
 
 
