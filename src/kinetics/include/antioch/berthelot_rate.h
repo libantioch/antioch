@@ -40,7 +40,7 @@ namespace Antioch
  *
    * The Berthelot kinetics model is of the form:
    * \f[
-   *    \alpha(T) =  A \exp\left(D T\right)
+   *    \alpha(T) =  C_f \exp\left(D T\right)
    * \f] 
    * thus
    * \f[
@@ -61,33 +61,45 @@ namespace Antioch
     BerthelotRate (const CoeffType Cf=0., const CoeffType D=0.);
     ~BerthelotRate();
     
+    /** \brief set the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     * 
+     * \param Cf  pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     */ 
     void set_Cf( const CoeffType Cf );
+    
+    /** \brief set the exponential factor 
+     * 
+     * \param D  factor in [K^-1]
+     */ 
     void set_D( const CoeffType D );
 
     void scale_D( const CoeffType scale );
 
+    //! \return the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
     CoeffType Cf() const;
+    
+    //! \return the exponential factor in [K^-1]
     CoeffType D() const;
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )..
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(_D*T)))
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )..
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     operator()(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
-    //! \return the derivative with respect to temperature evaluated at \p T.
+    //! \return the derivative with respect to temperature evaluated at \p T in units {kmol,s,m,K}.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)*_D)
 
-    //! Simultaneously evaluate the rate and its derivative at \p T.
+    //! Simultaneously evaluate the rate and its derivative at \p T in units {kmol,s,m,K}.
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
