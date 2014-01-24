@@ -198,6 +198,7 @@ namespace Antioch
   inline
   ReactionSet<CoeffType>::~ReactionSet()
   {
+    for(unsigned int ir = 1; ir < _reactions.size(); ir++) delete _reactions[ir];
     return;
   }
   
