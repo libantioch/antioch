@@ -41,14 +41,14 @@ namespace Antioch
    * 
    * The Van't Hoff kinetics model is of the form:
    * \f[
-   *   \alpha(T) =  A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \exp\left(-\frac{E_a}{\mathrm{R}T} + D T\right)
+   *   \alpha(T) =  C_f \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \exp\left(-\frac{E_a}{\mathrm{R}T} + D T\right)
    * \f]
    * thus
    * \f[
    *   \frac{\partial\alpha(T)}{\partial T} =  \alpha(T)\left(D + \frac{\beta}{T} + \frac{E_a}{\mathrm{R}T^2}\right)
    * \f]
    *
-   * Internally, we use the reduced pre-exponential parameter \f$a = \frac{A}{\mathrm{T_\text{ref}}^\beta}\f$ and
+   * Internally, we use the reduced pre-exponential parameter \f$a = \frac{C_f}{\mathrm{T_\text{ref}}^\beta}\f$ and
    * the reduced activation energy \f$e = \frac{E_a}{\mathrm{R}}\f$
    */
   template<typename CoeffType=double>
@@ -74,39 +74,76 @@ namespace Antioch
 
     ~VantHoffRate();
     
-    void set_Cf(    const CoeffType Cf );
-    void set_eta(   const CoeffType eta );
+      
+    /** \brief set the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     * 
+     * \param Cf  pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     */ 
+    void set_Cf(  const CoeffType Cf );
+    
+     /** \brief set \f$ \beta \f$ of \f$ \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \f$
+     * 
+     * \param eta \f$ \beta \f$ value [none] 
+     */  
+    void set_eta( const CoeffType eta );
+    
+    /** \brief set the exponential factor 
+     * 
+     * \param D  factor in [K^-1]
+     */ 
+    void set_D(   const CoeffType D );
+    
+     /** \brief set the reference temperature
+     * 
+     * \param Tref  reference temperature in [K]
+     */    
+    void set_Tref(const CoeffType Tref );
+
+    /** \brief set the activation energy 
+     * 
+     * \param Ea reduce activation energy \f$e = \frac{E_a}{\mathrm{R}}\f$ in [K]
+     */ 
     void set_Ea(    const CoeffType Ea );
-    void set_D(     const CoeffType D );
-    void set_Tref(  const CoeffType Tref );
+    
+    
     void set_rscale(const CoeffType rscale );
 
-    CoeffType Cf()     const;
-    CoeffType eta()    const;
+    //! \return the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+    CoeffType Cf()   const;
+    
+    //! \return the  \f$ \beta \f$ of \f$ \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \f$ in [none]
+    CoeffType eta()  const;
+    
+    //! \return the exponential factor in [K^-1]
+    CoeffType D()    const;
+    
+    //! \return reference temperature in [K]
+    CoeffType Tref() const;
+    
+    //! \return the activation energy divided by R in [K]
     CoeffType Ea()     const;
-    CoeffType D()      const;
-    CoeffType Tref()   const;
+    
     CoeffType rscale() const;
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T  in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] ).
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)*ant_exp(-_Ea/T + _D*T)))
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T  in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] ).
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     operator()(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
-    //! \return the derivative with respect to temperature evaluated at \p T.
+    //! \return the derivative with respect to temperature evaluated at \p T  in units {kmol,s,m,K}.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_D + _eta/T + _Ea/(T*T)))
 
-    //! Simultaneously evaluate the rate and its derivative at \p T.
+    //! Simultaneously evaluate the rate and its derivative at \p T  in units {kmol,s,m,K}.
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 

@@ -70,37 +70,69 @@ namespace Antioch
     KooijRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0., const CoeffType Tref = 1., const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
     ~KooijRate();
     
+    /** \brief set the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     * 
+     * \param Cf  pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     */ 
     void set_Cf(    const CoeffType Cf );
+    
+    /** \brief set \f$ \beta \f$ of \f$ \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \f$
+     * 
+     * \param eta \f$ \beta \f$ value [none] 
+     */ 
     void set_eta(   const CoeffType eta );
+    
+    /** \brief set the activation energy 
+     * 
+     * \param Ea reduce activation energy \f$e = \frac{E_a}{\mathrm{R}}\f$ in [K]
+     */ 
     void set_Ea(    const CoeffType Ea );
+    
+    /** \brief set the reference temperature
+     * 
+     * \param Tref  reference temperature in [K]
+     */    
     void set_Tref(  const CoeffType Tref );
+    
     void set_rscale(const CoeffType scale );
 
-    CoeffType Cf()     const;
-    CoeffType eta()    const;
+        //! \return the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+    CoeffType Cf()   const;
+    
+    //! \return the  \f$ \beta \f$ of \f$ \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \f$ in [none]
+    CoeffType eta()  const;
+    
+    //! \return the exponential factor in [K^-1]
+    CoeffType D()    const;
+    
+    //! \return reference temperature in [K]
+    CoeffType Tref() const;
+    
+    //! \return the activation energy divided by R in [K]
     CoeffType Ea()     const;
-    CoeffType Tref()   const;
+    
+    
     CoeffType rscale() const;
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] ).
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)*ant_exp(-_Ea/T)))
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] ).
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     operator()(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
-    //! \return the derivative with respect to temperature evaluated at \p T.
+    //! \return the derivative with respect to temperature evaluated at \p T in units {kmol,s,m,K}.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)/T*(_eta + _Ea/T))
 
-    //! Simultaneously evaluate the rate and its derivative at \p T.
+    //! Simultaneously evaluate the rate and its derivative at \p T in units {kmol,s,m,K}.
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 

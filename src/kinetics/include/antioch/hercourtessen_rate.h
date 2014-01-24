@@ -40,7 +40,7 @@ namespace Antioch
  *
    * Hercourt-Essen is a kinetics model of the form:
    * \f[
-   *  \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta
+   *  \alpha(T) = C_f \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta
    * \f]
    * Thus
    * \f[
@@ -65,33 +65,52 @@ namespace Antioch
     HercourtEssenRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Tref = 1.);
     ~HercourtEssenRate();
     
+    /** \brief set the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     * 
+     * \param Cf  pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
+     */ 
     void set_Cf(  const CoeffType Cf );
+    
+    /** \brief set \f$ \beta \f$ of \f$ \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \f$
+     * 
+     * \param eta \f$ \beta \f$ value [none] 
+     */  
     void set_eta( const CoeffType eta );
+    
+    /** \brief set the reference temperature
+     * 
+     * \param Tref  reference temperature in [K]
+     */    
     void set_Tref(const CoeffType Tref );
 
+    //! \return the pre-exponential factor in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] )
     CoeffType Cf()   const;
+    
+    //! \return the  \f$ \beta \f$ of \f$ \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \f$ in [none]
     CoeffType eta()  const;
+    
+    //! \return reference temperature in [K]
     CoeffType Tref() const;
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] ).
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)))
 
-    //! \return the rate evaluated at \p T.
+    //! \return the rate evaluated at \p T in units {kmol,s,m} (e.g. order=1 : [s^-1]; order=2 : [m^3.kmol^-1.s^-1] ).
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     operator()(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
-    //! \return the derivative with respect to temperature evaluated at \p T.
+    //! \return the derivative with respect to temperature evaluated at \p T in units {kmol,s,m,K}.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)/T*(_eta))
 
-    //! Simultaneously evaluate the rate and its derivative at \p T.
+    //! Simultaneously evaluate the rate and its derivative at \p T in units {kmol,s,m,K}.
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
