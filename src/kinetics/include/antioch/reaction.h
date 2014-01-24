@@ -284,6 +284,16 @@ namespace Antioch
     //! The forward reaction rate modified Arrhenius form.
     std::vector<KineticsType<CoeffType>* > _forward_rate;
 
+#if HAS_C11
+    std::vector<Antioch::unique_ptr< KineticsType<CoeffType> > > _forward_rate_unique;  
+    
+    
+#endif
+#if HAS_SHARED_PTR
+    std::vector<Antioch::shared_ptr< KineticsType<CoeffType> > > _forward_rate_shared;
+#endif    
+ 
+     
   };
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -550,6 +560,10 @@ namespace Antioch
   inline
   Reaction<CoeffType>::~Reaction()
   {
+    for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
+      {
+       delete _forward_rate[ir];
+      }
    return;
   }
 
