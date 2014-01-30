@@ -70,6 +70,19 @@
       <products>N:1 O:1</products>
     </reaction>
 
+    <reaction reversible="yes" type="Elementary" id="0003">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <b>0.42</b>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
     <!-- reaction 0004    -->
     <reaction reversible="yes" id="0004">
       <equation>N2 + O [=] NO + N</equation>
@@ -97,6 +110,21 @@
       <reactants>NO:1 O:1</reactants>
       <products>O2:1 N:1</products>
     </reaction>
+
+    <!-- reaction 0005bis -->
+    <reaction reversible="yes" id="0005">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>8.4e+09</A>
+           <b>0.00</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+    
     
     <!-- reaction 0006    -->
     <reaction reversible="yes" type="Elementary" id="0006">

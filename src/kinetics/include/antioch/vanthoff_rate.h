@@ -236,6 +236,11 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  CoeffType VantHoffRate<CoeffType>::Tref() const
+  { return _Tref; }
+
+  template<typename CoeffType>
+  inline
   CoeffType VantHoffRate<CoeffType>::rscale() const
   { return _rscale; }
 

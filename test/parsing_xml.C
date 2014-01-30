@@ -195,24 +195,7 @@ int tester(const std::string &root_name)
   std::vector<Scalar> molar_densities(n_species,5e-4);
   Scalar tot_dens((Scalar)n_species * 5e-4);
 
-///convenient storage for error output
-  std::vector<std::string> kinetics_model;
-  kinetics_model.push_back("Hercourt Essen");
-  kinetics_model.push_back("Berthelot");
-  kinetics_model.push_back("Arrhenius");
-  kinetics_model.push_back("Berthelot Hercourt Essen");
-  kinetics_model.push_back("Kooij");
-  kinetics_model.push_back("Modified Arrhenius");
-  kinetics_model.push_back("Van't Hoff");
-
-  std::vector<std::string> chem_proc;
-  chem_proc.push_back("Elementary");
-  chem_proc.push_back("Duplicate");
-  chem_proc.push_back("Three body");
-  chem_proc.push_back("Lindemann falloff");
-  chem_proc.push_back("Troe falloff");
-
-///Elementary
+///Elementary, + Kooij - Arrhenius conversion tested
   std::vector<Scalar> k;
   Scalar A,beta,Ea,D;
   A    = 7e18;
@@ -224,6 +207,8 @@ int tester(const std::string &root_name)
   A  = 5e12;
   Ea = 149943.0;
   k.push_back(Arrh(T,A,Ea,Rcal));
+  beta = 0.42;
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal));
   A = 5.7e9;
   beta = 0.42;
   k.push_back(BHE(T,A,beta,D));
@@ -231,6 +216,7 @@ int tester(const std::string &root_name)
   beta = 0.4;
   Ea = 38526.0;
   k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal));
+  k.push_back(Arrh(T,A,Ea,Rcal));
   A = 3.7e11;
   beta = -0.42;
   Ea = 138812.8;
@@ -459,7 +445,7 @@ int tester(const std::string &root_name)
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
   int return_flag(0);
-  for(unsigned int ir = 0; ir < k.size() - 1; ir++)
+  for(unsigned int ir = 0; ir < k.size(); ir++)
   {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
      if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] > tol)
@@ -467,9 +453,8 @@ int tester(const std::string &root_name)
         std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
                   << "Error in kinetics comparison\n"
+                  << "reaction #" << ir << "\n"
                   << "temperature: " << T << " K" << "\n"
-                  << "chemical process: " << chem_proc[ir/kinetics_model.size()] << "\n"
-                  << "kinetics model: " << kinetics_model[ir%kinetics_model.size()] << "\n"
                   << "theory: " << k[ir] << "\n"
                   << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
                   << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] << "\n"
@@ -478,23 +463,6 @@ int tester(const std::string &root_name)
         return_flag = 1;
      }
   }
-
-  const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(k.size() - 1);
-  if(std::abs(k.back() - reac->compute_forward_rate_coefficient(molar_densities,T))/k.back() > tol)
-     {
-        std::cout << *reac << std::endl;
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error in kinetics comparison\n"
-                  << "temperature: " << T << " K" << "\n"
-                  << "chemical process: Elementary\n" 
-                  << "kinetics model: photochemistry\n" 
-                  << "theory: " << k.back() << "\n"
-                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
-                  << "relative error = " << std::abs(k.back() - reac->compute_forward_rate_coefficient(molar_densities,T))/k.back() << "\n"
-                  << "tolerance = " <<  tol
-                  << std::endl;
-        return_flag = 1;
-     }
 
   return return_flag;
 }
