@@ -174,7 +174,7 @@ int test_cv_tr()
   {
     Scalar cv_NO = sm_thermo.cv_tr(4);
     
-    if( !test_relative(cv_NO, R_NO*Scalar(2.5), tol) )
+    if( !test_relative(cv_NO, R_NO*Scalar(2.5), tol*4) )
     {
       std::cerr << std::scientific << std::setprecision(20);
       std::cerr << "Error: Mismatch in cv_tr for NO."
