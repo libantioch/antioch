@@ -174,7 +174,7 @@ int test_cv_tr()
   {
     Scalar cv_NO = sm_thermo.cv_tr(4);
     
-    if( !test_relative(cv_NO, R_NO*Scalar(2.5), tol*4) )
+    if( !test_relative(cv_NO, R_NO*Scalar(2.5), tol) )
     {
       std::cerr << std::scientific << std::setprecision(20);
       std::cerr << "Error: Mismatch in cv_tr for NO."
@@ -340,7 +340,7 @@ int test_cv_vib()
     const Scalar expvmi = expv - Scalar(1.0);
     Scalar cv_vib_NO_true = R_NO*th0_NO*th0_NO*expv/expvmi/expvmi/Tv/Tv;
 
-    if( !test_relative(cv_vib_NO, cv_vib_NO_true, tol) )
+    if( !test_relative(cv_vib_NO, cv_vib_NO_true, tol*4) )
     {
       std::cerr << std::scientific << std::setprecision(20);
       std::cerr << "Error: Mismatch in cv_vib for NO."
