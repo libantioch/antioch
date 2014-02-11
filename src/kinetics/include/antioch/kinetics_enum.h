@@ -56,7 +56,8 @@ namespace Antioch
                          ARRHENIUS,   // A * exp(-Ea/T)
                          BHE,         // A * T^beta * exp(D*T)
                          KOOIJ,       // A * T^beta * exp(-Ea/T)
-                         VANTHOFF };  // A * T^beta * exp(-Ea/T + D*T)
+                         VANTHOFF,    // A * T^beta * exp(-Ea/T + D*T)
+                         PHOTOCHEM }; // int_0^\infty f(\lambda)\sigma(\lambda) d\lambda = const(T)
 
     template<typename CoeffType>
     CoeffType Tref()

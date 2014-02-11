@@ -120,6 +120,7 @@ namespace Antioch
     kin_keyword["Kooij"]                  = KineticsModel::KOOIJ;
     kin_keyword["ModifiedArrhenius"]      = KineticsModel::KOOIJ;  //for Arrhenius fans
     kin_keyword["VantHoff"]               = KineticsModel::VANTHOFF;
+    kin_keyword["photochemistry"]         = KineticsModel::PHOTOCHEM;
 
     std::vector<std::string> models; 
     models.push_back("HercourtEssen");
@@ -129,6 +130,7 @@ namespace Antioch
     models.push_back("Kooij");
     models.push_back("ModifiedArrhenius");
     models.push_back("VantHoff");
+    models.push_back("photochemistry");
 
     std::map<std::string,ReactionType::ReactionType> proc_keyword;
     proc_keyword["Elementary"]        = ReactionType::ELEMENTARY;
@@ -188,6 +190,7 @@ namespace Antioch
                           << "  Kooij (default)\n"
                           << "  ModifiedArrhenius (= Kooij)\n"
                           << "  VantHoff\n"
+                          << "  photochemistry\n"
                           << "See Antioch documentation for more details."
                           << std::endl;
                 antioch_not_implemented();
@@ -222,12 +225,11 @@ namespace Antioch
         {
           if(verbose) 
             {
-              std::cout << " rate: " << models[imod] << " model\n";
-              if(!rate_constant->FirstChildElement("A"))
+              std::cout << " rate: " << models[imod] << " model\n" << "\n";
+              if(rate_constant->FirstChildElement("A") != NULL)
               {
-                 antioch_error();
+                  std::cout << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n";
               }
-              std::cout << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
               if(rate_constant->FirstChildElement("b") != NULL)
               {
                   std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
@@ -240,24 +242,35 @@ namespace Antioch
               {
                   std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText() << "\n";
               }
+              if(rate_constant->FirstChildElement("lambda") != NULL)
+              {
+                  std::cout << "   lambda:\n" << rate_constant->FirstChildElement("lambda")->GetText() << "\n";
+              }
+              if(rate_constant->FirstChildElement("cross_section") != NULL)
+              {
+                  std::cout << "   cross section:\n" << rate_constant->FirstChildElement("cross_section")->GetText() << "\n";
+              }
             }
 
           // typically Cantera files list activation energy in cal/mol, but we want it in K.
           std::vector<NumericType> data;
-          data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()));
+          if(rate_constant->FirstChildElement("A") != NULL)
+          {
+            data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()));
+          }
           if(rate_constant->FirstChildElement("b") != NULL)
           {
              data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
-          }
-          if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
-          {
-             data.pop_back();
-             std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
-                       << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
-                       << "and most certainly not a Kooij one\n"
-                       << "it has been corrected, but please, change that in your file.\n"
-                       << "Thanks and a good day to you, user." << std::endl;
-             kineticsModel = KineticsModel::ARRHENIUS;
+            if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
+            {
+               data.pop_back();
+               std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
+                         << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
+                         << "and most certainly not a Kooij one\n"
+                         << "it has been corrected, but please, change that in your file.\n"
+                         << "Thanks and a good day to you, user." << std::endl;
+               kineticsModel = KineticsModel::ARRHENIUS;
+            }
           }
           if(rate_constant->FirstChildElement("E") != NULL)
           {
@@ -292,6 +305,44 @@ namespace Antioch
                   data.back() = 1.9858775L;
                 }
               }
+          }
+
+          //photochemistry
+          if(rate_constant->FirstChildElement("cross_section"))
+          {
+             antioch_assert_equal_to(kineticsModel,KineticsModel::PHOTOCHEM);
+             std::vector<std::string> sigma;
+             SplitString( std::string(rate_constant->FirstChildElement("cross_section")->GetText()),
+                          " ",
+                          sigma,
+                          /* include_empties = */ false );
+
+             data.clear();
+             for(unsigned int ics = 0; ics < sigma.size(); ics++)
+             {
+                data.push_back(std::atof(sigma[ics].c_str()));
+             }
+
+             if(!rate_constant->FirstChildElement("lambda"))
+             {
+                antioch_error();
+             }
+             std::vector<std::string> lambda;
+
+             SplitString( std::string(rate_constant->FirstChildElement("lambda")->GetText()),
+                          " ",
+                          lambda,
+                          /* include_empties = */ false );
+
+             if(sigma.size() != lambda.size())
+             {
+                antioch_error();
+             }
+             for(unsigned int il = 0; il < lambda.size(); il++)
+             {
+                data.push_back(std::atof(lambda[il].c_str()));
+             }
+             
           }
 
           KineticsType<NumericType>* rate = build_rate<NumericType>(data,kineticsModel);
