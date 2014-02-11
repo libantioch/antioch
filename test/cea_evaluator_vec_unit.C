@@ -79,7 +79,7 @@ int test_cp( const std::string& species_name, unsigned int species,
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 20;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 25;
 
   typedef typename Antioch::
 		     template TempCache<TrioScalars> Cache;
