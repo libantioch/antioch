@@ -72,7 +72,7 @@ namespace Antioch{
        template <typename StateType>
        ANTIOCH_AUTO(StateType) 
        rate(const StateType& T) const
-       ANTIOCH_AUTOFUNC(StateType, StateType(_k))
+       ANTIOCH_AUTOFUNC(StateType, Antioch::constant_clone(T, _k))
 
        //! \return the derivative with respect to temperature.
        template <typename StateType>
