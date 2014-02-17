@@ -31,6 +31,7 @@
 
 //C++
 #include <string>
+#include <vector>
 #include <iostream>
 
 namespace Antioch{
@@ -53,28 +54,42 @@ namespace Antioch{
   template <typename CoeffType>
   class VantHoffRate;
 
-  /*!
-   *
-   * \class KineticsType
+  template <typename CoeffType, typename VectorCoeffType>
+  class PhotochemicalRate;
+
+  /*!\class KineticsType
    * \brief base class for kinetics models
+   *
+   * Kinetics models are:
+   *   - Hercourt Essen (HercourtEssenRate)
+   *   - Berthelot (BerthelotRate)
+   *   - Arrhenius (ArrheniusRate)
+   *   - Berthelot Hercourt Essen (BerthelotHercourtEssenRate)
+   *   - Kooij (KooijRate)
+   *   - Van't Hoff (VantHoffRate)
+   *   - photochemical model (PhotochemicalRate)
+   *
    */
-  template <typename CoeffType>
+  template <typename CoeffType, typename VectorCoeffType = std::vector<CoeffType> >
   class KineticsType{
   public:
     KineticsType(const KineticsModel::KineticsModel type);
     virtual ~KineticsType();
 
-    //!\return error because I cannot make it pure virtual.
+    //!
     template <typename StateType>
     StateType operator()(const StateType& T) const;
 
-    //!\return error because I cannot make it pure virtual.
+    //!
     template <typename StateType>
     StateType derivative( const StateType& T ) const;
 
-    //!\return error because I cannot make it pure virtual.
+    //!
     template <typename StateType>
     void compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+
+    //!Particles flux supports
+    void calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux, bool x_update);
 
     virtual const std::string numeric() const = 0;
 
@@ -93,32 +108,51 @@ namespace Antioch{
   };
 
   /* ------------------------- Inline Functions -------------------------*/
-  template <typename CoeffType>
+  template <typename CoeffType, typename VectorCoeffType>
   inline
-  void KineticsType<CoeffType>::print(std::ostream& os) const
+  void KineticsType<CoeffType,VectorCoeffType>::print(std::ostream& os) const
   {
     os << numeric();
   }
 
-  template <typename CoeffType>
+  template <typename CoeffType, typename VectorCoeffType>
   inline
-  KineticsType<CoeffType>::KineticsType(const KineticsModel::KineticsModel type):
+  KineticsType<CoeffType,VectorCoeffType>::KineticsType(const KineticsModel::KineticsModel type):
     my_type(type)
   {
     return;
   }
 
-  template <typename CoeffType>
+  template <typename CoeffType, typename VectorCoeffType>
   inline
-  KineticsType<CoeffType>::~KineticsType()
+  KineticsType<CoeffType,VectorCoeffType>::~KineticsType()
   {
     return;
   }
 
-  template <typename CoeffType>
+
+  template <typename CoeffType, typename VectorCoeffType>
+  inline
+  void KineticsType<CoeffType,VectorCoeffType>::calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux, bool x_update)
+  {
+    switch(my_type) 
+      {
+      case(KineticsModel::PHOTOCHEM):
+        {
+          (static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->calculate_rate_constant(abs,flux,x_update);
+        }
+      break;
+      default:
+        {
+          antioch_error();
+        }
+      }
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
   template <typename StateType>
   inline
-  StateType KineticsType<CoeffType>::operator()(const StateType& T) const
+  StateType KineticsType<CoeffType,VectorCoeffType>::operator()(const StateType& T) const
   {
     switch(my_type) 
       {
@@ -158,6 +192,12 @@ namespace Antioch{
         }
         break;
 
+      case(KineticsModel::PHOTOCHEM):
+        {
+          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->rate(T);
+        }
+        break;
+
       default:
         {
           antioch_error();
@@ -169,10 +209,10 @@ namespace Antioch{
     return zero_clone(T);
   }
 
-  template <typename CoeffType>
+  template <typename CoeffType, typename VectorCoeffType>
   template <typename StateType>
   inline
-  StateType KineticsType<CoeffType>::derivative( const StateType& T ) const
+  StateType KineticsType<CoeffType,VectorCoeffType>::derivative( const StateType& T ) const
   {
     switch(my_type) 
       {
@@ -212,6 +252,12 @@ namespace Antioch{
         }
         break;
 
+      case(KineticsModel::PHOTOCHEM):
+        {
+          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->derivative(T);
+        }
+        break;
+
       default:
         {
           antioch_error();
@@ -223,10 +269,10 @@ namespace Antioch{
     return zero_clone(T);
   }
 
-  template <typename CoeffType>
+  template <typename CoeffType, typename VectorCoeffType>
   template <typename StateType>
   inline
-  void KineticsType<CoeffType>::compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
+  void KineticsType<CoeffType,VectorCoeffType>::compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
   {
     switch (my_type) 
       {
@@ -263,6 +309,12 @@ namespace Antioch{
       case(KineticsModel::VANTHOFF):
         {
           (static_cast<const VantHoffRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+        }
+        break;
+
+      case(KineticsModel::PHOTOCHEM):
+        {
+          (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
         }
         break;
 

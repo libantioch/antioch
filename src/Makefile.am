@@ -25,6 +25,10 @@ pkginclude_HEADERS += units/include/antioch/unit_defs.h
 pkginclude_HEADERS += units/include/antioch/units.h
 pkginclude_HEADERS += units/include/antioch/unit_store.h
 
+# particles_flux
+pkginclude_HEADERS += particles_flux/include/antioch/sigma_bin_converter.h
+pkginclude_HEADERS += particles_flux/include/antioch/particle_flux.h
+
 # kinetics-kinetics models
 pkginclude_HEADERS += kinetics/include/antioch/kinetics_enum.h
 pkginclude_HEADERS += kinetics/include/antioch/kinetics_type.h
@@ -34,6 +38,7 @@ pkginclude_HEADERS += kinetics/include/antioch/arrhenius_rate.h
 pkginclude_HEADERS += kinetics/include/antioch/berthelothercourtessen_rate.h
 pkginclude_HEADERS += kinetics/include/antioch/kooij_rate.h
 pkginclude_HEADERS += kinetics/include/antioch/vanthoff_rate.h
+pkginclude_HEADERS += kinetics/include/antioch/photochemical_rate.h
 # kinetics-chemical process
 pkginclude_HEADERS += kinetics/include/antioch/reaction_enum.h
 pkginclude_HEADERS += kinetics/include/antioch/reaction.h
@@ -109,6 +114,7 @@ antioch_version_SOURCES = apps/version.C
 AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/units/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/particles_flux/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include

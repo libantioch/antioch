@@ -27,6 +27,7 @@
 // Antioch
 #include "antioch/metaprogramming.h"
 #include "antioch/reaction.h"
+#include "antioch/particle_flux.h"
 
 // C++
 #include <vector>

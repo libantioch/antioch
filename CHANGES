@@ -1,4 +1,6 @@
-Version 0.1.0 (In progress)
+Version 0.1.0
+* Photochemistry modeling
+* Compatibility with newer VexCL
 
 Version 0.0.8
 * Bugfixes when using VexCL

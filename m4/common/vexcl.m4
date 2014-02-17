@@ -95,7 +95,7 @@ if test "${with_vexcl}" != no ; then
 
     AC_LANG_PUSH([C++])
     ac_VEXCL_save_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS $VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS $CL_CPPFLAGS"
+    CPPFLAGS="$CXXFLAGS $CPPFLAGS $VEXCL_CPPFLAGS $BOOST_CPPFLAGS $CL_CFLAGS $CL_CPPFLAGS"
     AC_CHECK_HEADER([vexcl/vexcl.hpp],[found_header=yes],[found_header=no])
     CPPFLAGS="$ac_VEXCL_save_CPPFLAGS"
     AC_LANG_POP([C++])

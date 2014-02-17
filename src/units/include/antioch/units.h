@@ -109,7 +109,7 @@ class Units{
       public:
 /*!\brief Copy constructor, uses Units &operator=(const Units&)*/
         template <typename P>
-        Units(const Units<P> &rhs){*this = rhs;develop_symbol(symbol);}
+        Units(const Units<P> &rhs);
 /*!\brief Fully descriptive constructor, mainly for internal purposes*/
         Units(const std::string &sym, const std::string &na,
                 const T &conva, const T &convb,
@@ -373,21 +373,6 @@ class Units{
 /*! \brief showAll().*/
         void showAll(std::ostream &out = std::cout);
 
-/*! \brief Memory dealing method
- *
- * This is a memory dealing method. In case of densification, the
- * integer nConnected keeps
- * track of how many objects are associated with this unit object.
- * This method adds one.
- * BEWARE: at the constructor level, nConnected is null, the management
- * should be done at another level.
- */
-        void add_one_to_connection()                     {nConnected++;}
-/*! \brief See void CoreUnit::add_one_to_connection()*/
-        void suppress_one_to_connection()                {nConnected--;}
-/*! \brief Integer nConnected getter*/
-        unsigned int n_connections()             const {return nConnected;}
-
       private:
 
 /*! \brief Root method for contracting or harmonizing the symbol
@@ -475,7 +460,7 @@ class Units{
  * \return the power associated to the unit.
  */
         int parse_power(std::string unit, int &nc)                    const;
-/*!\brief Small method to check if a character is an alpha-numerical.
+/*!\brief Small method to check if a character is a numerical.
  *
  * This method uses the values of the ascii table, which basically
  * means that is checks if the ascii integer associated to the
@@ -579,9 +564,17 @@ class Units{
         Converter<T> toSI;
 /*!\brief An InSI for the power vector.*/
         InSI power;
-/*! \brief Number of objects using this object as unit*/
-        unsigned int nConnected;
+
 };
+
+template <typename T>
+template <typename P>
+inline
+Units<T>::Units(const Units<P> &rhs)
+{
+  *this = rhs;
+  develop_symbol(symbol);
+}
 
 template<typename T>
 inline

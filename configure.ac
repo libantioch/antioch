@@ -2,7 +2,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([Antioch], [0.0.8], [pbauman@ices.utexas.edu], [antioch])
+AC_INIT([Antioch], [0.1.0], [pbauman@ices.utexas.edu], [antioch])
 PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
 AC_SUBST([PACKAGE_DESCRIPTION])
 PACKAGE_URL="https://github.com/libantioch/antioch/"
@@ -191,6 +191,8 @@ AC_CONFIG_FILES(test/kinetics_unit_thrust_air_5sp.sh,    [chmod +x test/kinetics
 AC_CONFIG_FILES(test/kinetics_vec_unit_air_5sp.sh,       [chmod +x test/kinetics_vec_unit_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_air_5sp.sh,     [chmod +x test/kinetics_regression_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_vec_air_5sp.sh, [chmod +x test/kinetics_regression_vec_air_5sp.sh])
+AC_CONFIG_FILES(test/photochemical_rate_unit.sh,         [chmod +x test/photochemical_rate_unit.sh])
+AC_CONFIG_FILES(test/sigma_bin_converter_unit.sh,        [chmod +x test/sigma_bin_converter_unit.sh])
 AC_CONFIG_FILES(test/parsing_xml.sh,                     [chmod +x test/parsing_xml.sh])
 AC_CONFIG_FILES(test/kinetics_reactive_scheme_unit.sh,   [chmod +x test/kinetics_reactive_scheme_unit.sh])
 

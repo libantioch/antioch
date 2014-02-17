@@ -132,8 +132,8 @@ int tester()
     dupl_reaction->add_forward_rate(rate_kinetics1);
     dupl_reaction->add_forward_rate(rate_kinetics2);
     Scalar rate1 = dupl_reaction->compute_forward_rate_coefficient(mol_densities,T);
-    Scalar rate;
-    Scalar drate_dT;
+    Scalar rate(0.);
+    Scalar drate_dT(0.);
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
     dupl_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);

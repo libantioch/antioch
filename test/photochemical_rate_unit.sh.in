@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROG="@top_builddir@/test/parsing_xml"
+PROG="@top_builddir@/test/photochemical_rate_unit"
 
 INPUT="@top_srcdir@/test/input_files"
 

@@ -76,6 +76,46 @@ namespace Antioch
         return Units<CoeffType>("mol-1");
     }
 
+    /*
+     * Planck's constant, m2.kg/s (J.s)
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType Planck_constant()
+    {
+      return 6.62606957e-34;
+    }
+
+    /*!
+     * Planck's constant unit
+     */
+    template<typename CoeffType>
+    inline
+    Units<CoeffType> Planck_constant_unit()
+    {
+        return Units<CoeffType>("m2.kg/s");
+    }
+
+    /*!
+     * light celerity, m/s
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType light_celerity()
+    {
+      return 2.99792458e8;
+    }
+
+    /*!
+     * light celerity unit
+     */
+    template<typename CoeffType>
+    inline
+    Units<CoeffType> light_celerity_unit()
+    {
+        return Units<CoeffType>("m/s");
+    }
+
   } // end namespace Constants
 } // end namespace Antioch
 

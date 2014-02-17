@@ -149,7 +149,7 @@ namespace Antioch
   void zero_clone(T1& output, const T2& example);
 
   // A function for initializing vectorized numeric types to a
-  // constant // while resizing them to match the example input
+  // constant while resizing them to match the example input
   template <typename T, typename Scalar>
   inline
   T constant_clone(const T& example, const Scalar& value);

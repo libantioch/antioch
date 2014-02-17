@@ -181,6 +181,7 @@ namespace Antioch
     kin_keyword["Kooij"]                  = KineticsModel::KOOIJ;
     kin_keyword["ModifiedArrhenius"]      = KineticsModel::KOOIJ;  //for Arrhenius fans
     kin_keyword["VantHoff"]               = KineticsModel::VANTHOFF;
+    kin_keyword["photochemistry"]         = KineticsModel::PHOTOCHEM;
 
     std::vector<std::string> models; 
     models.push_back("HercourtEssen");
@@ -190,6 +191,7 @@ namespace Antioch
     models.push_back("Kooij");
     models.push_back("ModifiedArrhenius");
     models.push_back("VantHoff");
+    models.push_back("photochemistry");
 
     std::map<std::string,ReactionType::ReactionType> proc_keyword;
     proc_keyword["Elementary"]        = ReactionType::ELEMENTARY;
@@ -248,6 +250,7 @@ namespace Antioch
                           << "  Kooij (default)\n"
                           << "  ModifiedArrhenius (= Kooij)\n"
                           << "  VantHoff\n"
+                          << "  photochemistry\n"
                           << "See Antioch documentation for more details."
                           << std::endl;
                 antioch_not_implemented();
@@ -376,6 +379,12 @@ namespace Antioch
         //      pre-exponential parameters in (m3/kmol)^(m-1)/s
         //      power parameter without unit
         // if falloff, we need to know who's k0 and kinfty
+        // if photochemistry, we have a cross-section on a lambda grid
+        //      cross-section typically in cm2/nm (cross-section on a resolution bin, 
+        //                                          if bin unit not given, it is lambda unit (supposed to anyway), and a warning message)
+        //      lambda typically in nm, sometimes in ang, default considered here is nm
+        //                         you can also have cm-1, conversion is done with
+        //                         formulae nm = cm-1 * / * adapted factor
           std::vector<NumericType> data;
           Units<NumericType> def_unit;
           int pow_unit(order_reaction - 1);
@@ -399,13 +408,13 @@ namespace Antioch
           def_unit *= pow_unit; //to the m-1 power
           def_unit.substract("s"); // per second
           
-
-          if(!rate_constant->FirstChildElement("A"))antioch_error();//HEY!!
-
           if(verbose) 
             {
-              std::cout << " rate: " << models[imod] << " model\n";
-              std::cout << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n"; //always
+              std::cout << " rate: " << models[imod] << " model\n" << "\n";
+              if(rate_constant->FirstChildElement("A") != NULL)
+              {
+                  std::cout << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n";
+              }
               if(rate_constant->FirstChildElement("b") != NULL)
               {
                   std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
@@ -418,37 +427,47 @@ namespace Antioch
               {
                   std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText() << "\n";
               }
+              if(rate_constant->FirstChildElement("lambda") != NULL)
+              {
+                  std::cout << "   lambda:\n" << rate_constant->FirstChildElement("lambda")->GetText() << "\n";
+              }
+              if(rate_constant->FirstChildElement("cross_section") != NULL)
+              {
+                  std::cout << "   cross section:\n" << rate_constant->FirstChildElement("cross_section")->GetText() << "\n";
+              }
             }
 
-          if(!rate_constant->FirstChildElement("A")->Attribute("units"))
+          if(rate_constant->FirstChildElement("A") != NULL)
           {
-             antioch_unit_required("A",def_unit.get_symbol());
-          }else
-          {
-             Units<NumericType> read_unit;
-             read_unit.set_unit(rate_constant->FirstChildElement("A")->Attribute("units"));
-             if(!read_unit.is_homogeneous(def_unit))
-             {
+            if(!rate_constant->FirstChildElement("A")->Attribute("units"))
+            {
+               antioch_unit_required("A",def_unit.get_symbol());
+            }else
+            {
+              Units<NumericType> read_unit;
+              read_unit.set_unit(rate_constant->FirstChildElement("A")->Attribute("units"));
+              if(!read_unit.is_homogeneous(def_unit))
+              {
                 std::string errorstring("Error in reaction " + my_rxn->equation());
                 errorstring += "\n A units should be homogeneous to " + def_unit.get_symbol() + 
                                " and you provided " + read_unit.get_symbol();
                 antioch_unit_error(errorstring);
-             }
-             def_unit = read_unit;
-          }
-          if(verbose) 
-            {
+              }
+              def_unit = read_unit;
+           }
+           if(verbose) 
+             {
              std::cout  << "   A: " << rate_constant->FirstChildElement("A")->GetText()
                         << " " << def_unit.get_symbol() << std::endl; 
-            }
-          data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()) * def_unit.get_SI_factor());
-
+             }
+           data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()) * def_unit.get_SI_factor());
+         }
 //b has no unit
-          if(rate_constant->FirstChildElement("b"))
-          {
-             data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
-             if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
-             {
+         if(rate_constant->FirstChildElement("b") != NULL)
+         {
+            data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
+            if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
+            {
                data.pop_back();
                std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
                          << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
@@ -456,12 +475,12 @@ namespace Antioch
                          << "it has been corrected, but please, change that in your file.\n"
                          << "Thanks and a good day to you, user." << std::endl;
                kineticsModel = KineticsModel::ARRHENIUS;
-             }
+            }
             if(verbose) 
               {
                 std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << std::endl; 
               }
-          }
+         }
 
 //E has cal/mol default unit
           if(rate_constant->FirstChildElement("E") != NULL)
@@ -569,8 +588,7 @@ namespace Antioch
                   data.push_back(Antioch::Constants::R_universal<NumericType>() * Antioch::Constants::R_universal_unit<NumericType>().factor_to_some_unit(def_unit));
                }else if(read_unit.is_homogeneous("K")) //K directly given
                {
-                  def_unit = read_unit;
-                  data.push_back(1.);
+                  data.push_back(1.L);
                }else
                {
                    std::string errorstring("Error in reaction " + my_rxn->equation());
@@ -583,6 +601,150 @@ namespace Antioch
                def_unit.set_unit("cal/mol/K"); // default R unit
                data.push_back(Antioch::Constants::R_universal<NumericType>() * Antioch::Constants::R_universal_unit<NumericType>().factor_to_some_unit(def_unit));
             }
+          }
+
+          //photochemistry
+          // lambda is either a length (def nm) or cm-1
+          // cross-section has several possibilities if given
+          //   * cm2 per bin:
+          //            - length (typically nm) or cm-1
+          //   * cm2 no bin given: 
+          //            - if given, lambda unit
+          //            - if not, nm
+
+          // starting with lambda (for bin unit in cross-section)
+          // lambda is not in SI (m is really to violent), it will be nm
+          if(rate_constant->FirstChildElement("lambda"))
+          {
+             data.clear();
+             antioch_assert_equal_to(kineticsModel,KineticsModel::PHOTOCHEM);
+             std::vector<std::string> lambda;
+             def_unit.set_unit("nm");
+
+       //reading part
+            SplitString( std::string(rate_constant->FirstChildElement("lambda")->GetText()),
+                          " ",
+                          lambda,
+                          /* include_empties = */ false );
+
+         //unit checking part
+             if(!rate_constant->FirstChildElement("lambda")->Attribute("units"))
+             {
+                antioch_unit_required("lambda",def_unit.get_symbol());
+                for(unsigned int il = 0; il < lambda.size(); il++)
+                {
+                   data.push_back(std::atof(lambda[il].c_str()) * def_unit.factor_to_some_unit("nm"));
+                }
+             }else
+             {
+               Units<NumericType> read_unit;
+               read_unit.set_unit(rate_constant->FirstChildElement("lambda")->Attribute("units"));
+               if(read_unit.is_homogeneous(def_unit))
+               {
+                   def_unit = read_unit;
+                   for(unsigned int il = 0; il < lambda.size(); il++)
+                   {
+                     data.push_back(std::atof(lambda[il].c_str()) * def_unit.factor_to_some_unit("nm"));
+                   }
+               }else if(read_unit.is_homogeneous("cm-1"))
+               {
+                 def_unit = read_unit;
+                 for(unsigned int il = 0; il < lambda.size(); il++)
+                 {
+                    data.push_back(1.L/(std::atof(lambda[il].c_str()) * def_unit.factor_to_some_unit("nm-1")));
+                  }
+               }else
+               {
+                   std::string errorstring("Error in reaction " + my_rxn->equation());
+                   errorstring += "\n Wavelength units should be homogeneous to " + def_unit.get_symbol() + " or cm-1"
+                                  ", and you provided " + read_unit.get_symbol();
+                   antioch_unit_error(errorstring);
+               }
+             }
+             Antioch::Units<NumericType> bin_unit = def_unit;
+             if(!rate_constant->FirstChildElement("cross_section"))
+             {
+                std::cerr << "Where is the cross-section?  In what universe have you photochemistry with a wavelength grid and no cross-section on it?" << std::endl;
+                antioch_error();
+             }
+
+             /* here we will use two def unit:
+              * cs_unit, cm2 by default
+              * bin_unit, nm by default.
+              *
+              * strict rigorous unit is
+              *         - (cs_unit - bin_unit): cm2/nm
+              * correct unit is
+              *         - cs_unit: cm2
+              *
+              * so we need to test against those two possibilities.
+              * Now the funny part is that we test homogeneity, not
+              * equality, for generality purposes, so in case of strict
+              * rigorous unit, we need to decompose the read_unit into
+              * cross_section and bin units, so we can make the appropriate change.
+              * 
+              * !TODO make the decomposition instead of strict equality
+              */
+
+             Antioch::Units<NumericType> cs_unit("cm2");
+             if(!rate_constant->FirstChildElement("cross_section")->Attribute("units"))
+             {
+                antioch_unit_required("cross_section",(cs_unit - bin_unit).get_symbol());
+             }else
+             {
+               Units<NumericType> read_unit;
+               read_unit.set_unit(rate_constant->FirstChildElement("cross_section")->Attribute("units"));
+               if(read_unit.is_homogeneous(cs_unit - bin_unit)) // here test the rigorous unit: cm2/nm 
+               {
+        // work to do here for decomposition   !!!!  supposes strict equality => cm2 per bin only
+               }else if(read_unit.is_homogeneous(cs_unit)) // here test the almost rigorous unit cm2
+               {
+                  cs_unit = read_unit;
+               }else //nothing can save you now...
+               {
+                   std::string errorstring("Error in reaction " + my_rxn->equation());
+                   errorstring += "\n Cross-section units should be homogeneous to " + def_unit.get_symbol() + 
+                                  ", and you provided " + read_unit.get_symbol();
+                   antioch_unit_error(errorstring);
+               }
+             }
+             std::vector<std::string> sigma;
+             SplitString( std::string(rate_constant->FirstChildElement("cross_section")->GetText()),
+                          " ",
+                          sigma,
+                          /* include_empties = */ false );
+             if(sigma.size() != lambda.size())
+             {
+                std::cerr << "Your cross-section vector and your lambda vector don't have the same size!\n"
+                          << "What am I supposed to do with that?"
+                          << std::endl;
+                antioch_error();
+             }
+
+             if(bin_unit.is_homogeneous("nm")) //nm
+             {
+              for(unsigned int ics = 0; ics < sigma.size(); ics++)
+              {
+                data.push_back(std::atof(sigma[ics].c_str()) * cs_unit.get_SI_factor() / (bin_unit.factor_to_some_unit("nm")));
+              }
+             }else if(bin_unit.is_homogeneous("cm-1"))//cm-1
+             {   
+               for(unsigned int ics = 0; ics < sigma.size(); ics++)
+               {
+                 data.push_back(std::atof(sigma[ics].c_str()) * cs_unit.get_SI_factor() / bin_unit.factor_to_some_unit("nm-1"));
+               }
+             }else //WHAT ?!!??
+             {
+                antioch_error();
+             }
+          } //end photochemistry
+
+          if(data.empty()) //replace the old "if no A parameters" as A is not required anymore
+          {
+                std::cerr << "Somehow, I have a bad feeling about a chemical reaction without any data parameters...\n"
+                          << "This is too sad, I give up...\n"
+                          << "Please, check the reaction " << my_rxn->equation() << " before coming back to me." << std::endl;
+                antioch_error(); //HEY!!!
           }
 
           KineticsType<NumericType>* rate = build_rate<NumericType>(data,kineticsModel);
