@@ -113,6 +113,7 @@ namespace Antioch
     tinyxml2::XMLElement* reaction = element->FirstChildElement("reaction");
 
     std::map<std::string,KineticsModel::KineticsModel> kin_keyword;
+    kin_keyword["Constant"]               = KineticsModel::CONSTANT;
     kin_keyword["HercourtEssen"]          = KineticsModel::HERCOURT_ESSEN;
     kin_keyword["Berthelot"]              = KineticsModel::BERTHELOT;
     kin_keyword["Arrhenius"]              = KineticsModel::ARRHENIUS;
@@ -123,6 +124,7 @@ namespace Antioch
     kin_keyword["photochemistry"]         = KineticsModel::PHOTOCHEM;
 
     std::vector<std::string> models; 
+    models.push_back("Constant");
     models.push_back("HercourtEssen");
     models.push_back("Berthelot");
     models.push_back("Arrhenius");
@@ -183,6 +185,7 @@ namespace Antioch
           {
                 std::cerr << "Could not find a suitable kinetics model.\n"
                           << "Implemented kinetics models are:\n"
+                          << "  Constant\n"
                           << "  HercourtEssen\n"
                           << "  Berthelot\n"
                           << "  Arrhenius\n"
