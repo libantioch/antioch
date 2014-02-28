@@ -33,6 +33,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/kinetics_type.h"
+#include "antioch/constant_rate.h"
 #include "antioch/hercourtessen_rate.h"
 #include "antioch/berthelot_rate.h"
 #include "antioch/arrhenius_rate.h"
@@ -89,6 +90,7 @@ namespace Antioch
       - Troe falloff (TroeFalloff).
 
    This class encapsulates a kinetics model.  The choosable kinetics models are
+   - Constant (ConstantRate),
    - Hercourt Hessen (HercourtEssenRate),
    - Berthelot  (BerthelotRate),
    - Arrhenius  (ArrheniusRate),
