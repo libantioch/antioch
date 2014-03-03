@@ -37,6 +37,9 @@
 namespace Antioch{
 
   template <typename CoeffType>
+  class ConstantRate;
+
+  template <typename CoeffType>
   class HercourtEssenRate;
 
   template <typename CoeffType>
@@ -61,6 +64,7 @@ namespace Antioch{
    * \brief base class for kinetics models
    *
    * Kinetics models are:
+   *   - constant (ConstantRate)
    *   - Hercourt Essen (HercourtEssenRate)
    *   - Berthelot (BerthelotRate)
    *   - Arrhenius (ArrheniusRate)
@@ -156,6 +160,12 @@ namespace Antioch{
   {
     switch(my_type) 
       {
+      case(KineticsModel::CONSTANT):
+        {
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->rate(T);
+        }
+        break;
+
       case(KineticsModel::HERCOURT_ESSEN):
         {
           return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate(T);
@@ -216,6 +226,12 @@ namespace Antioch{
   {
     switch(my_type) 
       {
+      case(KineticsModel::CONSTANT):
+        {
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->derivative(T);
+        }
+        break;
+
       case(KineticsModel::HERCOURT_ESSEN):
         {
           return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->derivative(T);
@@ -276,6 +292,12 @@ namespace Antioch{
   {
     switch (my_type) 
       {
+      case(KineticsModel::CONSTANT):
+        {
+          (static_cast<const ConstantRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+        }
+        break;
+
       case(KineticsModel::HERCOURT_ESSEN):
         {
           (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);

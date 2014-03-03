@@ -441,6 +441,8 @@ int tester(const std::string &root_name)
 //
 //photochemistry
   k.push_back(k_photo(lambda,hv,CH4_lambda,CH4_s));
+//Constant
+  k.push_back(2.5e11);
   
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
