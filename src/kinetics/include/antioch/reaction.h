@@ -931,7 +931,6 @@ namespace Antioch
 
     // If users want to use valarrays, then the output reference sizes
     // had better already match the input value sizes...
-    StateType Rfwd = Antioch::zero_clone(kfwd);
     StateType dRfwd_dT = Antioch::zero_clone(kfwd);
 
     // We need to construct using an input StateType argument if we
