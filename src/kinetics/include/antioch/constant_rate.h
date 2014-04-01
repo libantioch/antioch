@@ -136,7 +136,7 @@ namespace Antioch
                                                           StateType& rate,
                                                           StateType& drate_dT) const
   {
-    rate     = _Cf;
+    Antioch::constant_fill(rate, _Cf);
     Antioch::set_zero(drate_dT);
     return;
   }
