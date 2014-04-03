@@ -155,7 +155,7 @@ namespace Antioch
       _dnet_rate_dX_s( reaction_set.n_reactions() )
   {
 
-    for( unsigned int r = 0; r < reaction_set.n_reactions(); r++ )
+    for( unsigned int r = 0; r < this->n_reactions(); r++ )
       {
         _dnet_rate_dX_s[r].resize( reaction_set.n_species(), example );
       }
@@ -279,9 +279,12 @@ namespace Antioch
     for (unsigned int s=0; s < this->n_species(); s++)
       {
         Antioch::set_zero(dmole_dX_s[s]);
+      }
 
+    for (unsigned int rxn=0; rxn < this->n_reactions(); rxn++)
+      {
         /*! \todo Do we need to really initialize this? */
-        Antioch::set_zero(_dnet_rate_dX_s[s]);
+        Antioch::set_zero(_dnet_rate_dX_s[rxn]);
       }
 
     // compute the requisite reaction rates
