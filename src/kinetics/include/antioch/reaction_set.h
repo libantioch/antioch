@@ -70,6 +70,9 @@ namespace Antioch
     unsigned int n_reactions() const;
      
     //! Add a reaction to the system.
+    //
+    // The ownership is transfered to the ReactionSet
+    // object, they are deleted in the desctructor.
     void add_reaction(Reaction<CoeffType>* reaction);
 
     //!
