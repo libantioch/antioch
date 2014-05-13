@@ -260,13 +260,31 @@ namespace Antioch
         }
         kineticsModel = kin_keyword[models[imod]];
 
+        tinyxml2::XMLElement* reactants = reaction->FirstChildElement("reactants");
+        tinyxml2::XMLElement* products  = reaction->FirstChildElement("products");
+        
+        // usually Kooij is called Arrhenius, check here
+        if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
+        {
+          if(rate_constant->FirstChildElement("b"))
+          {
+            if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
+            {
+               kineticsModel = KineticsModel::KOOIJ;
+               std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
+                         << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
+                         << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
+                         << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
+                         << "thanks and a good day to you, user." << std::endl;
+            }
+          }
+        }
+
+
         // construct a Reaction object    
         Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),
                                                                                reversible,typeReaction,kineticsModel);
 
-        tinyxml2::XMLElement* reactants = reaction->FirstChildElement("reactants");
-        tinyxml2::XMLElement* products  = reaction->FirstChildElement("products");
-        
         // We will add the reaction, unless we do not have a 
         // reactant or product
         bool relevant_reaction = true;
@@ -348,28 +366,13 @@ namespace Antioch
               }
           }
 
+
         if(!relevant_reaction)
         {
           if(verbose) std::cout << "skipped reaction\n\n";
           reaction = reaction->NextSiblingElement("reaction");
+          delete my_rxn;
           continue;
-        }
-
-        // usually Kooij is called Arrhenius, check here
-        if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
-        {
-          if(rate_constant->FirstChildElement("b"))
-          {
-            if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
-            {
-               kineticsModel = KineticsModel::KOOIJ;
-               std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
-                         << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
-                         << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
-                         << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
-                         << "thanks and a good day to you, user." << std::endl;
-            }
-          }
         }
 
         while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
