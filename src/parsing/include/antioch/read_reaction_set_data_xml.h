@@ -39,9 +39,7 @@
 #include "antioch/reaction_parsing.h"
 #include "antioch/physical_constants.h"
 #include "antioch/units.h"
-
-// XML
-#include "antioch/tinyxml2_imp.h"
+#include "antioch/xml_parser.h"
 
 // C++
 #include <string>
@@ -116,6 +114,17 @@ namespace Antioch
                                    ReactionSet<NumericType>& reaction_set );
 
 
+  template<typename NumericType, typename ParserType>
+  void read_reaction_set_data(const std::string &filename,
+                              const bool verbose,
+                              ReactionSet<NumericType>& reaction_set );
+
+  template <typename NumericType>
+  void verify_unit_of_parameter(Units<NumericType> & default_unit, const std::string & provided_unit,
+                                 const std::vector<std::string> & accepted_unit,
+                                 const std::string & equation,     const std::string & parameter_name);
+
+
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
   inline
@@ -123,26 +132,52 @@ namespace Antioch
                                    const bool verbose,
                                    ReactionSet<NumericType>& reaction_set )
   {
-    tinyxml2::XMLDocument doc;
-    if(doc.LoadFile(filename.c_str()))
-      {
-        std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
-        std::cerr << "Error of tinyxml2 library:\n"
-                  << "\tID = " << doc.ErrorID() << "\n"
-                  << "\tError String1 = " << doc.GetErrorStr1() << "\n"
-                  << "\tError String2 = " << doc.GetErrorStr2() << std::endl;
-        antioch_error();
-      }
+     read_reaction_set_data<NumericType,XMLParser<NumericType> >(filename,verbose,reaction_set);
+  }
 
+  template <typename NumericType>
+  inline
+  void verify_unit_of_parameter(Units<NumericType> & default_unit, const std::string & provided_unit,
+                                const std::vector<std::string> & accepted_unit,
+                                const std::string & equation, const std::string & parameter_name)
+  {
+     if(provided_unit.empty() && default_unit.is_united()) //no unit provided and there is one
+     {
+         antioch_unit_required(parameter_name,default_unit.get_symbol());
+     }else // test
+     {
+        bool found(false);
+        for(unsigned int i = 0; i < accepted_unit.size(); i++)
+        {
+           if(default_unit.is_homogeneous(provided_unit))
+           {
+              found = true;
+              break;
+           }
+        }
+        if(!found)
+        {
+           std::string errorstring("Error in reaction " + equation);
+           errorstring += "\n" + parameter_name + " parameter's unit should be homogeneous to \"" + accepted_unit[0] + "\"";
+           for(unsigned int i = 1; i < accepted_unit.size(); i++)errorstring += ", or \"" + accepted_unit[i] + "\"";
+           errorstring += " and you provided \"" + provided_unit + "\"";
+           antioch_unit_error(errorstring);
+        }
+        default_unit.set_symbol(provided_unit);
+     }
+  }
 
-    tinyxml2::XMLElement* element = doc.FirstChildElement("ctml");
-    if (!element) 
-      {
-        std::cerr << "ERROR:  no <ctml> tag found in file " << filename
-                  << std::endl;
-        antioch_error();
-      }
-    
+  template<typename NumericType, typename ParserType>
+  inline
+  void read_reaction_set_data( const std::string& filename,
+                               const bool verbose,
+                               ReactionSet<NumericType>& reaction_set )
+  {
+    ParserType parser(filename);
+
+    //error or no reaction data
+    if(!parser.initialize())return;
+
     const ChemicalMixture<NumericType>& chem_mixture = reaction_set.chemical_mixture();
     unsigned int n_species = chem_mixture.n_species();
     // Sanity Check on species
@@ -169,12 +204,6 @@ namespace Antioch
       }
     */
 
-    // Now read in reaction data
-    element = element->FirstChildElement("reactionData");
-    if (!element) return;
-    
-    tinyxml2::XMLElement* reaction = element->FirstChildElement("reaction");
-
     std::map<std::string,KineticsModel::KineticsModel> kin_keyword;
     kin_keyword["Constant"]               = KineticsModel::CONSTANT;
     kin_keyword["HercourtEssen"]          = KineticsModel::HERCOURT_ESSEN;
@@ -185,6 +214,15 @@ namespace Antioch
     kin_keyword["ModifiedArrhenius"]      = KineticsModel::KOOIJ;  //for Arrhenius fans
     kin_keyword["VantHoff"]               = KineticsModel::VANTHOFF;
     kin_keyword["photochemistry"]         = KineticsModel::PHOTOCHEM;
+
+    std::map<KineticsModel::KineticsModel,unsigned int> kinetics_model_map;
+    kinetics_model_map[KineticsModel::HERCOURT_ESSEN] = 0;
+    kinetics_model_map[KineticsModel::BERTHELOT]      = 1;
+    kinetics_model_map[KineticsModel::ARRHENIUS]      = 2;
+    kinetics_model_map[KineticsModel::BHE]            = 3;
+    kinetics_model_map[KineticsModel::KOOIJ]          = 4;
+    kinetics_model_map[KineticsModel::VANTHOFF]       = 6;
+    kinetics_model_map[KineticsModel::PHOTOCHEM]      = 7;
 
     std::vector<std::string> models; 
     models.push_back("Constant");
@@ -205,20 +243,19 @@ namespace Antioch
     proc_keyword["LindemannFalloff"]  = ReactionType::LINDEMANN_FALLOFF;
     proc_keyword["TroeFalloff"]       = ReactionType::TROE_FALLOFF;
 
-    while (reaction)
+    while (parser.reaction())
       {
-        if (verbose) std::cout << "Reaction #" << reaction->IntAttribute("id") << ":\n"
-                               << " eqn: " << reaction->FirstChildElement("equation")->GetText()
+        if (verbose) std::cout << "Reaction #" << parser.reaction_id() << ":\n"
+                               << " eqn: " << parser.reaction_equation()
                                << std::endl;
 
         ReactionType::ReactionType typeReaction(ReactionType::ELEMENTARY);
         KineticsModel::KineticsModel kineticsModel(KineticsModel::HERCOURT_ESSEN); // = 0
-        bool reversible(true);
 
-        if (reaction->Attribute("type"))
+        if (!parser.reaction_chemical_process().empty())
           {
-            if (verbose) std::cout << " type: " << reaction->Attribute("type") << std::endl;
-            if(!proc_keyword.count(reaction->Attribute("type")))
+            if (verbose) std::cout << " type: " << parser.reaction_chemical_process() << std::endl;
+            if(!proc_keyword.count(parser.reaction_chemical_process()))
             {
                 std::cerr << "Implemented chemical processes are:\n"
                           << "  Elementary (default)\n"
@@ -230,147 +267,82 @@ namespace Antioch
                           << std::endl;
                 antioch_not_implemented();
             }
-            typeReaction = proc_keyword[reaction->Attribute("type")];
+            typeReaction = proc_keyword[parser.reaction_chemical_process()];
           }
             
-        if(reaction->Attribute("reversible"))
-        {
-          if (verbose) std::cout << "reversible: " << reaction->Attribute("reversible") << std::endl;
-          if(std::string(reaction->Attribute("reversible")) == "no")reversible = false;
-        }
-
-        unsigned int imod(0);
-        tinyxml2::XMLElement* rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
-        while(!rate_constant)
-        {
-          if(imod == models.size() - 1)
-          {
-                std::cerr << "Could not find a suitable kinetics model.\n"
-                          << "Implemented kinetics models are:\n"
-                          << "  Constant\n"
-                          << "  HercourtEssen\n"
-                          << "  Berthelot\n"
-                          << "  Arrhenius\n"
-                          << "  BerthelotHercourtEssen\n"
-                          << "  Kooij (default)\n"
-                          << "  ModifiedArrhenius (= Kooij)\n"
-                          << "  VantHoff\n"
-                          << "  photochemistry\n"
-                          << "See Antioch documentation for more details."
-                          << std::endl;
-                antioch_not_implemented();
-          }
-          imod++;
-          rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str());
-        }
-        kineticsModel = kin_keyword[models[imod]];
-
-        tinyxml2::XMLElement* reactants = reaction->FirstChildElement("reactants");
-        tinyxml2::XMLElement* products  = reaction->FirstChildElement("products");
-        
-        // usually Kooij is called Arrhenius, check here
-        if(kineticsModel == KineticsModel::ARRHENIUS && rate_constant->FirstChildElement("b") != NULL)
-        {
-          if(rate_constant->FirstChildElement("b"))
-          {
-            if(std::atof(rate_constant->FirstChildElement("b")->GetText()) != 0.)
-            {
-               kineticsModel = KineticsModel::KOOIJ;
-               std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
-                         << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
-                         << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
-                         << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
-                         << "thanks and a good day to you, user." << std::endl;
-            }
-          }
-        }
-
+        if (verbose) std::cout << "reversible: " << parser.reaction_reversible() << std::endl;
+        bool reversible(parser.reaction_reversible());
+       
+        kineticsModel = kin_keyword[parser.reaction_kinetics_model(models)];
+        const std::string reading_kinetics_model = models[kinetics_model_map[kin_keyword[parser.reaction_kinetics_model(models)]]];
 
         // construct a Reaction object    
-        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, reaction->FirstChildElement("equation")->GetText(),
+        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, parser.reaction_equation(),
                                                                                reversible,typeReaction,kineticsModel);
 
         // We will add the reaction, unless we do not have a 
         // reactant or product
         bool relevant_reaction = true;
         unsigned int order_reaction(0);
+        std::vector<std::pair<std::string,int> > molecules_pairs;
 
-        if(reactants->GetText())
+        if(parser.reactants_pairs(molecules_pairs))
           {
-            if (verbose) std::cout << "\n   reactants: " << reactants->GetText();
+            if (verbose)
+            {
+              std::cout << "\n   reactants: "; 
+              for(unsigned int ir = 0; ir < molecules_pairs.size(); ir++)
+                  std::cout << molecules_pairs[ir].first << ":" << molecules_pairs[ir].second << " ";
+            }
                 
-            std::vector<std::string> reactant_pairs;
-                
-            // Split the reactant string on whitespace. If no entries were found,
-            // there is no whitespace - and assume then only one reactant is listed.
-            if( !SplitString(std::string(reactants->GetText()),
-                             " ",
-                             reactant_pairs,
-                             /* include_empties = */ false)     )
+            for( unsigned int p=0; p < molecules_pairs.size(); p++ )
               {
-                reactant_pairs.push_back(reactants->GetText());
-              }
+                if(molecules_pairs[p].first == "e-") molecules_pairs[p].first = "e";
 
-            for( unsigned int p=0; p < reactant_pairs.size(); p++ )
-              {
-                std::pair<std::string,int> pair( split_string_int_on_colon(reactant_pairs[p]) );
+                if(verbose) std::cout  << "\n    " << molecules_pairs[p].first << " " << molecules_pairs[p].second;
 
-                if(pair.first == "e-") pair.first = "e";
-
-                if(verbose) std::cout  << "\n    " << reactant_pairs[p] << " " << pair.first << " " << pair.second;
-
-                if( !chem_mixture.species_name_map().count( pair.first ) )
+                if( !chem_mixture.active_species_name_map().count( molecules_pairs[p].first ) )
                   {
                     relevant_reaction = false;
-                    if (verbose) std::cout << "\n     -> skipping this reaction (no reactant " << pair.first << ")";
+                    if (verbose) std::cout << "\n     -> skipping this reaction (no reactant " << molecules_pairs[p].first << ")";
                   }
                 else
                   {
-                    my_rxn->add_reactant( pair.first,
-                                         chem_mixture.species_name_map().find( pair.first )->second,
-                                         pair.second );
-                    order_reaction += pair.second;
-                  }
-              }
-          }
-        if(products->GetText())
-          {
-            if(verbose) std::cout << "\n   products: " << products->GetText();
-                
-            std::vector<std::string> product_pairs;
-                
-            // Split the product string on whitespace. If no entries were found,
-            // there is no whitespace - and assume then only one product is listed.
-            if( !SplitString( std::string(products->GetText()),
-                              " ",
-                              product_pairs,
-                              /* include_empties = */ false )     )
-              {
-                product_pairs.push_back(products->GetText());
-              }
-
-            for (unsigned int p=0; p<product_pairs.size(); p++)
-              {
-                std::pair<std::string, int> pair(split_string_int_on_colon (product_pairs[p]));
-
-                if(pair.first == "e-") pair.first = "e";
-
-                if(verbose) std::cout  << "\n    " << product_pairs[p] << " " << pair.first << " " << pair.second;
-
-                if( !chem_mixture.species_name_map().count( pair.first ) )
-                  {
-                    relevant_reaction = false;
-                    if (verbose) std::cout << "\n     -> skipping this reaction (no product " << pair.first << ")";
-                  }
-                else
-                  {
-                    my_rxn->add_product( pair.first,
-                                        chem_mixture.species_name_map().find( pair.first )->second,
-                                        pair.second );
+                    my_rxn->add_reactant( molecules_pairs[p].first,
+                                         chem_mixture.active_species_name_map().find( molecules_pairs[p].first )->second,
+                                         molecules_pairs[p].second );
+                    order_reaction += molecules_pairs[p].second;
                   }
               }
           }
 
+        molecules_pairs.clear();
+        if(parser.products_pairs(molecules_pairs))
+          {
+            if(verbose) std::cout << "\n   products: ";
+              for(unsigned int ir = 0; ir < molecules_pairs.size(); ir++)
+                  std::cout << molecules_pairs[ir].first << ":" << molecules_pairs[ir].second << " ";
+                
+            for (unsigned int p=0; p < molecules_pairs.size(); p++)
+              {
+                if(molecules_pairs[p].first == "e-") molecules_pairs[p].first = "e";
+
+                if(verbose) std::cout  << "\n    " << molecules_pairs[p].first << " " << molecules_pairs[p].second;
+
+                if( !chem_mixture.active_species_name_map().count( molecules_pairs[p].first ) )
+                  {
+                    relevant_reaction = false;
+                    if (verbose) std::cout << "\n     -> skipping this reaction (no product " << molecules_pairs[p].first << ")";
+                  }
+                else
+                  {
+                    my_rxn->add_product( molecules_pairs[p].first,
+                                        chem_mixture.active_species_name_map().find( molecules_pairs[p].first )->second,
+                                        molecules_pairs[p].second );
+                  }
+              }
+             if(verbose) std::cout << std::endl;
+          }
 
         if(!relevant_reaction)
         {
@@ -380,235 +352,180 @@ namespace Antioch
           continue;
         }
 
-        while(rate_constant) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        //TODO delete the pointer, in another pull request/branch
+        if(!relevant_reaction)
         {
-        // typically Cantera files list 
-        //      activation energy in cal/mol, but we want it in K.
-        //      pre-exponential parameters in (m3/kmol)^(m-1)/s
-        //      power parameter without unit
-        // if falloff, we need to know who's k0 and kinfty
-        // if photochemistry, we have a cross-section on a lambda grid
-        //      cross-section typically in cm2/nm (cross-section on a resolution bin, 
-        //                                          if bin unit not given, it is lambda unit (supposed to anyway), and a warning message)
-        //      lambda typically in nm, sometimes in ang, default considered here is nm
-        //                         you can also have cm-1, conversion is done with
-        //                         formulae nm = cm-1 * / * adapted factor
-          std::vector<NumericType> data;
+          if(verbose) std::cout << "skipped reaction\n" << std::endl;
+          continue;
+        }
+
+        // usually Kooij is called Arrhenius, check here
+        if(kineticsModel == KineticsModel::ARRHENIUS)
+        {
+          if(parser.verify_Kooij_Arrhenius())
+          {
+               kineticsModel = KineticsModel::KOOIJ;
+               std::cerr << "In reaction " << parser.reaction_id() << "\n"
+                         << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
+                         << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
+                         << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
+                         << "thanks and a good day to you, user." << std::endl;
+          }
+        }
+
+        while(parser.rate_constant(reading_kinetics_model)) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        {
+
+         /* Any data is formatted by the parser method.
+          * For any data required, parser sends back:
+          *    - true/false if data is found
+          *    - value of data
+          *    - unit of data if found, empty string else
+          *    - default unit of data
+          *
+          * The parser defines the defaults, note the special case
+          * of the pre-exponential parameters:
+          *  its unit is [quantity-1]^(order - 1)/s, thus the parser
+          *  defines only the [quantity-1] unit (SI unit is m^3/mol)
+          *  as default.
+          */
+
+          std::vector<NumericType> data; // for rate constant
+
           Units<NumericType> def_unit;
           int pow_unit(order_reaction - 1);
-         //threebody always
+          //threebody always
           if(my_rxn->type() == ReactionType::THREE_BODY)pow_unit++;
-        //falloff for k0
+          //falloff for k0
           if(my_rxn->type() == ReactionType::LINDEMANN_FALLOFF ||
              my_rxn->type() == ReactionType::TROE_FALLOFF)
           {
-//k0 is either determined by an explicit name, or is the first of unnamed rate constants
-             if(rate_constant->Attribute("name"))
-             {
-                if(std::string(rate_constant->Attribute("name")) == "k0")pow_unit++;
-             }else if(my_rxn->n_rate_constants() == 0) // if we're indeed at the first reading
-             {
-                if(!rate_constant->NextSiblingElement(models[imod].c_str())->Attribute("name")) // and the next doesn't have a name
-                     pow_unit++;
-             }
+             //k0 is either determined by an explicit name, or is the first of unnamed rate constants
+             if(parser.is_k0(my_rxn->n_rate_constants(),models[kinetics_model_map[kineticsModel]]))pow_unit++;
           }
-          def_unit.set_unit("m3/kmol"); //default
-          def_unit *= pow_unit; //to the m-1 power
-          def_unit.substract("s"); // per second
-          
-          if(verbose) 
-            {
-              std::cout << " rate: " << models[imod] << " model\n" << "\n";
-              if(rate_constant->FirstChildElement("A") != NULL)
-              {
-                  std::cout << "   A: " << rate_constant->FirstChildElement("A")->GetText() << "\n";
-              }
-              if(rate_constant->FirstChildElement("b") != NULL)
-              {
-                  std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << "\n";
-              }
-              if(rate_constant->FirstChildElement("E") != NULL)
-              {
-                  std::cout << "   E: " << rate_constant->FirstChildElement("E")->GetText() << "\n";
-              }
-              if(rate_constant->FirstChildElement("D") != NULL)
-              {
-                  std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText() << "\n";
-              }
-              if(rate_constant->FirstChildElement("lambda") != NULL)
-              {
-                  std::cout << "   lambda:\n" << rate_constant->FirstChildElement("lambda")->GetText() << "\n";
-              }
-              if(rate_constant->FirstChildElement("cross_section") != NULL)
-              {
-                  std::cout << "   cross section:\n" << rate_constant->FirstChildElement("cross_section")->GetText() << "\n";
-              }
-            }
 
-          if(rate_constant->FirstChildElement("A") != NULL)
+          NumericType par_value(-1.);
+          std::vector<NumericType> par_values;
+          std::string par_unit;
+          std::string default_unit;
+          std::vector<std::string> accepted_unit;
+
+        // verbose as we read along
+          if(verbose)std::cout << " rate: " << models[kinetics_model_map[kineticsModel]] << " model\n" << "\n";
+
+// pre-exponential
+          if(parser.rate_constant_preexponential_parameter(par_value, par_unit, default_unit))
           {
-            if(!rate_constant->FirstChildElement("A")->Attribute("units"))
-            {
-               antioch_unit_required("A",def_unit.get_symbol());
-            }else
-            {
-              Units<NumericType> read_unit;
-              read_unit.set_unit(rate_constant->FirstChildElement("A")->Attribute("units"));
-              if(!read_unit.is_homogeneous(def_unit))
-              {
-                std::string errorstring("Error in reaction " + my_rxn->equation());
-                errorstring += "\n A units should be homogeneous to " + def_unit.get_symbol() + 
-                               " and you provided " + read_unit.get_symbol();
-                antioch_unit_error(errorstring);
-              }
-              def_unit = read_unit;
-           }
+            // using Units object to build accepted_unit
+            accepted_unit.clear();
+            def_unit.set_unit("m3/mol");
+            def_unit *= pow_unit;       //to the m-1 power
+            def_unit.substract("s");    // per second
+            accepted_unit.push_back(def_unit.get_symbol());
+
+            def_unit.set_unit(default_unit);
+            def_unit *= pow_unit;       //to the m-1 power
+            def_unit.substract("s");    // per second
+            verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "A");
            if(verbose) 
              {
-             std::cout  << "   A: " << rate_constant->FirstChildElement("A")->GetText()
-                        << " " << def_unit.get_symbol() << std::endl; 
+             std::cout  << "   A: " << par_value
+                        << " "      << def_unit.get_symbol() << std::endl; 
              }
-           data.push_back(std::atof(rate_constant->FirstChildElement("A")->GetText()) * def_unit.get_SI_factor());
+           data.push_back(par_value * def_unit.get_SI_factor());
          }
-//b has no unit
-         if(rate_constant->FirstChildElement("b") != NULL)
+
+// beta
+         if(parser.rate_constant_power_parameter(par_value,par_unit,default_unit))
          {
-            data.push_back(std::atof(rate_constant->FirstChildElement("b")->GetText()));
-            if(data.back() == 0.)//if ARRHENIUS parameterized as KOOIJ
+            accepted_unit.clear();
+            accepted_unit.push_back("");
+            def_unit.set_unit(default_unit);
+            verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "beta");
+            if(par_value == 0.)//if ARRHENIUS parameterized as KOOIJ, bad test, need to rethink it
             {
-               data.pop_back();
-               std::cerr << "In reaction " << reaction->Attribute("id") << "\n"
+               std::cerr << "In reaction " << parser.reaction_id() << "\n"
                          << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
                          << "and most certainly not a Kooij one\n"
                          << "it has been corrected, but please, change that in your file.\n"
                          << "Thanks and a good day to you, user." << std::endl;
                kineticsModel = KineticsModel::ARRHENIUS;
+            }else
+            {
+              data.push_back(par_value * def_unit.get_SI_factor());
             }
             if(verbose) 
               {
-                std::cout << "   b: " << rate_constant->FirstChildElement("b")->GetText() << std::endl; 
+                std::cout << "   b: " << par_value << std::endl; 
               }
          }
 
-//E has cal/mol default unit
-          if(rate_constant->FirstChildElement("E") != NULL)
+// activation energy
+          if(parser.rate_constant_activation_energy_parameter(par_value,par_unit,default_unit))
           {
-            def_unit.set_unit("cal/mol");
-            if(!rate_constant->FirstChildElement("E")->Attribute("units"))
-            {
-               antioch_unit_required("E",def_unit.get_symbol());
-            }else
-            {
-               Units<NumericType> read_unit;
-               read_unit.set_unit(rate_constant->FirstChildElement("E")->Attribute("units"));
-               if(!read_unit.is_homogeneous(def_unit) &&
-                  !read_unit.is_homogeneous("K")) //K directly given
-               {
-                   std::string errorstring("Error in reaction " + my_rxn->equation());
-                   errorstring += "\n E units should be homogeneous to " + def_unit.get_symbol() + 
-                                  " or K, and you provided " + read_unit.get_symbol();
-                   antioch_unit_error(errorstring);
-               }
-               def_unit = read_unit;
-            }
-            data.push_back(std::atof(rate_constant->FirstChildElement("E")->GetText()));
+            accepted_unit.clear();
+            accepted_unit.push_back("J/mol");
+            accepted_unit.push_back("K");
+            def_unit.set_unit(default_unit);
+            verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "Ea");
+            data.push_back(par_value * def_unit.get_SI_factor());
             if(verbose) 
               {
-                std::cout << "   E: " << rate_constant->FirstChildElement("E")->GetText()
-                          << " " << def_unit.get_symbol() << std::endl; 
+                std::cout << "   E: " << par_value
+                          << " "      << def_unit.get_symbol() << std::endl; 
               }
           }
 
 
-          if(rate_constant->FirstChildElement("D") != NULL)
+// Berthelot coefficient (D)
+          if(parser.rate_constant_Berthelot_coefficient_parameter(par_value,par_unit,default_unit))
           {
-            def_unit.set_unit("K-1");
-            if(!rate_constant->FirstChildElement("D")->Attribute("units"))
-            {
-               antioch_unit_required("D",def_unit.get_symbol());
-            }else
-            {
-               Units<NumericType> read_unit;
-               read_unit.set_unit(rate_constant->FirstChildElement("D")->Attribute("units"));
-               if(!read_unit.is_homogeneous(def_unit))
-               {
-                 std::string errorstring("Error in reaction " + my_rxn->equation());
-                 errorstring += "\n D units should be homogeneous to " + def_unit.get_symbol() + 
-                                " and you provided " + read_unit.get_symbol();
-                 antioch_unit_error(errorstring);
-               }
-               def_unit = read_unit;
-            }
-             data.push_back(std::atof(rate_constant->FirstChildElement("D")->GetText()) * def_unit.get_SI_factor());
+            accepted_unit.clear();
+            accepted_unit.push_back("K");
+            def_unit.set_unit(default_unit);
+            verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "D");
+            data.push_back(par_value * def_unit.get_SI_factor());
             if(verbose) 
               {
-                std::cout << "   D: " << rate_constant->FirstChildElement("D")->GetText()
-                          << " " << def_unit.get_symbol() << std::endl; 
+                std::cout << "   D: " << par_value
+                          << " "      << def_unit.get_symbol() << std::endl; 
               }
           }
 
-          //Tref
+// Tref, not for everyone
           if(kineticsModel == KineticsModel::HERCOURT_ESSEN ||
              kineticsModel == KineticsModel::BHE            ||
              kineticsModel == KineticsModel::KOOIJ          ||
              kineticsModel == KineticsModel::VANTHOFF) 
           {
-            data.push_back(1.);
-            def_unit.set_unit("K");
-            if(!rate_constant->FirstChildElement("Tref"))
+            par_value = 1.;
+            if(parser.rate_constant_Tref_parameter(par_value,par_unit,default_unit))
             {
-                antioch_parameter_required("Tref","1 K");
+              accepted_unit.clear();
+              accepted_unit.push_back("K");
+              def_unit.set_unit(default_unit);
+              verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "Tref");
             }else
             {
-              if(!rate_constant->FirstChildElement("Tref")->Attribute("units"))
-              {
-                 antioch_unit_required("Tref",def_unit.get_symbol());
-              }else
-              {
-                 Units<NumericType> read_unit;
-                 read_unit.set_unit(rate_constant->FirstChildElement("Tref")->Attribute("units"));
-                 if(!read_unit.is_homogeneous(def_unit))
-                 {
-                   std::string errorstring("Error in reaction " + my_rxn->equation());
-                   errorstring += "\n Tref units should be homogeneous to " + def_unit.get_symbol() + 
-                                  " and you provided " + read_unit.get_symbol();
-                   antioch_unit_error(errorstring);
-                }
-                def_unit = read_unit;
-              }
-              data.back() = std::atof(rate_constant->FirstChildElement("Tref")->GetText()) * def_unit.get_SI_factor();
+                antioch_parameter_required("Tref","1 K");
             }
+            data.push_back(par_value);
           }
 
-          //scale E -> E/R
+// scale E -> E/R
           if(kineticsModel == KineticsModel::ARRHENIUS ||
              kineticsModel == KineticsModel::KOOIJ     ||
              kineticsModel == KineticsModel::VANTHOFF)
           {
-            if(rate_constant->FirstChildElement("E")->Attribute("units"))
-            {
-               def_unit.set_unit("cal/mol"); // find E unit
-               Units<NumericType> read_unit;
-               read_unit.set_unit(rate_constant->FirstChildElement("E")->Attribute("units"));
-               if(def_unit.is_homogeneous(read_unit)) //energy given
-               {
-                  def_unit.set_unit(read_unit.get_symbol() + "/K"); //unit of R is (E unit)/K
-                  data.push_back(Antioch::Constants::R_universal<NumericType>() * Antioch::Constants::R_universal_unit<NumericType>().factor_to_some_unit(def_unit));
-               }else if(read_unit.is_homogeneous("K")) //K directly given
-               {
-                  data.push_back(1.L);
-               }else
-               {
-                   std::string errorstring("Error in reaction " + my_rxn->equation());
-                   errorstring += "\n E units should be homogeneous to " + def_unit.get_symbol() + 
-                                  " or K, and you provided " + read_unit.get_symbol();
-                   antioch_unit_error(errorstring);
-               }
-            }else 
-            {
-               def_unit.set_unit("cal/mol/K"); // default R unit
-               data.push_back(Antioch::Constants::R_universal<NumericType>() * Antioch::Constants::R_universal_unit<NumericType>().factor_to_some_unit(def_unit));
-            }
+            parser.rate_constant_activation_energy_parameter(par_value,par_unit,default_unit);
+            (par_unit.empty())?def_unit.set_unit(default_unit):def_unit.set_unit(par_unit);
+        // now finding R unit: [Ea] / [K]
+            def_unit.substract("K");
+
+            par_value = (def_unit.is_united())?
+                                Antioch::Constants::R_universal<NumericType>() * Antioch::Constants::R_universal_unit<NumericType>().factor_to_some_unit(def_unit) // some unit homogeneous to J/mol/K
+                                              :1.L;  // no unit, so Ea in K
+            data.push_back(par_value);
           }
 
           //photochemistry
@@ -622,57 +539,46 @@ namespace Antioch
 
           // starting with lambda (for bin unit in cross-section)
           // lambda is not in SI (m is really to violent), it will be nm
-          if(rate_constant->FirstChildElement("lambda"))
+          if(parser.rate_constant_lambda_parameter(par_values,par_unit,default_unit))
           {
-             data.clear();
              antioch_assert_equal_to(kineticsModel,KineticsModel::PHOTOCHEM);
-             std::vector<std::string> lambda;
-             def_unit.set_unit("nm");
-
-       //reading part
-            SplitString( std::string(rate_constant->FirstChildElement("lambda")->GetText()),
-                          " ",
-                          lambda,
-                          /* include_empties = */ false );
-
-         //unit checking part
-             if(!rate_constant->FirstChildElement("lambda")->Attribute("units"))
+             accepted_unit.clear();
+             accepted_unit.push_back("nm");
+             accepted_unit.push_back("cm-1");
+             def_unit.set_unit(default_unit);
+             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "lambda");
+             
+             data.clear();
+         
+             if(def_unit.is_homogeneous("nm"))// it's a length
              {
-                antioch_unit_required("lambda",def_unit.get_symbol());
-                for(unsigned int il = 0; il < lambda.size(); il++)
+                for(unsigned int il = 0; il < par_values.size(); il++)
                 {
-                   data.push_back(std::atof(lambda[il].c_str()) * def_unit.factor_to_some_unit("nm"));
+                   data.push_back(par_values[il] * def_unit.factor_to_some_unit("nm"));
                 }
-             }else
+             }else // it's the inverse of a length
              {
-               Units<NumericType> read_unit;
-               read_unit.set_unit(rate_constant->FirstChildElement("lambda")->Attribute("units"));
-               if(read_unit.is_homogeneous(def_unit))
-               {
-                   def_unit = read_unit;
-                   for(unsigned int il = 0; il < lambda.size(); il++)
-                   {
-                     data.push_back(std::atof(lambda[il].c_str()) * def_unit.factor_to_some_unit("nm"));
-                   }
-               }else if(read_unit.is_homogeneous("cm-1"))
-               {
-                 def_unit = read_unit;
-                 for(unsigned int il = 0; il < lambda.size(); il++)
-                 {
-                    data.push_back(1.L/(std::atof(lambda[il].c_str()) * def_unit.factor_to_some_unit("nm-1")));
-                  }
-               }else
-               {
-                   std::string errorstring("Error in reaction " + my_rxn->equation());
-                   errorstring += "\n Wavelength units should be homogeneous to " + def_unit.get_symbol() + " or cm-1"
-                                  ", and you provided " + read_unit.get_symbol();
-                   antioch_unit_error(errorstring);
-               }
+                for(unsigned int il = 0; il < par_values.size(); il++)
+                {
+                   data.push_back(1.L/(par_values[il] * def_unit.factor_to_some_unit("nm-1")));
+                }
              }
-             Antioch::Units<NumericType> bin_unit = def_unit;
-             if(!rate_constant->FirstChildElement("cross_section"))
+
+             //now the cross-section
+
+             NumericType bin_coefficient = (def_unit.is_homogeneous("nm"))?def_unit.factor_to_some_unit("nm"):
+                                                                           def_unit.factor_to_some_unit("nm-1");
+             if(!parser.rate_constant_cross_section_parameter(par_values,par_unit,default_unit))
              {
                 std::cerr << "Where is the cross-section?  In what universe have you photochemistry with a wavelength grid and no cross-section on it?" << std::endl;
+                antioch_error();
+             }
+             //test length
+             if(par_values.size() != data.size())
+             {
+                std::cerr << "Your cross-section vector and your lambda vector don't have the same size!\n"
+                          << "What am I supposed to do with that?"
+                          << std::endl;
                 antioch_error();
              }
 
@@ -694,57 +600,28 @@ namespace Antioch
               * !TODO make the decomposition instead of strict equality
               */
 
-             Antioch::Units<NumericType> cs_unit("cm2");
-             if(!rate_constant->FirstChildElement("cross_section")->Attribute("units"))
+             accepted_unit.clear();
+             accepted_unit.push_back("cm2");       // only cross-section
+             accepted_unit.push_back("cm2/nm");    // per bin, bin is length-like
+             accepted_unit.push_back("cm2/nm-1");  // per bin, bin is inverse length-like
+             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "cross-section");
+             
+
+             if(def_unit.is_homogeneous("cm2")) // gotta use the bin unit, real unit is [cs]/[provided bin unit]
              {
-                antioch_unit_required("cross_section",(cs_unit - bin_unit).get_symbol());
-             }else
-             {
-               Units<NumericType> read_unit;
-               read_unit.set_unit(rate_constant->FirstChildElement("cross_section")->Attribute("units"));
-               if(read_unit.is_homogeneous(cs_unit - bin_unit)) // here test the rigorous unit: cm2/nm 
+               for(unsigned int ics = 0; ics < par_values.size(); ics++)
                {
-        // work to do here for decomposition   !!!!  supposes strict equality => cm2 per bin only
-               }else if(read_unit.is_homogeneous(cs_unit)) // here test the almost rigorous unit cm2
-               {
-                  cs_unit = read_unit;
-               }else //nothing can save you now...
-               {
-                   std::string errorstring("Error in reaction " + my_rxn->equation());
-                   errorstring += "\n Cross-section units should be homogeneous to " + def_unit.get_symbol() + 
-                                  ", and you provided " + read_unit.get_symbol();
-                   antioch_unit_error(errorstring);
+                  data.push_back(par_values[ics] * def_unit.get_SI_factor() / bin_coefficient); //cs in SI, bin in nm or nm-1
                }
-             }
-             std::vector<std::string> sigma;
-             SplitString( std::string(rate_constant->FirstChildElement("cross_section")->GetText()),
-                          " ",
-                          sigma,
-                          /* include_empties = */ false );
-             if(sigma.size() != lambda.size())
+             }else                              // bin unit is provided
              {
-                std::cerr << "Your cross-section vector and your lambda vector don't have the same size!\n"
-                          << "What am I supposed to do with that?"
-                          << std::endl;
-                antioch_error();
+               std::string target_unit = (def_unit.is_homogeneous("cm2/nm"))?"m2/nm":"m2/nm-1";
+               for(unsigned int ics = 0; ics < par_values.size(); ics++)
+               {
+                  data.push_back(par_values[ics] * def_unit.factor_to_some_unit(target_unit));
+               }
              }
 
-             if(bin_unit.is_homogeneous("nm")) //nm
-             {
-              for(unsigned int ics = 0; ics < sigma.size(); ics++)
-              {
-                data.push_back(std::atof(sigma[ics].c_str()) * cs_unit.get_SI_factor() / (bin_unit.factor_to_some_unit("nm")));
-              }
-             }else if(bin_unit.is_homogeneous("cm-1"))//cm-1
-             {   
-               for(unsigned int ics = 0; ics < sigma.size(); ics++)
-               {
-                 data.push_back(std::atof(sigma[ics].c_str()) * cs_unit.get_SI_factor() / bin_unit.factor_to_some_unit("nm-1"));
-               }
-             }else //WHAT ?!!??
-             {
-                antioch_error();
-             }
           } //end photochemistry
 
           if(data.empty()) //replace the old "if no A parameters" as A is not required anymore
@@ -759,8 +636,6 @@ namespace Antioch
 
           my_rxn->add_forward_rate(rate);
 
-          rate_constant = rate_constant->NextSiblingElement(models[imod].c_str());
-
         } //end of duplicate/falloff kinetics description loop
 
         // for falloff, we need a way to know which rate constant is the low pressure limit 
@@ -773,154 +648,107 @@ namespace Antioch
            my_rxn->type() == ReactionType::TROE_FALLOFF)
         {
            antioch_assert_equal_to(my_rxn->n_rate_constants(),2);
-           rate_constant = reaction->FirstChildElement("rateCoeff")->FirstChildElement(models[imod].c_str())->NextSiblingElement(models[imod].c_str());
-           if(rate_constant->Attribute("name")) //if attribute exists
+           if(parser.where_is_k0(models[kinetics_model_map[kineticsModel]]) == 1) // second given is k0
            { 
-             if(std::string(rate_constant->Attribute("name")) == "k0") //and is indeed k0
-             {
                my_rxn->swap_forward_rates(0,1);
-             }
            }
         }
 
-        tinyxml2::XMLElement *efficiencies = 
-          reaction->FirstChildElement("rateCoeff")->FirstChildElement("efficiencies");
 
+        std::vector<std::pair<std::string,double> > efficiencies;
         //efficiencies are only for three body reactions
-        if(efficiencies)
+        if(parser.efficiencies(efficiencies))
           {
-            if(efficiencies->GetText())
-              {
-                antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn->type());
+              antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn->type());
 
-                if(verbose) std::cout << "   efficiencies: " << efficiencies->GetText();
+             if(verbose)
+             {
+                std::cout << "   efficiencies: ";
+                for(unsigned int ir = 0; ir < efficiencies.size(); ir++)
+                    std::cout << efficiencies[ir].first << ":" << efficiencies[ir].second << " " << std::endl;
+             }
 
-                std::vector<std::string> efficiency_pairs;
-
-                SplitString( std::string(efficiencies->GetText()),
-                             " ",
-                             efficiency_pairs,
-                             /* include_empties = */ false );
-
-                for(unsigned int p = 0; p < efficiency_pairs.size(); p++)
-                  {
-                    std::pair<std::string, double> pair(split_string_double_on_colon (efficiency_pairs[p]));
+             for(unsigned int p = 0; p < efficiencies.size(); p++)
+               {
                     if(verbose) 
                       {
-                        std::cout  << "\n    " << efficiency_pairs[p] 
-                                   << " " << pair.first << " " << pair.second;
+                        std::cout  << "\n    " 
+                                   << " " << efficiencies[p].first << " " << efficiencies[p].second;
                       }
 
-                    if(pair.first == "e-") pair.first = "e";
+                    if(efficiencies[p].first == "e-") efficiencies[p].first = "e";
 
                     // it is possible that the efficiency is specified for a species we are not
                     // modeling - so only add the efficiency if it is included in our list
-                    if( chem_mixture.species_name_map().count( pair.first ) )
+                    if( chem_mixture.active_species_name_map().count( efficiencies[p].first ) )
                       {
-                        my_rxn->set_efficiency( pair.first,
-                                               chem_mixture.species_name_map().find( pair.first )->second,
-                                               pair.second );
+                        my_rxn->set_efficiency( efficiencies[p].first,
+                                               chem_mixture.active_species_name_map().find( efficiencies[p].first )->second,
+                                               efficiencies[p].second );
                       }
-                  }
-              }
+               }
           }
 
         //F parameters only for Troe falloff
-        tinyxml2::XMLElement *troe = 
-          reaction->FirstChildElement("rateCoeff")->FirstChildElement("Troe");
-        if(troe)
+        if(parser.Troe())
         {
            antioch_assert_equal_to (ReactionType::TROE_FALLOFF, my_rxn->type());
            FalloffReaction<NumericType,TroeFalloff<NumericType> > *my_fall_rxn =
                 static_cast<FalloffReaction<NumericType,TroeFalloff<NumericType> > *> (my_rxn);
 
            Units<NumericType> def_unit;
+           NumericType par_value(-1.);
+           std::string par_unit;
+           std::string default_unit;
+           std::vector<std::string> accepted_unit;
 
-           if(!troe->FirstChildElement("alpha"))
+        // alpha
+           if(!parser.Troe_alpha_parameter(par_value,par_unit,default_unit))
            {
                 std::cerr << "alpha parameter of Troe falloff missing!" << std::endl;
                 antioch_error();
            }
-           my_fall_rxn->F().set_alpha(std::atof(troe->FirstChildElement("alpha")->GetText()));
+           accepted_unit.clear();
+           accepted_unit.push_back("");
+           def_unit.set_unit(default_unit);
+           verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "alpha");
+           my_fall_rxn->F().set_alpha(par_value * def_unit.get_SI_factor());
 
-           if(!troe->FirstChildElement("T3"))
+        // T***
+           if(!parser.Troe_T3_parameter(par_value,par_unit,default_unit))
            {
                 std::cerr << "T*** parameter of Troe falloff missing!" << std::endl;
                 antioch_error();
-           }else
-           {
-              def_unit.set_unit("K");
-              if(!troe->FirstChildElement("T3")->Attribute("units"))
-              {
-                 antioch_unit_required("T3",def_unit.get_symbol());
-              }else
-              {
-                 Units<NumericType> read_unit;
-                 read_unit.set_unit(rate_constant->FirstChildElement("T3")->Attribute("units"));
-                 if(!read_unit.is_homogeneous(def_unit))
-                 {
-                   std::string errorstring("Error in reaction " + my_rxn->equation());
-                   errorstring += "\n Tref units should be homogeneous to " + def_unit.get_symbol() + 
-                                  " and you provided " + read_unit.get_symbol();
-                 }
-                 def_unit = read_unit;
-              }
            }
-           my_fall_rxn->F().set_T3(std::atof(troe->FirstChildElement("T3")->GetText()) * def_unit.get_SI_factor());
+           accepted_unit.clear();
+           accepted_unit.push_back("K");
+           def_unit.set_unit(default_unit);
+           verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "T***");
+           my_fall_rxn->F().set_T3(par_value * def_unit.get_SI_factor());
 
-           if(!troe->FirstChildElement("T1"))
+        // T*
+           if(!parser.Troe_T1_parameter(par_value,par_unit,default_unit))
            {
                 std::cerr << "T* parameter of Troe falloff missing!" << std::endl;
                 antioch_error();
-           }else
-           {
-              def_unit.set_unit("K");
-              if(!troe->FirstChildElement("T1")->Attribute("units"))
-              {
-                 antioch_unit_required("T1",def_unit.get_symbol());
-              }else
-              {
-                 Units<NumericType> read_unit;
-                 read_unit.set_unit(rate_constant->FirstChildElement("T1")->Attribute("units"));
-                 if(!read_unit.is_homogeneous(def_unit))
-                 {
-                   std::string errorstring("Error in reaction " + my_rxn->equation());
-                   errorstring += "\n Tref units should be homogeneous to " + def_unit.get_symbol() + 
-                                  " and you provided " + read_unit.get_symbol();
-                 }
-                 def_unit = read_unit;
-              }
            }
-           my_fall_rxn->F().set_T1(std::atof(troe->FirstChildElement("T1")->GetText()) * def_unit.get_SI_factor());
+        // accepted unit is the same
+           def_unit.set_unit(default_unit);
+           verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "T*");
+           my_fall_rxn->F().set_T1(par_value * def_unit.get_SI_factor());
 
-           if(troe->FirstChildElement("T2"))//T2 is optional
+        // T** is optional
+           if(parser.Troe_T2_parameter(par_value,par_unit,default_unit))
            {
-             def_unit.set_unit("K");
-             if(!troe->FirstChildElement("T2")->Attribute("units"))
-             {
-                antioch_unit_required("T2",def_unit.get_symbol());
-             }else
-             {
-                Units<NumericType> read_unit;
-                read_unit.set_unit(rate_constant->FirstChildElement("T2")->Attribute("units"));
-                if(!read_unit.is_homogeneous(def_unit))
-                {
-                  std::string errorstring("Error in reaction " + my_rxn->equation());
-                  errorstring += "\n Tref units should be homogeneous to " + def_unit.get_symbol() + 
-                                 " and you provided " + read_unit.get_symbol();
-                }
-               def_unit = read_unit;
-             }
-             my_fall_rxn->F().set_T2(std::atof(troe->FirstChildElement("T2")->GetText()) * def_unit.get_SI_factor());
+             def_unit.set_unit(default_unit);
+             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "T**");
+             my_fall_rxn->F().set_T2(par_value * def_unit.get_SI_factor());
            }
         }
 
         reaction_set.add_reaction(my_rxn);     
 
         if(verbose) std::cout << "\n\n";
-
-        // Go to the next reaction
-        reaction = reaction->NextSiblingElement("reaction");
       }
 
     return;
