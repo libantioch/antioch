@@ -45,16 +45,17 @@
 
 
 template <typename Scalar>
-int check_test(const Scalar &exact,const Scalar &cal,const std::string &words)
+int check_test(const Scalar &exact,const Scalar &cal,const std::string &words, unsigned int rxn)
 {
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
   if(std::abs(exact - cal)/exact > tol)
   {
      std::cout << std::scientific << std::setprecision(20)
-               << "Erreur in tests of "  << words << "\n"
-               << "Calculated value is " << cal << "\n"
-               << "Exact value is "      << exact << "\n"
+               << "Erreur in tests of "  << words                       << "\n"
+               << "of reaction #"        << rxn                         << "\n"
+               << "Calculated value is " << cal                         << "\n"
+               << "Exact value is "      << exact                       << "\n"
                << "Relative error is "   << std::abs(exact - cal)/exact << "\n"
                << "Tolerance is "        << tol << std::endl;
     return 1;
@@ -165,14 +166,24 @@ int tester(const std::string& input_name)
   int return_flag(0);
   for(unsigned int rxn = 0; rxn < 5; rxn++)
   {
-     return_flag = return_flag ||
-                   check_test(net_rates_exact[rxn],net_rates[rxn],"net rates") ||
-                   check_test(kfwd_const_exact[rxn],kfwd_const[rxn],"rate constant forward") ||
-                   check_test(kbkwd_const_exact[rxn],kbkwd_const[rxn],"rate constant backward") ||
-                   check_test(kfwd_exact[rxn],kfwd[rxn],"rate forward") ||
-                   check_test(kbkwd_exact[rxn],kbkwd[rxn],"rate backward") ||
-                   check_test(fwd_conc_exact[rxn],fwd_conc[rxn],"concentrations forward") ||
-                   check_test(bkwd_conc_exact[rxn],bkwd_conc[rxn],"concentrations backward");
+     return_flag = check_test(net_rates_exact[rxn],net_rates[rxn],"net rates",rxn)                  ||
+                   return_flag;
+     return_flag = check_test(kfwd_const_exact[rxn],kfwd_const[rxn],"rate constant forward",rxn)    ||
+                   return_flag;
+     return_flag = check_test(kfwd_exact[rxn],kfwd[rxn],"rate forward",rxn)                         ||
+                   return_flag;
+     return_flag = check_test(fwd_conc_exact[rxn],fwd_conc[rxn],"concentrations forward",rxn)       ||
+                   return_flag;
+
+     if(rxn < 3)
+     {
+        return_flag = check_test(kbkwd_const_exact[rxn],kbkwd_const[rxn],"rate constant backward",rxn) ||
+                      return_flag;
+        return_flag = check_test(kbkwd_exact[rxn],kbkwd[rxn],"rate backward",rxn)                      ||
+                      return_flag;
+        return_flag = check_test(bkwd_conc_exact[rxn],bkwd_conc[rxn],"concentrations backward",rxn)    ||
+                      return_flag;
+     }
   }
   return return_flag;
 }
