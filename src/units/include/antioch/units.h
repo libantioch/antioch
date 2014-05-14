@@ -722,7 +722,13 @@ void Units<T>::develop_symbol(std::string &subsymb)
     {
       std::ostringstream np;
       np << pow;
-      subsymb.replace(po - nc,nc,np.str());
+      if(po < subsymb.size())
+      {
+         subsymb.replace(po - nc,nc,np.str());
+      }else
+      {
+        subsymb += np.str();
+      }
     }else
     {
       subsymb.erase(po - nc,nc);
