@@ -107,7 +107,7 @@ namespace Antioch{
          bool rate_constant_cross_section_parameter(std::vector<NumericType> & sigma,  std::string & sigma_unit,  std::string & def_unit) const;
 
          /*! return true if a Kooij is called Arrhenuis*/
-         bool verify_Kooij_Arrhenius() const;
+         bool verify_Kooij_in_place_of_Arrhenius() const;
 
          /*! return true if efficiencies are found*/
          bool efficiencies(std::vector<std::pair<std::string,double> > & par_values) const;
@@ -330,7 +330,7 @@ namespace Antioch{
   bool XMLParser<NumericType>::reaction_reversible() const
   {
      return (_reaction->Attribute(_map.at(ParsingKey::REVERSIBLE).c_str()))?
-                      (_reaction->Attribute(_map.at(ParsingKey::REVERSIBLE).c_str()) == std::string("no").c_str())?false:true //explicit
+                      (std::string(_reaction->Attribute(_map.at(ParsingKey::REVERSIBLE).c_str())) == std::string("no"))?false:true //explicit
                       :
                       true; //default
   }
@@ -441,8 +441,9 @@ namespace Antioch{
       antioch_assert(!_rate_constant); //should be done exterior to rate constant block
       antioch_assert(_reaction);       //should be done interior to reaction block
 
-      tinyxml2::XMLElement * rate_constant = _reaction->FirstChildElement(kin_model.c_str());
-      antioch_assert(rate_constant->NextSiblingElement());
+      tinyxml2::XMLElement * rate_constant = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str());
+      antioch_assert(rate_constant);
+      rate_constant = rate_constant->FirstChildElement(kin_model.c_str());
       unsigned int k0(0);
       if(rate_constant->NextSiblingElement()->Attribute("name"))
       {
@@ -557,10 +558,12 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  bool XMLParser<NumericType>::verify_Kooij_Arrhenius() const
+  bool XMLParser<NumericType>::verify_Kooij_in_place_of_Arrhenius() const
   {
      bool out(false);
      tinyxml2::XMLElement * rate_constant = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str());
+     antioch_assert(rate_constant->FirstChildElement("Arrhenius"));
+     rate_constant = rate_constant->FirstChildElement("Arrhenius");
      if(rate_constant->FirstChildElement(_map.at(ParsingKey::POWER).c_str()))
      {
         if(std::atof(rate_constant->FirstChildElement(_map.at(ParsingKey::POWER).c_str())->GetText()) != 0.) //not a very good test
@@ -577,15 +580,21 @@ namespace Antioch{
      bool out = false;
      if(_reaction)
      {
-       if(_reaction->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str()))
+       tinyxml2::XMLElement * rate_constant = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str());
+       if(rate_constant)
        {
-          std::vector<std::string> values;
-          SplitString(_reaction->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str())->GetText()," ",values,false);
-          for(unsigned int i = 0; i < values.size(); i++)
+          if(rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str()))
           {
-             par_values.push_back(split_string_double_on_colon (values[i]));
+            std::vector<std::string> values;
+            SplitString(std::string((rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str())->GetText())?rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str())->GetText():""),
+                                     " ",values,false);
+            for(unsigned int i = 0; i < values.size(); i++)
+            {
+               par_values.push_back(split_string_double_on_colon (values[i]));
+            }
+            out = true;
           }
-       }
+        }
      }
      return out;
   }

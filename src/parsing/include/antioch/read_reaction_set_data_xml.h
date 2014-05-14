@@ -161,7 +161,7 @@ namespace Antioch
            errorstring += " and you provided \"" + provided_unit + "\"";
            antioch_unit_error(errorstring);
         }
-        default_unit.set_symbol(provided_unit);
+        default_unit.set_unit(provided_unit);
      }
   }
 
@@ -268,11 +268,25 @@ namespace Antioch
             typeReaction = proc_keyword[parser.reaction_chemical_process()];
           }
             
-        if (verbose) std::cout << "reversible: " << parser.reaction_reversible() << std::endl;
         bool reversible(parser.reaction_reversible());
+        if (verbose) std::cout << "reversible: " << reversible << std::endl;
        
         kineticsModel = kin_keyword[parser.reaction_kinetics_model(models)];
-        const std::string reading_kinetics_model = models[kinetics_model_map[kin_keyword[parser.reaction_kinetics_model(models)]]];
+        const std::string reading_kinetics_model = parser.reaction_kinetics_model(models);
+
+        // usually Kooij is called Arrhenius, check here
+        if(kineticsModel == KineticsModel::ARRHENIUS)
+        {
+          if(parser.verify_Kooij_in_place_of_Arrhenius())
+          {
+               kineticsModel = KineticsModel::KOOIJ;
+               std::cerr << "In reaction " << parser.reaction_id() << "\n"
+                         << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
+                         << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
+                         << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
+                         << "thanks and a good day to you, user." << std::endl;
+          }
+        }
 
         // construct a Reaction object    
         Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, parser.reaction_equation(),
@@ -345,30 +359,8 @@ namespace Antioch
         if(!relevant_reaction)
         {
           if(verbose) std::cout << "skipped reaction\n\n";
-          reaction = reaction->NextSiblingElement("reaction");
           delete my_rxn;
           continue;
-        }
-
-        //TODO delete the pointer, in another pull request/branch
-        if(!relevant_reaction)
-        {
-          if(verbose) std::cout << "skipped reaction\n" << std::endl;
-          continue;
-        }
-
-        // usually Kooij is called Arrhenius, check here
-        if(kineticsModel == KineticsModel::ARRHENIUS)
-        {
-          if(parser.verify_Kooij_Arrhenius())
-          {
-               kineticsModel = KineticsModel::KOOIJ;
-               std::cerr << "In reaction " << parser.reaction_id() << "\n"
-                         << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
-                         << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
-                         << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
-                         << "thanks and a good day to you, user." << std::endl;
-          }
         }
 
         while(parser.rate_constant(reading_kinetics_model)) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
@@ -399,7 +391,7 @@ namespace Antioch
              my_rxn->type() == ReactionType::TROE_FALLOFF)
           {
              //k0 is either determined by an explicit name, or is the first of unnamed rate constants
-             if(parser.is_k0(my_rxn->n_rate_constants(),models[kinetics_model_map[kineticsModel]]))pow_unit++;
+             if(parser.is_k0(my_rxn->n_rate_constants(),reading_kinetics_model))pow_unit++;
           }
 
           NumericType par_value(-1.);
@@ -409,7 +401,7 @@ namespace Antioch
           std::vector<std::string> accepted_unit;
 
         // verbose as we read along
-          if(verbose)std::cout << " rate: " << models[kinetics_model_map[kineticsModel]] << " model\n" << "\n";
+          if(verbose)std::cout << " rate: " << models[kinetics_model_map[kineticsModel]] << " model\n";
 
 // pre-exponential
           if(parser.rate_constant_preexponential_parameter(par_value, par_unit, default_unit))
@@ -417,12 +409,26 @@ namespace Antioch
             // using Units object to build accepted_unit
             accepted_unit.clear();
             def_unit.set_unit("m3/mol");
-            def_unit *= pow_unit;       //to the m-1 power
+   //to the m-1 power
+            if(pow_unit != 0)
+            {
+               def_unit *= pow_unit;
+            }else
+            {
+              def_unit.clear();
+            }
             def_unit.substract("s");    // per second
             accepted_unit.push_back(def_unit.get_symbol());
 
             def_unit.set_unit(default_unit);
-            def_unit *= pow_unit;       //to the m-1 power
+   //to the m-1 power
+            if(pow_unit != 0)
+            {
+               def_unit *= pow_unit;
+            }else
+            {
+              def_unit.clear();
+            }
             def_unit.substract("s");    // per second
             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "A");
            if(verbose) 
@@ -521,8 +527,8 @@ namespace Antioch
             def_unit.substract("K");
 
             par_value = (def_unit.is_united())?
-                                Antioch::Constants::R_universal<NumericType>() * Antioch::Constants::R_universal_unit<NumericType>().factor_to_some_unit(def_unit) // some unit homogeneous to J/mol/K
-                                              :1.L;  // no unit, so Ea in K
+                                Antioch::Constants::R_universal<NumericType>() // Ea already tranformed in SI
+                                              :1.L;  // no unit, so Ea already in K
             data.push_back(par_value);
           }
 
@@ -646,7 +652,7 @@ namespace Antioch
            my_rxn->type() == ReactionType::TROE_FALLOFF)
         {
            antioch_assert_equal_to(my_rxn->n_rate_constants(),2);
-           if(parser.where_is_k0(models[kinetics_model_map[kineticsModel]]) == 1) // second given is k0
+           if(parser.where_is_k0(reading_kinetics_model) == 1) // second given is k0
            { 
                my_rxn->swap_forward_rates(0,1);
            }
@@ -657,22 +663,11 @@ namespace Antioch
         //efficiencies are only for three body reactions
         if(parser.efficiencies(efficiencies))
           {
-              antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn->type());
-
-             if(verbose)
-             {
-                std::cout << "   efficiencies: ";
-                for(unsigned int ir = 0; ir < efficiencies.size(); ir++)
-                    std::cout << efficiencies[ir].first << ":" << efficiencies[ir].second << " " << std::endl;
-             }
+             antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn->type());
 
              for(unsigned int p = 0; p < efficiencies.size(); p++)
                {
-                    if(verbose) 
-                      {
-                        std::cout  << "\n    " 
-                                   << " " << efficiencies[p].first << " " << efficiencies[p].second;
-                      }
+                    if(verbose)std::cout  << "\n" << efficiencies[p].first << " " << efficiencies[p].second;
 
                     if(efficiencies[p].first == "e-") efficiencies[p].first = "e";
 
@@ -685,6 +680,7 @@ namespace Antioch
                                                efficiencies[p].second );
                       }
                }
+               if(verbose)std::cout << std::endl;
           }
 
         //F parameters only for Troe falloff
