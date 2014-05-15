@@ -188,6 +188,7 @@ namespace Antioch{
       _map[ParsingKey::HV_CROSS_SECTION]      = "cross_section";
       _map[ParsingKey::UNIT]                  = "units";
       _map[ParsingKey::EFFICIENCY]            = "efficiencies";
+      _map[ParsingKey::FALLOFF_LOW]           = "k0";
       _map[ParsingKey::TROE_FALLOFF]          = "Troe";
       _map[ParsingKey::TROE_F_ALPHA]          = "alpha";
       _map[ParsingKey::TROE_F_TS]             = "T1";
@@ -419,7 +420,7 @@ namespace Antioch{
       bool k0(false);
       if(_rate_constant->Attribute("name"))
       {
-         if(std::string(_rate_constant->Attribute("name")) == "k0")k0 = true;
+         if(std::string(_rate_constant->Attribute("name")) == _map.at(ParsingKey::FALLOFF_LOW))k0 = true;
       }else if(nrc == 0) // if we're indeed at the first reading
       {
          antioch_assert(_rate_constant->NextSiblingElement(kin_model.c_str()));
@@ -428,7 +429,7 @@ namespace Antioch{
                k0 = true;
          }else
          {
-             if(std::string(_rate_constant->NextSiblingElement(kin_model.c_str())->Attribute("name")) == "k0")k0 = false; 
+             if(std::string(_rate_constant->NextSiblingElement(kin_model.c_str())->Attribute("name")) == _map.at(ParsingKey::FALLOFF_LOW))k0 = false; 
          }
       }
       return k0;
@@ -447,7 +448,7 @@ namespace Antioch{
       unsigned int k0(0);
       if(rate_constant->NextSiblingElement()->Attribute("name"))
       {
-        if(std::string(rate_constant->NextSiblingElement()->Attribute("name")) == "k0")k0=1;
+        if(std::string(rate_constant->NextSiblingElement()->Attribute("name")) == _map.at(ParsingKey::FALLOFF_LOW))k0=1;
       }
 
       return k0;
