@@ -41,6 +41,7 @@ namespace Antioch
                   HV_CROSS_SECTION,
                   UNIT,
                   EFFICIENCY,
+                  FALLOFF_LOW,
                   TROE_FALLOFF,
                   TROE_F_ALPHA,
                   TROE_F_TS,
