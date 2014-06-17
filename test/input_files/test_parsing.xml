@@ -727,5 +727,17 @@
       <products>CH3:1.0 H:1</products>
     </reaction>
 
+    <!-- reaction 0036    -->
+    <reaction reversible="yes" type="Elementary" id="0036">
+      <equation>CH4 [=] CH3 H </equation>
+      <rateCoeff>
+        <Constant>
+           <A>2.5e11</A>
+        </Constant>
+      </rateCoeff>
+      <reactants>CH4:1.0</reactants>
+      <products>CH3:1.0 H:1</products>
+    </reaction>
   </reactionData>
+
 </ctml>

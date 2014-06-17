@@ -33,6 +33,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/kinetics_type.h"
+#include "antioch/constant_rate.h"
 #include "antioch/hercourtessen_rate.h"
 #include "antioch/berthelot_rate.h"
 #include "antioch/arrhenius_rate.h"
@@ -89,6 +90,7 @@ namespace Antioch
       - Troe falloff (TroeFalloff).
 
    This class encapsulates a kinetics model.  The choosable kinetics models are
+   - Constant (ConstantRate),
    - Hercourt Hessen (HercourtEssenRate),
    - Berthelot  (BerthelotRate),
    - Arrhenius  (ArrheniusRate),
@@ -929,7 +931,6 @@ namespace Antioch
 
     // If users want to use valarrays, then the output reference sizes
     // had better already match the input value sizes...
-    StateType Rfwd = Antioch::zero_clone(kfwd);
     StateType dRfwd_dT = Antioch::zero_clone(kfwd);
 
     // We need to construct using an input StateType argument if we
@@ -948,7 +949,7 @@ namespace Antioch
       }
     
     //init
-    Rfwd = kfwd;
+    StateType facfwd = constant_clone(T,1);
     dRfwd_dT = dkfwd_dT;
 
     // Rfwd & derivatives
@@ -964,7 +965,7 @@ namespace Antioch
               static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
             );
 
-        Rfwd     *= val;
+        facfwd   *= val;
         dRfwd_dT *= val;
 
         for (unsigned int ri=0; ri<this->n_reactants(); ri++)
@@ -973,13 +974,12 @@ namespace Antioch
           }
       }
 
-    const StateType facfwd = Rfwd/kfwd;
     for (unsigned int s = 0; s < this->n_species(); s++)
       {
         dRfwd_dX_s[s] += facfwd * dkfwd_dX_s[s];
       }
         
-    net_reaction_rate = Rfwd;
+    net_reaction_rate = facfwd * kfwd;
 
     dnet_rate_dT = dRfwd_dT;
 
@@ -1009,7 +1009,6 @@ namespace Antioch
 
       // If users want to use valarrays, then the output reference sizes
       // had better already match the input value sizes...
-      StateType Rbkwd = Antioch::zero_clone(dkfwd_dT);
       StateType dRbkwd_dT = Antioch::zero_clone(dkbkwd_dT);
 
       // We need to construct using an input StateType argument if we
@@ -1028,7 +1027,7 @@ namespace Antioch
         }
 
       //init
-      Rbkwd = kbkwd;
+      StateType facbkwd = constant_clone(T,1);
       dRbkwd_dT = dkbkwd_dT;
 
       // Rbkwd & derivatives
@@ -1044,7 +1043,7 @@ namespace Antioch
                 static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
               );
         
-          Rbkwd     *= val;
+          facbkwd   *= val;
           dRbkwd_dT *= val;
 
           for (unsigned int pi=0; pi<this->n_products(); pi++)
@@ -1054,14 +1053,12 @@ namespace Antioch
         
         }
 
-      const StateType facbkwd = Rbkwd/kbkwd;
-
       for (unsigned int s = 0; s < this->n_species(); s++)
         {
           dRbkwd_dX_s[s] += facbkwd * dkbkwd_dX_s[s];
         }
 
-      net_reaction_rate -= Rbkwd;
+      net_reaction_rate -= facbkwd * kbkwd;
 
       dnet_rate_dT -= dRbkwd_dT;
 

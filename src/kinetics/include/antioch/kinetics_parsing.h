@@ -27,6 +27,7 @@
 //Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/kinetics_type.h"
+#include "antioch/constant_rate.h"
 #include "antioch/hercourtessen_rate.h"
 #include "antioch/berthelot_rate.h"
 #include "antioch/arrhenius_rate.h"
@@ -63,6 +64,13 @@ namespace Antioch
 
     switch(kin)
       {
+      case(KineticsModel::CONSTANT):
+        {
+          antioch_assert_equal_to(1,data.size());
+          rate = new ConstantRate<CoeffType>(data[0]);//Cf
+        }
+        break;
+
       case(KineticsModel::HERCOURT_ESSEN):
         {
           antioch_assert_equal_to(3,data.size());

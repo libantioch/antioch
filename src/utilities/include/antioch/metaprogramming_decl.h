@@ -154,6 +154,12 @@ namespace Antioch
   inline
   T constant_clone(const T& example, const Scalar& value);
 
+  // A function for filling already-initialized vectorized numeric
+  // types with a constant.
+  template <typename T, typename Scalar>
+  inline
+  void constant_fill(T& output, const Scalar& value);
+
   // A function for initializing vectorized numeric types
   // while resizing them to match the example input
   template <typename T>

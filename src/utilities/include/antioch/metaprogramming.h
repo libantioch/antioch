@@ -129,6 +129,10 @@ template <typename T, typename Scalar>
 inline
 T constant_clone(const T& /* example */, const Scalar& value) { return value; }
 
+template <typename T, typename Scalar>
+inline
+void constant_fill(T& output, const Scalar& value) { output = value; }
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_H

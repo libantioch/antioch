@@ -32,6 +32,7 @@ pkginclude_HEADERS += particles_flux/include/antioch/particle_flux.h
 # kinetics-kinetics models
 pkginclude_HEADERS += kinetics/include/antioch/kinetics_enum.h
 pkginclude_HEADERS += kinetics/include/antioch/kinetics_type.h
+pkginclude_HEADERS += kinetics/include/antioch/constant_rate.h
 pkginclude_HEADERS += kinetics/include/antioch/hercourtessen_rate.h
 pkginclude_HEADERS += kinetics/include/antioch/berthelot_rate.h
 pkginclude_HEADERS += kinetics/include/antioch/arrhenius_rate.h

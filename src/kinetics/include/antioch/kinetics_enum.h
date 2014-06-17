@@ -51,13 +51,14 @@ namespace Antioch
   namespace KineticsModel
   {
 
-    enum KineticsModel { HERCOURT_ESSEN = 0,// A * T^beta
-                         BERTHELOT,   // A * exp(D*T)
-                         ARRHENIUS,   // A * exp(-Ea/T)
-                         BHE,         // A * T^beta * exp(D*T)
-                         KOOIJ,       // A * T^beta * exp(-Ea/T)
-                         VANTHOFF,    // A * T^beta * exp(-Ea/T + D*T)
-                         PHOTOCHEM }; // int_0^\infty f(\lambda)\sigma(\lambda) d\lambda = const(T)
+    enum KineticsModel { CONSTANT = 0,   // A
+                         HERCOURT_ESSEN, // A * T^beta
+                         BERTHELOT,      // A * exp(D*T)
+                         ARRHENIUS,      // A * exp(-Ea/T)
+                         BHE,            // A * T^beta * exp(D*T)
+                         KOOIJ,          // A * T^beta * exp(-Ea/T)
+                         VANTHOFF,       // A * T^beta * exp(-Ea/T + D*T)
+                         PHOTOCHEM };    // int_0^\infty f(\lambda)\sigma(\lambda) d\lambda = const(T)
 
     template<typename CoeffType>
     CoeffType Tref()
