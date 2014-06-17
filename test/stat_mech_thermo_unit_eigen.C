@@ -89,6 +89,12 @@ int test_cv_tr()
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
+  const Scalar Mm_N  = 14.008e-3;   //in SI kg/mol
+  const Scalar Mm_O  = 16e-3;       //in SI kg/mol
+  const Scalar Mm_N2 = 2.L * Mm_N;  //in SI kg/mol
+  const Scalar Mm_O2 = 2.L * Mm_O;  //in SI kg/mol
+  const Scalar Mm_NO = Mm_O + Mm_N; //in SI kg/mol
+
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
   // Can we instantiate it?
@@ -104,11 +110,11 @@ int test_cv_tr()
 
   Scalar cv_tr_mix = 0.0;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/Mm_N2;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/Mm_O2;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/Mm_N;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/Mm_O;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/Mm_NO;
 
   int return_flag = 0;
 
@@ -240,6 +246,12 @@ int test_cv_vib()
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
+  const Scalar Mm_N  = 14.008e-3;   //in SI kg/mol
+  const Scalar Mm_O  = 16e-3;       //in SI kg/mol
+  const Scalar Mm_N2 = 2.L * Mm_N;  //in SI kg/mol
+  const Scalar Mm_O2 = 2.L * Mm_O;  //in SI kg/mol
+  const Scalar Mm_NO = Mm_O + Mm_N; //in SI kg/mol
+
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
   // Can we instantiate it?
@@ -253,9 +265,9 @@ int test_cv_vib()
   mass_fractions[3] = 0.1;
   mass_fractions[4] = 0.1;
 
-  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>() / Mm_N2;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>() / Mm_O2;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>() / Mm_NO;
 
   const Scalar th0_N2 = 3.39500e+03; // degeneracy = 1
   const Scalar th0_O2 = 2.23900e+03; // degeneracy = 1
@@ -430,6 +442,9 @@ int test_cv_el()
   species_str_list.push_back( "O2" );
   species_str_list.push_back( "O" );
 
+  const Scalar Mm_O  = 16.000e-3L;
+  const Scalar Mm_O2 = 2.L * Mm_O;
+
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
   // Can we instantiate it?
@@ -440,8 +455,8 @@ int test_cv_el()
   mass_fractions[0] = 0.9;
   mass_fractions[1] = 0.1;
 
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>() / Mm_O2;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()  / Mm_O;
 
   // Data taken from read_species_electronic_data_ascii_default
   unsigned int g_O[5] = {5, 3, 1, 5, 1};
@@ -462,7 +477,7 @@ int test_cv_el()
   // Te
   const Scalar Te = 1000.0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 7;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 8;
 
   Scalar cv_el_mix_true = 0.0;
 

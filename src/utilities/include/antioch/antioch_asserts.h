@@ -85,6 +85,15 @@
 #define antioch_error()    do { antioch_here(); ANTIOCH_THROW(Antioch::LogicError()); } while(0)
 #define antioch_not_implemented()    do { antioch_here(); ANTIOCH_THROW(Antioch::NotImplemented()); } while(0)
 #define antioch_file_error(filename)    do { antioch_here(); ANTIOCH_THROW(Antioch::FileError(filename)); } while(0)
+#define antioch_unit_error(description)    do { antioch_here(); ANTIOCH_THROW(Antioch::UnitError(description)); } while(0)
+#define antioch_parameter_required(parameter,defaultpar) \
+         do { std::cerr <<  "\n*** Warning, The parameter " << parameter << " is not provided\n" \
+                        <<  "default parameter is " << defaultpar << std::endl \
+                        << __FILE__ << ", line " << __LINE__ << std::endl;} while(0)
+#define antioch_unit_required(parameter,defaultunit) \
+         do { std::cerr <<  "\n*** Warning, The parameter " << parameter << " is not given a unit\n" \
+                        <<  "default unit given is " << defaultunit << std::endl \
+                        << __FILE__ << ", line " << __LINE__ << std::endl;} while(0)
 // The antioch_deprecated macro warns that you are using obsoleted code,
 // savagely copy/pasted from libmesh
 #define antioch_deprecated() \

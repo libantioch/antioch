@@ -70,7 +70,7 @@ namespace Antioch
 
     VantHoffRate (const CoeffType Cf=0., const CoeffType eta=0., const CoeffType Ea=0.,
                   const CoeffType D=0., const CoeffType Tref = 1.,
-                  const CoeffType rscale = Constants::R_universal<CoeffType>()/1000.);
+                  const CoeffType rscale = Constants::R_universal<CoeffType>());
 
     ~VantHoffRate();
     

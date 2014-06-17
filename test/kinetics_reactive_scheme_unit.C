@@ -120,24 +120,24 @@ int tester(const std::string& input_name)
   fwd_conc_exact.resize(5,1.L);
   bkwd_conc_exact.resize(5,1.L);
 
-  const Scalar Rcal = 1.9858775L;
+  const Scalar Rcal = Antioch::Constants::R_universal<Scalar>() * Antioch::Constants::R_universal_unit<Scalar>().factor_to_some_unit("cal/mol/K");
   const Scalar P0_RT(1.0e5/Antioch::Constants::R_universal<Scalar>()/T);
 //N2 + M <=> 2 N + M
-  kfwd_const_exact[0] = 7e18L * std::pow(T,-1.6L) * std::exp(-224801.3L/(Rcal * T)) * //Kooij
+  kfwd_const_exact[0] = 7e15L * std::pow(T,-1.6L) * std::exp(-224801.3L/(Rcal * T)) * //Kooij
                         (4.2857L * (molar_densities[2] + molar_densities[3]) // N and O
                          + molar_densities[0] + molar_densities[1] + molar_densities[4] ); //N2, O2, NO
   fwd_conc_exact[0] = molar_densities[0]; //N2
   bkwd_conc_exact[0] = std::pow(molar_densities[2],2); //2 N
 
 //O2 + M <=> 2 O + M
-  kfwd_const_exact[1] = 2e18L * std::pow(T,-1.5L) * std::exp(-117881.7L/(Rcal * T)) * //Kooij
+  kfwd_const_exact[1] = 2e15L * std::pow(T,-1.5L) * std::exp(-117881.7L/(Rcal * T)) * //Kooij
                         (5.0L * (molar_densities[2] + molar_densities[3]) // N and O
                          + molar_densities[0] + molar_densities[1] + molar_densities[4] ); //N2, O2, NO
   fwd_conc_exact[1] = molar_densities[1]; //O2
   bkwd_conc_exact[1] = std::pow(molar_densities[3],2); //2 O
 
 //NO + M <=> N + O + M
-  kfwd_const_exact[2] = 5e12L * std::exp(-149943.0L/(Rcal * T)) * //Kooij
+  kfwd_const_exact[2] = 5e9L * std::exp(-149943.0L/(Rcal * T)) * //Kooij
                         (22.0L * (molar_densities[2] + molar_densities[3] + molar_densities[4]) // N, O and NO
                          + molar_densities[0] + molar_densities[1]); //N2, O2
   fwd_conc_exact[2] = molar_densities[4]; //NO

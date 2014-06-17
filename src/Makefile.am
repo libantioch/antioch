@@ -6,7 +6,6 @@ BUILT_SOURCES   = .license.stamp
 
 bin_PROGRAMS    = antioch_version 
 
-
 #----------------------------
 # INCLUDES we want distributed
 #----------------------------
@@ -16,6 +15,15 @@ pkginclude_HEADERS  =
 pkginclude_HEADERS += core/include/antioch/chemical_species.h
 pkginclude_HEADERS += core/include/antioch/chemical_mixture.h
 pkginclude_HEADERS += core/include/antioch/species_enum.h
+
+# unit
+pkginclude_HEADERS += units/include/antioch/converter.h
+pkginclude_HEADERS += units/include/antioch/insi.h
+pkginclude_HEADERS += units/include/antioch/siprefix.h
+pkginclude_HEADERS += units/include/antioch/unit_base.h
+pkginclude_HEADERS += units/include/antioch/unit_defs.h
+pkginclude_HEADERS += units/include/antioch/units.h
+pkginclude_HEADERS += units/include/antioch/unit_store.h
 
 # particles_flux
 pkginclude_HEADERS += particles_flux/include/antioch/sigma_bin_converter.h
@@ -106,6 +114,7 @@ antioch_version_SOURCES = apps/version.C
 #--------------------------------------
 AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/units/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/particles_flux/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include

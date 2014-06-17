@@ -112,6 +112,12 @@ int tester()
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
+  const Scalar Mm_N = 14.008e-3L;
+  const Scalar Mm_O = 16.000e-3L;
+  const Scalar Mm_N2 = 2.L * Mm_N;
+  const Scalar Mm_O2 = 2.L * Mm_O;
+  const Scalar Mm_NO = Mm_N + Mm_O;
+
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
   const std::map<std::string,Antioch::Species>& species_name_map = chem_mixture.species_name_map();
@@ -148,7 +154,7 @@ int tester()
   // Check N2 properties
   {
     unsigned int index = 0;
-    Scalar molar_mass = 28.01600L;
+    Scalar molar_mass = Mm_N2;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -163,7 +169,7 @@ int tester()
   // Check O2 properties
   {
     unsigned int index = 1;
-    Scalar molar_mass = 32.00000L;
+    Scalar molar_mass = Mm_O2;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -178,7 +184,7 @@ int tester()
   // Check N properties
   {
     unsigned int index = 2;
-    Scalar molar_mass = 14.00800L;
+    Scalar molar_mass = Mm_N;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -193,7 +199,7 @@ int tester()
   // Check O properties
   {
     unsigned int index = 3;
-    Scalar molar_mass = 16.00000L;
+    Scalar molar_mass = Mm_O;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -208,7 +214,7 @@ int tester()
   // Check NO properties
   {
     unsigned int index = 4;
-    Scalar molar_mass = 30.00800L;
+    Scalar molar_mass = Mm_NO;
     if( molar_mass != chem_mixture.M(index) )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
@@ -222,15 +228,15 @@ int tester()
 
   std::vector<Scalar> mass_fractions( 5, 0.2L );
 
-  Scalar R_exact = Antioch::Constants::R_universal<Scalar>()*( 0.2L/28.016L + 0.2L/32.0L + 0.2L/14.008L + 0.2L/16.0L + 0.2L/30.008L );
-  Scalar M_exact = 1.0L/( 0.2L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L + 1.0L/30.008L) );
+  Scalar R_exact = Antioch::Constants::R_universal<Scalar>()*( 0.2L/Mm_N2 + 0.2L/Mm_O2 + 0.2L/Mm_N + 0.2L/Mm_O + 0.2L/Mm_NO );
+  Scalar M_exact = 1.0L/( 0.2L*( 1.0L/Mm_N2 + 1.0L/Mm_O2 + 1.0L/Mm_N + 1.0L/Mm_O + 1.0L/Mm_NO) );
   
   std::vector<Scalar> X_exact(5, 0.0L);
-  X_exact[0] = 0.2L*M_exact/28.016L;
-  X_exact[1] = 0.2L*M_exact/32.0L;
-  X_exact[2] = 0.2L*M_exact/14.008L;
-  X_exact[3] = 0.2L*M_exact/16.0L;
-  X_exact[4] = 0.2L*M_exact/30.008L;
+  X_exact[0] = 0.2L*M_exact/Mm_N2;
+  X_exact[1] = 0.2L*M_exact/Mm_O2;
+  X_exact[2] = 0.2L*M_exact/Mm_N;
+  X_exact[3] = 0.2L*M_exact/Mm_O;
+  X_exact[4] = 0.2L*M_exact/Mm_NO;
 
   Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
   if( abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact) > tol )

@@ -1,4 +1,4 @@
-#lambda (A) sigma (cm2)
+#lambda (ang) sigma (cm2/ang)
 1.0   1.00E-21
 23.6  2.60E-19
 31.6  5.30E-19

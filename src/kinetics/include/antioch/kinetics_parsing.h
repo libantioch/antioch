@@ -115,13 +115,13 @@ namespace Antioch
 
       case(KineticsModel::PHOTOCHEM):
         {
-          antioch_assert_equal_to(0,data.size()%2); //two vectors in one: cross-section then lambda
+          antioch_assert_equal_to(0,data.size()%2); //two vectors in one: lambda then cross-section
           VectorCoeffType cs;
           VectorCoeffType lambda;
           for(unsigned int i = 0; i < data.size()/2; i++)
           {
-             cs.push_back(data[i]); 
-             lambda.push_back(data[i + data.size()/2]); 
+             lambda.push_back(data[i]);
+             cs.push_back(data[i + data.size()/2]); 
           }
           rate = new PhotochemicalRate<CoeffType,VectorCoeffType>(cs,lambda);//cs,lambda
         }
