@@ -107,9 +107,7 @@ namespace Antioch{
 template <typename T = double>
 class Units{
       public:
-/*!\brief Copy constructor, uses Units &operator=(const Units&)*/
-        template <typename P>
-        Units(const Units<P> &rhs);
+
 /*!\brief Fully descriptive constructor, mainly for internal purposes*/
         Units(const std::string &sym, const std::string &na,
                 const T &conva, const T &convb,
@@ -567,14 +565,6 @@ class Units{
 
 };
 
-template <typename T>
-template <typename P>
-inline
-Units<T>::Units(const Units<P> &rhs)
-{
-  *this = rhs;
-  develop_symbol(symbol);
-}
 
 template<typename T>
 inline

@@ -45,13 +45,6 @@ class UnitBase{
                 _power_base(mi,kgi,si,Ai,Ki,moli,cdi,radi),
                 _symbol(sym),_name(nam){}
 
-     template <typename P>
-     UnitBase(const UnitBase<P> &rhs):
-        _conversion(rhs.converter()),
-        _power_base(rhs.power_array()),
-        _symbol(rhs.symbol()),
-        _name(rhs.name()){}
-
      ~UnitBase(){}
 
 

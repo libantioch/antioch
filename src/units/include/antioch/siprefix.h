@@ -48,9 +48,7 @@ namespace Antioch{
 template <typename T = double>
 class SIPrefixes{
     public:
-/*! \brief Copy constructor, uses the SIPrefixes &operator=(const SIPrefixe&)*/
-      template <typename P>
-      SIPrefixes(const SIPrefixes<P> &rhs){*this = rhs;}
+
 /*! \brief Default constructor, a std::string and a value*/
       SIPrefixes(const std::string &str, const std::string & na, const T &num):
                 _symbol(str),_name(na),_value(num){}

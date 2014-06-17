@@ -49,6 +49,7 @@
 //Antioch
 #include "antioch/unit_base.h"
 #include "antioch/siprefix.h"
+#include "antioch/math_constants.h"
 
 //C++
 #include <map>
@@ -58,16 +59,6 @@
 namespace Antioch{
 
 namespace UnitBaseConstant{
-
-//some useful physical constants
-namespace UnitConstant{//
-    template<typename CoeffType>
-    inline
-    CoeffType pi()
-    {
-      return 3.141592653589793L; //pi to 10^-15
-    }
-}
 
 template <typename T = double>
 class UnitBaseStore{
@@ -109,9 +100,9 @@ store.push_back(UnitBase<T>("hour","hour",  3600.0L,0.,0,0,1));
 store.push_back(UnitBase<T>("degC","degree Celsius",  1.L,    273.15L,          0,0,0,0,1));
 store.push_back(UnitBase<T>("degF","degree Farenheit",5.L/9.L,459.57L*5.0L/9.0L,0,0,0,0,1));
 //angle
-store.push_back(UnitBase<T>("deg", "degree",    UnitConstant::pi<T>()/180.0L,              0.,0,0,0,0,0,0,0,1));
-store.push_back(UnitBase<T>("\'",  "Arcminute", UnitConstant::pi<T>()/(180.0L*60.0L),      0.,0,0,0,0,0,0,0,1));
-store.push_back(UnitBase<T>("\'\'","Arcsecond", UnitConstant::pi<T>()/(180.0L*60.0L*60.0L),0.,0,0,0,0,0,0,0,1));
+store.push_back(UnitBase<T>("deg", "degree",    Constants::pi<T>()/180.0L,              0.,0,0,0,0,0,0,0,1));
+store.push_back(UnitBase<T>("\'",  "Arcminute", Constants::pi<T>()/(180.0L*60.0L),      0.,0,0,0,0,0,0,0,1));
+store.push_back(UnitBase<T>("\'\'","Arcsecond", Constants::pi<T>()/(180.0L*60.0L*60.0L),0.,0,0,0,0,0,0,0,1));
 //volume
 store.push_back(UnitBase<T>("l","litre",1e-3L,0.,3));
 store.push_back(UnitBase<T>("L","litre",1e-3L,0.,3));

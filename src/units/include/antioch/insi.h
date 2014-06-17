@@ -39,8 +39,7 @@ namespace Antioch{
  */
 class InSI{
     public:
-/*! \brief Copy constructor, uses InSI &operator=(const InSI&)*/
-      InSI(InSI const &rhs){*this = rhs;}
+
 /*! \brief Building constructor, fully descriptive, with zeros as default values to
  * simplify coder's interface*/
       InSI(int i0=0,int i1=0, int i2=0, int i3=0, int i4=0, int i5=0, int i6=0, int i7=0):
