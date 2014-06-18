@@ -146,9 +146,9 @@ _n_known_units = store.size();
   }
 }
 
-const int stored_index(const std::string &symb)    const {return (map_store.find(symb) == map_store.end())?-1:map_store.at(symb);}
+int stored_index(const std::string &symb)    const {return (map_store.find(symb) == map_store.end())?-1:map_store.at(symb);}
 const UnitBase<T> stored(const int &iunit) const {return store[iunit];}
-const int n_known_units()                          const {return _n_known_units;}
+int n_known_units()                          const {return _n_known_units;}
 
   private:
    std::map<std::string,unsigned int> map_store;
@@ -215,9 +215,9 @@ _n_prefixes = store.size();
   }
 }
 
-const int stored_index(const std::string &symb)     const {return (map_store.find(symb) == map_store.end())?-1:map_store.at(symb);}
+int stored_index(const std::string &symb)     const {return (map_store.find(symb) == map_store.end())?-1:map_store.at(symb);}
 const SIPrefixes<T> stored(const int &ipre) const {return store[ipre];}
-const int n_known_prefixes()                        const {return _n_prefixes;}
+int n_known_prefixes()                        const {return _n_prefixes;}
 
    private:
      std::map<std::string, int> map_store;

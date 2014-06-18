@@ -127,9 +127,9 @@ class Units{
  * Compares the power vector and the coefficient, regardless
  * of the symbol and the name.
  */
-        bool const operator== (const Units<T> &rhs) const;
+        bool operator== (const Units<T> &rhs) const;
 /*! \brief Comparison operator, not equal is not "equal"*/
-        bool const operator!= (const Units<T> &rhs) const {return !(*this == rhs);}
+        bool operator!= (const Units<T> &rhs) const {return !(*this == rhs);}
 /*!\brief Assignement operator
  *
  * It assigns the symbol std::string,
@@ -264,7 +264,7 @@ class Units{
  * Thus this method merely compares the power vectors, if they're equal
  * the units are homogeneous, if not, they're not.
  */
-        const bool is_homogeneous(const Units<T> &rhs) const;
+        bool is_homogeneous(const Units<T> &rhs) const;
 /*!\brief Homogenity testing with a std::string.
  *
  * Testing homogeneity with a std::string needs to build
@@ -272,9 +272,9 @@ class Units{
  * case of an empty std::string, instead of building a Units object
  * the boolean is_united() is tested.
  */
-        const bool is_homogeneous(std::string target) const;
+        bool is_homogeneous(std::string target) const;
 /*!\brief Test if the unit is non empty*/
-        const bool is_united() const {return !power.empty();}
+        bool is_united() const {return !power.empty();}
 
 
 /*!\brief Calculates the factor to any given unit.
@@ -515,9 +515,9 @@ class Units{
  * and not any of the following character: '/', '.' and '-'. Then this
  * symbol is consider to belong to a unit symbol.
  */
-        const bool is_in_symb(char c)               const;
+        bool is_in_symb(char c)               const;
 /*!\brief Number of dimensions of the unit in the SI basis.*/
-        const int n_dimension_of_units()             const;
+        int n_dimension_of_units()             const;
 /*!\brief Small method to add the SI symbol and power to a std::string.
  *
  * This method is useful in the std::string const Units::get_SI_symb() const
@@ -866,13 +866,13 @@ int Units<T>::parse_power(std::string unit,int &nc) const
 }
 
 template <typename T>
-const bool Units<T>::is_homogeneous(const Units<T> &rhs) const 
+bool Units<T>::is_homogeneous(const Units<T> &rhs) const 
 {
   return (power == rhs.get_power());
 }
 
 template <typename T>
-const bool Units<T>::is_homogeneous(std::string target) const
+bool Units<T>::is_homogeneous(std::string target) const
 {
   if(target.empty())
   {
@@ -1082,7 +1082,7 @@ std::string const Units<T>::manipulate_symbol(std::string input, bool contract) 
 }
 
 template <typename T>
-const int Units<T>::n_dimension_of_units() const
+int Units<T>::n_dimension_of_units() const
 {
   int ndim(0);
 
@@ -1217,7 +1217,7 @@ Converter<T> Units<T>::raise(const Converter<T> &tbm, double power) const
 }
 
 template <typename T>
-const bool Units<T>::is_in_symb(char c) const
+bool Units<T>::is_in_symb(char c) const
 {
 
   return (c != '/' && 

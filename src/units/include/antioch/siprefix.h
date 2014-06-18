@@ -68,10 +68,10 @@ class SIPrefixes{
       SIPrefixes &operator=(const SIPrefixes<P> &rhs);
 /*! \brief Comparison operator, equal if values are equal*/
       template <typename P>
-      bool const operator==(const SIPrefixes<P> &rhs) const {return (_value == rhs.value());}
+      bool operator==(const SIPrefixes<P> &rhs) const {return (_value == rhs.value());}
 /*! \brief Comparison operator, not equal is not "equal"*/
       template <typename P>
-      bool const operator!=(const SIPrefixes<P> &rhs) const {return !(*this == rhs);}
+      bool operator!=(const SIPrefixes<P> &rhs) const {return !(*this == rhs);}
 
     private:
 /*! \brief Default constructor, never uninitialize this stuff*/

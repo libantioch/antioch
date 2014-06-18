@@ -71,10 +71,10 @@ class Converter{
 
 /*! \brief Comparison operator, equal if the two values are equal*/
         template <typename P>
-        bool const operator== (const Converter<P> &rhs) const;
+        bool operator== (const Converter<P> &rhs) const;
 /*! \brief Comparison operator, not equal is not "equal"*/
         template <typename P>
-        bool const operator!=(const Converter<P> &rhs) const {return !(*this == rhs);}
+        bool operator!=(const Converter<P> &rhs) const {return !(*this == rhs);}
 /*! \brief Assignement operator, equalize the two values*/
         template <typename P>
         Converter & operator=  (const Converter<P> &rhs);
