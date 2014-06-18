@@ -61,9 +61,9 @@ class InSI{
         }
 
 /*! \brief Bool equalize operator, true if all the powers are equal*/
-      bool const operator== (const InSI & rhs) const;
+      bool operator== (const InSI & rhs) const;
 /*! \brief Not bool const operator==(const InSI&)*/
-      bool const operator!= (const InSI & rhs) const;
+      bool operator!= (const InSI & rhs) const;
 /*! \brief Assignement operator, equalize all the powers*/
       InSI &     operator=  (const InSI & rhs);
 /*! \brief Adding operator, add all the powers*/
@@ -94,21 +94,21 @@ class InSI{
       void clear();
 
 /*! \brief meter power getter*/
-      const int get_m()   const {return m;}
+      int get_m()   const {return m;}
 /*! \brief kilogramme power getter*/
-      const int get_kg()  const {return kg;}
+      int get_kg()  const {return kg;}
 /*! \brief second power getter*/
-      const int get_s()   const {return s;}
+      int get_s()   const {return s;}
 /*! \brief ampere power getter*/
-      const int get_A()   const {return A;}
+      int get_A()   const {return A;}
 /*! \brief kelvin power getter*/
-      const int get_K()   const {return K;}
+      int get_K()   const {return K;}
 /*! \brief mol power getter*/
-      const int get_mol() const {return mol;}
+      int get_mol() const {return mol;}
 /*! \brief candela power getter*/
-      const int get_cd()  const {return cd;}
+      int get_cd()  const {return cd;}
 /*! \brief radian power getter*/
-      const int get_rad() const {return rad;}
+      int get_rad() const {return rad;}
 
 /*!\brief Check if empty (all values to zero)*/
       bool empty() const;
@@ -118,7 +118,7 @@ class InSI{
 };
 
 inline
-bool const InSI::operator== (const InSI & rhs)const
+bool InSI::operator== (const InSI & rhs)const
 {
   return (
            m   == rhs.get_m()   &&
@@ -133,7 +133,7 @@ bool const InSI::operator== (const InSI & rhs)const
 }
 
 inline
-bool const InSI::operator!= (const InSI & rhs)const
+bool InSI::operator!= (const InSI & rhs)const
 {
   return (!(*this == rhs));
 }
