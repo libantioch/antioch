@@ -155,7 +155,12 @@ HAVE_ANTIOCH=0
     succeeded=no
     if test "$found_header" = yes; then
         if test "$version_succeeded" = yes; then
-              succeeded=yes
+              AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
+              if test "x$HAVE_CXX11" != "x1"; then
+                      succeeded=no
+              else
+                      succeeded=yes
+              fi
         fi
     fi
 
