@@ -585,7 +585,6 @@ Units<T>::Units(const std::string &sym, const std::string &na):  //constructors 
        symbol(sym),
        name(na)
 {
-  develop_symbol(symbol);
   fill_in_power(true);
 }
 
@@ -596,7 +595,6 @@ Units<T>::Units(const std::string &sym, const Converter<T> &conv, const std::str
        name(na),
        toSI(conv)
 {
-  develop_symbol(symbol);
   fill_in_power(false);
 }
 
@@ -604,6 +602,8 @@ template <typename T>
 void Units<T>::fill_in_power(bool doConv)
 {
   if(symbol.empty())return; // no unity
+  develop_symbol(symbol);
+
   std::string tmp(""),symboltmp(symbol);
   int signe(1),istart(0);
 
@@ -767,6 +767,7 @@ template <typename T>
 void Units<T>::parse_prefix_unit(int &iUnit,int &iPre,const std::string& unit) const
 {
   iPre = -1;
+
   iUnit = UnitBaseStorage::known_units().stored_index(unit);
 //prefix, if exists, is one or two character
    if(iUnit == -1 && unit.size() > 1)
@@ -801,7 +802,7 @@ bool Units<T>::parse_single_unit(int signe,std::string unit,bool doConv)
 
   T pre = 1.;
   if(iPre != -1)pre = UnitBaseStorage::known_prefixes().stored(iPre).value<T>();
-  if(UnitBaseStorage::known_units().stored(iUnit).symbol() == "kg")pre *= 1e-3;
+  if(UnitBaseStorage::known_units().stored(iUnit).symbol() == "kg")pre *= 1e-3; //rescale
   InSI powerTmp = UnitBaseStorage::known_units().stored(iUnit).power_array();
   power += (powerTmp * signe * ipower);
   if(doConv)
@@ -1121,7 +1122,6 @@ template <typename T>
 void Units<T>::set_unit(const std::string &sym, std::string na)
 {
   symbol = sym;
-  develop_symbol(symbol);
   name = na;
   toSI.clear();
   power.clear();

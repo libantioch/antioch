@@ -30,6 +30,7 @@
  *      - addition
  *      - substraction
  *      - multiplication
+ *      - multiple combinations with parenthesises
  */
 
 // C++
@@ -64,14 +65,14 @@ int test_factor(int nAddition)
   using std::abs;
 
 
-  const T tol = std::numeric_limits<T>::epsilon() * 100;
+  const T tol = std::numeric_limits<T>::epsilon() * 2.;
   const T unity = 1.L;
 
 // testing SI derived
   Antioch::Units<T> test("W");
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit SI description, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -79,7 +80,7 @@ int test_factor(int nAddition)
   test.set_unit("J");
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit SI description, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -87,7 +88,7 @@ int test_factor(int nAddition)
   test.set_unit("Hz");
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit SI description, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -95,7 +96,7 @@ int test_factor(int nAddition)
   test.set_unit("N");
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit SI description, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -103,7 +104,7 @@ int test_factor(int nAddition)
   test.set_unit("Pa");
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit SI description, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -111,7 +112,7 @@ int test_factor(int nAddition)
   test.set_unit("C");
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit SI description, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -119,7 +120,7 @@ int test_factor(int nAddition)
   test.set_unit("Bq");
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit SI description, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -164,7 +165,7 @@ int test_factor(int nAddition)
   test.set_unit(uu);
   if(abs((test.get_SI_factor()-unity)/unity) > tol)
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in unit combination, unity is not found" << std::endl
               << "factor = " << test.get_SI_factor() << std::endl;
     return 1;
@@ -182,7 +183,7 @@ int test_factor(int nAddition)
   T Rcalc = RJ * test.factor_to_some_unit("cal/mol/K");
   if(abs((Rcalc - Rcal)/Rcal) > tol && abs((Rcalc - Rcal)/Rcal) > abs(Runc/Rcal))
   {
-    std::cout << std::scientific << std::setprecision(16)
+    std::cerr << std::scientific << std::setprecision(16)
               << "mismatch in R calculation" << std::endl
               << "Rtheo = " << Rcal  << " cal/mol/K" << std::endl
               << "Rcal  = " << Rcalc << " cal/mol/K" << std::endl
@@ -193,6 +194,18 @@ int test_factor(int nAddition)
   }
 
   std::cout << "R calculation passed" << std::endl;
+
+  // now combining with parenthesises E = m * c * c, [E] = [m] + [c] + [c]
+  Antioch::Units<T> m("g"), c("m/s");
+  Antioch::Units<T> E = m + c + c;
+
+  if(!E.is_homogeneous("J"))
+  {
+     std::cerr << "E = m * c *c failed, output unit is " << E.get_symbol() << std::endl;
+     return 1;
+  }
+
+  std::cout << "E = m * c * c calculation passed" << std::endl;
 
   return 0;
 }
