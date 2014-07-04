@@ -109,8 +109,8 @@ MAINTAINERCLEANFILES += m4/lt~obsolete.m4
 #STAMPED_FILES  = $(shell find $(top_srcdir)/src -name '*.h' -or -name '*.C')
 
 .license.stamp: $(top_srcdir)/LICENSE
-        @$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE $(ANTIOCH_STAMPED_FILES)
-        echo 'updated source license headers' >$@
+	@$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE $(ANTIOCH_STAMPED_FILES)
+	echo 'updated source license headers' >$@
 
 CLEANFILES = .license.stamp
 
