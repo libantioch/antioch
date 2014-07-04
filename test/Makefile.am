@@ -1,5 +1,3 @@
-BUILT_SOURCES   = .license.stamp
-
 EXTRA_DIST = input_files
 
 check_PROGRAMS  =
@@ -181,13 +179,6 @@ CLEANFILES =
 if CODE_COVERAGE_ENABLED
   CLEANFILES += *.gcda *.gcno
 endif
-
-.license.stamp: $(top_srcdir)/LICENSE
-	$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE \
-	$(top_srcdir)/test/*.C
-	echo 'updated source license headers' >$@
-
-CLEANFILES += .license.stamp
 
 # Required for AX_AM_MACROS
 ###@INC_AMINCLUDE@
