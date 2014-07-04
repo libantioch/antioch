@@ -1,3 +1,7 @@
+Version 0.2.0
+* Added general units capabilities
+* Enabled subdir-objects option in Automake
+
 Version 0.1.0
 * Photochemistry modeling
 * Compatibility with newer VexCL
