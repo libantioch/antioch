@@ -27,6 +27,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/string_utils.h"
 #include "antioch/parsing_enum.h"
+#include "antioch/units.h"
 
 //ChemKin
 
@@ -149,6 +150,9 @@ namespace Antioch{
           void parse_equation_coef(const std::string & line);
 
           /*! Convenient method */
+          void parse_equation(std::string &equation);
+
+          /*! Convenient method */
           void parse_coefficients_line(const std::string &line);
 
           /*! Convenient method */
@@ -173,6 +177,8 @@ namespace Antioch{
           bool                             _reversible;
           unsigned int                     _nrates; // total number of rates
           unsigned int                     _crates; // current place
+
+          unsigned int                     _pow_unit; // for A unit
 
           // ChemKin allows real stoichiometric coefficients
           std::vector<std::pair<std::string,NumericType> > _reactants;
@@ -213,7 +219,7 @@ namespace Antioch{
                                _delim[REVERSIBLE_ALT] = "<=>";
                                _delim[IRREVERSIBLE]   = "=>";
 
-                               _symbol[TB]      = "+M";
+                               _symbol[TB]      = "M";
                                _symbol[FAL]     = "(+M)";
                                _symbol[PHOTO]   = "HV";
                                _symbol[ELECTRO] = "E";
@@ -221,7 +227,7 @@ namespace Antioch{
 
               ~ChemKinSpec(){}
 
-              enum Delim{
+              enum Delim{ ERROR = -1,
                           PLUS,
                           IRREVERSIBLE,
                           REVERSIBLE,
@@ -229,7 +235,7 @@ namespace Antioch{
                         };
 
               enum Symbol{
-                          TB,
+                          TB = 0,
                           FAL,
                           PHOTO,
                           ELECTRO 
@@ -254,6 +260,21 @@ namespace Antioch{
                                                                                   test == _delim.at(IRREVERSIBLE)
                                                                                   );}
 
+              Delim equation_delimiter(const std::string & test) const {if(test.find(_delim.at(REVERSIBLE_ALT)) != std::string::npos)
+                                                                      {
+                                                                          return REVERSIBLE_ALT;
+                                                                      }else if(test.find(_delim.at(IRREVERSIBLE)) != std::string::npos)
+                                                                      {
+                                                                          return IRREVERSIBLE;
+                                                                      }else if(test.find(_delim.at(REVERSIBLE)) != std::string::npos)
+                                                                      {
+                                                                          return REVERSIBLE;
+                                                                      }else
+                                                                      {
+                                                                          return ERROR;
+                                                                      };
+                                                                     }
+
             private:
               const std::string            _duplicate;
               const std::string            _end_tag;
@@ -273,8 +294,8 @@ namespace Antioch{
   inline
   ChemKinParser<NumericType>::ChemKinParser(const std::string &filename)
   {
-     _doc.open(filename.c_str());
-    if(_doc.fail())
+    _doc.open(filename.c_str(),std::ios_base::binary);
+    if(!_doc.good())
       {
         std::cerr << "ERROR: unable to load ChemKin file " << filename << std::endl;
         antioch_error();
@@ -324,23 +345,21 @@ namespace Antioch{
   bool ChemKinParser<NumericType>::initialize()
   {
       std::string line;
-      std::getline(_doc,line);
-      bool init(true);
+      ascii_getline(_doc,line);
+      bool init(false);
 
       while(line.find(_map.at(ParsingKey::REACTION_DATA)) == std::string::npos)
       {
-         if(!std::getline(_doc,line) || _doc.eof())
-         {
-            init = false;
-            break;
-         }
+         if(!ascii_getline(_doc,line) || _doc.eof())break;
       }
+
+      init = !(line.find(_map.at(ParsingKey::REACTION_DATA)) == std::string::npos);
 
       if(init)
       {
          std::vector<std::string> keywords;
          int nw = SplitString(line," ",keywords,false);
-         if(nw < 1)antioch_parsing_error("ChemKin parser: now you're in trouble, can find the REACTION tag anymore.");
+         if(nw == 0)keywords.push_back(line);
          for(unsigned int k = 1; k < keywords.size(); k++)// first word is REACTION
          {
             if(_unit_custom_ea.count(keywords[k]))
@@ -376,9 +395,13 @@ namespace Antioch{
       _nrates     = 0;
       _crates     = 0;
 
+      _pow_unit   = 0;
+
       _kinetics_model   = "Kooij"; //always Kooij, sometimes Arrhenius, should be corrected within the parser
       _chemical_process = "Elementary";
       _equation.clear();
+
+      _efficiencies.clear();
 
       _reactants.clear();
       _products.clear();
@@ -397,18 +420,37 @@ namespace Antioch{
       /* reaction */
       bool reac = true;
       std::string line;
-      std::getline(_doc,line);
-      while(!line.empty())
+      ascii_getline(_doc,line);
+
+// skip empty lines
+      while(line.empty() || _spec.is_comment(line[0]))                                         // fully commented alone line
       {
-        if(_spec.is_comment(line[0]))continue;
-        if(line.find(_spec.end_tag()) != std::string::npos || _doc.eof()) // equivalent
+        if(!ascii_getline(_doc,line)  || // getline
+           line.find(_spec.end_tag()) != std::string::npos || _doc.eof()     // end of file
+           )
         {
            reac = false;
            break;
         }
-        if(line.find(_spec.comment()) != std::string::npos)line.erase(line.find(_spec.comment()),std::string::npos); //supress comment
-        this->parse_a_line(line);
-        std::getline(_doc,line);
+      }
+
+      //rection found
+      if(reac)
+      {
+        while(!line.empty())
+        {
+          if(line.find(_spec.end_tag()) != std::string::npos || _doc.eof()) // equivalent
+          {
+             reac = false;
+             break;
+          }
+          if(line.find(_spec.comment()) != std::string::npos)line.erase(line.find(_spec.comment()),std::string::npos); //supress comment
+          if(!_spec.is_comment(line[0]))
+          {
+             this->parse_a_line(line);
+          }
+          ascii_getline(_doc,line);
+        }
       }
 
       return reac;
@@ -492,7 +534,7 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  bool ChemKinParser<NumericType>::is_k0(unsigned int nrc, const std::string & kin_model) const
+  bool ChemKinParser<NumericType>::is_k0(unsigned int nrc, const std::string & /*kin_model*/) const
   {
 // k0 is always the first, explicit in ChemKin
       return (nrc == 0);
@@ -514,8 +556,20 @@ namespace Antioch{
        A = _A[_crates - 1];
 // there is no default unit (or always default), anyway, units are
 // always explicit
-       A_unit = _default_unit.at(ParsingKey::PREEXP);
-       def_unit = A_unit;
+       def_unit = _default_unit.at(ParsingKey::PREEXP);
+
+       Units<NumericType> A_u(def_unit);
+   //to the m-1 power
+       int mult = (_chemical_process.find("Falloff") != std::string::npos && _crates == 1)?_pow_unit+1:_pow_unit; //falloff: +1 for k0
+       if(mult != 0)
+       {
+         A_u *= mult;
+       }else
+       {
+         A_u.clear();
+       }
+       A_u.substract("s");    // per second
+       A_unit = A_u.get_symbol();
      }
      return (_crates <= _A.size());
   }
@@ -648,13 +702,17 @@ namespace Antioch{
      if(line.find(_spec.delim().at(_spec.REVERSIBLE)) != std::string::npos) //equation a beta ea
      {
         this->parse_equation_coef(line);
+        _nrates++;
      }
      else if(line.find(_spec.duplicate()) != std::string::npos)
      {
         _chemical_process = "Duplicate";
-     }else
+     }else if(line.find(_spec.parser()) != std::string::npos)
      {
         this->parse_coefficients_line(line);
+     }else
+     {
+        antioch_parsing_error("ChemKin parser: Can't parse this line:\n" + line);
      }
   }
 
@@ -665,21 +723,34 @@ namespace Antioch{
   {
 
      std::vector<std::string> out;
-     int nword = SplitString(line," ",out,false);
-     if(nword < 4)antioch_parsing_error("ChemKin parser: unrecognized reaction input line:\n" + line);
+     SplitString(line," ",out,false);
+     if(out.size() < 4)antioch_parsing_error("ChemKin parser: unrecognized reaction input line:\n" + line);
 
 // parameters are the three last components
-     _Ea.push_back(std::atof(out[nword-1].c_str())); // last
-     _b.push_back( std::atof(out[nword-2].c_str())); // last - 1 
-     _A.push_back( std::atof(out[nword-3].c_str())); // last - 2
+     _Ea.push_back(std::atof(out[out.size()-1].c_str())); // last
+     _b.push_back( std::atof(out[out.size()-2].c_str())); // last - 1 
+     _A.push_back( std::atof(out[out.size()-3].c_str())); // last - 2
 
 // equation is the rest, can be 1 word as nreac + nprod + 1
 // so making it 1 whatever happens
      std::string equation;
-     for(unsigned int i = 0; i < nword - 3; i++)
+     for(unsigned int i = 0; i < out.size() - 3; i++)
      {
         equation += out[i];
      }
+// in case of duplicate, the equation will be
+// printed several times, we care only for the
+// first
+    if(_reactants.empty())this->parse_equation(equation);
+
+   }
+
+   template <typename NumericType>
+   inline
+   void ChemKinParser<NumericType>::parse_equation(std::string &equation)
+   {
+
+     _equation = equation;
 
 // first we need to treat the (+M) case (falloff)
 // as it is not compatible with SplitString using ChemKinSpec::PLUS (+)
@@ -695,9 +766,19 @@ namespace Antioch{
         }
      }
 
-     out.clear();
-     nword = SplitString(line,_spec.delim().at(ChemKinSpec::PLUS),out,true); //empties are cations charge, formatted as reac_i equation_separator prod_i
-     if(nword < 3)antioch_parsing_error("ChemKin parser: unrecognized reaction equation:\n" + equation);
+     std::vector<std::string> out;
+
+// now we're singling the equation separator (=, =>, <=>)
+     typename ChemKinSpec::Delim delim(_spec.equation_delimiter(equation));
+     if(delim == ChemKinSpec::ERROR)antioch_parsing_error("ChemKin parser: badly written equation:\n" + equation);
+
+//between ChemKinSpec::PLUS
+     equation.insert(equation.find(_spec.delim().at(delim)),_spec.delim().at(ChemKinSpec::PLUS));
+     equation.insert(equation.find(_spec.delim().at(delim)) + _spec.delim().at(delim).size(),_spec.delim().at(ChemKinSpec::PLUS));
+
+
+     SplitString(equation,_spec.delim().at(ChemKinSpec::PLUS),out,true); //empties are cations charge, formatted as reac_i equation_separator prod_i
+     if(out.size() < 3)antioch_parsing_error("ChemKin parser: unrecognized reaction equation:\n" + equation);
 /* cases are:
     - equation_separator => switch between reac and prod 
     - molecules:
@@ -705,11 +786,11 @@ namespace Antioch{
         * M if three body
 */
      bool prod(false);
-     for(unsigned int i = 0; i < nword; i++)
+     for(unsigned int i = 0; i < out.size(); i++)
      {
-        if(_spec.is_equation_delimiter(out[i]))
+        if(out[i] == _spec.delim().at(delim))
         {
-           _reversible = !(out[i] == _spec.delim().at(ChemKinSpec::IRREVERSIBLE));
+           _reversible = !(delim == ChemKinSpec::IRREVERSIBLE);
            prod = true;
          // is it a third-body reaction?
         }else if(out[i] == _spec.symbol().at(ChemKinSpec::TB))
@@ -717,17 +798,21 @@ namespace Antioch{
            if(_chemical_process.find("Falloff") != std::string::npos)
                       antioch_parsing_error("ChemKin parser: it seems you want both a falloff and a three-body reaction:\n" + equation);
 
-           _chemical_process = "ThreeBoby";
+           _chemical_process = "ThreeBody";
 
         }else // here's a regular molecule
         {
+
          // no assumption on the charge, you can put as many '+' as you want
          // adding empties, then skipping them
            unsigned int j(1);
-           while(out[i+j].empty())
+           if(i+j < out.size()) // don't go beyond the last one
            {
-             out[i] += "+";
-             j++;
+             while(out[i+j].empty())
+             {
+               out[i] += "+";
+               j++;
+             }
            }
            j--; // back to non empty
            (prod)?_products.push_back(this->parse_molecule(out[i]))
@@ -736,6 +821,7 @@ namespace Antioch{
            i += j; // skip empties
         }
      }
+
 
      // checking for real stoichiometric coeffs
      bool real(false);
@@ -760,6 +846,15 @@ namespace Antioch{
     }
 
     if(real)this->rescale_stoichiometry();
+
+    // order of reaction
+    for(unsigned int r = 0; r < _reactants.size(); r++)
+    {
+        _pow_unit += (unsigned int)_reactants[r].second;
+    }
+    _pow_unit--;
+    if(_chemical_process == "ThreeBody")_pow_unit++;
+
   }
 
   template <typename NumericType>
@@ -791,34 +886,39 @@ namespace Antioch{
   void ChemKinParser<NumericType>::parse_coefficients_line(const std::string &line)
   {
       std::vector<std::string> out;
-      int nk = SplitString(line,_spec.parser(),out,false);
-      if(nk < 2)antioch_parsing_error("ChemKin parser: can't parse this line:\n" + line);
-      // can be LOW, TROE or coefficients
+      SplitString(line,_spec.parser(),out,false);
+      if(out.size() < 2)antioch_parsing_error("ChemKin parser: can't parse this line:\n" + line);
+      // can be LOW, TROE or coefficients, anything else is ignored
         //accounts for blank spaces
       if(out.front().find(_map.at(ParsingKey::TROE_FALLOFF)) != std::string::npos) //TROE, alpha, T***, T*, T**
       {
         antioch_assert_greater_equal(out.size(),2);
         std::vector<std::string> troe_par;
-        int npar = SplitString(out[1]," ",troe_par,false);
-        if(npar < 3)antioch_parsing_error("ChemKin parser: Troe parameters error while reading:\n" + line);
+        SplitString(out[1]," ",troe_par,false);
+        if(troe_par.size() < 3)antioch_parsing_error("ChemKin parser: Troe parameters error while reading:\n" + line);
 
          _Troe_alpha = std::atof(troe_par[0].c_str());
          _Troe_T3    = std::atof(troe_par[1].c_str());
          _Troe_T1    = std::atof(troe_par[2].c_str());
-         _Troe_T2    = (npar == 4)?std::atof(troe_par[3].c_str()):-1.L;
+         _Troe_T2    = (troe_par.size() == 4)?std::atof(troe_par[3].c_str()):-1.L;
+
+        _chemical_process = "TroeFalloff";
       }
       else if(out.front().find(_map.at(ParsingKey::FALLOFF_LOW_NAME)) != std::string::npos) // k0
       {
         antioch_assert_greater_equal(out.size(),2);
         std::vector<std::string> k0_par;
-        int npar = SplitString(out[1]," ",k0_par,false);
-        if(npar != 3)antioch_parsing_error("ChemKin parser: Falloff k0 parameters error while reading:\n" + line);
+        SplitString(out[1]," ",k0_par,false);
+        if(k0_par.size() != 3)antioch_parsing_error("ChemKin parser: Falloff k0 parameters error while reading:\n" + line);
 
-        _A.insert(_A.begin(),std::atof(k0_par[0].c_str()));
-        _b.insert(_b.begin(),std::atof(k0_par[1].c_str()));
+        _A.insert( _A.begin(),std::atof( k0_par[0].c_str()));
+        _b.insert( _b.begin(),std::atof( k0_par[1].c_str()));
         _Ea.insert(_Ea.begin(),std::atof(k0_par[2].c_str()));
+
+        _nrates++;
          
-      }else // efficiencies
+      }else if(_chemical_process == "ThreeBody")// efficiencies
+ // in case it is superfluous (or we need to redesign pressure-dependance)
       {
         for(unsigned int i = 0; i < out.size(); i++)
         {
@@ -925,7 +1025,7 @@ namespace Antioch{
   {
     // smallest number tolerated 1e-3, it is already ridiculous
     const NumericType eps(1e-3);
-    return !((number - std::floor(number)) > eps);
+    return (std::abs(number - std::floor(number)) > eps);
   }
 
 }//end namespace Antioch
