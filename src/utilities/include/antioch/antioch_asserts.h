@@ -82,10 +82,11 @@
 #endif // NDEBUG
 
 
-#define antioch_error()    do { antioch_here(); ANTIOCH_THROW(Antioch::LogicError()); } while(0)
-#define antioch_not_implemented()    do { antioch_here(); ANTIOCH_THROW(Antioch::NotImplemented()); } while(0)
-#define antioch_file_error(filename)    do { antioch_here(); ANTIOCH_THROW(Antioch::FileError(filename)); } while(0)
-#define antioch_unit_error(description)    do { antioch_here(); ANTIOCH_THROW(Antioch::UnitError(description)); } while(0)
+#define antioch_error()                    do { antioch_here(); ANTIOCH_THROW(Antioch::LogicError()); }              while(0)
+#define antioch_not_implemented()          do { antioch_here(); ANTIOCH_THROW(Antioch::NotImplemented()); }          while(0)
+#define antioch_file_error(filename)       do { antioch_here(); ANTIOCH_THROW(Antioch::FileError(filename)); }       while(0)
+#define antioch_unit_error(description)    do { antioch_here(); ANTIOCH_THROW(Antioch::UnitError(description)); }    while(0)
+#define antioch_parsing_error(description) do { antioch_here(); ANTIOCH_THROW(Antioch::ParsingError(description)); } while(0)
 #define antioch_parameter_required(parameter,defaultpar) \
          do { std::cerr <<  "\n*** Warning, The parameter " << parameter << " is not provided\n" \
                         <<  "default parameter is " << defaultpar << std::endl \

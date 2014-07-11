@@ -91,6 +91,17 @@ namespace Antioch
     {}
   };
 
+  /*!
+   * A class representing error while parsing
+   */
+  class ParsingError : public std::runtime_error
+  {
+  public:
+    ParsingError(const std::string &description) 
+      : std::runtime_error (description)
+    {}
+  };
+
 } // end namespace Antioch
 
 #define ANTIOCH_THROW(e) do { throw e; } while (0)
