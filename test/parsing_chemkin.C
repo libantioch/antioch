@@ -91,13 +91,13 @@ int tester(const std::string &root_name)
 {
 
   std::vector<std::string> species_str_list;
-  species_str_list.push_back( "N2" );
   species_str_list.push_back( "O2" );
+  species_str_list.push_back( "OH" );
   species_str_list.push_back( "H2" );
   species_str_list.push_back( "H2O" );
-  species_str_list.push_back( "C2" );
-  species_str_list.push_back( "CN" );
-  species_str_list.push_back( "CH4" );
+  species_str_list.push_back( "H2O2" );
+  species_str_list.push_back( "HO2" );
+  species_str_list.push_back( "O" );
   species_str_list.push_back( "CH3" );
   species_str_list.push_back( "H" );
   unsigned int n_species = species_str_list.size();
@@ -165,13 +165,15 @@ int tester(const std::string &root_name)
 
 ///Elementary, + Kooij
   std::vector<Scalar> k;
-  Scalar A,beta,Ea;
+  Scalar A,b,Ea;
 /*
 ! Hessler, J. Phys. Chem. A, 102:4517 (1998)
 H+O2=O+OH                 3.547e+15 -0.406  1.6599E+4
 */
- 
- k.push_back(Kooij(T,(Scalar)3.547e15,(Scalar)-0.405,(Scalar)1.6599e4,Tr,Rcal));
+ A  = 3.547e15L * unitA_m1.get_SI_factor();
+ b  = -0.405L;
+ Ea = 1.6599e4L; 
+ k.push_back(Kooij(T,A,b,Ea,Tr,Rcal));
 
 /*
 ! Sutherland et al., 21st Symposium, p. 929 (1986)
