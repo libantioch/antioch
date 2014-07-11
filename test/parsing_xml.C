@@ -28,7 +28,7 @@
 #include "antioch/reaction_set.h"
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/read_reaction_set_data_xml.h"
+#include "antioch/read_reaction_set_data.h"
 #include "antioch/units.h"
 
 #include "antioch/vector_utils.h"
