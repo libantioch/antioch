@@ -38,6 +38,7 @@
 #include "antioch/physical_constants.h"
 #include "antioch/units.h"
 #include "antioch/xml_parser.h"
+#include "antioch/chemkin_parser.h"
 
 // C++
 #include <string>
@@ -47,9 +48,9 @@
 namespace Antioch
 {
 
- /*!\file read_reaction_set_data_xml.h
+ /*!\file read_reaction_set_data.h
   *
-  * We parse the XML file here, with an exhaustive
+  * We parse the file here, with an exhaustive
   * unit management. The starting point is the kinetics
   * equation:
   * \f[
@@ -111,6 +112,11 @@ namespace Antioch
                                    const bool verbose,
                                    ReactionSet<NumericType>& reaction_set );
 
+  template<class NumericType>
+  void read_reaction_set_data_chemkin( const std::string& filename,
+                                       const bool verbose,
+                                       ReactionSet<NumericType>& reaction_set );
+
 
   template<typename NumericType, typename ParserType>
   void read_reaction_set_data(const std::string &filename,
@@ -131,6 +137,15 @@ namespace Antioch
                                    ReactionSet<NumericType>& reaction_set )
   {
      read_reaction_set_data<NumericType,XMLParser<NumericType> >(filename,verbose,reaction_set);
+  }
+
+  template<class NumericType>
+  inline
+  void read_reaction_set_data_chemkin( const std::string& filename,
+                                       const bool verbose,
+                                       ReactionSet<NumericType>& reaction_set )
+  {
+     read_reaction_set_data<NumericType,ChemKinParser<NumericType> >(filename,verbose,reaction_set);
   }
 
   template <typename NumericType>
@@ -659,7 +674,7 @@ namespace Antioch
         }
 
 
-        std::vector<std::pair<std::string,double> > efficiencies;
+        std::vector<std::pair<std::string,NumericType> > efficiencies;
         //efficiencies are only for three body reactions
         if(parser.efficiencies(efficiencies))
           {

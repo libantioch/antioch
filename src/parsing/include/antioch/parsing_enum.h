@@ -21,6 +21,9 @@
 //
 //-----------------------------------------------------------------------el-
 
+#ifndef ANTIOCH_PARSING_ENUM_H
+#define ANTIOCH_PARSING_ENUM_H
+
 namespace Antioch
 {
   enum ParsingKey{REACTION_DATA = 0,
@@ -42,6 +45,7 @@ namespace Antioch
                   UNIT,
                   EFFICIENCY,
                   FALLOFF_LOW,
+                  FALLOFF_LOW_NAME,
                   TROE_FALLOFF,
                   TROE_F_ALPHA,
                   TROE_F_TS,
@@ -49,3 +53,5 @@ namespace Antioch
                   TROE_F_TSSS
                  };
 }
+
+#endif
