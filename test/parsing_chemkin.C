@@ -19,20 +19,25 @@
 #include <limits>
 
 template<typename Scalar>
-Scalar Arrh(const Scalar &T, const Scalar &Cf, const Scalar &Ea, const Scalar &R = Antioch::Constants::R_universal<Scalar>())
+Scalar HE(const Scalar &T, const Scalar &Cf, const Scalar &eta, const Scalar &Tf = 1.L)
 {
-  return Cf * std::exp(-Ea /(R * T));
+  return Cf * std::pow(T/Tf,eta);
 }
 
 template<typename Scalar>
-Scalar Kooij(const Scalar &T, const Scalar &Cf, const Scalar &eta, const Scalar &Ea, const Scalar &Tf = 1., 
-             const Scalar &R = Antioch::Constants::R_universal<Scalar>())
+Scalar Arrh(const Scalar &T, const Scalar &Cf, const Scalar &Ea)
 {
-  return Cf * std::pow(T/Tf,eta) * std::exp(-Ea /(R * T));
+  return Cf * std::exp(-Ea /(Antioch::Constants::R_universal<Scalar>() * T));
 }
 
 template<typename Scalar>
-Scalar FcentTroe(const Scalar &T, const Scalar &alpha, const Scalar &T3, const Scalar &T1, const Scalar &T2 = -1.)
+Scalar Kooij(const Scalar &T, const Scalar &Cf, const Scalar &eta, const Scalar &Ea, const Scalar &Tf = 1.L)
+{
+  return Cf * std::pow(T/Tf,eta) * std::exp(-Ea /(Antioch::Constants::R_universal<Scalar>() * T));
+}
+
+template<typename Scalar>
+Scalar FcentTroe(const Scalar &T, const Scalar &alpha, const Scalar &T3, const Scalar &T1, const Scalar &T2 = -1.L)
 {
   return (T2 < Scalar(0.))?(Scalar(1.) - alpha) * std::exp(-T/T3) + alpha * std::exp(-T/T1):
                            (Scalar(1.) - alpha) * std::exp(-T/T3) + alpha * std::exp(-T/T1) + std::exp(-T2/T);
@@ -106,57 +111,9 @@ int tester(const std::string &root_name)
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
   Antioch::read_reaction_set_data_chemkin<Scalar>( root_name + "/test_parsing.chemkin", true, reaction_set );
 
-//photochemistry set here
-  std::vector<Scalar> hv,lambda;
-  std::ifstream solar_flux(root_name + "/solar_flux.dat");
-  std::string line;
-
-
-//// the unit management here is tedious and useless, but it's got
-//   all the steps, if ever someone needs a reference
-  getline(solar_flux,line);
-  Antioch::Units<Scalar> solar_wave("nm");
-  Antioch::Units<Scalar> solar_irra("W/m2/nm");
-  Antioch::Units<Scalar> i_unit = solar_irra - (Antioch::Constants::Planck_constant_unit<Scalar>() +  Antioch::Constants::light_celerity_unit<Scalar>() - solar_wave); //photons.s-1 = irradiance/(h*c/lambda)
-  i_unit += Antioch::Units<Scalar>("nm"); //supress bin in unit calculations
-
-  while(!solar_flux.eof())
-  {
-     Scalar l,i,di;
-     solar_flux >> l >> i >> di;
-     
-     hv.push_back(i /(Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l) // irr/(h*c/lambda): power -> number of photons.s-1
-                                * i_unit.get_SI_factor()); //SI for cs, keep nm for bin
-     lambda.push_back(l * solar_wave.factor_to_some_unit("nm")); //nm
-     if(lambda.size() == 796)break;
-  }
-  solar_flux.close();
-
-  std::vector<Scalar> CH4_s,CH4_lambda;
-  std::ifstream CH4_file(root_name + "/CH4_hv_cs.dat");
-
   Scalar T = 2000.L;
-  Scalar Tr = 1.;
-  Antioch::Units<Scalar> unitA_m1("(cm3/mol)-1/s"),unitA_0("s-1"),unitA_1("cm3/mol/s"),unitA_2("(cm3/mol)2/s");
-
-  Scalar Rcal = Antioch::Constants::R_universal<Scalar>() * Antioch::Constants::R_universal_unit<Scalar>().factor_to_some_unit("cal/mol/K");
-  getline(CH4_file,line);
-
-  Antioch::Units<Scalar> cs_input("cm2");
-  Antioch::Units<Scalar> lambda_input("ang");
-  Scalar factor_cs = cs_input.get_SI_factor() / lambda_input.factor_to_some_unit("nm");
-  while(!CH4_file.eof())
-  {
-     Scalar l,s;
-     CH4_file >> l >> s;
-     CH4_s.push_back(s * factor_cs);
-     CH4_lambda.push_back(l * lambda_input.factor_to_some_unit("nm"));
-     if(CH4_s.size() == 137)break;
-  }
-  CH4_file.close();
-
-  Antioch::ParticleFlux<std::vector<Scalar> > photons(lambda,hv);
-  reaction_set.set_particle_flux(&photons);
+  Antioch::Units<Scalar> unitA_m1("(mol/cm3)/s"),unitA_0("s-1"),unitA_1("cm3/mol/s"),unitA_2("cm6/mol2/s"),
+                         unitEa_cal("cal/mol");
 
 //
   // Molar densities
@@ -170,28 +127,38 @@ int tester(const std::string &root_name)
 ! Hessler, J. Phys. Chem. A, 102:4517 (1998)
 H+O2=O+OH                 3.547e+15 -0.406  1.6599E+4
 */
- A  = 3.547e15L * unitA_m1.get_SI_factor();
- b  = -0.405L;
- Ea = 1.6599e4L; 
- k.push_back(Kooij(T,A,b,Ea,Tr,Rcal));
+ A  = 3.547e15L * unitA_1.get_SI_factor();
+ b  = -0.406L;
+ Ea = 1.6599e4L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Kooij(T,A,b,Ea));
+
 
 /*
 ! Sutherland et al., 21st Symposium, p. 929 (1986)
 O+H2=H+OH                 0.508E+05  2.67  0.629E+04
 */
- k.push_back(Kooij(T,(Scalar)0.508e5,(Scalar)2.67,(Scalar)0.629e4,Tr,Rcal));
+ A  = 0.508e5L * unitA_1.get_SI_factor();
+ b  = 2.67L;
+ Ea = 0.629e4L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Kooij(T,A,b,Ea));
 
 /*
 ! Michael and Sutherland, J. Phys. Chem. 92:3853 (1988)
 H2+OH=H2O+H               0.216E+09  1.51  0.343E+04
 */
- k.push_back(Kooij(T,(Scalar)0.216e9,(Scalar)1.51,(Scalar)0.343e4,Tr,Rcal));
+ A  = 0.216e9L * unitA_1.get_SI_factor();
+ b  = 1.51L;
+ Ea = 0.343e4L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Kooij(T,A,b,Ea));
 
 /*
 ! Sutherland et al., 23rd Symposium, p. 51 (1990)
 O+H2O=OH+OH               2.97e+06   2.02  1.34e+4
 */
- k.push_back(Kooij(T,(Scalar)2.97e6,(Scalar)2.02,(Scalar)1.34e4,Tr,Rcal));
+ A  = 2.97e6L * unitA_1.get_SI_factor();
+ b  = 2.02L;
+ Ea = 1.34e4L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Kooij(T,A,b,Ea));
 
 //! *************** H2-O2 Dissociation Reactions ******************
 /*
@@ -199,22 +166,29 @@ O+H2O=OH+OH               2.97e+06   2.02  1.34e+4
 H2+M=H+H+M                4.577E+19 -1.40  1.0438E+05
    H2/2.5/ H2O/12/
 */
- k.push_back(Kooij(T,(Scalar)2.97e6,(Scalar)2.02,(Scalar)1.34e4,Tr,Rcal));
+ A  = 4.577e19L * unitA_1.get_SI_factor();
+ b  = -1.40L;
+ Ea = 1.0438e5L * unitEa_cal.get_SI_factor(); 
+ Scalar sum_eps = 5e-4L * (2.5L + 12.L + (Scalar)(species_str_list.size() - 2));
+ k.push_back(sum_eps * Kooij(T,A,b,Ea));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986)
 O+O+M=O2+M                6.165E+15 -0.50  0.000E+00
    H2/2.5/ H2O/12/
 */
- Scalar sum_eps = 5e-4L * (2.5L + 12.L);
- k.push_back(sum_eps * Kooij(T,(Scalar)6.165e15,(Scalar)-0.50,(Scalar)0.00,Tr,Rcal));
+ A = 6.165e15L * unitA_2.get_SI_factor();
+ b = -0.50L;
+ k.push_back(sum_eps * HE(T,A,b));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986)
 O+H+M=OH+M                4.714E+18 -1.00  0.000E+00
    H2/2.5/ H2O/12/
 */
- k.push_back(sum_eps * Kooij(T,(Scalar)4.714e18,(Scalar)-1.00,(Scalar)0.00,Tr,Rcal));
+ A  = 4.714e18L * unitA_2.get_SI_factor();
+ b  = -1.00L;
+ k.push_back(sum_eps * HE(T,A,b));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986)
@@ -222,7 +196,9 @@ O+H+M=OH+M                4.714E+18 -1.00  0.000E+00
 H+OH+M=H2O+M               3.800E+22 -2.00  0.000E+00
    H2/2.5/ H2O/12/
 */
- k.push_back(sum_eps * Kooij(T,(Scalar)3.800e22,(Scalar)-2.00,(Scalar)0.00,Tr,Rcal));
+ A  = 3.800e22L * unitA_2.get_SI_factor();
+ b  = -2.00L;
+ k.push_back(sum_eps * HE(T,A,b));
 
 /*
 !************** Formation and Consumption of HO2******************
@@ -240,35 +216,48 @@ H+OH+M=H2O+M               3.800E+22 -2.00  0.000E+00
      TROE/0.8  1E-30  1E+30/
      H2/2.0/ H2O/11./ O2/0.78/
 */
-  Scalar k0   = Kooij(T,(Scalar)6.366e20,(Scalar)-1.72,(Scalar)5.248e2,Tr,Rcal);
-  Scalar kinf = Kooij(T,(Scalar)1.475e12,(Scalar)0.60,(Scalar)0.00,Tr,Rcal);
+  A  = 6.366e20L * unitA_2.get_SI_factor();
+  b  = -1.72L;
+  Ea = 5.248e2L * unitEa_cal.get_SI_factor(); 
+  Scalar k0   = Kooij(T,A,b,Ea);
+  A  = 1.475e12L * unitA_1.get_SI_factor();
+  b  = 0.60L;
+  Ea = 0.00L * unitEa_cal.get_SI_factor(); 
+  Scalar kinf = Kooij(T,A,b,Ea);
   Scalar Pr = tot_dens * k0/kinf;
-  Scalar Fc = FcentTroe(T,(Scalar)0.8,(Scalar)1e-30,(Scalar)1e30);
-  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+  Scalar Fc = FcentTroe(T,(Scalar)0.8L,(Scalar)1e-30L,(Scalar)1e30L);
+  k.push_back(k0 / (1.L/tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986) [modified]
 HO2+H=H2+O2               1.66E+13   0.00   0.823E+03
 */
- k.push_back(Arrh(T,(Scalar)1.66e13,(Scalar)0.823e3,Rcal));
+ A  = 1.66e13L * unitA_1.get_SI_factor();
+ Ea = 0.823e3L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Arrh(T,A,Ea));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986) [modified]
 HO2+H=OH+OH               7.079E+13   0.00   2.95E+02
 */
- k.push_back(Arrh(T,(Scalar)7.079e13,(Scalar)2.95e2,Rcal));
+ A  = 7.079e13L * unitA_1.get_SI_factor();
+ Ea = 2.95e2L   * unitEa_cal.get_SI_factor(); 
+ k.push_back(Arrh(T,A,Ea));
 
 /*
 ! Baulch et al., J. Phys. Chem. Ref Data, 21:411 (1992)
 HO2+O=O2+OH               0.325E+14  0.00   0.00E+00
 */
- k.push_back(0.325e14);
+ A  = 0.325e14L * unitA_1.get_SI_factor();
+ k.push_back(A);
 
 /*
 ! Keyser, J. Phys. Chem. 92:1193 (1988)
 HO2+OH=H2O+O2             2.890E+13  0.00 -4.970E+02
 */
- k.push_back(Arrh(T,(Scalar)2.890e13,(Scalar)-4.97e2,Rcal));
+ A  = 2.890e13L * unitA_1.get_SI_factor();
+ Ea = -4.97e2L  * unitEa_cal.get_SI_factor(); 
+ k.push_back(Arrh(T,A,Ea));
 
 //! ***************Formation and Consumption of H2O2******************
 /*
@@ -278,7 +267,11 @@ HO2+HO2=H2O2+O2            4.200e+14  0.00  1.1982e+04
 HO2+HO2=H2O2+O2            1.300e+11  0.00 -1.6293e+3
   DUPLICATE
 */
- k.push_back(Arrh(T,(Scalar)4.200e14,(Scalar)1.1982e4,Rcal) + Arrh(T,(Scalar)1.300e11,(Scalar)-1.6293e3,Rcal));
+ A  = 4.200e14L * unitA_1.get_SI_factor();
+ Ea = 1.1982e4L * unitEa_cal.get_SI_factor(); 
+ Scalar A2  = 1.300e11L  * unitA_1.get_SI_factor();
+ Scalar Ea2 = -1.6293e3L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Arrh(T,A,Ea) + Arrh(T,A2,Ea2));
 
 /*
 ! Brouwer et al., J. Chem. Phys. 86:6171 (1987) for kinf
@@ -288,30 +281,41 @@ H2O2(+M)=OH+OH(+M)         2.951e+14   0.00  4.843E+04
   TROE/0.5 1E-30 1E+30/
   H2/2.5/ H2O/12/
 */
-  k0   = Arrh(T,(Scalar)1.202e17,(Scalar)4.55e4,Rcal);
-  kinf = Arrh(T,(Scalar)2.951e14,(Scalar)4.843e4,Rcal);
-  Pr = tot_dens * k0/kinf;
-  Fc = FcentTroe(T,(Scalar)0.5,(Scalar)1e-30,(Scalar)1e30);
-  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+ A  = 1.202e17L * unitA_1.get_SI_factor();
+ Ea = 4.55e4L * unitEa_cal.get_SI_factor(); 
+ k0 = Arrh(T,A,Ea);
+ A  = 2.951e14L * unitA_0.get_SI_factor();
+ Ea = 4.843e4L * unitEa_cal.get_SI_factor(); 
+ kinf = Arrh(T,A,Ea);
+ Pr = tot_dens * k0/kinf;
+ Fc = FcentTroe(T,(Scalar)0.5L,(Scalar)1e-30L,(Scalar)1e30L);
+ k.push_back(k0 / (1.L/tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 //
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986)
 H2O2+H=H2O+OH             0.241E+14  0.00  0.397E+04
 */
- k.push_back(Arrh(T,(Scalar)0.241e14,(Scalar)0.397e4,Rcal));
+ A  = 0.241e14L * unitA_1.get_SI_factor();
+ Ea = 0.397e4L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Arrh(T,A,Ea));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986)
 H2O2+H=HO2+H2             0.482E+14  0.00  0.795E+04
 */
- k.push_back(Arrh(T,(Scalar)0.482e14,(Scalar)0.795e4,Rcal));
+ A  = 0.482e14L * unitA_1.get_SI_factor();
+ Ea = 0.795e4L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Arrh(T,A,Ea));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986)
 H2O2+O=OH+HO2             9.550E+06  2.00  3.970E+03
 */
- k.push_back(Kooij(T,(Scalar)9.550e6,(Scalar)2.00,(Scalar)3.970e3,Tr,Rcal));
+ A  = 9.550e6L * unitA_1.get_SI_factor();
+ b  = 2.00;
+ Ea = 3.970e3L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Kooij(T,A,b,Ea));
 
 /*
 ! Hippler and Troe, J. Chem. Phys. Lett. 192:333 (1992)
@@ -320,9 +324,15 @@ H2O2+OH=HO2+H2O           1.000E+12  0.00  0.000
 H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
     DUPLICATE
 */
- k.push_back(Arrh(T,(Scalar)1.000e12,(Scalar)0.0) + Arrh(T,(Scalar)5.800e14,(Scalar)9.557e3,Rcal));
+ A   = 1.000e12L * unitA_1.get_SI_factor();
+ Ea  = 0.000L * unitEa_cal.get_SI_factor(); 
+ A2  = 5.800e14L * unitA_1.get_SI_factor();
+ Ea2 = 9.557e3L * unitEa_cal.get_SI_factor(); 
+ k.push_back(Arrh(T,A,Ea) + Arrh(T,A2,Ea2));
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?
+                      std::numeric_limits<Scalar>::epsilon() * 6500:
+                      std::numeric_limits<Scalar>::epsilon() * 100;
   int return_flag(0);
   for(unsigned int ir = 0; ir < k.size(); ir++)
   {
@@ -332,12 +342,12 @@ H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
         std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
                   << "Error in kinetics comparison\n"
-                  << "reaction #" << ir << "\n"
-                  << "temperature: " << T << " K" << "\n"
-                  << "theory: " << k[ir] << "\n"
-                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
+                  << "reaction #"        << ir            << "\n"
+                  << "temperature: "     << T     << " K" << "\n"
+                  << "theory: "          << k[ir]         << "\n"
+                  << "calculated: "      << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
                   << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] << "\n"
-                  << "tolerance = " <<  tol
+                  << "tolerance = "      <<  tol
                   << std::endl;
         return_flag = 1;
      }
@@ -349,6 +359,6 @@ H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
 int main(int argc, char* argv[])
 {
   return (tester<float>(std::string(argv[1])) ||
-          tester<double>(std::string(argv[1])));/* ||
-          tester<long double>(std::string(argv[1])));*/
+          tester<double>(std::string(argv[1])) ||
+          tester<long double>(std::string(argv[1])));
 }
