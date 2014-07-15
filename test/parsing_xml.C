@@ -182,7 +182,7 @@ int tester(const std::string &root_name)
 
   Scalar T = 2000.L;
   Scalar Tr = 1.;
-  Antioch::Units<Scalar> unitA_m1("(m3/kmol)-1/s"),unitA_0("s-1"),unitA_1("m3/kmol/s"),unitA_2("(m3/kmol)2/s");
+  Antioch::Units<Scalar> unitA_m1("kmol/m3/s"),unitA_0("s-1"),unitA_1("m3/kmol/s"),unitA_2("m6/kmol2/s");
 
   Scalar Rcal = Antioch::Constants::R_universal<Scalar>() * Antioch::Constants::R_universal_unit<Scalar>().factor_to_some_unit("cal/mol/K");
   getline(CH4_file,line);
@@ -528,7 +528,9 @@ int tester(const std::string &root_name)
   k.push_back(2.5e11);
   
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?
+                      std::numeric_limits<Scalar>::epsilon() * 5000:
+                      std::numeric_limits<Scalar>::epsilon() * 100;
   int return_flag(0);
   for(unsigned int ir = 0; ir < k.size(); ir++)
   {
@@ -555,6 +557,6 @@ int tester(const std::string &root_name)
 int main(int argc, char* argv[])
 {
   return (tester<float>(std::string(argv[1])) ||
-          tester<double>(std::string(argv[1])));/* ||
-          tester<long double>(std::string(argv[1])));*/
+          tester<double>(std::string(argv[1])) ||
+          tester<long double>(std::string(argv[1])));
 }
