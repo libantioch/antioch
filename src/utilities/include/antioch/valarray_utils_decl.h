@@ -157,6 +157,12 @@ std::valarray<T>
 if_else(const std::valarray<bool>& condition,
         const std::valarray<T>& if_true,
         const std::valarray<T>& if_false);
+
+template <typename VectorT, typename IntT>
+inline
+typename value_type<VectorT>::type
+eval_index(const VectorT& vec, const std::valarray<IntT>& index);
+
 } // end namespace Antioch
 
 
