@@ -80,11 +80,13 @@ int tester_N2N(const std::string& input_name)
 
   int return_flag = 0;
 
+  Antioch::KineticsConditions<Scalar> cond;
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
       const Scalar rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
+      cond.change_temperature(T);
 
       typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
 
@@ -96,10 +98,10 @@ int tester_N2N(const std::string& input_name)
           std::vector<std::vector<Scalar> > prod_matrix;
           std::vector<std::vector<Scalar> > net_matrix;
 
-          reaction_set.print_chemical_scheme( std::cout, T, molar_densities, h_RT_minus_s_R, loss_matrix, prod_matrix, net_matrix );
+          reaction_set.print_chemical_scheme( std::cout, cond, molar_densities, h_RT_minus_s_R, loss_matrix, prod_matrix, net_matrix );
         }
       
-      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       Scalar sum = 0;
@@ -168,17 +170,19 @@ int tester(const std::string& input_name)
 
   int return_flag = 0;
 
+  Antioch::KineticsConditions<Scalar> cond;
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
       const Scalar rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
+      cond.change_temperature(T);
 
       typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
       Scalar sum = 0;

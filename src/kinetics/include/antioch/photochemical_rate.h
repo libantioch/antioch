@@ -27,9 +27,10 @@
 #define ANTIOCH_PHOTOCHEMICAL_RATE_H
 
 //Antioch
-#include "antioch/metaprogramming.h"
+#include "antioch/metaprogramming_decl.h"
 #include "antioch/sigma_bin_converter.h"
 #include "antioch/kinetics_type.h"
+#include "antioch/particle_flux.h"
 
 //C++
 #include <vector>
@@ -37,7 +38,15 @@
 #include <sstream>
 
 namespace Antioch{
-
+  /*!Photochemical rate
+   *
+   * \todo Need to find a place to store k once calculated,
+   * and recalculate only if the photon flux has changed.
+   * Might want also to re-put _cross_section_on_flux_grid,
+   * as usually, changes will appear in the photon flux, not
+   * the lambda grid.
+   *
+   */
   template<typename CoeffType, typename VectorCoeffType = std::vector<CoeffType> >
   class PhotochemicalRate:public KineticsType<CoeffType,VectorCoeffType>
   {
@@ -45,8 +54,6 @@ namespace Antioch{
      private:
        VectorCoeffType _cross_section;
        VectorCoeffType _lambda_grid;
-       VectorCoeffType _cross_section_on_flux_grid;
-       CoeffType _k;
        SigmaBinConverter<VectorCoeffType> _converter;
 
      public:
@@ -60,31 +67,26 @@ namespace Antioch{
        //!
        void set_lambda_grid(const VectorCoeffType &l);
 
-       //! calculate _k for a given photon flux
-       template<typename VectorStateType>
-       void calculate_rate_constant(const VectorStateType &hv_flux, const VectorStateType &hv_lambda, bool x_update = true);
-       
        //! \return the rate
-       template <typename StateType>
-       ANTIOCH_AUTO(StateType) 
-       operator()(const StateType& T) const
-       ANTIOCH_AUTOFUNC(StateType, this->rate(T))
+       template <typename VectorStateType>
+       ANTIOCH_AUTO(typename value_type<VectorStateType>::type)
+          operator()(const ParticleFlux<VectorStateType> & pf) const
+       ANTIOCH_AUTOFUNC(typename value_type<VectorStateType>::type , this->rate(pf))
 
-       //! \return the rate evaluated at \p T.
-       template <typename StateType>
-       ANTIOCH_AUTO(StateType) 
-       rate(const StateType& T) const
-       ANTIOCH_AUTOFUNC(StateType, Antioch::constant_clone(T, _k))
+       //! \return the rate evaluated at the given photon spectrum.
+       template <typename VectorStateType>
+       typename value_type<VectorStateType>::type 
+                rate(const ParticleFlux<VectorStateType>& pf) const;
 
        //! \return the derivative with respect to temperature.
-       template <typename StateType>
-       ANTIOCH_AUTO(StateType) 
-       derivative( const StateType& T ) const
-       ANTIOCH_AUTOFUNC(StateType, Antioch::zero_clone(T))
+       template <typename VectorStateType>
+       ANTIOCH_AUTO(typename value_type<VectorStateType>::type)
+       derivative( const ParticleFlux<VectorStateType>& /* ex */) const
+       ANTIOCH_AUTOFUNC(typename value_type<VectorStateType>::type, 0)
 
        //! Simultaneously evaluate the rate and its derivative at \p T.
-       template <typename StateType>
-       void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+       template <typename StateType, typename VectorStateType>
+       void rate_and_derivative(const ParticleFlux<VectorStateType>& pf, StateType& rate, StateType& drate_dT) const;
 
        //! print equation
        const std::string numeric() const;
@@ -97,8 +99,7 @@ namespace Antioch{
                                                                   const VectorCoeffType &lambda):
     KineticsType<CoeffType,VectorCoeffType>(KineticsModel::PHOTOCHEM),
     _cross_section(cs),
-    _lambda_grid(lambda),
-    _k(-1.)
+    _lambda_grid(lambda)
   {
     return;
   }
@@ -106,8 +107,7 @@ namespace Antioch{
   template<typename CoeffType, typename VectorCoeffType>
   inline
   PhotochemicalRate<CoeffType,VectorCoeffType>::PhotochemicalRate():
-    KineticsType<CoeffType,VectorCoeffType>(KineticsModel::PHOTOCHEM),
-    _k(-1.)
+    KineticsType<CoeffType,VectorCoeffType>(KineticsModel::PHOTOCHEM)
   {
     return;
   }
@@ -136,25 +136,29 @@ namespace Antioch{
   template<typename CoeffType, typename VectorCoeffType>
   template<typename VectorStateType>
   inline
-  void PhotochemicalRate<CoeffType,VectorCoeffType>::calculate_rate_constant(const VectorStateType &hv_flux, 
-                                                                             const VectorStateType &hv_lambda,
-                                                                             bool x_update)
+  typename value_type<VectorStateType>::type 
+        PhotochemicalRate<CoeffType,VectorCoeffType>::rate(const ParticleFlux<VectorStateType> & pf) const
   {
+     const VectorStateType &hv_flux =  pf.flux();
+     const VectorStateType &hv_lambda = pf.abscissa();
+
+     VectorStateType cross_section_on_flux_grid;
+
 //cross-section and lambda exists
      antioch_assert_greater(_cross_section.size(),0);
      antioch_assert_greater(_lambda_grid.size(),0);
 
-      if(x_update || _cross_section_on_flux_grid.empty())
-      {
-        _cross_section_on_flux_grid.clear();
-        _converter.y_on_custom_grid(_lambda_grid,_cross_section,hv_lambda,_cross_section_on_flux_grid);
-      }
-      Antioch::set_zero(_k);
+//put them on the right grid
+      _converter.y_on_custom_grid(_lambda_grid,_cross_section,hv_lambda,cross_section_on_flux_grid);
+
+//calculates
+      typename value_type<VectorStateType>::type k;
+      Antioch::set_zero(k);
       for(unsigned int ibin = 0; ibin < hv_lambda.size() - 1; ibin++)
       {
-          _k += _cross_section_on_flux_grid[ibin] * hv_flux[ibin] * (hv_lambda[ibin+1] - hv_lambda[ibin]); //right stairs
+          k += cross_section_on_flux_grid[ibin] * hv_flux[ibin] * (hv_lambda[ibin+1] - hv_lambda[ibin]); //right stairs
       }
-      return;
+      return k;
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -169,11 +173,11 @@ namespace Antioch{
 
 
   template<typename CoeffType, typename VectorCoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   inline
-  void PhotochemicalRate<CoeffType,VectorCoeffType>::rate_and_derivative(const StateType &T, StateType& rate, StateType& drate_dT) const
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::rate_and_derivative(const ParticleFlux<VectorStateType> &pf, StateType& rate, StateType& drate_dT) const
   {
-    Antioch::constant_clone(rate,_k);
+    Antioch::constant_clone(rate,this->rate(pf));
     Antioch::set_zero(drate_dT);
     return;
   }
