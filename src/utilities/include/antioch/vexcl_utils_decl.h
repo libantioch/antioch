@@ -155,6 +155,15 @@ if_else(const vex::vector_expression<BoolInput> &condition,
 	const IfValue   &if_true,
 	const ElseValue &if_false);
 
+template <typename VectorT, typename IntT>
+inline
+typename enable_if_c<
+  vex::is_vector_expression<typename value_type<VectorT>::type>::value &&
+  vex::is_vector_expression<IntT>::value,
+  typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const IntT& index);
+
 } // end namespace Antioch
 
 

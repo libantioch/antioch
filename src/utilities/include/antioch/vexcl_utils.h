@@ -203,6 +203,25 @@ if_else(const vex::vector_expression<BoolInput> &condition,
   return boost::proto::if_else(condition, if_true, if_false);
 }
 
+
+template <typename VectorT, typename IntT>
+inline
+typename enable_if_c<
+  vex::is_vector_expression<typename value_type<VectorT>::type>::value &&
+  vex::is_vector_expression<IntT>::value,
+  typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const IntT& index)
+{
+  typename value_type<VectorT>::type returnval = zero_clone(vec[0]);
+
+  // FIXME - this will be painfully slow
+  for (std::size_t i=0; i != index.size(); ++i)
+    returnval[i] = vec[index[i]][i];
+  return returnval;
+}
+
+
 } // end namespace Antioch
 
 
