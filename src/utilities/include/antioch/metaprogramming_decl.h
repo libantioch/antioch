@@ -192,6 +192,19 @@ namespace Antioch
 	    T if_true,
 	    T if_false);
 
+  // A function for indexing a vector type with an (integral) numeric
+  // type.
+  //
+  // The first argument should be a vector of (scalar or vectorized)
+  // numeric types; the second argument should be a similarly scalar
+  // or vectorized integer type with values valid as indices to the
+  // first argument.  The output will be a similarly scalar or
+  // vectorized numeric type.
+  template <typename VectorT, typename IntT>
+  inline
+  typename value_type<VectorT>::type
+  eval_index(const VectorT& vec, const IntT& index);
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_DECL_H

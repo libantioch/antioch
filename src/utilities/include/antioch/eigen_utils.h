@@ -240,6 +240,21 @@ const T2& if_false)
 }
 
 
+template <typename VectorT, typename IntT>
+inline
+typename enable_if_c<
+  is_eigen<typename value_type<VectorT>::type>::value &&
+  is_eigen<IntT>::value,
+  typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const IntT& index)
+{
+  typename value_type<VectorT>::type returnval = vec[0];
+  for (std::size_t i=0; i != index.size(); ++i)
+    returnval[i] = vec[index[i]][i];
+  return returnval;
+}
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_EIGEN_UTILS_H

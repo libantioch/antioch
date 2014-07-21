@@ -133,6 +133,14 @@ template <typename T, typename Scalar>
 inline
 void constant_fill(T& output, const Scalar& value) { output = value; }
 
+template <typename VectorT, typename IntT>
+inline
+typename value_type<VectorT>::type
+eval_index(const VectorT& vec, const IntT& index)
+{
+  return vec[index];
+}
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_H

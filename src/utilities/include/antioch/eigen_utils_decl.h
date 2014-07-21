@@ -221,6 +221,14 @@ const Condition& condition,
 const T1& if_true,
 const T2& if_false);
 
+template <typename VectorT, typename IntT>
+inline
+typename enable_if_c<
+  is_eigen<typename value_type<VectorT>::type>::value &&
+  is_eigen<IntT>::value,
+  typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const IntT& index);
 
 } // end namespace Antioch
 

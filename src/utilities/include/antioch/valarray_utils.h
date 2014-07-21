@@ -227,6 +227,19 @@ if_else(const std::valarray<bool>& condition,
   return returnval;
 }
 
+template <typename VectorT, typename IntT>
+inline
+typename value_type<VectorT>::type
+eval_index(const VectorT& vec, const std::valarray<IntT>& index)
+{
+  typename value_type<VectorT>::type returnval;
+  std::size_t sz = index.size();
+  returnval.resize(sz);
+  for (std::size_t i=0; i != sz; ++i)
+    returnval[i] = vec[index[i]][i];
+  return returnval;
+}
+
 } // end namespace Antioch
 
 
