@@ -3,8 +3,6 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -43,10 +41,15 @@ class SigmaBinConverter
         SigmaBinConverter();
         ~SigmaBinConverter();
 
+        template <typename VectorStateType>
         void y_on_custom_grid(const VectorCoeffType &x_old, const VectorCoeffType &y_old, 
-                              const VectorCoeffType &x_new,       VectorCoeffType &y_new);
+                              const VectorStateType &x_new,       VectorStateType &y_new) const;
 
      private:
+
+        template <typename VectorStateTypeIterator, typename UIntType, typename ScalarType>
+        UIntType vectorized_while(UIntType & ex, const ScalarType & lower_coeff_limit, const VectorStateTypeIterator &higher_state_limit,
+                                  VectorStateTypeIterator &state, unsigned int & istate) const;
 };
 
 template <typename VectorCoeffType>
@@ -64,17 +67,61 @@ SigmaBinConverter<VectorCoeffType>::~SigmaBinConverter()
 }
 
 template <typename VectorCoeffType>
+template <typename VectorStateTypeIterator,typename UIntType, typename ScalarType>
+inline
+UIntType SigmaBinConverter<VectorCoeffType>::vectorized_while(UIntType & ex, const ScalarType & lower_coeff_limit, 
+                                                              const VectorStateTypeIterator &higher_state_limit, VectorStateTypeIterator &state, unsigned int & istate) const
+{
+  return Antioch::if_else
+        (*state >= lower_coeff_limit && state != higher_state_limit,
+          Antioch::constant_clone(ex,istate),
+           vectorized_while(ex,lower_coeff_limit,higher_state_limit,state++,istate++));
+}
+
+template <typename VectorCoeffType>
+template <typename VectorStateType>
 inline
 void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType &x_old, const VectorCoeffType &y_old,  
-                                                          const VectorCoeffType &x_custom,    VectorCoeffType &y_custom)
+                                                          const VectorStateType &x_custom,    VectorStateType &y_custom) const
 {
   
   y_custom.clear();
-  y_custom.resize(x_custom.size(),0.L);
+  y_custom.resize(x_custom.size());
   Antioch::set_zero(y_custom);
 
-  unsigned int ilow(0);
-  while(x_custom[ilow] < x_old[0])ilow++; //skipping too low bins
+// first meta-prog needed stuff
+
+  typedef typename Antioch::value_type<VectorStateType>::type     StateType;
+  typedef typename Antioch::value_type<StateType>::type           ScalarType;
+  typedef typename Antioch::rebind<StateType, unsigned int>::type UIntType;
+
+  unsigned int k(0);
+  typename VectorStateType::const_iterator state_it = x_custom.begin();
+
+  UIntType ilow = vectorized_while(ilow, (ScalarType)x_old.front(), x_custom.end(), state_it, k);
+
+
+
+for (unsigned int i=0; i != x_custom.size(); ++i)
+  {
+    UIntType ihigh = Antioch::foo(uint(-1));
+    for (unsigned int it = 1; it != x_old.size(); ++it);
+      {
+        ihigh = Antioch::if_else (Antioch::eval_index(x_custom,i) < x_old[it] && ihigh != uint(-1),
+                                  it,
+                                  ihigh);
+      }
+    ilow = ihigh - 1;
+  }
+
+
+
+
+  y_custom.resize(x_custom.size(),1);
+
+  return;
+/*
+//  while( x_custom[ilow] < x_old.front() && ilow < x_custom.size())ilow++; //skipping too low bins
 
   unsigned int j(1);
   for(unsigned int i = ilow; i < x_custom.size() - 1; i++)//bin per bin, right stairs: y_old[i] from x_old[i] to x_old[i+1]
@@ -94,7 +141,7 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
        j++;
        if(!(j < x_old.size()))return;
      }
-     typename Antioch::value_type<VectorCoeffType>::type bin;
+     ScalarType bin;
      Antioch::set_zero(bin);
 
 // here we are: x_old[j-1] =< x_custom[i] < x_old[j] with j-1 >= 0
@@ -128,6 +175,7 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
   }
 
   return;
+*/
 }
 
 }
