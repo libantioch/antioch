@@ -169,7 +169,7 @@ TESTS += kinetics_reversibility_unit
 TESTS += parsing_xml.sh
 TESTS += units_unit
 TESTS += kinetics_reactive_scheme_unit.sh
-TESTS += sigma_bin_converter_unit.sh
+TESTS += sigma_bin_converter_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
