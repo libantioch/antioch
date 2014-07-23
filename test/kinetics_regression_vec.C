@@ -175,6 +175,7 @@ int vectester(const std::string& input_name,
       massfrac[2*tuple+1] = 0.2;
     }
 
+  const Antioch::KineticsConditions<PairScalars> conditions(T);
   const std::vector<PairScalars> Y(n_species,massfrac);
   std::vector<PairScalars> molar_densities(n_species, example);
   std::vector<PairScalars> h_RT_minus_s_R(n_species, example);
@@ -206,9 +207,9 @@ int vectester(const std::string& input_name,
   thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
   thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
 
-  kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
+  kinetics.compute_mass_sources( conditions, molar_densities, h_RT_minus_s_R, omega_dot );
 
-  kinetics.compute_mass_sources_and_derivs ( T,
+  kinetics.compute_mass_sources_and_derivs ( conditions,
 					     molar_densities,
 					     h_RT_minus_s_R,
 					     dh_RT_minus_s_R_dT,

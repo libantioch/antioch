@@ -203,7 +203,8 @@ int tester(const std::string &root_name)
   CH4_file.close();
 
   Antioch::ParticleFlux<std::vector<Scalar> > photons(lambda,hv);
-  reaction_set.set_particle_flux(&photons);
+
+  Antioch::KineticsConditions<Scalar,std::vector<Scalar> > conditions(T);
 
 //
   // Molar densities
@@ -526,6 +527,7 @@ int tester(const std::string &root_name)
 //
 //photochemistry
   k.push_back(k_photo(lambda,hv,CH4_lambda,CH4_s));
+  conditions.add_particle_flux(photons,k.size()-1);
 //Constant
   k.push_back(2.5e11);
   
@@ -537,7 +539,7 @@ int tester(const std::string &root_name)
   for(unsigned int ir = 0; ir < k.size(); ir++)
   {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
-     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] > tol)
+     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] > tol)
      {
         std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
@@ -545,8 +547,8 @@ int tester(const std::string &root_name)
                   << "reaction #" << ir << "\n"
                   << "temperature: " << T << " K" << "\n"
                   << "theory: " << k[ir] << "\n"
-                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
-                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] << "\n"
+                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,conditions) << "\n"
+                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] << "\n"
                   << "tolerance = " <<  tol
                   << std::endl;
         return_flag = 1;
