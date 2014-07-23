@@ -87,6 +87,8 @@ int tester(const std::string& input_name)
   const Scalar T = 1500.0; // K
   const Scalar P = 1.0e5; // Pa
 
+  const Antioch::KineticsConditions<Scalar> conditions(T);
+
   // Mass fractions
   std::vector<Scalar> Y(n_species,0.2);
 
@@ -104,7 +106,7 @@ int tester(const std::string& input_name)
 
   std::vector<Scalar> net_rates,kfwd_const,kbkwd_const,kfwd,kbkwd,fwd_conc,bkwd_conc;
 
-  reaction_set.get_reactive_scheme(T,molar_densities,h_RT_minus_s_R,net_rates,
+  reaction_set.get_reactive_scheme(conditions,molar_densities,h_RT_minus_s_R,net_rates,
                                    kfwd_const,kbkwd_const,kfwd,kbkwd,fwd_conc,bkwd_conc);
 
   std::vector<Scalar> net_rates_exact,
