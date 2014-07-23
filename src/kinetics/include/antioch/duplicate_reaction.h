@@ -135,8 +135,8 @@ namespace Antioch
       VectorStateType& dkfwd_dX) const
   {
     //dk_dT = sum_p dalpha_p_dT
-    StateType kfwd_tmp = Antioch::zero_clone(conditions);
-    StateType dkfwd_dT_tmp = Antioch::zero_clone(conditions);
+    StateType kfwd_tmp = Antioch::zero_clone(conditions.T());
+    StateType dkfwd_dT_tmp = Antioch::zero_clone(conditions.T());
 
     this->_forward_rate[0]->compute_rate_and_derivative(conditions,kfwd,dkfwd_dT);
 

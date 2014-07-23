@@ -190,7 +190,7 @@ namespace Antioch
     CoeffType efficiency( const unsigned int s) const;
 
     //! Computes derived quantities.
-    void initialize(unsigned int index);    
+    void initialize(unsigned int index = 0);
 
     //!
     int gamma() const;
