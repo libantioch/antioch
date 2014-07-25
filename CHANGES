@@ -1,3 +1,10 @@
+Version 0.2.0
+* Added general units capabilities
+* Update in conversion factor for gas constant
+* Molar masses are now in mol instead of kmol
+* Enabled subdir-objects option in Automake
+* Assorted bugfixes
+
 Version 0.1.0
 * Photochemistry modeling
 * Compatibility with newer VexCL
