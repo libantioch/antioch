@@ -25,20 +25,52 @@
 //
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
+#include "antioch_config.h"
+
+#include <valarray>
+
+#ifdef ANTIOCH_HAVE_EIGEN
+#include "Eigen/Dense"
+#endif
+
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+#include "metaphysicl/numberarray.h"
+#endif
+
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
+#include "antioch/vector_utils_decl.h"
+#include "antioch/eigen_utils_decl.h"
+#include "antioch/metaphysicl_utils_decl.h"
+#include "antioch/valarray_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
+
+#include "antioch/sigma_bin_converter.h"
+#include "antioch/antioch_asserts.h"
+#include "antioch/physical_constants.h"
+
+#include "antioch/vector_utils.h"
+#include "antioch/eigen_utils.h"
+#include "antioch/metaphysicl_utils.h"
+#include "antioch/valarray_utils.h"
+#include "antioch/vexcl_utils.h"
+
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
 
 // C++
+#include <cmath>
 #include <limits>
 #include <string>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 
-// Antioch
-#include "antioch/vector_utils_decl.h"
-#include "antioch/sigma_bin_converter.h"
-#include "antioch/antioch_asserts.h"
-#include "antioch/physical_constants.h"
-#include "antioch/vector_utils.h"
 /*
   x[0] = 1.;  y[0] = 1.;
   x[1] = 2.;  y[1] = 2.;
@@ -62,27 +94,27 @@ void make_custom(unsigned int choice, VectorPairScalar & x, VectorPairScalar & y
        x.resize(9);   y.resize(9);
        for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
        {
-          x[0 * tuple] = 2.50L;  y[0 * tuple] = 2.25L/0.75L; // 0.50 * 2  + 0.25 * 5
-          x[1 * tuple] = 3.25L;  y[1 * tuple] = 3.75L/0.75L; // 0.75 * 5
-          x[2 * tuple] = 4.00L;  y[2 * tuple] = 6.00L/0.75L; // 0.75 * 8
-          x[3 * tuple] = 4.75L;  y[3 * tuple] = 5.00L/0.75L; // 0.25 * 8  + 0.5  * 6
-          x[4 * tuple] = 5.50L;  y[4 * tuple] = 5.50L/0.75L; // 0.25 * 6  + 0.25 * 10
-          x[5 * tuple] = 6.25L;  y[5 * tuple] = 7.50L/0.75L; // 0.75 * 10
-          x[6 * tuple] = 7.00L;  y[6 * tuple] = 5.25L/0.75L; // 0.75 * 7
-          x[7 * tuple] = 7.75L;  y[7 * tuple] = 3.75L/0.75L; // 0.25 * 7 + 0.5 * 4
-          x[8 * tuple] = 8.50L;  y[8 * tuple] = 0.00L/0.75L; // 0. (right stairs)
+          x[0][2*tuple] = 2.50L;  y[0][2*tuple] = 2.25L/0.75L; // 0.50][2  + 0.25][5
+          x[1][2*tuple] = 3.25L;  y[1][2*tuple] = 3.75L/0.75L; // 0.75][5
+          x[2][2*tuple] = 4.00L;  y[2][2*tuple] = 6.00L/0.75L; // 0.75][8
+          x[3][2*tuple] = 4.75L;  y[3][2*tuple] = 5.00L/0.75L; // 0.25][8  + 0.5 ][6
+          x[4][2*tuple] = 5.50L;  y[4][2*tuple] = 5.50L/0.75L; // 0.25][6  + 0.25][10
+          x[5][2*tuple] = 6.25L;  y[5][2*tuple] = 7.50L/0.75L; // 0.75][10
+          x[6][2*tuple] = 7.00L;  y[6][2*tuple] = 5.25L/0.75L; // 0.75][7
+          x[7][2*tuple] = 7.75L;  y[7][2*tuple] = 3.75L/0.75L; // 0.25][7 + 0.5][4
+          x[8][2*tuple] = 8.50L;  y[8][2*tuple] = 0.00L/0.75L; // 0. (right stairs)
 
       // 9 bin outside ref -> [0;12] containing [1;10]
           
-          x[0 * tuple + 1] = 0.00L;  y[0 * tuple + 1] = 0.50L/1.50L; // 0.5 * 1
-          x[1 * tuple + 1] = 1.50L;  y[1 * tuple + 1] = 2.50L/1.50L; // 0.5 * 1  + 2.0 * 1
-          x[2 * tuple + 1] = 3.00L;  y[2 * tuple + 1] = 9.00L/1.50L; // 1.0 * 5  + 0.5 * 8
-          x[3 * tuple + 1] = 4.50L;  y[3 * tuple + 1] = 10.0L/1.50L; // 0.5 * 8  + 1.0 * 6
-          x[4 * tuple + 1] = 6.00L;  y[4 * tuple + 1] = 13.5L/1.50L; // 1.0 * 10 + 0.5 * 7
-          x[5 * tuple + 1] = 7.50L;  y[5 * tuple + 1] = 7.50L/1.50L; // 0.50 * 7 + 1.0 * 4
-          x[6 * tuple + 1] = 9.00L;  y[6 * tuple + 1] = 2.00L/1.50L; // 1.0 * 2 
-          x[7 * tuple + 1] = 10.5L;  y[7 * tuple + 1] = 0.00L/1.50L; // 0
-          x[8 * tuple + 1] = 12.0L;  y[8 * tuple + 1] = 0.00L/1.50L; // 0. (right stairs)
+          x[0][2*tuple + 1] = 0.00L;  y[0][2*tuple + 1] = 0.50L/1.50L; // 0.5][1
+          x[1][2*tuple + 1] = 1.50L;  y[1][2*tuple + 1] = 2.50L/1.50L; // 0.5][1  + 2.0][1
+          x[2][2*tuple + 1] = 3.00L;  y[2][2*tuple + 1] = 9.00L/1.50L; // 1.0][5  + 0.5][8
+          x[3][2*tuple + 1] = 4.50L;  y[3][2*tuple + 1] = 10.0L/1.50L; // 0.5][8  + 1.0][6
+          x[4][2*tuple + 1] = 6.00L;  y[4][2*tuple + 1] = 13.5L/1.50L; // 1.0][10 + 0.5][7
+          x[5][2*tuple + 1] = 7.50L;  y[5][2*tuple + 1] = 7.50L/1.50L; // 0.50][7 + 1.0][4
+          x[6][2*tuple + 1] = 9.00L;  y[6][2*tuple + 1] = 2.00L/1.50L; // 1.0][2 
+          x[7][2*tuple + 1] = 10.5L;  y[7][2*tuple + 1] = 0.00L/1.50L; // 0
+          x[8][2*tuple + 1] = 12.0L;  y[8][2*tuple + 1] = 0.00L/1.50L; // 0. (right stairs)
        }
        break;
       }
@@ -91,19 +123,19 @@ void make_custom(unsigned int choice, VectorPairScalar & x, VectorPairScalar & y
        x.resize(5);    y.resize(5);
        for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
        {
-          x[0 * tuple] = -1.00L;  y[0 * tuple] = 0.00L/1.20L; // 0
-          x[1 * tuple] =  0.20L;  y[1 * tuple] = 0.40L/1.20L; // 0.4 * 1
-          x[2 * tuple] =  1.40L;  y[2 * tuple] = 1.80L/1.20L; // 0.6 * 1  + 0.6 * 2
-          x[3 * tuple] =  2.60L;  y[3 * tuple] = 4.80L/1.20L; // 0.4 * 2  + 0.8 * 5
-          x[4 * tuple] =  3.80L;  y[4 * tuple] = 00.0L/1.20L; // 0. (right stairs)
+          x[0][2*tuple] = -1.00L;  y[0][2*tuple] = 0.00L/1.20L; // 0
+          x[1][2*tuple] =  0.20L;  y[1][2*tuple] = 0.40L/1.20L; // 0.4][1
+          x[2][2*tuple] =  1.40L;  y[2][2*tuple] = 1.80L/1.20L; // 0.6][1  + 0.6][2
+          x[3][2*tuple] =  2.60L;  y[3][2*tuple] = 4.80L/1.20L; // 0.4][2  + 0.8][5
+          x[4][2*tuple] =  3.80L;  y[4][2*tuple] = 00.0L/1.20L; // 0. (right stairs)
        
         // 6 bins beyond only max -> [2;10.75] in [0;10]
           x.resize(6);    y.resize(6);
-          x[0 * tuple + 1] =  2.0000L;  y[0 * tuple + 1] =  8.50L/2.1875L; // 1.0000 * 2  + 1.0000 * 5 + 0.1875 * 8
-          x[1 * tuple + 1] =  4.1875L;  y[1 * tuple + 1] = 16.25L/2.1875L; // 0.8125 * 8  + 1.0000 * 6 + 0.3750 * 10
-          x[2 * tuple + 1] =  6.3750L;  y[2 * tuple + 1] = 15.50L/2.1875L; // 0.6250 * 10 + 1.0000 * 7 + 0.5625 * 4
-          x[3 * tuple + 1] =  8.5625L;  y[3 * tuple + 1] =  3.75L/2.1875L; // 0.4375 * 4  + 1.0000 * 2 + 0
-          x[4 * tuple + 1] = 10.7500L;  y[4 * tuple + 1] =  0.00L/2.1875L; // 0. (right stairs)
+          x[0][2*tuple + 1] =  2.0000L;  y[0][2*tuple + 1] =  8.50L/2.1875L; // 1.0000][2  + 1.0000][5 + 0.1875][8
+          x[1][2*tuple + 1] =  4.1875L;  y[1][2*tuple + 1] = 16.25L/2.1875L; // 0.8125][8  + 1.0000][6 + 0.3750][10
+          x[2][2*tuple + 1] =  6.3750L;  y[2][2*tuple + 1] = 15.50L/2.1875L; // 0.6250][10 + 1.0000][7 + 0.5625][4
+          x[3][2*tuple + 1] =  8.5625L;  y[3][2*tuple + 1] =  3.75L/2.1875L; // 0.4375][4  + 1.0000][2 + 0
+          x[4][2*tuple + 1] = 10.7500L;  y[4][2*tuple + 1] =  0.00L/2.1875L; // 0. (right stairs)
         }
         break;
       }
@@ -171,33 +203,35 @@ int vectester(const PairScalars& example, const std::string& testname)
       {
 //tuple
 
-        Scalar dist = (exact_sol_y[il * tuple] < tol)?std::abs(bin_custom_y[il * tuple] - exact_sol_y[il * tuple]):
-                                                      std::abs(bin_custom_y[il * tuple] - exact_sol_y[il * tuple])/exact_sol_y[il * tuple];
+        Scalar dist = Antioch::if_else(exact_sol_y[il][2*tuple] < tol,
+                                                std::abs(bin_custom_y[il][2*tuple] - exact_sol_y[il][2*tuple]),
+                                                std::abs(bin_custom_y[il][2*tuple] - exact_sol_y[il][2*tuple])/exact_sol_y[il][2*tuple]);
         if( dist > tol )
         {
          std::cout << std::scientific << std::setprecision(16)
-                   << "Error: Mismatch in bin values."                                                                    << std::endl
-                   << "case ("            << bin_custom_x[il * tuple]   << ";"   << bin_custom_x[il * tuple + 1]   << ")" << std::endl 
-                   << "bin = "            << bin_custom_y[il * tuple]                                                     << std::endl
-                   << "bin_exact = "      << exact_sol_y[il * tuple]                                                      << std::endl
-                   << "relative error = " << dist                                                                         << std::endl
-                   << "tolerance = "      << tol                                                                          << std::endl;
+                   << "Error: Mismatch in bin values."                                                                      << std::endl
+                   << "case ("            << bin_custom_x[il][2*tuple]   << ";"   << bin_custom_x[il + 1][2*tuple]   << ")" << std::endl 
+                   << "bin = "            << bin_custom_y[il][2*tuple]                                                      << std::endl
+                   << "bin_exact = "      << exact_sol_y[il][2*tuple]                                                       << std::endl
+                   << "relative error = " << dist                                                                           << std::endl
+                   << "tolerance = "      << tol                                                                            << std::endl;
 
          return_flag = 1;
         }
 
 //tuple + 1
-        dist = (exact_sol_y[il * tuple + 1] < tol)?std::abs(bin_custom_y[il * tuple + 1] - exact_sol_y[il * tuple + 1]):
-                                                   std::abs(bin_custom_y[il * tuple + 1] - exact_sol_y[il * tuple + 1])/exact_sol_y[il * tuple + 1];
+        dist = Antioch::if_else(exact_sol_y[il][2*tuple + 1] < tol,
+                                                std::abs(bin_custom_y[il][2*tuple + 1] - exact_sol_y[il][2*tuple + 1]),
+                                                std::abs(bin_custom_y[il][2*tuple + 1] - exact_sol_y[il][2*tuple + 1])/exact_sol_y[il][2*tuple + 1]);
         if( dist > tol )
         {
          std::cout << std::scientific << std::setprecision(16)
-                   << "Error: Mismatch in bin values."                                                                        << std::endl
-                   << "case ("            << bin_custom_x[il * tuple + 1]   << ";"   << bin_custom_x[il * tuple + 2]   << ")" << std::endl 
-                   << "bin = "            << bin_custom_y[il * tuple + 1]                                                     << std::endl
-                   << "bin_exact = "      << exact_sol_y[il * tuple + 1]                                                      << std::endl
-                   << "relative error = " << dist                                                                             << std::endl
-                   << "tolerance = "      << tol                                                                              << std::endl;
+                   << "Error: Mismatch in bin values."                                                                            << std::endl
+                   << "case ("            << bin_custom_x[il][2*tuple + 1]   << ";"   << bin_custom_x[il+1][2*tuple + 1]   << ")" << std::endl 
+                   << "bin = "            << bin_custom_y[il][2*tuple + 1]                                                        << std::endl
+                   << "bin_exact = "      << exact_sol_y[il][2*tuple + 1]                                                         << std::endl
+                   << "relative error = " << dist                                                                                 << std::endl
+                   << "tolerance = "      << tol                                                                                  << std::endl;
 
          return_flag = 1;
         }
