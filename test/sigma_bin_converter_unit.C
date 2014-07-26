@@ -65,9 +65,9 @@ void make_custom(unsigned int choice, VectorScalar & x, VectorScalar & y)
           x[0] = 2.50L;  y[0] = 2.25L/0.75L; // 0.50 * 2  + 0.25 * 5
           x[1] = 3.25L;  y[1] = 3.75L/0.75L; // 0.75 * 5
           x[2] = 4.00L;  y[2] = 6.00L/0.75L; // 0.75 * 8
-          x[3] = 4.75L;  y[3] = 5.00L/0.75L; // 0.25 * 8  + 0.5 * 6
-          x[4] = 5.50L;  y[4] = 6.50L/0.75L; // 0.25 * 6  + 0.5 * 10
-          x[5] = 6.25L;  y[5] = 6.75L/0.75L; // 0.50 * 10 + 0.25 * 7
+          x[3] = 4.75L;  y[3] = 5.00L/0.75L; // 0.25 * 8  + 0.5  * 6
+          x[4] = 5.50L;  y[4] = 5.50L/0.75L; // 0.25 * 6  + 0.25 * 10
+          x[5] = 6.25L;  y[5] = 7.50L/0.75L; // 0.75 * 10
           x[6] = 7.00L;  y[6] = 5.25L/0.75L; // 0.75 * 7
           x[7] = 7.75L;  y[7] = 3.75L/0.75L; // 0.25 * 7 + 0.5 * 4
           x[8] = 8.50L;  y[8] = 0.00L/0.75L; // 0. (right stairs)
@@ -82,7 +82,7 @@ void make_custom(unsigned int choice, VectorScalar & x, VectorScalar & y)
           x[3] = 4.50L;  y[3] = 10.0L/1.50L; // 0.5 * 8  + 1.0 * 6
           x[4] = 6.00L;  y[4] = 13.5L/1.50L; // 1.0 * 10 + 0.5 * 7
           x[5] = 7.50L;  y[5] = 7.50L/1.50L; // 0.50 * 7 + 1.0 * 4
-          x[6] = 9.00L;  y[6] = 3.15L/1.50L; // 1.0 * 2 + 0.5 * 0.3
+          x[6] = 9.00L;  y[6] = 2.00L/1.50L; // 1.0 * 2 
           x[7] = 10.5L;  y[7] = 0.00L/1.50L; // 0
           x[8] = 12.0L;  y[8] = 0.00L/1.50L; // 0. (right stairs)
         break;
@@ -115,22 +115,23 @@ void make_custom(unsigned int choice, VectorScalar & x, VectorScalar & y)
 template <typename VectorScalar>
 void make_reference(VectorScalar & x, VectorScalar & y)
 {
-  x.resize(10);
-  y.resize(10);
-  for(unsigned int i = 1; i < 11; i++)
+  x.resize(10,0);
+  y.resize(10,0);
+  for(unsigned int i = 0; i < 10; i++)
   {
-     x[i-1] = ((typename Antioch::value_type<VectorScalar>::type)i);
+     x[i] = ((typename Antioch::value_type<VectorScalar>::type)(i+1));
   }
-  y[0] = 1.;
-  y[1] = 2.;
-  y[2] = 5.;
-  y[3] = 8.;
-  y[4] = 6.;
-  y[5] = 10.;
-  y[6] = 7.;
-  y[7] = 4.;
-  y[8] = 2.;
-  y[9] = 0.3;
+  y[0] = 1.L;
+  y[1] = 2.L;
+  y[2] = 5.L;
+  y[3] = 8.L;
+  y[4] = 6.L;
+  y[5] = 10.L;
+  y[6] = 7.L;
+  y[7] = 4.L;
+  y[8] = 2.L;
+  y[9] = 0.3L;
+
 }
 
 
@@ -143,7 +144,7 @@ int tester()
 
   Antioch::SigmaBinConverter<std::vector<Scalar> > bin;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
 
   int return_flag = 0;
 
@@ -162,17 +163,18 @@ int tester()
                          bin_custom_x,bin_custom_y);
 
 
-    for(unsigned int il = 0; il < bin_custom_x.size(); il++)
+    for(unsigned int il = 0; il < bin_custom_x.size() - 1; il++)
     {
-      if( std::abs( (bin_custom_y[il] - exact_sol_y[il])/exact_sol_y[il]) > tol )
+      const Scalar dist = (exact_sol_y[il] < tol)?std::abs(bin_custom_y[il] - exact_sol_y[il]):std::abs(bin_custom_y[il] - exact_sol_y[il])/exact_sol_y[il];
+      if( dist > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in bin values."                                                       << std::endl
-                  << "case "             << i                                                               << std::endl
-                  << "bin = "            << bin_custom_x[il]                                                << std::endl
-                  << "bin_exact = "      << exact_sol_y[il]                                                 << std::endl
-                  << "relative error = " << std::abs( (bin_custom_y[il] - exact_sol_y[il])/exact_sol_y[il]) << std::endl
-                  << "tolerance = "      << tol                                                             << std::endl;
+                  << "Error: Mismatch in bin values."                                                  << std::endl
+                  << "case ("            << bin_custom_x[il]   << ";"   << bin_custom_x[il+1]   << ")" << std::endl 
+                  << "bin = "            << bin_custom_y[il]                                           << std::endl
+                  << "bin_exact = "      << exact_sol_y[il]                                            << std::endl
+                  << "relative error = " << dist                                                       << std::endl
+                  << "tolerance = "      << tol                                                        << std::endl;
 
         return_flag = 1;
       }
