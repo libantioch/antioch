@@ -83,15 +83,15 @@ GRVY::GRVY_Timer_Class gt;
   x[8] = 9.;  y[8] = 2.;
   x[9] = 10.; y[9] = 0.3; // right stairs, this value is useless
 */
-template <typename VectorPairScalar>
-void make_custom(unsigned int choice, VectorPairScalar & x, VectorPairScalar & y)
+template <typename PairScalars, typename VectorPairScalar>
+void make_custom(unsigned int choice, const PairScalars & ex, VectorPairScalar & x, VectorPairScalar & y)
 {
   // sum_{bin} Delta x * y
   switch(choice)
   {
       case(0): // 9 bin contained in ref -> [2.5;8.5] within [1;10]
       {
-       x.resize(9);   y.resize(9);
+       x.resize(9,ex);   y.resize(9,ex);
        for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
        {
           x[0][2*tuple] = 2.50L;  y[0][2*tuple] = 2.25L/0.75L; // 0.50][2  + 0.25][5
@@ -120,7 +120,7 @@ void make_custom(unsigned int choice, VectorPairScalar & x, VectorPairScalar & y
       }
       case(1): // 5 bins beyond only min -> [-1;3.8] in [0;10]
       {
-       x.resize(5);    y.resize(5);
+       x.resize(5,ex);    y.resize(5,ex);
        for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
        {
           x[0][2*tuple] = -1.00L;  y[0][2*tuple] = 0.00L/1.20L; // 0
@@ -130,7 +130,6 @@ void make_custom(unsigned int choice, VectorPairScalar & x, VectorPairScalar & y
           x[4][2*tuple] =  3.80L;  y[4][2*tuple] = 00.0L/1.20L; // 0. (right stairs)
        
         // 6 bins beyond only max -> [2;10.75] in [0;10]
-          x.resize(6);    y.resize(6);
           x[0][2*tuple + 1] =  2.0000L;  y[0][2*tuple + 1] =  8.50L/2.1875L; // 1.0000][2  + 1.0000][5 + 0.1875][8
           x[1][2*tuple + 1] =  4.1875L;  y[1][2*tuple + 1] = 16.25L/2.1875L; // 0.8125][8  + 1.0000][6 + 0.3750][10
           x[2][2*tuple + 1] =  6.3750L;  y[2][2*tuple + 1] = 15.50L/2.1875L; // 0.6250][10 + 1.0000][7 + 0.5625][4
@@ -169,7 +168,6 @@ void make_reference(VectorScalar & x, VectorScalar & y)
 template <typename PairScalars>
 int vectester(const PairScalars& example, const std::string& testname)
 {
-
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   std::vector<Scalar> bin_ref_x,bin_ref_y;
@@ -191,7 +189,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   {
     std::vector<PairScalars> bin_custom_x, exact_sol_y;
     std::vector<PairScalars> bin_custom_y;
-    make_custom(i,bin_custom_x,exact_sol_y);
+    make_custom(i,example,bin_custom_x,exact_sol_y);
 
     bin.y_on_custom_grid(bin_ref_x,bin_ref_y,
                          bin_custom_x,bin_custom_y);
@@ -209,7 +207,7 @@ int vectester(const PairScalars& example, const std::string& testname)
         if( dist > tol )
         {
          std::cout << std::scientific << std::setprecision(16)
-                   << "Error: Mismatch in bin values."                                                                      << std::endl
+                   << "Error: Mismatch in bin values for " << testname                                                      << std::endl
                    << "case ("            << bin_custom_x[il][2*tuple]   << ";"   << bin_custom_x[il + 1][2*tuple]   << ")" << std::endl 
                    << "bin = "            << bin_custom_y[il][2*tuple]                                                      << std::endl
                    << "bin_exact = "      << exact_sol_y[il][2*tuple]                                                       << std::endl
@@ -226,7 +224,7 @@ int vectester(const PairScalars& example, const std::string& testname)
         if( dist > tol )
         {
          std::cout << std::scientific << std::setprecision(16)
-                   << "Error: Mismatch in bin values."                                                                            << std::endl
+                   << "Error: Mismatch in bin values for " << testname                                                      << std::endl
                    << "case ("            << bin_custom_x[il][2*tuple + 1]   << ";"   << bin_custom_x[il+1][2*tuple + 1]   << ")" << std::endl 
                    << "bin = "            << bin_custom_y[il][2*tuple + 1]                                                        << std::endl
                    << "bin_exact = "      << exact_sol_y[il][2*tuple + 1]                                                         << std::endl
@@ -255,6 +253,7 @@ int main()
     vectester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
     vectester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
+/*
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
     vectester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
@@ -282,7 +281,7 @@ int main()
     returnval = returnval ||
       vectester (vex::vector<double> (ctx_d, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
 #endif
-
+*/
 #ifdef ANTIOCH_HAVE_GRVY
   gt.Finalize();
   gt.Summarize();
