@@ -155,6 +155,7 @@ if_else(const vex::vector_expression<BoolInput> &condition,
 	const IfValue   &if_true,
 	const ElseValue &if_false);
 
+#ifdef ANTIOCH_HAVE_VEXCL
 template <typename VectorT, typename IntT>
 inline
 typename enable_if_c<
@@ -163,6 +164,7 @@ typename enable_if_c<
   typename value_type<VectorT>::type
 >::type
 eval_index(const VectorT& vec, const IntT& index);
+#endif
 
 } // end namespace Antioch
 

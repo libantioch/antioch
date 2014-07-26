@@ -242,6 +242,20 @@ eval_index(const VectorT& vec, const std::valarray<IntT>& index)
   return returnval;
 }
 
+template <typename VectorDownType, typename UpperType>
+inline
+std::valarray<UpperType>
+        upgrade_type(const std::valarray<UpperType> & ex,
+                     const VectorDownType & vec, const std::valarray<unsigned int> & index)
+{
+  std::valarray<UpperType> upgraded;
+  std::size_t sz = index.size();
+  upgraded.resize(sz);
+  for (std::size_t i=0; i != sz; ++i)
+    upgraded[i] = vec[index[i]];
+  return upgraded;
+}
+
 } // end namespace Antioch
 
 

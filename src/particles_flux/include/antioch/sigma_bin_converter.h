@@ -26,6 +26,7 @@
 
 //Antioch
 #include "antioch/metaprogramming.h"
+#include "antioch/antioch_asserts.h"
 
 //C++
 #include <vector>
@@ -47,9 +48,12 @@ class SigmaBinConverter
 
      private:
 
-        template <typename VectorStateTypeIterator, typename UIntType, typename ScalarType>
-        UIntType vectorized_while(UIntType & ex, const ScalarType & lower_coeff_limit, const VectorStateTypeIterator &higher_state_limit,
-                                  VectorStateTypeIterator &state, unsigned int & istate) const;
+        template <typename StateType, typename VIntType>
+        StateType custom_bin_value(const StateType & custom_head, const StateType & custom_tail,
+                                   const VIntType  & index_heads, unsigned int custom_head_index,
+                                   const VectorCoeffType & list_ref_head_tails,
+                                   const VectorCoeffType & list_ref_values) const;
+
 };
 
 template <typename VectorCoeffType>
@@ -67,117 +71,136 @@ SigmaBinConverter<VectorCoeffType>::~SigmaBinConverter()
 }
 
 template <typename VectorCoeffType>
-template <typename VectorStateTypeIterator,typename UIntType, typename ScalarType>
-inline
-UIntType SigmaBinConverter<VectorCoeffType>::vectorized_while(UIntType & ex, const ScalarType & lower_coeff_limit, 
-                                                              const VectorStateTypeIterator &higher_state_limit, VectorStateTypeIterator &state, unsigned int & istate) const
-{
-  return Antioch::if_else
-        (*state >= lower_coeff_limit && state != higher_state_limit,
-          Antioch::constant_clone(ex,istate),
-           vectorized_while(ex,lower_coeff_limit,higher_state_limit,state++,istate++));
-}
-
-template <typename VectorCoeffType>
 template <typename VectorStateType>
 inline
 void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType &x_old, const VectorCoeffType &y_old,  
                                                           const VectorStateType &x_custom,    VectorStateType &y_custom) const
 {
-  
+// data consistency
+  antioch_assert_not_equal_to(x_custom.size(),0);
+  antioch_assert_not_equal_to(x_old.size(),0);
+  antioch_assert_equal_to(x_old.size(),y_old.size());
+
   y_custom.clear();
-  y_custom.resize(x_custom.size());
-  Antioch::set_zero(y_custom);
+  y_custom.resize(x_custom.size(),Antioch::zero_clone(x_custom[0]));
 
 // first meta-prog needed stuff
 
   typedef typename Antioch::value_type<VectorStateType>::type     StateType;
-  typedef typename Antioch::value_type<StateType>::type           ScalarType;
-  typedef typename Antioch::rebind<StateType, unsigned int>::type UIntType;
+  typedef typename Antioch::rebind<StateType, unsigned int>::type IntType;
+  typedef typename Antioch::rebind<VectorStateType,IntType>::type VIntType;
 
-  unsigned int k(0);
-  typename VectorStateType::const_iterator state_it = x_custom.begin();
+// find all the indexes of old that are just after all
+// the custom values
+// todo: horrible inefficient way to build the indexes container
+  IntType example;
+  Antioch::zero_clone(example,x_custom[0]);
+  VIntType ihead(x_custom.size(), example);
 
-  UIntType ilow = vectorized_while(ilow, (ScalarType)x_old.front(), x_custom.end(), state_it, k);
-
-
-
-for (unsigned int i=0; i != x_custom.size(); ++i)
+  for(unsigned int ic = 0; ic < x_custom.size(); ic++)
   {
-    UIntType ihigh = Antioch::foo(uint(-1));
-    for (unsigned int it = 1; it != x_old.size(); ++it);
-      {
-        ihigh = Antioch::if_else (Antioch::eval_index(x_custom,i) < x_old[it] && ihigh != uint(-1),
-                                  it,
-                                  ihigh);
-      }
-    ilow = ihigh - 1;
+    IntType ihigh = Antioch::constant_clone(example,x_old.size()-1);
+    for (int i = 0; i != x_old.size() - 1; ++i)
+    {
+      IntType icus  = Antioch::constant_clone(example,ic);
+      ihigh = Antioch::if_else (Antioch::eval_index(x_custom,icus) < x_old[i] && ihigh == Antioch::constant_clone(example,x_old.size()-1),
+                                Antioch::constant_clone(example,i),
+                                ihigh);
+    }
+    ihead[ic] = ihigh;
   }
 
-
-
-
-  y_custom.resize(x_custom.size(),1);
-
-  return;
-/*
-//  while( x_custom[ilow] < x_old.front() && ilow < x_custom.size())ilow++; //skipping too low bins
-
-  unsigned int j(1);
-  for(unsigned int i = ilow; i < x_custom.size() - 1; i++)//bin per bin, right stairs: y_old[i] from x_old[i] to x_old[i+1]
+  // bin
+  for(unsigned int ic = 0; ic < x_custom.size() - 1; ic++) // right stairs, last one = 0
   {
-//equality check here
-     while(x_old[j-1] == x_custom[i] && x_old[j] == x_custom[i+1])
-     {
-        y_custom[i] = y_old[j-1];
-        j++;
-        i++;
-        if(i == x_custom.size() - 1)return;
-     }
-
-     if(x_old.back() < x_custom[i])return;
-     while(x_old[j] <= x_custom[i]) //find lowest j / x_custom[i] < x_old[j]
-     {
-       j++;
-       if(!(j < x_old.size()))return;
-     }
-     ScalarType bin;
-     Antioch::set_zero(bin);
-
-// here we are: x_old[j-1] =< x_custom[i] < x_old[j] with j-1 >= 0
-     // targeted bin within stored bin: x_old[j-1] =< x_custom[i] < x_custom[i+1] =< x_old[j], take all of them
-     if(i < x_custom.size() - 2) //if allowed
-     {
-       while(x_custom[i+1] <= x_old[j])
-       {
-         y_custom[i] = y_old[j-1]; //rectangle from i to i+1, same height
-         i = i + 1;
-         if(i >= x_custom.size() - 2)break;
-       }
-     }
-
-     // x_old[j-1] < x_custom[i] < x_old[j] < x_custom[i+1], calculating rectangle from x_custom[i] to x_old[j], height is y_old[j-1]
-     bin = y_old[j-1] * (x_old[j] - x_custom[i]); 
-
-// finding lowest j / x_custom[i+1] < x_old[j], 
-// adding all the k cases x_old[j-1] < x_custom[i] < x_old[j] < x_old[j+1] < ... < x_old[j+k] < x_custom[i+1]
-     while(j < x_old.size() - 1)
-     {
-        j++;
-        if(x_old[j] > x_custom[i+1])break;
-        bin += y_old[j-1] * (x_old[j] - x_old[j-1]); // adding contained bins
-     }
-
-// now we have found k_max, we calculate the rectangle from x_old[j + k_max] to x_custom[i+1]
-     if(j < x_old.size() - 1)bin += y_old[j-2] * (x_custom[i+1] - x_old[j-1]); //if exist, above rectangle
-     y_custom[i] = bin/(x_custom[i+1] - x_custom[i]); //rectangle from i to i+1
-
+    y_custom[ic] = this->custom_bin_value<StateType,VIntType>(x_custom[ic], x_custom[ic + 1],ihead, ic, x_old, y_old);
   }
 
   return;
-*/
+
 }
 
+   template <typename VectorCoeffType>
+   template <typename StateType, typename VIntType>
+   inline
+   StateType SigmaBinConverter<VectorCoeffType>::custom_bin_value(const StateType & custom_head, const StateType & custom_tail,
+                                                                  const VIntType  & index_heads, unsigned int custom_head_index,
+                                                                  const VectorCoeffType & list_ref_head_tails,
+                                                                  const VectorCoeffType & list_ref_values) const
+   {
+
+       using std::min;
+       using Antioch::min;
+       using std::max;
+       using Antioch::max;
+
+       antioch_assert_equal_to(list_ref_head_tails.size(),list_ref_values.size());
+
+
+       StateType surf = Antioch::zero_clone(custom_head);
+
+        // this is an Antioch::rebind<StateType,unsigned int>::type
+       typename Antioch::value_type<VIntType>::type  start_head = index_heads[custom_head_index];
+                                                                                // the typename ... ::type> is an unsigned int
+       typename Antioch::value_type<VIntType>::type  value_head = Antioch::if_else<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type >::type>
+                                                                                (start_head > Antioch::zero_clone(start_head),
+                                                                                       start_head - Antioch::constant_clone(start_head,1),
+                                                                                       index_heads.back()); // right stairs, value never used
+
+      typename Antioch::value_type<VIntType>::type ref_end_tail = min<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type>::type>
+                        (start_head + Antioch::constant_clone(start_head,1),Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1));
+
+
+       StateType ref_head  = Antioch::upgrade_type(custom_head,list_ref_head_tails,start_head);
+       StateType ref_tail  = Antioch::upgrade_type(custom_head,list_ref_head_tails,ref_end_tail);
+       StateType ref_value = Antioch::upgrade_type(custom_head,list_ref_values,value_head);
+
+       //head from custom head to ref head
+       surf += Antioch::if_else(Antioch::constant_clone(custom_head,list_ref_head_tails.front()) > custom_head ||
+                                Antioch::constant_clone(custom_head,list_ref_head_tails.back()) < custom_head, // custom is outside ref
+                                Antioch::zero_clone(surf),
+                                Antioch::if_else<typename Antioch::value_type<StateType>::type>(ref_head < custom_tail,   // custom is within ref bin
+                                                 ref_value * (ref_head - custom_head),
+                                                 ref_value * (custom_tail - custom_head))
+                       );
+                                                
+       //body from ref head to ref last tail
+       while(Antioch::disjunction(ref_tail < custom_tail &&                     // ref is below tail (<=> start_head < index_heads[custom_head_index + 1])
+                                  start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1))) // ref is still defined
+       {
+           ref_end_tail = min<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type>::type>
+                                (start_head + Antioch::constant_clone(start_head,1),Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1));
+
+           ref_head  = Antioch::upgrade_type(custom_head,list_ref_head_tails,start_head);
+           ref_tail  = Antioch::upgrade_type(custom_head,list_ref_head_tails,ref_end_tail);
+           ref_value = Antioch::upgrade_type(custom_head,list_ref_values,start_head);
+
+           surf += Antioch::if_else<typename Antioch::value_type<StateType>::type>(ref_tail < custom_tail && start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size()),
+                                        (ref_tail - ref_head) * ref_value,
+                                        Antioch::zero_clone(surf));
+
+           start_head += Antioch::if_else(ref_tail < custom_tail && start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size()),
+                                            Antioch::constant_clone(start_head,1),
+                                            Antioch::zero_clone(start_head));
+       }
+
+      ref_end_tail = min<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type>::type>
+                        (start_head + Antioch::constant_clone(start_head,1),Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1));
+                                                                                 
+       ref_head  = Antioch::upgrade_type(custom_head,list_ref_head_tails,start_head);
+       ref_tail  = Antioch::upgrade_type(custom_head,list_ref_head_tails,ref_end_tail);
+       ref_value = Antioch::upgrade_type(custom_head,list_ref_values,start_head);
+
+       //tail from ref_head to custom_tail
+       surf += Antioch::if_else<typename Antioch::value_type<StateType>::type>(
+                        Antioch::constant_clone(custom_tail,list_ref_head_tails.back()) < custom_tail || // custom is outside ref
+                        Antioch::constant_clone(custom_tail,list_ref_head_tails.front()) > custom_tail || // custom is outside ref
+                                ref_head > custom_tail,   // custom is fully inside ref bin (already taken into account in head)
+                                   Antioch::zero_clone(surf),
+                                   ref_value * (custom_tail - ref_head));
+
+      return surf / (custom_tail - custom_head);
+   }
 }
 
 #endif

@@ -143,6 +143,47 @@ eval_index(const VectorT& vec, const IntT& index)
   return vec[index];
 }
 
+template <typename VectorDownType, typename UpperType>
+inline
+UpperType upgrade_type(const UpperType & ex, const VectorDownType & vec, unsigned int index)
+{
+  return vec[index];
+}
+
+inline
+bool conjunction(const bool & vec)
+{
+  return vec;
+}
+
+template <typename T>
+inline
+bool conjunction(const T & vec)
+{
+  for(unsigned int i = 0; i < vec.size(); i++)
+  {
+    if(!vec[i])return false;
+  }
+  return true;
+}
+
+inline
+bool disjunction(const bool & vec)
+{
+  return vec;
+}
+
+template <typename T>
+inline
+bool disjunction(const T & vec)
+{
+  for(unsigned int i = 0; i < vec.size(); i++)
+  {
+    if(vec[i])return true;
+  }
+  return false;
+}
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_H
