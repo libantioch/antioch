@@ -98,6 +98,10 @@ template <typename T>
 inline
 void set_zero(std::vector<T>& a);
 
+template <typename VectorDownType, typename UpType, typename IntType>
+inline
+std::vector<typename Antioch::value_type<UpType>::type> upgrade_type(const VectorDownType & vec, const std::vector<typename Antioch::value_type<IntType>::type> & index);
+
 } // end namespace Antioch
 
 

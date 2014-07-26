@@ -207,6 +207,25 @@ namespace Antioch
   typename value_type<VectorT>::type
   eval_index(const VectorT& vec, const IntT& index);
 
+  // A function to `upgrade' a scalar.
+  // 
+  // The first argument is a vector of scalar, the return value
+  // is either a scalar or a vectorized numeric type, index being
+  // the similarly scalar or vectorized integer.
+  template <typename VectorDownType, typename UpperType>
+  inline
+  UpperType upgrade_type(const UpperType & ex, const VectorDownType & vec, const unsigned int index);
+
+  // A function to obtain the conjunction of boolean
+  template <typename T>
+  inline
+  bool conjunction(const T & vec);
+
+  // A function to obtain the disjunction of boolean
+  template <typename T>
+  inline
+  bool disjunction(const T & vec);
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_DECL_H
