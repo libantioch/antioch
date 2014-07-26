@@ -177,7 +177,7 @@ namespace Antioch{
   inline
   void PhotochemicalRate<CoeffType,VectorCoeffType>::rate_and_derivative(const ParticleFlux<VectorStateType> &pf, StateType& rate, StateType& drate_dT) const
   {
-    Antioch::constant_clone(rate,this->rate(pf));
+    Antioch::init_clone(rate,this->rate(pf));
     Antioch::set_zero(drate_dT);
     return;
   }
