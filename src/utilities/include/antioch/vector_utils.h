@@ -148,16 +148,15 @@ void set_zero(std::vector<T>& a)
     std::fill(a.begin(), a.end(), zero_clone(a[0]));
 }
 
-template <typename VectorDownType, typename UpType, typename IntType>
+template <typename T, typename VectorScalar>
 inline
-std::vector<typename Antioch::value_type<UpType>::type> upgrade_type(const VectorDownType & vec, const std::vector<typename Antioch::value_type<IntType>::type> & index)
+std::vector<T> custom_clone(const std::vector<T> & /*vec*/, const VectorScalar & vecsrc, std::vector<unsigned int> & indexes)
 {
-  UpType upgraded;
-  std::size_t sz = index.size();
-  upgraded.resize(sz);
-  for (std::size_t i=0; i != sz; ++i)
-    upgraded[i] = vec[index[i]];
-  return upgraded;
+  std::vector<T> returnval;
+  returnval.resize(indexes.size());
+  for (std::size_t i=0; i != indexes.size(); ++i)
+    returnval[i] = vecsrc[indexes[i]];
+  return returnval;
 }
 
 } // end namespace Antioch

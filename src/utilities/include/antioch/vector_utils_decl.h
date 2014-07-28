@@ -98,9 +98,9 @@ template <typename T>
 inline
 void set_zero(std::vector<T>& a);
 
-template <typename VectorDownType, typename UpType, typename IntType>
+template <typename T, typename VectorScalar>
 inline
-std::vector<typename Antioch::value_type<UpType>::type> upgrade_type(const VectorDownType & vec, const std::vector<typename Antioch::value_type<IntType>::type> & index);
+std::vector<T> custom_clone(const std::vector<T> & vec, const VectorScalar & vecsrc, const std::vector<unsigned int> & indexes);
 
 } // end namespace Antioch
 

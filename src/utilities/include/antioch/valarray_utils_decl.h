@@ -151,6 +151,10 @@ inline
 void
 init_clone(std::valarray<T>& output, const std::valarray<T>& example);
 
+template <typename T, typename VectorScalar>
+inline
+std::valarray<T> custom_clone(const std::valarray<T>& example, const VectorScalar& values, const std::valarray<unsigned int> & indexes);
+
 template <typename T>
 inline
 std::valarray<T>
@@ -162,12 +166,6 @@ template <typename VectorT, typename IntT>
 inline
 typename value_type<VectorT>::type
 eval_index(const VectorT& vec, const std::valarray<IntT>& index);
-
-template <typename VectorDownType, typename UpperType>
-inline
-std::valarray<UpperType> 
-        upgrade_type(const std::valarray<UpperType> & ex,
-                     const VectorDownType & vec, const std::valarray<unsigned int> & index);
 
 } // end namespace Antioch
 

@@ -209,6 +209,19 @@ init_clone(std::valarray<T>& output, const std::valarray<T>& example)
     init_clone(output[i], example[i]);
 }
 
+template <typename T, typename VectorScalar>
+inline
+std::valarray<T> custom_clone(const std::valarray<T>& /*example*/, const VectorScalar& values, const std::valarray<unsigned int> & indexes)
+{
+  std::valarray<T> returnval;
+  returnval.resize(indexes.size());
+  for(std::size_t i = 0; i < indexes.size(); i++)
+  {
+      returnval[i] = values[indexes[i]];
+  }
+  return returnval;
+}
+
 
 template <typename T>
 inline
@@ -240,20 +253,6 @@ eval_index(const VectorT& vec, const std::valarray<IntT>& index)
   for (std::size_t i=0; i != sz; ++i)
     returnval[i] = vec[index[i]][i];
   return returnval;
-}
-
-template <typename VectorDownType, typename UpperType>
-inline
-std::valarray<UpperType>
-        upgrade_type(const std::valarray<UpperType> & ex,
-                     const VectorDownType & vec, const std::valarray<unsigned int> & index)
-{
-  std::valarray<UpperType> upgraded;
-  std::size_t sz = index.size();
-  upgraded.resize(sz);
-  for (std::size_t i=0; i != sz; ++i)
-    upgraded[i] = vec[index[i]];
-  return upgraded;
 }
 
 } // end namespace Antioch
