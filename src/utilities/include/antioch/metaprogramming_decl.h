@@ -156,6 +156,12 @@ namespace Antioch
   inline
   T constant_clone(const T& example, const Scalar& value);
 
+  // A function for initializing vectorized numeric types to
+  // custom constants stored in vector
+  template <typename T, typename UIntType, typename VectorScalar>
+  inline
+  T custom_clone(const T& example, const VectorScalar& values, const UIntType & indexes);
+
   // A function for filling already-initialized vectorized numeric
   // types with a constant.
   template <typename T, typename Scalar>
@@ -206,15 +212,6 @@ namespace Antioch
   inline
   typename value_type<VectorT>::type
   eval_index(const VectorT& vec, const IntT& index);
-
-  // A function to `upgrade' a scalar.
-  // 
-  // The first argument is a vector of scalar, the return value
-  // is either a scalar or a vectorized numeric type, index being
-  // the similarly scalar or vectorized integer.
-  template <typename VectorDownType, typename UpperType>
-  inline
-  UpperType upgrade_type(const UpperType & ex, const VectorDownType & vec, const unsigned int index);
 
   // A function to obtain the conjunction of boolean
   template <typename T>

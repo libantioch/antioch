@@ -135,17 +135,14 @@ template <typename T, typename Scalar>
 inline
 void constant_fill(T& output, const Scalar& value) { output = value; }
 
+template <typename T, typename VectorScalar>
+inline
+T custom_clone(const T& /*example*/, const VectorScalar& values, const unsigned int & indexes) {return values[indexes];}
+
 template <typename VectorT, typename IntT>
 inline
 typename value_type<VectorT>::type
 eval_index(const VectorT& vec, const IntT& index)
-{
-  return vec[index];
-}
-
-template <typename VectorDownType, typename UpperType>
-inline
-UpperType upgrade_type(const UpperType & ex, const VectorDownType & vec, unsigned int index)
 {
   return vec[index];
 }
