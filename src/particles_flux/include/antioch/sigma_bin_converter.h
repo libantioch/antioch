@@ -151,11 +151,13 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
                         (start_head + Antioch::constant_clone(start_head,1),Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1));
 
 
+        // if StateType is vectorized, it takes care of it here
        StateType ref_head  = Antioch::upgrade_type(custom_head,list_ref_head_tails,start_head);
        StateType ref_tail  = Antioch::upgrade_type(custom_head,list_ref_head_tails,ref_end_tail);
        StateType ref_value = Antioch::upgrade_type(custom_head,list_ref_values,value_head);
 
        //head from custom head to ref head
+       // super not efficient, everything is calculated every time...
        surf += Antioch::if_else(Antioch::constant_clone(custom_head,list_ref_head_tails.front()) > custom_head ||
                                 Antioch::constant_clone(custom_head,list_ref_head_tails.back()) < custom_head, // custom is outside ref
                                 Antioch::zero_clone(surf),
