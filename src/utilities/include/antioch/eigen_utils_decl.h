@@ -114,7 +114,6 @@ a.array().min(b.array()));
 
 namespace Antioch
 {
-
 template <
   template <typename, int, int, int, int, int> class _Matrix,
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols,
@@ -210,6 +209,15 @@ inline
 void
 set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
 
+/*
+template <template <typename, int, int, int, int, int> class _Matrix,
+          typename T, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols,
+  typename VectorScalar
+>
+inline
+_Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> 
+  custom_clone(const _Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & example, const VectorScalar& values, const _Matrix<unsigned int,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & indexes);
+*/
 
 template <typename Condition, typename T1, typename T2>
 inline
@@ -223,14 +231,17 @@ const Condition& condition,
 const T1& if_true,
 const T2& if_false);
 
-template <typename VectorT, typename IntT>
+
+template <typename VectorT, 
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _UIntT, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
 inline
 typename enable_if_c<
-  is_eigen<typename value_type<VectorT>::type>::value &&
-  is_eigen<IntT>::value,
+  is_eigen<typename value_type<VectorT>::type>::value,
   typename value_type<VectorT>::type
 >::type
-eval_index(const VectorT& vec, const IntT& index);
+eval_index(const VectorT& vec, const _Matrix<_UIntT, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& index);
 
 } // end namespace Antioch
 

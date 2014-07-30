@@ -156,11 +156,17 @@ namespace Antioch
   inline
   T constant_clone(const T& example, const Scalar& value);
 
+  // A function for initializing non vectorized numeric types to
+  // custom constants stored in vector
+  template <typename T, typename VectorScalar>
+  inline
+  T custom_clone(const T& example, const VectorScalar& values, unsigned int indexes);
+
   // A function for initializing vectorized numeric types to
   // custom constants stored in vector
-  template <typename T, typename UIntType, typename VectorScalar>
+  template <typename T, typename VectorScalar>
   inline
-  T custom_clone(const T& example, const VectorScalar& values, const UIntType & indexes);
+  T custom_clone(const T& example, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes);
 
   // A function for filling already-initialized vectorized numeric
   // types with a constant.
@@ -208,10 +214,10 @@ namespace Antioch
   // or vectorized integer type with values valid as indices to the
   // first argument.  The output will be a similarly scalar or
   // vectorized numeric type.
-  template <typename VectorT, typename IntT>
+  template <typename VectorT>
   inline
   typename value_type<VectorT>::type
-  eval_index(const VectorT& vec, const IntT& index);
+  eval_index(const VectorT& vec, unsigned int index);
 
   // A function to obtain the conjunction of boolean
   template <typename T>

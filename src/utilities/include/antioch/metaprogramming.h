@@ -137,12 +137,26 @@ void constant_fill(T& output, const Scalar& value) { output = value; }
 
 template <typename T, typename VectorScalar>
 inline
-T custom_clone(const T& /*example*/, const VectorScalar& values, const unsigned int & indexes) {return values[indexes];}
+T custom_clone(const T& /*example*/, const VectorScalar& values, unsigned int indexes) {return values[indexes];}
 
-template <typename VectorT, typename IntT>
+template <typename T, typename VectorScalar>
+inline
+T custom_clone(const T& /*example*/, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes)
+{
+  T returnval(indexes.size()); //bof bof - metaphysicl has size within type, this suppose that size_type<indexes>::type can be changed in value_type<T>::type
+  
+  for(std::size_t i = 0; i < indexes.size(); i++)
+  {
+      returnval[i] = values[indexes[i]];
+  }
+  return returnval;
+}
+
+
+template <typename VectorT>
 inline
 typename value_type<VectorT>::type
-eval_index(const VectorT& vec, const IntT& index)
+eval_index(const VectorT& vec, unsigned int index)
 {
   return vec[index];
 }
