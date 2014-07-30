@@ -81,27 +81,32 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
   antioch_assert_not_equal_to(x_old.size(),0);
   antioch_assert_equal_to(x_old.size(),y_old.size());
 
-  y_custom.clear();
-  y_custom.resize(x_custom.size(),Antioch::zero_clone(x_custom[0]));
+//  y_custom.clear();
+  y_custom.resize(x_custom.size());
 
 // first meta-prog needed stuff
   typedef typename Antioch::rebind<typename Antioch::value_type<VectorStateType>::type, 
-                                              unsigned int>::type IntType;
-  typedef typename Antioch::rebind<VectorStateType,IntType>::type VUIntType;
+                                               unsigned int>::type UIntType;
+  typedef typename Antioch::rebind<VectorStateType,UIntType>::type VUIntType;
 
 // find all the indexes of old that are just after all
 // the custom values
 // todo: horrible inefficient way to build the indexes container
-  IntType example;
+  UIntType example;
   Antioch::zero_clone(example,x_custom[0]);
-  VUIntType ihead(x_custom.size(), example);
+  VUIntType ihead(x_custom.size());
 
   for(unsigned int ic = 0; ic < x_custom.size(); ic++)
   {
-    IntType ihigh = Antioch::constant_clone(example,x_old.size()-1);
-    for (int i = 0; i != x_old.size() - 1; ++i)
+    // if vectorized, get the correct size here
+    y_custom[ic] = (Antioch::zero_clone(x_custom[0]));
+    ihead[ic]    = example;
+
+
+    UIntType ihigh = Antioch::constant_clone(example,x_old.size()-1);
+    for (unsigned int i = 0; i != x_old.size() - 1; ++i)
     {
-      IntType icus  = Antioch::constant_clone(example,ic);
+      UIntType icus  = Antioch::constant_clone(example,ic);
       ihigh = Antioch::if_else (Antioch::eval_index(x_custom,icus) < x_old[i] && ihigh == Antioch::constant_clone(example,x_old.size()-1),
                                 Antioch::constant_clone(example,i),
                                 ihigh);
@@ -143,7 +148,7 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 
        UIntType value_head = Antioch::if_else(start_head > (typename Antioch::value_type<typename Antioch::value_type<VUIntType>::type>::type)0,
                                                (UIntType)(start_head - Antioch::constant_clone(start_head,1)),
-                                               (UIntType)(index_heads.back())); // right stairs, value never used
+                                               (UIntType)(index_heads[index_heads.size() - 1])); // right stairs, value never used
 
        UIntType ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) ,
                                    (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
@@ -155,8 +160,8 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 
        //head from custom head to ref head
        // super not efficient, everything is calculated every time...
-       surf += Antioch::if_else(Antioch::constant_clone(custom_head,list_ref_head_tails.front()) > custom_head ||
-                                Antioch::constant_clone(custom_head,list_ref_head_tails.back()) < custom_head, // custom is outside ref
+       surf += Antioch::if_else(Antioch::constant_clone(custom_head,list_ref_head_tails[0]) > custom_head ||
+                                Antioch::constant_clone(custom_head,list_ref_head_tails[list_ref_head_tails.size() - 1]) < custom_head, // custom is outside ref
                                 Antioch::zero_clone(surf),
                                 (StateType)
                                         Antioch::if_else(ref_head < custom_tail,   // custom is within ref bin
@@ -193,7 +198,7 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 
        //tail from ref_head to custom_tail
       surf += Antioch::if_else(
-                        Antioch::constant_clone(custom_tail,list_ref_head_tails.back()) < custom_tail || // custom is outside ref
+                        Antioch::constant_clone(custom_tail,list_ref_head_tails[list_ref_head_tails.size() - 1]) < custom_tail || // custom is outside ref
                         Antioch::constant_clone(custom_tail,list_ref_head_tails.front()) > custom_tail || // custom is outside ref
                                 ref_head > custom_tail,   // custom is fully inside ref bin (already taken into account in head)
                                    Antioch::zero_clone(surf),
