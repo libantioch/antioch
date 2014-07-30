@@ -48,9 +48,9 @@ class SigmaBinConverter
 
      private:
 
-        template <typename StateType, typename VIntType>
+        template <typename StateType, typename VUIntType>
         StateType custom_bin_value(const StateType & custom_head, const StateType & custom_tail,
-                                   const VIntType  & index_heads, unsigned int custom_head_index,
+                                   const VUIntType  & index_heads, unsigned int custom_head_index,
                                    const VectorCoeffType & list_ref_head_tails,
                                    const VectorCoeffType & list_ref_values) const;
 
@@ -85,17 +85,16 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
   y_custom.resize(x_custom.size(),Antioch::zero_clone(x_custom[0]));
 
 // first meta-prog needed stuff
-
-  typedef typename Antioch::value_type<VectorStateType>::type     StateType;
-  typedef typename Antioch::rebind<StateType, unsigned int>::type IntType;
-  typedef typename Antioch::rebind<VectorStateType,IntType>::type VIntType;
+  typedef typename Antioch::rebind<typename Antioch::value_type<VectorStateType>::type, 
+                                              unsigned int>::type IntType;
+  typedef typename Antioch::rebind<VectorStateType,IntType>::type VUIntType;
 
 // find all the indexes of old that are just after all
 // the custom values
 // todo: horrible inefficient way to build the indexes container
   IntType example;
   Antioch::zero_clone(example,x_custom[0]);
-  VIntType ihead(x_custom.size(), example);
+  VUIntType ihead(x_custom.size(), example);
 
   for(unsigned int ic = 0; ic < x_custom.size(); ic++)
   {
@@ -113,7 +112,7 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
   // bin
   for(unsigned int ic = 0; ic < x_custom.size() - 1; ic++) // right stairs, last one = 0
   {
-    y_custom[ic] = this->custom_bin_value<StateType,VIntType>(x_custom[ic], x_custom[ic + 1],ihead, ic, x_old, y_old);
+    y_custom[ic] = this->custom_bin_value(x_custom[ic], x_custom[ic + 1],ihead, ic, x_old, y_old);
   }
 
   return;
@@ -121,10 +120,10 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 }
 
    template <typename VectorCoeffType>
-   template <typename StateType, typename VIntType>
+   template <typename StateType, typename VUIntType>
    inline
    StateType SigmaBinConverter<VectorCoeffType>::custom_bin_value(const StateType & custom_head, const StateType & custom_tail,
-                                                                  const VIntType  & index_heads, unsigned int custom_head_index,
+                                                                  const VUIntType  & index_heads, unsigned int custom_head_index,
                                                                   const VectorCoeffType & list_ref_head_tails,
                                                                   const VectorCoeffType & list_ref_values) const
    {
@@ -136,20 +135,18 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 
        antioch_assert_equal_to(list_ref_head_tails.size(),list_ref_values.size());
 
-
        StateType surf = Antioch::zero_clone(custom_head);
 
-        // this is an Antioch::rebind<StateType,unsigned int>::type
-       typename Antioch::value_type<VIntType>::type  start_head = index_heads[custom_head_index];
-                                                                                // the typename ... ::type> is an unsigned int
-       typename Antioch::value_type<VIntType>::type  value_head = Antioch::if_else<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type >::type>
-                                                                                (start_head > Antioch::zero_clone(start_head),
-                                                                                       start_head - Antioch::constant_clone(start_head,1),
-                                                                                       index_heads.back()); // right stairs, value never used
+       typedef typename Antioch::value_type<VUIntType>::type UIntType;
 
-      typename Antioch::value_type<VIntType>::type ref_end_tail = min<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type>::type>
-                        (start_head + Antioch::constant_clone(start_head,1),Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1));
+       UIntType start_head = index_heads[custom_head_index];
 
+       UIntType value_head = Antioch::if_else(start_head > (typename Antioch::value_type<typename Antioch::value_type<VUIntType>::type>::type)0,
+                                               (UIntType)(start_head - Antioch::constant_clone(start_head,1)),
+                                               (UIntType)(index_heads.back())); // right stairs, value never used
+
+       UIntType ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) ,
+                                   (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
 
         // if StateType is vectorized, it takes care of it here
        StateType ref_head  = Antioch::custom_clone(custom_head,list_ref_head_tails,start_head);
@@ -161,24 +158,25 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
        surf += Antioch::if_else(Antioch::constant_clone(custom_head,list_ref_head_tails.front()) > custom_head ||
                                 Antioch::constant_clone(custom_head,list_ref_head_tails.back()) < custom_head, // custom is outside ref
                                 Antioch::zero_clone(surf),
-                                Antioch::if_else<typename Antioch::value_type<StateType>::type>(ref_head < custom_tail,   // custom is within ref bin
-                                                 ref_value * (ref_head - custom_head),
-                                                 ref_value * (custom_tail - custom_head))
+                                (StateType)
+                                        Antioch::if_else(ref_head < custom_tail,   // custom is within ref bin
+                                                         (StateType)(ref_value * (ref_head - custom_head)),
+                                                         (StateType)(ref_value * (custom_tail - custom_head)))
                        );
                                                 
        //body from ref head to ref last tail
        while(Antioch::disjunction(ref_tail < custom_tail &&                     // ref is below tail (<=> start_head < index_heads[custom_head_index + 1])
                                   start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1))) // ref is still defined
        {
-           ref_end_tail = min<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type>::type>
-                                (start_head + Antioch::constant_clone(start_head,1),Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1));
+           ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) ,
+                              (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
 
            ref_head  = Antioch::custom_clone(custom_head,list_ref_head_tails,start_head);
            ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
            ref_value = Antioch::custom_clone(custom_head,list_ref_values,start_head);
 
-           surf += Antioch::if_else<typename Antioch::value_type<StateType>::type>(ref_tail < custom_tail && start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size()),
-                                        (ref_tail - ref_head) * ref_value,
+           surf += Antioch::if_else(ref_tail < custom_tail && start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size()),
+                                        (StateType)((ref_tail - ref_head) * ref_value),
                                         Antioch::zero_clone(surf));
 
            start_head += Antioch::if_else(ref_tail < custom_tail && start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size()),
@@ -186,20 +184,20 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
                                             Antioch::zero_clone(start_head));
        }
 
-      ref_end_tail = min<typename Antioch::value_type<typename Antioch::value_type<VIntType>::type>::type>
-                        (start_head + Antioch::constant_clone(start_head,1),Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1));
+      ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) , 
+                         (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
                                                                                  
-       ref_head  = Antioch::custom_clone(custom_head,list_ref_head_tails,start_head);
-       ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
-       ref_value = Antioch::custom_clone(custom_head,list_ref_values,start_head);
+      ref_head  = Antioch::custom_clone(custom_head,list_ref_head_tails,start_head);
+      ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
+      ref_value = Antioch::custom_clone(custom_head,list_ref_values,start_head);
 
        //tail from ref_head to custom_tail
-       surf += Antioch::if_else<typename Antioch::value_type<StateType>::type>(
+      surf += Antioch::if_else(
                         Antioch::constant_clone(custom_tail,list_ref_head_tails.back()) < custom_tail || // custom is outside ref
                         Antioch::constant_clone(custom_tail,list_ref_head_tails.front()) > custom_tail || // custom is outside ref
                                 ref_head > custom_tail,   // custom is fully inside ref bin (already taken into account in head)
                                    Antioch::zero_clone(surf),
-                                   ref_value * (custom_tail - ref_head));
+                                   (StateType)(ref_value * (custom_tail - ref_head)));
 
       return surf / (custom_tail - custom_head);
    }
