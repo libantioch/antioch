@@ -209,9 +209,10 @@ init_clone(std::valarray<T>& output, const std::valarray<T>& example)
     init_clone(output[i], example[i]);
 }
 
+/*
 template <typename T, typename VectorScalar>
 inline
-std::valarray<T> custom_clone(const std::valarray<T>& /*example*/, const VectorScalar& values, const std::valarray<unsigned int> & indexes)
+std::valarray<T> custom_clone(const std::valarray<T>& example, const VectorScalar& values, const std::valarray<unsigned int> & indexes)
 {
   std::valarray<T> returnval;
   returnval.resize(indexes.size());
@@ -221,7 +222,7 @@ std::valarray<T> custom_clone(const std::valarray<T>& /*example*/, const VectorS
   }
   return returnval;
 }
-
+*/
 
 template <typename T>
 inline
@@ -242,10 +243,14 @@ if_else(const std::valarray<bool>& condition,
   return returnval;
 }
 
-template <typename VectorT, typename IntT>
+
+template <typename VectorT>
 inline
-typename value_type<VectorT>::type
-eval_index(const VectorT& vec, const std::valarray<IntT>& index)
+typename Antioch::enable_if_c<
+        Antioch::is_valarray<typename value_type<VectorT>::type>::value,
+        typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const std::valarray<unsigned int>& index)
 {
   typename value_type<VectorT>::type returnval;
   std::size_t sz = index.size();
@@ -254,6 +259,7 @@ eval_index(const VectorT& vec, const std::valarray<IntT>& index)
     returnval[i] = vec[index[i]][i];
   return returnval;
 }
+
 
 } // end namespace Antioch
 
