@@ -203,7 +203,6 @@ if_else(const vex::vector_expression<BoolInput> &condition,
   return boost::proto::if_else(condition, if_true, if_false);
 }
 
-
 #ifdef ANTIOCH_HAVE_VEXCL
 template <typename VectorT, typename IntT>
 inline

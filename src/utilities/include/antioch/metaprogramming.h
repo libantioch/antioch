@@ -167,6 +167,10 @@ bool conjunction(const bool & vec)
   return vec;
 }
 
+// FIXME - vexcl needs better 
+// test: something in the flavor of
+// vex::vector_expression<Condition>
+
 template <typename T>
 inline
 bool conjunction(const T & vec)

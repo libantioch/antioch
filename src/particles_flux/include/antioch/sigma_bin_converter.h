@@ -144,6 +144,8 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 
        typedef typename Antioch::value_type<VUIntType>::type UIntType;
 
+       typedef typename Antioch::rebind<UIntType,bool>::type BoolType;
+
        UIntType start_head = index_heads[custom_head_index];
 
        UIntType value_head = Antioch::if_else(start_head > (typename Antioch::value_type<typename Antioch::value_type<VUIntType>::type>::type)0,
@@ -170,8 +172,9 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
                        );
                                                 
        //body from ref head to ref last tail
-       while(Antioch::disjunction(ref_tail < custom_tail &&                     // ref is below tail (<=> start_head < index_heads[custom_head_index + 1])
-                                  start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1))) // ref is still defined
+       // FIXME - remove the BoolType once vexcl disjunction / cunjunction are fixed
+       while(Antioch::disjunction((BoolType)(ref_tail < custom_tail &&                     // ref is below tail (<=> start_head < index_heads[custom_head_index + 1])
+                                   start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)))) // ref is still defined
        {
            ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) ,
                               (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
