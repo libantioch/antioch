@@ -97,8 +97,8 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 // within eigen vector (VIntType = Eigen<vexcl<unsigned int> >):
 //   Eigen => can't initialize in constructor VUIntType
 //   vexcl => fixed size accessible only within constructor
-  VUIntType ihead; 
-  ihead.resize(x_custom.size(),example);
+  VUIntType ihead(x_custom.size()); 
+  Antioch::init_constant(ihead,example);
 
   UIntType unfound = Antioch::constant_clone(example,x_old.size()-1);
 
@@ -116,10 +116,8 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
       if(Antioch::conjunction(ihigh != unfound))break; // once we found everyone, don't waste time
     }
     ihead[ic] = ihigh;
-std::cout << ihigh << std::endl;
   }
 
-std::cout << "\nout of eval_index\n" << ihead << std::endl;
   // bin
   for(unsigned int ic = 0; ic < x_custom.size() - 1; ic++) // right stairs, last one = 0
   {
