@@ -119,7 +119,7 @@ typename Antioch::value_type<VectorScalar>::type k_photo(const VectorScalar &sol
                                                          const VectorScalar &sigma_lambda, const VectorScalar &sigma_sigma)
 {
   Antioch::SigmaBinConverter<VectorScalar> bin;
-  VectorScalar sigma_rescaled;
+  VectorScalar sigma_rescaled(solar_lambda.size());
   bin.y_on_custom_grid(sigma_lambda,sigma_sigma,solar_lambda,sigma_rescaled);
 
   typename Antioch::value_type<VectorScalar>::type _k(0.L);

@@ -142,11 +142,12 @@ namespace Antioch{
      const VectorStateType &hv_flux =  pf.flux();
      const VectorStateType &hv_lambda = pf.abscissa();
 
-     VectorStateType cross_section_on_flux_grid;
-
 //cross-section and lambda exists
      antioch_assert_greater(_cross_section.size(),0);
      antioch_assert_greater(_lambda_grid.size(),0);
+
+//needed grid to the right size
+     VectorStateType cross_section_on_flux_grid(hv_lambda.size());
 
 //put them on the right grid
       _converter.y_on_custom_grid(_lambda_grid,_cross_section,hv_lambda,cross_section_on_flux_grid);
