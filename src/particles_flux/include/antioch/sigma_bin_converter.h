@@ -50,7 +50,7 @@ class SigmaBinConverter
 
         template <typename StateType, typename VUIntType>
         StateType custom_bin_value(const StateType & custom_head, const StateType & custom_tail,
-                                   const VUIntType  & index_heads, unsigned int custom_head_index,
+                                   const VUIntType & index_heads, unsigned int custom_head_index,
                                    const VectorCoeffType & list_ref_head_tails,
                                    const VectorCoeffType & list_ref_values) const;
 
@@ -78,11 +78,10 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 {
 // data consistency
   antioch_assert_not_equal_to(x_custom.size(),0);
+  antioch_assert_equal_to(y_custom.size(),x_custom.size());
   antioch_assert_not_equal_to(x_old.size(),0);
   antioch_assert_equal_to(x_old.size(),y_old.size());
 
-//  y_custom.clear();
-  y_custom.resize(x_custom.size());
 
 // first meta-prog needed stuff
   typedef typename Antioch::rebind<typename Antioch::value_type<VectorStateType>::type, 
@@ -91,29 +90,36 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 
 // find all the indexes of old that are just after all
 // the custom values
-// todo: horrible inefficient way to build the indexes container
+// todo: better way to build the indexes container?
   UIntType example;
   Antioch::zero_clone(example,x_custom[0]);
-  VUIntType ihead(x_custom.size());
+// two levels needed to obtain correct fixed-sized vexcl vector
+// within eigen vector (VIntType = Eigen<vexcl<unsigned int> >):
+//   Eigen => can't initialize in constructor VUIntType
+//   vexcl => fixed size accessible only within constructor
+  VUIntType ihead; 
+  ihead.resize(x_custom.size(),example);
+
+  UIntType unfound = Antioch::constant_clone(example,x_old.size()-1);
 
   for(unsigned int ic = 0; ic < x_custom.size(); ic++)
   {
-    // if vectorized, get the correct size here
-    y_custom[ic] = (Antioch::zero_clone(x_custom[0]));
-    ihead[ic]    = example;
-
-
     UIntType ihigh = Antioch::constant_clone(example,x_old.size()-1);
     for (unsigned int i = 0; i != x_old.size() - 1; ++i)
     {
       UIntType icus  = Antioch::constant_clone(example,ic);
-      ihigh = Antioch::if_else (Antioch::eval_index(x_custom,icus) < x_old[i] && ihigh == Antioch::constant_clone(example,x_old.size()-1),
+
+      ihigh = Antioch::if_else (Antioch::eval_index(x_custom,icus) < x_old[i] && ihigh == unfound,
                                 Antioch::constant_clone(example,i),
                                 ihigh);
+
+      if(Antioch::conjunction(ihigh != unfound))break; // once we found everyone, don't waste time
     }
     ihead[ic] = ihigh;
+std::cout << ihigh << std::endl;
   }
 
+std::cout << "\nout of eval_index\n" << ihead << std::endl;
   // bin
   for(unsigned int ic = 0; ic < x_custom.size() - 1; ic++) // right stairs, last one = 0
   {
@@ -144,8 +150,6 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
 
        typedef typename Antioch::value_type<VUIntType>::type UIntType;
 
-       typedef typename Antioch::rebind<UIntType,bool>::type BoolType;
-
        UIntType start_head = index_heads[custom_head_index];
 
        UIntType value_head = Antioch::if_else(start_head > (typename Antioch::value_type<typename Antioch::value_type<VUIntType>::type>::type)0,
@@ -170,7 +174,9 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
                                                          (StateType)(ref_value * (ref_head - custom_head)),
                                                          (StateType)(ref_value * (custom_tail - custom_head)))
                        );
-                                                
+
+       typedef typename Antioch::rebind<StateType, bool>::type BoolType;
+
        //body from ref head to ref last tail
        // FIXME - remove the BoolType once vexcl disjunction / cunjunction are fixed
        while(Antioch::disjunction((BoolType)(ref_tail < custom_tail &&                     // ref is below tail (<=> start_head < index_heads[custom_head_index + 1])
