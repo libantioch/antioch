@@ -180,16 +180,18 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   int return_flag = 0;
 
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
+
   // 2 * 2  cases:
-  //   - custom inside ref
-  //   - ref inside custom
-  //   - custom beyond only min ref
-  //   - custom beyond only max ref
+  //   - custom inside ref, ref inside custom
+  //   - custom beyond only min ref, custom beyond only max ref
   for(unsigned int i = 0; i < 2; i++)
   {
     std::vector<PairScalars> bin_custom_x, exact_sol_y;
-    std::vector<PairScalars> bin_custom_y;
     make_custom(i,example,bin_custom_x,exact_sol_y);
+    std::vector<PairScalars> bin_custom_y(bin_custom_x.size(),Antioch::zero_clone(bin_custom_x[0]));
 
     bin.y_on_custom_grid(bin_ref_x,bin_ref_y,
                          bin_custom_x,bin_custom_y);
@@ -239,6 +241,10 @@ int vectester(const PairScalars& example, const std::string& testname)
     }
   }
 
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
+
   return return_flag;
 }
 
@@ -253,7 +259,7 @@ int main()
     vectester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
     vectester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
-/*
+
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
     vectester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
@@ -281,7 +287,7 @@ int main()
     returnval = returnval ||
       vectester (vex::vector<double> (ctx_d, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
 #endif
-*/
+
 #ifdef ANTIOCH_HAVE_GRVY
   gt.Finalize();
   gt.Summarize();

@@ -87,7 +87,7 @@ int tester(std::string path_to_files)
   Antioch::PhotochemicalRate<Scalar, std::vector<Scalar> > rate_hv(CH4_cs,CH4_lambda);
 
   Antioch::SigmaBinConverter<std::vector<Scalar> > bin;
-  std::vector<Scalar> sigma_rescaled;
+  std::vector<Scalar> sigma_rescaled(hv_lambda.size());
   bin.y_on_custom_grid(CH4_lambda,CH4_cs,hv_lambda,sigma_rescaled);
 
   Scalar rate = rate_hv.rate(part_flux);

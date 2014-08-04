@@ -156,8 +156,8 @@ int tester()
   for(unsigned int i = 0; i < 4; i++)
   {
     std::vector<Scalar> bin_custom_x, exact_sol_y;
-    std::vector<Scalar> bin_custom_y;
     make_custom(i,bin_custom_x,exact_sol_y);
+    std::vector<Scalar> bin_custom_y(bin_custom_x.size());
 
     bin.y_on_custom_grid(bin_ref_x,bin_ref_y,
                          bin_custom_x,bin_custom_y);
