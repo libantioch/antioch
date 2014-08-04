@@ -277,6 +277,24 @@ eval_index(const VectorT& vec, const _Matrix<_UIntT, _Rows, _Cols, _Options, _Ma
   return returnval;
 }
 
+template <template <bool, int, int, int, int, int> class _Matrix,
+  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+bool conjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec)
+{
+  return vec.all();
+}
+
+template <template <bool, int, int, int, int, int> class _Matrix,
+  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+bool disjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec)
+{
+  return vec.any();
+}
+
 
 } // end namespace Antioch
 

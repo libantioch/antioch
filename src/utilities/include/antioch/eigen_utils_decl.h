@@ -243,6 +243,18 @@ typename enable_if_c<
 >::type
 eval_index(const VectorT& vec, const _Matrix<_UIntT, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& index);
 
+template <template <bool, int, int, int, int, int> class _Matrix,
+  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+bool conjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec);
+
+template <template <bool, int, int, int, int, int> class _Matrix,
+  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+bool disjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec);
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_EIGEN_UTILS_DECL_H
