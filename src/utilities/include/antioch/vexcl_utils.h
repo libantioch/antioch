@@ -203,6 +203,23 @@ if_else(const vex::vector_expression<BoolInput> &condition,
   return boost::proto::if_else(condition, if_true, if_false);
 }
 
+template <typename BoolInput>
+inline
+bool disjunction(const vex::vector<BoolInput> & vec_input)
+{
+  vex::vector<bool> tr(vec_input);
+
+  return Antioch::disjunction(tr);
+}
+
+template <typename BoolInput>
+inline
+bool conjunction(const vex::vector_expression<BoolInput> & vec_input)
+{
+  vex::vector<bool> tr(vec_input);
+  return Antioch::conjunction(tr);
+}
+
 #ifdef ANTIOCH_HAVE_VEXCL
 template <typename VectorT, typename IntT>
 inline
@@ -218,6 +235,7 @@ eval_index(const VectorT& vec, const IntT& index)
   // FIXME - this will be painfully slow
   for (std::size_t i=0; i != index.size(); ++i)
     returnval[i] = vec[index[i]][i];
+
   return returnval;
 }
 #endif

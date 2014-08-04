@@ -155,6 +155,15 @@ if_else(const vex::vector_expression<BoolInput> &condition,
 	const IfValue   &if_true,
 	const ElseValue &if_false);
 
+template <typename BoolInput>
+inline
+bool disjunction(const vex::vector_expression<BoolInput> & vec_input);
+
+template <typename BoolInput>
+inline
+bool conjunction(const vex::vector_expression<BoolInput> & vec_input);
+
+
 #ifdef ANTIOCH_HAVE_VEXCL
 template <typename VectorT, typename IntT>
 inline
