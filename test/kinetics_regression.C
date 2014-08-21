@@ -89,18 +89,32 @@ int tester(const std::string& input_name)
 
   std::vector<Scalar> omega_dot(n_species);
   std::vector<Scalar> omega_dot_2(n_species);
+  std::vector<Scalar> omega_dot_3(n_species);
+  std::vector<Scalar> omega_dot_4(n_species);
   std::vector<Scalar> domega_dot_dT(n_species);
+  std::vector<Scalar> domega_dot_dT_2(n_species);
 
   std::vector<std::vector<Scalar> > domega_dot_drho_s(n_species);
+  std::vector<std::vector<Scalar> > domega_dot_drho_s_2(n_species);
   for( unsigned int s = 0; s < n_species; s++ )
     {
       domega_dot_drho_s[s].resize(n_species);
+      domega_dot_drho_s_2[s].resize(n_species);
     }
   
-  kinetics.compute_mass_sources( conditions, molar_densities, h_RT_minus_s_R, omega_dot);
+// backward compatibility
 
-  kinetics.compute_mass_sources_and_derivs( conditions, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
+  kinetics.compute_mass_sources( T , molar_densities, h_RT_minus_s_R, omega_dot);
+
+  kinetics.compute_mass_sources_and_derivs( T , molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                             omega_dot_2, domega_dot_dT, domega_dot_drho_s );
+
+// kinetics conditions
+
+  kinetics.compute_mass_sources( conditions , molar_densities, h_RT_minus_s_R, omega_dot_3);
+
+  kinetics.compute_mass_sources_and_derivs( conditions , molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
+                                            omega_dot_4, domega_dot_dT_2, domega_dot_drho_s_2 );
 
   for( unsigned int s = 0; s < n_species; s++)
     {
@@ -150,6 +164,24 @@ int tester(const std::string& input_name)
         }
     }
 
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      const Scalar rel_error = abs( (omega_dot_3[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      if( rel_error > tol )
+        {
+          return_flag = 1;
+        }
+    }
+ 
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      const Scalar rel_error = abs( (omega_dot_4[s] - omega_dot_reg[s])/omega_dot_reg[s]);
+      if( rel_error > tol )
+        {
+          return_flag = 1;
+        }
+    }
+
   // Regression values for domega_dot_dT
   std::vector<Scalar> domega_dot_reg_dT(n_species);
   domega_dot_reg_dT[0] =  1.8014990183270937e+02;
@@ -161,6 +193,15 @@ int tester(const std::string& input_name)
   for( unsigned int s = 0; s < n_species; s++)
     {
       const Scalar rel_error = abs( (domega_dot_dT[s] - domega_dot_reg_dT[s])/domega_dot_reg_dT[s]);
+      if( rel_error > tol )
+        {
+          return_flag = 1;
+        }
+    }
+
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      const Scalar rel_error = abs( (domega_dot_dT_2[s] - domega_dot_reg_dT[s])/domega_dot_reg_dT[s]);
       if( rel_error > tol )
         {
           return_flag = 1;
@@ -209,6 +250,18 @@ int tester(const std::string& input_name)
       for( unsigned int t = 0; t < n_species; t++)
         {
           const Scalar rel_error = abs( (domega_dot_drho_s[s][t] - domega_dot_reg_drhos[s][t])/domega_dot_reg_drhos[s][t]);
+          if( rel_error > tol )
+            {
+              return_flag = 1;
+            }
+        }
+    }
+
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      for( unsigned int t = 0; t < n_species; t++)
+        {
+          const Scalar rel_error = abs( (domega_dot_drho_s_2[s][t] - domega_dot_reg_drhos[s][t])/domega_dot_reg_drhos[s][t]);
           if( rel_error > tol )
             {
               return_flag = 1;
