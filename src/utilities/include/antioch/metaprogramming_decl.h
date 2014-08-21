@@ -138,6 +138,19 @@ namespace Antioch
     typedef const typename raw_value_type<T>::type type;
   };
 
+  template <typename T1, typename T2>
+  struct constructor_or_reference
+  {
+    typedef T1 type;
+  };
+
+  template <typename T>
+  struct constructor_or_reference<T,T>
+  {
+    typedef T & type;
+  };
+
+
   // A function for zero-initializing vectorized numeric types
   // while resizing them to match the example input
   template <typename T>
@@ -218,6 +231,7 @@ namespace Antioch
   inline
   typename value_type<VectorT>::type
   eval_index(const VectorT& vec, unsigned int index);
+
 
   // A function to obtain the conjunction of boolean
   template <typename T>
