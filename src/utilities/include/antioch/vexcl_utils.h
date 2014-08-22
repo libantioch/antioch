@@ -205,10 +205,12 @@ if_else(const vex::vector_expression<BoolInput> &condition,
 
 template <typename BoolInput>
 inline
-bool disjunction(const vex::vector<BoolInput> & vec_input)
+bool disjunction(const vex::vector_expression<BoolInput> & vec_input)
 {
-  vex::vector<bool> tr(vec_input);
-
+  vex::vector<int> tr(vec_input);
+/*  vex::Reductor<int,vex::MIN> min(tr.queue_list());
+  return 1 != min( tr == 0);
+*/
   return Antioch::disjunction(tr);
 }
 
@@ -216,7 +218,11 @@ template <typename BoolInput>
 inline
 bool conjunction(const vex::vector_expression<BoolInput> & vec_input)
 {
-  vex::vector<bool> tr(vec_input);
+  vex::vector<int> tr(vec_input);
+/*  
+  vex::Reductor<int,vex::MIN> min(tr.queue_list());
+  return 1 == min( tr != 0);
+*/
   return Antioch::conjunction(tr);
 }
 
