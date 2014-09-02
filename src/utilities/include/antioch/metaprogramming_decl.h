@@ -126,6 +126,12 @@ namespace Antioch
   min (const T& in);
   */
 
+  template <typename T, typename Enable=void>
+  struct tag_type
+  {
+    typedef const numeric_library_tag type;
+  };
+
   template <typename T>
   struct value_type<const T>
   {
@@ -232,6 +238,15 @@ namespace Antioch
   typename value_type<VectorT>::type
   eval_index(const VectorT& vec, unsigned int index);
 
+  //Root function for conjunction
+  template <typename T>
+  inline
+  bool conjunction_root(const T & vec, numeric_library_tag);
+
+  //Root function for disjunction
+  template <typename T>
+  inline
+  bool disjunction_root(const T & vec, numeric_library_tag);
 
   // A function to obtain the conjunction of boolean
   template <typename T>

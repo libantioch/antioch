@@ -145,7 +145,7 @@ T custom_clone(const T& /*example*/, const VectorScalar& values, const typename 
 {
   T returnval(indexes.size()); //bof bof - metaphysicl has size within type, this suppose that size_type<indexes>::type can be changed in value_type<T>::type
   
-  for(std::size_t i = 0; i < indexes.size(); i++)
+  for(unsigned int i = 0; i < indexes.size(); i++)
   {
       returnval[i] = values[indexes[i]];
   }
@@ -167,13 +167,17 @@ bool conjunction(const bool & vec)
   return vec;
 }
 
-// FIXME - vexcl needs better 
-// test: something in the flavor of
-// vex::vector_expression<Condition>
-
 template <typename T>
 inline
 bool conjunction(const T & vec)
+{
+  typedef typename tag_type<T>::type tag;
+  return conjunction_root(vec,tag());
+}
+
+template <typename T>
+inline
+bool conjunction_root(const T & vec, numeric_library_tag)
 {
   for(unsigned int i = 0; i < vec.size(); i++)
   {
@@ -191,6 +195,14 @@ bool disjunction(const bool & vec)
 template <typename T>
 inline
 bool disjunction(const T & vec)
+{
+  typedef typename tag_type<T>::type tag;
+  return disjunction_root(vec,tag());
+}
+
+template <typename T>
+inline
+bool disjunction_root(const T & vec, numeric_library_tag)
 {
   for(unsigned int i = 0; i < vec.size(); i++)
   {

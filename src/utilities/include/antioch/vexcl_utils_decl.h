@@ -51,6 +51,7 @@
 namespace vex {
   template <typename T> class vector;
   template <typename T> class vector_expression;
+  template <typename T> class is_vector_expression;
 }
 namespace boost {
   namespace proto {
@@ -91,6 +92,14 @@ namespace Antioch
 
 // Class to allow tag dispatching to VexCL specializations
 struct vexcl_library_tag : public numeric_library_tag {};
+
+template <typename T>
+struct tag_type<T,
+          typename std::enable_if<vex::is_vector_expression<T>::value>::type
+        >
+{
+    typedef const vexcl_library_tag type;
+};
 
 template <typename T, typename NewScalar>
 struct rebind<vex::vector<T>, NewScalar>
@@ -155,16 +164,15 @@ if_else(const vex::vector_expression<BoolInput> &condition,
 	const IfValue   &if_true,
 	const ElseValue &if_false);
 
-template <typename BoolInput>
+template <typename T>
 inline
-bool disjunction(const vex::vector_expression<BoolInput> & vec_input);
+bool disjunction_root(const T & vec_input, vexcl_library_tag);
 
-template <typename BoolInput>
+template <typename T>
 inline
-bool conjunction(const vex::vector_expression<BoolInput> & vec_input);
+bool conjunction_root(const T & vec_input, vexcl_library_tag);
 
 
-#ifdef ANTIOCH_HAVE_VEXCL
 template <typename VectorT, typename IntT>
 inline
 typename enable_if_c<
@@ -173,7 +181,6 @@ typename enable_if_c<
   typename value_type<VectorT>::type
 >::type
 eval_index(const VectorT& vec, const IntT& index);
-#endif
 
 } // end namespace Antioch
 
