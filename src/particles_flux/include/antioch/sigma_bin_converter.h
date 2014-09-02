@@ -162,7 +162,7 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
        StateType ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
        StateType ref_value = Antioch::custom_clone(custom_head,list_ref_values,value_head);
 
-       //head from custom head to ref head
+       // head from custom head to ref head
        // super not efficient, everything is calculated every time...
        surf += Antioch::if_else(Antioch::constant_clone(custom_head,list_ref_head_tails[0]) > custom_head ||
                                 Antioch::constant_clone(custom_head,list_ref_head_tails[list_ref_head_tails.size() - 1]) < custom_head, // custom is outside ref
@@ -200,7 +200,8 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
       ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
       ref_value = Antioch::custom_clone(custom_head,list_ref_values,start_head);
 
-       //tail from ref_head to custom_tail
+       // tail from ref_head to custom_tail
+       // super not efficient, everything is calculated every time...
       surf += Antioch::if_else(
                         Antioch::constant_clone(custom_tail,list_ref_head_tails[list_ref_head_tails.size() - 1]) < custom_tail || // custom is outside ref
                         Antioch::constant_clone(custom_tail,list_ref_head_tails.front()) > custom_tail || // custom is outside ref
