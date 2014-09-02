@@ -272,25 +272,21 @@ typename enable_if_c<
 eval_index(const VectorT& vec, const _Matrix<_UIntT, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& index)
 {
   typename value_type<VectorT>::type returnval = vec[0];
-  for (std::size_t i=0; i != index.size(); ++i)
+  for (unsigned int i=0; i != index.size(); ++i)
     returnval[i] = vec[index[i]][i];
   return returnval;
 }
 
-template <template <bool, int, int, int, int, int> class _Matrix,
-  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename T>
 inline
-bool conjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec)
+bool conjunction_root(const T & vec, eigen_library_tag)
 {
   return vec.all();
 }
 
-template <template <bool, int, int, int, int, int> class _Matrix,
-  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename T>
 inline
-bool disjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec)
+bool disjunction_root(const T & vec, eigen_library_tag)
 {
   return vec.any();
 }

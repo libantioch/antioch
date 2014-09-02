@@ -114,6 +114,14 @@ a.array().min(b.array()));
 
 namespace Antioch
 {
+template <typename T>
+struct tag_type<T,
+                typename std::enable_if<is_eigen<T>::value>::type
+>
+{
+  typedef eigen_library_tag type;
+};
+
 template <
   template <typename, int, int, int, int, int> class _Matrix,
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols,
@@ -243,17 +251,13 @@ typename enable_if_c<
 >::type
 eval_index(const VectorT& vec, const _Matrix<_UIntT, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& index);
 
-template <template <bool, int, int, int, int, int> class _Matrix,
-  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename T>
 inline
-bool conjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec);
+bool conjunction_root(const T & vec, eigen_library_tag);
 
-template <template <bool, int, int, int, int, int> class _Matrix,
-  bool _Cond, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
->
+template <typename T>
 inline
-bool disjunction(const _Matrix<_Cond,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & vec);
+bool disjunction_root(const T & vec, eigen_library_tag);
 
 } // end namespace Antioch
 

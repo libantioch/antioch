@@ -54,12 +54,19 @@
 // Forward declaration instead
 namespace vex {
 template <typename T> class vector;
+template <typename T> class is_vector_expression;
 
 template<typename real, class RDC>
 class Reductor;
 
 class MAX;
 class MIN;
+
+  namespace detail
+  {
+     class get_expression_properties;
+     class extract_terminal;
+  }
 }
 namespace boost {
   namespace proto {
@@ -203,30 +210,28 @@ if_else(const vex::vector_expression<BoolInput> &condition,
   return boost::proto::if_else(condition, if_true, if_false);
 }
 
-template <typename BoolInput>
+template <typename T>
 inline
-bool disjunction(const vex::vector_expression<BoolInput> & vec_input)
+bool disjunction_root(const T & vec_input, vexcl_library_tag)
 {
-  vex::vector<int> tr(vec_input);
-/*  vex::Reductor<int,vex::MIN> min(tr.queue_list());
-  return 1 != min( tr == 0);
-*/
-  return Antioch::disjunction(tr);
+  vex::detail::get_expression_properties prop;
+  vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
+
+  vex::Reductor<int,vex::MAX> max(prop.queue);
+  return 1 == max( vec_input == 1); // at least one true
 }
 
-template <typename BoolInput>
+template <typename T>
 inline
-bool conjunction(const vex::vector_expression<BoolInput> & vec_input)
+bool conjunction_root(const  T & vec_input, vexcl_library_tag)
 {
-  vex::vector<int> tr(vec_input);
-/*  
-  vex::Reductor<int,vex::MIN> min(tr.queue_list());
-  return 1 == min( tr != 0);
-*/
-  return Antioch::conjunction(tr);
+  vex::detail::get_expression_properties prop;
+  vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
+
+  vex::Reductor<int,vex::MAX> max(prop.queue);
+  return 1 != max( vec_input == 0); // at least one false
 }
 
-#ifdef ANTIOCH_HAVE_VEXCL
 template <typename VectorT, typename IntT>
 inline
 typename enable_if_c<
@@ -239,12 +244,11 @@ eval_index(const VectorT& vec, const IntT& index)
   typename value_type<VectorT>::type returnval = zero_clone(vec[0]);
 
   // FIXME - this will be painfully slow
-  for (std::size_t i=0; i != index.size(); ++i)
+  for (unsigned int i=0; i != index.size(); ++i)
     returnval[i] = vec[index[i]][i];
 
   return returnval;
 }
-#endif
 
 
 } // end namespace Antioch
