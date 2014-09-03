@@ -217,8 +217,8 @@ bool disjunction_root(const T & vec_input, vexcl_library_tag)
   vex::detail::get_expression_properties prop;
   vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
 
-  vex::Reductor<int,vex::MAX> max(prop.queue);
-  return 1 == max( vec_input == 1); // at least one true
+  vex::any_of any_of(prop.queue);
+  return any_of(vec_input); // at least one true
 }
 
 template <typename T>
@@ -228,8 +228,8 @@ bool conjunction_root(const  T & vec_input, vexcl_library_tag)
   vex::detail::get_expression_properties prop;
   vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
 
-  vex::Reductor<int,vex::MAX> max(prop.queue);
-  return 1 != max( vec_input == 0); // at least one false
+  vex::all_of all_of(prop.queue);
+  return all_of(vec_input); // at least one false
 }
 
 template <typename VectorT, typename IntT>
