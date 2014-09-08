@@ -64,6 +64,8 @@ install-data-hook:
 	    cd $(DESTDIR)$(prefix) && mv $$genfile.replaced $$genfile ; \
           done ; \
 	fi
+	cd $(DESTDIR)$(includedir) && cat antioch_config.h | $(SED) "s,\(define ANTIOCH_DEFAULT_FILES_PATH\).*$$,\1 "@datadir@/antioch_default_files/"," > config.replaced ; \
+	cd $(DESTDIR)$(includedir) && mv config.replaced antioch_config.h ;
 
 # Install config file
 BUILT_SOURCES += antioch_config.h
