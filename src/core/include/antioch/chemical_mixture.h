@@ -32,11 +32,12 @@
 #define ANTIOCH_CHEMICAL_MIXTURE_H
 
 // Antioch
+#include "antioch_config.h" // default files
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/species_ascii_parsing.h"
-#include "antioch/species_enum.h"
+//#include "antioch/species_enum.h"
 
 // C++
 #include <vector>
@@ -47,19 +48,42 @@
 
 namespace Antioch
 {
+  typedef unsigned int Species;
+
   //! Class storing chemical mixture properties
   /*!
     This class manages the list of ChemicalSpecies for a requested set
     of species from input.
     \todo This should probably be a singleton class, but being lazy for now.
+    We require four types of data:
+       - a list of species, in a form of std::vector<std::string>
+       - a file for mandatory species information:
+                        * molar mass
+                        * enthalpie of formation @ 0 K
+                        * number of translational-rotational degrees of freedom
+                        * charge
+       - a file for optional vibrational data
+                        * vibrational levels and associated degenerescence
+       - a file for optional electronic data
+                        * electronic levels and associated degenerescence
+    Constructor is overloaded so all or any data can be given, in the
+    order above.
   */
   template<typename CoeffType=double>
   class ChemicalMixture
   {
   public:
-    
-    ChemicalMixture( const std::vector<std::string>& species_list );
+    ChemicalMixture( const std::string & filename = ANTIOCH_DEFAULT_CHEMICAL_MIXTURE, 
+                     const bool verbose = true, 
+                     const std::string & species_data = ANTIOCH_DEFAULT_SPECIES_LIST,
+                     const std::string & vibration_data = ANTIOCH_DEFAULT_VIBRATIONAL_DATA,
+                     const std::string & electronic_data = ANTIOCH_DEFAULT_ELECTRONIC_DATA);
+    //! backward compatibility
+    ChemicalMixture( const std::vector<std::string>& species_list);
     ~ChemicalMixture();
+
+    //! method to initialize, backward compatibility
+    void initialize_species(const std::vector<std::string> & species_list);
 
     //! Returns the number of species in this mixture.
     unsigned int n_species() const;
@@ -161,7 +185,7 @@ namespace Antioch
 
   protected:
 
-    void init_species_name_map();
+    void init_species_name_map(const std::vector<std::string> & species_list);
     void build_inverse_name_map();
     void read_species_data();
     void read_species_data( std::istream& in );
@@ -172,9 +196,6 @@ namespace Antioch
     std::vector<ChemicalSpecies<CoeffType>*> _chemical_species;
     std::map<std::string,Species> _species_name_map;
     std::map<Species,std::string> _species_inv_name_map;
-    
-  private:
-    ChemicalMixture();
 
   };
 
@@ -266,11 +287,47 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  ChemicalMixture<CoeffType>::ChemicalMixture( const std::vector<std::string>& species_list )
-    : _chemical_species( species_list.size(), NULL )
+  ChemicalMixture<CoeffType>::ChemicalMixture(const std::string & filename, const bool verbose, 
+                                              const std::string & species_data,
+                                              const std::string & vibration_data,
+                                              const std::string & electronic_data)
   {
+      read_chemical_species_composition(filename,verbose,*this);
+      
+      read_species_data_ascii(species_data, *this);
+
+    //... and any vibrational data
+      read_species_vibrational_data_ascii(vibration_data, verbose, *this);
+
+    //... and any electronic data
+      read_species_electronic_data_ascii(electronic_data, verbose, *this);
+      return;
+  }
+
+  template<typename CoeffType>
+  inline
+  ChemicalMixture<CoeffType>::ChemicalMixture( const std::vector<std::string>& species_list)
+  {
+      this->initialize_species(species_list);
+
+    // mandatory data...
+      read_species_data_ascii(std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_CHEMICAL_MIXTURE), true, *this);
+
+    //... and any vibrational data
+      read_species_vibrational_data_ascii(std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_VIBRATIONAL_DATA), true, *this);
+
+    //... and any electronic data
+      read_species_electronic_data_ascii(std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_ELECTRONIC_DATA), true, *this);
+      return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void ChemicalMixture<CoeffType>::initialize_species( const std::vector<std::string>& species_list )
+  {
+    _chemical_species.resize( species_list.size(), NULL );
     // Build up name map for all possible species
-    this->init_species_name_map();
+    this->init_species_name_map(species_list);
     
     // Build up inverse name map
     this->build_inverse_name_map();
@@ -287,17 +344,8 @@ namespace Antioch
 
 	_species_list.push_back( _species_name_map.find( species_list[s] )->second );
 	_species_list_map.insert( std::make_pair( _species_name_map.find( species_list[s] )->second, s ) );
-	_active_species_name_map.insert( std::make_pair( species_list[s], s ) );
       }
-	 
-    // Now read in chemical properties for the requested species and stash
-    read_species_data_ascii_default(*this);
-
-    //... and any vibrational data
-    read_species_vibrational_data_ascii_default(*this);
-
-    //... and any electronic data
-    read_species_electronic_data_ascii_default(*this);
+    _active_species_name_map = _species_name_map;
   }
 
 
@@ -418,72 +466,14 @@ namespace Antioch
   
   template<typename CoeffType>
   inline
-  void ChemicalMixture<CoeffType>::init_species_name_map()
+  void ChemicalMixture<CoeffType>::init_species_name_map(const std::vector<std::string> & species_list)
   {
-    _species_name_map["Air"  ] = Air; 
-    _species_name_map["CPAir"] = CPAir; 
-    _species_name_map["Ar"   ] = Ar;   
-    _species_name_map["Ar+"  ] = Arp;  
-    _species_name_map["C"    ] = C;    
-    _species_name_map["C+"   ] = Cp;   
-    _species_name_map["C2"   ] = C2;   
-    _species_name_map["C2H"  ] = C2H;  
-    _species_name_map["C2H2" ] = C2H2; 
-    _species_name_map["C3"   ] = C3;   
-    _species_name_map["CF"   ] = CF;   
-    _species_name_map["CF2"  ] = CF2;  
-    _species_name_map["CF3"  ] = CF3;  
-    _species_name_map["CF4"  ] = CF4;  
-    _species_name_map["CH"   ] = CH;   
-    _species_name_map["CH2"  ] = CH2;  
-    _species_name_map["CH3"  ] = CH3;  
-    _species_name_map["CH4"  ] = CH4;  
-    _species_name_map["Cl"   ] = Cl;   
-    _species_name_map["Cl2"  ] = Cl2;  
-    _species_name_map["CN"   ] = CN;   
-    _species_name_map["CN+"  ] = CNp;  
-    _species_name_map["CO"   ] = CO;   
-    _species_name_map["CO+"  ] = COp;  
-    _species_name_map["CO2"  ] = CO2;  
-    _species_name_map["F"    ] = F;    
-    _species_name_map["F2"   ] = F2;   
-    _species_name_map["H"    ] = H;    
-    _species_name_map["H+"   ] = Hp;   
-    _species_name_map["H2"   ] = H2;   
-    _species_name_map["H2+"  ] = H2p;  
-    _species_name_map["H2O"  ] = H2O;
-    _species_name_map["H2O2" ] = H2O2;
-    _species_name_map["HCl"  ] = HCl;  
-    _species_name_map["HCN"  ] = HCN;  
-    _species_name_map["He"   ] = He;   
-    _species_name_map["He+"  ] = Hep;
-    _species_name_map["HO2"  ] = HO2;
-    _species_name_map["N"    ] = N;    
-    _species_name_map["N+"   ] = Np;   
-    _species_name_map["N2"   ] = N2;   
-    _species_name_map["CPN2" ] = CPN2;   
-    _species_name_map["N2+"  ] = N2p;  
-    _species_name_map["Ne"   ] = Ne;   
-    _species_name_map["NCO"  ] = NCO;  
-    _species_name_map["NH"   ] = NH;   
-    _species_name_map["NH+"  ] = NHp;  
-    _species_name_map["NH2"  ] = NH2;  
-    _species_name_map["NH3"  ] = NH3;  
-    _species_name_map["NO"   ] = NO;   
-    _species_name_map["NO+"  ] = NOp;  
-    _species_name_map["NO2"  ] = NO2;  
-    _species_name_map["O"    ] = O;    
-    _species_name_map["O+"   ] = Op;   
-    _species_name_map["O2"   ] = O2;   
-    _species_name_map["O2+"  ] = O2p;  
-    _species_name_map["OH"   ] = OH;   
-    _species_name_map["Si"   ] = Si;   
-    _species_name_map["SiO"  ] = SiO;  
-    _species_name_map["e"    ] = e;
-
-    return;
+    _species_name_map.clear();
+    for(unsigned int s = 0; s < species_list.size(); s++)
+    {
+        _species_name_map[species_list[s]] = s;
+    }
   }
-
 
   template<typename CoeffType>
   inline
