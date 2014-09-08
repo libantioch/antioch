@@ -235,6 +235,18 @@ TOP_SEARCH_DIR=$ac_abs_top_srcdir
 ANTIOCH_STAMPED_FILES=$(find $TOP_SEARCH_DIR/{src,test} -name "*.h" -or -name "*.C" | tr "\n" " ")
 AC_SUBST(ANTIOCH_STAMPED_FILES)
 
+# defaults files, set here for tests
+# changed in Makefile.am at install
+# step (see install-data-hook)
+# to make it $datadir/antioch_default_files
+# then we define the default files
+ANTIOCH_DEFAULT_FILES_PATH_TMP=$TOP_SEARCH_DIR/share/antioch_default_files/
+AC_DEFINE_UNQUOTED(DEFAULT_FILES_PATH,"$ANTIOCH_DEFAULT_FILES_PATH_TMP",[Path to defaults files])
+AC_DEFINE(DEFAULT_SPECIES_LIST,"antioch_default_chemical_species.dat",[Default list of species])
+AC_DEFINE(DEFAULT_CHEMICAL_MIXTURE,"antioch_default_chemical_mixture.dat",[Mandatory default informations on species])
+AC_DEFINE(DEFAULT_VIBRATIONAL_DATA,"antioch_default_vibrational_data.dat",[Vibrational default data])
+AC_DEFINE(DEFAULT_ELECTRONIC_DATA,"antioch_default_electronic_data.dat",[Electronic default data])
+
 
 # Must still call AC_OUTPUT() after generating all the files
 AC_OUTPUT()
