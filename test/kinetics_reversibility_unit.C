@@ -95,10 +95,10 @@ int tester(const std::string& testname)
   data.push_back(1.9858775L);
   Antioch::KineticsType<Scalar>* rate = Antioch::build_rate<Scalar>(data,kineticsModel);
   my_rxn->add_forward_rate(rate);
-  my_rxn->add_reactant("N2",chem_mixture.species_list_map().at(Antioch::Species::N2),1);
-  my_rxn->add_reactant("O" ,chem_mixture.species_list_map().at(Antioch::Species::O) ,1);
-  my_rxn->add_product ("NO",chem_mixture.species_list_map().at(Antioch::Species::NO),1);
-  my_rxn->add_product ("N" ,chem_mixture.species_list_map().at(Antioch::Species::N) ,1);
+  my_rxn->add_reactant("N2",chem_mixture.species_name_map().at("N2"),1);
+  my_rxn->add_reactant("O" ,chem_mixture.species_name_map().at("O") ,1);
+  my_rxn->add_product ("NO",chem_mixture.species_name_map().at("NO"),1);
+  my_rxn->add_product ("N" ,chem_mixture.species_name_map().at("N") ,1);
   my_rxn->initialize();
   my_rxn->print();
 
