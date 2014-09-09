@@ -104,7 +104,7 @@ namespace Antioch
 
     const std::vector<Species>& species_list() const;
 
-    const std::map<Species,unsigned int>& species_list_map() const;
+//    const std::map<Species,unsigned int>& species_list_map() const;
 
     const std::map<std::string,Species>& species_name_map() const;
 
@@ -189,7 +189,7 @@ namespace Antioch
     void read_species_data( std::istream& in );
 
     std::vector<Species> _species_list;
-    std::map<Species,unsigned int> _species_list_map;
+//    std::map<Species,unsigned int> _species_list_map;
     std::vector<ChemicalSpecies<CoeffType>*> _chemical_species;
     std::map<std::string,Species> _species_name_map;
     std::map<Species,std::string> _species_inv_name_map;
@@ -212,13 +212,13 @@ namespace Antioch
     return _species_list;
   }
 
-  template<typename CoeffType>
+/*  template<typename CoeffType>
   inline
   const std::map<Species,unsigned int>& ChemicalMixture<CoeffType>::species_list_map() const
   {
     return _species_list_map;
   }
-
+*/
   template<typename CoeffType>
   inline
   const std::vector<ChemicalSpecies<CoeffType>*>& ChemicalMixture<CoeffType>::chemical_species() const
@@ -333,7 +333,7 @@ namespace Antioch
 	  }
 
 	_species_list.push_back( _species_name_map.find( species_list[s] )->second );
-	_species_list_map.insert( std::make_pair( _species_name_map.find( species_list[s] )->second, s ) );
+//	_species_list_map.insert( std::make_pair( _species_name_map.find( species_list[s] )->second, s ) );
       }
   }
 
