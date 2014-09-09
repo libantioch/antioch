@@ -101,10 +101,10 @@ namespace Antioch
   void MixtureViscosity<Viscosity,CoeffType>::add( const std::string& species_name,
 						   const std::vector<CoeffType>& coeffs )
   {
-    antioch_assert( _chem_mixture.active_species_name_map().find(species_name) !=
-		    _chem_mixture.active_species_name_map().end() );
+    antioch_assert( _chem_mixture.species_name_map().find(species_name) !=
+		    _chem_mixture.species_name_map().end() );
 
-    unsigned int s = _chem_mixture.active_species_name_map().find(species_name)->second;
+    unsigned int s = _chem_mixture.species_name_map().find(species_name)->second;
 
     antioch_assert_less_equal( s, _species_viscosities.size() );
     antioch_assert( !_species_viscosities[s] );

@@ -90,8 +90,8 @@ namespace Antioch
 	if (in.good())
 	  {
 	    // Check if this is a species we want.
-	    if( chem_mixture.active_species_name_map().find(name) !=
-		chem_mixture.active_species_name_map().end() )
+	    if( chem_mixture.species_name_map().find(name) !=
+		chem_mixture.species_name_map().end() )
 	      {
 		thermo.add_curve_fit(name, coeffs);
 	      }
