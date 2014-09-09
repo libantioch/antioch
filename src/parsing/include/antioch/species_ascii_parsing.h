@@ -34,9 +34,6 @@
 // Antioch
 #include "antioch/input_utils.h"
 #include "antioch/string_utils.h"
-//#include "antioch/chemical_mixture.h"
-//#include "antioch/chemical_species.h"
-//#include "antioch/species_enum.h"
 
 // C++
 #include <algorithm> // std::search_n
