@@ -125,7 +125,7 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar> mu( chem_mixture );
 
-  Antioch::read_blottner_data_ascii_default( mu );
+  Antioch::read_blottner_data_ascii( mu,  std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_BLOTTNER_DATA) );
 
   Antioch::WilkeEvaluator< Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar>,
                            Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >,
