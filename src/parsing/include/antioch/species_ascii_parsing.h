@@ -194,6 +194,28 @@ namespace Antioch
 	  }
       }
     in.close();
+
+    // sanity check, we require these informations
+    if(chem_mixture.chemical_species().size() != chem_mixture.species_list().size())
+    {
+       std::cerr << "Molecule(s) is(are) missing.  Please update the information."
+                 << "  Currently using file " << filename << ".\n"
+                 << "Missing molecule(s) is(are):" << std::endl;
+       for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
+       {
+         unsigned int s;
+         for(s = 0; s < chem_mixture.chemical_species().size(); s++)
+         {
+             if(chem_mixture.chemical_species()[s]->species() == chem_mixture.species_inverse_name_map().at(i))break;
+         }
+         if(s == chem_mixture.species_list().size())
+         {
+             std::cerr << chem_mixture.species_inverse_name_map().at(i) << std::endl;
+         }
+      }
+      antioch_error();
+    }
+
     return;
   }
 
@@ -246,6 +268,21 @@ namespace Antioch
           }
       }
       in.close();
+
+    // sanity check, we check these informations
+    std::vector<std::string> missing;
+    for(unsigned int s = 0; s < chem_mixture.chemical_species().size(); s++)
+    {
+        if(chem_mixture.chemical_species()[s]->theta_v().empty())missing.push_back(chem_mixture.chemical_species()[s]->species());
+    }
+    if(!missing.empty())
+    {
+       std::cerr << "WARNING:\nVibrational levels are missing.  Please update the information."
+                 << "  Currently using file " << filename << ".\n"
+                 << "Missing molecule(s) is(are):" << std::endl;
+       for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
+    }
+    return;
   }
 
   
@@ -299,6 +336,20 @@ namespace Antioch
         
       }
       in.close();
+    // sanity check, we check these informations
+    std::vector<std::string> missing;
+    for(unsigned int s = 0; s < chem_mixture.chemical_species().size(); s++)
+    {
+        if(chem_mixture.chemical_species()[s]->theta_e().empty())missing.push_back(chem_mixture.chemical_species()[s]->species());
+    }
+    if(!missing.empty())
+    {
+       std::cerr << "WARNING:\nElectronic levels are missing.  Please update the information."
+                 << "  Currently using file " << filename << ".\n"
+                 << "Missing molecule(s) is(are):" << std::endl;
+       for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
+    }
+    return;
   }
   
 } // end namespace Antioch
