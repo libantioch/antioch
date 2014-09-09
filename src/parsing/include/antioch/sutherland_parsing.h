@@ -42,18 +42,21 @@ namespace Antioch
 {
   template<class NumericType>
   void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
-				   std::istream &in);
-
-  template<class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType>& mu );
-
+				   const std::string &filename);
  
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
   inline
   void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
-				   std::istream &in)
+				   const std::string &filename)
   {
+    std::ifstream in(filename.c_str());
+    if(!in.is_open())
+    {
+       std::cerr << "ERROR: unable to load file " << filename << std::endl;
+       antioch_error();
+    }
+    
     // skip the header
     skip_comment_lines(in, '#');
 
@@ -85,46 +88,9 @@ namespace Antioch
 	      }
 	  }
       }
-
+      in.close();
     return;
   }
-
-  template<class NumericType>
-  inline
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType>& mu )
-  {
-    static const std::string
-      default_sutherland_transport_data
-      ("#-----------------------------------------------------------------------------\n"
-       "# Coefficients for Sutherland viscosity model\n"
-       "# \n"
-       "# Form of the fit:\n"
-       "# \n"
-       "# mu = A*T^1.5/(T + B)\n"
-       "# \n"
-       "# where T is in Kelvin and the viscosity is then given in Pa-s.\n"
-       "# \n"
-       "# Sources:\n"
-       "# \n"
-       "# Air   -- \n"
-       "# N2    -- \n"
-       "# CPAir & CPN2 -- compatibility with benkirk's dissertation cases\n"
-       "# \n"
-       "# Sutherland coefficients are in general not as accurate as Blottner fits,\n"
-       "# and are provided mainly for completeness.\n"
-       "\n"
-       "Air     1.458000e-06  1.103000e+02\n"
-       "CPAir   1.458000e-06  1.104000e+02\n"
-       "N2      1.399306e-06  1.066667e+02\n"
-       "CPN2    1.399306e-06  1.066667e+02\n");
-
-    std::istringstream buf(default_sutherland_transport_data);
-
-    read_sutherland_data_ascii( mu, buf );
-
-    return;
-  }
-
 
 } // end namespace Antioch
 

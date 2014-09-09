@@ -247,6 +247,8 @@ AC_DEFINE(DEFAULT_CHEMICAL_MIXTURE,"antioch_default_chemical_mixture.dat",[Manda
 AC_DEFINE(DEFAULT_VIBRATIONAL_DATA,"antioch_default_vibrational_data.dat",[Vibrational default data])
 AC_DEFINE(DEFAULT_ELECTRONIC_DATA,"antioch_default_electronic_data.dat",[Electronic default data])
 AC_DEFINE(DEFAULT_THERMO_DATA,"antioch_default_thermo_data.dat",[Thermodynamic default data, NASA polynom])
+AC_DEFINE(DEFAULT_BLOTTNER_DATA,"antioch_default_blottner_coefficient.dat",[Blottner model, default data])
+AC_DEFINE(DEFAULT_SUTHERLAND_DATA,"antioch_default_sutherland_coefficient.dat",[Sutherland model, default data])
 
 
 # Must still call AC_OUTPUT() after generating all the files
