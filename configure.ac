@@ -246,6 +246,7 @@ AC_DEFINE(DEFAULT_SPECIES_LIST,"antioch_default_chemical_species.dat",[Default l
 AC_DEFINE(DEFAULT_CHEMICAL_MIXTURE,"antioch_default_chemical_mixture.dat",[Mandatory default informations on species])
 AC_DEFINE(DEFAULT_VIBRATIONAL_DATA,"antioch_default_vibrational_data.dat",[Vibrational default data])
 AC_DEFINE(DEFAULT_ELECTRONIC_DATA,"antioch_default_electronic_data.dat",[Electronic default data])
+AC_DEFINE(DEFAULT_THERMO_DATA,"antioch_default_thermo_data.dat",[Thermodynamic default data, NASA polynom])
 
 
 # Must still call AC_OUTPUT() after generating all the files
