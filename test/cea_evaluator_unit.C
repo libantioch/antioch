@@ -33,6 +33,7 @@
 #include <limits>
 
 // Antioch
+#include "antioch_config.h"
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_mixture.h"
@@ -141,7 +142,7 @@ int tester()
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
   Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
-  Antioch::read_cea_mixture_data_ascii_default( cea_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_THERMO_DATA) );
   Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   //const Scalar P = 100000.0;

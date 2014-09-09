@@ -32,6 +32,7 @@
 #define ANTIOCH_CEA_THERMO_H
 
 // Antioch
+#include "antioch_config.h"
 #include "antioch/cea_curve_fit.h"
 #include "antioch/cea_thermo_ascii_parsing.h"
 #include "antioch/chemical_mixture.h"
@@ -55,7 +56,8 @@ namespace Antioch
   {
   public:
 
-    CEAThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture );
+    CEAThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture,
+                       const std::string & filename = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_THERMO_DATA) );
 
     //! Destructor
     /*! virtual so this can be subclassed by the user. */
@@ -179,14 +181,14 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  CEAThermodynamics<CoeffType>::CEAThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture )
+  CEAThermodynamics<CoeffType>::CEAThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture, const std::string & filename )
     : _chem_mixture(chem_mixture),
       _species_curve_fits(chem_mixture.n_species(), NULL)
   {
     // Read in CEA coefficients. Note this assumes chem_mixture is fully constructed.
     /*! \todo Generalize this to optionally read in a file instead of using the default here.
         The method is there for the reading, just need to do input file foo. */
-    read_cea_thermo_data_ascii_default(*this);
+    read_cea_thermo_data_ascii(*this, filename);
 
     // Cache cp values at small temperatures
     _cp_at_200p1.reserve( _species_curve_fits.size() );
