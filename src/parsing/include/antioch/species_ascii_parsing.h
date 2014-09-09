@@ -230,16 +230,9 @@ namespace Antioch
             // If we do not have this species, just keep going
             if (!chem_mixture.species_name_map().count(name))continue;
 	
-            // If this species is not part of the existing mixture, we
-            // don't care about it, so just continue silently
-            if( !chem_mixture.active_species_name_map().count(name) )
-              {
-                continue;
-              }
-        
             // ... otherwise we add the data
             const unsigned int s = 
-              chem_mixture.active_species_name_map().find(name)->second;
+              chem_mixture.species_name_map().find(name)->second;
 
             antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
         
@@ -286,19 +279,12 @@ namespace Antioch
         // in the section above
         if (in.good())
           {
-            // If we do not this species, just go on
+            // If we do not have this species, just go on
             if (!chem_mixture.species_name_map().count(name))continue;
             
-            // If this species is not part of the existing mixture, we
-            // don't care about it, so just continue silently.
-            if (!chem_mixture.active_species_name_map().count(name))
-              {
-                continue;
-              }
-
             // ... otherwise we add the data
             const unsigned int s = 
-              chem_mixture.active_species_name_map().find(name)->second;
+              chem_mixture.species_name_map().find(name)->second;
 
             antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
             
