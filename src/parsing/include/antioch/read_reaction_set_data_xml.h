@@ -319,7 +319,7 @@ namespace Antioch
 
                 if(verbose) std::cout  << "\n    " << reactant_pairs[p] << " " << pair.first << " " << pair.second;
 
-                if( !chem_mixture.active_species_name_map().count( pair.first ) )
+                if( !chem_mixture.species_name_map().count( pair.first ) )
                   {
                     relevant_reaction = false;
                     if (verbose) std::cout << "\n     -> skipping this reaction (no reactant " << pair.first << ")";
@@ -327,7 +327,7 @@ namespace Antioch
                 else
                   {
                     my_rxn->add_reactant( pair.first,
-                                         chem_mixture.active_species_name_map().find( pair.first )->second,
+                                         chem_mixture.species_name_map().find( pair.first )->second,
                                          pair.second );
                     order_reaction += pair.second;
                   }
@@ -357,7 +357,7 @@ namespace Antioch
 
                 if(verbose) std::cout  << "\n    " << product_pairs[p] << " " << pair.first << " " << pair.second;
 
-                if( !chem_mixture.active_species_name_map().count( pair.first ) )
+                if( !chem_mixture.species_name_map().count( pair.first ) )
                   {
                     relevant_reaction = false;
                     if (verbose) std::cout << "\n     -> skipping this reaction (no product " << pair.first << ")";
@@ -365,7 +365,7 @@ namespace Antioch
                 else
                   {
                     my_rxn->add_product( pair.first,
-                                        chem_mixture.active_species_name_map().find( pair.first )->second,
+                                        chem_mixture.species_name_map().find( pair.first )->second,
                                         pair.second );
                   }
               }
@@ -815,10 +815,10 @@ namespace Antioch
 
                     // it is possible that the efficiency is specified for a species we are not
                     // modeling - so only add the efficiency if it is included in our list
-                    if( chem_mixture.active_species_name_map().count( pair.first ) )
+                    if( chem_mixture.species_name_map().count( pair.first ) )
                       {
                         my_rxn->set_efficiency( pair.first,
-                                               chem_mixture.active_species_name_map().find( pair.first )->second,
+                                               chem_mixture.species_name_map().find( pair.first )->second,
                                                pair.second );
                       }
                   }

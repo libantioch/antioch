@@ -74,8 +74,8 @@ namespace Antioch
 	    const ChemicalMixture<NumericType>& chem_mixture = mu.chemical_mixture();
 	    
 	    // Check if this is a species we want.
-	    if( chem_mixture.active_species_name_map().find(name) !=
-		chem_mixture.active_species_name_map().end() )
+	    if( chem_mixture.species_name_map().find(name) !=
+		chem_mixture.species_name_map().end() )
 	      {
 		// Pack up coefficients
 		std::vector<NumericType> coeffs(2);
