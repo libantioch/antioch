@@ -71,14 +71,26 @@ pkginclude_HEADERS += thermo/include/antioch/cea_evaluator.h
 pkginclude_HEADERS += thermo/include/antioch/cea_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 
+# viscosity
+pkginclude_HEADERS += viscosity/include/antioch/viscosity_enum.h
+pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/pure_species_viscosity.h
+
+# diffusion
+pkginclude_HEADERS += diffusion/include/antioch/diffusion_enum.h
+pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
+pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion.h
+
+# thermal conduction
+pkginclude_HEADERS += thermal_conductivity/include/antioch/thermal_conductivity_enum.h
+pkginclude_HEADERS += thermal_conductivity/include/antioch/eucken_thermal_conductivity.h
+pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_thermal_conductivity.h
+
 # transport
-pkginclude_HEADERS += transport/include/antioch/blottner_viscosity.h
-pkginclude_HEADERS += transport/include/antioch/sutherland_viscosity.h
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
 pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
-pkginclude_HEADERS += transport/include/antioch/eucken_thermal_conductivity.h
 pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
-pkginclude_HEADERS += transport/include/antioch/constant_lewis_diffusivity.h
 
 # utilities
 pkginclude_HEADERS += utilities/include/antioch/antioch_exceptions.h
@@ -119,6 +131,9 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/diffusion/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/thermal_conductivity/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/viscosity/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_INCLUDES)
