@@ -26,6 +26,7 @@
 
 //Antioch
 #include "antioch/antioch_assert.h"
+#include "antioch/thermal_conductivity_enum.h"
 #include "antioch/rotational_relaxation.h"
 #include "antioch/metaprogramming_decl.h"
 
@@ -61,6 +62,9 @@ namespace Antioch{
                                              const StateType & Cv_vib,const StateType & Cv_rot,const StateType & Cv_trans, //Cv
                                              const StateType & vis, const StateType & self_diffusion) const; //other transports
 
+
+        ThermalConductivityModel model() const {return _model;}
+
       private:
 
         /*! never ever use it*/
@@ -79,6 +83,8 @@ namespace Antioch{
         const CoeffType two_over_pi;
         const CoeffType one;
 
+        const ThermalConductivityModel _model;
+
   };
 
   template <typename CoeffType>
@@ -88,10 +94,11 @@ namespace Antioch{
         _M(M),
         _m(_M/Constants::Avogadro<StateType>()),
         _LJ_depth(LJ_depth),
-        five_over_two(5./2.),
-        five_over_three(5./3.),
-        two_over_pi(2./Constants::pi<CoeffType>()),
-        one(1.)
+        five_over_two(5.L/2.L),
+        five_over_three(5.L/3.L),
+        two_over_pi(2.L/Constants::pi<CoeffType>()),
+        one(1.L),
+        _model(PURE_SPECIES)
   {
       return;
   }

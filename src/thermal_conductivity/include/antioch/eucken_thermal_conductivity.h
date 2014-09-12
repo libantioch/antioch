@@ -31,6 +31,8 @@
 #ifndef ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H
 #define ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H
 
+#include "antioch/thermal_conductivity_enum.h"
+
 namespace Antioch
 {
   template<class ThermoEvaluator>
@@ -39,10 +41,11 @@ namespace Antioch
   protected:
 
     const ThermoEvaluator& _thermo;
+    const ThermalConductivityModel _model;
 
   public:
 
-    EuckenThermalConductivity( const ThermoEvaluator& t) : _thermo(t) {}
+    EuckenThermalConductivity( const ThermoEvaluator& t) : _thermo(t), _model(EUCKEN) {}
 
     ~EuckenThermalConductivity() {}
 
@@ -70,6 +73,8 @@ namespace Antioch
     ANTIOCH_AUTO(StateType)
     elec( const unsigned int s, const StateType& mu, const StateType& Te ) const
     ANTIOCH_AUTOFUNC(StateType, mu*_thermo.cv_el(s, Te))
+
+    ThermalConductivityModel model() const {return _model;}
 
   };
 

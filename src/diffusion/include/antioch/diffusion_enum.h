@@ -27,7 +27,7 @@
 namespace Antioch
 {
     enum DiffusionModel { LEWIS = 0,
-                          PURE_SPECIES};
+                          BIMOLECULAR};
 
 } // end namespace Antioch
 

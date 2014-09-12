@@ -28,12 +28,12 @@
 // Antioch
 #include "antioch/metaprogramming.h"
 #include "antioch/antioch_asserts.h"
+#include "antioch/viscosity_enum.h"
 #include "antioch/math_constants.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/Stockmayer_potential.h"
 #include "antioch/Lennard_Jones_potential.h"
-#include "antioch/viscosity.h"
 
 // C++
 #include <cmath>
@@ -43,7 +43,7 @@
 namespace Antioch
 {
 
-  /*! \class KineticsTheoryViscosity
+  /*! \class PureSpeciesViscosity
    *
    * Get the kinetics theory's expression of
    * viscosity. Ideal gaz assumption.
@@ -65,7 +65,7 @@ namespace Antioch
    * dipole moment.
    */
   template<typename CoeffType = double >
-  class KineticsTheoryViscosity: public Viscosity<CoeffType>
+  class PureSpeciesViscosity
   {
     public:
 
@@ -81,10 +81,10 @@ namespace Antioch
        * in the calculation of _delta_star,
        * we use the coefficient to SI from debye (3.335641 10-30 from http://cccbdb.nist.gov/debye.asp)
        */
-      KineticsTheoryViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, // depth in K (epsilon/kB), diameter in angström
+      PureSpeciesViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, // depth in K (epsilon/kB), diameter in angström
                                const CoeffType & dipole_moment, const CoeffType & mass);  // dipole moment in D, molecular mass in kg 
 
-      ~KineticsTheoryViscosity();
+      ~PureSpeciesViscosity();
 
 
       void reset_coeffs( const CoeffType & LJ_depth, const CoeffType & LJ_dia, const CoeffType & dipole_moment, const CoeffType & mass );
@@ -131,7 +131,7 @@ namespace Antioch
       const CoeffType & delta_star() const;
 
       //! Formatted print.
-      friend std::ostream& operator<<(std::ostream& os, const KineticsTheoryViscosity& mu)
+      friend std::ostream& operator<<(std::ostream& os, const PureSpeciesViscosity& mu)
       {
         mu.print(os);
         return os;
@@ -141,7 +141,7 @@ namespace Antioch
     private:
 
       /*! never ever use it*/
-      KineticsTheoryViscosity();
+      PureSpeciesViscosity();
 
       //! angles integrated collision integral
       template <typename StateType>
@@ -162,12 +162,14 @@ namespace Antioch
       std::vector<CoeffType> _temperature_line;
       std::vector<CoeffType> _temperature;
 
+      const ViscosityModel _model;
+
   };
 
 
   template <typename CoeffType>
   inline
-  KineticsTheoryViscosity<CoeffType>::KineticsTheoryViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, 
+  PureSpeciesViscosity<CoeffType>::PureSpeciesViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, 
                                                               const CoeffType & dipole_moment, const CoeffType & mass):
         Viscosity<CoeffType>(ViscosityModel::KINETICSTHEORY),
         _a(0.3125e-12L * ant_sqrt(Constants::pi<CoeffType>() * Constants::Boltzmann_constant<CoeffType>() * 1e24L)), /* 5 / 16 * sqrt(pi * Boltzmann constant) */
@@ -177,7 +179,8 @@ namespace Antioch
         _delta_star(ant_pow(_dipole_moment * CoeffType(3.335641L),2) * CoeffType(1e-30L) /             
                      ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
                            Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) )),
-        _collision_coefficients(3,0.)  // from ChemKin: quadratic interpolation
+        _collision_coefficients(3,0.),  // from ChemKin: quadratic interpolation
+        _model(PURE_SPECIES)
   {
      StockmayerPotential<CoeffType> stock;
      stock.temperature_interpolation(StockmayerPotential<CoeffType>::INTEGRAL::TWO,_delta_star,_collision_coefficients,_temperature_line);
@@ -189,14 +192,14 @@ namespace Antioch
 
   template <typename CoeffType>
   inline
-  KineticsTheoryViscosity<CoeffType>::~KineticsTheoryViscosity()
+  PureSpeciesViscosity<CoeffType>::~PureSpeciesViscosity()
   {
      return;
   }
 
   template <typename CoeffType>
   inline
-  void KineticsTheoryViscosity<CoeffType>::reset_coeffs( const CoeffType & LJ_depth, const CoeffType & LJ_dia, const CoeffType & dipole_moment, const CoeffType & mass )
+  void PureSpeciesViscosity<CoeffType>::reset_coeffs( const CoeffType & LJ_depth, const CoeffType & LJ_dia, const CoeffType & dipole_moment, const CoeffType & mass )
   {
 //redefining parameters
      _LJ.reset_coeffs(LJ_depth,LJ_dia);
@@ -216,7 +219,7 @@ namespace Antioch
 
   template <typename CoeffType>
   inline
-  void KineticsTheoryViscosity<CoeffType>::reset_coeffs( const std::vector<CoeffType> & coeffs )
+  void PureSpeciesViscosity<CoeffType>::reset_coeffs( const std::vector<CoeffType> & coeffs )
   {
      antioch_assert_equal_to(coeffs.size(),4);
 
@@ -226,7 +229,7 @@ namespace Antioch
   template <typename CoeffType>
   template <typename StateType>
   inline
-  const StateType KineticsTheoryViscosity<CoeffType>::collision_integral(const StateType & T) const
+  const StateType PureSpeciesViscosity<CoeffType>::collision_integral(const StateType & T) const
   {
      StateType omega_22 = zero_clone(T);
      StateType Tmp = constant_clone(T,1);
@@ -256,7 +259,7 @@ namespace Antioch
   template <typename CoeffType>
   template <typename StateType>
   inline
-  const StateType KineticsTheoryViscosity<CoeffType>::dcollision_integral_dTstar(const StateType & T) const
+  const StateType PureSpeciesViscosity<CoeffType>::dcollision_integral_dTstar(const StateType & T) const
   {
      StateType domega22_dTstar = zero_clone(T);
      StateType Tmp = constant_clone(T,1);
@@ -275,7 +278,7 @@ namespace Antioch
   template <typename CoeffType>
   template <typename StateType>
   inline
-  StateType KineticsTheoryViscosity<CoeffType>::compute_viscosity_and_derivative( const StateType& T, StateType & viscosity, StateType & dviscosity_dT ) const
+  StateType PureSpeciesViscosity<CoeffType>::compute_viscosity_and_derivative( const StateType& T, StateType & viscosity, StateType & dviscosity_dT ) const
   {
      viscosity = this->viscosity(T);
      dviscosity_dT = viscosity *
@@ -285,7 +288,7 @@ namespace Antioch
 
   template <typename CoeffType>
   inline
-  void KineticsTheoryViscosity<CoeffType>::print(std::ostream& os) const
+  void PureSpeciesViscosity<CoeffType>::print(std::ostream& os) const
   {
      os << "Kinetics theory viscosity:\n"
         << "5/16 * sqrt(pi * " << _mass << " * kb * T) / ( pi * " << _LJ.depth() << "^2 * <Omega(2,2)*> )\n"
@@ -295,9 +298,16 @@ namespace Antioch
 
   template <typename CoeffType>
   inline
-  const CoeffType & KineticsTheoryViscosity<CoeffType>::delta_star() const
+  const CoeffType & PureSpeciesViscosity<CoeffType>::delta_star() const
   {
      return _delta_star;
+  }
+
+  template<typename CoeffType>
+  inline
+  ViscosityModel PureSpeciesViscosity<CoeffType>::model() const
+  {
+      return _model;
   }
 
 } // end namespace Antioch

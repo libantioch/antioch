@@ -32,6 +32,7 @@
 #define ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
 
 #include "antioch/metaprogramming_decl.h" // ANTIOCH_AUTO*
+#include "antioch/diffusion_enum.h"
 
 namespace Antioch
 {
@@ -42,10 +43,11 @@ namespace Antioch
   protected:
 
     CoeffType _Le;
+    const DiffusionModel _model;
     
   public:
     
-    ConstantLewisDiffusivity( const CoeffType Le ) : _Le(Le) {}
+    ConstantLewisDiffusivity( const CoeffType Le ) : _Le(Le), _model(LEWIS) {}
 
     ~ConstantLewisDiffusivity() {}
     
@@ -54,7 +56,10 @@ namespace Antioch
     D( const StateType& rho, const StateType& cp, const StateType& k ) const
     ANTIOCH_AUTOFUNC(StateType, _Le*k/(rho*cp))
 
+    DiffusionModel model() const {return _model;}
+
   };
+
 
 } // end namespace Antioch
 

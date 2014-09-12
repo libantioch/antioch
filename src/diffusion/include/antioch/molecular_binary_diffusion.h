@@ -87,12 +87,17 @@ namespace Antioch{
                                            const TransportSpecies<SpeciesType> & si, const TransportSpecies<SpeciesType> & sj) const;
 
 
+          DiffusionModel model() const {return _model;}
+
+
         private:
 
           template <typename SpeciesType>
           const CoeffType composed_xi(const TransportSpecies<SpeciesType> & si, const TransportSpecies<SpeciesType> & sj) const;
 
           const CoeffType _coefficient;
+
+          const DiffusionModel _model;
 
   };
 
@@ -110,7 +115,8 @@ namespace Antioch{
       _coefficient(CoeffType(3e-3L * 4.L /16.L) * ant_sqrt(CoeffType(2.L) * (Constants::Boltzmann_constant<CoeffType>() * CoeffType(1e23L) ) /
                                                             ((Constants::Avogadro<CoeffType>() * CoeffType(1e-23)) * Constants::pi<CoeffType>())
                                                           )
-                  ) // 4 is from reduced diameter => 1 / (1/2)^2, 10^20 for SI, ang -> m
+                  ), // 4 is from reduced diameter => 1 / (1/2)^2, 10^20 for SI, ang -> m
+      _model(BIMOLECULAR)
   {
      return;
   }
