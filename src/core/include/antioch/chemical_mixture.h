@@ -37,7 +37,6 @@
 #include "antioch/chemical_species.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/species_ascii_parsing.h"
-//#include "antioch/species_enum.h"
 
 // C++
 #include <vector>
