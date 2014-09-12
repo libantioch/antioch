@@ -92,34 +92,31 @@ namespace Antioch
           if(!getline(data,line))break;
           if(line[0] == '#' || line.empty())continue;
           std::vector<std::string> tmp_spec;
+// in case several species on same line
           int nspec = SplitString(line," ",tmp_spec,false);
-          if(nspec == 0)
+// in case only one
+          if(nspec == 0)tmp_spec.push_back(line);
+          for(unsigned int i = 0; i < tmp_spec.size(); i++)
           {
-             species_list.push_back(line);
-          }else
-          {
-            for(unsigned int i = 0; i < tmp_spec.size(); i++)
-            {
-                // checking if multiple declaration
-                bool doublon(false);
-                for(unsigned int s = 0; s < species_list.size(); s++)
-                {
-                   if(tmp_spec[i] == species_list[s])
-                   {
-                      doublon = true;
-                      break;
-                   }
-                }
-                if(doublon)
-                {
-                   std::cerr << "Multiple declaration of " << tmp_spec[i]
-                             << ", skipping doublon" << std::endl;
-                   continue;
-                }
-                // adding
-                if(verbose)std::cout << tmp_spec[i] << std::endl;
-                species_list.push_back(tmp_spec[i]);
-            }
+              // checking if multiple declaration
+              bool doublon(false);
+              for(unsigned int s = 0; s < species_list.size(); s++)
+              {
+                 if(tmp_spec[i] == species_list[s])
+                 {
+                    doublon = true;
+                    break;
+                 }
+              }
+              if(doublon)
+              {
+                 std::cerr << "Multiple declaration of " << tmp_spec[i]
+                           << ", skipping doublon" << std::endl;
+                 continue;
+              }
+              // adding
+              if(verbose)std::cout << tmp_spec[i] << std::endl;
+              species_list.push_back(tmp_spec[i]);
           }
       }
       data.close();

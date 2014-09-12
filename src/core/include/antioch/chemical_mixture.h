@@ -72,11 +72,11 @@ namespace Antioch
   class ChemicalMixture
   {
   public:
-    ChemicalMixture( const std::string & filename = ANTIOCH_DEFAULT_CHEMICAL_MIXTURE, 
+    ChemicalMixture( const std::string & filename = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_SPECIES_LIST), 
                      const bool verbose = true, 
-                     const std::string & species_data = ANTIOCH_DEFAULT_SPECIES_LIST,
-                     const std::string & vibration_data = ANTIOCH_DEFAULT_VIBRATIONAL_DATA,
-                     const std::string & electronic_data = ANTIOCH_DEFAULT_ELECTRONIC_DATA);
+                     const std::string & species_data = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_CHEMICAL_MIXTURE),
+                     const std::string & vibration_data = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_VIBRATIONAL_DATA),
+                     const std::string & electronic_data = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_ELECTRONIC_DATA));
     //! backward compatibility
     ChemicalMixture( const std::vector<std::string>& species_list);
     ~ChemicalMixture();
@@ -281,9 +281,9 @@ namespace Antioch
                                               const std::string & vibration_data,
                                               const std::string & electronic_data)
   {
-      read_chemical_species_composition(filename,verbose,*this);
+      read_chemical_species_composition(filename, verbose,*this);
       
-      read_species_data_ascii(species_data, *this);
+      read_species_data_ascii(species_data, verbose, *this);
 
     //... and any vibrational data
       read_species_vibrational_data_ascii(vibration_data, verbose, *this);
