@@ -90,8 +90,8 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> b_mu_mixture(chem_mixture);
 
-  Antioch::read_sutherland_data_ascii_default<Scalar>( s_mu_mixture );
-  Antioch::read_blottner_data_ascii_default<Scalar>( b_mu_mixture );
+  Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_SUTHERLAND_DATA) );
+  Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_BLOTTNER_DATA) );
 
   std::cout << s_mu_mixture << std::endl;
   std::cout << b_mu_mixture << std::endl;
