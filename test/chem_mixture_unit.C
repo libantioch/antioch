@@ -41,13 +41,13 @@
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
 
-
 template <typename Scalar>
 int test_species( const unsigned int species,
 		  const std::vector<Antioch::ChemicalSpecies<Scalar>*>& chemical_species,
 		  const std::string& species_name,
 		  Scalar molar_mass, Scalar gas_constant, Scalar formation_enthalpy, 
-		  Scalar n_tr_dofs, int charge )
+		  Scalar n_tr_dofs, int charge,
+                  const Scalar tol )
 {
 
   int return_flag = 0;
@@ -61,21 +61,21 @@ int test_species( const unsigned int species,
       return_flag = 1;
     }
 
-  if( chem_species.molar_mass() != molar_mass )
+  if( std::abs(chem_species.molar_mass() - molar_mass)/molar_mass > tol )
     {
       std::cerr << "Error: Molar mass mismatch for "<< species_name << std::endl
 		<< "molar mass = " << chem_species.molar_mass() << std::endl;
       return_flag = 1;
     }
 
-  if( chem_species.gas_constant() != gas_constant )
+  if( std::abs(chem_species.gas_constant() - gas_constant)/gas_constant > tol )
     {
       std::cerr << "Error: Gas constant mismatch for "<< species_name << std::endl
 		<< "gas constant = " << chem_species.gas_constant() << std::endl;
       return_flag = 1;
     }
 
-  if( chem_species.formation_enthalpy() != formation_enthalpy )
+  if( std::abs(chem_species.formation_enthalpy() - formation_enthalpy)/formation_enthalpy > tol )
     {
       std::cerr << "Error: Formation enthalpy mismatch for "<< species_name << std::endl
 		<< "formation enthalpy = " << chem_species.formation_enthalpy() << std::endl;
@@ -121,13 +121,22 @@ int tester()
   const Scalar Mm_NO = Mm_N + Mm_O;
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+  // testing default
+  Antioch::ChemicalMixture<Scalar> default_mixture;
+  const unsigned int iN2 = default_mixture.species_name_map().at("N2");
+  const unsigned int iO2 = default_mixture.species_name_map().at("O2");
+  const unsigned int iNO = default_mixture.species_name_map().at("NO");
+  const unsigned int iO  = default_mixture.species_name_map().at("O");
+  const unsigned int iN  = default_mixture.species_name_map().at("N");
 
   const std::map<std::string,Antioch::Species>& species_name_map = chem_mixture.species_name_map();
   const std::map<Antioch::Species,std::string>& species_inverse_name_map = chem_mixture.species_inverse_name_map();
   const std::vector<Antioch::ChemicalSpecies<Scalar>*>& chemical_species = chem_mixture.chemical_species();
   const std::vector<Antioch::Species> species_list = chem_mixture.species_list();
+  const std::vector<Antioch::ChemicalSpecies<Scalar>*>& default_species = default_mixture.chemical_species();
 
   int return_flag = 0;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
 
   // Check name map consistency
   for( unsigned int i = 0; i < n_species; i++ )
@@ -157,75 +166,105 @@ int tester()
   {
     unsigned int index = 0;
     Scalar molar_mass = Mm_N2;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol ||
+        std::abs(molar_mass - default_mixture.M(iN2))/molar_mass > tol)
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
-		  << "molar mass = " << chem_mixture.M(index) << std::endl;
+		  << "molar mass = " << chem_mixture.M(index) << std::endl
+		  << "molar mass (default mixture) = " << default_mixture.M(iN2) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "N2", molar_mass, 
+    return_flag = return_flag || 
+                   test_species( index, chemical_species, "N2", molar_mass, 
                                 Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
-                                Scalar(0.0), Scalar(2.5), Scalar(0));
+                                Scalar(0.0), Scalar(2.5), Scalar(0), tol) ||
+                   test_species( iN2, default_species, "N2", molar_mass, 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
+                                Scalar(0.0), Scalar(2.5), Scalar(0), tol);
   }
   
   // Check O2 properties
   {
     unsigned int index = 1;
     Scalar molar_mass = Mm_O2;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index)) > tol ||
+        std::abs(molar_mass - default_mixture.M(iO2))/molar_mass > tol)
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
-		  << "molar mass = " << chem_mixture.M(index) << std::endl;
+		  << "molar mass = " << chem_mixture.M(index) << std::endl
+		  << "molar mass (default mixture) = " << default_mixture.M(iO2) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "O2", molar_mass, 
+    return_flag = return_flag || 
+                        test_species( index, chemical_species, "O2", molar_mass, 
                                 Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass),
-                                Scalar(0.0), Scalar(2.5), Scalar(0));
+                                Scalar(0.0), Scalar(2.5), Scalar(0), tol) ||
+                        test_species( iO2, default_species, "O2", molar_mass, 
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass),
+                                Scalar(0.0), Scalar(2.5), Scalar(0), tol);
   }
 
   // Check N properties
   {
     unsigned int index = 2;
     Scalar molar_mass = Mm_N;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index)) > tol ||
+        std::abs(molar_mass - default_mixture.M(iN))/molar_mass > tol)
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
-		  << "molar mass = " << chem_mixture.M(index) << std::endl;
+		  << "molar mass = " << chem_mixture.M(index) << std::endl
+		  << "molar mass (default mixture) = " << default_mixture.M(iN) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "N", molar_mass,
+    return_flag = return_flag || 
+                        test_species( index, chemical_species, "N", molar_mass,
                                 Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
-                                Scalar(3.3621610000e7), Scalar(1.5), Scalar(0));
+                                Scalar(3.3621610000e7), Scalar(1.5), Scalar(0), tol) ||
+                        test_species( iN, default_species, "N", molar_mass,
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
+                                Scalar(3.3621610000e7), Scalar(1.5), Scalar(0), tol);
   }
 
   // Check O properties
   {
     unsigned int index = 3;
     Scalar molar_mass = Mm_O;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index)) > tol ||
+        std::abs(molar_mass - default_mixture.M(iO)) > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
-		  << "molar mass = " << chem_mixture.M(index) << std::endl;
+		  << "molar mass = " << chem_mixture.M(index) << std::endl
+		  << "molar mass (default mixture) = " << default_mixture.M(iO) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "O", molar_mass,
+    return_flag = return_flag || 
+                        test_species( index, chemical_species, "O", molar_mass,
                                 Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
-                                Scalar(1.5420000000e7), Scalar(1.5), Scalar(0));
+                                Scalar(1.5420000000e7), Scalar(1.5), Scalar(0), tol) ||
+                        test_species( iO, default_species, "O", molar_mass,
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
+                                Scalar(1.5420000000e7), Scalar(1.5), Scalar(0), tol);
   }
 
   // Check NO properties
   {
     unsigned int index = 4;
     Scalar molar_mass = Mm_NO;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index)) > tol ||
+        std::abs(molar_mass - default_mixture.M(iNO)) > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
-		  << "molar mass = " << chem_mixture.M(index) << std::endl;
+		  << "molar mass = " << chem_mixture.M(index) << std::endl
+		  << "molar mass (default mixture) = " << default_mixture.M(iNO) << std::endl;
 	return_flag = 1;
       }
-    return_flag = test_species( index, chemical_species, "NO", molar_mass,
+    return_flag = return_flag || 
+                        test_species( index, chemical_species, "NO", molar_mass,
                                 Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
-                                Scalar(2.9961230000e6), Scalar(2.5), Scalar(0));
+                                Scalar(2.9961230000e6), Scalar(2.5), Scalar(0), tol) ||
+                        test_species( iNO, default_species, "NO", molar_mass,
+                                Scalar(Antioch::Constants::R_universal<Scalar>()/molar_mass), 
+                                Scalar(2.9961230000e6), Scalar(2.5), Scalar(0), tol);
   }
 
   std::vector<Scalar> mass_fractions( 5, 0.2L );
@@ -240,7 +279,6 @@ int tester()
   X_exact[3] = 0.2L*M_exact/Mm_O;
   X_exact[4] = 0.2L*M_exact/Mm_NO;
 
-  Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
   if( abs( (chem_mixture.R(mass_fractions) - R_exact)/R_exact) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
@@ -272,7 +310,7 @@ int tester()
 	  return_flag = 1;
 	}
     }
-  
+
   return return_flag;
 }
 
