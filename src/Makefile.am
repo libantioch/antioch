@@ -13,7 +13,6 @@ pkginclude_HEADERS  =
 # core
 pkginclude_HEADERS += core/include/antioch/chemical_species.h
 pkginclude_HEADERS += core/include/antioch/chemical_mixture.h
-pkginclude_HEADERS += core/include/antioch/species_enum.h
 pkginclude_HEADERS += core/include/antioch/kinetics_conditions.h
 
 # unit
