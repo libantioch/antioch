@@ -1,0 +1,9 @@
+nobase_dist_data_DATA = \
+antioch_default_files/antioch_default_blottner_coefficient.dat \
+antioch_default_files/antioch_default_chemical_mixture.dat \
+antioch_default_files/antioch_default_chemical_species.dat \
+antioch_default_files/antioch_default_electronic_data.dat \
+antioch_default_files/antioch_default_sutherland_coefficient.dat \
+antioch_default_files/antioch_default_thermo_data.dat \
+antioch_default_files/antioch_default_vibrational_data.dat
+
