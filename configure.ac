@@ -209,6 +209,7 @@ AC_CONFIG_FILES([
   doxygen/Makefile
   doxygen/antioch.dox
   Makefile
+  share/Makefile
   src/Makefile
   test/Makefile
 ])

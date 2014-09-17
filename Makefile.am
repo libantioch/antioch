@@ -6,11 +6,11 @@ include $(top_srcdir)/doxygen/aminclude.am
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS  = -I m4 -I m4/common
 
-SUBDIRS          = src test doxygen
+SUBDIRS          = src test doxygen share
 EXTRA_DIST       = CHANGES LICENSE COPYING share
 
 aclocaldir = $(prefix)/share/aclocal
-aclocal_DATA = $(top_srcdir)/share/aclocal/*
+aclocal_DATA = $(top_srcdir)/share/aclocal/antioch.m4
 
 # Eliminate .svn directories in dist tarball
 # Also hacking around EXTRA_DIST not dealing with
