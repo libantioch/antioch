@@ -35,6 +35,7 @@
 #include "antioch_config.h" // default files
 #include "antioch/antioch_asserts.h"
 #include "antioch/chemical_species.h"
+#include "antioch/default_filename.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/species_ascii_parsing.h"
 
@@ -72,11 +73,12 @@ namespace Antioch
   class ChemicalMixture
   {
   public:
-    ChemicalMixture( const std::string & filename = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_SPECIES_LIST), 
+    ChemicalMixture( const std::string & filename = DefaultFilename::species_list(),
                      const bool verbose = true, 
-                     const std::string & species_data = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_CHEMICAL_MIXTURE),
-                     const std::string & vibration_data = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_VIBRATIONAL_DATA),
-                     const std::string & electronic_data = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_ELECTRONIC_DATA));
+                     const std::string & species_data = DefaultFilename::chemical_mixture(),
+                     const std::string & vibration_data = DefaultFilename::vibrational_data(),
+                     const std::string & electronic_data = DefaultFilename::electronic_data());
+
     //! backward compatibility
     ChemicalMixture( const std::vector<std::string>& species_list);
     ~ChemicalMixture();
@@ -300,13 +302,13 @@ namespace Antioch
       this->initialize_species(species_list);
 
     // mandatory data...
-      read_species_data_ascii(std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_CHEMICAL_MIXTURE), true, *this);
+      read_species_data_ascii(DefaultFilename::chemical_mixture(), true, *this);
 
     //... and any vibrational data
-      read_species_vibrational_data_ascii(std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_VIBRATIONAL_DATA), true, *this);
+      read_species_vibrational_data_ascii(DefaultFilename::vibrational_data(), true, *this);
 
     //... and any electronic data
-      read_species_electronic_data_ascii(std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_ELECTRONIC_DATA), true, *this);
+      read_species_electronic_data_ascii(DefaultFilename::electronic_data(), true, *this);
       return;
   }
 

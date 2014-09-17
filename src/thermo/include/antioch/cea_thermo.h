@@ -37,6 +37,7 @@
 #include "antioch/cea_thermo_ascii_parsing.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
+#include "antioch/default_filename.h"
 #include "antioch/input_utils.h"
 #include "antioch/metaprogramming.h"
 
@@ -57,7 +58,7 @@ namespace Antioch
   public:
 
     CEAThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture,
-                       const std::string & filename = std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_THERMO_DATA) );
+                       const std::string & filename = DefaultFilename::thermo_data() );
 
     //! Destructor
     /*! virtual so this can be subclassed by the user. */
