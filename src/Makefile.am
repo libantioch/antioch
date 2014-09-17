@@ -84,6 +84,7 @@ pkginclude_HEADERS += transport/include/antioch/constant_lewis_diffusivity.h
 pkginclude_HEADERS += utilities/include/antioch/antioch_exceptions.h
 pkginclude_HEADERS += utilities/include/antioch/antioch_asserts.h
 pkginclude_HEADERS += utilities/include/antioch/cmath_shims.h
+pkginclude_HEADERS += utilities/include/antioch/default_filename.h
 pkginclude_HEADERS += utilities/include/antioch/eigen_utils.h
 pkginclude_HEADERS += utilities/include/antioch/eigen_utils_decl.h
 pkginclude_HEADERS += utilities/include/antioch/input_utils.h
