@@ -74,13 +74,17 @@ namespace Antioch
   {
   public:
     ChemicalMixture( const std::string & filename = DefaultFilename::species_list(),
-                     const bool verbose = true, 
+                     const bool verbose = true,
                      const std::string & species_data = DefaultFilename::chemical_mixture(),
                      const std::string & vibration_data = DefaultFilename::vibrational_data(),
                      const std::string & electronic_data = DefaultFilename::electronic_data());
 
-    //! backward compatibility
-    ChemicalMixture( const std::vector<std::string>& species_list);
+    ChemicalMixture( const std::vector<std::string>& species_list,
+                     const bool verbose = true,
+                     const std::string & species_data = DefaultFilename::chemical_mixture(),
+                     const std::string & vibration_data = DefaultFilename::vibrational_data(),
+                     const std::string & electronic_data = DefaultFilename::electronic_data());
+
     ~ChemicalMixture();
 
     //! method to initialize, backward compatibility
@@ -284,7 +288,7 @@ namespace Antioch
                                               const std::string & electronic_data)
   {
       read_chemical_species_composition(filename, verbose,*this);
-      
+
       read_species_data_ascii(species_data, verbose, *this);
 
     //... and any vibrational data
@@ -297,18 +301,21 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  ChemicalMixture<CoeffType>::ChemicalMixture( const std::vector<std::string>& species_list)
+  ChemicalMixture<CoeffType>::ChemicalMixture(const std::vector<std::string>& species_list,
+                                              const bool verbose,
+                                              const std::string & species_data,
+                                              const std::string & vibration_data,
+                                              const std::string & electronic_data)
   {
       this->initialize_species(species_list);
 
-    // mandatory data...
-      read_species_data_ascii(DefaultFilename::chemical_mixture(), true, *this);
+      read_species_data_ascii(species_data, verbose, *this);
 
     //... and any vibrational data
-      read_species_vibrational_data_ascii(DefaultFilename::vibrational_data(), true, *this);
+      read_species_vibrational_data_ascii(vibration_data, verbose, *this);
 
     //... and any electronic data
-      read_species_electronic_data_ascii(DefaultFilename::electronic_data(), true, *this);
+      read_species_electronic_data_ascii(electronic_data, verbose, *this);
       return;
   }
 

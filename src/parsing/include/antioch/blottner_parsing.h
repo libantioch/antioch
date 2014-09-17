@@ -44,6 +44,9 @@ namespace Antioch
   void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
 				 const std::string &filename );
 
+  template<class NumericType>
+  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu );
+
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
   inline
@@ -93,6 +96,13 @@ namespace Antioch
       }
       in.close();
     return;
+  }
+
+  template<class NumericType>
+  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu )
+  {
+    antioch_deprecated();
+    read_blottner_data_ascii(mu, DefaultFilename::blottner_data());
   }
 
 } // end namespace Antioch
