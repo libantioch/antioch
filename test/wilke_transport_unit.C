@@ -37,6 +37,7 @@
 #include "antioch/vector_utils_decl.h"
 
 #include "antioch/chemical_mixture.h"
+#include "antioch/default_filename.h"
 #include "antioch/stat_mech_thermo.h"
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
@@ -92,7 +93,7 @@ int tester()
 
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar> mu( chem_mixture );
 
-  Antioch::read_blottner_data_ascii( mu, std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_BLOTTNER_DATA) );
+  Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
   Antioch::WilkeEvaluator< Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar>,
                            Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >,
