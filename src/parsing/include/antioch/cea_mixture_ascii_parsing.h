@@ -50,6 +50,9 @@ namespace Antioch
   template<class NumericType>
   void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType>& thermo, const std::string &filename );
 
+  template<class NumericType>
+  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType>& thermo );
+
  
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
@@ -112,6 +115,13 @@ namespace Antioch
     in.close();
 
     return;
+  }
+
+  template<class NumericType>
+  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType>& thermo )
+  {
+    antioch_deprecated();
+    read_cea_mixture_data_ascii(thermo, DefaultFilename::thermo_data());
   }
 
 } // end namespace Antioch
