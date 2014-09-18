@@ -46,7 +46,7 @@ namespace Antioch
   {
   public:
 
-    WilkeEvaluator( const WilkeMixture<CoeffType>& mixture);
+    WilkeEvaluator( const WilkeMixture<Diffusion,Viscosity,ThermalConductivity,CoeffType>& mixture);
 
     ~WilkeEvaluator();
 
