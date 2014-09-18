@@ -36,7 +36,7 @@ namespace Antioch
         {
            add.push_back(MolecularBinaryDiffusion<NumericType,Interpolator>(D.mixture().transport_species()[s],D.mixture().transport_species()[j]));
         }
-        D.add_model(D.mixture().chemical_mixture().species_inverse_name_map().at(s),add);
+        D.add_model(D.mixture().species_inverse_name_map().at(s),add);
      }
   }
 

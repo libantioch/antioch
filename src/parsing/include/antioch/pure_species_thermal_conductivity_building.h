@@ -32,7 +32,7 @@ namespace Antioch
            init.Z_298K   = k.mixture().transport_species()[s].rotational_relaxation();
            init.M        = k.mixture().transport_species()[s].M();
            init.LJ_depth = k.mixture().transport_species()[s].LJ_depth();
-           k.add_model(k.mixture().chemical_mixture().species_inverse_name_map().at(s),init);
+           k.add_model(k.mixture().species_inverse_name_map().at(s),init);
        }
   }
 

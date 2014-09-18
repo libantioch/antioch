@@ -50,6 +50,9 @@ namespace Antioch
   template<typename ThermoEvaluator,typename CoeffType=double>
   class TransportMixture
   {
+
+     typedef typename unsigned int Species;
+
   public:
     
     TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
@@ -62,6 +65,9 @@ namespace Antioch
 
     //! ChemicalMixture method
     const std::vector<Species>& species_list() const;
+
+    //! ChemicalMixture method
+    const std::map<Species,std::string>& species_inverse_name_map() const;
 
     //! \returns the chemical mixture
     const ChemicalMixture<CoeffType> & chemical_mixture() const;
@@ -103,6 +109,13 @@ namespace Antioch
   const std::vector<Species>& TransportMixture<CoeffType>::species_list() const
   { 
     return _chemical_mixture.species_list();
+  }
+
+  template<typename ThermoEvaluator,typename CoeffType>
+  inline
+  const std::map<Species,std::string>& TransportMixture<CoeffType>::species_inverse_name_map() const
+  {
+    return _chemical_mixture.species_inverse_name_map();
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
