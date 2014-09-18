@@ -72,7 +72,8 @@ namespace Antioch{
           in >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
           if(transport.chemical_mixture().active_species_name_map().count(name))
           {
-              unsigned int place = transport.chemical_mixture().active_species_name_map().at(name);
+              unsigned int place = transport.chemical_mixture().species_name_map().at(name);
+                // TODO: better unit checking
               NumericType mass = transport.chemical_mixture().M(place) * NumericType(1e-3); //to SI
 // adding species in mixture
               transport.add_species(place,LJ_eps_kB,LJ_sigma,dipole_moment,pol,Zrot,mass);
