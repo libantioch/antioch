@@ -35,6 +35,10 @@
 
 namespace Antioch{
 
+
+  /* Stockmayer potential from
+     Monchich & Mason 1961, surface[T][delta]
+   */
   template <typename CoeffType> //typename VectorCoeffType, typename MatrixCoeffType>
   class StockmayerPotential
   {
@@ -42,18 +46,12 @@ namespace Antioch{
           StockmayerPotential();
           ~StockmayerPotential();
 
-          enum INTEGRAL{ONE = 0,
-                        TWO};
-
-          template <typename Scalar>
-          const Scalar collision_integral(const INTEGRAL & WHICH, const Scalar & T_reduced, const Scalar & dipole_reduced) const;
-
-          template <typename Scalar, typename VectorScalar>
-          void temperature_interpolation(const INTEGRAL & WHICH, const Scalar & delta, VectorScalar & coefficients, VectorScalar & temperature) const;
-
           const std::vector<CoeffType> temperature() const {return _T;}
 
           const std::vector<CoeffType> delta()       const {return _delta;}
+
+          const std::vector<std::vector<CoeffType> > omega_1_1() const {return _omega_1_1;}
+          const std::vector<std::vector<CoeffType> > omega_2_2() const {return _omega_2_2;}
 
         private:
 
@@ -102,75 +100,6 @@ namespace Antioch{
   {
      return;
   }
-
-  template <typename CoeffType>
-  template <typename Scalar>
-  inline
-  const Scalar StockmayerPotential<CoeffType>::collision_integral(const INTEGRAL & WHICH, const Scalar & T_reduced, const Scalar & dipole_reduced) const
-  {
-     return (WHICH == INTEGRAL::ONE)?omega_1_1(T_reduced,dipole_reduced):
-                                     omega_2_2(T_reduced,dipole_reduced);
-  }
-
-
-  template <typename CoeffType>
-  template <typename Scalar, typename VectorScalar>
-  inline
-  void StockmayerPotential<CoeffType>::temperature_interpolation(const INTEGRAL & WHICH, const Scalar & delta, VectorScalar & coefficients, VectorScalar & temperature) const
-  {
-     (WHICH == INTEGRAL::ONE)?this->temperature_interpolation(_omega_1_1,delta,coefficients,temperature):
-                              this->temperature_interpolation(_omega_2_2,delta,coefficients,temperature);
-
-     return;
-  }
-
-
-
-  template <typename CoeffType>
-  template <typename Scalar, typename VectorScalar>
-  inline
-  void StockmayerPotential<CoeffType>::temperature_interpolation(const std::vector<std::vector<CoeffType> > & omega , const Scalar & delta, VectorScalar & coefficients, VectorScalar & temperature) const
-  {
-
-     antioch_assert_equal_to(_T_size, omega.size());
-     PolynomialRegression reg_pol;
-
-     temperature.resize(_T_size,0.);
-     const CoeffType eps = std::numeric_limits<CoeffType>::epsilon() * CoeffType(coefficients.size());
-     for(unsigned int i = 0; i < _T_size; i++)
-     {
-        // extrapolate delta, below eps tolerance
-        std::vector<CoeffType> coeff;
-        CoeffType eps_reg = reg_pol.polynomial_regression(_delta,omega[i],coeff,eps);
-        if(eps_reg > eps)
-        {
-            std::cerr << "Regression of quality (sum of squares) is " 
-                      << eps_reg << ", inferior to " 
-                      << eps     << " for a delta* = " << delta 
-                      << " at T* = " << _T[i] << std::endl;
-        }
-        Scalar omega_loc(0.);
-        Scalar delta_tmp(1.);
-        for(unsigned int k = 0; k < coeff.size(); k++)
-        {
-           omega_loc += coeff[k] * delta_tmp;
-           delta_tmp *= delta;
-        }
-        temperature[i] = omega_loc;
-     }
-     CoeffType eps_reg = reg_pol.polynomial_regression(_T,temperature,coefficients.size(),coefficients,eps);
-     if(eps_reg > eps)
-     {
-        std::cerr << "Regression of quality (sum of squares) is " 
-                  << eps_reg << ", inferior to " 
-                  << eps     << " for a delta* = " << delta << std::endl;
-     }
-
-     return;
-  }
-
-
-
 
   template <typename CoeffType>
   inline
