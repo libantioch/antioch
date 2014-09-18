@@ -31,8 +31,6 @@
 #ifndef ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H
 #define ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H
 
-#include "antioch/thermal_conductivity_enum.h"
-
 namespace Antioch
 {
   template<class ThermoEvaluator>
@@ -41,13 +39,21 @@ namespace Antioch
   protected:
 
     const ThermoEvaluator& _thermo;
-    const ThermalConductivityModel _model;
 
   public:
 
-    EuckenThermalConductivity( const ThermoEvaluator& t) : _thermo(t), _model(EUCKEN) {}
+    EuckenThermalConductivity( const ThermoEvaluator& t) : _thermo(t) {}
 
     ~EuckenThermalConductivity() {}
+
+     // As seen coded in previous WilkeEvaluator, frankly, all Ts the same??
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    operator()( const unsigned int s, const StateType& mu, const StateType & T ) const
+    ANTIOCH_AUTOFUNC(StateType,
+		     mu * (typename Antioch::raw_value_type<StateType>::type(2.5) * _thermo.cv_trans(s) +
+                            _thermo.cv_rot(s) + _thermo.cv_vib(s,T) + _thermo.cv_el(s,T)) )
+
 
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
@@ -74,10 +80,9 @@ namespace Antioch
     elec( const unsigned int s, const StateType& mu, const StateType& Te ) const
     ANTIOCH_AUTOFUNC(StateType, mu*_thermo.cv_el(s, Te))
 
-    ThermalConductivityModel model() const {return _model;}
-
   };
-
 } // end namespace Antioch
+
+#include "antioch/eucken_thermal_conductivity_utils_decl.h"
 
 #endif // ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H

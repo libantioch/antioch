@@ -91,9 +91,12 @@ pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils
 pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils_decl.h
 
 # thermal conduction
-pkginclude_HEADERS += thermal_conductivity/include/antioch/thermal_conductivity_enum.h
 pkginclude_HEADERS += thermal_conductivity/include/antioch/eucken_thermal_conductivity.h
+pkginclude_HEADERS += thermal_conductivity/include/antioch/eucken_thermal_conductivity_utils.h
+pkginclude_HEADERS += thermal_conductivity/include/antioch/eucken_thermal_conductivity_utils_decl.h
 pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_thermal_conductivity.h
+pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_thermal_conductivity_utils.h
+pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_thermal_conductivity_utils_decl.h
 
 # transport
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
