@@ -126,7 +126,7 @@ pkginclude_HEADERS += utilities/include/antioch/math_constants.h
 pkginclude_HEADERS += utilities/include/antioch/physical_constants.h
 pkginclude_HEADERS += utilities/include/antioch/string_utils.h
 pkginclude_HEADERS += utilities/include/antioch/gsl_spliner.h
->>>>>>> default GSL spline
+
 # utilities-vectorization metaprogramming
 pkginclude_HEADERS += utilities/include/antioch/metaprogramming.h
 pkginclude_HEADERS += utilities/include/antioch/metaprogramming_decl.h

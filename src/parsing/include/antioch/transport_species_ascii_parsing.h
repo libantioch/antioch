@@ -50,7 +50,7 @@ namespace Antioch{
   template <typename NumericType>
   void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename)
   {
-    std::ifstream data(filename.c_str());
+    std::ifstream in(filename.c_str());
     if(!in.is_open())
     {
       std::cerr << "ERROR: unable to load file " << filename << std::endl;
