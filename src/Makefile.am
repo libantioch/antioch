@@ -83,9 +83,12 @@ pkginclude_HEADERS += viscosity/include/antioch/pure_species_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/pure_species_viscosity_utils_decl.h
 
 # diffusion
-pkginclude_HEADERS += diffusion/include/antioch/diffusion_enum.h
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
+pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils.h
+pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils_decl.h
 pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion.h
+pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils.h
+pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils_decl.h
 
 # thermal conduction
 pkginclude_HEADERS += thermal_conductivity/include/antioch/thermal_conductivity_enum.h
