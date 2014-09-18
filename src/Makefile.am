@@ -53,15 +53,26 @@ pkginclude_HEADERS += kinetics/include/antioch/reaction_parsing.h
 pkginclude_HEADERS += kinetics/include/antioch/kinetics_parsing.h
 pkginclude_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 
-# parsing
+# parsing-general
 pkginclude_HEADERS += parsing/include/antioch/tinyxml2.h
 pkginclude_HEADERS += parsing/include/antioch/tinyxml2_imp.h
+pkginclude_HEADERS += parsing/include/antioch/species_ascii_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/transport_species_ascii_parsing.h
+# parsing-kinetics
 pkginclude_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
+# parsing-viscosity
 pkginclude_HEADERS += parsing/include/antioch/blottner_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/sutherland_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/pure_species_viscosity_building.h
+# parsing-diffusion
+pkginclude_HEADERS += parsing/include/antioch/constant_lewis_diffusivity_building.h
+pkginclude_HEADERS += parsing/include/antioch/molecular_binary_diffusion_building.h
+# parsing-thermal conduction
+pkginclude_HEADERS += parsing/include/antioch/eucken_thermal_conductivity_building.h
+pkginclude_HEADERS += parsing/include/antioch/pure_species_thermal_conductivity_building.h
+# parsing-thermo
 pkginclude_HEADERS += parsing/include/antioch/cea_thermo_ascii_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/cea_mixture_ascii_parsing.h
-pkginclude_HEADERS += parsing/include/antioch/species_ascii_parsing.h
 
 # thermo
 pkginclude_HEADERS += thermo/include/antioch/cea_curve_fit.h
