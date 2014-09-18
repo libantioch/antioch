@@ -33,7 +33,6 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/physical_constants.h"
 #include "antioch/Lennard_Jones_potential.h"
-#include "antioch/species_enum.h"
 
 // C++
 #include <vector>
@@ -42,6 +41,9 @@
 
 namespace Antioch
 {
+
+  typedef unsigned int Species;
+
   //! Class to encapsulate data relevant for transport for each chemical species
   /*!
    * This class is designed to store information relevant to the transport of a chemical species.
