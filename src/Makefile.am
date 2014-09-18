@@ -15,6 +15,7 @@ pkginclude_HEADERS += core/include/antioch/chemical_species.h
 pkginclude_HEADERS += core/include/antioch/chemical_mixture.h
 pkginclude_HEADERS += core/include/antioch/transport_species.h
 pkginclude_HEADERS += core/include/antioch/transport_mixture.h
+pkginclude_HEADERS += core/include/antioch/Lennard_Jones_potential.h
 
 # unit
 pkginclude_HEADERS += units/include/antioch/converter.h
