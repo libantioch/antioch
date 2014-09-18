@@ -33,7 +33,6 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/viscosity_enum.h"
 
 // C++
 #include <cmath>
@@ -59,8 +58,6 @@ namespace Antioch
     void reset_coeffs( const CoeffType a, const CoeffType b, const CoeffType c );
     void reset_coeffs( const std::vector<CoeffType> coeffs );
 
-    ViscosityModel model() const;
-
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
 
@@ -76,7 +73,6 @@ namespace Antioch
     CoeffType _a;
     CoeffType _b;
     CoeffType _c;
-    const ViscosityModel _model;
     
   private:
     
@@ -88,19 +84,26 @@ namespace Antioch
   BlottnerViscosity<CoeffType>::BlottnerViscosity(const CoeffType a,
 						  const CoeffType b,
 						  const CoeffType c)
-    : _a(a), _b(b), _c(c), _model(BLOTTNER)
+    : _a(a), _b(b), _c(c)
   {
     return;
   }
 
   template<typename CoeffType>
   BlottnerViscosity<CoeffType>::BlottnerViscosity( const std::vector<CoeffType>& coeffs )
-    : _a(-1.0), _b(-1.0), _c(-1.0), _model(BLOTTNER)
+    : 
+#ifndef NDEBUG
+     _a(-1.0), _b(-1.0), _c(-1.0)
+#else
+     _a(coeffs[0]), _b(coeffs[1]), _c(coeffs[2])
+#endif
   {
+#ifndef NDEBUG
     antioch_assert_equal_to( coeffs.size(), 3);
     _a = coeffs[0];
     _b = coeffs[1];
     _c = coeffs[2];
+#endif
     return;
   }
 
@@ -155,14 +158,8 @@ namespace Antioch
     return;
   }
 
-  template<typename CoeffType>
-  inline
-  ViscosityModel BlottnerViscosity<CoeffType>::model() const
-  {
-      return _model;
-  }
-  
-
 } // end namespace Antioch
+
+#include "antioch/blottner_viscosity_utils_decl.h"
 
 #endif //ANTIOCH_BLOTTNER_VISCOSITY_H

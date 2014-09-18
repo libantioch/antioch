@@ -33,7 +33,6 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/viscosity_enum.h"
 #include "antioch/cmath_shims.h"
 
 // C++
@@ -50,7 +49,6 @@ namespace Antioch
 
     CoeffType _mu_ref;
     CoeffType _T_ref;
-    const ViscosityModel _model;
     
   public:
 
@@ -67,8 +65,6 @@ namespace Antioch
     
     void reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref );
     void reset_coeffs( const std::vector<CoeffType> coeffs );
-
-    ViscosityModel model() const;
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -88,7 +84,7 @@ namespace Antioch
 
   template<typename CoeffType>
   SutherlandViscosity<CoeffType>::SutherlandViscosity( const CoeffType mu_ref, const CoeffType T_ref )
-    : _mu_ref(mu_ref), _T_ref(T_ref), _model(SUTHERLAND)
+    : _mu_ref(mu_ref), _T_ref(T_ref)
   {
   }
 
@@ -99,7 +95,6 @@ namespace Antioch
 #else
     : _mu_ref(coeffs[0]), _T_ref(coeffs[1])
 #endif
-     , _model(SUTHERLAND)
   {
 #ifndef NDEBUG
     antioch_assert_equal_to( coeffs.size(), 2 );
@@ -131,13 +126,8 @@ namespace Antioch
     _T_ref = coeffs[1];
   }
 
-  template<typename CoeffType>
-  inline
-  ViscosityModel SutherlandViscosity<CoeffType>::model() const
-  {
-      return _model;
-  }
-
 } // end namespace Antioch
+
+#include "antioch/sutherland_viscosity_utils_decl.h"
 
 #endif //ANTIOCH_SUTHERLAND_VISCOSITY_H

@@ -72,10 +72,15 @@ pkginclude_HEADERS += thermo/include/antioch/cea_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 
 # viscosity
-pkginclude_HEADERS += viscosity/include/antioch/viscosity_enum.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils.h
+pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils_decl.h
 pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils.h
+pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils_decl.h
 pkginclude_HEADERS += viscosity/include/antioch/pure_species_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/pure_species_viscosity_utils.h
+pkginclude_HEADERS += viscosity/include/antioch/pure_species_viscosity_utils_decl.h
 
 # diffusion
 pkginclude_HEADERS += diffusion/include/antioch/diffusion_enum.h
