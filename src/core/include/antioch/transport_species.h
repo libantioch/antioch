@@ -75,16 +75,19 @@ namespace Antioch
     //! Destructor
     ~TransportSpecies();
 
-    //! Returns a descriptive name for this species.
+    //! returns a descriptive name for this species.
     const Species species() const;
 
-    //!Returns the Lennard-Jones depth in (K), this is \f$\frac{\epsilon}{\mathrm{k_B}}\f$.
+    //!returns the Lennard-Jones depth in (K), this is \f$\frac{\epsilon}{\mathrm{k_B}}\f$.
     CoeffType LJ_depth() const;
 
-    //!Returns the Lennard-Jones diameter in (Angström).
+    //!returns the Lennard-Jones diameter in (Angström).
     CoeffType LJ_diameter() const;
 
-    //! Returns dipole moment in units of [D]
+    //! return Lennard-Jones potential
+    LennardJonesPotential<CoeffType> & LJ() const;
+
+    //! returns dipole moment in units of [D]
     CoeffType dipole_moment() const;
 
     //! Returns polarizability in units of [Angström^3]
@@ -159,6 +162,13 @@ namespace Antioch
   inline
   CoeffType TransportSpecies<CoeffType>::LJ_diameter() const 
   { return _LJ.diameter(); }
+
+  template<typename CoeffType>
+  inline
+  LennardJonesPotential<CoeffType> & TransportSpecies<CoeffType>::LJ() const
+  {
+    return _LJ;
+  }
 
   template<typename CoeffType>
   inline

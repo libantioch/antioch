@@ -66,6 +66,9 @@ namespace Antioch
     //! \returns the chemical mixture
     const ChemicalMixture<CoeffType> & chemical_mixture() const;
 
+    //! \returns the thermodynamics evaluator
+    const ThermoEvaluator & thermo() const;
+
     void add_species( const unsigned int index,
                       CoeffType LJ_depth, CoeffType LJ_diameter,
                       CoeffType dipole_moment, CoeffType polarizability, CoeffType rotational_relaxation, CoeffType mass);
@@ -76,7 +79,7 @@ namespace Antioch
 
     const ChemicalMixture<CoeffType>        & _chemical_mixture;
 
-    const ThermoEvaluator & _thermo;
+    const ThermoEvaluator                   & _thermo;
 
     std::vector<TransportSpecies<CoeffType>*> _transport_species;
 
@@ -88,36 +91,42 @@ namespace Antioch
 
   /* ------------------------- Inline Functions -------------------------*/
 
-  template<typename CoeffType>
+  template<typename ThermoEvaluator,typename CoeffType>
   inline
   unsigned int TransportMixture<CoeffType>::n_species() const
   {
     return _chemical_mixture.n_species();
   }
 
-  template<typename CoeffType>
+  template<typename ThermoEvaluator,typename CoeffType>
   inline
   const std::vector<Species>& TransportMixture<CoeffType>::species_list() const
   { 
     return _chemical_mixture.species_list();
   }
 
-  template<typename CoeffType>
+  template<typename ThermoEvaluator,typename CoeffType>
   inline
   const ChemicalMixture<CoeffType> & TransportMixture<CoeffType>::chemical_mixture() const
   {
      return _chemical_mixture;
   }
 
-  template<typename CoeffType>
+  template<typename ThermoEvaluator,typename CoeffType>
+  inline
+  const ThermoEvaluator & TransportMixture<CoeffType>::thermo() const
+  {
+     return _thermo;
+  }
+
+  template<typename ThermoEvaluator,typename CoeffType>
   inline
   const std::vector<TransportSpecies<CoeffType>*>& TransportMixture<CoeffType>::transport_species() const
   {
     return _transport_species;
   }
 
-
-  template<typename CoeffType>
+  template<typename ThermoEvaluator,typename CoeffType>
   inline
   TransportMixture<CoeffType>::TransportMixture( const ChemicalMixture<CoeffType>& chem_mix, const ThermoEvaluator & t, const std::string & filename )
     : _chemical_mixture( chem_mix),
@@ -144,8 +153,7 @@ namespace Antioch
 
   }
 
-
-  template<typename CoeffType>
+  template<typename ThermoEvaluator,typename CoeffType>
   inline
   TransportMixture<CoeffType>::~TransportMixture()
   {
@@ -159,7 +167,7 @@ namespace Antioch
     return;
   }
 
-  template<typename CoeffType>
+  template<typename ThermoEvaluator,typename CoeffType>
   inline
   void TransportMixture<CoeffType>::add_species( const unsigned int index,
                                                 CoeffType LJ_depth,
