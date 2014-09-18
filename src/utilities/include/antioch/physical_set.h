@@ -13,7 +13,7 @@ namespace
       public:
         PhysicalSet(const Mixture & mix):_mixture(mix)
           {
-            physical_set_initialize(_set, physical_set_tag<Physics>::type());
+            physical_set_initialize(*this, physical_set_tag<Physics>::type());
           }
 
           ~PhysicalSet()
@@ -22,6 +22,12 @@ namespace
           }
 
         const Mixture & mixture() const {return _mixture;}
+
+        // writable reference to the set
+              SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set()       {return _set;}
+
+        // const reference to the set
+        const SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set() const {return _set;}
 
         template <typename InitType>
         void add_model(const std::string & species, const InitType & initMe)
@@ -32,7 +38,7 @@ namespace
 
            unsigned int s = _mixture.species_name_map().find(species)->second;
 
-           physical_set_add(_set,initMe,physical_set_tag<Physics>::type());
+           physical_set_add(s, _set,initMe,physical_set_tag<Physics>::type());
         }
 
         template <typename InitType>

@@ -25,6 +25,47 @@ namespace Antioch
    template <typename CoeffType, typename Interpolator, bool B>
    struct SetOrEquation<MolecularBinaryDiffusion<CoeffType,Interpolator>,B>;
 
+   // we can initialize without the user's help,
+   // so we tag the physical_set_tag:
+   // we need to define 
+   // physical_set_initialize
+   // physical_set_delete
+   // physical_set_add
+   // physical_set_reset
+   // but not the default ones that are not concerned
+   template <typename CoeffType, typename Interpolator>
+   struct physical_set_tag<MolecularBinaryDiffusion<CoeffType,Interpolator> >
+   {
+     typedef typename pure_species_viscosity_tag type;
+   };
+
+   // we can initialize without the user's help
+   template <typename ModelSet>
+   void physical_set_initialize(ModelSet & mod, pure_species_viscosity_tag )
+   {
+      build_pure_species_viscosity(mod);
+   }
+
+   template <typename ModelSet>
+   void physical_set_delete(ModelSet & mod, pure_species_viscosity_tag )
+   {}
+
+   template <typename Model, typename InitType>
+   void physical_set_add(unsigned int s, SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, pure_species_viscosity_tag)
+   {
+     antioch_assert(!set[s]);
+     set[s] = new Model(init);
+   }
+
+   template <typename Model, typename InitType>
+   void physical_set_rest(unsigned int s, SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, pure_species_viscosity_tag)
+   {
+     set[s]->reset_coeffs(init);
+   }
+
+
+
+
    template<typename Model, typename StateType, typename MatrixStateType>
    void physical_set_operator_diffusion_comes_first(const Model & set, const StateType & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag);
 

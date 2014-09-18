@@ -81,11 +81,11 @@ namespace Antioch
   struct Initializer;
 
     // init
-   template <typename Model>
-   void physical_set_initialize(Model & mod, default_physical_tag );
+   template <typename ModelSet>
+   void physical_set_initialize(ModelSet & mod, default_physical_tag );
 
-   template <typename Model>
-   void physical_set_initialize(Model & mod, physical_set_type_tag );
+   template <typename ModelSet>
+   void physical_set_initialize(ModelSet & mod, physical_set_type_tag );
 
     // deleted
    template <typename Model>

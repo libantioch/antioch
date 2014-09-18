@@ -33,18 +33,24 @@
 namespace Antioch
 {
    // init
-   template <typename Model>
-   void physical_set_initialize(Model & mod, default_physical_tag ){mod = NULL;}
+   template <typename ModelSet>
+   void physical_set_initialize(ModelSet & mod, default_physical_tag ){mod.set() = NULL;}
 
-   template <typename Model>
-   void physical_set_initialize(Model & mod, physical_set_type_tag ){}
+   template <typename ModelSet>
+   void physical_set_initialize(ModelSet & mod, physical_set_type_tag ){mod.set().resize(mod.mixture().n_species(),NULL);}
 
    // delete
    template <typename Model>
    void physical_set_delete(Model & set, default_physical_tag) {delete set;}
 
    template <typename Model>
-   void physical_set_delete(Model & set, physical_set_tag) {}
+   void physical_set_delete(Model & set, physical_set_tag)
+   {
+      for(set::iterator it = set.begin(); it != set.end(); ++it)
+      {
+         delete (*it);
+      }
+   }
 
    // add general model
    template <typename Model, typename InitType>
@@ -63,7 +69,7 @@ namespace Antioch
    template <typename Model, typename InitType>
    void physical_set_add(unsigned int s, SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, physical_set_tag)
    {
-      set.push_back(Model(init));
+      set[s] = new Model(init);
    }
 
    // reset general model
@@ -83,7 +89,7 @@ namespace Antioch
    template <typename Model, typename InitType>
    void physical_set_reset(unsigned int s, Model & set, const InitType & init, physical_set_tag)
    {
-      set[s].reset_coeffs(init);
+      set[s]->reset_coeffs(init);
    }
 
    template<typename Model, typename StateType>
