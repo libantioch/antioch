@@ -15,15 +15,19 @@ namespace Antioch
 
    // getting tag
    template <typename CoeffType>
-   struct physical_tag_type<BlottnerViscosity<CoeffType> >;
+   struct physical_tag<BlottnerViscosity<CoeffType> >;
 
    // physical set boolean
    template<typename CoeffType>
    struct is_physical_set<BlottnerViscosity<CoeffType> >;
 
+     // operator one species
+   template<typename Model, typename StateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType &k, blottner_viscosity_tag);
+
+     // operator full mixture
    template<typename Model, typename StateType, typename VectorStateType>
-   ANTIOCH_AUTO(StateType) 
-        physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, blottner_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, blottner_viscosity_tag);
 }
 
 #endif

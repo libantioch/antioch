@@ -15,15 +15,19 @@ namespace Antioch
 
    // getting tag
    template <typename CoeffType>
-   struct physical_tag_type<SutherlandViscosity<CoeffType> >;
+   struct physical_tag<SutherlandViscosity<CoeffType> >;
 
    // physical set boolean
    template<typename CoeffType>
    struct is_physical_set<SutherlandViscosity<CoeffType> >;
 
+   // species
+   template<typename Model, typename StateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType & mu, sutherland_viscosity_tag);
+
+   // mixture
    template<typename Model, typename StateType, typename VectorStateType>
-   ANTIOCH_AUTO(StateType) 
-        physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, sutherland_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, sutherland_viscosity_tag);
 }
 
 #endif

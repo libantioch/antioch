@@ -5,6 +5,7 @@
 #ifndef ANTIOCH_SUTHERLAND_VISCOSITY_UTILS_H
 #define ANTIOCH_SUTHERLAND_VISCOSITY_UTILS_H
 
+#include "antioch/antioch_asserts.h"
 #include "antioch/sutherland_viscosity_utils_decl.h"
 
 namespace Antioch
@@ -12,9 +13,32 @@ namespace Antioch
 // Sutherland
    // getting tag
    template <typename CoeffType>
-   struct physical_tag_type<SutherlandViscosity<CoeffType> >
+   struct physical_tag<SutherlandViscosity<CoeffType> >
    {
+      typedef SutherlandViscosity<CoeffType> Model;
       typedef sutherland_viscosity_tag type;
+        // kind of set tag
+     typedef typename if_else_type<is_physical_set<Model>::value,
+                                     default_physical_set_tag,
+                                     default_physical_tag
+                                   >::type set_type;
+        // some models require specific initialization
+        // (typically automatic initialization)
+     typedef typename if_else_type<is_physical_set<Model>::value,
+                                     default_physical_set_tag,
+                                     default_physical_tag
+                                   >::type init_type;
+        // some models require specific initialization
+        // but not specific deletion
+     typedef typename if_else_type<is_physical_set<Model>::value,
+                                     default_physical_set_tag,
+                                     default_physical_tag
+                                   >::type del_type;
+        // for operators, diffusion is special, see comment below
+     typedef sutherland_viscosity_tag viscosity_type;
+     typedef default_physical_tag     diffusion_species_type;
+     typedef default_physical_tag     diffusion_mixture_type;
+     typedef default_physical_tag     thermal_conductivity_type;
    };
 
    // physical set boolean
@@ -24,10 +48,22 @@ namespace Antioch
       static const bool value = true;
    };
 
+   template<typename Model, typename StateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType & mu, sutherland_viscosity_tag)
+   {
+        mu = (*set[s])(T);
+   }
+
    template<typename Model, typename StateType, typename VectorStateType>
-   ANTIOCH_AUTO(StateType) 
-        physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, sutherland_viscosity_tag)
-   ANTIOCH_AUTOFUNC(StateType,set[s](T))
+   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, sutherland_viscosity_tag)
+   {
+      antioch_assert_equal_to(mu.size(), set.size());
+
+      for(unsigned int s = 0; s < mu.size(); s++)
+      {
+          mu[s] = (*set[s])(T);
+      }
+   }
 }
 
 
