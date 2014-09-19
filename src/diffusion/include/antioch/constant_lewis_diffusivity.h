@@ -46,7 +46,6 @@ namespace Antioch
   protected:
 
     CoeffType _Le;
-    const DiffusionModel _model;
     
   public:
     
@@ -54,6 +53,11 @@ namespace Antioch
     ConstantLewisDiffusivity( const std::vector<CoeffType> & coefs );
 
     ~ConstantLewisDiffusivity() {}
+
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    operator()( const StateType& rho, const StateType& cp, const StateType& k ) const
+    ANTIOCH_AUTOFUNC(StateType, _Le * k / (rho * cp) )
 
     template<typename StateType>
     ANTIOCH_AUTO(StateType)

@@ -5,15 +5,29 @@
 #ifndef ANTIOCH_MOLECULAR_BINARY_DIFFUSION_UTILS_H
 #define ANTIOCH_MOLECULAR_BINARY_DIFFUSION_UTILS_H
 
+#include "antioch/transport_species.h"
 #include "antioch/molecular_binary_diffusion_utils_decl.h"
 
 namespace Antioch
 {
    // getting tag
    template <typename CoeffType, typename Interpolator>
-   struct physical_tag_type<MolecularBinaryDiffusion<CoeffType,Interpolator> >
+   struct physical_tag<MolecularBinaryDiffusion<CoeffType,Interpolator> >
    {
       typedef bimolecular_diffusion_tag type;
+        // kind of set tag
+     typedef bimolecular_diffusion_tag set_type;
+        // some models require specific initialization
+        // (typically automatic initialization)
+     typedef bimolecular_diffusion_tag init_type;
+        // some models require specific initialization
+        // but not specific deletion
+     typedef bimolecular_diffusion_tag del_type;
+        // for operators, diffusion is special, see comment below
+     typedef default_physical_tag      viscosity_type;
+     typedef bimolecular_diffusion_tag diffusion_species_type;
+     typedef default_physical_tag      diffusion_mixture_type;
+     typedef default_physical_tag      thermal_conductivity_type;
    };
 
    // physical set boolean
@@ -23,54 +37,76 @@ namespace Antioch
       static const bool value = true;
    };
 
+        // special set
    template <typename CoeffType, typename Interpolator>
    struct SetOrEquation<MolecularBinaryDiffusion<CoeffType,Interpolator>,true>
    {
-      typedef std::vector<std::vector<BinaryDiffusion<CoeffType,Interpolation> >* > type;
+      typedef std::vector<std::vector<BinaryDiffusion<CoeffType,Interpolation>* > > type;
    }
 
-   // we can initialize without the user's help,
-   // so we tag the physical_set_tag:
-   // we need to define 
-   // physical_set_initialize
-   // physical_set_delete
-   // physical_set_add
-   // physical_set_reset
-   // but not the default ones that are not concerned
-   template <typename CoeffType, typename Interpolator>
-   struct physical_set_tag<MolecularBinaryDiffusion<CoeffType,Interpolator> >
-   {
-     typedef typename molecular_binary_diffusion_tag type;
-   };
+   // initializer
+  template<typename CoeffType, typename Interpolator>
+  struct Initializer<MolecularBinaryDiffusion<CoeffType,Interpolator> >
+  {
+     unsigned int j;
+     TransportSpecies<CoeffType> & si;
+     TransportSpecies<CoeffType> & sj;
+  };
 
    // we can initialize without the user's help
    template <typename ModelSet>
    void physical_set_initialize(ModelSet & mod, molecular_binary_diffusion_tag )
    {
+      mod.set().resize(mod.mixture().n_species());
+      for(unsigned int i = 0; i < mod.set().size(); i++)
+      {
+          mod.set()[i].resize(i,NULL);
+      }
       build_molecular_binary_diffusion(mod);
    }
 
-   template <typename ModelSet>
-   void physical_set_delete(ModelSet & mod, molecular_binary_diffusion_tag )
+
+   template <typename Model, typename InitType>
+   void physical_set_add(Model & set, const InitType & init, bimolecular_diffusion_tag){}
+
+   template <typename Model, typename InitType>
+   void physical_set_add(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, molecular_binary_diffusion_tag)
+   {
+     antioch_assert_less(s,set.size());
+     antioch_assert_less(init.j,set[s].size());
+     antioch_assert(!set[s][init.j]);
+
+     set[s][init.j] = new Model(init.si,init.sj);
+   }
+
+
+   template <typename Model, typename InitType>
+   void physical_set_reset(Model & set, const InitType & init, bimolecular_diffusion_tag)
    {}
 
    template <typename Model, typename InitType>
-   void physical_set_add(unsigned int s, SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, molecular_binary_diffusion_tag)
+   void physical_set_reset(unsigned int s, SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, molecular_binary_diffusion_tag)
    {
-     antioch_assert(!set[s]);
-     set[s] = new Model(init);
+     set[s][init.j]->reset_coeffs(init.si,init.sj);
    }
 
-   template <typename Model, typename InitType>
-   void physical_set_rest(unsigned int s, SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, molecular_binary_diffusion_tag)
+   template <typename Model>
+   void physical_set_print(SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const std::map<unsigned int, std::string>& spec, std::ostream & out, bimolecular_diffusion_tag)
    {
-     set[s]->reset_coeffs(init);
-   }
+        out << "Bimolecular diffusion" << std::endl;
 
+        for(unsigned int s = 0; s < spec.size(); ++s)
+        {
+            for(unsigned int j = 0; j <= s; ++j)
+            {
+                out << spec.at(s) << ":" << spec.at(j) << " " << *set[s][j] << std::endl;
+            }
+        }
+   }
 
 
    template<typename Model, typename StateType, typename MatrixStateType>
-   void physical_set_operator_diffusion_comes_first(const Model & set, const StateType & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag)
+   void physical_set_operator_diffusion(const Model & set, const StateType & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag)
    {
        antioch_assert_equal_to(Ds.size(),set.size());
 
@@ -85,15 +121,11 @@ namespace Antioch
        }
    }
 
-   template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_diffusion_comes_first(const Model & set, const StateType & T, const StateType & cTot, VectorStateType & Ds, bimolecular_diffusion_second_tag)
+   template<typename Model, typename StateType>
+   void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_second_tag)
    {
        antioch_assert_equal_to(Ds.size(),set.size());
-
-       for(unsigned int i = 0; i < Ds.size(); i++)
-       {
-             Ds[i] = _set[i][i](T,cTot);
-       }
+       Ds = _set[s][s](T,cTot);
    }
 
         // template around mixture mainly to avoid 
@@ -107,7 +139,7 @@ namespace Antioch
        antioch_assert(ds.size(),mass_fractions.size());
 
        VectorStateType molar_fractions = zero_clone(mass_fractions);
-       _transport_mixture.chemical_mixture().X(_transport_mixture.chemical_mixture().M(mass_fractions),mass_fractions,molar_fractions);
+       _mixture.X(_mixture.M(mass_fractions),mass_fractions,molar_fractions);
 
        for(unsigned int s = 0; s < ds.size(); s++)
        {
