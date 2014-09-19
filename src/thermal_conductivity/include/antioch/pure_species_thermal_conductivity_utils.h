@@ -13,29 +13,15 @@ namespace Antioch
 {
    // getting tag
    template <typename CoeffType>
-   struct physical_tag<PureSpeciesThermalConductivity<CoeffType> >
+   struct physical_tag<PureSpeciesThermalConductivity<CoeffType> >:
+        public physical_tag_base<PureSpeciesThermalConductivity<CoeffType> >
    {
-      typedef PureSpeciesThermalConductivity<CoeffType> Model;
       typedef pure_species_thermal_conductivity_tag type;
-        // kind of set tag
-     typedef typename if_else_type<is_physical_set<Model>::value,
-                                     default_physical_set_tag,
-                                     default_physical_tag
-                                   >::type set_type;
         // some models require specific initialization
         // (typically automatic initialization)
      typedef pure_species_thermal_conductivity init_type;
-        // some models require specific initialization
-        // but not specific deletion
-     typedef typename if_else_type<is_physical_set<Model>::value,
-                                     default_physical_set_tag,
-                                     default_physical_tag
-                                   >::type del_type;
         // for operators, diffusion is special, see comment below
-     typedef default_physical_tag viscosity_type;
-     typedef default_physical_tag diffusion_species_type;
-     typedef default_physical_tag diffusion_mixture_type;
-     typedef default_physical_tag thermal_conductivity_type;
+     typedef pure_species_thermal_conductivity thermal_conductivity_type;
    };
 
    // physical set boolean

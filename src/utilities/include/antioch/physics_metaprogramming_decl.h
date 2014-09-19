@@ -47,9 +47,9 @@ namespace Antioch
    struct default_physical_set_tag {};
 
 // gives the tag of the model for any interesting
-// action
+// action, base class so we don't rewrite everything
    template <typename Model, typename Enable = void>
-   struct physical_tag
+   struct physical_tag_base
    {
         // tag
      typedef default_physical_tag type;
@@ -76,6 +76,10 @@ namespace Antioch
      typedef default_physical_tag diffusion_mixture_type;
      typedef default_physical_tag thermal_conductivity_type;
    };
+
+   template <typename Model, typename Enable = void>
+   struct physical_tag: public physical_tag_base<Model,Enable>
+   {};
 
    /* Whether we have an equation
       for every species, or we need

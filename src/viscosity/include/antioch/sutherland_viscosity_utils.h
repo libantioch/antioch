@@ -13,32 +13,12 @@ namespace Antioch
 // Sutherland
    // getting tag
    template <typename CoeffType>
-   struct physical_tag<SutherlandViscosity<CoeffType> >
+   struct physical_tag<SutherlandViscosity<CoeffType> >:
+        public physical_tag_base<SutherlandViscosity<CoeffType> >
    {
-      typedef SutherlandViscosity<CoeffType> Model;
       typedef sutherland_viscosity_tag type;
-        // kind of set tag
-     typedef typename if_else_type<is_physical_set<Model>::value,
-                                     default_physical_set_tag,
-                                     default_physical_tag
-                                   >::type set_type;
-        // some models require specific initialization
-        // (typically automatic initialization)
-     typedef typename if_else_type<is_physical_set<Model>::value,
-                                     default_physical_set_tag,
-                                     default_physical_tag
-                                   >::type init_type;
-        // some models require specific initialization
-        // but not specific deletion
-     typedef typename if_else_type<is_physical_set<Model>::value,
-                                     default_physical_set_tag,
-                                     default_physical_tag
-                                   >::type del_type;
         // for operators, diffusion is special, see comment below
      typedef sutherland_viscosity_tag viscosity_type;
-     typedef default_physical_tag     diffusion_species_type;
-     typedef default_physical_tag     diffusion_mixture_type;
-     typedef default_physical_tag     thermal_conductivity_type;
    };
 
    // physical set boolean

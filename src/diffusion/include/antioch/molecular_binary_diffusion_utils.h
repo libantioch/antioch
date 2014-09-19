@@ -12,7 +12,8 @@ namespace Antioch
 {
    // getting tag
    template <typename CoeffType, typename Interpolator>
-   struct physical_tag<MolecularBinaryDiffusion<CoeffType,Interpolator> >
+   struct physical_tag<MolecularBinaryDiffusion<CoeffType,Interpolator> >:
+        public physical_tag_base<MolecularBinaryDiffusion<CoeffType,Interpolator> >
    {
       typedef bimolecular_diffusion_tag type;
         // kind of set tag
@@ -24,10 +25,7 @@ namespace Antioch
         // but not specific deletion
      typedef bimolecular_diffusion_tag del_type;
         // for operators, diffusion is special, see comment below
-     typedef default_physical_tag      viscosity_type;
      typedef bimolecular_diffusion_tag diffusion_species_type;
-     typedef default_physical_tag      diffusion_mixture_type;
-     typedef default_physical_tag      thermal_conductivity_type;
    };
 
    // physical set boolean
