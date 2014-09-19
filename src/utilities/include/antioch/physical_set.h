@@ -5,87 +5,244 @@
 #ifndef ANTIOCH_PHYSICAL_SET_H
 #define ANTIOCH_PHYSICAL_SET_H
 
-namespace
+// Antioch
+#include "antioch/physics_metaprogramming_decl.h"
+
+// C++
+#include <iostream>
+
+namespace Antioch
 {
   template<typename Physics, typename Mixture>
-  PhysicalSet
+  class  PhysicalSet
   {
       public:
-        PhysicalSet(const Mixture & mix):_mixture(mix)
-          {
-            physical_set_initialize(*this, physical_set_tag<Physics>::type());
-          }
+// always usable wherever
+        typedef Physics model;
 
-          ~PhysicalSet()
-          {
-            physical_set_delete(set, physical_set_tag<Physics>::type());
-          }
+        PhysicalSet(const Mixture & mix);
 
-        const Mixture & mixture() const {return _mixture;}
+        ~PhysicalSet();
+
+        const Mixture & mixture() const;
 
         // writable reference to the set
-              SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set()       {return _set;}
+        typename SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set();
 
         // const reference to the set
-        const SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set() const {return _set;}
+        const typename SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set() const;
 
         template <typename InitType>
-        void add_model(const std::string & species, const InitType & initMe)
-        {
-           
-           antioch_assert( _mixture.species_name_map().find(species_name) !=
-	        	   _mixture.species_name_map().end() );
-
-           unsigned int s = _mixture.species_name_map().find(species)->second;
-
-           physical_set_add(s, _set,initMe,physical_set_tag<Physics>::type());
-        }
+        void add_model(const std::string & species_name, const InitType & initMe);
 
         template <typename InitType>
-        void add_model(const InitType & initMe)
-        {
-           physical_set_add(_set,initMe,physical_set_tag<Physics>::type());
-        }
+        void add_model(const InitType & initMe);
 
         template <typename InitType>
-        void reset_model(unsigned int s, const InitType & coefs)
-        {
-           physical_set_reset(s,_set,initMe,physical_set_tag<Physics>::type());
-        }
+        void reset_model(unsigned int s, const InitType & initMe);
 
         template <typename InitType>
-        void reset_model(const InitType & coefs)
-        {
-           physical_set_reset(_set,initMe,physical_set_tag<Physics>::type());
-        }
+        void reset_model(const InitType & initMe);
 
+        // viscosity one species
         template<typename StateType>
-        ANTIOCH_AUTO(StateType) operator()(unsigned int s, const StateType & T) const 
-        ANTIOCH_AUTOFUNC(StateType, physical_set_operator_viscosity(_set,s,T,physical_tag<Physics>::type()))
+        void operator()(unsigned int s, const StateType & T, StateType & mu) const;
 
+        // viscosity full set
+        template<typename StateType, typename VectorStateType>
+        void operator()(const StateType & T, VectorStateType & mu) const;
+
+        // diffusion full set (set level, matrix)
         template<typename StateType, typename MatrixStateType>
-        void operator()(const StateType & T, const StateType & cTot, MatrixStateType & Ds) const 
-        {
-           physical_set_operator_diffusion_comes_first(_set, T, cTot, Ds, physical_tag<Physics>::type());
-        }
+        void operator()(const StateType & T, const StateType & cTot, MatrixStateType & Ds) const;
 
+        // diffusion self coefficient
         template<typename StateType>
-        void operator()(unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, StateType & k) const
-        {
-           physical_set_operator_thermal_conductivity(_set, s, mu, dss, T, rho, k, physical_tag<Physics>::type());
-        }
+        void operator()(unsigned int s, const StateType & T, const StateType & cTot, StateType & dss) const;
 
-        template<typename StateType, typename ThermoEvaluator>
-        void operator()(const StateType & cp, const StateType & k, StateType & ds) const
+        // diffusion species (mixture level, scalar)
+        template<typename StateType>
+        void operator()(const StateType & rho, const StateType & cp, const StateType & k, StateType & ds) const;
+
+        // diffusion full set (mixture level, species)
+        template<typename StateType, typename VectorStateType>
+        void operator()(const StateType & rho, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds) const;
+
+        // thermal conduction one species
+        template<typename StateType>
+        void operator()(unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, StateType & k) const;
+
+        // thermal conduction full set
+        template<typename StateType, typename VectorStateType>
+        void operator()(const VectorStateType & mu, const VectorStateType & dss, const StateType & T, const StateType & rho, VectorStateType & k) const;
+
+        void print(std::ostream & out = std::cout) const;
+
+        friend std::ostream & operator<< (std::ostream & out, const PhysicalSet<Physics,Mixture> & physical_set )
         {
-           physical_set_operator_diffusion_comes_last(_set, cp, k, ds, physical_tag<Physics>::type());
+            physical_set.print(out);
+            return out;
         }
+        
 
       private:
         const Mixture & _mixture;
-        SetOrEquation<Physics, is_physical_set<Physics>::value>::type _set;
+        typename SetOrEquation<Physics,is_physical_set<Physics>::value>::type _set;
   };
 
+  template<typename Physics, typename Mixture>
+  inline
+  PhysicalSet<Physics,Mixture>::PhysicalSet(const Mixture & mix):_mixture(mix)
+  {
+    physical_set_initialize(*this, typename physical_tag<Physics>::init_type ());
+  }
+
+  template<typename Physics, typename Mixture>
+  inline
+  PhysicalSet<Physics,Mixture>::~PhysicalSet()
+  {
+    physical_set_delete(*this, typename physical_tag<Physics>::del_type());
+  }
+
+  template<typename Physics, typename Mixture>
+  inline
+  const Mixture & PhysicalSet<Physics,Mixture>::mixture() const
+  {
+    return _mixture;
+  }
+
+        // writable reference to the set
+  template<typename Physics, typename Mixture>
+  inline
+  typename SetOrEquation<Physics, is_physical_set<Physics>::value>::type & PhysicalSet<Physics,Mixture>::set()
+  {
+    return _set;
+  }
+
+        // const reference to the set
+  template<typename Physics, typename Mixture>
+  inline
+  const typename SetOrEquation<Physics, is_physical_set<Physics>::value>::type & PhysicalSet<Physics,Mixture>::set() const 
+  {
+    return _set;
+  }
+
+  template<typename Physics, typename Mixture>
+  template <typename InitType>
+  inline
+  void PhysicalSet<Physics,Mixture>::add_model(const std::string & species_name, const InitType & initMe)
+  {
+           
+     antioch_assert( _mixture.species_name_map().find(species_name) !=
+                     _mixture.species_name_map().end() );
+
+     unsigned int s = _mixture.species_name_map().find(species_name)->second;
+
+     physical_set_add<Physics>(s, _set, initMe, typename physical_tag<Physics>::set_type());
+  }
+
+  template<typename Physics, typename Mixture>
+  template <typename InitType>
+  inline
+  void PhysicalSet<Physics,Mixture>::add_model(const InitType & initMe)
+  {
+    physical_set_add<Physics>(_set, initMe, typename physical_tag<Physics>::set_type());
+  }
+
+  template<typename Physics, typename Mixture>
+  template <typename InitType>
+  inline
+  void PhysicalSet<Physics,Mixture>::reset_model(unsigned int s, const InitType & initMe)
+  {
+    physical_set_reset(s, _set, initMe, typename physical_tag<Physics>::set_type());
+  }
+
+  template<typename Physics, typename Mixture>
+  template <typename InitType>
+  inline
+  void PhysicalSet<Physics,Mixture>::reset_model(const InitType & initMe)
+  {
+    physical_set_reset(_set, initMe, typename physical_tag<Physics>::set_type());
+  }
+
+  template<typename Physics, typename Mixture>
+  inline
+  void PhysicalSet<Physics,Mixture>::print(std::ostream & out) const
+  {
+    physical_set_print(_set, _mixture.species_inverse_name_map(), out, typename physical_tag<Physics>::set_type());  
+  }
+
+  // viscosity one
+  template<typename Physics, typename Mixture>
+  template<typename StateType>
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const StateType & T, StateType & mu) const
+  {
+     physical_set_operator_viscosity(_set,s,T, mu, typename physical_tag<Physics>::viscosity_type());
+  }
+
+  // viscosity full
+  template<typename Physics, typename Mixture>
+  template<typename StateType, typename VectorStateType >
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(const StateType & T, VectorStateType &mu) const
+  {
+      physical_set_operator_viscosity(_set,T,mu, typename physical_tag<Physics>::viscosity_type());
+  }
+
+  // diffusion full
+  template<typename Physics, typename Mixture>
+  template<typename StateType, typename MatrixStateType>
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(const StateType & T, const StateType & cTot, MatrixStateType & Ds) const 
+  {
+    physical_set_operator_diffusion(_set, T, cTot, Ds, typename physical_tag<Physics>::diffusion_species_type());
+  }
+
+  // diffusion self-diffusion
+  template<typename Physics, typename Mixture>
+  template<typename StateType>
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const StateType & T, const StateType & cTot, StateType & dss) const 
+  {
+    physical_set_operator_diffusion(s,_set, T, cTot, dss, typename physical_tag<Physics>::diffusion_species_type());
+  }
+
+  // diffusion one, mixture level
+  template<typename Physics, typename Mixture>
+  template<typename StateType>
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(const StateType & rho, const StateType & cp, const StateType & k, StateType & ds) const
+  {
+    physical_set_operator_diffusion(_set, rho, cp, k, ds, typename physical_tag<Physics>::diffusion_mixture_type());
+  }
+
+  // diffusion full, mixture level
+  template<typename Physics, typename Mixture>
+  template<typename StateType, typename VectorStateType>
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(const StateType & rho, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds) const
+  {
+    physical_set_operator_diffusion(_set, rho, cp, k, ds, typename physical_tag<Physics>::diffusion_mixture_type());
+  }
+
+  // thermal conductivity one
+  template<typename Physics, typename Mixture>
+  template<typename StateType>
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, StateType & k) const
+  {
+    physical_set_operator_thermal_conductivity(_set, s, mu, dss, T, rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
+  }
+
+  // thermal conductivity full
+  template<typename Physics, typename Mixture>
+  template<typename StateType, typename VectorStateType>
+  inline
+  void PhysicalSet<Physics,Mixture>::operator()(const VectorStateType & mu, const VectorStateType & dss, const StateType & T, const StateType & rho, VectorStateType & k) const
+  {
+    physical_set_operator_thermal_conductivity(_set, mu, dss, T, rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
+  }
 }
 
 #endif
