@@ -15,13 +15,22 @@ namespace Antioch
   struct eucken_thermal_conductivity_tag{};
 
   // getting the tag
-  template <typename ThermoEvaluator, typename CoeffType>
-  struct physical_tag<EuckenThermalConductivity<ThermoEvaluator, CoeffType> >;
+  template <typename ThermoEvaluator>
+  struct physical_tag<EuckenThermalConductivity<ThermoEvaluator> >;
 
-  // not a physical set
-   template<typename Model, typename StateType, typename VectorStateType>
-   void  physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & /*dss*/, const StateType & T, const StateType & /*rho*/, 
-                                                    StateType & k, eucken_thermal_conductivity_tag);
+  // we can initialize on our own
+   template <typename Model>
+   void physical_set_initialize(Model & mod, eucken_thermal_conductivity_tag);
+
+   //species
+  template<typename Model, typename StateType>
+  void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & /*dss*/, const StateType & T, const StateType & /*rho*/, 
+                                                   StateType &k, eucken_thermal_conductivity_tag);
+
+  // mixture
+  template<typename Model, typename StateType, typename VectorStateType>
+  void  physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & /*dss*/, const StateType & T, const StateType & /*rho*/, 
+                                                   VectorStateType & k, eucken_thermal_conductivity_tag);
 }
 
 #endif
