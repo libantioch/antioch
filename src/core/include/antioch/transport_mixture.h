@@ -51,7 +51,7 @@ namespace Antioch
   class TransportMixture
   {
 
-     typedef typename unsigned int Species;
+     typedef unsigned int Species;
 
   public:
     
@@ -99,49 +99,49 @@ namespace Antioch
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  unsigned int TransportMixture<CoeffType>::n_species() const
+  unsigned int TransportMixture<ThermoEvaluator,CoeffType>::n_species() const
   {
     return _chemical_mixture.n_species();
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  const std::vector<Species>& TransportMixture<CoeffType>::species_list() const
+  const std::vector<Species>& TransportMixture<ThermoEvaluator,CoeffType>::species_list() const
   { 
     return _chemical_mixture.species_list();
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  const std::map<Species,std::string>& TransportMixture<CoeffType>::species_inverse_name_map() const
+  const std::map<Species,std::string>& TransportMixture<ThermoEvaluator,CoeffType>::species_inverse_name_map() const
   {
     return _chemical_mixture.species_inverse_name_map();
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  const ChemicalMixture<CoeffType> & TransportMixture<CoeffType>::chemical_mixture() const
+  const ChemicalMixture<CoeffType> & TransportMixture<ThermoEvaluator,CoeffType>::chemical_mixture() const
   {
      return _chemical_mixture;
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  const ThermoEvaluator & TransportMixture<CoeffType>::thermo() const
+  const ThermoEvaluator & TransportMixture<ThermoEvaluator,CoeffType>::thermo() const
   {
      return _thermo;
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  const std::vector<TransportSpecies<CoeffType>*>& TransportMixture<CoeffType>::transport_species() const
+  const std::vector<TransportSpecies<CoeffType>*>& TransportMixture<ThermoEvaluator,CoeffType>::transport_species() const
   {
     return _transport_species;
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  TransportMixture<CoeffType>::TransportMixture( const ChemicalMixture<CoeffType>& chem_mix, const ThermoEvaluator & t, const std::string & filename )
+  TransportMixture<ThermoEvaluator,CoeffType>::TransportMixture( const ChemicalMixture<CoeffType>& chem_mix, const ThermoEvaluator & t, const std::string & filename )
     : _chemical_mixture( chem_mix),
       _thermo(t),
       _transport_species(_chemical_mixture.n_species(), NULL )
@@ -168,7 +168,7 @@ namespace Antioch
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  TransportMixture<CoeffType>::~TransportMixture()
+  TransportMixture<ThermoEvaluator,CoeffType>::~TransportMixture()
   {
     // Clean up all the TransportSpecies we stored
     for( typename std::vector<TransportSpecies<CoeffType>* >::iterator it = _transport_species.begin();
@@ -182,7 +182,7 @@ namespace Antioch
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  void TransportMixture<CoeffType>::add_species( const unsigned int index,
+  void TransportMixture<ThermoEvaluator,CoeffType>::add_species( const unsigned int index,
                                                 CoeffType LJ_depth,
                                                 CoeffType LJ_diameter,
                                                 CoeffType dipole_moment,
