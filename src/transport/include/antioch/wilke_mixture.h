@@ -33,58 +33,64 @@
 
 // Antioch
 #include "antioch/physics_metaprogramming_decl.h"
+#include "antioch/temp_cache.h"
+#include "antioch/cmath_shims.h"
 
 // C++
 #include <vector>
 
 namespace Antioch
 {
-// Forward declarations
-
-  template<class CoeffType>
-  class TransportMixture;
-
-  template<class CoeffType>
-  class TempCache;
-
-  template<class Diffusion, class Viscosity, class ThermalConduction,
-           class CoeffType=double>
+  /*
+      This somewhat ridicule thermodynamics
+      construct is because StatMechThermodynamics
+      can't give cp, and NASA9 can't give
+      the vibrational, translational, etc.,
+      parts of this same quantity.
+      Notice that the internal R used is the
+      massic one, thus Cp is in J/kg/K
+  */
+  template<class Diffusion, class Viscosity, class ThermalConduction, // physics
+           class Mixture, class ThermoEvaluator,                      // mixture + thermo
+           class CoeffType = double>                                  // type
   class WilkeMixture
   {
   public:
 
     WilkeMixture( const Diffusion & diffusion, const Viscosity & viscosity, 
                   const ThermalConduction & thermal_conduction,
-                  const TransportMixture<CoeffType>& transport_mixture );
+                  const Mixture & transport_mixture,
+                  const ThermoEvaluator & thermo_eval );
     ~WilkeMixture();
 
-    const TransportMixture<CoeffType>& transport_mixture() const; // contains the thermo
+    const Mixture & transport_mixture() const; // contains the detailed thermo for species
 
-    const PhysicalSet<Diffusion> & diffusion() const;
+    const ThermoEvaluator & thermo_evaluator() const; // contains the non detailed thermo for mixture
 
-    const PhysicalSet<Viscosity> & viscosity() const;
+    const Diffusion & diffusion() const;
 
-    const PhysicalSet<ThermalConduction> & thermal_conduction() const;
+    const Viscosity & viscosity() const;
+
+    const ThermalConduction & thermal_conduction() const;
 
     template <typename StateType, typename VectorStateType>
-    void D(unsigned int s, const StateType & T, const StateType & cTot, const VectorStateType & mass_fractions, const StateType mu, VectorStateType & ds) const;
+    void D(const StateType & T, const StateType & rho, const StateType & cTot, 
+           const VectorStateType & mass_fractions, const VectorStateType & mu, VectorStateType & ds) const;
 
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
-     mu(unsigned int s, const StateType & T) const
-     ANTIOCH_AUTOFUNC(StateType, _viscosity_set(s,T,typename physical_tag<Viscosity>::type))
+    mu(unsigned int s, const StateType & T) const;
 
     template <typename StateType, typename VectorStateType>
-    void  mu(const StateType & T, VectorStateType & mu) const;
+    void mu(const StateType & T, VectorStateType & mu) const;
 
     template <typename StateType, typename VectorStateType>
-    const StateType k(unsigned int s, const StateType & mu, const StateType & T, const StateType &rho, const VectorStateType & mass_fractions) const;
+    const StateType k(unsigned int s, const StateType & mu, const StateType & T, const VectorStateType & mass_fractions, const StateType &rho = 0) const;
 
-    template <typename StateType, Typename VectorStateType>
-    void D_and_k(const StateType & mu, unsigned int s, const StateType & T, const VectorStateType & mass_fractions, 
-                       VectorStateType & k, VectorStateType & D) const;
+    template <typename StateType, typename VectorStateType>
+    void D_and_k(const VectorStateType & mu, const StateType & T, const StateType & rho, 
+                 const VectorStateType & mass_fractions, VectorStateType & k, VectorStateType & D) const;
 
-  protected:
 
     CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
                                        const unsigned int s ) const;
@@ -92,13 +98,17 @@ namespace Antioch
     CoeffType denominator( const unsigned int r,
                            const unsigned int s ) const;
 
-    const TransportMixture<CoeffType>& _transport_mixture;
+  protected:
 
-    const PhysicalSet<Diffusion>         & _diffusion_set;
+    const Mixture           & _transport_mixture;
 
-    const PhysicalSet<Viscosity>         & _viscosity_set;
+    const Diffusion         & _diffusion_set;
 
-    const PhysicalSet<ThermalConduction> & _thermal_conduction_set;
+    const Viscosity         & _viscosity_set;
+
+    const ThermalConduction & _thermal_conduction_set;
+
+    const ThermoEvaluator   & _thermo_evaluator;
 
     //! Cache for numerator term
     /*! \todo We should use a more efficient data structure */
@@ -110,14 +120,18 @@ namespace Antioch
 
   };
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
-  WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::WilkeMixture(const Diffusion & diffusion, const Viscosity & viscosity, 
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  inline
+  WilkeMixture<Diffusion,Viscosity,ThermalConduction,Mixture,ThermoEvaluator,CoeffType>::WilkeMixture(
+                                        const Diffusion & diffusion, const Viscosity & viscosity, 
                                         const ThermalConduction & thermal_conduction,
-                                        const TransportMixture<CoeffType>& transport_mixture )
+                                        const Mixture & transport_mixture,
+                                        const ThermoEvaluator & thermo_eval )
     : _transport_mixture(transport_mixture),
       _diffusion_set(diffusion),
       _viscosity_set(viscosity),
       _thermal_conduction_set(thermal_conduction),
+      _thermo_evaluator(thermo_eval),
       _Mr_Ms_to_the_one_fourth(_transport_mixture.n_species(), std::vector<CoeffType>(_transport_mixture.n_species())),
       _denom(_transport_mixture.n_species(), std::vector<CoeffType>(_transport_mixture.n_species()))
   {
@@ -126,10 +140,10 @@ namespace Antioch
       {
         for( unsigned int s = 0; s < transport_mixture.n_species(); s++ )
           {
-            const CoeffType Mr = _transport_mixture.M(r);
-            const CoeffType Ms = _transport_mixture.M(s);
+            const CoeffType Mr = _transport_mixture.chemical_mixture().M(r);
+            const CoeffType Ms = _transport_mixture.chemical_mixture().M(s);
 
-            _Mr_Ms_to_the_one_fourth[r][s] = ant_pow( Mr/Ms, Antioch::constant_clone(CoeffType,0.25) );
+            _Mr_Ms_to_the_one_fourth[r][s] = ant_pow( Mr/Ms, Antioch::constant_clone(CoeffType(),0.25) );
             _denom[r][s] = ant_sqrt(8.0L * (1.0L + Ms / Mr));
           }
       }
@@ -137,70 +151,74 @@ namespace Antioch
     return;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
-  WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::~WilkeMixture()
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  inline
+  WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::~WilkeMixture()
   {
     return;
   }
 
   
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   inline
-  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
+  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
                                                               const unsigned int s ) const
   {
     return _Mr_Ms_to_the_one_fourth[r][s];
   }
     
   
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   inline
-  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::denominator( const unsigned int r,
+  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::denominator( const unsigned int r,
                                                   const unsigned int s ) const
   {
     return _denom[r][s];
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
-  template <typename StateType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   inline
-  const ANTIOCH_AUTO(StateType) WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::k_trans(unsigned int s, const StateType & T, const StateType &rho) const
-  {
-     
-  }
-
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
-  inline
-  const TransportMixture<CoeffType>& WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::transport_mixture() const
+  const Mixture & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::transport_mixture() const
   {
     return _transport_mixture;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   inline
-  const PhysicalSet<Diffusion> & WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::diffusion() const
+  const Diffusion & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::diffusion() const
   {
-     return _diffusion;
+     return _diffusion_set;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   inline
-  const PhysicalSet<Viscosity> & WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::viscosity() const
+  const Viscosity & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::viscosity() const
   {
-     return _viscosity;
+     return _viscosity_set;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   inline
-  const PhysicalSet<ThermalConduction> & WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::thermal_conduction() const
+  const ThermalConduction & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::thermal_conduction() const
   {
-     return _thermal_conduction;
+     return _thermal_conduction_set;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template <typename StateType>
+  inline
+  const ANTIOCH_AUTO(StateType)
+    WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::mu(unsigned int s, const StateType & T) const
+  {
+     StateType mu = zero_clone(T);
+     _viscosity_set(s,T,mu);
+     return mu;
+  }
+
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::mu(const StateType & T, VectorStateType & mu) const
+  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture,ThermoEvaluator,CoeffType>::mu(const StateType & T, VectorStateType & mu) const
   {
       antioch_assert_equal_to(mu.size(),_transport_mixture.n_species());
       for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
@@ -209,39 +227,44 @@ namespace Antioch
       }
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, CoeffType>::D(const StateType & T, const StateType & cTot, const VectorStateType & mass_fractions, 
-                                                                           const StateType & mu, VectorStateType & ds) const
+  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, Mixture, ThermoEvaluator, CoeffType>::D(const StateType & T, const StateType & rho,
+                                                                           const StateType & cTot, const VectorStateType & mass_fractions, 
+                                                                           const VectorStateType & mu, VectorStateType & ds) const
   {
 // first way
 // TODO: if not needed, find a way to supress Ds building
      typename rebind<VectorStateType,VectorStateType>::type Ds(ds.size(),zero_clone(ds));
-     _diffusion_set(T,cTot,Ds, typename physical_tag<Diffusion>::type());
-     wilke_diffusion_rule(_transport_mixture.chemical_mixture(),mass_fractions,Ds,ds,physical_tag<Diffusion>::type());
+     _diffusion_set(T,cTot,Ds );
+     wilke_diffusion_rule(_transport_mixture.chemical_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
+
 // second way
 // TODO: if not needed, find a way to supress k building
-     StateType k = zero_clone(cTot);
+// TODO: Ds[s][s] not needed here
+     StateType k = zero_clone(T);
      for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
      {
-        _thermal_conduction_set(s,mu,D[s][s],T,rho,k, typename physical_tag<ThermalConduction>::type());
-        _diffusion_set(_transport_mixture.thermo().cp(TempCache(T),s), k[s], ds[s], typename physical_tag<Diffusion>::type());
+        _thermal_conduction_set(s,mu[s],Ds[s][s],T,rho,k);
+        _diffusion_set(_thermo_evaluator.cp(TempCache<StateType>(T),s), k, ds[s]);
      }
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConduction, class CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  const StateType WilkeMixture<Diffusion,Viscosity,ThermalConduction,CoeffType>::k(unsigned int s, const StateType & mu, const StateType & T, const StateType &rho, const VectorStateType & mass_fractions) const
+  const StateType WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::k(unsigned int s, const StateType & mu, 
+                                                                                   const StateType & T, const VectorStateType & mass_fractions, 
+                                                                                   const StateType &rho) const
   {
-     StateType k = zero_clone(T);
 // if needed
 // TODO: if not needed, find a way to supress Ds building
-     VectorStateType Ds = zero_clone(mass_fractions);
-     _diffusion_set(T,rho / _transport_mixture().chemical_mixture().M(mass_fractions),Ds, typename physical_tag<Diffusion>::second_type());
+     StateType Ds = zero_clone(T);
+     _diffusion_set(s,T,rho / _transport_mixture.chemical_mixture().M(mass_fractions),Ds);
 
-     _thermal_conduction_set(s,mu,D[s][s],T,rho,k, typename physical_tag<ThermalConduction>::type());
+     StateType k = zero_clone(T);
+     _thermal_conduction_set(s,mu,Ds,T,rho,k);
 
      return k;
   }
@@ -249,10 +272,12 @@ namespace Antioch
 
   // species mu and k
   // mixture D
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, CoeffType>::D_and_k(const VectorStateType & mu, const StateType & T, const StateType & rho, const VectorStateType & mass_fractions, 
-                                                                                       VectorStateType & k, VectorStateType & ds) const
+  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, Mixture, ThermoEvaluator, CoeffType>::D_and_k(const VectorStateType & mu, const StateType & T, const StateType & rho, 
+                                                                                                  const VectorStateType & mass_fractions, 
+                                                                                                        VectorStateType & k, VectorStateType & ds) const
   {
 
      antioch_assert_equal_to(ds.size(),mass_fractions.size());
@@ -261,17 +286,17 @@ namespace Antioch
 
 // diffusion comes first
 // TODO: if not needed, find a way to supress Ds building and cTot computation
-     VectorStateType Ds = zero_clone(mass_fractions);
-     _diffusion_set(T, rho / _transport_mixture().chemical_mixture().M(mass_fractions), Ds, typename physical_tag<Diffusion>::type());
-     wilke_diffusion_rule(_transport_mixture.chemical_mixture(), mass_fractions, Ds, ds, physical_tag<Diffusion>::type());
+     typename Antioch::rebind<VectorStateType,VectorStateType>::type Ds(mass_fractions.size(),zero_clone(mass_fractions));
+     _diffusion_set(T, rho / _transport_mixture.chemical_mixture().M(mass_fractions), Ds);
+     wilke_diffusion_rule(_transport_mixture.chemical_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
 
 // thermal conduction
     for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
-        _thermal_conduction_set(s,mu[s],Ds[s][s],T,rho,k[s], typename physical_tag<ThermalConduction>::type());
+         _thermal_conduction_set(s,mu[s],Ds[s][s],T,rho,k[s]);
 
 // diffusion comes last
     for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
-        _diffusion_set(_transport_mixture.thermo().cp(TempCache(T),s), k[s], ds[s], typename physical_tag<Diffusion>::type());
+        _diffusion_set(rho, _thermo_evaluator.cp(TempCache<StateType>(T),s), k[s], ds[s] );
   }
 
 
