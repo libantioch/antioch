@@ -37,18 +37,18 @@
 namespace Antioch{
 
   //Forward declaration
-  template <typename NumericType>
+  template <typename ThermoEvaluator, typename NumericType>
   class TransportMixture;
 
 
-  template <typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename);
+  template <typename ThermoEvaluator, typename NumericType>
+  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename);
 
 /*----------- inline functions ----------------*/
 
 
-  template <typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename)
+  template <typename ThermoEvaluator, typename NumericType>
+  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename)
   {
     std::ifstream in(filename.c_str());
     if(!in.is_open())
@@ -70,7 +70,7 @@ namespace Antioch{
     while (in.good())
       {
           in >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
-          if(transport.chemical_mixture().active_species_name_map().count(name))
+          if(transport.chemical_mixture().species_name_map().count(name))
           {
               unsigned int place = transport.chemical_mixture().species_name_map().at(name);
                 // TODO: better unit checking

@@ -46,7 +46,7 @@ namespace Antioch
 				   const std::string &filename);
  
   template<class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu );
+  void read_sutherland_data_ascii_default( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu );
 
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
@@ -97,7 +97,7 @@ namespace Antioch
   }
 
   template<class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu )
+  void read_sutherland_data_ascii_default( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu )
   {
     antioch_deprecated();
     read_sutherland_data_ascii(mu, DefaultFilename::sutherland_data());

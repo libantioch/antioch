@@ -29,14 +29,16 @@ namespace Antioch
   template<class NumericType, class Interpolator>
   void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolatir>, TransportMixture<NumericType> >& D)
   {
+     Initializer<MolecularBinaryDiffusion<Numeric> > init;
      for(unsigned int s = 0; s < D.mixture().n_species(); s++)
      {
-        std::vector<MolecularBinaryDiffusion<NumericType,Interpolator> > add;
+        init.si = D.mixture().transport_species()[s];
         for (unsigned int j = 0; j <= s; j++)
         {
-           add.push_back(MolecularBinaryDiffusion<NumericType,Interpolator>(D.mixture().transport_species()[s],D.mixture().transport_species()[j]));
+           init.j = j;
+           init.sj = D.mixture().transport_species()[j];
+           D.add_model(D.mixture().species_inverse_name_map().at(s),init);
         }
-        D.add_model(D.mixture().species_inverse_name_map().at(s),add);
      }
   }
 
