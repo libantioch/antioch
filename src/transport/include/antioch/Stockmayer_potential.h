@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -29,7 +31,6 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h"
 #include "antioch/cmath_shims.h"
-#include "antioch/polynomial_regression.h"
 
 //C++
 
@@ -46,9 +47,11 @@ namespace Antioch{
           StockmayerPotential();
           ~StockmayerPotential();
 
-          const std::vector<CoeffType> temperature() const {return _T;}
+          const std::vector<CoeffType> temperature()     const {return _T;}
 
-          const std::vector<CoeffType> delta()       const {return _delta;}
+          const std::vector<CoeffType> log_temperature() const {return _logT;}
+
+          const std::vector<CoeffType> delta()           const {return _delta;}
 
           const std::vector<std::vector<CoeffType> > omega_1_1() const {return _omega_1_1;}
           const std::vector<std::vector<CoeffType> > omega_2_2() const {return _omega_2_2;}
@@ -70,7 +73,7 @@ namespace Antioch{
           const unsigned int _T_size;
           const unsigned int _delta_size;
 
-          std::vector<CoeffType>               _T;
+          std::vector<CoeffType>               _T, _logT;
           std::vector<CoeffType>               _delta;
           std::vector<std::vector<CoeffType> > _omega_1_1;
           std::vector<std::vector<CoeffType> > _omega_2_2;
@@ -116,43 +119,43 @@ namespace Antioch{
      _delta[7] = 2.5;
 
     ///T
-     _T[0]  = ant_log(0.1);
-     _T[1]  = ant_log(0.2);
-     _T[2]  = ant_log(0.3);
-     _T[3]  = ant_log(0.4);
-     _T[4]  = ant_log(0.5);
-     _T[5]  = ant_log(0.6);
-     _T[6]  = ant_log(0.7);
-     _T[7]  = ant_log(0.8);
-     _T[8]  = ant_log(0.9);
-     _T[9]  = ant_log(1.0);
-     _T[10] = ant_log(1.2);
-     _T[11] = ant_log(1.4);
-     _T[12] = ant_log(1.6);
-     _T[13] = ant_log(1.8);
-     _T[14] = ant_log(2.0);
-     _T[15] = ant_log(2.5);
-     _T[16] = ant_log(3.0);
-     _T[17] = ant_log(3.5);
-     _T[18] = ant_log(4.0);
-     _T[19] = ant_log(5.0);
-     _T[20] = ant_log(6.0);
-     _T[21] = ant_log(7.0);
-     _T[22] = ant_log(8.0);
-     _T[23] = ant_log(9.0);
-     _T[24] = ant_log(10.0);
-     _T[25] = ant_log(12.0);
-     _T[26] = ant_log(14.0);
-     _T[27] = ant_log(16.0);
-     _T[28] = ant_log(18.0);
-     _T[29] = ant_log(20.0);
-     _T[30] = ant_log(25.0);
-     _T[31] = ant_log(30.0);
-     _T[32] = ant_log(35.0);
-     _T[33] = ant_log(40.0);
-     _T[34] = ant_log(50.0);
-     _T[35] = ant_log(75.0);
-     _T[36] = ant_log(100.0);
+     _T[0]  = (0.1);    _logT[0]  = ant_log(_T[0]);
+     _T[1]  = (0.2);    _logT[1]  = ant_log(_T[1]);
+     _T[2]  = (0.3);    _logT[2]  = ant_log(_T[2]);
+     _T[3]  = (0.4);    _logT[3]  = ant_log(_T[3]);
+     _T[4]  = (0.5);    _logT[4]  = ant_log(_T[4]);
+     _T[5]  = (0.6);    _logT[5]  = ant_log(_T[5]);
+     _T[6]  = (0.7);    _logT[6]  = ant_log(_T[6]);
+     _T[7]  = (0.8);    _logT[7]  = ant_log(_T[7]);
+     _T[8]  = (0.9);    _logT[8]  = ant_log(_T[8]);
+     _T[9]  = (1.0);    _logT[9]  = ant_log(_T[9]);
+     _T[10] = (1.2);    _logT[10] = ant_log(_T[10]);
+     _T[11] = (1.4);    _logT[11] = ant_log(_T[11]);
+     _T[12] = (1.6);    _logT[12] = ant_log(_T[12]);
+     _T[13] = (1.8);    _logT[13] = ant_log(_T[13]);
+     _T[14] = (2.0);    _logT[14] = ant_log(_T[14]);
+     _T[15] = (2.5);    _logT[15] = ant_log(_T[15]);
+     _T[16] = (3.0);    _logT[16] = ant_log(_T[16]);
+     _T[17] = (3.5);    _logT[17] = ant_log(_T[17]);
+     _T[18] = (4.0);    _logT[18] = ant_log(_T[18]);
+     _T[19] = (5.0);    _logT[19] = ant_log(_T[19]);
+     _T[20] = (6.0);    _logT[20] = ant_log(_T[20]);
+     _T[21] = (7.0);    _logT[21] = ant_log(_T[21]);
+     _T[22] = (8.0);    _logT[22] = ant_log(_T[22]);
+     _T[23] = (9.0);    _logT[23] = ant_log(_T[23]);
+     _T[24] = (10.0);   _logT[24] = ant_log(_T[24]);
+     _T[25] = (12.0);   _logT[25] = ant_log(_T[25]);
+     _T[26] = (14.0);   _logT[26] = ant_log(_T[26]);
+     _T[27] = (16.0);   _logT[27] = ant_log(_T[27]);
+     _T[28] = (18.0);   _logT[28] = ant_log(_T[28]);
+     _T[29] = (20.0);   _logT[29] = ant_log(_T[29]);
+     _T[30] = (25.0);   _logT[30] = ant_log(_T[30]);
+     _T[31] = (30.0);   _logT[31] = ant_log(_T[31]);
+     _T[32] = (35.0);   _logT[32] = ant_log(_T[32]);
+     _T[33] = (40.0);   _logT[33] = ant_log(_T[33]);
+     _T[34] = (50.0);   _logT[34] = ant_log(_T[34]);
+     _T[35] = (75.0);   _logT[35] = ant_log(_T[35]);
+     _T[36] = (100.0);  _logT[36] = ant_log(_T[36]);
 
      //// <omega(1,1)*>
      _omega_1_1[0][0]  = 4.0079;  _omega_1_1[0][1]  = 4.002;  _omega_1_1[0][2]  = 4.655;  _omega_1_1[0][3]  = 4.521;  _omega_1_1[0][4]  = 6.454;  _omega_1_1[0][5]  = 8.214;  _omega_1_1[0][6]  = 9.824;  _omega_1_1[0][7]  = 11.31; 
