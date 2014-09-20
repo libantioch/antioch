@@ -35,12 +35,19 @@
 const long double pi(3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825);
 
 template <typename Scalar>
-Scalar Z(const Scalar & x)
+Scalar F(const Scalar & x)
 {
   return 1.L + std::pow(pi,1.5)/2.L * std::sqrt(x) 
              + (pi*pi/4.L + 2.L) * x
              + std::pow(pi * x,1.5);
 }
+
+template <typename Scalar>
+Scalar Z(const Scalar & T, const Scalar & eps_kb, const Scalar & z_298)
+{
+  return z_298 * F(eps_kb / 298.L) / F(eps_kb / T);
+}
+
 
 template <typename Scalar>
 int tester()
@@ -51,23 +58,23 @@ int tester()
   const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
                       std::numeric_limits<Scalar>::epsilon() * 10;
 
-  Antioch::RotationalRelaxation<Scalar> rot;
-
   const Scalar eps_kb = 97.53L; // N2 value
+  const Scalar z_298 = 4.0L; // N2 value
+
+  Antioch::RotationalRelaxation<Scalar> rot(z_298,eps_kb);
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
-     Scalar x = eps_kb / T;
-     Scalar z = rot(x);
-     Scalar z_exact = Z(x);
+     Scalar z = rot(T);
+     Scalar z_exact = Z(T,eps_kb,z_298);
 
     if( abs( (z - z_exact)/z_exact) > tol )
       {
           std::cout << std::scientific << std::setprecision(16)
                     << "Error: Mismatch in rotational relaxation values." << std::endl
-                    << " T / eps = " << x << std::endl
+                    << " T = " << T << std::endl
                     << " z = " << z << std::endl
-                    << " z_exact = " << z << std::endl
+                    << " z_exact = " << z_exact << std::endl
                     << " relative error = " << std::abs(z - z_exact)/z_exact << std::endl
                     << " tolerance = " << tol << std::endl;
 
