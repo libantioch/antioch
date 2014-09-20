@@ -77,6 +77,7 @@ AC_ARG_WITH([n_runs],
 	    [n_runs=1])
 AC_DEFINE_UNQUOTED(N_RUNS, $n_runs, [number of runs done in each vector test])
 
+AX_PATH_GSL_NEW(1.10,yes)
 
 dnl--------------------------
 dnl Checks for third-party libraries
