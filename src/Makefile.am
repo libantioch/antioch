@@ -111,6 +111,7 @@ pkginclude_HEADERS += thermal_conductivity/include/antioch/eucken_thermal_conduc
 pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_thermal_conductivity.h
 pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_thermal_conductivity_utils.h
 pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_thermal_conductivity_utils_decl.h
+pkginclude_HEADERS += thermal_conductivity/include/antioch/rotational_relaxation.h
 
 # transport
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
