@@ -51,6 +51,7 @@ check_PROGRAMS += sigma_bin_converter_unit
 check_PROGRAMS += gsl_spline_unit
 check_PROGRAMS += pure_species_viscosity_unit
 check_PROGRAMS += rotational_relaxation_unit
+check_PROGRAMS += pure_species_thermal_conductivity_unit
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -130,6 +131,7 @@ sigma_bin_converter_unit_SOURCES = sigma_bin_converter_unit.C
 gsl_spline_unit_SOURCES = gsl_spline_unit.C
 pure_species_viscosity_unit_SOURCES = pure_species_viscosity_unit.C
 rotational_relaxation_unit_SOURCES = rotational_relaxation_unit.C
+pure_species_thermal_conductivity_unit_SOURCES = pure_species_thermal_conductivity_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -187,6 +189,7 @@ TESTS += sigma_bin_converter_unit.sh
 TESTS += gsl_spline_unit
 TESTS += pure_species_viscosity_unit
 TESTS += rotational_relaxation_unit
+TESTS += pure_species_thermal_conductivity_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen

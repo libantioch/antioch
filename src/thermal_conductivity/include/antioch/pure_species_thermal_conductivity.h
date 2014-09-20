@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -25,9 +27,10 @@
 #define ANTIOCH_PURE_SPECIES_THERMAL_CONDUCTIVITY_H
 
 //Antioch
-#include "antioch/antioch_assert.h"
+#include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h"
 #include "antioch/rotational_relaxation.h"
+#include "antioch/physics_metaprogramming_decl.h"
 
 //C++
 #include <vector>
@@ -35,20 +38,21 @@
 namespace Antioch{
 
   template <typename ThermoEvaluator, typename CoeffType>
-  class PurespeciesThermalConductivity
+  class PureSpeciesThermalConductivity
   {
       public:
 
-        PurespeciesThermalConductivity(const ThermoEvaluator & t, const CoeffType & Z_298K, const CoeffType & M, const CoeffType & LJ_depth);
+        PureSpeciesThermalConductivity(const ThermoEvaluator & t, const CoeffType & Z_298K, const CoeffType & M, const CoeffType & LJ_depth);
 
-        PurespeciesThermalConductivity(const Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> > & init);
+        PureSpeciesThermalConductivity(const Initializer< PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> > & init);
                                    
-        ~PurespeciesThermalConductivity();
+        ~PureSpeciesThermalConductivity();
 
         void reset_coeffs(const std::vector<CoeffType> & coeffs);
 
         template <typename StateType>
-        const StateType operator()(const StateType& mu, const StateType T, const StateType & rho, const StateType & Dss) const;
+        const ANTIOCH_AUTO(StateType) 
+                operator()(unsigned int s, const StateType& mu, const StateType T, const StateType & rho, const StateType & Dss) const;
 
         template <typename StateType>
         ANTIOCH_AUTO(StateType)
@@ -77,20 +81,18 @@ namespace Antioch{
         const
         ANTIOCH_AUTO(StateType)
          B(unsigned int s, const StateType & T, const StateType & rho_times_self_diff_over_mu) const  
-        ANTIOCH_AUTOFUNC(StateType,_rot(T,_LJ_depth) + two_over_pi * (five_over_three * _thermo.cv_rot(s) / Constants::R_universal<StateType>() +
-                                                    rho_times_self_diff_over_mu )
+        ANTIOCH_AUTOFUNC(StateType,_rot(T) + two_over_pi * (five_over_three * _thermo.cv_rot(s) / Constants::R_universal<StateType>() +
+                                                    rho_times_self_diff_over_mu ) )
 
 
         /*! never ever use it*/
-        PurespeciesThermalConductivity();
+        PureSpeciesThermalConductivity();
 
         const ThermoEvaluator & _thermo;
 
 //small enough
         RotationalRelaxation<CoeffType> _rot;
-
-        CoeffType                       _M;        // molar mass
-        CoeffType                       _LJ_depth; // Lennard-Jones depth
+        CoeffType  _M;        // molar mass
 
 //constants
         const CoeffType five_over_two;
@@ -102,11 +104,10 @@ namespace Antioch{
 
   template <typename ThermoEvaluator, typename CoeffType>
   inline
-  PurespeciesThermalConductivity<ThermoEvaluator,CoeffType>::PurespeciesThermalConductivity(const ThermoEvaluator & t, const CoeffType & Z_298K, const CoeffType & M, const CoeffType & LJ_depth):
+  PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>::PureSpeciesThermalConductivity(const ThermoEvaluator & t, const CoeffType & Z_298K, const CoeffType & LJ_depth, const CoeffType & M):
         _thermo(t),
-        _rot(Z_298K),
+        _rot(Z_298K,LJ_depth),
         _M(M),
-        _LJ_depth(LJ_depth),
         five_over_two(5.L/2.L),
         five_over_three(5.L/3.L),
         two_over_pi(2.L/Constants::pi<CoeffType>()),
@@ -117,11 +118,10 @@ namespace Antioch{
 
   template <typename ThermoEvaluator, typename CoeffType>
   inline
-  PurespeciesThermalConductivity<ThermoEvaluator,CoeffType>::PurespeciesThermalConductivity(const Initializor<PureSpeciesThermalConduction<ThermoEvaluator,CoeffType> > & init)
+  PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>::PureSpeciesThermalConductivity(const Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> > & init):
         _thermo(init.t),
-        _rot(init.Z_298K),
+        _rot(init.Z_298K,init.LJ_depth),
         _M(init.M),
-        _LJ_depth(init.LJ_depth),
         five_over_two(5.L/2.L),
         five_over_three(5.L/3.L),
         two_over_pi(2.L/Constants::pi<CoeffType>()),
@@ -132,17 +132,17 @@ namespace Antioch{
 
   template <typename ThermoEvaluator, typename CoeffType>
   inline
-  void PurespeciesThermalConductivity<ThermoEvaluator,CoeffType>::reset_coeffs(const std::vector<CoeffType> & coeffs)
+  void PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>::reset_coeffs(const std::vector<CoeffType> & coeffs)
   {
       antioch_assert_equal_to(coeffs.size(),3);
-      _rot      = coeffs[0];
-      _M        = coeffs[1];
-      _LJ_depth = coeffs[2];
+
+      _rot.reset_coeffs(coeffs[0],coeffs[1]);
+      _M        = coeffs[2];
   }
 
   template <typename ThermoEvaluator, typename CoeffType>
   inline
-  PurespeciesThermalConductivity<ThermoEvaluator,CoeffType>::~PurespeciesThermalConductivity()
+  PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>::~PureSpeciesThermalConductivity()
   {
      return;
   }
@@ -151,13 +151,16 @@ namespace Antioch{
   template <typename StateType>
   inline
   const ANTIOCH_AUTO(StateType) 
-        PurespeciesThermalConductivity<ThermoEvaluator,CoeffType>::operator()(const unsigned int s, const StateType& mu, const StateType T, const StateType & rho, const StateType & Dss) const
+        PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>::operator()(const unsigned int s, const StateType& mu, const StateType T, const StateType & rho, const StateType & Dss) const
   {
       StateType A_B = this->A(rho * Dss / mu) / this->B(s, T, rho * Dss / mu);
 
+     std::cout << "k_trans = " <<  ( mu  * _thermo.cv_trans(s) * five_over_two * (one - two_over_pi * _thermo.cv_rot(s) / _thermo.cv_trans(s) * A_B)) / _M << std::endl
+               << "k_rot = "   << rho * Dss  * ( _thermo.cv_rot(s) * (one + two_over_pi * A_B) ) / _M  << std::endl
+               << "k_vib = "   << rho * Dss  *   _thermo.cv_vib(s,T) /_M << std::endl << std::endl;
       return ( mu  * _thermo.cv_trans(s) * five_over_two * (one - two_over_pi * _thermo.cv_rot(s) / _thermo.cv_trans(s) * A_B) +
                rho * Dss  * ( _thermo.cv_rot(s) * (one + two_over_pi * A_B) +
-                              _thermo.cv_vib(s) ) ) /_M ;
+                              _thermo.cv_vib(s,T) ) ) /_M ;
   }
 
 } //end namespace Antioch
