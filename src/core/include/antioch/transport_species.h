@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -202,12 +204,12 @@ namespace Antioch
   template<typename CoeffType>
   inline
   TransportSpecies<CoeffType>::TransportSpecies( const Species name,
-                                               const CoeffType LJ_depth,
-                                               const CoeffType LJ_diameter,
-                                               const CoeffType dipole_moment,
-                                               const CoeffType polarizability,
-                                               const CoeffType rotational_relaxation,
-                                               const CoeffType mass)
+                                                 const CoeffType LJ_depth,
+                                                 const CoeffType LJ_diameter,
+                                                 const CoeffType dipole_moment,
+                                                 const CoeffType polarizability,
+                                                 const CoeffType rotational_relaxation,
+                                                 const CoeffType mass)
     : _name                  (name),
       _LJ                    (LJ_depth,LJ_diameter),
       _dipole_moment         (dipole_moment),

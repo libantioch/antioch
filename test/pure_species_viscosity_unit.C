@@ -69,8 +69,6 @@ int tester()
 
   Antioch::PureSpeciesViscosity<Scalar,Antioch::GSLSpliner> mu(LJ_depth,LJ_diameter,dipole_moment,mass);
 
-  std::cout << mu << std::endl;
-
   const Scalar T = 1500.1;
 
   // bc gives

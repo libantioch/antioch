@@ -28,10 +28,11 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/metaprogramming.h"
+#include "antioch/metaprogramming_decl.h"
 
 // GSL
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_errno.h>
 #include <vector>
 
 namespace Antioch
@@ -41,29 +42,29 @@ namespace Antioch
   {
      public:
        GSLSpliner();
-       GSLSpliner(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point, VectorCoeffType & spline);
+       template <typename VectorCoeffType>
+       GSLSpliner(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
        ~GSLSpliner();
 
-     template <typename VectorCoeffType = std::vector<CoeffType> >
+     template <typename VectorCoeffType>
      void spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
 
      void spline_delete();
 
-     template <CoeffType>
+     template <typename CoeffType>
      CoeffType interpolated_value(const CoeffType & x) const;
 
-      //TODO: make it correct
-     template <CoeffType>
+     template <typename CoeffType>
      CoeffType dinterp_dx(const CoeffType & x) const;
 
      private:
        gsl_interp_accel * _acc;
-       gsl_spline * _spline;
+       gsl_spline       * _spline;
   };
 
   inline
-  GSLSpliner::GSLSpliner():
-      spline(NULL)
+  GSLSpliner::GSLSpliner()
+      :_acc(NULL),_spline(NULL)
   {
     _acc =  gsl_interp_accel_alloc();
     return;
@@ -72,20 +73,21 @@ namespace Antioch
   template <typename VectorCoeffType>
   inline
   GSLSpliner::GSLSpliner(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point)
+        :_acc(NULL),_spline(NULL)
   {
     _acc =  gsl_interp_accel_alloc();
-    spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point) const
+    spline_init(data_x_point, data_y_point);
   }
 
   GSLSpliner::~GSLSpliner()
   {
     this->spline_delete();
     gsl_interp_accel_free(_acc);
-    return
+    return;
   }
 
   inline
-  GSLSpliner::spline_delete()
+  void GSLSpliner::spline_delete()
   {
     gsl_spline_free(_spline);
     return;
@@ -93,33 +95,40 @@ namespace Antioch
 
   template <typename VectorCoeffType>
   inline
-  void GSLSpliner::spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point, VectorCoeffType & spline)
+  void GSLSpliner::spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point)
   {
      antioch_assert_equal_to(data_x_point.size(), data_y_point.size());
 
      _spline = gsl_spline_alloc(gsl_interp_cspline, data_x_point.size());
 
-     typename Antioch::value_type<VectorCoeffType>::type * CoeffType;
+   // GLS takes only double, raaaaahhhh
+     typedef typename rebind<VectorCoeffType,double>::type VectorGSLType;
+     VectorGSLType gsl_x_point(data_x_point.size(),0);
+     VectorGSLType gsl_y_point(data_y_point.size(),0);
+     for(unsigned int i = 0; i < data_x_point.size(); i++)
+     {
+        gsl_x_point[i] = (const double)data_x_point[i];
+        gsl_y_point[i] = (const double)data_y_point[i];
+     }
 
-     CoeffType x = data_x_point[0];
-     CoeffType y = data_y_point[0];
+     const double * x = &gsl_x_point[0];
+     const double * y = &gsl_y_point[0];
 
      gsl_spline_init(_spline, x, y, data_x_point.size());
   }
 
-  template <CoeffType>
+  template <typename CoeffType>
   inline
-  CoeffType GSLSpline::interpolated_value(const CoeffType & x) const
+  CoeffType GSLSpliner::interpolated_value(const CoeffType & x) const
   {
      return gsl_spline_eval(_spline,x,_acc);
   }
 
-  template <CoeffType>
+  template <typename CoeffType>
   inline
-  CoeffType GSLSpline::dinterp_dx(const CoeffType & x) const
+  CoeffType GSLSpliner::dinterp_dx(const CoeffType & x) const
   {
-     dx = 1e-6;
-     return (gsl_spline_eval(_spline,x,_acc) - gsl_spline_eval(_spline,x + dx,_acc) / dx;
+     return gsl_spline_eval_deriv(_spline,x,_acc);
   }
 
 }
