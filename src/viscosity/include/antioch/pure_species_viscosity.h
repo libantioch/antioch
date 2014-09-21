@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -34,6 +36,7 @@
 #include "antioch/Stockmayer_potential.h"
 #include "antioch/gsl_spliner.h"
 #include "antioch/Lennard_Jones_potential.h"
+#include "antioch/physical_constants.h"
 
 // C++
 #include <cmath>
@@ -64,7 +67,7 @@ namespace Antioch
    * with \f$\epsilon\f$ the Lennard-Jones potential well depth and \f$\alpha\f$ the
    * dipole moment.
    */
-  template<typename CoeffType = double, typename Interpolator = GSLSpline>
+  template<typename CoeffType = double, typename Interpolator = GSLSpliner>
   class PureSpeciesViscosity
   {
     public:
@@ -78,8 +81,7 @@ namespace Antioch
        *   - mass in kg
        *
        * Angström,  debye and Boltzmann constant will (almost) cancel out the orders of magnitude
-       * in the calculation of _delta_star,
-       * we use the coefficient to SI from debye (3.335641 10-30 from http://cccbdb.nist.gov/debye.asp)
+       * in the calculation of _delta_star.
        */
       PureSpeciesViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, // depth in K (epsilon/kB), diameter in angström
                                const CoeffType & dipole_moment, const CoeffType & mass);  // dipole moment in D, molecular mass in kg 
@@ -108,10 +110,10 @@ namespace Antioch
       template <typename StateType>
       ANTIOCH_AUTO(StateType) 
       viscosity(const StateType &T) const
-      ANTIOCH_AUTOFUNC(StateType,    _a * CoeffType(1e-13)  // 5 / 16 * sqrt(pi * Boltzmann_constant)
-                                        * ant_sqrt(CoeffType(1e26L) * _mass * T )  
+      ANTIOCH_AUTOFUNC(StateType,    _a   // 5 / 16 * sqrt(pi * Boltzmann_constant)
+                                        * ant_sqrt(_mass * T )  
                                      / ( Constants::pi<CoeffType>() * _LJ.diameter() * _LJ.diameter() * CoeffType(1e-20L) * // to SI
-                                          _interp.interpolated_value( T / _LJ.depth() )   // Omega(2,2), T*
+                                         _interp.interpolated_value( T / _LJ.depth() )   // Omega(2,2), T*
                                         )
                       )
 
@@ -124,6 +126,12 @@ namespace Antioch
 
       template <typename StateType>
       StateType compute_viscosity_and_derivative( const StateType& T, StateType & viscosity, StateType & dviscosity_dT ) const;
+
+      template <typename StateType>
+      ANTIOCH_AUTO(StateType)
+        Stockmayer(const StateType & T) const
+      ANTIOCH_AUTOFUNC(StateType,_interp.interpolated_value( T / _LJ.depth() ) )   // Omega(2,2)
+                                          
 
       //! Formatted print, by default to \p std::cout
       void print(std::ostream& os = std::cout) const;
@@ -140,6 +148,8 @@ namespace Antioch
       
 
     private:
+
+      void build_interpolation();
 
       /*! never ever use it*/
       PureSpeciesViscosity();
@@ -160,14 +170,15 @@ namespace Antioch
   inline
   PureSpeciesViscosity<CoeffType,Interpolator>::PureSpeciesViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, 
                                                               const CoeffType & dipole_moment, const CoeffType & mass):
-        _a(0.3125e-12L * ant_sqrt(Constants::pi<CoeffType>() * Constants::Boltzmann_constant<CoeffType>() * 1e24L)), /* 5 / 16 * sqrt(pi * Boltzmann constant) */
+        _a(0.3125L * ant_sqrt(Constants::pi<CoeffType>() * Constants::Boltzmann_constant<CoeffType>())), /* 5 / 16 * sqrt(pi * Boltzmann constant) */
         _LJ(LJ_depth,LJ_diameter),
         _dipole_moment(dipole_moment),
         _mass(mass),
-        _delta_star(ant_pow(_dipole_moment * CoeffType(3.335641L),2) * CoeffType(1e-30L) /             
+        _delta_star(ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
                      ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
                            Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) ))
   {
+std::cout << std::setprecision(15) << Constants::pi<CoeffType>() << " * " << Constants::Boltzmann_constant<CoeffType>() << std::endl;
      this->build_interpolation();
      return;
   }
@@ -175,17 +186,17 @@ namespace Antioch
   template <typename CoeffType, typename Interpolator>
   inline
   PureSpeciesViscosity<CoeffType,Interpolator>::PureSpeciesViscosity(const std::vector<CoeffType> & coeffs):
-        _a(0.3125e-12L * ant_sqrt(Constants::pi<CoeffType>() * Constants::Boltzmann_constant<CoeffType>() * 1e24L)), /* 5 / 16 * sqrt(pi * Boltzmann constant) */
+        _a(0.3125 * ant_sqrt(Constants::pi<CoeffType>() * Constants::Boltzmann_constant<CoeffType>())), /* 5 / 16 * sqrt(pi * Boltzmann constant) */
 #ifndef NDEBUG
         _LJ(-1,-1),
         _dipole_moment(-1),
         _mass(-1),
         _delta_star(-1)
 #else
-        _LJ(coeffs[0],coeff[1]),
-        _dipole_moment(coeff[2]),
-        _mass(coeff[3]),
-        _delta_star(ant_pow(_dipole_moment * CoeffType(3.335641L),2) * CoeffType(1e-30L) /             
+        _LJ(coeffs[0],coeffs[1]),
+        _dipole_moment(coeffs[2]),
+        _mass(coeffs[3]),
+        _delta_star(ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
                      ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
                            Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) ))
 #endif
@@ -194,10 +205,10 @@ namespace Antioch
         antioch_assert_equal_to(coeffs.size(),4);
 
         _LJ.set_depth(coeffs[0]);
-        _LJ.set_diameter(coeff[1]);
-        _dipole_moment(coeff[2]);
-        _mass(coeff[3]);
-        _delta_star = ant_pow(_dipole_moment * CoeffType(3.335641L),2) * CoeffType(1e-30L) /             
+        _LJ.set_diameter(coeffs[1]);
+        _dipole_moment(coeffs[2]);
+        _mass(coeffs[3]);
+        _delta_star = ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
                      ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
                            Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) );
 #endif
@@ -223,7 +234,7 @@ namespace Antioch
      std::vector<CoeffType> interp_surf(surface.temperature().size(),0);
      for(unsigned int iT = 0; iT < surface.temperature().size(); iT++)
      {
-        GSLSpliner<CoeffType> spline(surface.delta(),surface.omega_2_2()[iT]);
+        Interpolator spline(surface.delta(),surface.omega_2_2()[iT]);
         interp_surf[iT] = spline.interpolated_value(_delta_star);
      }
 
@@ -238,7 +249,7 @@ namespace Antioch
      _LJ.reset_coeffs(LJ_depth,LJ_dia);
      _dipole_moment = dipole_moment;
      _mass = mass;
-     _delta_star = (ant_pow(_dipole_moment * CoeffType(3.335641L),2) * CoeffType(1e-30L) /             
+     _delta_star = (ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
                      ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
                            Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) ));
 
@@ -254,24 +265,6 @@ namespace Antioch
 
      this->reset_coeffs(coeffs[0],coeffs[1],coeffs[2],coeffs[3]);
   }
-
-  template <typename CoeffType, typename Interpolator>
-  template <typename StateType>
-  inline
-  const StateType PureSpeciesViscosity<CoeffType,Interpolator>::dcollision_integral_dTstar(const StateType & T) const
-  {
-     StateType domega22_dTstar = zero_clone(T);
-     StateType Tmp = constant_clone(T,1);
-     StateType Tlogstar = ant_log(T / _LJ.depth() );
-
-     for(unsigned int d = 1; d < _collision_coefficients.size(); d++)
-     {
-        domega22_dTstar += constant_clone(T,d) * Tmp * _collision_coefficients[d];
-        Tmp *= Tlogstar;
-     }
-     return domega22_dTstar;
-  }
-
 
   template <typename CoeffType, typename Interpolator>
   template <typename StateType>
