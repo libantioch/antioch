@@ -86,7 +86,7 @@ namespace Antioch{
   StockmayerPotential<CoeffType>::StockmayerPotential():
         _T_size(37),
         _delta_size(8),
-        _T(_T_size,0.),
+        _T(_T_size,0.),_logT(_T_size,0.),
         _delta(_delta_size,0.),
         _omega_1_1(_T_size,std::vector<CoeffType>(_delta_size,0.)),
         _omega_2_2(_T_size,std::vector<CoeffType>(_delta_size,0.))
