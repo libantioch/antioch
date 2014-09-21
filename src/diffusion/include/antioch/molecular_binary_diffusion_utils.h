@@ -1,5 +1,26 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
+//
+// Antioch - A Gas Dynamics Thermochemistry Library
+//
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
+// Copyright (C) 2013 The PECOS Development Team
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the Version 2.1 GNU Lesser General
+// Public License as published by the Free Software Foundation.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc. 51 Franklin Street, Fifth Floor,
+// Boston, MA  02110-1301  USA
+//
 //-----------------------------------------------------------------------el-
 
 #ifndef ANTIOCH_MOLECULAR_BINARY_DIFFUSION_UTILS_H
@@ -39,7 +60,7 @@ namespace Antioch
    template <typename CoeffType, typename Interpolator>
    struct SetOrEquation<MolecularBinaryDiffusion<CoeffType,Interpolator>,true>
    {
-      typedef std::vector<std::vector<BinaryDiffusion<CoeffType,Interpolation>* > > type;
+      typedef std::vector<std::vector<MolecularBinaryDiffusion<CoeffType,Interpolation>* > > type;
    }
 
    // initializer
@@ -83,13 +104,14 @@ namespace Antioch
    {}
 
    template <typename Model, typename InitType>
-   void physical_set_reset(unsigned int s, SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, molecular_binary_diffusion_tag)
+   void physical_set_reset(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, molecular_binary_diffusion_tag)
    {
      set[s][init.j]->reset_coeffs(init.si,init.sj);
    }
 
-   template <typename Model>
-   void physical_set_print(SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const std::map<unsigned int, std::string>& spec, std::ostream & out, bimolecular_diffusion_tag)
+   template <typename CoeffType, typename Interpolator>
+   void physical_set_print(typename SetOrEquation<MolecularBinaryDiffusion<CoeffType,Interpolator>,true>::type & set, 
+                            const std::map<unsigned int, std::string>& spec, std::ostream & out, bimolecular_diffusion_tag)
    {
         out << "Bimolecular diffusion" << std::endl;
 
