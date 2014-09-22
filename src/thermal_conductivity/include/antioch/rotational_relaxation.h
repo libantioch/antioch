@@ -27,6 +27,7 @@
 #define ANTIOCH_ROTATIONAL_RELAXATION_H
 
 // Antioch
+#include "antioch/metaprogramming_decl.h"
 #include "antioch/math_constants.h"
 #include "antioch/cmath_shims.h"
 
@@ -46,7 +47,7 @@ namespace Antioch
         template <typename StateType>
         ANTIOCH_AUTO(StateType)
           operator()(const StateType & T) const
-        ANTIOCH_AUTOFUNC(StateType, _z_298 * F(_eps_kb / (CoeffType)298) / F(_eps_kb/T))
+        ANTIOCH_AUTOFUNC(StateType, _z_298 * this->F(_eps_kb/CoeffType(298.L)) / this->F(StateType(_eps_kb/T)))
 
       private:
 
