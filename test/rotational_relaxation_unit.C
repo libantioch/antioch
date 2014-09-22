@@ -25,6 +25,7 @@
 
 // Antioch
 #include "antioch/rotational_relaxation.h"
+#include "antioch/metaprogramming.h"
 
 // C++
 #include <iostream>

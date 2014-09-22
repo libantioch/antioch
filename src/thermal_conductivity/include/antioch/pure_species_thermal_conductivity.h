@@ -79,7 +79,7 @@ namespace Antioch{
         const
         ANTIOCH_AUTO(StateType)
          B(unsigned int s, const StateType & T, const StateType & rho_times_self_diff_over_mu) const  
-        ANTIOCH_AUTOFUNC(StateType,_rot(T) + two_over_pi * (five_over_three * _thermo.cv_rot(s) / Constants::R_universal<StateType>() +
+        ANTIOCH_AUTOFUNC(StateType,_rot(T) + two_over_pi * (five_over_three * _thermo.cv_rot(s) / Constants::R_universal<CoeffType>() +
                                                     rho_times_self_diff_over_mu ) )
 
 
@@ -137,11 +137,9 @@ namespace Antioch{
   const ANTIOCH_AUTO(StateType) 
         PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>::operator()(const unsigned int s, const StateType& mu, const StateType T, const StateType & rho, const StateType & Dss) const
   {
-      StateType A_B = this->A(rho * Dss / mu) / this->B(s, T, rho * Dss / mu);
+      StateType rho_d_m = rho * Dss / mu; // only once instead of twice
+      StateType A_B = this->A(rho_d_m) / this->B(s, T, rho_d_m);
 
-     std::cout << "k_trans = " <<  ( mu  * _thermo.cv_trans(s) * five_over_two * (one - two_over_pi * _thermo.cv_rot(s) / _thermo.cv_trans(s) * A_B)) / _M << std::endl
-               << "k_rot = "   << rho * Dss  * ( _thermo.cv_rot(s) * (one + two_over_pi * A_B) ) / _M  << std::endl
-               << "k_vib = "   << rho * Dss  *   _thermo.cv_vib(s,T) /_M << std::endl << std::endl;
       return ( mu  * _thermo.cv_trans(s) * five_over_two * (one - two_over_pi * _thermo.cv_rot(s) / _thermo.cv_trans(s) * A_B) +
                rho * Dss  * ( _thermo.cv_rot(s) * (one + two_over_pi * A_B) +
                               _thermo.cv_vib(s,T) ) ) /_M ;

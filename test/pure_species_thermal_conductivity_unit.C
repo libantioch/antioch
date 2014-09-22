@@ -31,6 +31,7 @@
 #include "antioch/stat_mech_thermo.h"
 #include "antioch/pure_species_thermal_conductivity.h"
 #include "antioch/chemical_mixture.h"
+#include "antioch/metaprogramming.h"
 
 template <typename Scalar>
 int test_k( const Scalar k, const Scalar k_exact, const Scalar tol )

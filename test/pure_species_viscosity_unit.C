@@ -72,7 +72,7 @@ int tester()
   const Scalar T = 1500.1;
 
   // bc gives
-  const Scalar mu_exact_times_interp =0.0000417395098853601937871105407365424874568203066945573066;
+  const Scalar mu_exact_times_interp = 0.0000417395098853601937871105407365424874568203066945573066;
 
   int return_flag = 0;
 
