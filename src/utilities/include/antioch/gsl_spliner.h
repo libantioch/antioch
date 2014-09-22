@@ -38,6 +38,29 @@
 namespace Antioch
 {
 
+  template<bool B>
+  struct GSLInterp
+  {
+      template <typename Scalar>
+      Scalar interpolation(const Scalar & x, gsl_spline * spline, gsl_interp_accel * acc)
+                {return gsl_spline_eval(spline,x,acc);}
+  };
+
+  template <>
+  struct GSLInterp<true>
+  {
+      template <typename VectorScalar>
+      VectorScalar interpolation(const VectorScalar & x, gsl_spline * spline, gsl_interp_accel * acc)
+                {
+                  VectorScalar out = zero_clone(x);
+                  for(unsigned int i =0; i < x.size(); ++i)
+                  {
+                    out[i] = gsl_spline_eval(spline,x[i],acc);
+                  }
+                  return out;
+                }
+  };
+
   class GSLSpliner
   {
      public:
@@ -51,13 +74,14 @@ namespace Antioch
 
      void spline_delete();
 
-     template <typename CoeffType>
-     CoeffType interpolated_value(const CoeffType & x) const;
+     template <typename StateType>
+     StateType interpolated_value(const StateType & x) const;
 
      template <typename CoeffType>
      CoeffType dinterp_dx(const CoeffType & x) const;
 
      private:
+
        gsl_interp_accel * _acc;
        gsl_spline       * _spline;
   };
@@ -121,7 +145,7 @@ namespace Antioch
   inline
   CoeffType GSLSpliner::interpolated_value(const CoeffType & x) const
   {
-     return gsl_spline_eval(_spline,x,_acc);
+     return GSLInterp<has_size<CoeffType>::value>().interpolation(x, _spline, _acc);
   }
 
   template <typename CoeffType>
