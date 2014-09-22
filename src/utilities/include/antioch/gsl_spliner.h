@@ -44,6 +44,10 @@ namespace Antioch
       template <typename Scalar>
       Scalar interpolation(const Scalar & x, gsl_spline * spline, gsl_interp_accel * acc)
                 {return gsl_spline_eval(spline,x,acc);}
+
+      template <typename Scalar>
+      Scalar dinterpolation(const Scalar & x, gsl_spline * spline, gsl_interp_accel * acc)
+                {return gsl_spline_eval_deriv(spline,x,acc);}
   };
 
   template <>
@@ -56,6 +60,17 @@ namespace Antioch
                   for(unsigned int i =0; i < x.size(); ++i)
                   {
                     out[i] = gsl_spline_eval(spline,x[i],acc);
+                  }
+                  return out;
+                }
+
+      template <typename VectorScalar>
+      VectorScalar dinterpolation(const VectorScalar & x, gsl_spline * spline, gsl_interp_accel * acc)
+                {
+                  VectorScalar out = zero_clone(x);
+                  for(unsigned int i =0; i < x.size(); ++i)
+                  {
+                    out[i] = gsl_spline_eval_deriv(spline,x[i],acc);
                   }
                   return out;
                 }
@@ -77,8 +92,8 @@ namespace Antioch
      template <typename StateType>
      StateType interpolated_value(const StateType & x) const;
 
-     template <typename CoeffType>
-     CoeffType dinterp_dx(const CoeffType & x) const;
+     template <typename StateType>
+     StateType dinterp_dx(const StateType & x) const;
 
      private:
 
@@ -141,18 +156,18 @@ namespace Antioch
      gsl_spline_init(_spline, x, y, data_x_point.size());
   }
 
-  template <typename CoeffType>
+  template <typename StateType>
   inline
-  CoeffType GSLSpliner::interpolated_value(const CoeffType & x) const
+  StateType GSLSpliner::interpolated_value(const StateType & x) const
   {
-     return GSLInterp<has_size<CoeffType>::value>().interpolation(x, _spline, _acc);
+     return GSLInterp<has_size<StateType>::value>().interpolation(x, _spline, _acc);
   }
 
-  template <typename CoeffType>
+  template <typename StateType>
   inline
-  CoeffType GSLSpliner::dinterp_dx(const CoeffType & x) const
+  StateType GSLSpliner::dinterp_dx(const StateType & x) const
   {
-     return gsl_spline_eval_deriv(_spline,x,_acc);
+     return GSLInterp<has_size<StateType>::value>().dinterpolation(x, _spline, _acc);
   }
 
 }
