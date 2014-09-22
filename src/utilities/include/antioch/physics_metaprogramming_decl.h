@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------bl-
+      //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
@@ -100,8 +100,8 @@ namespace Antioch
 
   // might be required when std::vector<> can't hold all the
   // initialization
-  template<typename Physics>
-  struct Initializer;
+  template<typename Physics, typename Tag = default_physical_tag>
+  struct Initializer{};
 
     // init
    template <typename ModelSet>

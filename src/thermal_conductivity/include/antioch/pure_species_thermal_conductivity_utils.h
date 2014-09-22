@@ -33,16 +33,17 @@
 namespace Antioch
 {
    // getting tag
-   template <typename CoeffType>
-   struct physical_tag<PureSpeciesThermalConductivity<CoeffType> >:
-        public physical_tag_base<PureSpeciesThermalConductivity<CoeffType> >
+   template <typename ThermoEvaluator, typename CoeffType>
+   struct physical_tag<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> >:
+        public physical_tag_base<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> >
    {
       typedef pure_species_thermal_conductivity_tag type;
         // some models require specific initialization
         // (typically automatic initialization)
-     typedef pure_species_thermal_conductivity init_type;
+     typedef pure_species_thermal_conductivity_tag init_type;
+     typedef pure_species_thermal_conductivity_tag set_type;
         // for operators, diffusion is special, see comment below
-     typedef pure_species_thermal_conductivity thermal_conductivity_type;
+     typedef pure_species_thermal_conductivity_tag thermal_conductivity_type;
    };
 
    // physical set boolean
@@ -51,6 +52,47 @@ namespace Antioch
    {
       static const bool value = true;
    };
+
+   template <typename ThermoEvaluator, typename CoeffType>
+   struct Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>, pure_species_thermal_conductivity_tag >
+  {
+     Initializer(const ThermoEvaluator & th, const CoeffType & Z_298K_,const CoeffType & M_, const CoeffType & LJ_depth_):
+                        t(th),Z_298K(Z_298K_),M(M_),LJ_depth(LJ_depth_){}
+
+     const ThermoEvaluator & t;
+     const CoeffType       & Z_298K;
+     const CoeffType       & M;
+     const CoeffType       & LJ_depth;
+  };
+
+   // custom add
+   template <typename Model, typename InitType>
+   void physical_set_add(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, pure_species_thermal_conductivity_tag)
+   {
+       antioch_assert_less(s,set.size());
+       antioch_assert(!set[s]);
+
+       set[s] = new Model(init.t, init.Z_298K, init.M, init.LJ_depth);
+   }
+
+   // requires to void this
+   template <typename Model, typename InitType>
+   void physical_set_add(Model & set, const InitType & init, pure_species_thermal_conductivity_tag){}
+
+   // custom reset
+   template <typename Model, typename InitType>
+   void physical_set_reset(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init,  pure_species_thermal_conductivity_tag)
+   {
+       antioch_assert_less(s,set.size());
+       antioch_assert(set[s]);
+
+       set[s]->reset_coeffs(init.t, init.Z_298K, init.M, init.LJ_depth);
+   }
+
+   // requires to void this
+   template <typename Model, typename InitType>
+   void physical_set_reset(Model & set, const InitType & init,  pure_species_thermal_conductivity_tag){}
+
 
    // operator
    template<typename Model, typename StateType>
@@ -73,16 +115,6 @@ namespace Antioch
           k[s] = (*set[s])(mu[s],T,rho,dss[s]);
       }
    }
-
-   //initialize me
-  template <typename ThermoEvaluator, typename CoeffType>
-  struct Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> >
-  {
-     const ThermoEvaluator & t;
-     const CoeffType & Z_298K;
-     const CoeffType & M;
-     const CoeffType & LJ_depth;
-  };
 
    template <typename ModelSet>
    void physical_set_initialize(ModelSet & mod, pure_species_thermal_conductivity_tag)

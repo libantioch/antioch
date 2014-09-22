@@ -43,8 +43,6 @@ namespace Antioch{
       public:
 
         PureSpeciesThermalConductivity(const ThermoEvaluator & t, const CoeffType & Z_298K, const CoeffType & M, const CoeffType & LJ_depth);
-
-        PureSpeciesThermalConductivity(const Initializer< PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> > & init);
                                    
         ~PureSpeciesThermalConductivity();
 
@@ -108,20 +106,6 @@ namespace Antioch{
         _thermo(t),
         _rot(Z_298K,LJ_depth),
         _M(M),
-        five_over_two(5.L/2.L),
-        five_over_three(5.L/3.L),
-        two_over_pi(2.L/Constants::pi<CoeffType>()),
-        one(1.L)
-  {
-      return;
-  }
-
-  template <typename ThermoEvaluator, typename CoeffType>
-  inline
-  PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>::PureSpeciesThermalConductivity(const Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> > & init):
-        _thermo(init.t),
-        _rot(init.Z_298K,init.LJ_depth),
-        _M(init.M),
         five_over_two(5.L/2.L),
         five_over_three(5.L/3.L),
         two_over_pi(2.L/Constants::pi<CoeffType>()),

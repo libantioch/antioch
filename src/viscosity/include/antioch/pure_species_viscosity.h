@@ -206,9 +206,9 @@ std::cout << std::setprecision(15) << Constants::pi<CoeffType>() << " * " << Con
 
         _LJ.set_depth(coeffs[0]);
         _LJ.set_diameter(coeffs[1]);
-        _dipole_moment(coeffs[2]);
-        _mass(coeffs[3]);
-        _delta_star = ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
+        _dipole_moment   = coeffs[2];
+        _mass            = coeffs[3];
+        _delta_star      = ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
                      ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
                            Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) );
 #endif

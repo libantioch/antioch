@@ -35,7 +35,7 @@ namespace Antioch
    // getting tag
    template <typename CoeffType, typename Interpolator>
    struct physical_tag<PureSpeciesViscosity<CoeffType, Interpolator> >:
-        public physical_tab_base<PureSpeciesViscosity<CoeffType, Interpolator> >
+        public physical_tag_base<PureSpeciesViscosity<CoeffType, Interpolator> >
    {
       typedef pure_species_viscosity_tag type;
         // some models require specific initialization
@@ -50,20 +50,6 @@ namespace Antioch
    struct is_physical_set<PureSpeciesViscosity<CoeffType, Interpolator> >
    {
       static const bool value = true;
-   };
-
-   // we can initialize without the user's help,
-   // so we tag the physical_set_tag:
-   // we need to define 
-   // physical_set_initialize
-   // physical_set_delete
-   // physical_set_add
-   // physical_set_reset
-   // but not the default ones that are not concerned
-   template <typename CoeffType, typename Interpolator>
-   struct physical_set_tag<PureSpeciesViscosity<CoeffType,Interpolator> >
-   {
-     typedef typename pure_species_viscosity_tag type;
    };
 
    // we can initialize without the user's help

@@ -42,6 +42,10 @@ namespace Antioch
    template<typename ThermoEvaluator, typename CoeffType>
    struct is_physical_set<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> >;
 
+   //initialize me
+   template <typename ThermoEvaluator, typename CoeffType>
+   struct Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>, pure_species_thermal_conductivity_tag >;
+
    // operator
    template<typename Model, typename StateType>
    void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, 
@@ -51,13 +55,24 @@ namespace Antioch
    void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & dss, const StateType & T, const StateType & rho, 
                                                    VectorStateType & k, pure_species_thermal_conductivity_tag);
 
-   //initialize me
-   template <typename ThermoEvaluator, typename CoeffType>
-   struct Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType> >;
-
    template <typename ModelSet>
    void physical_set_initialize(ModelSet & mod, pure_species_thermal_conductivity_tag);
 
+   // custom add
+   template <typename Model, typename InitType>
+   void physical_set_add(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, pure_species_thermal_conductivity_tag);
+
+   // requires to void this
+   template <typename Model, typename InitType>
+   void physical_set_add(Model & set, const InitType & init, pure_species_thermal_conductivity_tag);
+
+   // custom reset
+   template <typename Model, typename InitType>
+   void physical_set_reset(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init,  pure_species_thermal_conductivity_tag);
+
+   // requires to void this
+   template <typename Model, typename InitType>
+   void physical_set_reset(Model & set, const InitType & init,  pure_species_thermal_conductivity_tag);
 }
 
 #endif

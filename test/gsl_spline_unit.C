@@ -40,7 +40,9 @@
 template <typename Scalar>
 int check_value(const Scalar & ref, const Scalar & candidate, const Scalar & x, const std::string & words)
 {
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10.;
+ /*because not the real test function impossible due to boundary conditions
+  */
+  const Scalar tol = 5e-3;//std::numeric_limits<Scalar>::epsilon() * 10.;
 
   if(std::abs((ref - candidate)/ref) > tol)
   {
@@ -68,22 +70,18 @@ void fill_ref(std::vector<Scalar> & x_ref, std::vector<Scalar> & y_ref,
               unsigned int n_data, const Scalar & min,
               const Scalar & max)
 {
-std::ofstream out("gsl.ref");
   for(unsigned int i = 0; i < n_data; i++)
   {
      x_ref[i] = min + (Scalar)(i) * (max - min) / (Scalar)(n_data-1);
      y_ref[i] = function(x_ref[i]);
-out << x_ref[i] << " " << y_ref[i] << std::endl;
   }
-  out.close();
-
 }
 
 template <typename Scalar>
 int tester()
 {
   const unsigned int n_data(40);
-  const unsigned int n_test(15);
+  const unsigned int n_test(39);
   std::vector<Scalar> x_ref(n_data,0),y_ref(n_data,0);
 
   const Scalar min = -5L;
@@ -95,35 +93,17 @@ int tester()
 
   default_constructor.spline_init(x_ref,y_ref);
 
-  gsl_interp_accel * acc;
-  gsl_spline       * spline;
-  acc =  gsl_interp_accel_alloc();
-  spline = gsl_spline_alloc(gsl_interp_cspline, x_ref.size());
-  double xptr[n_data]; 
-  double yptr[n_data]; 
-  for(unsigned int i = 0; i < n_data; ++i)
-  {
-      xptr[i] = x_ref[i];
-      yptr[i] = y_ref[i];
-  }
-  gsl_spline_init(spline, xptr, yptr, n_data);
-
   int return_flag(0);
 
-  std::ofstream out("gsl.dat");
   for(unsigned int n = 0; n < n_test; n++)
   {
      Scalar x = min + (Scalar)(n) * (max - min) / (Scalar)(n_test-1);
      Scalar exact = function(x);
      Scalar spline_default = default_constructor.interpolated_value(x);
      Scalar spline_explicit = explicit_constructor.interpolated_value(x);
-     Scalar  y = gsl_spline_eval(spline,x,acc);
-        out << x << " " << exact << " " << y << std::endl;
-//     return_flag = check_value(exact,spline_default,"default constructor") || return_flag;
- //    return_flag = check_value(exact,spline_explicit,"explicit constructor") || return_flag;
-     return_flag = check_value(exact,spline_default,x,"GODDAMMIT") || return_flag;
+     return_flag = check_value(exact,spline_default,x,"default constructor") || return_flag;
+     return_flag = check_value(exact,spline_explicit,x,"explicit constructor") || return_flag;
   }
-  out.close();
 
 
   return return_flag;

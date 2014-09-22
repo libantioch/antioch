@@ -28,7 +28,6 @@
 
 // Antioch
 #include "antioch/molecular_binary_diffusion.h"
-#include "antioch/transport_mixture.h"
 #include "antioch/physical_set.h"
 
 // C++
@@ -42,22 +41,24 @@ namespace Antioch
   template <typename CoeffType>
   class TransportSpecies;
 
-  template<class NumericType, typename Interpolator>
-  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolator> , TransportMixture<NumericType> >& D);
+  template <typename ThermoEvaluator,typename CoeffType>
+  class TransportMixture;
+
+  template<class NumericType, typename Interpolator, typename ThermoEvaluator>
+  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolator> , TransportMixture<ThermoEvaluator,NumericType> >& D);
 
 // ----------------------------------------- //
 
-  template<class NumericType, class Interpolator>
-  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolatir>, TransportMixture<NumericType> >& D)
+  template<typename NumericType, typename Interpolator, typename ThermoEvaluator>
+  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolator>, TransportMixture<ThermoEvaluator,NumericType> >& D)
   {
-     Initializer<MolecularBinaryDiffusion<Numeric> > init;
      for(unsigned int s = 0; s < D.mixture().n_species(); s++)
      {
-        init.si = D.mixture().transport_species()[s];
         for (unsigned int j = 0; j <= s; j++)
         {
-           init.j = j;
-           init.sj = D.mixture().transport_species()[j];
+           Initializer<MolecularBinaryDiffusion<NumericType>, bimolecular_diffusion_tag > 
+                init(j,*(D.mixture().transport_species()[s]), *(D.mixture().transport_species()[j]));
+
            D.add_model(D.mixture().species_inverse_name_map().at(s),init);
         }
      }

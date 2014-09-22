@@ -48,11 +48,11 @@ namespace Antioch
 
    // custom initialization
    template<typename CoeffType, typename Interpolator>
-   struct Initializer<MolecularBinaryDiffusion<CoeffType,Interpolator> >;
+   struct Initializer<MolecularBinaryDiffusion<CoeffType,Interpolator>, bimolecular_diffusion_tag >;
 
    // we can initialize without the user's help
-   template <typename ModelSet>
-   void physical_set_initialize(ModelSet & mod, bimolecular_diffusion_tag );
+   template <typename Model>
+   void physical_set_initialize(Model & mod, bimolecular_diffusion_tag );
 
    // custom delete
    template <typename ModelSet>
