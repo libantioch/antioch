@@ -147,6 +147,6 @@ namespace Antioch{
 
 } //end namespace Antioch
 
-#include "antioch/pure_species_thermal_conductivity_utils_decl.h"
+#include "antioch/pure_species_the_con_utils_decl.h"
 
 #endif

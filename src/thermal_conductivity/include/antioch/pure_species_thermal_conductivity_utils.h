@@ -27,7 +27,7 @@
 #define ANTIOCH_PURE_SPECIES_THERMAL_CONDUCTIVITY_UTILS_H
 
 #include "antioch/antioch_asserts.h"
-#include "antioch/pure_species_thermal_conductivity_utils_decl.h"
+#include "antioch/pure_species_the_con_utils_decl.h"
 #include "antioch/pure_species_thermal_conductivity_building.h"
 
 namespace Antioch
