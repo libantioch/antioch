@@ -115,8 +115,6 @@ int vectester(const PairScalars& example, const std::string& testname)
       T[2*tuple+1] = 1600.1;
     }
   
-  PairScalars mu = mu_sp(T) * mu_sp.Stockmayer(T);
-
   const Scalar mu_exact0 = 0.0000417395098853601937871105407365424874568203066945573066;
   const Scalar mu_exact1 = 0.0000431082906407300464864929380770860406892212065614947462;
 
@@ -126,7 +124,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.BeginTimer(testname);
 #endif
 
-  const PairScalars mu_pure_species = (T);
+  PairScalars mu = mu_sp(T) * mu_sp.Stockmayer(T);
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testname);

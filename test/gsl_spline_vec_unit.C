@@ -139,12 +139,11 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.BeginTimer(testname);
 #endif
 
+  const PairScalars gsl = gsl_spline.interpolated_value(x);
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testname);
 #endif
-
-  const PairScalars gsl = gsl_spline.interpolated_value(x);
 
     for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
       {
