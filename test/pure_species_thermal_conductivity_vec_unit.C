@@ -66,8 +66,8 @@ GRVY::GRVY_Timer_Class gt;
 #include <cmath>
 #include <limits>
 
-template <typename Scalar>
-int test_k( const Scalar k, const Scalar k_exact, const Scalar tol )
+template <typename Scalar, typename Element>
+int test_k( const Element & k, const Scalar & k_exact, const Scalar & tol )
 {
   using std::abs;
 
@@ -92,8 +92,6 @@ int test_k( const Scalar k, const Scalar k_exact, const Scalar tol )
 template <typename PairScalars>
 int vectester(const PairScalars& example, const std::string& testname)
 {
-  using std::abs;
-  using std::exp;
 
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 

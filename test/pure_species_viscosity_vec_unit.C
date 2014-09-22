@@ -68,8 +68,8 @@ GRVY::GRVY_Timer_Class gt;
 #include <cmath>
 #include <limits>
 
-template <typename Scalar>
-int test_viscosity( const Scalar mu, const Scalar mu_exact, const Scalar tol )
+template <typename Scalar, typename Element>
+int test_viscosity( const Element & mu, const Scalar  & mu_exact, const Scalar & tol )
 {
   using std::abs;
 

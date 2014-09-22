@@ -56,7 +56,7 @@ namespace Antioch
         template <typename StateType>
         ANTIOCH_AUTO(StateType)
           F(const StateType & eps_T) const
-        ANTIOCH_AUTOFUNC(StateType, _one + _pi32_2 * ant_sqrt(eps_T) + _pi2_4_plus_2 * eps_T + _pi32 * ant_pow(eps_T,1.5))
+        ANTIOCH_AUTOFUNC(StateType, _one + _pi32_2 * ant_sqrt(eps_T) + _pi2_4_plus_2 * eps_T + _pi32 * ant_pow(eps_T,(float)1.5)) //unambiguate pow() for vexcl
 
         CoeffType _z_298;
         CoeffType _eps_kb;

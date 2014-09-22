@@ -70,8 +70,8 @@ GRVY::GRVY_Timer_Class gt;
 #include <cmath>
 #include <limits>
 
-template <typename Scalar>
-int check_value(const Scalar & ref, const Scalar & candidate, const Scalar & x, const std::string & words)
+template <typename Scalar,typename Element>
+int check_value(const Element & ref, const Element & candidate, const Element & x, const std::string & words)
 {
  /*because not the real test function impossible due to boundary conditions
   */
@@ -95,7 +95,11 @@ int check_value(const Scalar & ref, const Scalar & candidate, const Scalar & x, 
 template <typename Scalar>
 Scalar function(const Scalar x)
 {
-  return 10.L + 5.L * x + 10.L * x * x - 2.L * x * x * x;
+  Scalar ten  = Antioch::constant_clone(x,10);
+  Scalar two  = Antioch::constant_clone(x,2);
+  Scalar five = Antioch::constant_clone(x,5);
+
+  return ten + five * x + ten * x * x - two * x * x * x;
 }
 
 template <typename Scalar>
@@ -145,12 +149,11 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.EndTimer(testname);
 #endif
 
+    const PairScalars exact = function(x);
     for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
       {
-          const Scalar exact0 = function(x[2*tuple]);
-          const Scalar exact1 = function(x[2*tuple+1]);
-          return_flag = check_value(exact0, gsl[2*tuple],   x[2*tuple],   "gsl vectorized") || return_flag;
-          return_flag = check_value(exact1, gsl[2*tuple+1], x[2*tuple+1], "gsl vectorized") || return_flag;
+          return_flag = check_value<Scalar>(exact[2*tuple],   gsl[2*tuple],   x[2*tuple],   "gsl vectorized") || return_flag;
+          return_flag = check_value<Scalar>(exact[2*tuple+1], gsl[2*tuple+1], x[2*tuple+1], "gsl vectorized") || return_flag;
       }
   return return_flag;
 }

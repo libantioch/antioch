@@ -67,8 +67,8 @@ GRVY::GRVY_Timer_Class gt;
 #include <cmath>
 #include <limits>
 
-template <typename Scalar>
-int test_diff( const Scalar dij, const Scalar dij_exact, const Scalar tol, const std::string & words )
+template <typename Scalar, typename Element, typename ElementOrScalar>
+int test_diff( const Element & dij, const ElementOrScalar & dij_exact, const Scalar & tol, const std::string & words )
 {
   using std::abs;
 

@@ -54,6 +54,8 @@
 #include "antioch/valarray_utils.h"
 #include "antioch/vexcl_utils.h"
 
+#include "antioch/cmath_shims.h"
+
 #ifdef ANTIOCH_HAVE_GRVY
 #include "grvy.h"
 
@@ -68,14 +70,15 @@ const long double pi(3.141592653589793238462643383279502884197169399375105820974
 template <typename Scalar>
 Scalar F(const Scalar & x)
 {
-  return 1.L + std::pow(pi,1.5)/2.L * std::sqrt(x) 
+  return 1.L + Antioch::ant_pow(pi,(float)1.5)/2.L  * Antioch::ant_sqrt(x)
              + (pi*pi/4.L + 2.L) * x
-             + std::pow(pi * x,1.5);
+             + Antioch::ant_pow(pi * x,(float)1.5);
 }
 
 template <typename Scalar>
 Scalar z(const Scalar & T, const Scalar & eps_kb, const Scalar & z_298)
 {
+std::cout << "iiiii" << std::endl;
   return z_298 * F(eps_kb / 298.L) / F(eps_kb / T);
 }
 
@@ -83,16 +86,17 @@ Scalar z(const Scalar & T, const Scalar & eps_kb, const Scalar & z_298)
 template <typename PairScalars>
 int vectester(const PairScalars& example, const std::string& testname)
 {
-  using std::abs;
-  using std::exp;
 
+std::cout << "entering " << testname << std::endl;
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
   const Scalar eps_kb = 97.53L; // N2 value
   const Scalar z_298 = 4.0L; // N2 value
 
+std::cout << "0" << std::endl;
   Antioch::RotationalRelaxation<Scalar> rot(z_298,eps_kb);
 
+std::cout << "1" << std::endl;
   // Construct from example to avoid resizing issues
   PairScalars T = example;
   for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
@@ -103,11 +107,14 @@ int vectester(const PairScalars& example, const std::string& testname)
   
   int return_flag = 0;
 
+std::cout << "2" << std::endl;
 #ifdef ANTIOCH_HAVE_GRVY
   gt.BeginTimer(testname);
 #endif
 
+std::cout << "3" << std::endl;
   const PairScalars Z = rot(T);
+std::cout << "4" << std::endl;
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testname);
@@ -119,8 +126,10 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
     {
-      const Scalar Z_exact0 = z(T[2*tuple], eps_kb, z_298);
-      const Scalar Z_exact1 = z(T[2*tuple+1], eps_kb, z_298);
+std::cout << "mmmmm " << tuple << " / " << ANTIOCH_N_TUPLES << "  " << testname << std::endl;
+      const Scalar Z_exact0 = z( (Scalar)1500.1, eps_kb, z_298);
+std::cout << "ppppp" << std::endl;
+      const Scalar Z_exact1 = z( (Scalar)1600.1, eps_kb, z_298);
 
       if( abs( (Z[2*tuple] - Z_exact0)/Z_exact0 ) > tol )
         {
