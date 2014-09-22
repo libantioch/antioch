@@ -71,6 +71,9 @@ namespace Antioch
     //! ChemicalMixture method
     const std::map<Species,std::string>& species_inverse_name_map() const;
 
+    //! ChemicalMixture method
+    const std::map<std::string, Species>& species_name_map() const;
+
     //! \returns the chemical mixture
     const ChemicalMixture<CoeffType> & chemical_mixture() const;
 
@@ -118,6 +121,13 @@ namespace Antioch
   const std::map<Species,std::string>& TransportMixture<ThermoEvaluator,CoeffType>::species_inverse_name_map() const
   {
     return _chemical_mixture.species_inverse_name_map();
+  }
+
+  template<typename ThermoEvaluator,typename CoeffType>
+  inline
+  const std::map<std::string,Species>& TransportMixture<ThermoEvaluator,CoeffType>::species_name_map() const
+  {
+    return _chemical_mixture.species_name_map();
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
