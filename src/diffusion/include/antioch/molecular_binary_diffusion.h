@@ -92,14 +92,14 @@ namespace Antioch{
           const
           ANTIOCH_AUTO(StateType)
              Stockmayer(const StateType & T)
-          ANTIOCH_AUTOFUNC(StateType,_interp.interpolated_value(T / _reduced_LJ_depth))
+          ANTIOCH_AUTOFUNC(StateType,_interp.interpolated_value(StateType(T / _reduced_LJ_depth) ) )
 
           //! \return molecular binary diffusion coefficient
           template <typename StateType>
           const 
           ANTIOCH_AUTO(StateType) 
                 binary_diffusion(const StateType & T, const StateType & cTot) const
-          ANTIOCH_AUTOFUNC(StateType,_coefficient * ant_sqrt(T / _reduced_mass) / (cTot * (_reduced_LJ_diameter * _reduced_LJ_diameter)  * _interp.interpolated_value((T / _reduced_LJ_depth))))
+          ANTIOCH_AUTOFUNC(StateType,_coefficient * ant_sqrt(T / _reduced_mass) / (cTot * (_reduced_LJ_diameter * _reduced_LJ_diameter)  * _interp.interpolated_value(StateType(T / _reduced_LJ_depth))))
 
           void print(std::ostream & out = std::cout) const;
 

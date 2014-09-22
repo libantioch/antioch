@@ -57,6 +57,7 @@ check_PROGRAMS += rotational_relaxation_vec_unit
 check_PROGRAMS += pure_species_thermal_conductivity_vec_unit
 check_PROGRAMS += gsl_spline_vec_unit
 check_PROGRAMS += pure_species_viscosity_vec_unit
+check_PROGRAMS += molecular_binary_diffusion_vec_unit
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -142,6 +143,7 @@ rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
 pure_species_thermal_conductivity_vec_unit_SOURCES = pure_species_thermal_conductivity_vec_unit.C
 gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
 pure_species_viscosity_vec_unit_SOURCES = pure_species_viscosity_vec_unit.C
+molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -205,6 +207,7 @@ TESTS += rotational_relaxation_vec_unit
 TESTS += pure_species_thermal_conductivity_vec_unit
 TESTS += gsl_spline_vec_unit
 TESTS += pure_species_viscosity_vec_unit
+TESTS += molecular_binary_diffusion_vec_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
