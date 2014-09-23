@@ -24,6 +24,9 @@
 //-----------------------------------------------------------------------el-
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+#ifdef ANTIOCH_HAVE_GSL // if we do not have it, we don't even define the stuff
+
 #ifndef ANTIOCH_PURE_SPECIES_VISCOSITY_H
 #define ANTIOCH_PURE_SPECIES_VISCOSITY_H
 
@@ -299,3 +302,5 @@ std::cout << std::setprecision(15) << Constants::pi<CoeffType>() << " * " << Con
 #include "antioch/pure_species_viscosity_utils_decl.h"
 
 #endif //ANTIOCH_PURE_SPECIES_VISCOSITY_H
+
+#endif // if ANTIOCH_HAVE_GSL

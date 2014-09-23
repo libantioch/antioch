@@ -24,8 +24,12 @@
 //-----------------------------------------------------------------------el-
 //--------------------------------------------------------------------------
 
+#include "antioch_config.h"
+#ifdef ANTIOCH_HAVE_GSL // if we do not have it, we don't even define the stuff
+
 #ifndef ANTIOCH_MOLECULAR_BINARY_DIFFUSION_H
 #define ANTIOCH_MOLECULAR_BINARY_DIFFUSION_H
+
 
 //Antioch
 #include "antioch/antioch_asserts.h"
@@ -37,6 +41,8 @@
 
 //C++
 #include <vector>
+
+
 
 namespace Antioch{
 
@@ -287,4 +293,6 @@ namespace Antioch{
 }
 
 #include "antioch/molecular_binary_diffusion_utils_decl.h"
-#endif
+#endif // ANTIOCH_BIMOL_DIFF
+
+#endif // ifdef ANTIOCH_HAVE_GSL

@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------el-
 
+#include "antioch_config.h" //only of we have GSL
+#ifdef ANTIOCH_HAVE_GSL
 #ifndef ANTIOCH_GSL_SPLINER_H
 #define ANTIOCH_GSL_SPLINER_H
 
@@ -172,4 +174,6 @@ namespace Antioch
 
 }
 
-#endif
+#endif // ANTIOCH_GSL_SPLINE
+
+#endif// if ANTIOCH_HAVE_GSL

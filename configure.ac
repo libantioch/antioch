@@ -77,8 +77,6 @@ AC_ARG_WITH([n_runs],
 	    [n_runs=1])
 AC_DEFINE_UNQUOTED(N_RUNS, $n_runs, [number of runs done in each vector test])
 
-AX_PATH_GSL_NEW(1.10,yes)
-
 dnl--------------------------
 dnl Checks for third-party libraries
 dnl--------------------------
@@ -124,6 +122,15 @@ if (test x$HAVE_GRVY = x1); then
   antioch_optional_test_INCLUDES="$GRVY_CFLAGS $antioch_optional_test_INCLUDES"
   antioch_optional_test_LIBS="$GRVY_LIBS $antioch_optional_test_LIBS"
 fi
+
+dnl GSL for spline method
+AX_PATH_GSL_NEW(1.10,no)
+if (test x$HAVE_GSL = x1); then
+  antioch_optional_test_INCLUDES="$GSL_CFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LIBS="$GSL_LIBS $antioch_optional_test_LIBS"
+  antioch_optional_test_LDFLAGS="$GSL_LDFLAGS $antioch_optional_test_LDFLAGS"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$enableeigen = xyes)
 
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
