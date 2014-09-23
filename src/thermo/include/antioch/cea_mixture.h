@@ -28,11 +28,10 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_MIXTURE_H
-#define ANTIOCH_CEA_MIXTURE_H
+#ifndef ANTIOCH_NASA_MIXTURE_H
+#define ANTIOCH_NASA_MIXTURE_H
 
 // Antioch
-#include "antioch/cea_curve_fit.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
 #include "antioch/input_utils.h"
@@ -47,9 +46,13 @@
 namespace Antioch
 {
   
-  template<typename CoeffType> class CEAEvaluator;
+  template<typename CoeffType>
+  class CEACurveFit;
 
-  template<typename CoeffType=double>
+  template<typename CoeffType, typename NASAFit>
+  class CEAEvaluator;
+
+  template<typename CoeffType=double, typename NASAFit = CEACurveFit<CoeffType> >
   class CEAThermoMixture
   {
   public:
@@ -62,7 +65,7 @@ namespace Antioch
 
     void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs );
 
-    const CEACurveFit<CoeffType>& curve_fit( unsigned int s ) const;
+    const NASAFit& curve_fit( unsigned int s ) const;
 
     CoeffType cp_at_200p1( unsigned int s ) const;
 
@@ -75,7 +78,7 @@ namespace Antioch
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
-    std::vector<CEACurveFit<CoeffType>* > _species_curve_fits;
+    std::vector<NASAFit* > _species_curve_fits;
 
     std::vector<CoeffType> _cp_at_200p1;
 
@@ -88,8 +91,8 @@ namespace Antioch
   };
 
   /* --------------------- Constructor/Destructor -----------------------*/
-  template<typename CoeffType>
-  CEAThermoMixture<CoeffType>::CEAThermoMixture( const ChemicalMixture<CoeffType>& chem_mixture )
+  template<typename CoeffType, typename NasaFit>
+  CEAThermoMixture<CoeffType,NASAFit>::CEAThermoMixture( const ChemicalMixture<CoeffType>& chem_mixture )
     : _chem_mixture(chem_mixture),
       _species_curve_fits(chem_mixture.n_species(), NULL),
       _cp_at_200p1( _species_curve_fits.size() )
@@ -98,11 +101,11 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType>
-  CEAThermoMixture<CoeffType>::~CEAThermoMixture()
+  template<typename CoeffType, typename NasaFit>
+  CEAThermoMixture<CoeffType,NASAFit>::~CEAThermoMixture()
   {
-    // Clean up all the CEACurveFits we created
-    for( typename std::vector<CEACurveFit<CoeffType>* >::iterator it = _species_curve_fits.begin();
+    // Clean up all the NASAFits we created
+    for( typename std::vector<NASAFit* >::iterator it = _species_curve_fits.begin();
 	 it < _species_curve_fits.end(); ++it )
       {
 	delete (*it);
@@ -112,9 +115,9 @@ namespace Antioch
   }
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename CoeffType>
+  template<typename CoeffType, typename NasaFit>
   inline
-  void CEAThermoMixture<CoeffType>::add_curve_fit( const std::string& species_name,
+  void CEAThermoMixture<CoeffType,NASAFit>::add_curve_fit( const std::string& species_name,
                                                    const std::vector<CoeffType>& coeffs )
   {
     antioch_assert( _chem_mixture.species_name_map().find(species_name) !=
@@ -125,7 +128,7 @@ namespace Antioch
     antioch_assert_less_equal( s, _species_curve_fits.size() );
     antioch_assert( !_species_curve_fits[s] );
 
-    _species_curve_fits[s] = new CEACurveFit<CoeffType>(coeffs);
+    _species_curve_fits[s] = new NASAFit(coeffs);
 
     CEAEvaluator<CoeffType> evaluator( *this );
     _cp_at_200p1[s] = evaluator.cp( TempCache<CoeffType>(200.1), s );
@@ -134,13 +137,13 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename NasaFit>
   inline
-  bool CEAThermoMixture<CoeffType>::check() const
+  bool CEAThermoMixture<CoeffType,NASAFit>::check() const
   {
     bool valid = true;
 
-    for( typename std::vector<CEACurveFit<CoeffType>* >::const_iterator it = _species_curve_fits.begin();
+    for( typename std::vector<NASAFit* >::const_iterator it = _species_curve_fits.begin();
 	 it != _species_curve_fits.end(); ++ it )
       {
 	if( !(*it) )
@@ -150,29 +153,29 @@ namespace Antioch
     return valid;
   }
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename NasaFit>
   inline
-  const CEACurveFit<CoeffType>& CEAThermoMixture<CoeffType>::curve_fit( unsigned int s ) const
+  const NASAFit& CEAThermoMixture<CoeffType,NASAFit>::curve_fit( unsigned int s ) const
   {
     antioch_assert_less( s, _species_curve_fits.size() );
     return *_species_curve_fits[s];
   }
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename NasaFit>
   inline
-  CoeffType CEAThermoMixture<CoeffType>::cp_at_200p1( unsigned int s ) const
+  CoeffType CEAThermoMixture<CoeffType,NASAFit>::cp_at_200p1( unsigned int s ) const
   {
     antioch_assert_less( s, _cp_at_200p1.size() );
     return _cp_at_200p1[s];
   }
 
-  template<typename CoeffType>
+  template<typename CoeffType, typename NasaFit>
   inline
-  const ChemicalMixture<CoeffType>& CEAThermoMixture<CoeffType>::chemical_mixture() const
+  const ChemicalMixture<CoeffType>& CEAThermoMixture<CoeffType,NASAFit>::chemical_mixture() const
   {
     return _chem_mixture;
   }
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_CEA_MIXTURE_H
+#endif // ANTIOCH_NASA_MIXTURE_H
