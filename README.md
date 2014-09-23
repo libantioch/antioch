@@ -19,7 +19,7 @@ Dependencies
 Requirements
 ------------
 
-Antioch has no required dependencies other than a reasonably modern C++ compiler.
+Antioch requires GSL and a reasonably modern C++ compiler.
 
 Optional Packages
 -----------------
