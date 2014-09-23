@@ -59,10 +59,10 @@ endif
 
 if ANTIOCH_ENABLE_GSL
 check_PROGRAMS += gsl_spline_unit
-check_PROGRAMS += pure_species_viscosity_unit
-check_PROGRAMS += molecular_binary_diffusion_unit
 check_PROGRAMS += gsl_spline_vec_unit
+check_PROGRAMS += pure_species_viscosity_unit
 check_PROGRAMS += pure_species_viscosity_vec_unit
+check_PROGRAMS += molecular_binary_diffusion_unit
 check_PROGRAMS += molecular_binary_diffusion_vec_unit
 endif
 
@@ -132,10 +132,10 @@ parsing_xml_SOURCES = parsing_xml.C
 units_unit_SOURCES = units_unit.C
 kinetics_reactive_scheme_unit_SOURCES = kinetics_reactive_scheme_unit.C
 sigma_bin_converter_unit_SOURCES = sigma_bin_converter_unit.C
-pure_species_viscosity_unit_SOURCES = pure_species_viscosity_unit.C
 rotational_relaxation_unit_SOURCES = rotational_relaxation_unit.C
 rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
 pure_species_thermal_conductivity_vec_unit_SOURCES = pure_species_thermal_conductivity_vec_unit.C
+pure_species_thermal_conductivity_unit_SOURCES = pure_species_thermal_conductivity_unit.C
 
 
 if ANTIOCH_ENABLE_EIGEN
@@ -144,11 +144,11 @@ endif
 
 if ANTIOCH_ENABLE_GSL
 gsl_spline_unit_SOURCES = gsl_spline_unit.C
-pure_species_thermal_conductivity_unit_SOURCES = pure_species_thermal_conductivity_unit.C
-molecular_binary_diffusion_unit_SOURCES =  molecular_binary_diffusion_unit.C
 gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
-pure_species_viscosity_vec_unit_SOURCES = pure_species_viscosity_vec_unit.C
+molecular_binary_diffusion_unit_SOURCES =  molecular_binary_diffusion_unit.C
 molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
+pure_species_viscosity_vec_unit_SOURCES = pure_species_viscosity_vec_unit.C
+pure_species_viscosity_unit_SOURCES = pure_species_viscosity_unit.C
 endif
 
 #Define tests to actually be run
@@ -211,11 +211,11 @@ endif
 
 if ANTIOCH_ENABLE_GSL
 TESTS += gsl_spline_unit
-TESTS += pure_species_viscosity_unit
-TESTS += molecular_binary_diffusion_unit
 TESTS += gsl_spline_vec_unit
-TESTS += pure_species_viscosity_vec_unit
+TESTS += molecular_binary_diffusion_unit
 TESTS += molecular_binary_diffusion_vec_unit
+TESTS += pure_species_viscosity_vec_unit
+TESTS += pure_species_viscosity_unit
 endif
 
 CLEANFILES =
