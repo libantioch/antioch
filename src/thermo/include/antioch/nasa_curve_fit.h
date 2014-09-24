@@ -46,7 +46,7 @@ namespace Antioch
   {
   public:
     
-    NASACurveFit( const std::vector<CoeffType>& coeffs );
+    NASACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temp );
     ~NASACurveFit();
 
     //! The number of intervals for this NASA curve fit
@@ -218,7 +218,7 @@ namespace Antioch
   template<typename CoeffType>
   template <typename StateType>
   inline
-  const StateType NASACurveFit<CoeffType>::cp_over_R(const const TempCache<StateType>& cache) const
+  const StateType NASACurveFit<CoeffType>::cp_over_R(const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -247,7 +247,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType NASACurvefit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
+  StateType NASACurveFit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -275,7 +275,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType NASACurvefit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
+  StateType NASACurveFit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;

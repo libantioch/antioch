@@ -39,18 +39,21 @@
 namespace Antioch
 {
 
+  template<typename CoeffType> 
+  class CEACurveFit;
+
   template<typename CoeffType, typename NASAFit> 
   class CEAThermoMixture;
 
-  template<typename CoeffType=double, typename NASAFit>
+  template<typename CoeffType=double, typename NASAFit = CEACurveFit<CoeffType> >
   class CEAEvaluator
   {
   public:
 
-    CEAEvaluator( const CEAThermoMixture<CoeffType>& cea_mixture );
+    CEAEvaluator( const CEAThermoMixture<CoeffType, NASAFit>& cea_mixture );
     ~CEAEvaluator();
 
-    const CEAThermoMixture<CoeffType>& cea_mixture() const;
+    const CEAThermoMixture<CoeffType,NASAFit>& cea_mixture() const;
 
     //! We currently need different specializations for scalar vs vector inputs here
     template<typename StateType>
@@ -122,7 +125,7 @@ namespace Antioch
 
   protected:
 
-    const CEAThermoMixture<CoeffType>& _cea_mixture;
+    const CEAThermoMixture<CoeffType,NASAFit>& _cea_mixture;
 
     //! Convenience function
     unsigned int n_species() const;
@@ -139,42 +142,42 @@ namespace Antioch
   };
 
   /* --------------------- Constructor/Destructor -----------------------*/
-  template<typename CoeffType, typename NasaFit>
-  CEAEvaluator<CoeffType,NASAFit>::CEAEvaluator( const CEAThermoMixture<CoeffType>& cea_mixture )
+  template<typename CoeffType, typename NASAFit>
+  CEAEvaluator<CoeffType,NASAFit>::CEAEvaluator( const CEAThermoMixture<CoeffType,NASAFit>& cea_mixture )
     : _cea_mixture(cea_mixture)
   {
     return;
   }
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   CEAEvaluator<CoeffType,NASAFit>::~CEAEvaluator()
   {
     return;
   }
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
-  const CEAThermoMixture<CoeffType>& CEAEvaluator<CoeffType,NASAFit>::cea_mixture() const
+  const CEAThermoMixture<CoeffType,NASAFit>& CEAEvaluator<CoeffType,NASAFit>::cea_mixture() const
   {
     return _cea_mixture;
   }
   
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
   unsigned int CEAEvaluator<CoeffType,NASAFit>::n_species() const
   {
     return _cea_mixture.chemical_mixture().n_species();
   }
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
   const ChemicalMixture<CoeffType>& CEAEvaluator<CoeffType,NASAFit>::chem_mixture() const
   {
     return _cea_mixture.chemical_mixture();
   }
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType>
   inline
   StateType
@@ -192,7 +195,7 @@ namespace Antioch
 	    this->cp_over_R(cache, species)));
   }
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType, typename VectorStateType>
   inline
   typename enable_if_c<
@@ -215,7 +218,7 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType, typename VectorStateType>
   inline
   typename enable_if_c<
@@ -234,7 +237,7 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType>
   inline
   StateType
@@ -249,7 +252,7 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType>
   inline
   StateType CEAEvaluator<CoeffType,NASAFit>::h_over_RT( const TempCache<StateType>& cache, unsigned int species ) const
@@ -258,11 +261,11 @@ namespace Antioch
     antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
                          _cea_mixture.curve_fit(species).n_intervals() );
     
-    return interval = this->_cea_mixture.curve_fit(species).h_over_RT(cache);
+    return this->_cea_mixture.curve_fit(species).h_over_RT(cache);
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType>
   inline
   StateType CEAEvaluator<CoeffType,NASAFit>::s_over_R( const TempCache<StateType>& cache, unsigned int species ) const
@@ -275,7 +278,7 @@ namespace Antioch
   }
   
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType>
   inline
   StateType
@@ -290,7 +293,7 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType, typename VectorStateType>
   inline
   typename enable_if_c<
@@ -311,7 +314,7 @@ namespace Antioch
 
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType>
   inline
   StateType
@@ -322,13 +325,11 @@ namespace Antioch
     // antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
     //                      _cea_mixture.curve_fit(species).n_intervals() );
       
-    typedef typename
-      Antioch::rebind<StateType, unsigned int>::type UIntType;
     return this->_cea_mixture.curve_fit(species).dh_RT_minus_s_R_dT(cache);
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType, typename VectorStateType>
   inline
   typename enable_if_c<
@@ -348,7 +349,7 @@ namespace Antioch
   }
   
   
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   template<typename StateType, typename VectorStateType>
   inline
   typename enable_if_c<

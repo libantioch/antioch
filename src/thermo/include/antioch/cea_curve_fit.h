@@ -212,7 +212,7 @@ namespace Antioch
   template<typename CoeffType>
   template <typename StateType>
   inline
-  const StateType CEACurveFit<CoeffType>::cp_over_R(const const TempCache<StateType>& cache) const
+  const StateType CEACurveFit<CoeffType>::cp_over_R(const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -242,7 +242,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEACurvefit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
+  StateType CEACurveFit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -270,7 +270,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEACurvefit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
+  StateType CEACurveFit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
