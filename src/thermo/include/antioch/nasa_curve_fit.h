@@ -75,10 +75,9 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{h}{\mathrm{R}T}\f$
         \f[
-            \frac{h}{\mathrm{R}T} = -\frac{a_0}{T^2} + \frac{a_1}{T} \ln(T) 
-                                    + a2  + \frac{a_3}{2} T + \frac{a_4}{3} T^2 
-                                    + \frac{a_5}{4} T^3 + \frac{a_6}{5} T^4 
-                                    + \frac{a_8}{T}
+            \frac{h}{\mathrm{R}T} = a0  + \frac{a_1}{2} T + \frac{a_2}{3} T^2 
+                                    + \frac{a_3}{4} T^3 + \frac{a_4}{5} T^4 
+                                    + \frac{a_5}{T}
         \f]
      */
     template <typename StateType>
@@ -87,10 +86,9 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{s}{\mathrm{R}}\f$
         \f[
-            \frac{s}{\mathrm{R}} = -\frac{a_0}{2T^2} - \frac{a_1}{T}
-                                    + a_2 \ln(T) + a_3 T + \frac{a_4}{2} T^2 
-                                    + \frac{a_5}{3} T^3 + \frac{a_6}{4} T^4 
-                                    + a_9
+            \frac{s}{\mathrm{R}} =  a_0 \ln(T) + a_1 T + \frac{a_2}{2} T^2 
+                                    + \frac{a_3}{3} T^3 + \frac{a_4}{4} T^4 
+                                    + a_6
         \f]
      */
     template <typename StateType>
@@ -99,11 +97,10 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{g}{\mathrm{R}T} = \frac{h}{\mathrm{R}T} - \frac{s}{R}\f$
         \f[
-            \frac{g}{\mathrm{R}T} = -\frac{a_0}{2T^2} - \frac{a_1 + a_8}{T}
-                                    + \frac{a_1}{T} \ln(T) - a2 \ln(T) 
-                                    + (a_2 - a_9) - \frac{a_3}{2} T 
-                                    - \frac{a_4}{6} T^2
-                                    - \frac{a_5}{12} T^3 - \frac{a_6}{20} T^4 
+            \frac{g}{\mathrm{R}T} =   \frac{a_5}{T}      - a0 \ln(T) 
+                                    + (a_0 - a_6) 
+                                    - \frac{a_1}{2} T    - \frac{a_2}{6} T^2
+                                    - \frac{a_3}{12} T^3 - \frac{a_4}{20} T^4 
         \f]
      */
     template <typename StateType>
@@ -113,10 +110,9 @@ namespace Antioch
       @returns the value \f$\frac{\partial\left(\frac{g}{\mathrm{R}T}\right)}\frac{\partial T} 
                             = \frac{\partial\left(\frac{h}{\mathrm{R}T} - \frac{s}{R}\right)}{\partial T}\f$
         \f[
-            \frac{g}{\mathrm{R}T} =   \frac{a_0}{T^3} + \frac{a_1 + a_8}{T^2}
-                                    + a_1 \ln(T) + a_1 - \frac{a2}{T}
-                                    - \frac{a_3}{2} - \frac{a_4}{3} T
-                                    - \frac{a_5}{4} T^2 - \frac{a_6}{5} T^3 
+            \frac{g}{\mathrm{R}T} = - \frac{a_5}{T^2}   - \frac{a_0}{T}
+                                    - \frac{a_1}{2}     - \frac{a_2}{3} T
+                                    - \frac{a_3}{4} T^2 - \frac{a_4}{5} T^3
         \f]
      */
     template <typename StateType>
