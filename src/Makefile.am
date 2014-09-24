@@ -67,8 +67,10 @@ pkginclude_HEADERS += parsing/include/antioch/species_ascii_parsing.h
 # thermo
 pkginclude_HEADERS += thermo/include/antioch/nasa_curve_fit.h
 pkginclude_HEADERS += thermo/include/antioch/cea_curve_fit.h
-pkginclude_HEADERS += thermo/include/antioch/cea_mixture.h
 pkginclude_HEADERS += thermo/include/antioch/temp_cache.h
+pkginclude_HEADERS += thermo/include/antioch/nasa_mixture.h
+pkginclude_HEADERS += thermo/include/antioch/nasa_evaluator.h
+pkginclude_HEADERS += thermo/include/antioch/cea_mixture.h
 pkginclude_HEADERS += thermo/include/antioch/cea_evaluator.h
 pkginclude_HEADERS += thermo/include/antioch/cea_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/stat_mech_thermo.h
