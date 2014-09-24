@@ -35,6 +35,7 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
 #include "antioch/input_utils.h"
+#include "antioch/cea_curve_fit.h"
 #include "antioch/temp_cache.h"
 #include "antioch/cea_evaluator.h"
 
@@ -46,9 +47,6 @@
 namespace Antioch
 {
   
-  template<typename CoeffType>
-  class CEACurveFit;
-
   template<typename CoeffType, typename NASAFit>
   class CEAEvaluator;
 
@@ -91,7 +89,7 @@ namespace Antioch
   };
 
   /* --------------------- Constructor/Destructor -----------------------*/
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   CEAThermoMixture<CoeffType,NASAFit>::CEAThermoMixture( const ChemicalMixture<CoeffType>& chem_mixture )
     : _chem_mixture(chem_mixture),
       _species_curve_fits(chem_mixture.n_species(), NULL),
@@ -101,7 +99,7 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   CEAThermoMixture<CoeffType,NASAFit>::~CEAThermoMixture()
   {
     // Clean up all the NASAFits we created
@@ -115,7 +113,7 @@ namespace Antioch
   }
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
   void CEAThermoMixture<CoeffType,NASAFit>::add_curve_fit( const std::string& species_name,
                                                    const std::vector<CoeffType>& coeffs )
@@ -130,14 +128,14 @@ namespace Antioch
 
     _species_curve_fits[s] = new NASAFit(coeffs);
 
-    CEAEvaluator<CoeffType> evaluator( *this );
+    CEAEvaluator<CoeffType,NASAFit> evaluator( *this );
     _cp_at_200p1[s] = evaluator.cp( TempCache<CoeffType>(200.1), s );
 
     return;
   }
 
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
   bool CEAThermoMixture<CoeffType,NASAFit>::check() const
   {
@@ -153,7 +151,7 @@ namespace Antioch
     return valid;
   }
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
   const NASAFit& CEAThermoMixture<CoeffType,NASAFit>::curve_fit( unsigned int s ) const
   {
@@ -161,7 +159,7 @@ namespace Antioch
     return *_species_curve_fits[s];
   }
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
   CoeffType CEAThermoMixture<CoeffType,NASAFit>::cp_at_200p1( unsigned int s ) const
   {
@@ -169,7 +167,7 @@ namespace Antioch
     return _cp_at_200p1[s];
   }
 
-  template<typename CoeffType, typename NasaFit>
+  template<typename CoeffType, typename NASAFit>
   inline
   const ChemicalMixture<CoeffType>& CEAThermoMixture<CoeffType,NASAFit>::chemical_mixture() const
   {
