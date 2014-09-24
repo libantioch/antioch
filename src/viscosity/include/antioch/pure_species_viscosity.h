@@ -181,7 +181,6 @@ namespace Antioch
                      ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
                            Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) ))
   {
-std::cout << std::setprecision(15) << Constants::pi<CoeffType>() << " * " << Constants::Boltzmann_constant<CoeffType>() << std::endl;
      this->build_interpolation();
      return;
   }
