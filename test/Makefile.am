@@ -3,7 +3,7 @@ EXTRA_DIST = input_files
 check_PROGRAMS  =
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
-check_PROGRAMS += cea_evaluator_unit
+check_PROGRAMS += nasa_evaluator_unit
 check_PROGRAMS += cea_evaluator_vec_unit
 check_PROGRAMS += cea_thermo_unit
 check_PROGRAMS += cea_thermo_vec_unit
@@ -71,7 +71,7 @@ LIBS = $(antioch_optional_test_LIBS)
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
 chem_mixture_vec_unit_SOURCES = chem_mixture_vec_unit.C
-cea_evaluator_unit_SOURCES = cea_evaluator_unit.C
+nasa_evaluator_unit_SOURCES = nasa_evaluator_unit.C
 cea_evaluator_vec_unit_SOURCES = cea_evaluator_vec_unit.C
 cea_thermo_unit_SOURCES = cea_thermo_unit.C
 cea_thermo_vec_unit_SOURCES = cea_thermo_vec_unit.C
@@ -125,7 +125,7 @@ endif
 TESTS  =
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
-TESTS += cea_evaluator_unit
+TESTS += nasa_evaluator_unit.sh
 TESTS += cea_evaluator_vec_unit
 TESTS += cea_thermo_unit
 TESTS += cea_thermo_vec_unit

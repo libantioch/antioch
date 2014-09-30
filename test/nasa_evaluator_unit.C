@@ -43,16 +43,17 @@
 #include "antioch/cea_mixture.h"
 #include "antioch/cea_evaluator.h"
 #include "antioch/cea_mixture_ascii_parsing.h"
+#include "antioch/nasa_mixture_ascii_parsing.h"
 
 template <typename Scalar, typename NASAFit>
 int test_cp( const std::string& species_name, unsigned int species, Scalar cp_exact, Scalar T,
-	     const Antioch::CEAEvaluator<Scalar,NASAFit>& thermo )
+	     const Antioch::NASAEvaluator<Scalar,NASAFit>& thermo )
 {
   using std::abs;
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 1000;
 
   typedef typename Antioch::template TempCache<Scalar> Cache;
 
@@ -60,7 +61,8 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
 
   if( abs( (cp_exact - cp)/cp_exact ) > tol )
     {
-      std::cerr << "Error: Mismatch in species specific heat."
+      std::cerr << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in species specific heat."
 		<< "\nspecies    = " << species_name
 		<< "\ncp         = " << cp
 		<< "\ncp_exact   = " << cp_exact
@@ -75,13 +77,13 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
 
 template <typename Scalar, typename NASAFit>
 int test_h( const std::string& species_name, unsigned int species, Scalar h_exact, Scalar T,
-            const Antioch::CEAEvaluator<Scalar,NASAFit>& thermo )
+            const Antioch::NASAEvaluator<Scalar,NASAFit>& thermo )
 {
   using std::abs;
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 40;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
 
   typedef typename Antioch::template TempCache<Scalar> Cache;
 
@@ -105,13 +107,13 @@ int test_h( const std::string& species_name, unsigned int species, Scalar h_exac
 
 template <typename Scalar, typename NASAFit>
 int test_s( const std::string& species_name, unsigned int species, Scalar s_exact, Scalar T,
-	     const Antioch::CEAEvaluator<Scalar, NASAFit>& thermo )
+	     const Antioch::NASAEvaluator<Scalar, NASAFit>& thermo )
 {
   using std::abs;
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 1000;
 
   typedef typename Antioch::template TempCache<Scalar> Cache;
 
@@ -119,9 +121,10 @@ int test_s( const std::string& species_name, unsigned int species, Scalar s_exac
 
   if( abs( (s_exact - s)/s_exact ) > tol )
     {
-      std::cerr << "Error: Mismatch in species entropie."
+      std::cerr << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in species entropie."
 		<< "\nspecies    = " << species_name
-		<< "\ns          = " << s_exact
+		<< "\ns          = " << s
 		<< "\ns_exact    = " << s_exact
 		<< "\ndifference = " << (s_exact - s)
 		<< "\ntolerance  = " << tol
@@ -134,22 +137,23 @@ int test_s( const std::string& species_name, unsigned int species, Scalar s_exac
 
 template <typename Scalar, typename NASAFit>
 int test_g( const std::string& species_name, unsigned int species, Scalar g_exact, Scalar T,
-	     const Antioch::CEAEvaluator<Scalar, NASAFit>& thermo )
+	     const Antioch::NASAEvaluator<Scalar, NASAFit>& thermo )
 {
   using std::abs;
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 1000;
 
   typedef typename Antioch::template TempCache<Scalar> Cache;
 
   const Scalar g =   thermo.h_over_RT(Cache(T), species)
-                   - thermo.s_over_R(Cache(T), species) * T;
+                   - thermo.s_over_R(Cache(T), species) ;
 
   if( abs( (g_exact - g)/g_exact ) > tol )
     {
-      std::cerr << "Error: Mismatch in species specific heat."
+      std::cerr << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in species free energy (Gibbs energy)."
 		<< "\nspecies    = " << species_name
 		<< "\ng          = " << g
 		<< "\ng_exact    = " << g_exact
@@ -167,7 +171,7 @@ Scalar cea_cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
 	   Scalar a3, Scalar a4, Scalar a5, Scalar a6 )
 {
   if( T < 200.1)
-    T = 200.1;
+    T = 200.1L;
 
   return a0/(T*T) + a1/T + a2 + a3*T + a4*(T*T) + a5*(T*T*T) + a6*(T*T*T*T);
 }
@@ -192,7 +196,7 @@ Scalar nasa_cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
 	   Scalar a3, Scalar a4)
 {
   if( T < 200.1)
-    T = 200.1;
+    T = 200.1L;
 
   return a0 + a1*T + a2*T*T + a3*T*T*T + a4*T*T*T*T;
 }
@@ -205,8 +209,8 @@ Scalar nasa_h( Scalar T, Scalar a0, Scalar a1, Scalar a2,
           a4*T*T*T*T/5.0L + a5/T;
 }
 template <typename Scalar>
-Scalar cea_s( Scalar T, Scalar a0, Scalar a1, Scalar a2, 
-          Scalar a3, Scalar a4, Scalar a5, Scalar a6)
+Scalar nasa_s( Scalar T, Scalar a0, Scalar a1, Scalar a2, 
+          Scalar a3, Scalar a4, Scalar a6)
 {
   return a0*std::log(T) + a1*T + a2*T*T/2.0L + a3*T*T*T/3.0L +
          a4*T*T*T*T/4.0L + a6;
@@ -236,15 +240,15 @@ int tester(const std::string & nasa_filename)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-// default values for backward compatibility
+// backward compatibility
   Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
   Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
   Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
 // explicit
-  Antioch::CEAThermoMixture<Scalar, NASACurveFit<Scalar> > nasa_mixture( chem_mixture );
-  Antioch::read_nasa_mixture_data_ascii( nasa_filename );
-  Antioch::CEAEvaluator<Scalar> nasa_thermo( nasa_mixture );
+  Antioch::NASAThermoMixture<Scalar, Antioch::NASACurveFit<Scalar> > nasa_mixture( chem_mixture );
+  Antioch::read_nasa_mixture_data_ascii( nasa_mixture, nasa_filename );
+  Antioch::NASAEvaluator<Scalar, Antioch::NASACurveFit<Scalar> > nasa_thermo( nasa_mixture );
 
   //const Scalar P = 100000.0;
   const Scalar T1 = 190.0;
@@ -254,12 +258,12 @@ int tester(const std::string & nasa_filename)
 
   const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/Mm_N2;
   const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/Mm_O2;
-  const Scalar R_H  = Antioch::Constants::R_universal<Scalar>()/Mm_H;
+  const Scalar R_H2 = Antioch::Constants::R_universal<Scalar>()/Mm_H2;
   const Scalar R_O  = Antioch::Constants::R_universal<Scalar>()/Mm_O;
   const Scalar R_OH = Antioch::Constants::R_universal<Scalar>()/Mm_OH;
 
 // declare everyone here, easier
-  const Scalar cea_N2_a1[10] = { 2.21037122e+04, -3.81846145e+02,  6.08273815e+00, -8.53091381e-03,  1.38464610e-05
+  const Scalar cea_N2_a1[10] = { 2.21037122e+04, -3.81846145e+02,  6.08273815e+00, -8.53091381e-03,  1.38464610e-05,
                                 -9.62579293e-09,  2.51970560e-12,  0.00000000e+00,  7.10845911e+02, -1.07600320e+01};
   const Scalar cea_N2_a2[10] = { 5.87709908e+05, -2.23924255e+03,  6.06694267e+00, -6.13965296e-04,  1.49179819e-07,
                                 -1.92309442e-11,  1.06194871e-15,  0.00000000e+00,  1.28320618e+04, -1.58663484e+01};
@@ -329,6 +333,7 @@ int tester(const std::string & nasa_filename)
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
     int return_flag_temp = 0;
+
     return_flag_temp = test_cp( species_name, index, cea_cp_N2_1, T1, thermo );
     if( return_flag_temp != 0 ) return_flag = 1;
 
@@ -338,7 +343,9 @@ int tester(const std::string & nasa_filename)
     return_flag_temp = test_cp( species_name, index, cea_cp_N2_3, T3, thermo );
     if( return_flag_temp != 0 ) return_flag = 1;
 
+
 // NASA [300 - 1000] [1000 - 5000]
+
     const Scalar nasa_cp_N2_1 = R_N2 * nasa_cp(T4, nasa_N2_a1[0], nasa_N2_a1[1], nasa_N2_a1[2], nasa_N2_a1[3], nasa_N2_a1[4]);
 
     const Scalar nasa_cp_N2_2 = R_N2 * nasa_cp(T2, nasa_N2_a2[0], nasa_N2_a2[1], nasa_N2_a2[2], nasa_N2_a2[3], nasa_N2_a2[4]);
@@ -475,6 +482,7 @@ int tester(const std::string & nasa_filename)
     return_flag_temp = test_cp( species_name, index, cp_3, T3, thermo );
     if( return_flag_temp != 0 ) return_flag = 1;
 
+
 // NASA [300 - 1000] [1000 - 5000]
     const Scalar nasa_cp_H2_1 = R_H2 * nasa_cp(T4, nasa_H2_a1[0], nasa_H2_a1[1], nasa_H2_a1[2], nasa_H2_a1[3], nasa_H2_a1[4]);
 
@@ -484,6 +492,7 @@ int tester(const std::string & nasa_filename)
     if( return_flag_temp != 0 ) return_flag = 1;
 
     return_flag_temp = test_cp( species_name, index, nasa_cp_H2_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
   }
 
 // h, s, && g
@@ -493,15 +502,15 @@ int tester(const std::string & nasa_filename)
   {
     unsigned int index = 0;
     const Scalar h_N2_1 = R_N2 * T1 * cea_h( T1, cea_N2_a1[0], cea_N2_a1[1], cea_N2_a1[2], cea_N2_a1[3], cea_N2_a1[4], cea_N2_a1[5], cea_N2_a1[6],cea_N2_a1[8]);
-    const Scalar s_N2_1 =  cea_h( T1, cea_H2_a1[0], cea_H2_a1[1], cea_H2_a1[2], cea_H2_a1[3], cea_H2_a1[4], cea_H2_a1[5], cea_H2_a1[6],cea_H2_a1[9]);
-    const Scalar g_N2_1 = h_N2_1/(R_N2 * T1) - s_N2_1;
+    const Scalar s_N2_1 =             cea_s( T1, cea_N2_a1[0], cea_N2_a1[1], cea_N2_a1[2], cea_N2_a1[3], cea_N2_a1[4], cea_N2_a1[5], cea_N2_a1[6],cea_N2_a1[9]);
+    const Scalar g_N2_1 = h_N2_1/(R_N2 * T1) - s_N2_1; // h/(R*T) - s/R
 
-    const Scalar h_N2_2 = R_N2*T2*cea_h( T2, cea_N2_a1[0], cea_N2_a2[1], cea_N2_a2[2], cea_N2_a2[3], cea_N2_a2[4], cea_N2_a2[5], cea_N2_a2[6],cea_N2_a2[8]);
-    const Scalar s_N2_2 = cea_s( T2, cea_N2_a2[0], cea_N2_a2[1], cea_N2_a2[2], cea_N2_a2[3], cea_N2_a2[4], cea_N2_a2[5], cea_N2_a2[6],cea_N2_a2[9]);
-    const Scalar g_N2_2 = h_N2_2/(R_N2*T2) - s_N2_2;
+    const Scalar h_N2_2 = R_N2 * T2 * cea_h( T2, cea_N2_a2[0], cea_N2_a2[1], cea_N2_a2[2], cea_N2_a2[3], cea_N2_a2[4], cea_N2_a2[5], cea_N2_a2[6],cea_N2_a2[8]);
+    const Scalar s_N2_2 =             cea_s( T2, cea_N2_a2[0], cea_N2_a2[1], cea_N2_a2[2], cea_N2_a2[3], cea_N2_a2[4], cea_N2_a2[5], cea_N2_a2[6],cea_N2_a2[9]);
+    const Scalar g_N2_2 = h_N2_2/(R_N2 * T2) - s_N2_2;
 
-    const Scalar h_N2_3 = R_N2*T3*cea_h( T3, cea_N2_a2[0], cea_N2_a2[1], cea_N2_a2[2], cea_N2_a2[3], cea_N2_a2[4], cea_N2_a2[5], cea_N2_a2[6],cea_N2_a2[8]);
-    const Scalar s_N2_3 = cea_s( T3, cea_N2_a2[0], cea_N2_a2[1], cea_N2_a2[2], cea_N2_a2[3], cea_N2_a2[4], cea_N2_a2[5], cea_N2_a2[6],cea_N2_a2[9]);
+    const Scalar h_N2_3 = R_N2 * T3 * cea_h( T3, cea_N2_a3[0], cea_N2_a3[1], cea_N2_a3[2], cea_N2_a3[3], cea_N2_a3[4], cea_N2_a3[5], cea_N2_a3[6],cea_N2_a3[8]);
+    const Scalar s_N2_3 =             cea_s( T3, cea_N2_a3[0], cea_N2_a3[1], cea_N2_a3[2], cea_N2_a3[3], cea_N2_a3[4], cea_N2_a3[5], cea_N2_a3[6],cea_N2_a3[9]);
     const Scalar g_N2_3 = h_N2_3 /(R_N2 * T3) - s_N2_3;
 
     
@@ -568,17 +577,17 @@ int tester(const std::string & nasa_filename)
   // Test O2 h
   {
     unsigned int index = 1;
-    const Scalar h_1 = R_O2*T1*cea_h( T1, cea_O2_a1[0], cea_O2_a1[1], cea_O2_a1[2], cea_O2_a1[3], cea_O2_a1[4], cea_O2_a1[5], cea_N2_a1[6],cea_N2_a1[8]);
-    const Scalar s_1 =         cea_s( T1, cea_O2_a1[0], cea_O2_a1[1], cea_O2_a1[2], cea_O2_a1[3], cea_O2_a1[4], cea_O2_a1[5], cea_N2_a1[6],cea_N2_a1[9]);
-    const Scalar g_1 = h1/(R_O2*T1) - s_1;
+    const Scalar h_1 = R_O2*T1*cea_h( T1, cea_O2_a1[0], cea_O2_a1[1], cea_O2_a1[2], cea_O2_a1[3], cea_O2_a1[4], cea_O2_a1[5], cea_O2_a1[6],cea_O2_a1[8]);
+    const Scalar s_1 =         cea_s( T1, cea_O2_a1[0], cea_O2_a1[1], cea_O2_a1[2], cea_O2_a1[3], cea_O2_a1[4], cea_O2_a1[5], cea_O2_a1[6],cea_O2_a1[9]);
+    const Scalar g_1 = h_1/(R_O2*T1) - s_1;
 
-    const Scalar h_2 = R_O2*T2*cea_h( T2, cea_O2_a2[0], cea_O2_a2[1], cea_O2_a2[2], cea_O2_a2[3], cea_O2_a2[4], cea_O2_a2[5], cea_N2_a2[6],cea_N2_a2[8]);
-    const Scalar s_2 =         cea_s( T2, cea_O2_a2[0], cea_O2_a2[2], cea_O2_a2[2], cea_O2_a2[3], cea_O2_a2[4], cea_O2_a2[5], cea_N2_a2[6],cea_N2_a2[9]);
-    const Scalar g_2 = h2/(R_O2*T2) - s_2;
+    const Scalar h_2 = R_O2*T2*cea_h( T2, cea_O2_a2[0], cea_O2_a2[1], cea_O2_a2[2], cea_O2_a2[3], cea_O2_a2[4], cea_O2_a2[5], cea_O2_a2[6],cea_O2_a2[8]);
+    const Scalar s_2 =         cea_s( T2, cea_O2_a2[0], cea_O2_a2[1], cea_O2_a2[2], cea_O2_a2[3], cea_O2_a2[4], cea_O2_a2[5], cea_O2_a2[6],cea_O2_a2[9]);
+    const Scalar g_2 = h_2/(R_O2*T2) - s_2;
 
-    const Scalar h_3 = R_O2*T3*cea_h( T3, cea_O2_a3[0], cea_O2_a3[1], cea_O2_a3[2], cea_O2_a3[3], cea_O2_a3[4], cea_O2_a3[5], cea_N2_a3[6],cea_N2_a3[8]);
-    const Scalar s_3 =         cea_s( T3, cea_O2_a3[0], cea_O2_a3[3], cea_O2_a3[2], cea_O2_a3[3], cea_O2_a3[4], cea_O2_a3[5], cea_N2_a3[6],cea_N2_a3[9]);
-    const Scalar g_3 = h3/(R_O2*T3) - s_3;
+    const Scalar h_3 = R_O2*T3*cea_h( T3, cea_O2_a3[0], cea_O2_a3[1], cea_O2_a3[2], cea_O2_a3[3], cea_O2_a3[4], cea_O2_a3[5], cea_O2_a3[6],cea_O2_a3[8]);
+    const Scalar s_3 =         cea_s( T3, cea_O2_a3[0], cea_O2_a3[1], cea_O2_a3[2], cea_O2_a3[3], cea_O2_a3[4], cea_O2_a3[5], cea_O2_a3[6],cea_O2_a3[9]);
+    const Scalar g_3 = h_3/(R_O2*T3) - s_3;
     
     const Antioch::Species species = chem_mixture.species_list()[index];
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
@@ -617,7 +626,7 @@ int tester(const std::string & nasa_filename)
     const Scalar nasa_g_O2_1 = nasa_h_O2_1/(R_O2*T4) - nasa_s_O2_1;
 
     const Scalar nasa_h_O2_2 = R_O2 * T2 * nasa_h(T2, nasa_O2_a2[0], nasa_O2_a2[1], nasa_O2_a2[2], nasa_O2_a2[3], nasa_O2_a2[4], nasa_O2_a2[5]);
-    const Scalar nasa_s_O2_2 =             nasa_s(T4, nasa_O2_a2[0], nasa_O2_a2[1], nasa_O2_a2[2], nasa_O2_a2[3], nasa_O2_a2[4], nasa_O2_a2[6]);
+    const Scalar nasa_s_O2_2 =             nasa_s(T2, nasa_O2_a2[0], nasa_O2_a2[1], nasa_O2_a2[2], nasa_O2_a2[3], nasa_O2_a2[4], nasa_O2_a2[6]);
     const Scalar nasa_g_O2_2 = nasa_h_O2_2/(R_O2*T2) - nasa_s_O2_2;
 
     return_flag_temp = test_h( species_name, index, nasa_h_O2_1, T4, nasa_thermo );
@@ -644,15 +653,15 @@ int tester(const std::string & nasa_filename)
   {
     unsigned int index = 2;
     const Scalar h_1 = R_OH*T1*cea_h( T1, cea_OH_a1[0], cea_OH_a1[1], cea_OH_a1[2], cea_OH_a1[3], cea_OH_a1[4], cea_OH_a1[5], cea_OH_a1[6],cea_OH_a1[8]);
-    const Scalar s_1 =         cea_h( T1, cea_OH_a1[0], cea_OH_a1[1], cea_OH_a1[2], cea_OH_a1[3], cea_OH_a1[4], cea_OH_a1[5], cea_OH_a1[6],cea_OH_a1[9]);
+    const Scalar s_1 =         cea_s( T1, cea_OH_a1[0], cea_OH_a1[1], cea_OH_a1[2], cea_OH_a1[3], cea_OH_a1[4], cea_OH_a1[5], cea_OH_a1[6],cea_OH_a1[9]);
     const Scalar g_1 = h_1/(R_OH*T1) - s_1;
 
     const Scalar h_2 = R_OH*T2*cea_h( T2, cea_OH_a2[0], cea_OH_a2[1], cea_OH_a2[2], cea_OH_a2[3], cea_OH_a2[4], cea_OH_a2[5], cea_OH_a2[6],cea_OH_a2[8]);
-    const Scalar s_2 =         cea_h( T2, cea_OH_a2[0], cea_OH_a2[1], cea_OH_a2[2], cea_OH_a2[3], cea_OH_a2[4], cea_OH_a2[5], cea_OH_a2[6],cea_OH_a2[9]);
+    const Scalar s_2 =         cea_s( T2, cea_OH_a2[0], cea_OH_a2[1], cea_OH_a2[2], cea_OH_a2[3], cea_OH_a2[4], cea_OH_a2[5], cea_OH_a2[6],cea_OH_a2[9]);
     const Scalar g_2 = h_2/(R_OH*T2) - s_2;
 
     const Scalar h_3 = R_OH*T3*cea_h( T3, cea_OH_a3[0], cea_OH_a3[1], cea_OH_a3[2], cea_OH_a3[3], cea_OH_a3[4], cea_OH_a3[5], cea_OH_a3[6],cea_OH_a3[8]);
-    const Scalar s_3 =         cea_h( T3, cea_OH_a3[0], cea_OH_a3[1], cea_OH_a3[2], cea_OH_a3[3], cea_OH_a3[4], cea_OH_a3[5], cea_OH_a3[6],cea_OH_a3[9]);
+    const Scalar s_3 =         cea_s( T3, cea_OH_a3[0], cea_OH_a3[1], cea_OH_a3[2], cea_OH_a3[3], cea_OH_a3[4], cea_OH_a3[5], cea_OH_a3[6],cea_OH_a3[9]);
     const Scalar g_3 = h_3/(R_OH*T3) - s_3;
     
     const Antioch::Species species = chem_mixture.species_list()[index];
@@ -688,11 +697,11 @@ int tester(const std::string & nasa_filename)
 
 // NASA [300 - 1000] [1000 - 5000]
     const Scalar nasa_h_OH_1 = R_OH * T4 * nasa_h(T4, nasa_OH_a1[0], nasa_OH_a1[1], nasa_OH_a1[2], nasa_OH_a1[3], nasa_OH_a1[4], nasa_OH_a1[5]);
-    const Scalar nasa_s_OH_1 =             nasa_h(T4, nasa_OH_a1[0], nasa_OH_a1[1], nasa_OH_a1[2], nasa_OH_a1[3], nasa_OH_a1[4], nasa_OH_a1[6]);
+    const Scalar nasa_s_OH_1 =             nasa_s(T4, nasa_OH_a1[0], nasa_OH_a1[1], nasa_OH_a1[2], nasa_OH_a1[3], nasa_OH_a1[4], nasa_OH_a1[6]);
     const Scalar nasa_g_OH_1 = nasa_h_OH_1/(R_OH*T4) - nasa_s_OH_1;
 
     const Scalar nasa_h_OH_2 = R_OH * T2 * nasa_h(T2, nasa_OH_a2[0], nasa_OH_a2[1], nasa_OH_a2[2], nasa_OH_a2[3], nasa_OH_a2[4], nasa_OH_a2[5]);
-    const Scalar nasa_s_OH_2 =             nasa_h(T2, nasa_OH_a2[0], nasa_OH_a2[1], nasa_OH_a2[2], nasa_OH_a2[3], nasa_OH_a2[4], nasa_OH_a2[6]);
+    const Scalar nasa_s_OH_2 =             nasa_s(T2, nasa_OH_a2[0], nasa_OH_a2[1], nasa_OH_a2[2], nasa_OH_a2[3], nasa_OH_a2[4], nasa_OH_a2[6]);
     const Scalar nasa_g_OH_2 = nasa_h_OH_2/(R_OH*T2) - nasa_s_OH_2;
 
     return_flag_temp = test_h( species_name, index, nasa_h_OH_1, T4, nasa_thermo );
@@ -762,12 +771,12 @@ int tester(const std::string & nasa_filename)
 
 // NASA [300 - 1000] [1000 - 5000]
     const Scalar nasa_h_O_1 = R_O * T4 * nasa_h(T4, nasa_O_a1[0], nasa_O_a1[1], nasa_O_a1[2], nasa_O_a1[3], nasa_O_a1[4], nasa_O_a1[5]);
-    const Scalar nasa_s_O_1 =            nasa_h(T4, nasa_O_a1[0], nasa_O_a1[1], nasa_O_a1[2], nasa_O_a1[3], nasa_O_a1[4], nasa_O_a1[6]);
-    const Scalar nasa_g_O_1 = nasa_h_1/(R_O*T4) - nasa_s_1;
+    const Scalar nasa_s_O_1 =            nasa_s(T4, nasa_O_a1[0], nasa_O_a1[1], nasa_O_a1[2], nasa_O_a1[3], nasa_O_a1[4], nasa_O_a1[6]);
+    const Scalar nasa_g_O_1 = nasa_h_O_1/(R_O*T4) - nasa_s_O_1;
 
     const Scalar nasa_h_O_2 = R_O * T2 * nasa_h(T2, nasa_O_a2[0], nasa_O_a2[1], nasa_O_a2[2], nasa_O_a2[3], nasa_O_a2[4], nasa_O_a2[5]);
-    const Scalar nasa_s_O_2 =            nasa_h(T2, nasa_O_a2[0], nasa_O_a2[1], nasa_O_a2[2], nasa_O_a2[3], nasa_O_a2[4], nasa_O_a2[6]);
-    const Scalar nasa_g_O_2 = nasa_h_2/(R_O*T2) - nasa_s_2;
+    const Scalar nasa_s_O_2 =            nasa_s(T2, nasa_O_a2[0], nasa_O_a2[1], nasa_O_a2[2], nasa_O_a2[3], nasa_O_a2[4], nasa_O_a2[6]);
+    const Scalar nasa_g_O_2 = nasa_h_O_2/(R_O*T2) - nasa_s_O_2;
 
     return_flag_temp = test_h( species_name, index, nasa_h_O_1, T4, nasa_thermo );
     if( return_flag_temp != 0 ) return_flag = 1;
@@ -796,11 +805,11 @@ int tester(const std::string & nasa_filename)
     const Scalar g_1 = h_1/(R_H2*T1) - s_1;
 
     const Scalar h_2 = R_H2*T2*cea_h( T2, cea_H2_a2[0], cea_H2_a2[1], cea_H2_a2[2], cea_H2_a2[3], cea_H2_a2[4], cea_H2_a2[5], cea_H2_a2[6],cea_H2_a2[8]);
-    const Scalar s_2 =         cea_s( T1, cea_H2_a2[0], cea_H2_a2[1], cea_H2_a2[2], cea_H2_a2[3], cea_H2_a2[4], cea_H2_a2[5], cea_H2_a2[6],cea_H2_a2[9]);
+    const Scalar s_2 =         cea_s( T2, cea_H2_a2[0], cea_H2_a2[1], cea_H2_a2[2], cea_H2_a2[3], cea_H2_a2[4], cea_H2_a2[5], cea_H2_a2[6],cea_H2_a2[9]);
     const Scalar g_2 = h_2/(R_H2*T2) - s_2;
 
     const Scalar h_3 = R_H2*T3*cea_h( T3, cea_H2_a3[0], cea_H2_a3[1], cea_H2_a3[2], cea_H2_a3[3], cea_H2_a3[4], cea_H2_a3[5], cea_H2_a3[6],cea_H2_a3[8]);
-    const Scalar s_3 =         cea_s( T1, cea_H2_a3[0], cea_H2_a3[1], cea_H2_a3[2], cea_H2_a3[3], cea_H2_a3[4], cea_H2_a3[5], cea_H2_a3[6],cea_H2_a3[9]);
+    const Scalar s_3 =         cea_s( T3, cea_H2_a3[0], cea_H2_a3[1], cea_H2_a3[2], cea_H2_a3[3], cea_H2_a3[4], cea_H2_a3[5], cea_H2_a3[6],cea_H2_a3[9]);
     const Scalar g_3 = h_3/(R_H2*T3) - s_3;
     
     const Antioch::Species species = chem_mixture.species_list()[index];
@@ -834,13 +843,15 @@ int tester(const std::string & nasa_filename)
     return_flag_temp = test_g( species_name, index, g_3, T3, thermo );
     if( return_flag_temp != 0 ) return_flag = 1;
 
+return return_flag;
+
 // NASA [300 - 1000] [1000 - 5000]
     const Scalar nasa_h_H2_1 = R_H2 * T4 * nasa_h(T4, nasa_H2_a1[0], nasa_H2_a1[1], nasa_H2_a1[2], nasa_H2_a1[3], nasa_H2_a1[4], nasa_H2_a1[5]);
-    const Scalar nasa_s_H2_1 =             nasa_h(T4, nasa_H2_a1[0], nasa_H2_a1[1], nasa_H2_a1[2], nasa_H2_a1[3], nasa_H2_a1[4], nasa_H2_a1[6]);
+    const Scalar nasa_s_H2_1 =             nasa_s(T4, nasa_H2_a1[0], nasa_H2_a1[1], nasa_H2_a1[2], nasa_H2_a1[3], nasa_H2_a1[4], nasa_H2_a1[6]);
     const Scalar nasa_g_H2_1 = nasa_h_H2_1/(R_H2 * T4) - nasa_s_H2_1;
 
     const Scalar nasa_h_H2_2 = R_H2 * T2 * nasa_h(T2, nasa_H2_a2[0], nasa_H2_a2[1], nasa_H2_a2[2], nasa_H2_a2[3], nasa_H2_a2[4], nasa_H2_a2[5]);
-    const Scalar nasa_s_H2_2 =             nasa_h(T2, nasa_H2_a2[0], nasa_H2_a2[1], nasa_H2_a2[2], nasa_H2_a2[3], nasa_H2_a2[4], nasa_H2_a2[6]);
+    const Scalar nasa_s_H2_2 =             nasa_s(T2, nasa_H2_a2[0], nasa_H2_a2[1], nasa_H2_a2[2], nasa_H2_a2[3], nasa_H2_a2[4], nasa_H2_a2[6]);
     const Scalar nasa_g_H2_2 = nasa_h_H2_2/(R_H2 * T2) - nasa_s_H2_2;
 
     return_flag_temp = test_h( species_name, index, nasa_h_H2_1, T4, nasa_thermo );
