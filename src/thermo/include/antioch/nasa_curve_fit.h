@@ -45,7 +45,10 @@ namespace Antioch
   class NASACurveFit
   {
   public:
-    
+
+    // default: [300,1000] [1000,5000]
+    NASACurveFit( const std::vector<CoeffType>& coeffs);
+
     NASACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temp );
     ~NASACurveFit();
 
@@ -129,7 +132,7 @@ namespace Antioch
   protected:
 
     //! The number of coefficients in each interval
-    const unsigned int _n_coeffs;
+    unsigned int _n_coeffs;
 
     //! The coefficient data
     /*!
@@ -137,13 +140,13 @@ namespace Antioch
       a0-a6 for the first interval, a0-a6 for the second interval,
       and so on.
      */
-    const std::vector<CoeffType> _coefficients;
+    std::vector<CoeffType> _coefficients;
 
     //! The temperatures
     /*!
       The temperature defining the intervals
      */
-    const std::vector<CoeffType> _temp;
+    std::vector<CoeffType> _temp;
   };
 
 
@@ -159,6 +162,22 @@ namespace Antioch
       // consistency checks
     antioch_assert_equal_to(_coefficients.size()%7,0);
     antioch_assert_equal_to(_temp.size(),_coefficients.size()/_n_coeffs + 1);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  NASACurveFit<CoeffType>::NASACurveFit( const std::vector<CoeffType>& coeffs)
+    : _n_coeffs(7),
+      _coefficients(coeffs)
+  {
+      // consistency checks
+    antioch_assert_equal_to(_coefficients.size(),14);
+
+    _temp.resize(3);
+    _temp[0] = 300.L;
+    _temp[1] = 1000.L;
+    _temp[2] = 5000.L;
     return;
   }
 
@@ -182,15 +201,13 @@ namespace Antioch
     UIntType interval;
     Antioch::zero_clone(interval, T);
 
-
     for(unsigned int i = 1; i < _temp.size(); ++i)
     {
         interval = Antioch::if_else
-                   (T < _temp[i],
+                   (T > _temp[i-1] && T < _temp[i],
                        i - 1,
                        interval); 
     }
-
     return interval;
   }
 
@@ -225,7 +242,6 @@ namespace Antioch
     // FIXME - this needs expression templates to be faster...
 
     StateType returnval = Antioch::zero_clone(cache.T);
-
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
         const CoeffType * const a =
@@ -237,7 +253,6 @@ namespace Antioch
       }
 
     return returnval;
-      
   }
 
   template<typename CoeffType>
@@ -261,8 +276,8 @@ namespace Antioch
         returnval = Antioch::if_else
         ( interval == i,
            StateType(  a[0] + 
-                       a[1]*cache.T/2.0 + a[2]*cache.T2/3.0 + a[3]*cache.T3/4.0 +
-                       a[4]*cache.T4/5.0 + a[5]/cache.T),
+                       a[1]*cache.T/2.0L + a[2]*cache.T2/3.0L + a[3]*cache.T3/4.0L +
+                       a[4]*cache.T4/5.0L + a[5]/cache.T),
            returnval);
        }
        return returnval;
@@ -289,8 +304,8 @@ namespace Antioch
         returnval = Antioch::if_else
         ( interval == i,
            StateType(   a[0]*cache.lnT 
-                      + a[1]*cache.T + a[2]*cache.T2/2.0 + a[3]*cache.T3/3.0 
-                      + a[4]*cache.T4/4.0 + a[6]),
+                      + a[1]*cache.T + a[2]*cache.T2/2.0L + a[3]*cache.T3/3.0L 
+                      + a[4]*cache.T4/4.0L + a[6]),
            returnval);
        }
        return returnval;
@@ -320,8 +335,8 @@ namespace Antioch
         ( interval == i,
 	   StateType(a[5]/cache.T - a[0]*cache.lnT
                      + a[0] - a[6]
-		     - a[1]/2*cache.T   - a[2]*cache.T2/6
-                     - a[3]*cache.T3/12 - a[4]*cache.T4/20),
+		     - a[1]/2.L*cache.T   - a[2]*cache.T2/6.L
+                     - a[3]*cache.T3/12.L - a[4]*cache.T4/20.L),
            returnval);
        }
        return returnval;
@@ -350,9 +365,9 @@ namespace Antioch
           this->coefficients(i);
 	returnval = Antioch::if_else
 	  (interval == i,
-	   StateType(- a[5]/cache.T2   - a[0]/cache.T
-		     - a[1]/2          - a[2]*cache.T/3
-                     - a[3]*cache.T2/4 - a[4]*cache.T3/5),
+	   StateType(- a[5]/cache.T2     - a[0]/cache.T
+		     - a[1]/2.L          - a[2]*cache.T/3.L
+                     - a[3]*cache.T2/4.L - a[4]*cache.T3/5.L),
 	   returnval);
       }
 

@@ -36,6 +36,7 @@
 #include "antioch/chemical_species.h"
 #include "antioch/input_utils.h"
 #include "antioch/cea_curve_fit.h"
+#include "antioch/nasa_curve_fit.h"
 #include "antioch/temp_cache.h"
 
 // C++
@@ -60,7 +61,11 @@ namespace Antioch
     /*! virtual so this can be subclassed by the user. */
     virtual ~NASAThermoMixture();
 
+     //CEA friendly
     void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs );
+
+     //NASA general
+    void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs, const std::vector<CoeffType>& temps );
 
     const NASAFit& curve_fit( unsigned int s ) const;
 
@@ -115,7 +120,7 @@ namespace Antioch
   template<typename CoeffType, typename NASAFit>
   inline
   void NASAThermoMixture<CoeffType,NASAFit>::add_curve_fit( const std::string& species_name,
-                                                   const std::vector<CoeffType>& coeffs )
+                                                   const std::vector<CoeffType>& coeffs)
   {
     antioch_assert( _chem_mixture.species_name_map().find(species_name) !=
 		    _chem_mixture.species_name_map().end() );
@@ -127,7 +132,28 @@ namespace Antioch
 
     _species_curve_fits[s] = new NASAFit(coeffs);
 
-    CEAEvaluator<CoeffType,NASAFit> evaluator( *this );
+    NASAEvaluator<CoeffType,NASAFit> evaluator( *this );
+    _cp_at_200p1[s] = evaluator.cp( TempCache<CoeffType>(200.1), s );
+
+    return;
+  }
+
+  template<typename CoeffType, typename NASAFit>
+  inline
+  void NASAThermoMixture<CoeffType,NASAFit>::add_curve_fit( const std::string& species_name,
+                                                   const std::vector<CoeffType>& coeffs, const std::vector<CoeffType>& temps )
+  {
+    antioch_assert( _chem_mixture.species_name_map().find(species_name) !=
+		    _chem_mixture.species_name_map().end() );
+
+    unsigned int s = _chem_mixture.species_name_map().find(species_name)->second;
+
+    antioch_assert_less_equal( s, _species_curve_fits.size() );
+    antioch_assert( !_species_curve_fits[s] );
+
+    _species_curve_fits[s] = new NASAFit(coeffs,temps);
+
+    NASAEvaluator<CoeffType,NASAFit> evaluator( *this );
     _cp_at_200p1[s] = evaluator.cp( TempCache<CoeffType>(200.1), s );
 
     return;

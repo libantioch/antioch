@@ -142,6 +142,10 @@ namespace Antioch
       and so on.
      */
     const std::vector<CoeffType> _coefficients;
+
+   private:
+    // for compatibility with NASA, not used
+    CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> &temps );
   };
 
 
@@ -260,8 +264,8 @@ namespace Antioch
         returnval = Antioch::if_else
         ( interval == i,
            StateType( -a[0]/cache.T2 + a[1]*cache.lnT/cache.T + a[2] + 
-                       a[3]*cache.T/2.0 + a[4]*cache.T2/3.0 + a[5]*cache.T3/4.0 +
-                       a[6]*cache.T4/5.0 + a[8]/cache.T),
+                       a[3]*cache.T/2.0L + a[4]*cache.T2/3.0L + a[5]*cache.T3/4.0L +
+                       a[6]*cache.T4/5.0L + a[8]/cache.T),
            returnval);
        }
        return returnval;

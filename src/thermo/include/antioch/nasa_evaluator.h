@@ -122,7 +122,7 @@ namespace Antioch
 
   protected:
 
-    const NASAThermoMixture<CoeffType,NASAFit>& _cea_mixture;
+    const NASAThermoMixture<CoeffType,NASAFit>& _nasa_mixture;
 
     //! Convenience function
     unsigned int n_species() const;
@@ -141,7 +141,7 @@ namespace Antioch
   /* --------------------- Constructor/Destructor -----------------------*/
   template<typename CoeffType, typename NASAFit>
   NASAEvaluator<CoeffType,NASAFit>::NASAEvaluator( const NASAThermoMixture<CoeffType,NASAFit>& cea_mixture )
-    : _cea_mixture(cea_mixture)
+    : _nasa_mixture(cea_mixture)
   {
     return;
   }
@@ -157,21 +157,21 @@ namespace Antioch
   inline
   const NASAThermoMixture<CoeffType,NASAFit>& NASAEvaluator<CoeffType,NASAFit>::cea_mixture() const
   {
-    return _cea_mixture;
+    return _nasa_mixture;
   }
   
   template<typename CoeffType, typename NASAFit>
   inline
   unsigned int NASAEvaluator<CoeffType,NASAFit>::n_species() const
   {
-    return _cea_mixture.chemical_mixture().n_species();
+    return _nasa_mixture.chemical_mixture().n_species();
   }
 
   template<typename CoeffType, typename NASAFit>
   inline
   const ChemicalMixture<CoeffType>& NASAEvaluator<CoeffType,NASAFit>::chem_mixture() const
   {
-    return _cea_mixture.chemical_mixture();
+    return _nasa_mixture.chemical_mixture();
   }
 
   template<typename CoeffType, typename NASAFit>
@@ -182,11 +182,12 @@ namespace Antioch
   {
     typedef typename Antioch::value_type<StateType>::type ScalarType;
     // T < 200.1 ? cp_at_200p1 : R * cp_over_R
+        
     return
       Antioch::if_else
         (cache.T < ScalarType(200.1),
          Antioch::constant_clone
-	   (cache.T,_cea_mixture.cp_at_200p1(species)),
+	   (cache.T,_nasa_mixture.cp_at_200p1(species)),
 	 StateType
 	   (this->chem_mixture().R(species) * 
 	    this->cp_over_R(cache, species)));
@@ -242,10 +243,10 @@ namespace Antioch
   {
     antioch_assert_less( species, this->n_species() );
     // FIXME - we need assert_less to be vectorizable
-    // antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
-    //                      _cea_mixture.curve_fit(species).n_intervals() );
+    // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+    //                      _nasa_mixture.curve_fit(species).n_intervals() );
 
-    return this->_cea_mixture.curve_fit(species).cp_over_R(cache);
+    return this->_nasa_mixture.curve_fit(species).cp_over_R(cache);
   }
 
 
@@ -255,10 +256,10 @@ namespace Antioch
   StateType NASAEvaluator<CoeffType,NASAFit>::h_over_RT( const TempCache<StateType>& cache, unsigned int species ) const
   {
     antioch_assert_less( species, this->n_species() );
-    antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
-                         _cea_mixture.curve_fit(species).n_intervals() );
+    antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+                         _nasa_mixture.curve_fit(species).n_intervals() );
     
-    return this->_cea_mixture.curve_fit(species).h_over_RT(cache);
+    return this->_nasa_mixture.curve_fit(species).h_over_RT(cache);
   }
 
 
@@ -268,10 +269,10 @@ namespace Antioch
   StateType NASAEvaluator<CoeffType,NASAFit>::s_over_R( const TempCache<StateType>& cache, unsigned int species ) const
   {
     antioch_assert_less( species, this->n_species() );
-    antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
-                         _cea_mixture.curve_fit(species).n_intervals() );
+    antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+                         _nasa_mixture.curve_fit(species).n_intervals() );
     
-    return this->_cea_mixture.curve_fit(species).s_over_R(cache);
+    return this->_nasa_mixture.curve_fit(species).s_over_R(cache);
   }
   
 
@@ -283,10 +284,10 @@ namespace Antioch
   {
     antioch_assert_less( species, this->n_species() );
     // FIXME - we need assert_less to be vectorizable
-    // antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
-    //                      _cea_mixture.curve_fit(species).n_intervals() );
+    // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+    //                      _nasa_mixture.curve_fit(species).n_intervals() );
     
-    return this->_cea_mixture.curve_fit(species).h_RT_minus_s_R(cache);
+    return this->_nasa_mixture.curve_fit(species).h_RT_minus_s_R(cache);
   }
 
 
@@ -319,10 +320,10 @@ namespace Antioch
   {
     antioch_assert_less( species, this->n_species() );
     // FIXME - we need assert_less to be vectorizable
-    // antioch_assert_less( _cea_mixture.curve_fit(species).interval(cache.T),
-    //                      _cea_mixture.curve_fit(species).n_intervals() );
+    // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+    //                      _nasa_mixture.curve_fit(species).n_intervals() );
       
-    return this->_cea_mixture.curve_fit(species).dh_RT_minus_s_R_dT(cache);
+    return this->_nasa_mixture.curve_fit(species).dh_RT_minus_s_R_dT(cache);
   }
 
 

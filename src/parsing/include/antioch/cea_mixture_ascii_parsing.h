@@ -43,21 +43,24 @@ namespace Antioch
 {
   // Forward declarations
   template <class NumericType, class NASAFit>
-  class CEAThermoMixture;
+  class NASAThermoMixture;
+
+  template <class NumericType>
+  class CEACurveFit;
 
   // New declarations
 
-  template<class NumericType, class NASAFit>
-  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType,NASAFit>& thermo, const std::string &filename );
+  template<class NumericType>
+  void read_cea_mixture_data_ascii( NASAThermoMixture<NumericType,CEACurveFit<NumericType> >& thermo, const std::string &filename );
 
-  template<class NumericType, class NASAFit>
-  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType,NASAFit>& thermo );
+  template<class NumericType>
+  void read_cea_mixture_data_ascii_default( NASAThermoMixture<NumericType,CEACurveFit<NumericType> >& thermo );
 
  
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType, class NASAFit>
+  template<class NumericType>
   inline
-  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType,NASAFit>& thermo, const std::string &filename )
+  void read_cea_mixture_data_ascii( NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo, const std::string &filename )
   {
     
     std::ifstream in(filename.c_str());
@@ -117,8 +120,8 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType, class NASAFit>
-  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType,NASAFit>& thermo )
+  template<class NumericType>
+  void read_cea_mixture_data_ascii_default( NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo )
   {
     antioch_deprecated();
     read_cea_mixture_data_ascii(thermo, DefaultFilename::thermo_data());

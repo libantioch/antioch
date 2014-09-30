@@ -49,10 +49,9 @@ namespace Antioch
   public:
 
     CEAThermoMixture( const ChemicalMixture<CoeffType>& chem_mixture ):
-        NASAThermoMixture(chem_mixture)
+        NASAThermoMixture<CoeffType,CEACurveFit<CoeffType> >(chem_mixture)
         {antioch_deprecated();}
-                
-    ~CEAThermoMixture();
+    ~CEAThermoMixture(){}
 
   };
 

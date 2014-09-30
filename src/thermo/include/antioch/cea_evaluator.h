@@ -33,6 +33,7 @@
 
 // Antioch
 #include "antioch/nasa_evaluator.h"
+#include "antioch/cea_mixture.h"
 
 namespace Antioch
 {
@@ -47,10 +48,10 @@ namespace Antioch
   {
   public:
 
-    CEAEvaluator( const CEAThermoMixture<CoeffType, CEACurveFit<CoeffType> >& cea_mixture ):
-        NASAEvaluator(cea_mixture)
+    CEAEvaluator( const CEAThermoMixture<CoeffType>& cea_mixture ):
+        NASAEvaluator<CoeffType,CEACurveFit<CoeffType> >(cea_mixture)
         {antioch_deprecated();}
-    ~CEAEvaluator();
+    ~CEAEvaluator(){}
 
   };
 
