@@ -37,6 +37,7 @@
 #include "antioch/metaprogramming.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/transport_species_ascii_parsing.h"
+#include "antioch/default_filename.h"
 
 // C++
 #include <vector>
@@ -58,7 +59,7 @@ namespace Antioch
   public:
     
     TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
-                      const std::string & filename = (std::string(ANTIOCH_DEFAULT_FILES_PATH) + std::string(ANTIOCH_DEFAULT_TRANSPORT_DATA)));
+                      const std::string & filename = DefaultFilename::transport_mixture());
 
     ~TransportMixture();
 
