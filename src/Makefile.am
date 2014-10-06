@@ -114,6 +114,7 @@ pkginclude_HEADERS += thermal_conductivity/include/antioch/pure_species_the_con_
 pkginclude_HEADERS += thermal_conductivity/include/antioch/rotational_relaxation.h
 
 # transport
+pkginclude_HEADERS += transport/include/antioch/Stockmayer_potential.h
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
 pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
 pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
