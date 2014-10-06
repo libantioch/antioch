@@ -190,25 +190,17 @@ namespace Antioch
     in.close();
 
     // sanity check, we require these informations
-    if(chem_mixture.chemical_species().size() != chem_mixture.species_list().size())
+    bool error(false);
+    for(unsigned int s = 0; s < chem_mixture.species_list().size(); s++)
     {
-       std::cerr << "Molecule(s) is(are) missing.  Please update the information."
-                 << "  Currently using file " << filename << ".\n"
-                 << "Missing molecule(s) is(are):" << std::endl;
-       for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
-       {
-         unsigned int s;
-         for(s = 0; s < chem_mixture.chemical_species().size(); s++)
+         if(!chem_mixture.chemical_species()[s])
          {
-             if(chem_mixture.chemical_species()[s]->species() == chem_mixture.species_inverse_name_map().at(i))break;
+           error = true;
+           std::cerr << "In filename " << filename << " we miss informations on molecules "
+                     << chem_mixture.species_inverse_name_map().at(chem_mixture.species_list()[s]) << std::endl;
          }
-         if(s == chem_mixture.species_list().size())
-         {
-             std::cerr << chem_mixture.species_inverse_name_map().at(i) << std::endl;
-         }
-      }
-      antioch_error();
-    }
+     }
+     if(error)antioch_error();
 
     return;
   }
