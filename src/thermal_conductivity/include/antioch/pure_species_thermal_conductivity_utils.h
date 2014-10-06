@@ -101,7 +101,7 @@ namespace Antioch
    {
         antioch_assert(!set.empty());
 
-        k = (*set[s])(mu,T,rho,dss);
+        k = (*set[s])(s,mu,T,rho,dss);
    }
 
    template<typename Model, typename StateType, typename VectorStateType>
@@ -112,7 +112,7 @@ namespace Antioch
 
       for(unsigned int s = 0; s < k.size(); ++s)
       {
-          k[s] = (*set[s])(mu[s],T,rho,dss[s]);
+          k[s] = (*set[s])(s,mu[s],T,rho,dss[s]);
       }
    }
 

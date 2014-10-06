@@ -164,12 +164,12 @@ namespace Antioch
 
    // suppose to disappear and be optimized out
    template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(const Model & set, const StateType & cp, const StateType & k, StateType & ds, default_physical_tag)
+   void physical_set_operator_diffusion(const Model & set, const StateType & rho, const StateType & cp, const StateType & k, StateType & ds, default_physical_tag)
    {}
 
    // suppose to disappear and be optimized out
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_diffusion(const Model & set, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds, default_physical_tag)
+   void physical_set_operator_diffusion(const Model & set, const StateType & rho, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds, default_physical_tag)
    {}
 
    // suppose to disappear and be optimized out

@@ -153,7 +153,7 @@ namespace Antioch
          antioch_assert_equal_to(Ds[i].size(),set.size());
          for(unsigned int j = 0; j <= i; j++)
          {
-             Ds[i][j] = set[i][j](T,cTot);
+             Ds[i][j] = (*set[i][j])(T,cTot);
              Ds[j][i] = Ds[i][j];
          }
        }

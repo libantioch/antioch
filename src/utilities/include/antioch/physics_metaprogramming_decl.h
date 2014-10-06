@@ -214,12 +214,12 @@ namespace Antioch
         /// this one may or may not be used,
         /// void by default to skip it in concerned cases
    template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(const Model & set, const StateType & cp, const StateType & k, StateType & ds, default_physical_tag);
+   void physical_set_operator_diffusion(const Model & set, const StateType & rho, const StateType & cp, const StateType & k, StateType & ds, default_physical_tag);
 
         /// this one may or may not be used,
         /// void by default to skip it in concerned cases
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_diffusion(const Model & set, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds, default_physical_tag);
+   void physical_set_operator_diffusion(const Model & set, const StateType & rho, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds, default_physical_tag);
 
         /// To have Wilke rule inside Wilke object and not
         /// in diffusion object, avoid it by default to
