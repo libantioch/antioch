@@ -236,7 +236,7 @@ namespace Antioch
   {
 // first way
 // TODO: if not needed, find a way to supress Ds building
-     typename rebind<VectorStateType,VectorStateType>::type Ds(ds.size(),zero_clone(ds));
+     typename rebind<VectorStateType,VectorStateType>::type Ds(ds.size());
      _diffusion_set(T,cTot,Ds );
      wilke_diffusion_rule(_transport_mixture.chemical_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
 
