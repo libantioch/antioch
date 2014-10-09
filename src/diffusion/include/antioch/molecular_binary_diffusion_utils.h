@@ -113,7 +113,9 @@ namespace Antioch
      antioch_assert_less(init.j,set[s].size());
      antioch_assert(!set[s][init.j]);
 
-     set[s][init.j] = new Model(init.si,init.sj);
+        // matrix is symmetric
+     (s >= init.j)?set[s][init.j] = new Model(init.si,init.sj):
+                   set[init.j][s] = new Model(init.sj,init.si);
    }
 
 
@@ -124,7 +126,9 @@ namespace Antioch
    template <typename Model, typename InitType>
    void physical_set_reset(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, bimolecular_diffusion_tag)
    {
-     set[s][init.j]->reset_coeffs(init.si,init.sj);
+        // matrix is symmetric
+     (s >= init.j)?set[s][init.j]->reset_coeffs(init.si,init.sj):
+                   set[init.j][s]->reset_coeffs(init.sj,init.si);
    }
 
    template <typename CoeffType, typename Interpolator>
@@ -154,7 +158,6 @@ namespace Antioch
          for(unsigned int j = 0; j <= i; j++)
          {
              Ds[i][j] = (*set[i][j])(T,cTot);
-             Ds[j][i] = Ds[i][j];
          }
        }
    }
@@ -163,7 +166,7 @@ namespace Antioch
    void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
    {
        antioch_assert_equal_to(Ds.size(),set.size());
-       Ds = set[s][s](T,cTot);
+       Ds = (*set[s][s])(T,cTot);
    }
 
         // template around mixture mainly to avoid 
@@ -186,7 +189,13 @@ namespace Antioch
           for(unsigned int j = 0; j < ds.size(); j++)
           {
              if(j == s)continue;
-             denom += molar_fractions[j] / Ds[s][j];
+             unsigned int l(s),m(j);
+             if(l < m)
+             {
+                l = j;
+                m = s;
+             }
+             denom += molar_fractions[j] / Ds[l][m];
           }
           ds[s] /= denom;
        }

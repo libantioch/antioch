@@ -236,6 +236,7 @@ namespace Antioch
   {
 // first way
 // TODO: if not needed, find a way to supress Ds building
+// TODO: initialization as full squared matrix, even though half is needed and used
      typename rebind<VectorStateType,VectorStateType>::type Ds(ds.size());
      init_constant(Ds,ds);
      _diffusion_set(T,cTot,Ds );
@@ -287,6 +288,7 @@ namespace Antioch
 
 // diffusion comes first
 // TODO: if not needed, find a way to supress Ds building and cTot computation
+// TODO: initialization as full squared matrix, even though half is needed and used
      typename Antioch::rebind<VectorStateType,VectorStateType>::type Ds(mass_fractions.size());
      init_constant(Ds,ds);
      _diffusion_set(T, rho / _transport_mixture.chemical_mixture().M(mass_fractions), Ds);
