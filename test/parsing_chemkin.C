@@ -353,9 +353,18 @@ H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
                       std::numeric_limits<Scalar>::epsilon() * 6500:
                       std::numeric_limits<Scalar>::epsilon() * 100;
   int return_flag(0);
-  for(unsigned int ir = 0; ir < k.size(); ir++)
+
+  if(reaction_set.n_reactions() != k.size())
   {
+     std::cerr << "Not the right number of reactions" << std::endl;
+     std::cerr << reaction_set.n_reactions() << " instead of " << k.size() << std::endl;
+     return_flag = 1;
+  }
+  {
+    for(unsigned int ir = 0; ir < k.size(); ir++)
+    {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
+
      if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] > tol)
      {
         std::cout << *reac << std::endl;
@@ -370,7 +379,8 @@ H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
                   << std::endl;
         return_flag = 1;
      }
-  }
+    }
+   }
 
   return return_flag;
 }
