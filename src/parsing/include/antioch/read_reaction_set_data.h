@@ -229,13 +229,14 @@ namespace Antioch
     kin_keyword["photochemistry"]         = KineticsModel::PHOTOCHEM;
 
     std::map<KineticsModel::KineticsModel,unsigned int> kinetics_model_map;
-    kinetics_model_map[KineticsModel::HERCOURT_ESSEN] = 0;
-    kinetics_model_map[KineticsModel::BERTHELOT]      = 1;
-    kinetics_model_map[KineticsModel::ARRHENIUS]      = 2;
-    kinetics_model_map[KineticsModel::BHE]            = 3;
-    kinetics_model_map[KineticsModel::KOOIJ]          = 4;
-    kinetics_model_map[KineticsModel::VANTHOFF]       = 6;
-    kinetics_model_map[KineticsModel::PHOTOCHEM]      = 7;
+    kinetics_model_map[KineticsModel::CONSTANT]       = 0;
+    kinetics_model_map[KineticsModel::HERCOURT_ESSEN] = 1;
+    kinetics_model_map[KineticsModel::BERTHELOT]      = 2;
+    kinetics_model_map[KineticsModel::ARRHENIUS]      = 3;
+    kinetics_model_map[KineticsModel::BHE]            = 4;
+    kinetics_model_map[KineticsModel::KOOIJ]          = 5;
+    kinetics_model_map[KineticsModel::VANTHOFF]       = 7;
+    kinetics_model_map[KineticsModel::PHOTOCHEM]      = 8;
 
     std::vector<std::string> models; 
     models.push_back("Constant");
