@@ -27,6 +27,7 @@
 #define ANTIOCH_HERCOURT_ESSEN_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/cmath_shims.h"
 
@@ -70,6 +71,19 @@ namespace Antioch
     void set_Cf(  const CoeffType Cf );
     void set_eta( const CoeffType eta );
     void set_Tref(const CoeffType Tref );
+
+    /*! reset the coeffs
+     *
+     * Two ways of modifying your rate:
+     *   - you change totally the rate, thus you 
+     *        require exactly three parameters, the order
+     *        assumed is Cf, eta, Tref
+     *   - you just change the value, thus Tref is not
+     *        modified. You require exactly two parameters,
+     *        the order assumed is Cf, eta
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
 
     CoeffType Cf()   const;
     CoeffType eta()  const;
@@ -150,6 +164,7 @@ namespace Antioch
   void HercourtEssenRate<CoeffType>::set_eta( const CoeffType eta )
   {
     _eta = eta;
+    this->compute_cf();
     return;
   }
 
@@ -161,6 +176,18 @@ namespace Antioch
     this->compute_cf();
 
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void HercourtEssenRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+      antioch_assert_greater(coefficients.size(),1);
+      antioch_assert_less(coefficients.size(),4);
+      if(coefficients.size() == 3)this->set_Tref(coefficients[2]);
+      this->set_Cf(coefficients[0]);
+      this->set_eta(coefficients[1]);
   }
 
   template<typename CoeffType>
@@ -194,7 +221,7 @@ namespace Antioch
   inline
   void HercourtEssenRate<CoeffType>::compute_cf()
   {
-    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+    _Cf = _raw_Cf * ant_pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
 
     return;
   }
