@@ -27,6 +27,7 @@
 #define ANTIOCH_CONSTANT_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/kinetics_type.h"
 
 // C++
@@ -63,6 +64,13 @@ namespace Antioch
     ~ConstantRate();
     
     void set_Cf(  const CoeffType Cf );
+
+    /*! reset the coeffs
+     *
+     * You require exactly one parameter
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
 
     CoeffType Cf()   const;
 
@@ -124,6 +132,16 @@ namespace Antioch
     _Cf = Cf;
 
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void ConstantRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+     antioch_assert_equal_to(coefficients.size(),1);
+
+     this->set_Cf(coefficients[0]);
   }
 
   template<typename CoeffType>

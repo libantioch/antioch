@@ -27,6 +27,7 @@
 #define ANTIOCH_BERTHELOT_HERCOURT_ESSEN_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/cmath_shims.h"
 
@@ -72,6 +73,19 @@ namespace Antioch
     void set_eta( const CoeffType eta );
     void set_D(   const CoeffType D );
     void set_Tref(const CoeffType Tref );
+
+    /*! reset the coeffs
+     *
+     * Two ways of modifying your rate:
+     *   - you change totally the rate, thus you 
+     *        require exactly four parameters, the order
+     *        assumed is Cf, eta, D, Tref
+     *   - you just change the value, thus Tref is not
+     *        modified. You require exactly three parameters,
+     *        the order assumed is Cf, eta, D
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
 
     CoeffType Cf()   const;
     CoeffType eta()  const;
@@ -143,7 +157,6 @@ namespace Antioch
   inline
   void BerthelotHercourtEssenRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    using std::pow;
     _raw_Cf = Cf;
     this->compute_cf();
     return;
@@ -153,7 +166,6 @@ namespace Antioch
   inline
   void BerthelotHercourtEssenRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
-    using std::pow;
     _Tref = Tref;
     this->compute_cf();
     return;
@@ -164,6 +176,7 @@ namespace Antioch
   void BerthelotHercourtEssenRate<CoeffType>::set_eta( const CoeffType eta )
   {
     _eta = eta;
+    this->compute_cf();
     return;
   }
 
@@ -173,6 +186,20 @@ namespace Antioch
   {
     _D = D;
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+    antioch_assert_greater(coefficients.size(),2);
+    antioch_assert_less(coefficients.size(),5);
+
+    if(coefficients.size() == 4)this->set_Tref(coefficients[3]);
+    this->set_Cf(coefficients[0]);
+    this->set_eta(coefficients[1]);
+    this->set_D(coefficients[2]);
   }
 
   template<typename CoeffType>
@@ -211,7 +238,7 @@ namespace Antioch
   inline
   void BerthelotHercourtEssenRate<CoeffType>::compute_cf()
   {
-    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+    _Cf = _raw_Cf * ant_pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 

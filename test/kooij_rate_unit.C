@@ -30,30 +30,28 @@
 
 // C++
 #include <limits>
+#include <vector>
 // Antioch
 #include "antioch/kooij_rate.h"
+#include "antioch/physical_constants.h"
+#include "antioch/units.h"
 
 template <typename Scalar>
-int tester()
+int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const Scalar & Tref, const Scalar & R, const Antioch::KooijRate<Scalar> & kooij_rate)
 {
   using std::abs;
   using std::exp;
   using std::pow;
 
-  const Scalar Cf = 1.4;
-  const Scalar eta = 1.2;
-  const Scalar Ea = 5.0;
-
-  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea,1.,1.);
-
   int return_flag = 0;
+
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
-  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+  for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
   
-    const Scalar rate_exact = Cf*pow(T,eta)*exp(-Ea/T);
-    const Scalar derive_exact = exp(-Ea/T) * pow(T,eta) * Cf/T * (Ea/T + eta );
+    const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(-Ea/(R*T));
+    const Scalar derive_exact = exp(-Ea/(R*T)) * pow(T/Tref,eta) * Cf/T * (Ea/(R*T) + eta );
 
     Scalar rate1 = kooij_rate(T);
     Scalar deriveRate1 = kooij_rate.derivative(T);
@@ -105,6 +103,61 @@ int tester()
 
      if(return_flag)break;
   }
+  return return_flag;
+}
+
+template <typename Scalar>
+int tester()
+{
+
+  Scalar Cf = 1.4L;
+  Scalar eta = 1.2L;
+  Scalar Ea = 298.0L;
+  Scalar Tref = 1.L;
+  Scalar R = 1.L;
+
+  Antioch::KooijRate<Scalar> kooij_rate(Cf,eta,Ea,Tref,R);
+
+  int return_flag = test_values(Cf,eta,Ea,Tref,R,kooij_rate);
+
+  Cf = 1e-7L;
+  eta = 0.7L;
+  Ea = 36000.0L;
+  Tref = 298.;
+  R = Antioch::Constants::R_universal<Scalar>() * Antioch::Units<Scalar>("cal").get_SI_factor();
+  kooij_rate.set_Cf(Cf);
+  kooij_rate.set_eta(eta);
+  kooij_rate.set_Ea(Ea);
+  kooij_rate.set_Tref(Tref);
+  kooij_rate.set_rscale(R);
+
+  return_flag = test_values(Cf,eta,Ea,Tref,R,kooij_rate) || return_flag;
+
+  Cf = 2.1e-7L;
+  eta = 1.1L;
+  Ea = 23000.0L;
+  std::vector<Scalar> values(3);
+  values[0] = Cf;
+  values[1] = eta;
+  values[2] = Ea;
+  kooij_rate.reset_coefs(values);
+
+  return_flag = test_values(Cf,eta,Ea,Tref,R,kooij_rate) || return_flag;
+
+  Cf = 2.1e-11L;
+  eta = -0.01L;
+  Ea = 100000.0L;
+  R = Antioch::Constants::R_universal<Scalar>();
+  Tref= 300.L;
+  values.resize(5);
+  values[0] = Cf;
+  values[1] = eta;
+  values[2] = Ea;
+  values[3] = Tref;
+  values[4] = R;
+  kooij_rate.reset_coefs(values);
+
+  return_flag = test_values(Cf,eta,Ea,Tref,R,kooij_rate) || return_flag;
 
   return return_flag;
 }
