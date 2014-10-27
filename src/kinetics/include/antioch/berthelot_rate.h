@@ -74,7 +74,7 @@ namespace Antioch
     template <typename VectorCoeffType>
     void reset_coefs(const VectorCoeffType & coefficients);
 
-    // TODO: delete this method, why does it exist?
+    // \todo delete this method, why does it exist?
     void scale_D( const CoeffType scale );
 
     CoeffType Cf() const;
