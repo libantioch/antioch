@@ -51,7 +51,7 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
   {
   
     const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(-Ea/(R*T));
-    const Scalar derive_exact = exp(-Ea/(R*T)) * pow(T/Tref,eta) * Cf/T * (Ea/(R*T) + eta );
+    const Scalar derive_exact = exp(-Ea/(R*T)) * pow(T/Tref,eta) * Cf * (Ea/(R*T*T) + eta/T );
 
     Scalar rate1 = kooij_rate(T);
     Scalar deriveRate1 = kooij_rate.derivative(T);
