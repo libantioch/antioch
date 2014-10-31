@@ -83,6 +83,8 @@ namespace Antioch{
     KineticsType(const KineticsModel::KineticsModel type);
     virtual ~KineticsType();
 
+    KineticsModel::KineticsModel type() const;
+
     //!
     template <typename StateType, typename VectorStateType>
     StateType operator()(const KineticsConditions<StateType,VectorStateType> & conditions) const;
@@ -90,10 +92,6 @@ namespace Antioch{
     //!
     template <typename StateType, typename VectorStateType>
     StateType derivative( const KineticsConditions<StateType,VectorStateType> & conditions ) const;
-
-    //! reset the coefficients, not necessarily a VectorCoeffType
-    template <typename VectorType>
-    void reset_coefs(const VectorType & coefficients);
 
     //!
     template <typename StateType, typename VectorStateType>
@@ -134,6 +132,13 @@ namespace Antioch{
     my_index(0)
   {
     return;
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
+  inline
+  KineticsModel::KineticsModel KineticsType<CoeffType,VectorCoeffType>::type() const
+  {
+    return my_type;
   }
 
   template <typename CoeffType, typename VectorCoeffType>
@@ -346,69 +351,6 @@ namespace Antioch{
       } // switch(my_type)
     
     return;
-  }
-
-  template <typename CoeffType, typename VectorCoeffType>
-  template <typename VectorType>
-  inline
-  void KineticsType<CoeffType,VectorCoeffType>::reset_coefs(const VectorType& coeffs)
-  {
-    switch(my_type) 
-      {
-      case(KineticsModel::CONSTANT):
-        {
-          return (static_cast<const ConstantRate<CoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      case(KineticsModel::HERCOURT_ESSEN):
-        {
-          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      case(KineticsModel::BERTHELOT):
-        {
-          return (static_cast<const BerthelotRate<CoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      case(KineticsModel::ARRHENIUS):
-        {
-          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      case(KineticsModel::BHE):
-        {
-          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      case(KineticsModel::KOOIJ):
-        {
-          return (static_cast<const KooijRate<CoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      case(KineticsModel::VANTHOFF):
-        {
-          return (static_cast<const VantHoffRate<CoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      case(KineticsModel::PHOTOCHEM):
-        {
-          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->reset_coefs(coeffs);
-        }
-        break;
-
-      default:
-        {
-          antioch_error();
-        }
-
-      } // switch(my_type)
   }
 
 } // end namespace Antioch

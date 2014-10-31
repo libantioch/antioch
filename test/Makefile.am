@@ -50,6 +50,7 @@ check_PROGRAMS += units_unit
 check_PROGRAMS += kinetics_reactive_scheme_unit
 check_PROGRAMS += sigma_bin_converter_unit
 check_PROGRAMS += sigma_bin_converter_vec_unit
+check_PROGRAMS += kinetics_settings_unit
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -120,6 +121,7 @@ units_unit_SOURCES = units_unit.C
 kinetics_reactive_scheme_unit_SOURCES = kinetics_reactive_scheme_unit.C
 sigma_bin_converter_unit_SOURCES = sigma_bin_converter_unit.C
 sigma_bin_converter_vec_unit_SOURCES = sigma_bin_converter_vec_unit.C
+kinetics_settings_unit_SOURCES = kinetics_settings_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -176,6 +178,8 @@ TESTS += units_unit
 TESTS += kinetics_reactive_scheme_unit.sh
 TESTS += sigma_bin_converter_unit
 TESTS += sigma_bin_converter_vec_unit
+TESTS += sigma_bin_converter_unit.sh
+TESTS += kinetics_settings_unit
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
