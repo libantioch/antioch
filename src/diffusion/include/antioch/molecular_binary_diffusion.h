@@ -206,6 +206,7 @@ namespace Antioch{
      _xi(-1),
      _reduced_LJ_diameter(-1),
      _reduced_LJ_depth(-1),
+      _coefficient(0.)
 #else
      _i(species[0].species()),
      _j(species[1].species()),
@@ -216,8 +217,12 @@ namespace Antioch{
      _reduced_dipole_moment((CoeffType(1e-7L) * ant_pow(Constants::light_celerity<CoeffType>(),2)) * 
                               (si.dipole_moment() * sj.dipole_moment() * ant_pow(Units<CoeffType>("D").get_SI_factor(),2 )) / 
                             (CoeffType(2.L) * _reduced_LJ_depth * Constants::Boltzmann_constant<CoeffType>() * ant_pow(_reduced_LJ_diameter,3) )), // mu^2 / (2*eps*sigma^3)
+      _coefficient(CoeffType(0.1875e-25L) * ant_sqrt(CoeffType(2.L) * Constants::Boltzmann_constant<CoeffType>() * CoeffType(1e25L)  /
+                                                            (Constants::Avogadro<CoeffType>() * CoeffType(1e-25L) * Constants::pi<CoeffType>())
+                                                          )
+                                         / ( sqrt(_reduced_mass) * (_reduced_LJ_diameter * _reduced_LJ_diameter) )
+                  )
 #endif
-      _coefficient(0.) //defined in set_coeffs
   {
 #ifndef NDEBUG
      antioch_assert_equal_to(species.size(),2);
