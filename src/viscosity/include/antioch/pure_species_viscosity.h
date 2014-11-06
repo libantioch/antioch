@@ -113,11 +113,8 @@ namespace Antioch
       template <typename StateType>
       ANTIOCH_AUTO(StateType) 
       viscosity(const StateType &T) const
-      ANTIOCH_AUTOFUNC(StateType,    _a   // 5 / 16 * sqrt(pi * Boltzmann_constant)
-                                        * ant_sqrt(_mass * T )  
-                                     / ( Constants::pi<CoeffType>() * _LJ.diameter() * _LJ.diameter() * CoeffType(1e-20L) * // to SI
-                                         _interp.interpolated_value(StateType(ant_log(T / _LJ.depth()) ) )   // Omega(2,2), T*
-                                        )
+      ANTIOCH_AUTOFUNC(StateType,    _a   // 5 / 16 * sqrt(pi * Boltzmann_constant * mass) / ( pi * sigma * sigma )
+                                       * ant_sqrt(T) / _interp.interpolated_value(StateType(ant_log(T / _LJ.depth()) ) )   // Omega(2,2), T*
                       )
 
       template <typename StateType>
@@ -157,15 +154,16 @@ namespace Antioch
       /*! never ever use it*/
       PureSpeciesViscosity();
 
-      const CoeffType _a;
 
       LennardJonesPotential<CoeffType> _LJ;
       CoeffType                        _dipole_moment;
       CoeffType                        _mass;
 
-
       Interpolator    _interp;
       CoeffType _delta_star;
+
+        // a = 5 / 16 * sqrt( Boltzmann_constant * mass / pi) / ( sigma * sigma )
+      CoeffType _a;
 
   };
 
@@ -173,13 +171,16 @@ namespace Antioch
   inline
   PureSpeciesViscosity<CoeffType,Interpolator>::PureSpeciesViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, 
                                                               const CoeffType & dipole_moment, const CoeffType & mass):
-        _a(0.3125L * ant_sqrt(Constants::pi<CoeffType>() * Constants::Boltzmann_constant<CoeffType>())), /* 5 / 16 * sqrt(pi * Boltzmann constant) */
         _LJ(LJ_depth,LJ_diameter),
         _dipole_moment(dipole_moment),
         _mass(mass),
-        _delta_star(ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
-                     ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
-                           Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) ))
+        _delta_star(CoeffType(1e-7) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
+                    ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
+                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * CoeffType(2.L) * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
+        _a(0.3125e-14L * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+                / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))  
+          ) /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2) 
+                ~ 10^-14 float can't take 10^-28 in sqrt*/
   {
      this->build_interpolation();
      return;
@@ -188,32 +189,31 @@ namespace Antioch
   template <typename CoeffType, typename Interpolator>
   inline
   PureSpeciesViscosity<CoeffType,Interpolator>::PureSpeciesViscosity(const std::vector<CoeffType> & coeffs):
-        _a(0.3125 * ant_sqrt(Constants::pi<CoeffType>() * Constants::Boltzmann_constant<CoeffType>())), /* 5 / 16 * sqrt(pi * Boltzmann constant) */
 #ifndef NDEBUG
         _LJ(-1,-1),
         _dipole_moment(-1),
         _mass(-1),
-        _delta_star(-1)
+        _delta_star(-1),
+       _a(0.L) 
 #else
         _LJ(coeffs[0],coeffs[1]),
         _dipole_moment(coeffs[2]),
         _mass(coeffs[3]),
-        _delta_star(ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
-                     ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
-                           Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) ))
+        _delta_star(CoeffType(1e-7) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
+                    ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
+                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * CoeffType(2.L) * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
+        _a(0.3125e-14L * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+                / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))  
+          ) /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2)
+                ~ 10^-14 float can't take 10^-28 in sqrt*/
 #endif
   {
 #ifndef NDEBUG
         antioch_assert_equal_to(coeffs.size(),4);
 
-        _LJ.set_depth(coeffs[0]);
-        _LJ.set_diameter(coeffs[1]);
-        _dipole_moment   = coeffs[2];
-        _mass            = coeffs[3];
-        _delta_star      = ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
-                     ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
-                           Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) );
+        this->reset_coeffs(coeffs[0],coeffs[1],coeffs[2],coeffs[3]);
 #endif
+
      this->build_interpolation();
      return;
   }
@@ -251,9 +251,12 @@ namespace Antioch
      _LJ.reset_coeffs(LJ_depth,LJ_dia);
      _dipole_moment = dipole_moment;
      _mass = mass;
-     _delta_star = (ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
-                     ( _LJ.depth() * CoeffType(8.L) * Constants::pi<CoeffType>() * Constants::vacuum_permittivity<CoeffType>() * 
-                           Constants::Boltzmann_constant<CoeffType>() * ant_pow(_LJ.diameter(),3) ));
+     _delta_star = CoeffType(1e-7) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
+                    ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
+                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * CoeffType(2.L) * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) );
+     _a = CoeffType(0.3125L) * ant_sqrt(Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+                / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2));
+          
 
 //redefining collision integral
     this->build_interpolation();

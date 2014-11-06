@@ -85,7 +85,7 @@ int tester()
 
 int main()
 {
-  return  tester<double>() &&
-        tester<long double>() &&
-        tester<float>();
+  return tester<double>() ||
+         tester<long double>() ||
+         tester<float>();
 };
