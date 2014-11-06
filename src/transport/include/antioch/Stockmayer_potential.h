@@ -67,9 +67,6 @@ namespace Antioch{
           template <typename Scalar>
           const Scalar omega_1_1(const Scalar & T_red, const Scalar & dipole_red) const {antioch_not_implemented();}
 
-          template <typename Scalar, typename VectorScalar>
-          void temperature_interpolation(const std::vector<std::vector<CoeffType> > & omega, const Scalar & delta, VectorScalar & coefficients, VectorScalar & temperature) const;
-
           const unsigned int _T_size;
           const unsigned int _delta_size;
 

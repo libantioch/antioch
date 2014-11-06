@@ -98,14 +98,14 @@ namespace Antioch{
           const
           ANTIOCH_AUTO(StateType)
              Stockmayer(const StateType & T)
-          ANTIOCH_AUTOFUNC(StateType,_interp.interpolated_value(StateType(T / _reduced_LJ_depth) ) )
+          ANTIOCH_AUTOFUNC(StateType,_interp.interpolated_value(StateType(ant_log(T / _reduced_LJ_depth)) ) )
 
           //! \return molecular binary diffusion coefficient
           template <typename StateType>
           const 
           ANTIOCH_AUTO(StateType) 
                 binary_diffusion(const StateType & T, const StateType & cTot) const
-          ANTIOCH_AUTOFUNC(StateType,_coefficient * ant_sqrt(T / _reduced_mass) / (cTot * (_reduced_LJ_diameter * _reduced_LJ_diameter)  * _interp.interpolated_value(StateType(T / _reduced_LJ_depth))))
+          ANTIOCH_AUTOFUNC(StateType,_coefficient * ant_sqrt(T / _reduced_mass) / (cTot * (_reduced_LJ_diameter * _reduced_LJ_diameter)  * _interp.interpolated_value(StateType(ant_log(T / _reduced_LJ_depth) ) )))
 
           void print(std::ostream & out = std::cout) const;
 
@@ -268,14 +268,14 @@ namespace Antioch{
   {
      _interp.spline_delete();
      StockmayerPotential<CoeffType> surface;
-     std::vector<CoeffType> interp_surf(surface.temperature().size(),0);
+     std::vector<CoeffType> interp_surf(surface.log_temperature().size(),0);
      for(unsigned int iT = 0; iT < surface.temperature().size(); iT++)
      {
         Interpolator spline(surface.delta(),surface.omega_1_1()[iT]);
         interp_surf[iT] = spline.interpolated_value(_reduced_dipole_moment);
      }
 
-     _interp.spline_init(surface.temperature(),interp_surf);
+     _interp.spline_init(surface.log_temperature(),interp_surf);
   }
 
   template <typename CoeffType, typename Interpolator>
