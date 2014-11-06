@@ -172,7 +172,8 @@ namespace Antioch
         // template around mixture mainly to avoid 
         // ChemicalMixture<CoeffType> forward declaration
         // Formulae used is
-        // d_s = 1 - y_s / (sum_{j \neq s} x_j/D_{sj})
+        // d_s = (1 - y_s) / (sum_{j \neq s} x_j/D_{sj})
+        // might want to change it for stability
    template <typename Mixture, typename MatrixStateType, typename VectorStateType>
    void wilke_diffusion_rule(const Mixture & mixture, const VectorStateType & mass_fractions, const MatrixStateType & Ds, VectorStateType & ds,bimolecular_diffusion_tag)
    {
@@ -189,13 +190,8 @@ namespace Antioch
           for(unsigned int j = 0; j < ds.size(); j++)
           {
              if(j == s)continue;
-             unsigned int l(s),m(j);
-             if(l < m)
-             {
-                l = j;
-                m = s;
-             }
-             denom += molar_fractions[j] / Ds[l][m];
+             (s > j)?denom += molar_fractions[j] / Ds[s][j]:
+                     denom += molar_fractions[j] / Ds[j][s];
           }
           ds[s] /= denom;
        }

@@ -103,16 +103,17 @@ H2O                   572.400     2.605     1.844     0.000     4.000
   const Scalar cTot = 5e-7;
 
   // bc gives
-  const Scalar D00_exact_times_interp = 2.528351554826481544245441087815348035e3;
-  const Scalar D11_exact_times_interp = 3.121901788240534934432311782758941744e3;
-  const Scalar D22_exact_times_interp = 6.091902339576262080292252875366557807e3;
+  const Scalar D00_exact_times_interp = 3.575629059282712203350417538824313603e3;
+  const Scalar D11_exact_times_interp = 4.415035849326582722446637772820322872e3;
+  const Scalar D22_exact_times_interp = 8.615250909281137767894964155009068175e3;
   const Scalar D10_exact_times_interp = 4.048999169845892614961423528844221310e3;
   const Scalar D20_exact_times_interp = 5.468107000169991297723144486054211050e3;
   const Scalar D12_exact_times_interp = 5.973341001459783642751059656941311432e3;
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10.;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10. < 2e-16)?2e-16:
+                                                                            std::numeric_limits<Scalar>::epsilon() * 10.;
 
 // symetric consistency
   std::cout << "***  Testing symetry ...";
@@ -137,7 +138,7 @@ H2O                   572.400     2.605     1.844     0.000     4.000
 
 int main()
 {
-  return  tester<double>() &&
-        tester<long double>() &&
-        tester<float>();
+  return tester<double>()    ||
+         tester<long double>() ||
+         tester<float>();
 };
