@@ -56,12 +56,11 @@ namespace Antioch
    template <typename ThermoEvaluator, typename CoeffType>
    struct Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>, pure_species_thermal_conductivity_tag >
   {
-     Initializer(const ThermoEvaluator & th, const CoeffType & Z_298K_,const CoeffType & M_, const CoeffType & LJ_depth_):
-                        t(th),Z_298K(Z_298K_),M(M_),LJ_depth(LJ_depth_){}
+     Initializer(const ThermoEvaluator & th, const CoeffType  Z_298K_, const CoeffType  LJ_depth_):
+                        t(th),Z_298K(Z_298K_),LJ_depth(LJ_depth_){}
 
      const ThermoEvaluator & t;
      const CoeffType       & Z_298K;
-     const CoeffType       & M;
      const CoeffType       & LJ_depth;
   };
 
@@ -72,7 +71,7 @@ namespace Antioch
        antioch_assert_less(s,set.size());
        antioch_assert(!set[s]);
 
-       set[s] = new Model(init.t, init.Z_298K, init.M, init.LJ_depth);
+       set[s] = new Model(init.t, init.Z_298K, init.LJ_depth);
    }
 
    // requires to void this

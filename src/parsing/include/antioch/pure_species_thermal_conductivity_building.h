@@ -55,7 +55,6 @@ namespace Antioch
            Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,NumericType>, pure_species_thermal_conductivity_tag >
              init(k.mixture().thermo(),
                   k.mixture().transport_species()[s]->rotational_relaxation(),
-                  k.mixture().transport_species()[s]->M(),
                   k.mixture().transport_species()[s]->LJ_depth());
            k.add_model(k.mixture().species_inverse_name_map().at(s),init);
        }
