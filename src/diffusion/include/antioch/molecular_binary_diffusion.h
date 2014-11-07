@@ -215,7 +215,7 @@ namespace Antioch{
      _reduced_LJ_diameter(CoeffType(0.5L) * (species[0].LJ_diameter() + species[1].LJ_diameter()) * Units<CoeffType>("ang").get_SI_factor() * ant_pow(_xi,-1.L/6.L)), // 1/2 * (sigma_1 + sigma_2) * xi^(-1/6)
      _reduced_LJ_depth(ant_sqrt(species[0].LJ_depth() * species[1].LJ_depth())  *_xi * _xi), // sqrt(eps_1 * eps_2) * xi^2
      _reduced_dipole_moment((CoeffType(1e-7L) * ant_pow(Constants::light_celerity<CoeffType>(),2)) * 
-                              (si.dipole_moment() * sj.dipole_moment() * ant_pow(Units<CoeffType>("D").get_SI_factor(),2 )) / 
+                              (species[0].dipole_moment() * species[1].dipole_moment() * ant_pow(Units<CoeffType>("D").get_SI_factor(),2 )) / 
                             (CoeffType(2.L) * _reduced_LJ_depth * Constants::Boltzmann_constant<CoeffType>() * ant_pow(_reduced_LJ_diameter,3) )), // mu^2 / (2*eps*sigma^3)
       _coefficient(CoeffType(0.1875e-25L) * ant_sqrt(CoeffType(2.L) * Constants::Boltzmann_constant<CoeffType>() * CoeffType(1e25L)  /
                                                             (Constants::Avogadro<CoeffType>() * CoeffType(1e-25L) * Constants::pi<CoeffType>())
