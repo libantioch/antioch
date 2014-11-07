@@ -100,8 +100,6 @@ int vectester(const PairScalars& example, const std::string& testname)
   species_str_list.reserve(n_species);
   species_str_list.push_back( "N2" );
 
-  const Scalar Mm_N = 14.008e-3L;
-  const Scalar Mm_N2 = 2.L * Mm_N;
   const Scalar LJ_depth_N2 = 97.53L;
   const Scalar Z_298 = 4.0L;
 
@@ -109,7 +107,7 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar > k( thermo, Z_298, LJ_depth_N2, Mm_N2);
+  Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar > k( thermo, Z_298, LJ_depth_N2);
 
   // Construct from example to avoid resizing issues
   PairScalars mu  = example;
@@ -128,8 +126,8 @@ int vectester(const PairScalars& example, const std::string& testname)
       rho[2*tuple+1] = 1.4;
     }
   
-  const Scalar k_exact0 = 123.296800605309501138839307257794302255577891781560672779553;
-  const Scalar k_exact1 = 123.335459776209344597337725820704523045620225410498050659927;
+  const Scalar k_exact0 = 3.19434291925996020233442116364270671873509961381739235964650684;
+  const Scalar k_exact1 = 3.2021908709042895344166123247634817043607657971633006497668;
 
   int return_flag = 0;
 
@@ -143,8 +141,8 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.EndTimer(testname);
 #endif
 
-  const Scalar tol = (std::numeric_limits<Scalar>::epsilon()*10 < 5e-17)?
-                        5e-17:
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon()*10 < 7e-17)?
+                        7e-17:
                         std::numeric_limits<Scalar>::epsilon()*10;
 
   for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)

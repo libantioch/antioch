@@ -44,7 +44,8 @@ int test_k( const Scalar k, const Scalar k_exact, const Scalar tol )
 
   if( rel_error  > tol )
     {
-      std::cerr << "Error: Mismatch in thermal conductivity" << std::endl
+      std::cerr << std::setprecision(15)
+                << "Error: Mismatch in thermal conductivity" << std::endl
 		<< "k       = " << k << std::endl
 		<< "k_exact = " << k_exact << std::endl
 		<< "rel_error = " << rel_error << std::endl
@@ -63,8 +64,6 @@ int tester()
   species_str_list.reserve(n_species);
   species_str_list.push_back( "N2" );
 
-  const Scalar Mm_N = 14.008e-3L;
-  const Scalar Mm_N2 = 2.L * Mm_N;
   const Scalar LJ_depth_N2 = 97.53L;
   const Scalar Z_298 = 4.0L;
 
@@ -72,7 +71,7 @@ int tester()
 
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar > k( thermo, Z_298, LJ_depth_N2, Mm_N2);
+  Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar > k( thermo, Z_298, LJ_depth_N2);
 
   const Scalar mu  = 3.14e-3;
   const Scalar dss = 5.23e-5;
@@ -80,11 +79,12 @@ int tester()
   const Scalar T = 1500.1L;
 
   // from bc
-  const Scalar k_N2_exact = 123.296800605309501138839307257794302255577891781560672779553;
-
+  const Scalar k_N2_exact = 3.194342919259960202334421163642706718735099613817392359646;
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 2 < 7e-17)?7e-17:
+                                                                           std::numeric_limits<Scalar>::epsilon() * 2;
+
 
   int return_flag_temp = 0;
   return_flag_temp = test_k( k(0,mu,T,rho,dss), k_N2_exact, tol );
@@ -96,6 +96,6 @@ int tester()
 int main()
 {
   return (tester<double>() ||
-//         tester<long double>() ||
+         tester<long double>() ||
           tester<float>());
 }
