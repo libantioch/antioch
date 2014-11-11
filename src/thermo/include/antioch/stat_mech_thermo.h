@@ -110,6 +110,25 @@ namespace Antioch
     CoeffType cv_tr (const unsigned int species) const;
 
     /**
+     * @returns species translational specific heat over R at constant volume.
+     * Since the translational modes are assumed to be fully polulated
+     * this is simply 
+     * \f[
+     *   \frac{C^{trans}_{v,s}}{\mathrm{R}}  = \frac{3}{2}
+     * \f]
+     */
+    CoeffType cv_trans_over_R( const unsigned int species ) const;
+
+    /**
+     * @returns species rotational specific heat over R at constant volume.
+     * By convention, we lump the translational/rotational components
+     * \f[
+     *   \frac{C^{rot}_{v,s}}{\mathrm{R}} \equiv \frac{C^{tr}_{v,s}}{\mathrm{R}} - \frac{C^{trans}_{v,s}}{\mathrm{R}}
+     * \f]
+     */
+    CoeffType cv_rot_over_R( const unsigned int species ) const;
+
+    /**
      * @returns species translational/rotational specific heat over R at
      * constant volume.
      */
@@ -528,6 +547,13 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_trans_over_R( const unsigned int species ) const
+  {
+    return CoeffType(1.5);
+  }
+
+  template<typename CoeffType>
+  inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_rot( const unsigned int species ) const
   {
     using std::max;
@@ -546,12 +572,28 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_rot_over_R( const unsigned int species ) const
+  {
+    using std::max;
+
+    return max(this->cv_tr_over_R(species) - this->cv_trans_over_R(species), CoeffType(0) ); 
+  }
+
+  template<typename CoeffType>
+  inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_tr (const unsigned int species) const
   {
     return _chem_mixture.R(species)*(_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
 
    template<typename CoeffType>
+  inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_tr_over_R (const unsigned int species) const
+  {
+    return (_chem_mixture.chemical_species()[species])->n_tr_dofs();
+  }
+
+  template<typename CoeffType>
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_tr_over_R (const unsigned int species) const
   {
