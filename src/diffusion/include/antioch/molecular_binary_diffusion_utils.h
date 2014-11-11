@@ -96,7 +96,8 @@ namespace Antioch
       {
         for(unsigned int j = 0; j < mod.set()[i].size(); j++)
         {
-          delete mod.set()[i][j];
+          if(mod.set()[i][j])delete mod.set()[i][j];
+          mod.set()[i][j] = NULL;
         }
       }
    }

@@ -41,14 +41,19 @@ namespace Antioch
 
    // delete
    template <typename ModelSet>
-   void physical_set_delete(ModelSet & mod, default_physical_tag) {delete mod.set();}
+   void physical_set_delete(ModelSet & mod, default_physical_tag) 
+   {
+      if(mod.set())delete mod.set();
+      mod.set() = NULL;
+   }
 
    template <typename ModelSet>
    void physical_set_delete(ModelSet & mod, default_physical_set_tag)
    {
       for(unsigned int s = 0; s < mod.mixture().n_species(); ++s)
       {
-         delete mod.set()[s];
+         if(mod.set()[s])delete mod.set()[s];
+         mod.set()[s] = NULL;
       }
    }
 
