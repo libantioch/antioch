@@ -86,6 +86,31 @@ namespace Antioch
      */
     CoeffType cv_tr (const unsigned int species) const;
 
+    /**
+     * @returns species translational specific heat over R at constant volume.
+     * Since the translational modes are assumed to be fully polulated
+     * this is simply 
+     * \f[
+     *   \frac{C^{trans}_{v,s}}{\mathrm{R}}  = \frac{3}{2}
+     * \f]
+     */
+    CoeffType cv_trans_over_R( const unsigned int species ) const;
+
+    /**
+     * @returns species rotational specific heat over R at constant volume.
+     * By convention, we lump the translational/rotational components
+     * \f[
+     *   \frac{C^{rot}_{v,s}}{\mathrm{R}} \equiv \frac{C^{tr}_{v,s}}{\mathrm{R}} - \frac{C^{trans}_{v,s}}{\mathrm{R}}
+     * \f]
+     */
+    CoeffType cv_rot_over_R( const unsigned int species ) const;
+
+    /**
+     * @returns species translational/rotational specific heat over R at
+     * constant volume.
+     */
+    CoeffType cv_tr_over_R (const unsigned int species) const;
+
       
     /**
      * @returns mixture translational/rotational specific heat at
@@ -104,6 +129,13 @@ namespace Antioch
      */
     template<typename StateType>
     StateType cv_vib (const unsigned int species, const StateType& Tv) const;
+
+    /**
+     * @returns species vibrational specific heat over R
+     * constant volume.
+     */
+    template<typename StateType>
+    StateType cv_vib_over_R (const unsigned int species, const StateType& Tv) const;
       
     /**
      * @returns mixture vibrational specific heat
@@ -485,6 +517,13 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_trans_over_R( const unsigned int species ) const
+  {
+    return CoeffType(1.5);
+  }
+
+  template<typename CoeffType>
+  inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_rot( const unsigned int species ) const
   {
     using std::max;
@@ -494,9 +533,25 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_rot_over_R( const unsigned int species ) const
+  {
+    using std::max;
+
+    return max(this->cv_tr_over_R(species) - this->cv_trans_over_R(species), CoeffType(0) ); 
+  }
+
+  template<typename CoeffType>
+  inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_tr (const unsigned int species) const
   {
     return _chem_mixture.R(species)*(_chem_mixture.chemical_species()[species])->n_tr_dofs();
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_tr_over_R (const unsigned int species) const
+  {
+    return (_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
 
   template<typename CoeffType>
@@ -525,6 +580,16 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_vib (const unsigned int species, 
                                                        const StateType& Tv) const
   {
+      return (this->cv_vib_over_R() * _chem_mixture.chemical_species()[species]->gas_constant());
+  }
+
+
+  template<typename CoeffType>
+  template<typename StateType>
+  inline
+  StateType StatMechThermodynamics<CoeffType>::cv_vib_over_R (const unsigned int species, 
+                                                       const StateType& Tv) const
+  {
     using std::exp;
 
     // convenience
@@ -547,7 +612,7 @@ namespace Antioch
         const StateType expvalminusone = expval - raw_type(1);
       
         cv_vib += (static_cast<CoeffType>(ndg_v[level])*
-                   chem_species.gas_constant()*theta_v[level]*theta_v[level]*expval/(expvalminusone*expvalminusone)/(Tv*Tv));
+                        theta_v[level]*theta_v[level]*expval/(expvalminusone*expvalminusone)/(Tv*Tv));
       }
     
     return cv_vib;
