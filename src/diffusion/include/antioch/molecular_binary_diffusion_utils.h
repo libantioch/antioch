@@ -147,6 +147,11 @@ namespace Antioch
    }
 
 
+      // here we need only the lower triangular
+      // matrix, the diagonal need not be computed
+      // for the diffusion, it is required only
+      // for the thermal conduction in case of
+      // kinetics theory
    template<typename Model, typename StateType, typename MatrixStateType>
    void physical_set_operator_diffusion(const Model & set, const StateType & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag)
    {
@@ -155,13 +160,14 @@ namespace Antioch
        for(unsigned int i = 0; i < Ds.size(); i++)
        {
          antioch_assert_equal_to(Ds[i].size(),set.size());
-         for(unsigned int j = 0; j <= i; j++)
+         for(unsigned int j = 0; j < i; j++)
          {
              Ds[i][j] = (*set[i][j])(T,cTot);
          }
        }
    }
 
+     // self-diffusion
    template<typename Model, typename StateType>
    void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
    {
