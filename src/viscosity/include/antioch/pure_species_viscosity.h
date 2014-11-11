@@ -114,15 +114,13 @@ namespace Antioch
       ANTIOCH_AUTO(StateType) 
       viscosity(const StateType &T) const
       ANTIOCH_AUTOFUNC(StateType,    _a   // 5 / 16 * sqrt(pi * Boltzmann_constant * mass) / ( pi * sigma * sigma )
-                                       * ant_sqrt(T) / _interp.interpolated_value(StateType(ant_log(T / _LJ.depth()) ) )   // Omega(2,2), T*
+                                       * _interp.interpolated_value(T)    // sqrt(T) / Omega<(2,2)>(T*)
                       )
 
       template <typename StateType>
       ANTIOCH_AUTO(StateType) 
       derivative(const StateType &T) const
-      ANTIOCH_AUTOFUNC(StateType,  this->viscosity(T) * 
-                           (StateType (1.L)/T - _interp.dinterp_dx( StateType(ant_log(T / _LJ.depth()) )) / _interp.interpolated_value(StateType(ant_log(T / _LJ.depth()) ))     // T*
-                           ))
+      ANTIOCH_AUTOFUNC(StateType,  _a * _interp.dinterp_dx(T) )
 
       template <typename StateType>
       StateType compute_viscosity_and_derivative( const StateType& T, StateType & viscosity, StateType & dviscosity_dT ) const;
@@ -130,7 +128,7 @@ namespace Antioch
       template <typename StateType>
       ANTIOCH_AUTO(StateType)
         Stockmayer(const StateType & T) const
-      ANTIOCH_AUTOFUNC(StateType,_interp.interpolated_value( StateType(ant_log(T / _LJ.depth()) ) ) )   // Omega(2,2)
+      ANTIOCH_AUTOFUNC(StateType,ant_sqrt(T) / _interp.interpolated_value(T) )   // Omega(2,2)
                                           
 
       //! Formatted print, by default to \p std::cout
@@ -234,13 +232,16 @@ namespace Antioch
      _interp.spline_delete();
      StockmayerPotential<CoeffType> surface;
      std::vector<CoeffType> interp_surf(surface.log_temperature().size(),0);
+     std::vector<CoeffType> rescaled_temp(surface.log_temperature().size(),0);
      for(unsigned int iT = 0; iT < surface.log_temperature().size(); iT++)
      {
         Interpolator spline(surface.delta(),surface.omega_2_2()[iT]);
-        interp_surf[iT] = spline.interpolated_value(_delta_star);
+        interp_surf[iT] = ant_sqrt(surface.temperature()[iT] * _LJ.depth()) / 
+                                spline.interpolated_value(_delta_star); // splining sqrt(T) / Omega<(2,2)>(log(T*))
+        rescaled_temp[iT] = surface.temperature()[iT] * _LJ.depth();
      }
 
-     _interp.spline_init(surface.log_temperature(),interp_surf);
+     _interp.spline_init(rescaled_temp,interp_surf); // T, sqrt(T)/Omega<(2,2)>(log(T*))
   }
 
   template <typename CoeffType, typename Interpolator>
@@ -276,10 +277,10 @@ namespace Antioch
   inline
   StateType PureSpeciesViscosity<CoeffType,Interpolator>::compute_viscosity_and_derivative( const StateType& T, StateType & viscosity, StateType & dviscosity_dT ) const
   {
+      // viscosity     = _a * spline(T)
+      // dviscosity_dT = _a * dspline_dT(T)
      viscosity = this->viscosity(T);
-     dviscosity_dT = viscosity *
-                           (StateType (1.)/T - _interp.dinterp_dx(ant_log(T / _LJ.depth() ) ) /
-                               (_LJ.depth() * _interp.interpolated_value(ant_log(T / _LJ.depth()) ) ));  // T*, dc/dT = dc/dT* * dT*/dT = dc/dT* / _LJ.depth() 
+     dviscosity_dT = _a * _interp.dinterp_dx(T);
      return;
   }
 
