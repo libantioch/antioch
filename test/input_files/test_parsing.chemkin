@@ -146,5 +146,8 @@ H2O2+OH=HO2+H2O           1.000E+12  0.00  0.000
 H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
     DUPLICATE
 
+! made up for rev test
+CH3 + H <=> CH4 1e12 1.2 3.125e4
+  REV/ 1e8 0.8 3.5e3/
 
 END
