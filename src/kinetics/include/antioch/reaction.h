@@ -733,6 +733,8 @@ namespace Antioch
       }
     os << "\n#   Chemical process: " << _type;
     os << "\n#   Kinetics model: "   << _kintype;
+    (_reversible)?os << "\n#   reversible":
+                  os << "\n#   irreversible";
     for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
       {
         os << "\n#   forward rate eqn: " << *_forward_rate[ir];
