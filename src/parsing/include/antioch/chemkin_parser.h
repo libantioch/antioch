@@ -153,6 +153,9 @@ namespace Antioch{
           void parse_equation_coef(const std::string & line);
 
           /*! Convenient method */
+          void parse_reversible_parameters(const std::string & line);
+
+          /*! Convenient method */
           void parse_equation(std::string &equation);
 
           /*! Convenient method */
@@ -218,13 +221,14 @@ namespace Antioch{
 
           std::string _cached_line;
           bool        _duplicate_process;
+          bool        _next_is_reverse;
 
 /*ChemKin spec*/
 
           class ChemKinSpec
           {
             public:
-              ChemKinSpec():_duplicate("DUPLICATE"),_end_tag("END"),_comment("!"),_parser("/")
+              ChemKinSpec():_reversible("REV"),_duplicate("DUPLICATE"),_end_tag("END"),_comment("!"),_parser("/")
                            {
                                _delim[PLUS]           = "+";
                                _delim[REVERSIBLE]     = "=";
@@ -257,6 +261,8 @@ namespace Antioch{
 
               const std::map<Symbol,std::string> & symbol() const {return _symbol;}
 
+              const std::string & reversible()              const {return _reversible;}
+
               const std::string & duplicate()               const {return _duplicate;}
 
               const std::string & end_tag()                 const {return _end_tag;}
@@ -272,7 +278,8 @@ namespace Antioch{
                                                                                   test == _delim.at(IRREVERSIBLE)
                                                                                   );}
 
-              Delim equation_delimiter(const std::string & test) const {if(test.find(_delim.at(REVERSIBLE_ALT)) != std::string::npos)
+              Delim equation_delimiter(const std::string & test) const 
+                                                                     {if(test.find(_delim.at(REVERSIBLE_ALT)) != std::string::npos)
                                                                       {
                                                                           return REVERSIBLE_ALT;
                                                                       }else if(test.find(_delim.at(IRREVERSIBLE)) != std::string::npos)
@@ -288,6 +295,7 @@ namespace Antioch{
                                                                      }
 
             private:
+              const std::string            _reversible;
               const std::string            _duplicate;
               const std::string            _end_tag;
               const std::string            _comment;
@@ -305,7 +313,8 @@ namespace Antioch{
   template <typename NumericType>
   inline
   ChemKinParser<NumericType>::ChemKinParser(const std::string &filename):
-        _duplicate_process(false)
+        _duplicate_process(false),
+        _next_is_reverse(false)
   {
     _doc.open(filename.c_str());
     if(!_doc.good())
@@ -442,22 +451,54 @@ namespace Antioch{
   inline
   bool ChemKinParser<NumericType>::reaction()
   {
+    
       /*default*/
-      _reversible = true;
-      _nrates     = 0;
-      _crates     = 0;
-      _duplicate_process = false;
+      if(!_next_is_reverse)
+      {
+        _reversible = true;
+        _nrates     = 0;
+        _crates     = 0;
+        _duplicate_process = false;
 
-      _pow_unit   = 0;
+        _pow_unit   = 0;
 
-      _kinetics_model   = "Kooij"; //always Kooij, sometimes Arrhenius, should be corrected within the parser
-      _chemical_process = "Elementary";
-      _equation.clear();
+        _kinetics_model   = "Kooij"; //always Kooij, sometimes Arrhenius, should be corrected within the parser
+        _chemical_process = "Elementary";
+        _equation.clear();
 
-      _efficiencies.clear();
+        _efficiencies.clear();
 
-      _reactants.clear();
-      _products.clear();
+        _reactants.clear();
+        _products.clear();
+      }else
+      {
+        _next_is_reverse = false;
+        _reversible = false;
+        _nrates = 1;
+        _crates = 0;
+        _duplicate_process = false;
+
+        _pow_unit   = 0;
+
+        _kinetics_model   = "Kooij"; //always Kooij, sometimes Arrhenius, should be corrected within the parser
+        _chemical_process = "Elementary";
+
+
+        _efficiencies.clear();
+
+        // reverse products and reactants
+        std::vector<std::pair<std::string,NumericType> > tmp(_reactants);
+        _reactants = _products;
+        _products = tmp;
+
+        // reverse the reaction
+        typename ChemKinSpec::Delim delim = _spec.equation_delimiter(_equation);
+        std::string str_delim = _spec.delim().at(delim);
+        std::size_t lim = _equation.find(str_delim);
+        std::string reac_to_prod = _equation.substr(0,lim);
+        std::string prod_to_reac = _equation.substr(lim + str_delim.size(), std::string::npos);
+        _equation = prod_to_reac + str_delim + reac_to_prod;
+      }
 
       _A.clear();
       _b.clear();
@@ -750,8 +791,18 @@ namespace Antioch{
      {
         this->parse_equation_coef(line);
         _nrates++;
-     }
-     else if(line.find(_spec.duplicate()) != std::string::npos)
+     }else if(line.find(_spec.reversible()) != std::string::npos) // reversible reaction is explicit
+     {
+       _reversible = false; 
+       if(_next_is_reverse)
+       {
+          this->parse_reversible_parameters(line);
+          _next_is_reverse = false;
+       }else
+       {
+         _next_is_reverse = true;
+       }
+     }else if(line.find(_spec.duplicate()) != std::string::npos)
      {
         _chemical_process = "Duplicate";
         _duplicate_process = true;
@@ -790,6 +841,26 @@ namespace Antioch{
 // printed several times, we care only for the
 // first
     if(_reactants.empty())this->parse_equation(equation);
+   }
+
+   template <typename NumericType>
+   inline
+   void ChemKinParser<NumericType>::parse_reversible_parameters(const std::string & line)
+   {
+// line looks like "REV / A beta Ea /"
+
+     std::vector<std::string> out;
+     SplitString(line,"/",out,false);
+     if(out.size() < 2)antioch_parsing_error("ChemKin parser: unrecognized reversible reaction parameters input line:\n" + line);
+
+     std::vector<std::string> pars;
+     SplitString(out[1]," ",pars,false);
+     if(pars.size() < 3)antioch_parsing_error("ChemKin parser: unrecognized reversible reaction parameters input line:\n" + line);
+
+// parameters are given
+     _A.push_back( std::atof(pars[0].c_str()));
+     _b.push_back( std::atof(pars[1].c_str()));
+     _Ea.push_back(std::atof(pars[2].c_str()));
    }
 
    template <typename NumericType>
@@ -1081,6 +1152,8 @@ namespace Antioch{
      if(input_line.find(_spec.delim().at(ChemKinSpec::REVERSIBLE)) != std::string::npos || 
         input_line.find(_spec.end_tag()) != std::string::npos) out = true;
 
+     if(_next_is_reverse) out = true; // reversible given, get out
+
      if(input_line == _cached_line || _cached_line.empty()) out = false; // current reaction
 
      if(_duplicate_process && input_line.find(_spec.delim().at(ChemKinSpec::REVERSIBLE)) != std::string::npos)// if we find a reaction and it is the same than the cached one
@@ -1144,6 +1217,7 @@ namespace Antioch{
   inline
   bool ChemKinParser<NumericType>::next_meaningful_line(std::string & line)
   {
+      if(_next_is_reverse)return false;
       bool out(true);
       // skip empty lines
       ascii_getline(_doc,line);
@@ -1151,7 +1225,7 @@ namespace Antioch{
       {
         if(!ascii_getline(_doc,line)  || // getline
            line.find(_spec.end_tag()) != std::string::npos || _doc.eof()     // end of file
-           )
+          )
         {
            out = false;
            break;

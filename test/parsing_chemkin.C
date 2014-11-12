@@ -123,6 +123,7 @@ int tester(const std::string &root_name)
   species_str_list.push_back( "HO2" );
   species_str_list.push_back( "O" );
   species_str_list.push_back( "CH3" );
+  species_str_list.push_back( "CH4" );
   species_str_list.push_back( "H" );
   unsigned int n_species = species_str_list.size();
 
@@ -344,10 +345,24 @@ H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
     DUPLICATE
 */
  A   = 1.000e12L * unitA_1.get_SI_factor();
- Ea  = 0.000L * unitEa_cal.get_SI_factor(); 
+ Ea  = 0.000L    * unitEa_cal.get_SI_factor(); 
  A2  = 5.800e14L * unitA_1.get_SI_factor();
- Ea2 = 9.557e3L * unitEa_cal.get_SI_factor(); 
+ Ea2 = 9.557e3L  * unitEa_cal.get_SI_factor(); 
  k.push_back(Arrh(T,A,Ea) + Arrh(T,A2,Ea2));
+
+/*! made up for rev test
+CH3 + H <=>  CH4 1e12 1.2 3.125e4
+  REV/ 1e8 1.2 3.5e3/
+*/
+  A  = 1e12    * unitA_1.get_SI_factor();
+  b  = 1.2;
+  Ea = 3.125e4 * unitEa_cal.get_SI_factor();
+  k.push_back(Kooij(T,A,b,Ea));
+  A  = 1e8   * unitA_0.get_SI_factor();
+  b  = 0.8;
+  Ea = 3.5e3 * unitEa_cal.get_SI_factor();
+  k.push_back(Kooij(T,A,b,Ea));
+
 
   const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?
                       std::numeric_limits<Scalar>::epsilon() * 6500:
@@ -356,6 +371,7 @@ H2O2+OH=HO2+H2O           5.800E+14  0.00  9.557E+03
 
   if(reaction_set.n_reactions() != k.size())
   {
+     std::cerr << reaction_set << std::endl;
      std::cerr << "Not the right number of reactions" << std::endl;
      std::cerr << reaction_set.n_reactions() << " instead of " << k.size() << std::endl;
      return_flag = 1;
