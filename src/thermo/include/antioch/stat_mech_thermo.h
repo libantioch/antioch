@@ -580,7 +580,7 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_vib (const unsigned int species, 
                                                        const StateType& Tv) const
   {
-      return (this->cv_vib_over_R() * _chem_mixture.chemical_species()[species]->gas_constant());
+      return (this->cv_vib_over_R(species,Tv) * _chem_mixture.chemical_species()[species]->gas_constant());
   }
 
 

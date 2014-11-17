@@ -255,21 +255,6 @@ namespace Antioch
   template<typename CoeffType, typename NASAFit>
   template<typename StateType>
   inline
-  StateType
-  NASAEvaluator<CoeffType,NASAFit>::cp_over_R( const TempCache<StateType>& cache, unsigned int species ) const
-  {
-    antioch_assert_less( species, this->n_species() );
-    // FIXME - we need assert_less to be vectorizable
-    // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
-    //                      _nasa_mixture.curve_fit(species).n_intervals() );
-
-    return (this->cp_over_R(cache) - constant_clone(cache.T,1));
-  }
-
-
-  template<typename CoeffType, typename NASAFit>
-  template<typename StateType>
-  inline
   StateType NASAEvaluator<CoeffType,NASAFit>::h_over_RT( const TempCache<StateType>& cache, unsigned int species ) const
   {
     antioch_assert_less( species, this->n_species() );
