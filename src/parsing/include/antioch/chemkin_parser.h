@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 namespace Antioch{
 
@@ -228,7 +229,7 @@ namespace Antioch{
           class ChemKinSpec
           {
             public:
-              ChemKinSpec():_reversible("REV"),_duplicate("DUPLICATE"),_end_tag("END"),_comment("!"),_parser("/")
+              ChemKinSpec():_reversible("REV"),_duplicate("DUP"),_end_tag("END"),_comment("!"),_parser("/")
                            {
                                _delim[PLUS]           = "+";
                                _delim[REVERSIBLE]     = "=";
@@ -787,11 +788,14 @@ namespace Antioch{
   inline
   void ChemKinParser<NumericType>::parse_a_line(const std::string & line)
   {
-     if(line.find(_spec.delim().at(_spec.REVERSIBLE)) != std::string::npos) //equation a beta ea
+     std::string capital_line(line);
+     std::transform(capital_line.begin(),capital_line.end(), capital_line.begin(),::toupper);
+
+     if(line.find(_spec.delim().at(_spec.REVERSIBLE)) != std::string::npos) //equation a beta ea, "="
      {
         this->parse_equation_coef(line);
         _nrates++;
-     }else if(line.find(_spec.reversible()) != std::string::npos) // reversible reaction is explicit
+     }else if(capital_line.find(_spec.reversible()) != std::string::npos) // reversible reaction is explicit "REV"
      {
        _reversible = false; 
        if(_next_is_reverse)
@@ -802,11 +806,11 @@ namespace Antioch{
        {
          _next_is_reverse = true;
        }
-     }else if(line.find(_spec.duplicate()) != std::string::npos)
+     }else if(capital_line.find(_spec.duplicate()) != std::string::npos) // duplicate, "DUPLICATE" or "DUP" , search for "DUP"
      {
         _chemical_process = "Duplicate";
         _duplicate_process = true;
-     }else if(line.find(_spec.parser()) != std::string::npos)
+     }else if(line.find(_spec.parser()) != std::string::npos) // "/"
      {
         this->parse_coefficients_line(line);
      }else
