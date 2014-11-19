@@ -26,6 +26,8 @@
 #ifndef ANTIOCH_THERMO_EVALUATOR_H
 #define ANTIOCH_THERMO_EVALUATOR_H
 
+#include "antioch/ideal_gas_internal_thermo.h"
+
 namespace Antioch
 {
 
