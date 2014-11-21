@@ -45,16 +45,17 @@ namespace Antioch
         void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
 
         //! read the vibrational data
-        void read_species_vibrational_data(ChemicalMixture<NumericType>& chem_mixture);
+        void read_vibrational_data(ChemicalMixture<NumericType>& chem_mixture);
 
         //! read the electronic data
-        void read_species_electronic_data(ChemicalMixture<NumericType>& chem_mixture);
+        void read_electronic_data(ChemicalMixture<NumericType>& chem_mixture);
 
 
      private:
         //! not allowed
         ASCIIParser();
 
+        std::string   _file;
         std::ifstream _doc;
         bool          _verbose;
         std::map<ParsingUnit,std::string> _unit_map;
@@ -65,6 +66,7 @@ namespace Antioch
   template <typename NumericType>
   inline
   ASCIIParser<NumericType>::ASCIIParser(const std::string & file, bool verbose):
+        _file(file),
         _doc(file.c_str()),
         _verbose(verbose)
   {
@@ -94,7 +96,9 @@ namespace Antioch
   {
       std::vector<std::string> species_list;
       std::string spec;
-      while(!_doc.good())
+
+      if(_verbose)std::cout << "Reading species list in file " << _file << std::endl;
+      while(_doc.good())
       {
           skip_comment_lines(_doc, '#'); // if comments in the middle
           
@@ -123,7 +127,7 @@ namespace Antioch
           species_list.push_back(spec);
       }
 
-      if(_verbose)std::cout << "Found " << species_list.size() << " species" << std::endl;
+      if(_verbose)std::cout << "Found " << species_list.size() << " species\n\n" << std::endl;
       return species_list;
   }
 
@@ -136,8 +140,9 @@ namespace Antioch
     NumericType mol_wght, h_form, n_tr_dofs;
     int charge;
     NumericType mw_unit = Units<NumericType>(_unit_map.at(MOL_WEIGHT)).get_SI_factor();
-    NumericType ef_unit = Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor();
+    NumericType ef_unit = NumericType(1.L);//Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor();
 
+    if(_verbose)std::cout << "Reading species characteristics in file " << _file << std::endl;
     while (_doc.good())
       {
 
@@ -159,6 +164,10 @@ namespace Antioch
           {
             // If we do not have this species, just go on
             if (!chem_mixture.species_name_map().count(name))continue;
+
+           // value
+            Species species = chem_mixture.species_name_map().find(name)->second;
+
             // using default comparison:
             std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 
                                                                      chem_mixture.species_list().end(),
@@ -185,20 +194,21 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_species_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
+  void ASCIIParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
   {
     std::string name;
     NumericType theta_v;
     unsigned int n_degeneracies;
 
+    if(_verbose)std::cout << "Reading vibrational data in file " << _file << std::endl;
     while (_doc.good())
       {
 
         skip_comment_lines(_doc, '#'); // if comment in the middle
 
-        in >> name;           // Species Name
-        in >> theta_v;        // characteristic vibrational temperature (K)
-        in >> n_degeneracies; // degeneracy of the mode
+        _doc >> name;           // Species Name
+        _doc >> theta_v;        // characteristic vibrational temperature (K)
+        _doc >> n_degeneracies; // degeneracy of the mode
       
         // If we are still good, we have a valid set of thermodynamic
         // data for this species. Otherwise, we read past end-of-file 
@@ -229,17 +239,18 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_species_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
+  void ASCIIParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
   {
     std::string name;
     NumericType theta_e;
     unsigned int n_degeneracies;
     
+    if(_verbose)std::cout << "Reading electronic data in file " << _file << std::endl;
     while (_doc.good())
       {
-        in >> name;           // Species Name
-        in >> theta_e;        // characteristic electronic temperature (K)
-        in >> n_degeneracies; // number of degeneracies for this level
+        _doc >> name;           // Species Name
+        _doc >> theta_e;        // characteristic electronic temperature (K)
+        _doc >> n_degeneracies; // number of degeneracies for this level
         
         // If we are still good, we have a valid set of thermodynamic
         // data for this species. Otherwise, we read past end-of-file 

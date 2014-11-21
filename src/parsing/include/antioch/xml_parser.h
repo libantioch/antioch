@@ -272,7 +272,7 @@ namespace Antioch{
 
       if(_species_block)
       {
-         SplitString(std::string(_species_block->GetText())," ",species_molecules,false);
+         SplitString(std::string(_species_block->GetText())," ",molecules,false);
       }
 
       return molecules;
