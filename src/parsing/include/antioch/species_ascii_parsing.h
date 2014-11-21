@@ -131,6 +131,7 @@ namespace Antioch
   void read_species_data_ascii(const std::string& filename, bool verbose, 
                                ChemicalMixture<NumericType>& chem_mixture)
   {
+/*
     std::ifstream in(filename.c_str());
     if(!in.is_open())
     {
@@ -162,11 +163,9 @@ namespace Antioch
 	    // If we do not have this species, just go on
 	    if (!chem_mixture.species_name_map().count(name))continue;
 
-
-	    /* Only add a ChemicalSpecies if the user supplied it to
-	       the ChemicalMixture. */
-	    Species species = chem_mixture.species_name_map().find(name)->second;
-
+*/
+    ASCIIParser<NumericType> parser(in);
+/*
 	    // using default comparison:
 	    std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 
 								     chem_mixture.species_list().end(),
@@ -209,6 +208,8 @@ namespace Antioch
       }
       antioch_error();
     }
+*/
+    parser.read_chemical_species(chem_mixture);
 
     return;
   }

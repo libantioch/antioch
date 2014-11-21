@@ -27,6 +27,7 @@
 namespace Antioch
 {
   enum ParsingKey{SPECIES_SET = 0,
+                  PHASE_BLOCK,
                   REACTION_DATA,
                   REACTION,
                   REVERSIBLE,
