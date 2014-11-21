@@ -165,8 +165,7 @@ namespace Antioch{
         _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
-        _rate_constant(NULL),<sylvain.plessis@gmail.com 
-> <mailto:sylvain.plessis@gmail.com>> 
+        _rate_constant(NULL),
         _Troe(NULL)
   {
     if(_doc.LoadFile(filename.c_str()))
