@@ -33,6 +33,8 @@
 
 // Antioch
 #include "antioch/ascii_parser.h"
+#include "antioch/chemkin_parser.h"
+#include "antioch/xml_parser.h"
 
 // C++
 #include <fstream>
