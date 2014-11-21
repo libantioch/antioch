@@ -24,6 +24,9 @@
 namespace Antioch
 {
 
+   // backward compatibility
+  typedef unsigned int Species;
+
   // Forward declarations
   template <class NumericType>
   class ChemicalMixture;
@@ -36,16 +39,16 @@ namespace Antioch
         ~ASCIIParser();
 
         //! read species list
-        const std::vector<std::string>  species_list() const;
+        const std::vector<std::string>  species_list();
 
         //! read the mandatory data
-        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture) const;
+        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
 
         //! read the vibrational data
-        void read_species_vibrational_data(ChemicalMixture<NumericType>& chem_mixture) const;
+        void read_species_vibrational_data(ChemicalMixture<NumericType>& chem_mixture);
 
         //! read the electronic data
-        void read_species_electronic_data(ChemicalMixture<NumericType>& chem_mixture) const;
+        void read_species_electronic_data(ChemicalMixture<NumericType>& chem_mixture);
 
 
      private:
@@ -54,7 +57,7 @@ namespace Antioch
 
         std::ifstream _doc;
         bool          _verbose;
-        std::map<std::string,std::string> _unit_map;
+        std::map<ParsingUnit,std::string> _unit_map;
 
   };
 
@@ -87,7 +90,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  const std::vector<std::string> ASCIIParser<NumericType>::species_list() const
+  const std::vector<std::string> ASCIIParser<NumericType>::species_list()
   {
       std::vector<std::string> species_list;
       std::string spec;
@@ -126,7 +129,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture) const
+  void ASCIIParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
   {
       
     std::string name;
@@ -140,30 +143,30 @@ namespace Antioch
 
          skip_comment_lines(_doc, '#'); // if comment in the middle
 
-	_doc >> name;      // Species Name
-	_doc >> mol_wght;  // molecular weight (kg/kmol)
-	_doc >> h_form;    // heat of formation at Ok (J/kg)
-	_doc >> n_tr_dofs; // number of translational/rotational DOFs
-	_doc >> charge;    // charge number
+        _doc >> name;      // Species Name
+        _doc >> mol_wght;  // molecular weight (kg/kmol)
+        _doc >> h_form;    // heat of formation at Ok (J/kg)
+        _doc >> n_tr_dofs; // number of translational/rotational DOFs
+        _doc >> charge;    // charge number
 
         mol_wght *= mw_unit; // to SI (kg/mol)
         h_form *= ef_unit; // to SI (J/kg)
-	
-	// If we are still good, we have a valid set of thermodynamic
-	// data for this species. Otherwise, we read past end-of-file 
-	// in the section above
-	if (_doc.good())
-	  {
-	    // If we do not have this species, just go on
-	    if (!chem_mixture.species_name_map().count(name))cont_docue;
-	    // us_docg default comparison:
-	    std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().beg_doc(), 
-								     chem_mixture.species_list().end(),
-								     1, species);
-	    if( it != chem_mixture.species_list().end() )
-	      {
-		unsigned int index = static_cast<unsigned _doct>(it - chem_mixture.species_list().beg_doc());
-		chem_mixture.add_species( index, name, mol_wght, h_form, n_tr_dofs, charge );
+        
+        // If we are still good, we have a valid set of thermodynamic
+        // data for this species. Otherwise, we read past end-of-file 
+        // in the section above
+        if (_doc.good())
+          {
+            // If we do not have this species, just go on
+            if (!chem_mixture.species_name_map().count(name))continue;
+            // using default comparison:
+            std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 
+                                                                     chem_mixture.species_list().end(),
+                                                                     1, species);
+            if( it != chem_mixture.species_list().end() )
+              {
+                unsigned int index = static_cast<unsigned int>(it - chem_mixture.species_list().begin());
+                chem_mixture.add_species( index, name, mol_wght, h_form, n_tr_dofs, charge );
                 if(_verbose)
                 {
                     std::cout << "Adding " << name << " informations:\n\t"
@@ -172,9 +175,9 @@ namespace Antioch
                               << "trans-rot degrees of freedom: " << n_tr_dofs << "\n\t"
                               << "charge: "                       << charge << std::endl;
                 }
-	      }
+              }
 
-	  }
+          }
       }
 
       return;
@@ -182,7 +185,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_species_vibrational_data(ChemicalMixture<NumericType> & chem_mixture) const
+  void ASCIIParser<NumericType>::read_species_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
   {
     std::string name;
     NumericType theta_v;
@@ -204,7 +207,7 @@ namespace Antioch
           {
             // If we do not have this species, just keep going
             if (!chem_mixture.species_name_map().count(name))continue;
-	
+        
             // ... otherwise we add the data
             const unsigned int s = 
               chem_mixture.species_name_map().find(name)->second;
@@ -226,7 +229,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_species_electronic_data(ChemicalMixture<NumericType> & chem_mixture) const
+  void ASCIIParser<NumericType>::read_species_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
   {
     std::string name;
     NumericType theta_e;
