@@ -39,6 +39,10 @@
 
 namespace Antioch{
 
+  template <typename CoeffType>
+  class ChemicalMixture;
+
+
   template <typename NumericType = double>
   class XMLParser{
         public:
@@ -50,8 +54,17 @@ namespace Antioch{
          bool initialize();
 
 /// species
-
+        //! reads the species set
         const std::vector<std::string> species_list() const;
+
+        //! reads the mandatory data, not valid in xml
+        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+
+        //! reads the vibrational data, not valid in xml
+        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+
+        //! reads the electronic data, not valid in xml
+        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
 
 /// reaction
 
@@ -660,6 +673,36 @@ namespace Antioch{
   {
       def_unit = _default_unit.at(ParsingKey::TROE_F_TSSS);
       return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSSS),T3,T3_unit);
+  }
+
+  template <typename NumericType>
+  inline
+  void XMLParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a XML parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  inline
+  void XMLParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a XML parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  inline
+  void XMLParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a XML parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
   }
 
 
