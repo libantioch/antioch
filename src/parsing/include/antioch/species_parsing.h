@@ -47,46 +47,46 @@ namespace Antioch
   template <class NumericType>
   class ChemicalMixture;
 
-  template <typename NumericType>
+  template <typename NumericType,typename Parser>
   void read_chemical_species_composition(const std::string & filename,
                                          bool verbose,
                                          ChemicalMixture<NumericType> & mixture);
 
-  template<class NumericType>
-  void read_species_data_ascii( const std::string& filename,
-                                bool verbose,
-                                ChemicalMixture<NumericType>& chem_mixture);
+  template<class NumericType,typename Parser>
+  void read_species_data( const std::string& filename,
+                          bool verbose,
+                          ChemicalMixture<NumericType>& chem_mixture);
 				
 
-  template<class NumericType>
-  void read_species_vibrational_data_ascii (const std::string &filename,
-                                            bool verbose,
-                                            ChemicalMixture<NumericType>& chem_mixture);
+  template<class NumericType,typename Parser>
+  void read_species_vibrational_data(const std::string &filename,
+                                     bool verbose,
+                                     ChemicalMixture<NumericType>& chem_mixture);
 
-  template<class NumericType>
-  void read_species_electronic_data_ascii (const std::string &filename,
-                                           bool verbose,
-                                           ChemicalMixture<NumericType>& chem_mixture);
+  template<class NumericType,typename Parser>
+  void read_species_electronic_data(const std::string &filename,
+                                    bool verbose,
+                                    ChemicalMixture<NumericType>& chem_mixture);
 
 //----------------------------------------------------------------
 
-   template <typename NumericType>
+   template <typename NumericType,typename Parser>
    inline
    void read_chemical_species_composition(const std::string & filename,
                                           bool verbose,
                                           ChemicalMixture<NumericType> & mixture)
    {
-      ASCIIParser<NumericType> parser(filename,verbose);
+      Parser parser(filename,verbose);
       mixture.initialize_species(parser.species_list());
    }
   
-  template<class NumericType>
+  template<class NumericType,typename Parser>
   inline
   void read_species_data_ascii(const std::string& filename, bool verbose, 
                                ChemicalMixture<NumericType>& chem_mixture)
   {
 
-    ASCIIParser<NumericType> parser(filename,verbose);
+    Parser parser(filename,verbose);
 
     parser.read_chemical_species(chem_mixture);
 
@@ -114,14 +114,14 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType>
+  template<class NumericType,typename Parser>
   inline
   void read_species_vibrational_data_ascii (const std::string & filename, 
                                             bool verbose, 
                                             ChemicalMixture<NumericType>& chem_mixture)
   {
 
-    ASCIIParser<NumericType> parser(filename,verbose);
+    Parser parser(filename,verbose);
 
     parser.read_vibrational_data(chem_mixture);
 
@@ -142,14 +142,14 @@ namespace Antioch
   }
 
   
-  template<class NumericType>
+  template<class NumericType,typename Parser>
   inline
   void read_species_electronic_data_ascii (const std::string & filename, bool verbose,
                                            ChemicalMixture<NumericType>& chem_mixture)
                                            
   {
 
-    ASCIIParser<NumericType> parser(filename,verbose);
+    Parser parser(filename,verbose);
 
     parser.read_electronic_data(chem_mixture);
     
