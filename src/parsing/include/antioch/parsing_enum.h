@@ -54,6 +54,12 @@ namespace Antioch
                   TROE_F_TSS,
                   TROE_F_TSSS
                  };
+
+  enum ParsingUnit{
+                    MOL_WEIGHT = 0,
+                    MASS_ENTHALPY
+                   };
+
 }
 
 #endif
