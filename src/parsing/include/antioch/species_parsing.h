@@ -82,8 +82,8 @@ namespace Antioch
   
   template<class NumericType,typename Parser>
   inline
-  void read_species_data_ascii(const std::string& filename, bool verbose, 
-                               ChemicalMixture<NumericType>& chem_mixture)
+  void read_species_data(const std::string& filename, bool verbose, 
+                         ChemicalMixture<NumericType>& chem_mixture)
   {
 
     Parser parser(filename,verbose);
@@ -116,9 +116,9 @@ namespace Antioch
 
   template<class NumericType,typename Parser>
   inline
-  void read_species_vibrational_data_ascii (const std::string & filename, 
-                                            bool verbose, 
-                                            ChemicalMixture<NumericType>& chem_mixture)
+  void read_species_vibrational_data(const std::string & filename, 
+                                     bool verbose, 
+                                     ChemicalMixture<NumericType>& chem_mixture)
   {
 
     Parser parser(filename,verbose);
@@ -144,8 +144,8 @@ namespace Antioch
   
   template<class NumericType,typename Parser>
   inline
-  void read_species_electronic_data_ascii (const std::string & filename, bool verbose,
-                                           ChemicalMixture<NumericType>& chem_mixture)
+  void read_species_electronic_data(const std::string & filename, bool verbose,
+                                    ChemicalMixture<NumericType>& chem_mixture)
                                            
   {
 
