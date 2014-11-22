@@ -45,6 +45,8 @@
 namespace Antioch
 {
 
+  typedef unsigned int Species;
+
   // Forward declarations
   template <class NumericType>
   class ChemicalMixture;
@@ -57,16 +59,16 @@ namespace Antioch
         ~ASCIIParser();
 
         //! read species list
-        const std::vector<std::string>  species_list() const;
+        const std::vector<std::string>  species_list();
 
         //! read the mandatory data
-        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture) const;
+        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
 
         //! read the vibrational data
-        void read_species_vibrational_data(ChemicalMixture<NumericType>& chem_mixture) const;
+        void read_vibrational_data(ChemicalMixture<NumericType>& chem_mixture);
 
         //! read the electronic data
-        void read_species_electronic_data(ChemicalMixture<NumericType>& chem_mixture) const;
+        void read_electronic_data(ChemicalMixture<NumericType>& chem_mixture);
 
 
      private:
@@ -75,7 +77,7 @@ namespace Antioch
 
         std::ifstream _doc;
         bool          _verbose;
-        std::map<std::string,std::string> _unit_map;
+        std::map<ParsingUnit,std::string> _unit_map;
 
   };
 
@@ -108,7 +110,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  const std::vector<std::string> ASCIIParser<NumericType>::species_list() const
+  const std::vector<std::string> ASCIIParser<NumericType>::species_list()
   {
       std::vector<std::string> species_list;
       std::string spec;
@@ -147,7 +149,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture) const
+  void ASCIIParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
   {
       
     std::string name;
@@ -176,14 +178,17 @@ namespace Antioch
 	if (_doc.good())
 	  {
 	    // If we do not have this species, just go on
-	    if (!chem_mixture.species_name_map().count(name))cont_docue;
-	    // us_docg default comparison:
-	    std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().beg_doc(), 
+	    if (!chem_mixture.species_name_map().count(name))continue;
+
+            Species species = chem_mixture.species_inverse_name_map().at(name);
+
+	    // using default comparison:
+	    std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 
 								     chem_mixture.species_list().end(),
 								     1, species);
 	    if( it != chem_mixture.species_list().end() )
 	      {
-		unsigned int index = static_cast<unsigned _doct>(it - chem_mixture.species_list().beg_doc());
+		unsigned int index = static_cast<unsigned int>(it - chem_mixture.species_list().begin());
 		chem_mixture.add_species( index, name, mol_wght, h_form, n_tr_dofs, charge );
                 if(_verbose)
                 {
@@ -203,7 +208,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_species_vibrational_data(ChemicalMixture<NumericType> & chem_mixture) const
+  void ASCIIParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
   {
     std::string name;
     NumericType theta_v;
@@ -214,9 +219,9 @@ namespace Antioch
 
         skip_comment_lines(_doc, '#'); // if comment in the middle
 
-        in >> name;           // Species Name
-        in >> theta_v;        // characteristic vibrational temperature (K)
-        in >> n_degeneracies; // degeneracy of the mode
+        _doc >> name;           // Species Name
+        _doc >> theta_v;        // characteristic vibrational temperature (K)
+        _doc >> n_degeneracies; // degeneracy of the mode
       
         // If we are still good, we have a valid set of thermodynamic
         // data for this species. Otherwise, we read past end-of-file 
@@ -247,7 +252,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ASCIIParser<NumericType>::read_species_electronic_data(ChemicalMixture<NumericType> & chem_mixture) const
+  void ASCIIParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
   {
     std::string name;
     NumericType theta_e;
@@ -255,9 +260,9 @@ namespace Antioch
     
     while (_doc.good())
       {
-        in >> name;           // Species Name
-        in >> theta_e;        // characteristic electronic temperature (K)
-        in >> n_degeneracies; // number of degeneracies for this level
+        _doc >> name;           // Species Name
+        _doc >> theta_e;        // characteristic electronic temperature (K)
+        _doc >> n_degeneracies; // number of degeneracies for this level
         
         // If we are still good, we have a valid set of thermodynamic
         // data for this species. Otherwise, we read past end-of-file 

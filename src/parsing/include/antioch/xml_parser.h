@@ -48,7 +48,7 @@ namespace Antioch{
   template <typename NumericType = double>
   class XMLParser{
         public:
-          XMLParser(const std::string &filename);
+          XMLParser(const std::string &filename, bool verbose = true);
           ~XMLParser();
 
 //// first local pointers
@@ -163,6 +163,9 @@ namespace Antioch{
           /*! Never use default constructor*/
           XMLParser();
           tinyxml2::XMLDocument _doc;
+          bool                  _verbose;
+
+//
           tinyxml2::XMLElement * _species_block;
           tinyxml2::XMLElement * _reaction_block;
           tinyxml2::XMLElement * _reaction;
@@ -176,7 +179,8 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  XMLParser<NumericType>::XMLParser(const std::string &filename):
+  XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
+        _verbose(verbose),
         _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
@@ -287,7 +291,7 @@ namespace Antioch{
 
       if(_species_block)
       {
-         SplitString(std::string(_species_block->GetText())," ",species_molecules,false);
+         SplitString(std::string(_species_block->GetText())," ",molecules,false);
       }
 
       return molecules;

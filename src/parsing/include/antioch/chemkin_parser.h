@@ -62,7 +62,7 @@ namespace Antioch{
   template <typename NumericType = double>
   class ChemKinParser{
         public:
-          ChemKinParser(const std::string &filename);
+          ChemKinParser(const std::string &filename, bool verbose = true);
           ~ChemKinParser();
 
 //// first local pointers
@@ -202,6 +202,8 @@ namespace Antioch{
           /*! Never use default constructor*/
           ChemKinParser();
           std::ifstream                    _doc;
+          bool                             _verbose;
+          
 
           bool                             _reversible;
           unsigned int                     _nrates; // total number of rates
@@ -329,11 +331,12 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  ChemKinParser<NumericType>::ChemKinParser(const std::string &filename):
+  ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
+        _doc(filename.c_str()),
+        _verbose(verbose),
         _duplicate_process(false),
         _next_is_reverse(false)
   {
-    _doc.open(filename.c_str());
     if(!_doc.good())
       {
         std::cerr << "ERROR: unable to load ChemKin file " << filename << std::endl;
@@ -699,7 +702,7 @@ namespace Antioch{
   inline
   bool ChemKinParser<NumericType>::rate_constant_activation_energy_parameter(NumericType & Ea, std::string & Ea_unit, std::string & def_unit) const
   {
-     if(_crates <= _Ea.size());
+     if(_crates <= _Ea.size())
      {
        Ea = _Ea[_crates-1];
 // there is no default unit (or always default), anyway, units are
