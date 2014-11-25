@@ -90,6 +90,8 @@ int test_species( const unsigned int species,
   int return_flag = 0;
 
   const Antioch::ChemicalSpecies<Scalar>& chem_species = *(chemical_species[species]);
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                           std::numeric_limits<Scalar>::epsilon() * 10;
 
   if( chem_species.species() != species_name )
     {
@@ -98,21 +100,21 @@ int test_species( const unsigned int species,
       return_flag = 1;
     }
 
-  if( chem_species.molar_mass() != molar_mass )
+  if( std::abs(chem_species.molar_mass() - molar_mass)/molar_mass > tol )
     {
       std::cerr << "Error: Molar mass mismatch for "<< species_name << std::endl
 		<< "molar mass = " << chem_species.molar_mass() << std::endl;
       return_flag = 1;
     }
 
-  if( chem_species.gas_constant() != gas_constant )
+  if( std::abs(chem_species.gas_constant() - gas_constant)/gas_constant > tol )
     {
       std::cerr << "Error: Gas constant mismatch for "<< species_name << std::endl
 		<< "gas constant = " << chem_species.gas_constant() << std::endl;
       return_flag = 1;
     }
 
-  if( chem_species.formation_enthalpy() != formation_enthalpy )
+  if( std::abs(chem_species.formation_enthalpy() - formation_enthalpy)/formation_enthalpy )
     {
       std::cerr << "Error: Formation enthalpy mismatch for "<< species_name << std::endl
 		<< "formation enthalpy = " << chem_species.formation_enthalpy() << std::endl;
@@ -168,6 +170,9 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   int return_flag = 0;
 
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                           std::numeric_limits<Scalar>::epsilon() * 10;
+
   // Check name map consistency
   for( unsigned int i = 0; i < n_species; i++ )
     {
@@ -196,7 +201,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   {
     unsigned int index = 0;
     Scalar molar_mass = Mm_N2;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -211,7 +216,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   {
     unsigned int index = 1;
     Scalar molar_mass = Mm_O2;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -226,7 +231,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   {
     unsigned int index = 2;
     Scalar molar_mass = Mm_N;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -241,7 +246,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   {
     unsigned int index = 3;
     Scalar molar_mass = Mm_O;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -256,7 +261,7 @@ int vectester(const PairScalars& example, const std::string& testname)
   {
     unsigned int index = 4;
     Scalar molar_mass = Mm_NO;
-    if( molar_mass != chem_mixture.M(index) )
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -318,16 +323,14 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.EndTimer(testnormal);
 #endif
 
-  Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
-
   const PairScalars rel_R_error = 
     abs( (R - R_exact)/R_exact);
   if( Antioch::max(rel_R_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
 		<< std::setprecision(16) << std::scientific
-		<< "R       = " << R << std::endl
-		<< "R_exact = " << R_exact <<  std::endl;
+		<< "R       = "  << R << std::endl
+		<< "R_exact = "  << R_exact <<  std::endl;
       return_flag = 1;
     }
 
@@ -397,7 +400,8 @@ int vectester(const PairScalars& example, const std::string& testname)
     gt.EndTimer(testeigenA);
 #endif
 
-    Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                             std::numeric_limits<Scalar>::epsilon() * 10;
 
     const PairScalars eigen_rel_R_error = 
       abs( (R_eigen - R_exact)/R_exact);
@@ -476,7 +480,8 @@ int vectester(const PairScalars& example, const std::string& testname)
     gt.EndTimer(testeigenV);
 #endif
 
-    Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                             std::numeric_limits<Scalar>::epsilon() * 10;
 
     const PairScalars eigen_rel_R_error = 
       abs( (R_eigen - R_exact)/R_exact);
