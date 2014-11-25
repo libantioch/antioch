@@ -213,8 +213,6 @@ namespace Antioch
 
     void init_species_name_map(const std::vector<std::string> & species_list);
     void build_inverse_name_map();
-    void read_species_data();
-    void read_species_data( std::istream& in );
 
     std::vector<Species> _species_list;
 //    std::map<Species,unsigned int> _species_list_map;
@@ -320,7 +318,7 @@ namespace Antioch
                                               const std::string & vibration_data,
                                               const std::string & electronic_data)
   {
-      read_chemical_species_composition<Parser>(filename, verbose,*this);
+      read_chemical_species_composition<CoeffType,Parser>(filename, verbose,*this);
 
       this->read_species_characteristics<Parser>(verbose,species_data,vibration_data,electronic_data);
 
@@ -348,28 +346,28 @@ namespace Antioch
   }
 
 
-  template<typename CoeffType>
+  template <typename CoeffType>
   template <typename Parser>
   inline
-  void read_species_mandatory_characteristics(const bool verbose, const std::string & species_data)
+  void ChemicalMixture<CoeffType>::read_species_mandatory_characteristics(const bool verbose, const std::string & species_data)
   {
-      read_species_data<Parser>(species_data, verbose, *this);
+      read_species_data<CoeffType,Parser>(species_data, verbose, *this);
   }
 
-  template<typename CoeffType>
+  template <typename CoeffType>
   template <typename Parser>
   inline
-  void read_species_vibrational_characteristics(const bool verbose, const std::string & vibration_data)
+  void ChemicalMixture<CoeffType>::read_species_vibrational_characteristics(const bool verbose, const std::string & vibration_data)
   {
-      read_species_vibrational_data<Parser>(vibration_data, verbose, *this);
+      read_species_vibrational_data<CoeffType,Parser>(vibration_data, verbose, *this);
   }
 
-  template<typename CoeffType>
+  template <typename CoeffType>
   template <typename Parser>
   inline
-  void read_species_electronic_characteristics(const bool verbose, const std::string & electronic_data)
+  void ChemicalMixture<CoeffType>::read_species_electronic_characteristics(const bool verbose, const std::string & electronic_data)
   {
-      read_species_electronic_data<Parser>(electronic_data, verbose, *this);
+      read_species_electronic_data<CoeffType,Parser>(electronic_data, verbose, *this);
   }
 
   template<typename CoeffType>
