@@ -195,7 +195,8 @@ namespace Antioch
     _cp_at_200p1.reserve( _species_curve_fits.size() );
     for( unsigned int s = 0; s < _species_curve_fits.size(); s++ )
       {
-	_cp_at_200p1.push_back( this->cp( Cache<CoeffType>(200.1), s ) );
+        _cp_at_200p1.push_back(CoeffType(0));
+	_cp_at_200p1[s] = this->cp( Cache<CoeffType>(200.1), s );
       }
 
     return;

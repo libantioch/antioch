@@ -136,7 +136,8 @@ int tester()
   const std::vector<Antioch::ChemicalSpecies<Scalar>*>& default_species = default_mixture.chemical_species();
 
   int return_flag = 0;
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                           std::numeric_limits<Scalar>::epsilon() * 10;
 
   // Check name map consistency
   for( unsigned int i = 0; i < n_species; i++ )
