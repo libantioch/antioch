@@ -343,6 +343,8 @@ namespace Antioch{
         antioch_error();
       }
 
+      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
+
       _map[ParsingKey::SPECIES_SET]      = "SPECIES";
       _map[ParsingKey::REACTION_DATA]    = "REAC"; //REACTIONS || REAC
       _map[ParsingKey::FALLOFF_LOW_NAME] = "LOW";

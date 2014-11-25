@@ -94,6 +94,8 @@ namespace Antioch
         antioch_error();
       }
 
+      if(_verbose)std::cout << "Having opened file " << file << std::endl;
+
       skip_comment_lines(_doc, '#');
 
       _unit_map[MOL_WEIGHT]    = "g/mol";
@@ -114,7 +116,7 @@ namespace Antioch
   {
       std::vector<std::string> species_list;
       std::string spec;
-      while(!_doc.good())
+      while(_doc.good())
       {
           skip_comment_lines(_doc, '#'); // if comments in the middle
           
@@ -180,7 +182,7 @@ namespace Antioch
 	    // If we do not have this species, just go on
 	    if (!chem_mixture.species_name_map().count(name))continue;
 
-            Species species = chem_mixture.species_inverse_name_map().at(name);
+            Species species = chem_mixture.species_name_map().at(name);
 
 	    // using default comparison:
 	    std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 

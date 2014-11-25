@@ -197,6 +197,9 @@ namespace Antioch{
         antioch_error();
       }
 
+      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
+
+
       _map[ParsingKey::PHASE_BLOCK]           = "phase";
       _map[ParsingKey::SPECIES_SET]           = "speciesArray";
       _map[ParsingKey::REACTION_DATA]         = "reactionData";
