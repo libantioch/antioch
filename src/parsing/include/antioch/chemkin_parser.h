@@ -43,6 +43,15 @@
 namespace Antioch{
 
 
+  template <typename NumericType>
+  class ChemicalMixture;
+
+  template <typename NumericType>
+  class NASAThermoMixture;
+
+  template <typename NumericType>
+  class NASACurveFit;
+
   /*! ChemKin format file reader
    *
    * defaults unit:
@@ -65,12 +74,9 @@ namespace Antioch{
           ChemKinParser(const std::string &filename, bool verbose = true);
           ~ChemKinParser();
 
-//// first local pointers
-         /*! Read header of file, go to interesting part*/
-         bool initialize();
-
 
 ////////////// species
+
          /*! read SPECIES block*/
          const std::vector<std::string> species_list();
 
@@ -83,8 +89,15 @@ namespace Antioch{
         //! reads the electronic data, not valid in ChemKin
         void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
 
+////////////////// thermo
+
+        //! reads the thermo, NASA generalist
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASACurveFit<NumericType> >& thermo);
 
 ///////////////// kinetics
+
+         /*! Read header of file, go to interesting part*/
+         bool initialize();
 
          /*! go to next reaction*/
          bool reaction();
@@ -1288,6 +1301,80 @@ namespace Antioch{
                 << "No format has been defined yet.  Maybe contribute?\n"
                 << "https://github.com/libantioch/antioch" << std::endl;
       return;
+  }
+
+  template <typename NumericType>
+  inline
+  void ChemKinParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, NASACurveFit<NumericType> >& thermo)
+  {
+    const ChemicalMixture<NumericType>& chem_mixture = thermo.chemical_mixture();
+
+    std::string name;
+    std::vector<NumericType> coeffs;
+    std::vector<NumericType> temps(3,0.);
+
+    skip_comment_lines(_doc, '!');
+
+// chemkin classic
+// only two intervals
+// TODO: the parser will allow custom
+// intervals definition
+    while (_doc.good())
+      {
+        std::string line;
+        std::stringstream tmp;
+
+        if(!ascii_getline(_doc,line))break;
+        if(line[0] == '!')continue;
+        tmp << line.substr(0,18); //name
+
+        // this is ChemKin doc, 1st: temps E10.0
+        tmp << line.substr(45,10);         // low
+        tmp << " " << line.substr(55,10);  // high
+        tmp << " " << line.substr(65,10);  // inter
+
+         // get rid of last character
+        for(unsigned int n = 0; n < 3; n++)
+        {
+          if(!ascii_getline(_doc,line))// we have a problem
+          {
+             std::cerr << "NASA input file error, check " << filename << std::endl;
+             in.close();
+             antioch_error();
+          }
+                //2nd: coeffs E15.8
+          tmp << line.substr(0,15)  << " " 
+              << line.substr(15,15) << " " 
+              << line.substr(30,15) << " "
+              << line.substr(45,15) << " "
+              << line.substr(60,15) << " ";
+        }
+
+	coeffs.clear();
+	tmp >> name     // Species Name
+            >> temps[0]
+            >> temps[2]
+            >> temps[1];
+        for(unsigned int i = 0; i < 14; i++)
+        {
+           NumericType a;
+           tmp >> a;
+           coeffs.push_back(a);
+        }
+
+	// If we are still good, we have a valid set of thermodynamic
+	// data for this species. Otherwise, we read past end-of-file 
+	// in the section above
+	if (_doc.good())
+	  {
+	    // Check if this is a species we want.
+	    if( chem_mixture.species_name_map().find(name) !=
+		chem_mixture.species_name_map().end() )
+	      {
+		thermo.add_curve_fit(name, coeffs, temps);
+	      }
+	  }
+      } // end while
   }
   
 
