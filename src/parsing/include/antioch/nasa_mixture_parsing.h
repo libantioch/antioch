@@ -47,16 +47,14 @@ namespace Antioch
   template <class NumericType>
   class NASACurveFit;
 
-  // New declarations
-
-  template<class NumericType,typename Parser>
-  void read_nasa_mixture_data( NASAThermoMixture<NumericType,NASACurveFit<NumericType> >& thermo, const std::string &filename );
+  template<class NumericType, typename CurveType = NASACurveFit<NumericType>, typename Parser = ASCIIParser<NumericType> >
+  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType > & thermo, const std::string &filename );
 
  
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType, typename Parser>
+  template<class NumericType, typename CurveType, typename Parser>
   inline
-  void read_nasa_mixture_data( NASAThermoMixture<NumericType, NASACurveFit<NumericType> >& thermo, const std::string &filename )
+  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType >& thermo, const std::string &filename )
   {
     
    Parser parser(filename);
