@@ -46,11 +46,8 @@ namespace Antioch{
   template <typename NumericType>
   class ChemicalMixture;
 
-  template <typename NumericType>
+  template <typename NumericType, typename CurveType>
   class NASAThermoMixture;
-
-  template <typename NumericType>
-  class NASACurveFit;
 
   /*! ChemKin format file reader
    *
@@ -92,7 +89,8 @@ namespace Antioch{
 ////////////////// thermo
 
         //! reads the thermo, NASA generalist
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASACurveFit<NumericType> >& thermo);
+        template <typename CurveType>
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
 
 ///////////////// kinetics
 
@@ -359,6 +357,7 @@ namespace Antioch{
       if(_verbose)std::cout << "Having opened file " << filename << std::endl;
 
       _map[ParsingKey::SPECIES_SET]      = "SPECIES";
+      _map[ParsingKey::THERMO]           = "THERMO";
       _map[ParsingKey::REACTION_DATA]    = "REAC"; //REACTIONS || REAC
       _map[ParsingKey::FALLOFF_LOW_NAME] = "LOW";
       _map[ParsingKey::TROE_FALLOFF]     = "TROE";
@@ -1304,9 +1303,26 @@ namespace Antioch{
   }
 
   template <typename NumericType>
+  template <typename CurveType>
   inline
-  void ChemKinParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, NASACurveFit<NumericType> >& thermo)
+  void ChemKinParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo)
   {
+
+// finding thermo
+    std::string line;
+    ascii_getline(_doc,line);
+
+    while(line.find(_map.at(ParsingKey::THERMO)) == std::string::npos)
+    {
+       if(!ascii_getline(_doc,line) || _doc.eof())break;
+    }
+
+    if(!_doc.good())
+    {
+        std::cerr << "Thermodynamics description not found" << std::endl;
+        antioch_error();
+    }
+
     const ChemicalMixture<NumericType>& chem_mixture = thermo.chemical_mixture();
 
     std::string name;
@@ -1317,15 +1333,33 @@ namespace Antioch{
 
 // chemkin classic
 // only two intervals
-// TODO: the parser will allow custom
+// \todo: the parser should allow custom
 // intervals definition
     while (_doc.good())
       {
-        std::string line;
         std::stringstream tmp;
+        skip_comment_lines(_doc, '!'); // comments in middle
 
         if(!ascii_getline(_doc,line))break;
-        if(line[0] == '!')continue;
+        // question is: will we have temps or NASA coeffs
+        // line is 80 character long for coeffs, so if not, it's temps
+        if(line.size() != 80)
+        {
+           std::vector<std::string> temp_tmp;
+           SplitString(line," ",temp_tmp,false);
+           if(temp_tmp.size() == 0)
+           {
+              std::cerr << "This line is not understandable by the chemkin parser:\n" << line << std::endl;
+              antioch_error();
+           }
+           temps.resize(temp_tmp.size(),0.);
+           for(unsigned int t = 0; t < temp_tmp.size(); t++)
+           {
+               temps[t] = std::atof(temp_tmp[t].c_str());
+           }
+           continue;
+        }
+
         tmp << line.substr(0,18); //name
 
         // this is ChemKin doc, 1st: temps E10.0
@@ -1338,8 +1372,7 @@ namespace Antioch{
         {
           if(!ascii_getline(_doc,line))// we have a problem
           {
-             std::cerr << "NASA input file error, check " << filename << std::endl;
-             in.close();
+             std::cerr << "NASA input file error" << std::endl;
              antioch_error();
           }
                 //2nd: coeffs E15.8
@@ -1350,8 +1383,8 @@ namespace Antioch{
               << line.substr(60,15) << " ";
         }
 
-	coeffs.clear();
-	tmp >> name     // Species Name
+        coeffs.clear();
+        tmp >> name     // Species Name
             >> temps[0]
             >> temps[2]
             >> temps[1];
@@ -1362,18 +1395,18 @@ namespace Antioch{
            coeffs.push_back(a);
         }
 
-	// If we are still good, we have a valid set of thermodynamic
-	// data for this species. Otherwise, we read past end-of-file 
-	// in the section above
-	if (_doc.good())
-	  {
-	    // Check if this is a species we want.
-	    if( chem_mixture.species_name_map().find(name) !=
-		chem_mixture.species_name_map().end() )
-	      {
-		thermo.add_curve_fit(name, coeffs, temps);
-	      }
-	  }
+        // If we are still good, we have a valid set of thermodynamic
+        // data for this species. Otherwise, we read past end-of-file 
+        // in the section above
+        if (_doc.good())
+          {
+            // Check if this is a species we want.
+            if( chem_mixture.species_name_map().find(name) !=
+                chem_mixture.species_name_map().end() )
+              {
+                thermo.add_curve_fit(name, coeffs, temps);
+              }
+          }
       } // end while
   }
   
