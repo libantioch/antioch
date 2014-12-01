@@ -115,6 +115,8 @@ namespace Antioch
 
     const std::map<Species,std::string>& species_inverse_name_map() const;
 
+    const std::map<std::string,Species>& active_species_name_map() const;
+
     //! Gas constant for species s in [J/kg-K]
     CoeffType R( const unsigned int s ) const;
 
@@ -243,6 +245,15 @@ namespace Antioch
   const std::map<Species,std::string>& ChemicalMixture<CoeffType>::species_inverse_name_map() const
   {
     return _species_inv_name_map;
+  }
+
+  template<typename CoeffType>
+  inline
+  const std::map<std::string,Species>&
+  ChemicalMixture<CoeffType>::active_species_name_map() const
+  {
+    antioch_deprecated();
+    return _species_name_map;
   }
 
   template<typename CoeffType>

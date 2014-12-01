@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_CURVE_FIT_H
-#define ANTIOCH_CEA_CURVE_FIT_H
+#ifndef ANTIOCH_NASA_CURVE_FIT_H
+#define ANTIOCH_NASA_CURVE_FIT_H
 
 // Antioch
 #include "antioch/antioch_asserts.h"
@@ -42,20 +42,23 @@
 namespace Antioch
 {
   template<typename CoeffType=double>
-  class CEACurveFit
+  class NASACurveFit
   {
   public:
-    
-    CEACurveFit( const std::vector<CoeffType>& coeffs );
-    ~CEACurveFit();
 
-    //! The number of intervals for this CEA curve fit
+    // default: [300,1000] [1000,5000]
+    NASACurveFit( const std::vector<CoeffType>& coeffs);
+
+    NASACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temp );
+    ~NASACurveFit();
+
+    //! The number of intervals for this NASA curve fit
     unsigned int n_intervals() const;
 
     //! The interval the input temperature lies in
     /*!
       @returns which curve fit interval the input temperature 
-      lies in.  The CEA thermodynamic intervals are 
+      lies in.  The NASA thermodynamic intervals are 
       [200-1,000], [1,000-6,000], [6,000-20,000] K
      */
     template <typename StateType>
@@ -75,10 +78,9 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{h}{\mathrm{R}T}\f$
         \f[
-            \frac{h}{\mathrm{R}T} = -\frac{a_0}{T^2} + \frac{a_1}{T} \ln(T) 
-                                    + a2  + \frac{a_3}{2} T + \frac{a_4}{3} T^2 
-                                    + \frac{a_5}{4} T^3 + \frac{a_6}{5} T^4 
-                                    + \frac{a_8}{T}
+            \frac{h}{\mathrm{R}T} = a0  + \frac{a_1}{2} T + \frac{a_2}{3} T^2 
+                                    + \frac{a_3}{4} T^3 + \frac{a_4}{5} T^4 
+                                    + \frac{a_5}{T}
         \f]
      */
     template <typename StateType>
@@ -87,10 +89,9 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{s}{\mathrm{R}}\f$
         \f[
-            \frac{s}{\mathrm{R}} = -\frac{a_0}{2T^2} - \frac{a_1}{T}
-                                    + a_2 \ln(T) + a_3 T + \frac{a_4}{2} T^2 
-                                    + \frac{a_5}{3} T^3 + \frac{a_6}{4} T^4 
-                                    + a_9
+            \frac{s}{\mathrm{R}} =  a_0 \ln(T) + a_1 T + \frac{a_2}{2} T^2 
+                                    + \frac{a_3}{3} T^3 + \frac{a_4}{4} T^4 
+                                    + a_6
         \f]
      */
     template <typename StateType>
@@ -99,11 +100,10 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{g}{\mathrm{R}T} = \frac{h}{\mathrm{R}T} - \frac{s}{R}\f$
         \f[
-            \frac{g}{\mathrm{R}T} = -\frac{a_0}{2T^2} - \frac{a_1 + a_8}{T}
-                                    + \frac{a_1}{T} \ln(T) - a2 \ln(T) 
-                                    + (a_2 - a_9) - \frac{a_3}{2} T 
-                                    - \frac{a_4}{6} T^2
-                                    - \frac{a_5}{12} T^3 - \frac{a_6}{20} T^4 
+            \frac{g}{\mathrm{R}T} =   \frac{a_5}{T}      - a0 \ln(T) 
+                                    + (a_0 - a_6) 
+                                    - \frac{a_1}{2} T    - \frac{a_2}{6} T^2
+                                    - \frac{a_3}{12} T^3 - \frac{a_4}{20} T^4 
         \f]
      */
     template <typename StateType>
@@ -113,10 +113,9 @@ namespace Antioch
       @returns the value \f$\frac{\partial\left(\frac{g}{\mathrm{R}T}\right)}\frac{\partial T} 
                             = \frac{\partial\left(\frac{h}{\mathrm{R}T} - \frac{s}{R}\right)}{\partial T}\f$
         \f[
-            \frac{g}{\mathrm{R}T} =   \frac{a_0}{T^3} + \frac{a_1 + a_8}{T^2}
-                                    + a_1 \ln(T) + a_1 - \frac{a2}{T}
-                                    - \frac{a_3}{2} - \frac{a_4}{3} T
-                                    - \frac{a_5}{4} T^2 - \frac{a_6}{5} T^3 
+            \frac{g}{\mathrm{R}T} = - \frac{a_5}{T^2}   - \frac{a_0}{T}
+                                    - \frac{a_1}{2}     - \frac{a_2}{3} T
+                                    - \frac{a_3}{4} T^2 - \frac{a_4}{5} T^3
         \f]
      */
     template <typename StateType>
@@ -125,7 +124,7 @@ namespace Antioch
 
     //! @returns a pointer to the coefficients in the interval specified.
     /*!   
-      The CEA-style equilibrium curve fits are defined in terms of
+      The NASA-style equilibrium curve fits are defined in terms of
       _n_coeffs coefficients for each range fit.
     */
     const CoeffType* coefficients(const unsigned int interval) const;
@@ -133,19 +132,21 @@ namespace Antioch
   protected:
 
     //! The number of coefficients in each interval
-    const unsigned int _n_coeffs;
+    unsigned int _n_coeffs;
 
     //! The coefficient data
     /*!
       The coeffcients are packed in linear ordering. That is,
-      a0-a9 for the first interval, a0-a9 for the second interval,
+      a0-a6 for the first interval, a0-a6 for the second interval,
       and so on.
      */
-    const std::vector<CoeffType> _coefficients;
+    std::vector<CoeffType> _coefficients;
 
-   private:
-    // for compatibility with NASA, not used
-    CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> &temps );
+    //! The temperatures
+    /*!
+      The temperature defining the intervals
+     */
+    std::vector<CoeffType> _temp;
   };
 
 
@@ -153,17 +154,37 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs )
-    : _n_coeffs(10),
+  NASACurveFit<CoeffType>::NASACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temp )
+    : _n_coeffs(7),
+      _coefficients(coeffs),
+      _temp(temp)
+  {
+      // consistency checks
+    antioch_assert_equal_to(_coefficients.size()%7,0);
+    antioch_assert_equal_to(_temp.size(),_coefficients.size()/_n_coeffs + 1);
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  NASACurveFit<CoeffType>::NASACurveFit( const std::vector<CoeffType>& coeffs)
+    : _n_coeffs(7),
       _coefficients(coeffs)
   {
+      // consistency checks
+    antioch_assert_equal_to(_coefficients.size(),14);
+
+    _temp.resize(3);
+    _temp[0] = 300.L;
+    _temp[1] = 1000.L;
+    _temp[2] = 5000.L;
     return;
   }
 
 
   template<typename CoeffType>
   inline
-  CEACurveFit<CoeffType>::~CEACurveFit()
+  NASACurveFit<CoeffType>::~NASACurveFit()
   {
     return;
   }
@@ -173,39 +194,33 @@ namespace Antioch
   template<typename StateType>
   inline
   typename Antioch::rebind<StateType, unsigned int>::type
-  CEACurveFit<CoeffType>::interval(const StateType& T) const
+  NASACurveFit<CoeffType>::interval(const StateType& T) const
   {
     typedef typename 
       Antioch::rebind<StateType, unsigned int>::type UIntType;
     UIntType interval;
     Antioch::zero_clone(interval, T);
 
-    typedef typename Antioch::value_type<StateType>::type ScalarType;
-
-    /* CEA thermodynamic intervals are:
-       [200-1,000], [1,000-6,000], [6,000-20,000] K */
-    interval = Antioch::if_else
-      (T > ScalarType(6000.),
-       Antioch::constant_clone(interval,2),
-       UIntType
-         (Antioch::if_else
-            (T > ScalarType(1000.),
-	     Antioch::constant_clone(interval,1),
-	     Antioch::constant_clone(interval,0))));
-
+    for(unsigned int i = 1; i < _temp.size(); ++i)
+    {
+        interval = Antioch::if_else
+                   (T > _temp[i-1] && T < _temp[i],
+                       i - 1,
+                       interval); 
+    }
     return interval;
   }
 
 
   template<typename CoeffType>
   inline
-  unsigned int CEACurveFit<CoeffType>::n_intervals() const 
+  unsigned int NASACurveFit<CoeffType>::n_intervals() const 
   { return _coefficients.size() / _n_coeffs; }
 
 
   template<typename CoeffType>
   inline
-  const CoeffType* CEACurveFit<CoeffType>::coefficients(const unsigned int interval) const
+  const CoeffType* NASACurveFit<CoeffType>::coefficients(const unsigned int interval) const
   {
     antioch_assert_less( interval, this->n_intervals() );
     antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
@@ -216,7 +231,7 @@ namespace Antioch
   template<typename CoeffType>
   template <typename StateType>
   inline
-  const StateType CEACurveFit<CoeffType>::cp_over_R(const TempCache<StateType>& cache) const
+  const StateType NASACurveFit<CoeffType>::cp_over_R(const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -227,26 +242,23 @@ namespace Antioch
     // FIXME - this needs expression templates to be faster...
 
     StateType returnval = Antioch::zero_clone(cache.T);
-
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
         const CoeffType * const a =
           this->coefficients(i);
 	returnval = Antioch::if_else
 	  (interval == i,
-	   StateType(a[0]/cache.T2 + a[1]/cache.T + a[2] + a[3]*cache.T +
-	             a[4]*cache.T2 + a[5]*cache.T3 + a[6]*cache.T4),
+	   StateType(a[0] + a[1]*cache.T + a[2]*cache.T2 + a[3]*cache.T3 + a[4]*cache.T4),
 	   returnval);
       }
 
     return returnval;
-      
   }
 
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEACurveFit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
+  StateType NASACurveFit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -260,12 +272,12 @@ namespace Antioch
       {
          const CoeffType *a = this->coefficients(interval);
     
-         /* h/RT = -a0*T^-2   + a1*T^-1*lnT + a2     + a3*T/2 + a4*T^2/3 + a5*T^3/4 + a6*T^4/5 + a8/T */
+         /* h/RT = a0     + a1*T/2 + a2*T^2/3 + a3*T^3/4 + a4*T^4/5 + a5/T */
         returnval = Antioch::if_else
         ( interval == i,
-           StateType( -a[0]/cache.T2 + a[1]*cache.lnT/cache.T + a[2] + 
-                       a[3]*cache.T/2.0L + a[4]*cache.T2/3.0L + a[5]*cache.T3/4.0L +
-                       a[6]*cache.T4/5.0L + a[8]/cache.T),
+           StateType(  a[0] + 
+                       a[1]*cache.T/2.0L + a[2]*cache.T2/3.0L + a[3]*cache.T3/4.0L +
+                       a[4]*cache.T4/5.0L + a[5]/cache.T),
            returnval);
        }
        return returnval;
@@ -274,7 +286,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEACurveFit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
+  StateType NASACurveFit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -288,12 +300,12 @@ namespace Antioch
       {
          const CoeffType *a = this->coefficients(interval);
     
-    /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a9 */
+    /* s/R = a0*lnT + a1*T   + a2*T^2/2 + a3*T^3/3 + a4*T^4/4 + a6 */
         returnval = Antioch::if_else
         ( interval == i,
-           StateType( -a[0]/cache.T2/2.0 - a[1]/cache.T + a[2]*cache.lnT 
-                      + a[3]*cache.T + a[4]*cache.T2/2.0 + a[5]*cache.T3/3.0 
-                      + a[6]*cache.T4/4.0 + a[9]),
+           StateType(   a[0]*cache.lnT 
+                      + a[1]*cache.T + a[2]*cache.T2/2.0L + a[3]*cache.T3/3.0L 
+                      + a[4]*cache.T4/4.0L + a[6]),
            returnval);
        }
        return returnval;
@@ -303,7 +315,7 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType
-  CEACurveFit<CoeffType>::h_RT_minus_s_R( const TempCache<StateType>& cache) const
+  NASACurveFit<CoeffType>::h_RT_minus_s_R( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -317,15 +329,14 @@ namespace Antioch
       {
          const CoeffType *a = this->coefficients(interval);
     
-    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
-       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
+    /* h/RT =  a[0]     + a[1]*T/2. + a[2]*T2/3. + a[3]*T3/4. + a[4]*T4/5. + a[5]/T,
+       s/R  =  a[0]*lnT + a[1]*T    + a[2]*T2/2. + a[3]*T3/3. + a[4]*T4/4. + a[6]   */
         returnval = Antioch::if_else
         ( interval == i,
-	   StateType(-a[0]/cache.T2/2.0 + (a[1] + a[8])/cache.T +
-		     a[1]*cache.lnT/cache.T - a[2]*cache.lnT + 
-		     (a[2] - a[9]) - a[3]*cache.T/2.0 -
-		     a[4]*cache.T2/6.0 - a[5]*cache.T3/12.0 -
-		     a[6]*cache.T4/20.0),
+	   StateType(a[5]/cache.T - a[0]*cache.lnT
+                     + a[0] - a[6]
+		     - a[1]/2.L*cache.T   - a[2]*cache.T2/6.L
+                     - a[3]*cache.T3/12.L - a[4]*cache.T4/20.L),
            returnval);
        }
        return returnval;
@@ -334,7 +345,7 @@ namespace Antioch
    template <typename CoeffType>
    template <typename StateType>
    inline
-   StateType CEACurveFit<CoeffType>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache) const
+   StateType NASACurveFit<CoeffType>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache) const
    {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -354,10 +365,9 @@ namespace Antioch
           this->coefficients(i);
 	returnval = Antioch::if_else
 	  (interval == i,
-	   StateType(a[0]/cache.T3 - a[8]/cache.T2 -
-		     a[1]*cache.lnT/cache.T2 - a[2]/cache.T -
-		     a[3]/2.  - a[4]*cache.T/3. - a[5]*cache.T2/4. -
-		     a[6]*cache.T3/5.),
+	   StateType(- a[5]/cache.T2     - a[0]/cache.T
+		     - a[1]/2.L          - a[2]*cache.T/3.L
+                     - a[3]*cache.T2/4.L - a[4]*cache.T3/5.L),
 	   returnval);
       }
 
@@ -367,4 +377,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif //ANTIOCH_CEA_CURVE_FIT_H
+#endif //ANTIOCH_NASA_CURVE_FIT_H

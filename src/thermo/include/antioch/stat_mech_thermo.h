@@ -587,7 +587,8 @@ namespace Antioch
   {
       return this->cv_vib_over_R(species,Tv) * (_chem_mixture.chemical_species()[species])->gas_constant();
   }
-      
+
+
   template<typename CoeffType>
   template<typename StateType>
   inline
