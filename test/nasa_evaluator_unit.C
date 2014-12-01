@@ -42,8 +42,8 @@
 #include "antioch/temp_cache.h"
 #include "antioch/cea_mixture.h"
 #include "antioch/cea_evaluator.h"
-#include "antioch/cea_mixture_ascii_parsing.h"
-#include "antioch/nasa_mixture_ascii_parsing.h"
+#include "antioch/cea_mixture_parsing.h"
+#include "antioch/nasa_mixture_parsing.h"
 
 template <typename Scalar, typename NASAFit>
 int test_cp( const std::string& species_name, unsigned int species, Scalar cp_exact, Scalar T,
@@ -242,12 +242,12 @@ int tester(const std::string & nasa_filename)
 
 // backward compatibility
   Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
-  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::read_nasa_mixture_data( cea_mixture, Antioch::DefaultFilename::thermo_data() );
   Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
 // explicit
   Antioch::NASAThermoMixture<Scalar, Antioch::NASACurveFit<Scalar> > nasa_mixture( chem_mixture );
-  Antioch::read_nasa_mixture_data_ascii( nasa_mixture, nasa_filename );
+  Antioch::read_nasa_mixture_data<Scalar,Antioch::NASACurveFit<Scalar>,Antioch::ChemKinParser<Scalar> >( nasa_mixture, nasa_filename );
   Antioch::NASAEvaluator<Scalar, Antioch::NASACurveFit<Scalar> > nasa_thermo( nasa_mixture );
 
   //const Scalar P = 100000.0;
