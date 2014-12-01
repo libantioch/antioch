@@ -51,6 +51,13 @@ namespace Antioch
   template <class NumericType>
   class ChemicalMixture;
 
+  template <typename NumericType, typename CurveType>
+  class NASAThermoMixture;
+
+  // deprecated
+  template <typename NumericType>
+  class CEAThermodynamics;
+
   template <typename NumericType>
   class ASCIIParser
   {
@@ -69,6 +76,13 @@ namespace Antioch
 
         //! read the electronic data
         void read_electronic_data(ChemicalMixture<NumericType>& chem_mixture);
+
+        //! read the thermodynamic data
+        template <typename CurveType>
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
+
+        //! read the thermodynamic data, deprecated object
+        void read_thermodynamic_data(CEAThermodynamics<NumericType>& thermo);
 
 
      private:
@@ -290,6 +304,98 @@ namespace Antioch
           }
       }
       return;
+  }
+
+  template <typename NumericType>
+  template <typename CurveType>
+  inline
+  void ASCIIParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo)
+  {
+    std::string name;
+    unsigned int n_int;
+    std::vector<NumericType> coeffs;
+    NumericType h_form, val;
+
+    const ChemicalMixture<NumericType>& chem_mixture = thermo.chemical_mixture();
+
+// \todo: only cea, should do NASA
+    while (_doc.good())
+      {
+        skip_comment_lines(_doc, '#');
+
+        _doc >> name;   // Species Name
+        _doc >> n_int;  // Number of T intervals: [200-1000], [1000-6000], ([6000-20000])
+        _doc >> h_form; // Formation Enthalpy @ 298.15 K
+
+        coeffs.clear();
+        for (unsigned int interval=0; interval<n_int; interval++)
+          {
+            for (unsigned int n=0; n<10; n++)
+              {
+                _doc >> val, coeffs.push_back(val);
+              }
+          }
+
+        // If we are still good, we have a valid set of thermodynamic
+        // data for this species. Otherwise, we read past end-of-file 
+        // in the section above
+        if (_doc.good())
+          {
+            // Check if this is a species we want.
+            if( chem_mixture.species_name_map().find(name) !=
+                chem_mixture.species_name_map().end() )
+              {
+                if(_verbose)std::cout << "Adding curve fit " << name << std::endl;
+                thermo.add_curve_fit(name, coeffs);
+              }
+          }
+      } // end while
+  }
+
+
+  template <typename NumericType>
+  inline
+  void ASCIIParser<NumericType>::read_thermodynamic_data(CEAThermodynamics<NumericType>& thermo)
+  {
+    
+    std::string name;
+    unsigned int n_int;
+    std::vector<NumericType> coeffs;
+    NumericType h_form, val;
+
+    const ChemicalMixture<NumericType>& chem_mixture = thermo.chemical_mixture();
+
+// \todo: only cea, should do NASA
+    while (_doc.good())
+      {
+        skip_comment_lines(_doc, '#');
+
+        _doc >> name;   // Species Name
+        _doc >> n_int;  // Number of T intervals: [200-1000], [1000-6000], ([6000-20000])
+        _doc >> h_form; // Formation Enthalpy @ 298.15 K
+
+        coeffs.clear();
+        for (unsigned int interval=0; interval<n_int; interval++)
+          {
+            for (unsigned int n=0; n<10; n++)
+              {
+                _doc >> val, coeffs.push_back(val);
+              }
+          }
+
+        // If we are still good, we have a valid set of thermodynamic
+        // data for this species. Otherwise, we read past end-of-file 
+        // in the section above
+        if (_doc.good())
+          {
+            // Check if this is a species we want.
+            if( chem_mixture.species_name_map().find(name) !=
+                chem_mixture.species_name_map().end() )
+              {
+                thermo.add_curve_fit(name, coeffs);
+              }
+          }
+      } // end while
   }
 
 } // end namespace Antioch

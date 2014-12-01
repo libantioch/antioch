@@ -44,6 +44,8 @@ namespace Antioch{
   template <typename CoeffType>
   class ChemicalMixture;
 
+  template <typename NumericType, typename CurveType>
+  class NASAThermoMixture;
 
   template <typename NumericType = double>
   class XMLParser{
@@ -67,6 +69,12 @@ namespace Antioch{
 
         //! reads the electronic data, not valid in xml
         void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+
+////////////////// thermo
+
+        //! reads the thermo, NASA generalist
+        template <typename CurveType>
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
 
 /// reaction
 
@@ -167,6 +175,7 @@ namespace Antioch{
 
 //
           tinyxml2::XMLElement * _species_block;
+          tinyxml2::XMLElement * _thermo_block;
           tinyxml2::XMLElement * _reaction_block;
           tinyxml2::XMLElement * _reaction;
           tinyxml2::XMLElement * _rate_constant;
@@ -202,6 +211,7 @@ namespace Antioch{
 
       _map[ParsingKey::PHASE_BLOCK]           = "phase";
       _map[ParsingKey::SPECIES_SET]           = "speciesArray";
+      _map[ParsingKey::THERMO]                = "species"; // thermo in <species> <thermo> <NASA> <floatArray> </floatArray></NASA> </thermo> </species>
       _map[ParsingKey::REACTION_DATA]         = "reactionData";
       _map[ParsingKey::REACTION]              = "reaction";
       _map[ParsingKey::REVERSIBLE]            = "reversible";
@@ -271,6 +281,7 @@ namespace Antioch{
       {
           _species_block = _species_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
       }
+      _thermo_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::THERMO).c_str());
       _reaction_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
 
       _reaction = NULL;
@@ -712,6 +723,73 @@ namespace Antioch{
                 << "No format has been defined yet.  Maybe contribute?\n"
                 << "https://github.com/libantioch/antioch" << std::endl;
       return;
+  }
+
+  template <typename NumericType>
+  template <typename CurveType>
+  inline
+  void XMLParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo)
+  {
+     if(!_thermo_block)
+     {
+        std::cerr << "No thermodynamics data found!" << std::endl;
+        antioch_error();
+     }
+
+        // just a temp value to compare NumericType
+     const NumericType tol = std::numeric_limits<NumericType>::epsilon() * 10.;
+
+     const ChemicalMixture<NumericType> & chem_mixture = thermo.chemical_mixture();
+     for(unsigned int s = 0; s < chem_mixture->n_species(); s++)
+     {
+        std::string name = chem_mixture.species_name_map().at(s);
+        tinyxml2::XMLElement * spec = _thermo_block->FirstChildElement(name.c_str());
+        if(!spec)
+        {
+           std::cerr << "Species " << name << " has not been found" << std::endl;
+        }else
+        {
+          // temp containers
+           std::vector<NumericType> temps;
+           std::vector<NumericType> values;
+
+         // xml place
+           tinyxml2::XMLElement * nasa = spec->FirstChildElement("NASA");
+         // temperature
+           temps.push_back(std::atof(nasa->Attribute("Tmin")));
+           temps.push_back(std::atof(nasa->Attribute("Tmax")));
+
+         // now coefs
+           std::vector<std::string> coefs_str;
+           SplitString(std::string(nasa->GetText())," ",coefs_str,false);
+           for(unsigned int d = 0; d < coefs_str.size(); d++)
+               values.push_back(std::atof(coefs_str[d].c_str()));
+        // looping
+           while(nasa->NextSiblingElement("NASA"))
+           {
+             nasa = nasa->NextSiblingElement("NASA");
+              // temperatures, only Tmax as Tmin is suppose to be last Tmax
+             temps.push_back(std::atof(nasa->Attribute("Tmax")));
+
+              // now coefs
+             SplitString(std::string(nasa->GetText())," ",coefs_str,false);
+             for(unsigned int d = 0; d < coefs_str.size(); d++)
+                 values.push_back(std::atof(coefs_str[d].c_str()));
+
+             // checking this Tmin = last Tmax thing
+             if(std::abs(NumericType(std::atof(nasa->Attribute("Tmin"))) - temps[temps.size() - 2] )/temps[temps.size() - 2] > tol)
+             {
+                std::cerr << "No temperature connection between intervals in xml file description"
+                          << std::endl;
+                antioch_error();
+             }
+           }
+
+           thermo.add_curve_fit(name, values, temps);
+        }
+     }
+
+
   }
 
 
