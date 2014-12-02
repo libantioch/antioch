@@ -119,21 +119,16 @@ namespace Antioch
          ANTIOCH_AUTOFUNC(StateType, _int_therm.cv_vib_over_R(s,T))
 
         //! cv_rot
-        template <typename StateType>
-        const CoeffType cv_rot(unsigned int s) const {return _int_therm.cv_vib(s);}
+        const CoeffType cv_rot(unsigned int s)          const {return _int_therm.cv_vib(s);}
 
         //! cv_rot/R
-        template <typename StateType>
-        const CoeffType
-           cv_rot_over_R(unsigned int s) const {return _int_therm.cv_rot_over_R(s,T);}
+        const CoeffType cv_rot_over_R(unsigned int s)   const {return _int_therm.cv_rot_over_R(s);}
 
         //! cv_trans
-        template <typename StateType>
-        const CoeffType cv_trans(unsigned int s) const {return _int_therm.cv_trans(s);}
+        const CoeffType cv_trans(unsigned int s)        const {return _int_therm.cv_trans(s);}
 
         //! cv_trans/R
-        template <typename StateType>
-        const CoeffType cv_trans_over_R(unsigned int s) const {return _int_therm.cv_trans_over_R(s,T);}
+        const CoeffType cv_trans_over_R(unsigned int s) const {return _int_therm.cv_trans_over_R(s);}
 
 
 // objects
