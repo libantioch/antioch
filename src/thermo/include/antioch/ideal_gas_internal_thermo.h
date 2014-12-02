@@ -94,21 +94,21 @@ namespace Antioch
 
   template <typename ExternalThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr_over_R(unsigned int s)
+  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr_over_R(unsigned int s) const
   {
      return _chem_mix.chemical_species[s]->n_tr_dofs();
   }
 
   template <typename ExternalThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr(unsigned int s)
+  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr(unsigned int s) const
   {
     return _chem_mix.R(species) * (_chem_mix.chemical_species()[species])->n_tr_dofs();
   }
 
   template <typename ExternalThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_rot(unsigned int s)
+  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_rot(unsigned int s) const
   {
     using std::max;
 
@@ -117,7 +117,7 @@ namespace Antioch
 
   template <typename ExternalThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_rot_over_R(unsigned int s)
+  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_rot_over_R(unsigned int s) const
   {
     return std::max(this->cv_tr_over_R(s) - this->cv_trans_over_R(s), CoeffType(0) ); 
   }
