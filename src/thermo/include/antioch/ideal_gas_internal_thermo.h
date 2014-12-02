@@ -29,6 +29,13 @@
 namespace Antioch
 {
 
+  template <typename CoeffType>
+  class ChemicalMixture;
+
+  template <typename CoeffType>
+  class TempCache;
+
+
   template <typename ExternalThermo, typename CoeffType = double>
   class IdealGasInternalThermo
   {
@@ -40,35 +47,32 @@ namespace Antioch
         template <typename StateType>
         const ANTIOCH_AUTO(StateType)
            cv_vib(const StateType & T, unsigned int s) const
-         ANTIOCH_AUTOFUNC(StateType, _ext_therm.cv(s,T) - this->cv_tr(s))
+         ANTIOCH_AUTOFUNC(StateType, (_chem_mix.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))?zero_clone(T):
+                                                                                                    _ext_therm.cv(TempCache<CoeffType>(T),s) - this->cv_tr(s))
 
         //! cv_vib/R
         template <typename StateType>
         const ANTIOCH_AUTO(StateType)
            cv_vib_over_R(const StateType & T, unsigned int s) const
-         ANTIOCH_AUTOFUNC(StateType, _ext_therm.cv_vib_over_R(s,T) - this->cv_tr_over_R(s))
+         ANTIOCH_AUTOFUNC(StateType, (_chem_mix.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))?zero_clone(T):
+                                                                                                    _ext_therm.cv_over_R(TempCache<CoeffType>(T),s) - this->cv_tr_over_R(s))
 
         //! cv_rot
         const CoeffType cv_rot(unsigned int s) const;
 
         //! cv_rot/R
-        template <typename StateType>
         const CoeffType cv_rot_over_R(unsigned int s) const;
 
         //! cv_trans
-        template <typename StateType>
         const CoeffType cv_trans(unsigned int s) const;
 
         //! cv_trans/R
-        template <typename StateType>
         const CoeffType cv_trans_over_R(unsigned int s) const;
 
         //! cv_trans-rot
-        template <typename StateType>
         const CoeffType cv_tr(unsigned int s) const;
 
         //! cv_trans_rot/R
-        template <typename StateType>
         const CoeffType cv_tr_over_R(unsigned int s) const;
 
        private:
@@ -96,14 +100,14 @@ namespace Antioch
   inline
   const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr_over_R(unsigned int s) const
   {
-     return _chem_mix.chemical_species[s]->n_tr_dofs();
+     return _chem_mix.chemical_species()[s]->n_tr_dofs();
   }
 
   template <typename ExternalThermo, typename CoeffType>
   inline
   const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr(unsigned int s) const
   {
-    return _chem_mix.R(species) * (_chem_mix.chemical_species()[species])->n_tr_dofs();
+    return _chem_mix.R(s) * (_chem_mix.chemical_species()[s])->n_tr_dofs();
   }
 
   template <typename ExternalThermo, typename CoeffType>
@@ -112,7 +116,7 @@ namespace Antioch
   {
     using std::max;
 
-    return max(this->cv_tr(species) - this->cv_trans(species), CoeffType(0) ); 
+    return max(this->cv_tr(s) - this->cv_trans(s), CoeffType(0) ); 
   }
 
   template <typename ExternalThermo, typename CoeffType>
@@ -126,12 +130,12 @@ namespace Antioch
   inline
   const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_trans( const unsigned int species ) const
   {
-    return CoeffType(1.5)*_chem_mixture.R(species);
+    return CoeffType(1.5)*_chem_mix.R(species);
   }
 
   template <typename ExternalThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_trans_over_R( const unsigned int species ) const
+  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_trans_over_R( const unsigned int /*species*/ ) const
   {
     return CoeffType(1.5);
   }
