@@ -111,15 +111,20 @@ namespace Antioch
     dh_RT_minus_s_R_dT( const TempCache<StateType>& cache, VectorStateType& h_RT_minus_s_R ) const;
 
 
+     //! Cp over R, directly from the curve fit
     template<typename StateType>
     StateType cp_over_R( const TempCache<StateType>& cache, unsigned int species ) const;
 
+     //! Cv over R, from ideal gas, 
+     // \f[ \frac{C_v}{\mathrm{R} = \frac{C_p}{\mathrm{R}} - 1\f]
     template<typename StateType>
     StateType cv_over_R( const TempCache<StateType>& cache, unsigned int species ) const;
 
+     //! h over RT, directly from the curve fit
     template<typename StateType>
     StateType h_over_RT( const TempCache<StateType>& cache, unsigned int species ) const;
 
+     //! s over R, directly from the curve fit
     template<typename StateType>
     StateType s_over_R( const TempCache<StateType>& cache, unsigned int species ) const;
 
@@ -250,6 +255,19 @@ namespace Antioch
     //                      _nasa_mixture.curve_fit(species).n_intervals() );
 
     return this->_nasa_mixture.curve_fit(species).cp_over_R(cache);
+  }
+
+  template<typename CoeffType, typename NASAFit>
+  template<typename StateType>
+  inline
+  StateType
+  NASAEvaluator<CoeffType,NASAFit>::cv_over_R( const TempCache<StateType>& cache, unsigned int species ) const
+  {
+    antioch_assert_less( species, this->n_species() );
+    // FIXME - we need assert_less to be vectorizable
+    // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+    //                      _nasa_mixture.curve_fit(species).n_intervals() );
+    return this->_nasa_mixture.curve_fit(species).cp_over_R(cache) - StateType(1.L);
   }
 
   template<typename CoeffType, typename NASAFit>
