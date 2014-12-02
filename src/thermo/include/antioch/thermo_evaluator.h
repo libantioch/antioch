@@ -124,8 +124,9 @@ namespace Antioch
 
         //! cv_rot/R
         template <typename StateType>
-        const CoeffType
-           cv_rot_over_R(unsigned int s) const {return _int_therm.cv_rot_over_R(s,T);}
+        const ANTIOCH_AUTO(StateType)
+           cv_rot_over_R(unsigned int s) const 
+        ANTIOCH_AUTOFUNC(_int_therm.cv_rot_over_R(s,T))
 
         //! cv_trans
         template <typename StateType>
@@ -133,7 +134,9 @@ namespace Antioch
 
         //! cv_trans/R
         template <typename StateType>
-        const CoeffType cv_trans_over_R(unsigned int s) const {return _int_therm.cv_trans_over_R(s,T);}
+        const ANTIOCH_AUTO(StateType)
+          cv_trans_over_R(unsigned int s) const 
+        ANTIOCH_AUTOFUNC(_int_therm.cv_trans_over_R(s,T))
 
 
 // objects
