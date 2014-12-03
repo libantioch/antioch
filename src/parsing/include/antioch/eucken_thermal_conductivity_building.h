@@ -37,15 +37,15 @@
 
 namespace Antioch
 {
-  template<class ThermoEvaluator, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator> , TransportMixture<ThermoEvaluator,NumericType> >& k);
+  template<class ThermoMicro, class ThermoEval, class NumericType>
+  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoMicro> , TransportMixture<ThermoEval,NumericType> >& k);
 
 // ----------------------------------------- //
 
-  template<class ThermoEvaluator, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator>, TransportMixture<ThermoEvaluator,NumericType> >& k)
+  template<class ThermoMicro, class ThermoEval, class NumericType>
+  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoMicro>, TransportMixture<ThermoEval,NumericType> >& k)
   {
-       k.add_model(k.mixture().thermo());
+       k.add_model(k.mixture().thermo().internal_thermo());
   }
 
 }

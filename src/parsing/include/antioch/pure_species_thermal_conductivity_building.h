@@ -42,18 +42,18 @@ namespace Antioch
   class TransportMixture;
 
 
-  template<class ThermoEvaluator, class NumericType>
-  void build_pure_species_thermal_conductivity( PhysicalSet<PureSpeciesThermalConductivity<ThermoEvaluator,NumericType> , TransportMixture<ThermoEvaluator,NumericType> >& k);
+  template<typename ThermoMicro, typename ThermoEvaluator, typename NumericType>
+  void build_pure_species_thermal_conductivity( PhysicalSet<PureSpeciesThermalConductivity<ThermoMicro,NumericType> , TransportMixture<ThermoEvaluator,NumericType> >& k);
 
 // ----------------------------------------- //
 
-  template<class ThermoEvaluator,class NumericType>
-  void build_pure_species_thermal_conductivity( PhysicalSet<PureSpeciesThermalConductivity<ThermoEvaluator,NumericType>, TransportMixture<ThermoEvaluator,NumericType> >& k)
+  template<typename ThermoMicro, typename ThermoEvaluator,typename NumericType>
+  void build_pure_species_thermal_conductivity( PhysicalSet<PureSpeciesThermalConductivity<ThermoMicro,NumericType>, TransportMixture<ThermoEvaluator,NumericType> >& k)
   {
        for(unsigned int s = 0; s < k.mixture().n_species(); s++)
        {
-           Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,NumericType>, pure_species_thermal_conductivity_tag >
-             init(k.mixture().thermo(),
+           Initializer<PureSpeciesThermalConductivity<ThermoMicro,NumericType>, pure_species_thermal_conductivity_tag >
+             init(k.mixture().thermo().internal_thermo(),
                   k.mixture().transport_species()[s]->rotational_relaxation(),
                   k.mixture().transport_species()[s]->LJ_depth());
            k.add_model(k.mixture().species_inverse_name_map().at(s),init);
