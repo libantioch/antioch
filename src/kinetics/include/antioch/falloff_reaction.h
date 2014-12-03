@@ -30,6 +30,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/reaction.h"
+#include "antioch/kinetics_conditions.h"
 #include "antioch/lindemann_falloff.h"
 #include "antioch/troe_falloff.h"
 
@@ -104,12 +105,12 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                const StateType& T ) const;
+                                                const KineticsConditions<StateType,VectorStateType>& conditions ) const;
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const StateType& T,  
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions,  
                                                            StateType& kfwd,  
                                                            StateType& dkfwd_dT, 
                                                            VectorStateType& dkfkwd_dX) const;
@@ -165,48 +166,48 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   StateType FalloffReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                                                      const StateType& T  ) const
+                                                                                      const KineticsConditions<StateType,VectorStateType>& conditions  ) const
   {
 //falloff is k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
-    StateType M = Antioch::zero_clone(T);
+    StateType M = Antioch::zero_clone(conditions.T());
     for(unsigned int i = 0; i < molar_densities.size(); i++)
     {
         M += molar_densities[i];
     }
 
-    return (*this->_forward_rate[0])(T) / (ant_pow(M,-1) + (*this->_forward_rate[0])(T) /(*this->_forward_rate[1])(T)) * 
-            _F(T,molar_densities,(*this->_forward_rate[0])(T),(*this->_forward_rate[1])(T));
+    return (*this->_forward_rate[0])(conditions) / (ant_pow(M,-1) + (*this->_forward_rate[0])(conditions) /(*this->_forward_rate[1])(conditions)) * 
+            _F(conditions.T(),molar_densities,(*this->_forward_rate[0])(conditions),(*this->_forward_rate[1])(conditions));
   }
 
   template<typename CoeffType, typename FalloffType>
   template<typename StateType, typename VectorStateType>
   inline
   void FalloffReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
-                                                                                                 const StateType& T,
+                                                                                                 const KineticsConditions<StateType,VectorStateType>& conditions,
                                                                                                  StateType& kfwd, 
                                                                                                  StateType& dkfwd_dT,
                                                                                                  VectorStateType& dkfwd_dX) const 
   {
     //variables, k0,kinf and derivatives
-   StateType k0 = Antioch::zero_clone(T);
-    StateType dk0_dT = Antioch::zero_clone(T);
-    StateType kinf = Antioch::zero_clone(T);
-    StateType dkinf_dT = Antioch::zero_clone(T);
+    StateType k0 = Antioch::zero_clone(conditions.T());
+    StateType dk0_dT = Antioch::zero_clone(conditions.T());
+    StateType kinf = Antioch::zero_clone(conditions.T());
+    StateType dkinf_dT = Antioch::zero_clone(conditions.T());
 
-    this->_forward_rate[0]->compute_rate_and_derivative(T,k0,dk0_dT);
-    this->_forward_rate[1]->compute_rate_and_derivative(T,kinf,dkinf_dT);
+    this->_forward_rate[0]->compute_rate_and_derivative(conditions,k0,dk0_dT);
+    this->_forward_rate[1]->compute_rate_and_derivative(conditions,kinf,dkinf_dT);
 
-    StateType M = Antioch::zero_clone(T);
+    StateType M = Antioch::zero_clone(conditions.T());
     for(unsigned int i = 0; i < molar_densities.size(); i++)
     {
         M += molar_densities[i];
     }
 
     //F
-    StateType f = Antioch::zero_clone(T);
-    StateType df_dT = Antioch::zero_clone(T);
+    StateType f = Antioch::zero_clone(M);
+    StateType df_dT = Antioch::zero_clone(M);
     VectorStateType df_dX = Antioch::zero_clone(molar_densities);
-    _F.F_and_derivatives(T,molar_densities,k0,dk0_dT,kinf,dkinf_dT,f,df_dT,df_dX);
+    _F.F_and_derivatives(conditions.T(),molar_densities,k0,dk0_dT,kinf,dkinf_dT,f,df_dT,df_dX);
 
 // k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
     kfwd = k0 / (ant_pow(M,-1) + k0/kinf); //temp variable here for calculations dk_d{T,X}

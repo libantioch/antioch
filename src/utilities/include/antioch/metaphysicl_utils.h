@@ -148,6 +148,24 @@ if_else(const Tbool& condition,
   return returnval;
 }
 
+template <typename VectorT, typename UIntType>
+inline
+typename Antioch::enable_if_c<
+   is_metaphysicl<typename Antioch::value_type<VectorT>::type >::value &&
+   is_metaphysicl<UIntType>::value,
+   typename Antioch::value_type<VectorT>::type
+>::type
+eval_index(const VectorT & vec, const UIntType & indexes)
+{
+  typename Antioch::value_type<VectorT>::type returnval;
+
+  for(typename Antioch::size_type<typename Antioch::value_type<VectorT>::type>::type i = 0;
+                i < indexes.size(); i++)
+    returnval[i] = vec[indexes[i]][i];
+
+  return returnval;
+}
+
 } // end namespace Antioch
 
 #endif // ANTIOCH_METAPHYSICL_UTILS_H

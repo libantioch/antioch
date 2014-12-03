@@ -38,6 +38,8 @@
 #include "antioch_config.h"
 #include "metaprogramming_decl.h"
 
+#include <type_traits> // std::enable_if
+
 #ifdef ANTIOCH_HAVE_EIGEN
 // While this logic is Eigen-specific, these forward declarations deliberately
 // do not require <Eigen/Dense> to be included.  This choice permits mixing
@@ -114,6 +116,13 @@ a.array().min(b.array()));
 
 namespace Antioch
 {
+template <typename T>
+struct tag_type<T,
+                typename std::enable_if<is_eigen<T>::value>::type
+>
+{
+  typedef eigen_library_tag type;
+};
 
 template <
   template <typename, int, int, int, int, int> class _Matrix,
@@ -210,6 +219,15 @@ inline
 void
 set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a);
 
+/*
+template <template <typename, int, int, int, int, int> class _Matrix,
+          typename T, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols,
+  typename VectorScalar
+>
+inline
+_Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> 
+  custom_clone(const _Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & example, const VectorScalar& values, const _Matrix<unsigned int,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & indexes);
+*/
 
 template <typename Condition, typename T1, typename T2>
 inline
@@ -223,6 +241,25 @@ const Condition& condition,
 const T1& if_true,
 const T2& if_false);
 
+
+template <typename VectorT, 
+  template <typename, int, int, int, int, int> class _Matrix,
+  typename _UIntT, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+typename enable_if_c<
+  is_eigen<typename value_type<VectorT>::type>::value,
+  typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const _Matrix<_UIntT, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& index);
+
+template <typename T>
+inline
+bool conjunction_root(const T & vec, eigen_library_tag);
+
+template <typename T>
+inline
+bool disjunction_root(const T & vec, eigen_library_tag);
 
 } // end namespace Antioch
 

@@ -49,6 +49,7 @@ check_PROGRAMS += parsing_chemkin
 check_PROGRAMS += units_unit
 check_PROGRAMS += kinetics_reactive_scheme_unit
 check_PROGRAMS += sigma_bin_converter_unit
+check_PROGRAMS += sigma_bin_converter_vec_unit
 check_PROGRAMS += rotational_relaxation_unit
 check_PROGRAMS += pure_species_thermal_conductivity_unit
 check_PROGRAMS += rotational_relaxation_vec_unit
@@ -135,6 +136,7 @@ parsing_chemkin_SOURCES = parsing_chemkin.C
 units_unit_SOURCES = units_unit.C
 kinetics_reactive_scheme_unit_SOURCES = kinetics_reactive_scheme_unit.C
 sigma_bin_converter_unit_SOURCES = sigma_bin_converter_unit.C
+sigma_bin_converter_vec_unit_SOURCES = sigma_bin_converter_vec_unit.C
 rotational_relaxation_unit_SOURCES = rotational_relaxation_unit.C
 rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
 pure_species_thermal_conductivity_vec_unit_SOURCES = pure_species_thermal_conductivity_vec_unit.C
@@ -203,12 +205,14 @@ TESTS += parsing_xml.sh
 TESTS += parsing_chemkin.sh
 TESTS += units_unit
 TESTS += kinetics_reactive_scheme_unit.sh
-TESTS += sigma_bin_converter_unit.sh
 TESTS += rotational_relaxation_unit
 TESTS += pure_species_thermal_conductivity_unit
 TESTS += rotational_relaxation_vec_unit
 TESTS += pure_species_thermal_conductivity_vec_unit
 TESTS += ideal_gas_internal_thermo_unit
+TESTS += sigma_bin_converter_unit
+TESTS += sigma_bin_converter_vec_unit
+
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
 endif
