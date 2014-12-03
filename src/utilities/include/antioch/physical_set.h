@@ -28,8 +28,10 @@
 
 // Antioch
 #include "antioch/physics_metaprogramming_decl.h"
+#include "antioch/kinetics_conditions.h"
 
 // C++
+#include <vector>
 #include <iostream>
 
 namespace Antioch
@@ -67,11 +69,11 @@ namespace Antioch
 
         // viscosity one species
         template<typename StateType>
-        void operator()(unsigned int s, const StateType & T, StateType & mu) const;
+        void operator()(unsigned int s, const KineticsConditions<StateType> & T, StateType & mu) const;
 
         // viscosity full set
         template<typename StateType, typename VectorStateType>
-        void operator()(const StateType & T, VectorStateType & mu) const;
+        void operator()(const KineticsConditions<StateType> & T, VectorStateType & mu) const;
 
         // diffusion full set (set level, matrix)
         template<typename StateType, typename MatrixStateType>
@@ -197,7 +199,7 @@ namespace Antioch
   template<typename Physics, typename Mixture>
   template<typename StateType>
   inline
-  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const StateType & T, StateType & mu) const
+  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const KineticsConditions<StateType> & T, StateType & mu) const
   {
      physical_set_operator_viscosity(_set,s,T, mu, typename physical_tag<Physics>::viscosity_type());
   }
@@ -206,7 +208,7 @@ namespace Antioch
   template<typename Physics, typename Mixture>
   template<typename StateType, typename VectorStateType >
   inline
-  void PhysicalSet<Physics,Mixture>::operator()(const StateType & T, VectorStateType &mu) const
+  void PhysicalSet<Physics,Mixture>::operator()(const KineticsConditions<StateType> & T, VectorStateType &mu) const
   {
       physical_set_operator_viscosity(_set,T,mu, typename physical_tag<Physics>::viscosity_type());
   }

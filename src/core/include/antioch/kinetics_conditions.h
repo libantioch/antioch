@@ -29,6 +29,7 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/particle_flux.h"
+#include "antioch/temp_cache.h"
 
 // C++
 #include <vector>
@@ -63,8 +64,7 @@ namespace Antioch{
   {
         public:
 
-          KineticsConditions();
-          KineticsConditions(const KineticsConditions<StateType,VectorStateType>& rhs);
+   //       KineticsConditions(const KineticsConditions<StateType,VectorStateType>& rhs);
           KineticsConditions(const StateType & temperature);
           ~KineticsConditions();
 
@@ -76,13 +76,18 @@ namespace Antioch{
 
           const StateType & T() const;
 
+          const StateType & Tvib() const;
+
+          const TempCache<StateType> & temp_cache() const;
+
           const ParticleFlux<VectorStateType> & particle_flux(int nr) const;
 
           const std::map<unsigned int, ParticleFlux<VectorStateType> const *> & map_pf() const;
 
         private:
-        // pointer's not const, temperature is
-          StateType const * _temperature; 
+          KineticsConditions();
+
+          TempCache<StateType> _temperature; 
         // pointer's not const, particle flux is
           std::map<unsigned int,ParticleFlux<VectorStateType> const * > _map_pf; 
 
@@ -90,20 +95,12 @@ namespace Antioch{
 
   template <typename StateType, typename VectorStateType>
   inline
-  KineticsConditions<StateType,VectorStateType>::KineticsConditions():
-        _temperature(NULL)
-  {
-    return;
-  }
-
-  template <typename StateType, typename VectorStateType>
-  inline
   KineticsConditions<StateType,VectorStateType>::KineticsConditions(const StateType & temperature):
-        _temperature(&temperature)
+        _temperature(temperature)
   {
     return;
   }
-
+/*
   template <typename StateType, typename VectorStateType>
   inline
   KineticsConditions<StateType,VectorStateType>::KineticsConditions(const KineticsConditions<StateType,VectorStateType>& rhs)
@@ -116,7 +113,7 @@ namespace Antioch{
 
      return;
   }
-
+*/
   template <typename StateType, typename VectorStateType>
   inline
   KineticsConditions<StateType,VectorStateType>::~KineticsConditions()
@@ -150,8 +147,14 @@ namespace Antioch{
   inline
   const StateType & KineticsConditions<StateType,VectorStateType>::T() const
   {
-     antioch_assert(_temperature);
-     return *_temperature;
+     return _temperature::T;
+  }
+
+  template <typename StateType, typename VectorStateType>
+  inline
+  const StateType & KineticsConditions<StateType,VectorStateType>::Tvib() const
+  {
+     return _temperature::T;
   }
 
   template <typename StateType, typename VectorStateType>
@@ -167,6 +170,13 @@ namespace Antioch{
   {
      antioch_assert(_map_pf.count(nr));
      return *(_map_pf.at(nr));
+  }
+
+  template <typename StateType, typename VectorStateType>
+  inline
+  const TempCache<StateType> & KineticsConditions<StateType,VectorStateType>::temp_cache() const
+  {
+     return _temperature;
   }
 
 

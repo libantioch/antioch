@@ -33,7 +33,7 @@
 
 // Antioch
 #include "antioch/physics_metaprogramming_decl.h"
-#include "antioch/temp_cache.h"
+#include "antioch/kinetics_conditions.h"
 #include "antioch/cmath_shims.h"
 
 // C++
@@ -96,11 +96,11 @@ namespace Antioch
     //! Viscosity of one species
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
-    mu(unsigned int s, const StateType & T) const;
+    mu(unsigned int s, const KineticsConditions<StateType> & T) const;
 
     //! Viscosities of all species
     template <typename StateType, typename VectorStateType>
-    void mu(const StateType & T, VectorStateType & mu) const;
+    void mu(const KineticsConditions<StateType> & T, VectorStateType & mu) const;
 
     //! Thermal conduction of one species
     template <typename StateType>
@@ -232,7 +232,7 @@ namespace Antioch
   template <typename StateType>
   inline
   const ANTIOCH_AUTO(StateType)
-    WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::mu(unsigned int s, const StateType & T) const
+    WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::mu(unsigned int s, const KineticsConditions<StateType> & T) const
   {
      StateType mu = zero_clone(T);
      _viscosity_set(s,T,mu);
@@ -242,7 +242,7 @@ namespace Antioch
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction,ThermoEvaluator,CoeffType>::mu(const StateType & T, VectorStateType & mu) const
+  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction,ThermoEvaluator,CoeffType>::mu(const KineticsConditions<StateType> & T, VectorStateType & mu) const
   {
       antioch_assert_equal_to(mu.size(),_transport_mixture.n_species());
       for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)

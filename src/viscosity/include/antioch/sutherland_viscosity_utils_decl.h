@@ -27,6 +27,7 @@
 #define ANTIOCH_SUTHERLAND_VISCOSITY_UTILS_DECL_H
 
 #include "antioch/physics_metaprogramming_decl.h"
+#include "antioch/kinetics_conditions.h"
 
 namespace Antioch
 {
@@ -44,11 +45,11 @@ namespace Antioch
 
    // species
    template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType & mu, sutherland_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, const KineticsConditions<StateType> & T, StateType & mu, sutherland_viscosity_tag);
 
    // mixture
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, sutherland_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType> & T, VectorStateType & mu, sutherland_viscosity_tag);
 }
 
 #endif

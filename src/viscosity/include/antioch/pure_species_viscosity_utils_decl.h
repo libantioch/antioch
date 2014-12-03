@@ -27,6 +27,7 @@
 #define ANTIOCH_PURE_SPECIES_VISCOSITY_UTILS_DECL_H
 
 #include "antioch/physics_metaprogramming_decl.h"
+#include "antioch/kinetics_conditions.h"
 
 namespace Antioch
 {
@@ -48,11 +49,11 @@ namespace Antioch
    // species
    template<typename Model, typename StateType>
    ANTIOCH_AUTO(StateType) 
-        physical_set_first_operator(const Model & set, unsigned int s, const StateType & T, pure_species_viscosity_tag);
+        physical_set_first_operator(const Model & set, unsigned int s, const KineticsConditions<StateType> & T, pure_species_viscosity_tag);
 
    // mixture
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, pure_species_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType> & T, VectorStateType & mu, pure_species_viscosity_tag);
 }
 
 #endif
