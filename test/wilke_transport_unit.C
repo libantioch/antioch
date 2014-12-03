@@ -39,6 +39,7 @@
 #include "antioch/default_filename.h"
 #include "antioch/transport_mixture.h"
 #include "antioch/stat_mech_thermo.h"
+#include "antioch/thermo_evaluator.h"
 #include "antioch/cea_mixture.h"
 #include "antioch/cea_evaluator.h"
 #include "antioch/cea_mixture_ascii_parsing.h"
@@ -109,35 +110,50 @@ int tester()
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
-// mixture and thermo for conduction
+// thermo micro
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::StatMechThermodynamics<Scalar> thermo_stat( chem_mixture );
-  Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> tran_mixture( chem_mixture, thermo_stat );
 
-// thermo for cp (diffusion)
+// thermo macro
   Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
   Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
   Antioch::CEAEvaluator<Scalar> thermo_mix( cea_mixture );
 
+// full
+  Antioch::ThermoEvaluator<Scalar,Antioch::CEAEvaluator<Scalar>,Antioch::StatMechThermodynamics<Scalar> > thermo_eval(thermo_mix,thermo_stat);
+  typedef Antioch::ThermoEvaluator<Scalar,Antioch::CEAEvaluator<Scalar>,Antioch::StatMechThermodynamics<Scalar> > ThermoEval;
+
+
+
+// transport mixture with full thermo
+  Antioch::TransportMixture<ThermoEval,Scalar> tran_mixture( chem_mixture, thermo_eval );
+  typedef Antioch::TransportMixture<ThermoEval,Scalar> TransportType;
+
 // 
-  Antioch::PhysicalSet<Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >,
-                       Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> >k( tran_mixture );
+  Antioch::PhysicalSet<Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >, TransportType > k( tran_mixture );
 
   Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>,        Antioch::ChemicalMixture<Scalar> > mu( chem_mixture );
 
   Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> > D( chem_mixture );
 
+  typedef Antioch::PhysicalSet<Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >, TransportType >  Eucken;
+  typedef Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, Antioch::ChemicalMixture<Scalar> >                         Blottner;
+  typedef Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >                  Lewis;
+
 // pure species set, all internally set
 #ifdef ANTIOCH_HAVE_GSL
-  Antioch::PhysicalSet<Antioch::PureSpeciesViscosity<Scalar, Antioch::GSLSpliner>,
-                       Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar > > ps_mu(tran_mixture);
 
-  Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >,
-                       Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> > bimol_D( tran_mixture );
+  Antioch::PhysicalSet< Antioch::PureSpeciesViscosity<Scalar, Antioch::GSLSpliner>, TransportType > ps_mu(tran_mixture);
+  typedef Antioch::PhysicalSet< Antioch::PureSpeciesViscosity<Scalar, Antioch::GSLSpliner>, TransportType > KTViscosity;
+
+  Antioch::PhysicalSet< Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >, TransportType > bimol_D( tran_mixture );
+  typedef Antioch::PhysicalSet< Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >, TransportType >    KTDiffusion;
+
 #endif
 
-  Antioch::PhysicalSet<Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar >,
-                       Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> > ps_k( tran_mixture );
+  Antioch::PhysicalSet< Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar >, TransportType> ps_k( tran_mixture );
+  typedef Antioch::PhysicalSet< Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar >, TransportType> KTThermCond;
+
 
 //Eucken is internally set
 
@@ -146,83 +162,24 @@ int tester()
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
 // non pure species
-  Antioch::WilkeMixture< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
-                         Antioch::PhysicalSet< Antioch::BlottnerViscosity<Scalar>,        Antioch::ChemicalMixture<Scalar> >,
-                         Antioch::PhysicalSet< Antioch::EuckenThermalConductivity< Antioch::StatMechThermodynamics<Scalar> >,
-                                               Antioch::TransportMixture< Antioch::StatMechThermodynamics<Scalar>, Scalar >
-                                             >,
-                         Antioch::TransportMixture< Antioch::StatMechThermodynamics<Scalar>, Scalar>,
-                         Antioch::CEAEvaluator<Scalar>, 
-                         Scalar
-                       >
-        wilke_mixture(D,mu,k, tran_mixture, thermo_mix);
+  Antioch::WilkeMixture<Lewis,Blottner,Eucken,ThermoEval,Scalar> wilke_mixture(D,mu,k, tran_mixture);
 
-  Antioch::WilkeEvaluator<
-                          Antioch::WilkeMixture
-                          < 
-                           Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
-                           Antioch::PhysicalSet< Antioch::BlottnerViscosity<Scalar>,        Antioch::ChemicalMixture<Scalar> >,
-                           Antioch::PhysicalSet< Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >, 
-                                                 Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>, Scalar >
-                                               >,
-                           Antioch::TransportMixture< Antioch::StatMechThermodynamics<Scalar>, Scalar>,
-                           Antioch::CEAEvaluator<Scalar>, 
-                           Scalar
-                           >
-                         > wilke( wilke_mixture);
+  Antioch::WilkeEvaluator<Antioch::WilkeMixture<Lewis,Blottner,Eucken,ThermoEval,Scalar> > wilke( wilke_mixture);
 
-// pure species full
+// pure species
 #ifdef ANTIOCH_HAVE_GSL
-  Antioch::WilkeMixture<
-                        Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >,
-                                             Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> >,
-                        Antioch::PhysicalSet<Antioch::PureSpeciesViscosity<Scalar, Antioch::GSLSpliner>,
-                                             Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar > >,
-                        Antioch::PhysicalSet<Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar >,
-                                             Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> >,
-                         Antioch::TransportMixture< Antioch::StatMechThermodynamics<Scalar>, Scalar>,
-                         Antioch::CEAEvaluator<Scalar>, 
-                         Scalar
-                       >
-        wilke_ps_mixture(bimol_D,ps_mu,ps_k, tran_mixture, thermo_mix);
 
-   Antioch::WilkeEvaluator<
-                Antioch::WilkeMixture<
-                        Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >,
-                                             Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> >,
-                        Antioch::PhysicalSet<Antioch::PureSpeciesViscosity<Scalar, Antioch::GSLSpliner>,
-                                             Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar > >,
-                        Antioch::PhysicalSet<Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar >,
-                                             Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> >,
-                         Antioch::TransportMixture< Antioch::StatMechThermodynamics<Scalar>, Scalar>,
-                         Antioch::CEAEvaluator<Scalar>, 
-                         Scalar
-                               >
-                        > wilke_ps_evaluator( wilke_ps_mixture);
+  Antioch::WilkeMixture<KTDiffusion,KTViscosity,KTThermCond,ThermoEval,Scalar> wilke_ps_mixture(bimol_D,ps_mu,ps_k, tran_mixture);
+  typedef Antioch::WilkeMixture<KTDiffusion,KTViscosity,KTThermCond,ThermoEval,Scalar>  WilkeKT;
+
+  Antioch::WilkeEvaluator<WilkeKT> wilke_ps_evaluator( wilke_ps_mixture);
+
 #else //only thermal conduction then
 
-  Antioch::WilkeMixture< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
-                         Antioch::PhysicalSet< Antioch::BlottnerViscosity<Scalar>,        Antioch::ChemicalMixture<Scalar> >,
-                         Antioch::PhysicalSet< Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar >,
-                                               Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> >,
-                         Antioch::TransportMixture< Antioch::StatMechThermodynamics<Scalar>, Scalar>,
-                         Antioch::CEAEvaluator<Scalar>, 
-                         Scalar
-                       >
-        wilke_ps_mixture(D,mu,ps_k, tran_mixture, thermo_mix);
+  Antioch::WilkeMixture<Lewis,Blottner,KTThermCond> wilke_ps_mixture(D,mu,ps_k, tran_mixture);
+  typedef Antioch::WilkeMixture<Lewis,Blottner,KTThermCond> Wilke;
 
-  Antioch::WilkeEvaluator<
-                          Antioch::WilkeMixture
-                          < 
-                           Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
-                           Antioch::PhysicalSet< Antioch::BlottnerViscosity<Scalar>,        Antioch::ChemicalMixture<Scalar> >,
-                           Antioch::PhysicalSet< Antioch::PureSpeciesThermalConductivity<Antioch::StatMechThermodynamics<Scalar>, Scalar >,
-                                                 Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> >,
-                           Antioch::TransportMixture< Antioch::StatMechThermodynamics<Scalar>, Scalar>,
-                           Antioch::CEAEvaluator<Scalar>, 
-                           Scalar
-                           >
-                         > wilke_ps_evaluator( wilke_ps_mixture);
+  Antioch::WilkeEvaluator<Wilke> wilke_ps_evaluator( wilke_ps_mixture);
 #endif
 
   int return_flag = 0;
