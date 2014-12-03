@@ -383,7 +383,7 @@ CH3 + H <=>  CH4 1e12 1.2 3.125e4
     {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
 
-     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] > tol)
+     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,Antioch::KineticsConditions<Scalar>(T)))/k[ir] > tol)
      {
         std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
@@ -391,8 +391,8 @@ CH3 + H <=>  CH4 1e12 1.2 3.125e4
                   << "reaction #"        << ir            << "\n"
                   << "temperature: "     << T     << " K" << "\n"
                   << "theory: "          << k[ir]         << "\n"
-                  << "calculated: "      << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
-                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] << "\n"
+                  << "calculated: "      << reac->compute_forward_rate_coefficient(molar_densities,Antioch::KineticsConditions<Scalar>(T)) << "\n"
+                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,Antioch::KineticsConditions<Scalar>(T)))/k[ir] << "\n"
                   << "tolerance = "      <<  tol
                   << std::endl;
         return_flag = 1;
