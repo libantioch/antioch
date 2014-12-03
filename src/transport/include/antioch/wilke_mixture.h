@@ -105,11 +105,11 @@ namespace Antioch
     //! Thermal conduction of one species
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
-    k(unsigned int s, const StateType & mu, const StateType & T, const StateType &n_molar_mixture = 0) const;
+    k(unsigned int s, const StateType & mu, const KineticsConditions<StateType> & T, const StateType &n_molar_mixture = 0) const;
 
     //! Thermal conduction of all species
     template <typename StateType, typename VectorStateType>
-    void k(const VectorStateType & mu, const StateType & T, const VectorStateType & mass_fractions, const StateType &rho, VectorStateType & k) const;
+    void k(const VectorStateType & mu, const KineticsConditions<StateType> & T, const VectorStateType & mass_fractions, const StateType &rho, VectorStateType & k) const;
 
     //! Thermal conduction and diffusion
     template <typename StateType, typename VectorStateType>
@@ -282,7 +282,7 @@ namespace Antioch
   inline
   const ANTIOCH_AUTO(StateType) 
         WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(unsigned int s, const StateType & mu, 
-                                                                                                   const StateType & T, const StateType &n_molar_mixture) const
+                                                                                          const KineticsConditions<StateType> & T, const StateType &n_molar_mixture) const
   {
 // if needed
 // \todo: if not needed, find a way to supress Ds building
@@ -298,9 +298,9 @@ namespace Antioch
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(const VectorStateType & mu, const StateType & T, 
-                                                                                                  const VectorStateType & mass_fractions, 
-                                                                                                  const StateType &rho, VectorStateType & k) const
+  void WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(const VectorStateType & mu, const KineticsConditions<StateType> & T, 
+                                                                                         const VectorStateType & mass_fractions, 
+                                                                                         const StateType &rho, VectorStateType & k) const
   {
       antioxh_assert_equal_to(k.size(),mu.size());
       antioxh_assert_equal_to(k.size(),mass_fractions.size());

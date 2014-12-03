@@ -93,11 +93,11 @@ namespace Antioch
 
         // thermal conduction one species
         template<typename StateType>
-        void operator()(unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, StateType & k) const;
+        void operator()(unsigned int s, const StateType & mu, const StateType & dss, const KineticsConditions<StateType> & T, const StateType & rho, StateType & k) const;
 
         // thermal conduction full set
         template<typename StateType, typename VectorStateType>
-        void operator()(const VectorStateType & mu, const VectorStateType & dss, const StateType & T, const StateType & rho, VectorStateType & k) const;
+        void operator()(const VectorStateType & mu, const VectorStateType & dss, const KineticsConditions<StateType> & T, const StateType & rho, VectorStateType & k) const;
 
         void print(std::ostream & out = std::cout) const;
 
@@ -253,7 +253,7 @@ namespace Antioch
   template<typename Physics, typename Mixture>
   template<typename StateType>
   inline
-  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, StateType & k) const
+  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const StateType & mu, const StateType & dss, const KineticsConditions<StateType> & T, const StateType & rho, StateType & k) const
   {
     physical_set_operator_thermal_conductivity(_set, s, mu, dss, T, rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
   }
@@ -262,7 +262,7 @@ namespace Antioch
   template<typename Physics, typename Mixture>
   template<typename StateType, typename VectorStateType>
   inline
-  void PhysicalSet<Physics,Mixture>::operator()(const VectorStateType & mu, const VectorStateType & dss, const StateType & T, const StateType & rho, VectorStateType & k) const
+  void PhysicalSet<Physics,Mixture>::operator()(const VectorStateType & mu, const VectorStateType & dss, const KineticsConditions<StateType> & T, const StateType & rho, VectorStateType & k) const
   {
     physical_set_operator_thermal_conductivity(_set, mu, dss, T, rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
   }
