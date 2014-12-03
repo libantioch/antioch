@@ -82,7 +82,10 @@ int test_k( const Element & k, const Scalar & k_exact, const Scalar & tol )
 		<< "k       = " << k << std::endl
 		<< "k_exact = " << k_exact << std::endl
 		<< "rel_error = " << rel_error << std::endl
-		<< "tol = " << tol << std::endl;
+		<< "tol = " << tol << std::endl
+                << "we're testing at ";
+      (tol > 1e-15)?std::cerr << "float":(tol > 1e-16)?std::cerr << "double":std::cerr << "long double";
+      std::cerr << " precision" << std::endl;
       return_flag = 1;
     }
 
@@ -141,9 +144,9 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.EndTimer(testname);
 #endif
 
-  const Scalar tol = (std::numeric_limits<Scalar>::epsilon()*10 < 7e-17)?
-                        7e-17:
-                        std::numeric_limits<Scalar>::epsilon()*10;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 2 < 1e-16)?
+                        1e-16:
+                        std::numeric_limits<Scalar>::epsilon() * 2;
 
   for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
     {

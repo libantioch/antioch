@@ -82,7 +82,7 @@ int tester()
   const Scalar k_N2_exact = 3.194342919259960202334421163642706718735099613817392359646;
   int return_flag = 0;
 
-  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 2 < 7e-17)?7e-17:
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 2 < 1e-16)?1e-16:
                                                                            std::numeric_limits<Scalar>::epsilon() * 2;
 
 
