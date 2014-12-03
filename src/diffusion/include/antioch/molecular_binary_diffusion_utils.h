@@ -154,7 +154,7 @@ namespace Antioch
       // for the thermal conduction in case of
       // kinetics theory
    template<typename Model, typename StateType, typename MatrixStateType>
-   void physical_set_operator_diffusion(const Model & set, const StateType & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag)
+   void physical_set_operator_diffusion(const Model & set, const KineticsType<StateType> & cond, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag)
    {
        antioch_assert_equal_to(Ds.size(),set.size());
 
@@ -163,17 +163,17 @@ namespace Antioch
          antioch_assert_equal_to(Ds[i].size(),set.size());
          for(unsigned int j = 0; j < i; j++)
          {
-             Ds[i][j] = (*set[i][j])(T,cTot);
+             Ds[i][j] = (*set[i][j])(cond.T(),cTot);
          }
        }
    }
 
      // self-diffusion
    template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
+   void physical_set_operator_diffusion(unsigned int s, const Model & set, const KineticsConditions<StateType> & cond, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
    {
        antioch_assert_equal_to(Ds.size(),set.size());
-       Ds = (*set[s][s])(T,cTot);
+       Ds = (*set[s][s])(cond.T(),cTot);
    }
 
         // template around mixture mainly to avoid 

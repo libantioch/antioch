@@ -77,11 +77,11 @@ namespace Antioch
 
         // diffusion full set (set level, matrix)
         template<typename StateType, typename MatrixStateType>
-        void operator()(const StateType & T, const StateType & cTot, MatrixStateType & Ds) const;
+        void operator()(const KineticsConditions<StateType> & T, const StateType & cTot, MatrixStateType & Ds) const;
 
         // diffusion self coefficient
         template<typename StateType>
-        void operator()(unsigned int s, const StateType & T, const StateType & cTot, StateType & dss) const;
+        void operator()(unsigned int s, const KineticsConditions<StateType> & T, const StateType & cTot, StateType & dss) const;
 
         // diffusion species (mixture level, scalar)
         template<typename StateType>
@@ -217,7 +217,7 @@ namespace Antioch
   template<typename Physics, typename Mixture>
   template<typename StateType, typename MatrixStateType>
   inline
-  void PhysicalSet<Physics,Mixture>::operator()(const StateType & T, const StateType & cTot, MatrixStateType & Ds) const 
+  void PhysicalSet<Physics,Mixture>::operator()(const KineticsConditions<StateType> & T, const StateType & cTot, MatrixStateType & Ds) const 
   {
     physical_set_operator_diffusion(_set, T, cTot, Ds, typename physical_tag<Physics>::diffusion_species_type());
   }
@@ -226,7 +226,7 @@ namespace Antioch
   template<typename Physics, typename Mixture>
   template<typename StateType>
   inline
-  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const StateType & T, const StateType & cTot, StateType & dss) const 
+  void PhysicalSet<Physics,Mixture>::operator()(unsigned int s, const KineticsConditions<StateType> & T, const StateType & cTot, StateType & dss) const 
   {
     physical_set_operator_diffusion(s,_set, T, cTot, dss, typename physical_tag<Physics>::diffusion_species_type());
   }

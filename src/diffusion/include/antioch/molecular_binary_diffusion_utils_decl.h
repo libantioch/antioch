@@ -27,6 +27,7 @@
 #define ANTIOCH_MOLECULAR_BINARY_DIFFUSION_UTILS_DECL_H
 
 #include "antioch/physics_metaprogramming_decl.h"
+#include "antioch/kinetics_conditions.h"
 
 namespace Antioch
 {
@@ -80,10 +81,10 @@ namespace Antioch
                             const std::map<unsigned int, std::string>& spec, std::ostream & out, bimolecular_diffusion_tag);
 
    template<typename Model, typename StateType, typename MatrixStateType>
-   void physical_set_operator_diffusion(const Model & set, const StateType & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag);
+   void physical_set_operator_diffusion(const Model & set, const KineticsConditions<StateType> & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag);
 
    template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag);
+   void physical_set_operator_diffusion(unsigned int s, const Model & set, const KineticsConditions<StateType> & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag);
 
         // template around mixture mainly to avoid 
         // ChemicalMixture<CoeffType> forward declaration
