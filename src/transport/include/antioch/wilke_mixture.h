@@ -41,19 +41,27 @@
 
 namespace Antioch
 {
+  // forward declaration
+  template<typename ThermoEval, typename CoeffType>
+  class TransportMixture;
+
   /*
-      This somewhat ridicule thermodynamics
-      construct is because StatMechThermodynamics
-      can't give cp, and NASA9 can't give
-      the vibrational, translational, etc.,
-      parts of this same quantity.
-      Notice that the internal R used is the
-      massic one, thus Cp is in J/kg/K
+     Now all the thermodynamics (macro and micro) are
+     in the TransportMixture<Thermo,CoeffType>. We still
+     use a template for the Thermo class, as the full
+     declaration is
+     template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
+     class ThermoEvaluator;
+     with External being the macro description, internal the micro description.
+     Thus it is easier to template around.
+     Now the template arguments are no more necessary, they are explicit in
+     the constructor.
+
 
       \todo make Wilke rules be computed here?
   */
   template<class Diffusion, class Viscosity, class ThermalConduction, // physics
-           class Mixture, class ThermoEvaluator,                      // mixture + thermo
+           class ThermoEvaluator,                                     // thermo
            class CoeffType = double>                                  // type
   class WilkeMixture
   {
@@ -61,15 +69,14 @@ namespace Antioch
 
     WilkeMixture( const Diffusion & diffusion, const Viscosity & viscosity, 
                   const ThermalConduction & thermal_conduction,
-                  const Mixture & transport_mixture,
-                  const ThermoEvaluator & thermo_eval );
+                  const TransportMixture<ThermoEvaluator,CoeffType> & transport_mixture);
     ~WilkeMixture();
 
     //! const ref to transport_mixture
-    const Mixture & transport_mixture() const; // contains the detailed thermo for species
+    const TransportMixture<ThermoEvaluator,CoeffType> & transport_mixture() const;
 
-    //! const ref to thermo evaluator, internal computations only (vib, rot, trans)
-    const ThermoEvaluator & thermo_evaluator() const; // contains the non detailed thermo for mixture
+    //! const ref to thermo evaluator
+    const ThermoEvaluator & thermo_evaluator() const;
 
     //! const ref to diffusion
     const Diffusion & diffusion() const;
@@ -118,15 +125,15 @@ namespace Antioch
 
   protected:
 
-    const Mixture           & _transport_mixture;
+    const TransportMixture<ThermoEvaluator,CoeffType> & _transport_mixture;
 
-    const Diffusion         & _diffusion_set;
+    const Diffusion                                   & _diffusion_set;
 
-    const Viscosity         & _viscosity_set;
+    const Viscosity                                   & _viscosity_set;
 
-    const ThermalConduction & _thermal_conduction_set;
+    const ThermalConduction                           & _thermal_conduction_set;
 
-    const ThermoEvaluator   & _thermo_evaluator;
+    const ThermoEvaluator                             & _thermo_evaluator;
 
     //! Cache for numerator term
     /*! \todo We should use a more efficient data structure */
@@ -138,18 +145,17 @@ namespace Antioch
 
   };
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  WilkeMixture<Diffusion,Viscosity,ThermalConduction,Mixture,ThermoEvaluator,CoeffType>::WilkeMixture(
+  WilkeMixture<Diffusion,Viscosity,ThermalConduction,ThermoEvaluator,CoeffType>::WilkeMixture(
                                         const Diffusion & diffusion, const Viscosity & viscosity, 
                                         const ThermalConduction & thermal_conduction,
-                                        const Mixture & transport_mixture,
-                                        const ThermoEvaluator & thermo_eval )
-    : _transport_mixture(transport_mixture),
+                                        const TransportMixture<ThermoEvaluator,CoeffType> & transport_mixture):
+      _transport_mixture(transport_mixture),
       _diffusion_set(diffusion),
       _viscosity_set(viscosity),
       _thermal_conduction_set(thermal_conduction),
-      _thermo_evaluator(thermo_eval),
+      _thermo_evaluator(_transport_mixture.thermo()),
       _Mr_Ms_to_the_one_fourth(_transport_mixture.n_species(), std::vector<CoeffType>(_transport_mixture.n_species())),
       _denom(_transport_mixture.n_species(), std::vector<CoeffType>(_transport_mixture.n_species()))
   {
@@ -169,74 +175,74 @@ namespace Antioch
     return;
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::~WilkeMixture()
+  WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::~WilkeMixture()
   {
     return;
   }
 
   
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
+  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
                                                               const unsigned int s ) const
   {
     return _Mr_Ms_to_the_one_fourth[r][s];
   }
     
   
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::denominator( const unsigned int r,
+  CoeffType WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::denominator( const unsigned int r,
                                                   const unsigned int s ) const
   {
     return _denom[r][s];
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  const Mixture & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::transport_mixture() const
+  const TransportMixture<ThermoEvaluator,CoeffType> & WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::transport_mixture() const
   {
     return _transport_mixture;
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  const Diffusion & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::diffusion() const
+  const Diffusion & WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::diffusion() const
   {
      return _diffusion_set;
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  const Viscosity & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::viscosity() const
+  const Viscosity & WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::viscosity() const
   {
      return _viscosity_set;
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   inline
-  const ThermalConduction & WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::thermal_conduction() const
+  const ThermalConduction & WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::thermal_conduction() const
   {
      return _thermal_conduction_set;
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType>
   inline
   const ANTIOCH_AUTO(StateType)
-    WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::mu(unsigned int s, const StateType & T) const
+    WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::mu(unsigned int s, const StateType & T) const
   {
      StateType mu = zero_clone(T);
      _viscosity_set(s,T,mu);
      return mu;
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture,ThermoEvaluator,CoeffType>::mu(const StateType & T, VectorStateType & mu) const
+  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction,ThermoEvaluator,CoeffType>::mu(const StateType & T, VectorStateType & mu) const
   {
       antioch_assert_equal_to(mu.size(),_transport_mixture.n_species());
       for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
@@ -245,10 +251,10 @@ namespace Antioch
       }
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, Mixture, ThermoEvaluator, CoeffType>::D(const StateType & T, const StateType & rho,
+  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, ThermoEvaluator, CoeffType>::D(const StateType & T, const StateType & rho,
                                                                            const StateType & cTot, const VectorStateType & mass_fractions, 
                                                                            const VectorStateType & mu, VectorStateType & ds) const
   {
@@ -271,11 +277,11 @@ namespace Antioch
      }
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType>
   inline
   const ANTIOCH_AUTO(StateType) 
-        WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::k(unsigned int s, const StateType & mu, 
+        WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(unsigned int s, const StateType & mu, 
                                                                                                    const StateType & T, const StateType &n_molar_mixture) const
   {
 // if needed
@@ -289,10 +295,10 @@ namespace Antioch
      return k;
   }
 
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion,Viscosity,ThermalConduction, Mixture, ThermoEvaluator,CoeffType>::k(const VectorStateType & mu, const StateType & T, 
+  void WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(const VectorStateType & mu, const StateType & T, 
                                                                                                   const VectorStateType & mass_fractions, 
                                                                                                   const StateType &rho, VectorStateType & k) const
   {
@@ -310,12 +316,12 @@ namespace Antioch
 
   // species mu and k
   // mixture D
-  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename Mixture, typename ThermoEvaluator, typename CoeffType>
+  template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, Mixture, ThermoEvaluator, CoeffType>::D_and_k(const VectorStateType & mu, const StateType & T, const StateType & rho, 
-                                                                                                           const VectorStateType & mass_fractions, 
-                                                                                                           VectorStateType & k, VectorStateType & ds) const
+  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, ThermoEvaluator, CoeffType>::D_and_k(const VectorStateType & mu, const StateType & T, const StateType & rho, 
+                                                                                                  const VectorStateType & mass_fractions, 
+                                                                                                  VectorStateType & k, VectorStateType & ds) const
   {
 
      antioch_assert_equal_to(ds.size(),mass_fractions.size());
