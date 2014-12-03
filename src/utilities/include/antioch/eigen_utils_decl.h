@@ -38,6 +38,8 @@
 #include "antioch_config.h"
 #include "metaprogramming_decl.h"
 
+#include <type_traits> // std::enable_if
+
 #ifdef ANTIOCH_HAVE_EIGEN
 // While this logic is Eigen-specific, these forward declarations deliberately
 // do not require <Eigen/Dense> to be included.  This choice permits mixing

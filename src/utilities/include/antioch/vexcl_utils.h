@@ -43,7 +43,7 @@
 
 
 #ifdef ANTIOCH_HAVE_VEXCL
-// Though the following implementations are all valid without
+// Though the following implementations are almost all valid without
 // <vexcl/vexcl.hpp>, successfully using them with
 // VexCL types requires VexCL to be included first.
 // Configure-time VexCL support enforces this constraint but
@@ -214,22 +214,32 @@ template <typename T>
 inline
 bool disjunction_root(const T & vec_input, vexcl_library_tag)
 {
+#ifdef ANTIOCH_HAVE_VEXCL
   vex::detail::get_expression_properties prop;
   vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
 
   vex::any_of any_of(prop.queue);
   return any_of(vec_input); // at least one true
+#else
+  antioch_error();
+  return false;
+#endif
 }
 
 template <typename T>
 inline
 bool conjunction_root(const  T & vec_input, vexcl_library_tag)
 {
+#ifdef ANTIOCH_HAVE_VEXCL
   vex::detail::get_expression_properties prop;
   vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
 
   vex::all_of all_of(prop.queue);
   return all_of(vec_input); // at least one false
+#else
+  antioch_error();
+  return false;
+#endif
 }
 
 template <typename VectorT, typename IntT>

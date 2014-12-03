@@ -38,6 +38,8 @@
 // Antioch
 #include "antioch/metaprogramming_decl.h"
 
+#include <type_traits> // std::enable_if
+
 #ifdef ANTIOCH_HAVE_VEXCL
 // Though the following implementations are all valid without
 // <vexcl/vexcl.hpp>, successfully using them with
