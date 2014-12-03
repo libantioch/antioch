@@ -147,34 +147,36 @@ namespace Antioch
   };
 
 
-   template <typename ExternalThermo, typename InternalThermo>
+   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
    inline
-   ThermoEvaluator<ExternalThermo, InternalThermo>::ThermoEvaluator(const ExternalThermo & external_thermo, const InternalThermo & internal_thermo):
+   ThermoEvaluator<CoeffType,ExternalThermo, InternalThermo>::ThermoEvaluator(const ExternalThermo & external_thermo, const InternalThermo & internal_thermo):
         _ext_therm(external_thermo),
         _int_therm(internal_thermo)
    {
       return;
    }
 
-   template <typename ExternalThermo, typename InternalThermo>
+   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
    inline
-   ThermoEvaluator<ExternalThermo, InternalThermo>::~ThermoEvaluator()
+   ThermoEvaluator<CoeffType, ExternalThermo, InternalThermo>::~ThermoEvaluator()
    {
      return;
    }
 
 
-   template <typename ExternalThermo, typename InternalThermo>
+   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
    inline
-   const ExternalThermo & ThermoEvaluator<ExternalThermo, InternalThermo>::external_thermo() const
+   const ExternalThermo & ThermoEvaluator<CoeffType, ExternalThermo, InternalThermo>::external_thermo() const
    {
-      return _ext_thermo;
+      return _ext_therm;
    }
    
 
-   const InternalThermo &  ThermoEvaluator<ExternalThermo, InternalThermo>::internal_thermo() const
+   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
+   inline
+   const InternalThermo &  ThermoEvaluator<CoeffType, ExternalThermo, InternalThermo>::internal_thermo() const
    {
-      return _int_thermo;
+      return _int_therm;
    }
 
 }
