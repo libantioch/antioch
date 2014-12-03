@@ -56,7 +56,7 @@
 #include "antioch/stat_mech_thermo.h"
 #include "antioch/cea_mixture.h"
 #include "antioch/cea_evaluator.h"
-#include "antioch/cea_mixture_ascii_parsing.h"
+#include "antioch/cea_mixture_parsing.h"
 #include "antioch/thermo_evaluator.h"
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
