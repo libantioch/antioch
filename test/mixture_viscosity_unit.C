@@ -66,19 +66,20 @@ int tester()
   std::cout << b_mu_mixture << std::endl;
 
   const Scalar T = 1500.1;
+  const Antioch::KineticsConditions<Scalar> cond(T);
   Scalar mu(-1);
 
   std::cout << "Blottner:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
     {
-      b_mu_mixture(s, T, mu);
+      b_mu_mixture(s, cond, mu);
       std::cout << "mu(" << species_str_list[s] << ") = " << mu << std::endl;
     }
 
   std::cout << "Sutherland:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
     {
-      s_mu_mixture(s, T, mu);
+      s_mu_mixture(s, cond, mu);
       std::cout << "mu(" << species_str_list[s] << ") = " << mu << std::endl;
     }
 

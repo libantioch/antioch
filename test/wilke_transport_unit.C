@@ -228,6 +228,7 @@ int tester()
 
   const Scalar T = 1000.0L;
   const Scalar rho = 3.14L;
+  const Antioch::KineticsConditions<Scalar> cond(T);
 
   Scalar wilke_mu = wilke.mu(T, mass_fractions );
   Scalar wilke_k = wilke.k(T, mass_fractions, rho );

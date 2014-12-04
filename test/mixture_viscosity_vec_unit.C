@@ -106,6 +106,7 @@ int vectester(const PairScalars& example, const std::string& testname)
       T[2*tuple  ] = 1500.1;
       T[2*tuple+1] = 1600.1;
     }
+  Antioch::KineticsConditions<PairScalars> cond(T);
 
   PairScalars mu = example;
 
@@ -117,7 +118,7 @@ int vectester(const PairScalars& example, const std::string& testname)
       gt.BeginTimer(testblottner);
 #endif
 
-      b_mu_mixture(s,T,mu);
+      b_mu_mixture(s,cond,mu);
 
 #ifdef ANTIOCH_HAVE_GRVY
       gt.EndTimer(testblottner);
@@ -134,7 +135,7 @@ int vectester(const PairScalars& example, const std::string& testname)
       gt.BeginTimer(testsutherland);
 #endif
 
-      s_mu_mixture(s,T,mu);
+      s_mu_mixture(s,cond,mu);
 
 #ifdef ANTIOCH_HAVE_GRVY
       gt.EndTimer(testsutherland);
