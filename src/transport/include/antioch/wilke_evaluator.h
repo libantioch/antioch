@@ -32,13 +32,20 @@
 #define ANTIOCH_WILKE_EVALUATOR_H
 
 // Antioch
-#include "antioch/metaprogramming.h"
+#include "antioch/metaprogramming_decl.h"
 #include "antioch/wilke_mixture.h"
 #include "antioch/mixture_viscosity.h"
 
 namespace Antioch
 {
 
+  /*!
+   * WilkeEvaluator, small object to easily access
+   * transport calculations.
+   * KC stands for KineticsConditions or StateType,
+   * it adapts at the preprocessing time.
+   *
+   */
   
   template<class Mixture>
   class WilkeEvaluator
@@ -49,28 +56,31 @@ namespace Antioch
 
     ~WilkeEvaluator();
 
-    template <typename StateType, typename VectorStateType>
-    StateType mu( const StateType& T,
+    template <typename KC, typename VectorStateType>
+    typename value_type<VectorStateType>::type 
+              mu( const KC& cond,
                   const VectorStateType& mass_fractions ) const;
 
-    template <typename StateType, typename VectorStateType>
-    StateType k( const StateType& T,
-                 const VectorStateType& mass_fractions, const StateType &rho = 0) const;
+    template <typename KC, typename VectorStateType>
+    typename value_type<VectorStateType>::type 
+              k( const KC& cond,
+                 const VectorStateType& mass_fractions, 
+                 const typename value_type<VectorStateType>::type &rho = 0) const;
 
-    template <typename StateType, typename VectorStateType>
-    void D( const StateType& T, const StateType & rho,
+    template <typename KC, typename VectorStateType>
+    void D( const KC& cond, const typename value_type<VectorStateType>::type & rho,
             const VectorStateType& mass_fractions, VectorStateType & Ds ) const;
 
-    template <typename StateType, typename VectorStateType>
-    void mu_and_k_and_D( const StateType& T, const StateType & rho,
+    template <typename StateType, typename VectorStateType, typename KC>
+    void mu_and_k_and_D( const KC& cond, const StateType & rho,
                    const VectorStateType& mass_fractions,
                    StateType& mu, StateType& k, VectorStateType & Ds ) const;
 
     //! Helper function to reduce code duplication.
     /*! Populates species viscosities and the intermediate \chi variable
         needed for Wilke's mixing rule. */
-    template <typename StateType, typename VectorStateType>
-    void compute_mu_chi( const StateType& T,
+    template <typename KC, typename VectorStateType>
+    void compute_mu_chi( const KC& cond,
                          const VectorStateType& mass_fractions,
                          VectorStateType& mu,
                          VectorStateType& chi ) const;
@@ -95,6 +105,7 @@ namespace Antioch
   };
 
   template<typename Mixture>
+  inline
   WilkeEvaluator<Mixture>::WilkeEvaluator( const Mixture & mixture)
     : _mixture(mixture)
   {
@@ -108,16 +119,25 @@ namespace Antioch
   }
 
   template<typename Mixture>
-  template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<Mixture>::mu( const StateType& T,
+  template <typename KC, typename VectorStateType>
+  inline
+  typename value_type<VectorStateType>::type 
+            WilkeEvaluator<Mixture>::mu( const KC& cond,
                                          const VectorStateType& mass_fractions ) const
   {
-    StateType mu_mix = zero_clone(T);
+
+      // convenient
+    typedef typename value_type<VectorStateType>::type StateType;
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                conditions(cond);
+
+    StateType mu_mix = zero_clone(conditions.T());
     
     VectorStateType mu  = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
     
-    this->compute_mu_chi( T, mass_fractions, mu, chi );
+    this->compute_mu_chi( conditions, mass_fractions, mu, chi );
 
     for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
       {
@@ -130,18 +150,25 @@ namespace Antioch
   }
 
   template<typename Mixture>
-  template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<Mixture>::k( const StateType& T, 
-                                        const VectorStateType& mass_fractions, const StateType & rho ) const
+  template <typename KC, typename VectorStateType>
+  typename value_type<VectorStateType>::type 
+            WilkeEvaluator<Mixture>::k( const KC& cond, 
+                                        const VectorStateType& mass_fractions, 
+                                        const typename value_type<VectorStateType>::type & rho ) const
   {
     antioch_assert_equal_to(mass_fractions.size(), _mixture.transport_mixture().n_species());
 
-    StateType k_mix = zero_clone(T);
+    typedef typename value_type<VectorStateType>::type StateType;
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                conditions(cond);
+
+    StateType k_mix = zero_clone(conditions.T());
 
     VectorStateType mu  = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
 
-    this->compute_mu_chi( T, mass_fractions, mu, chi );
+    this->compute_mu_chi( conditions, mass_fractions, mu, chi );
 
     const StateType n_molar_mixture = rho / _mixture.transport_mixture().chemical_mixture().M(mass_fractions); // total molar density
 
@@ -149,7 +176,7 @@ namespace Antioch
       {
         StateType phi_s = this->compute_phi( mu, chi, s );
         
-        StateType k_s = _mixture.k( s, mu[s], T, n_molar_mixture );
+        StateType k_s = _mixture.k( s, mu[s], conditions, n_molar_mixture );
 
         k_mix += k_s*chi[s]/phi_s;
       }
@@ -158,24 +185,30 @@ namespace Antioch
   }
 
   template<typename Mixture>
-  template <typename StateType, typename VectorStateType>
-  void WilkeEvaluator<Mixture>::mu_and_k_and_D( const StateType& T, const StateType & rho,
+  template <typename StateType, typename VectorStateType, typename KC>
+  void WilkeEvaluator<Mixture>::mu_and_k_and_D( const KC& cond, const StateType & rho,
                                                 const VectorStateType& mass_fractions,
                                                 StateType& mu_mix,
                                                 StateType& k_mix,
                                                 VectorStateType & ds ) const
   {
-    mu_mix = zero_clone(T);
-    k_mix  = zero_clone(T);
-    ds = zero_clone(mass_fractions);
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                conditions(cond);
+
+     
+    /*! \todo Do we need to really initialize this? */
+    set_zero(mu_mix);
+    set_zero(k_mix);
+    set_zero(ds);
 
     VectorStateType mu  = zero_clone(mass_fractions);
-    VectorStateType k  = zero_clone(mass_fractions);
+    VectorStateType k   = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
 
-    this->compute_mu_chi( T, mass_fractions, mu, chi );
+    this->compute_mu_chi( conditions, mass_fractions, mu, chi );
 
-    _mixture.D_and_k(mu, T, rho , mass_fractions, k, ds );
+    _mixture.D_and_k(mu, conditions, rho , mass_fractions, k, ds );
 
     for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
       {
@@ -189,31 +222,43 @@ namespace Antioch
   }
 
   template <typename Mixture>
-  template <typename StateType, typename VectorStateType>
+  template <typename KC, typename VectorStateType>
   inline
-  void WilkeEvaluator<Mixture>::D( const StateType& T, const StateType & rho, const VectorStateType& mass_fractions, VectorStateType & Ds ) const
+  void WilkeEvaluator<Mixture>::D( const KC& cond, 
+                                   const typename value_type<VectorStateType>::type & rho, 
+                                   const VectorStateType& mass_fractions, VectorStateType & Ds ) const
   {
-      VectorStateType mu = zero_clone(mass_fractions);
-      _mixture.mu(T,mu);
+    typedef typename value_type<VectorStateType>::type StateType;
 
-      _mixture.D(T, rho, rho / _mixture.transport_mixture().chemical_mixture().M(mass_fractions), mass_fractions, mu, Ds);
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                conditions(cond);
+
+      VectorStateType mu = zero_clone(mass_fractions);
+      _mixture.mu(conditions,mu);
+
+      _mixture.D(conditions, rho, rho / _mixture.transport_mixture().chemical_mixture().M(mass_fractions), mass_fractions, mu, Ds);
   }
 
   template<typename Mixture>
-  template <typename StateType, typename VectorStateType>
-  void WilkeEvaluator<Mixture>::compute_mu_chi( const StateType& T,
+  template <typename KC, typename VectorStateType>
+  void WilkeEvaluator<Mixture>::compute_mu_chi( const KC& cond,
                                                 const VectorStateType& mass_fractions,
                                                 VectorStateType& mu,
                                                 VectorStateType& chi ) const
   {
+    typedef typename value_type<VectorStateType>::type StateType;
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                conditions(cond);
+
     const StateType M = _mixture.transport_mixture().chemical_mixture().M(mass_fractions);
 
     // Precompute needed quantities
     // chi_s = w_s*M/M_s
     for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
       {
-        mu[s] = _mixture.mu(s,T);
-        chi[s] = mass_fractions[s]*M/_mixture.transport_mixture().chemical_mixture().M(s);
+        mu[s] = _mixture.mu(s,conditions);
+        chi[s] = mass_fractions[s] * M / _mixture.transport_mixture().chemical_mixture().M(s);
       }
 
     return;

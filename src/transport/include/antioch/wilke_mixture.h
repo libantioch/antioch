@@ -90,30 +90,30 @@ namespace Antioch
 
     //! Full array of mixture-level diffusion
     template <typename StateType, typename VectorStateType>
-    void D(const KineticsConditions<StateType> & T, const StateType & rho, const StateType & cTot, 
+    void D(const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho, const StateType & cTot, 
            const VectorStateType & mass_fractions, const VectorStateType & mu, VectorStateType & ds) const;
 
     //! Viscosity of one species
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     const ANTIOCH_AUTO(StateType)
-    mu(unsigned int s, const KineticsConditions<StateType> & T) const;
+    mu(unsigned int s, const KineticsConditions<StateType,VectorStateType> & cond) const;
 
     //! Viscosities of all species
     template <typename StateType, typename VectorStateType>
-    void mu(const KineticsConditions<StateType> & T, VectorStateType & mu) const;
+    void mu(const KineticsConditions<StateType,VectorStateType> & cond, VectorStateType & mu) const;
 
     //! Thermal conduction of one species
-    template <typename StateType>
+    template <typename StateType, typename VectorStateType>
     const ANTIOCH_AUTO(StateType)
-    k(unsigned int s, const StateType & mu, const KineticsConditions<StateType> & T, const StateType &n_molar_mixture = 0) const;
+    k(unsigned int s, const StateType & mu, const KineticsConditions<StateType,VectorStateType> & cond, const StateType &n_molar_mixture = 0) const;
 
     //! Thermal conduction of all species
     template <typename StateType, typename VectorStateType>
-    void k(const VectorStateType & mu, const KineticsConditions<StateType> & T, const VectorStateType & mass_fractions, const StateType &rho, VectorStateType & k) const;
+    void k(const VectorStateType & mu, const KineticsConditions<StateType,VectorStateType> & cond, const VectorStateType & mass_fractions, const StateType &rho, VectorStateType & k) const;
 
     //! Thermal conduction and diffusion
     template <typename StateType, typename VectorStateType>
-    void D_and_k(const VectorStateType & mu, const KineticsConditions<StateType> & T, const StateType & rho, 
+    void D_and_k(const VectorStateType & mu, const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho, 
                  const VectorStateType & mass_fractions, VectorStateType & k, VectorStateType & D) const;
 
 
@@ -229,32 +229,34 @@ namespace Antioch
   }
 
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   inline
   const ANTIOCH_AUTO(StateType)
-    WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::mu(unsigned int s, const KineticsConditions<StateType> & T) const
+    WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::mu(unsigned int s, 
+                                                                                       const KineticsConditions<StateType,VectorStateType> & cond) const
   {
-     StateType mu = zero_clone(T);
-     _viscosity_set(s,T,mu);
+     StateType mu = zero_clone(cond.T());
+     _viscosity_set(s,cond,mu);
      return mu;
   }
 
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction,ThermoEvaluator,CoeffType>::mu(const KineticsConditions<StateType> & T, VectorStateType & mu) const
+  void  WilkeMixture<Diffusion,Viscosity,ThermalConduction,ThermoEvaluator,CoeffType>::mu(const KineticsConditions<StateType,VectorStateType> & cond, 
+                                                                                          VectorStateType & mu) const
   {
       antioch_assert_equal_to(mu.size(),_transport_mixture.n_species());
       for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
       {
-          mu[s] = this->mu(s,T);
+          mu[s] = this->mu(s,cond);
       }
   }
 
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, ThermoEvaluator, CoeffType>::D(const KineticsType<StateType> & T, const StateType & rho,
+  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, ThermoEvaluator, CoeffType>::D(const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho,
                                                                            const StateType & cTot, const VectorStateType & mass_fractions, 
                                                                            const VectorStateType & mu, VectorStateType & ds) const
   {
@@ -263,34 +265,35 @@ namespace Antioch
 // \todo: initialization as full squared matrix, even though half is needed and used
      typename rebind<VectorStateType,VectorStateType>::type Ds(ds.size());
      init_constant(Ds,ds);
-     _diffusion_set(T,cTot,Ds );
+     _diffusion_set(cond,cTot,Ds );
      wilke_diffusion_rule(_transport_mixture.chemical_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
 
 // second way
 // \todo: if not needed, find a way to supress k building
 // \todo: Ds[s][s] not needed here
-     StateType k = zero_clone(T);
+     StateType k = zero_clone(cond.T());
      for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
      {
-        _thermal_conduction_set(s,mu[s],Ds[s][s],T,cTot * _transport_mixture.chemical_mixture().M(s),k);
-        _diffusion_set(_thermo_evaluator.cp(T.temp_cache(),s), k, ds[s]);
+        _thermal_conduction_set(s,mu[s],Ds[s][s],cond,cTot * _transport_mixture.chemical_mixture().M(s),k);
+        _diffusion_set(rho,_thermo_evaluator.cp(cond.temp_cache(),s), k, ds[s]);
      }
   }
 
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   inline
   const ANTIOCH_AUTO(StateType) 
         WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(unsigned int s, const StateType & mu, 
-                                                                                          const KineticsConditions<StateType> & T, const StateType &n_molar_mixture) const
+                                                                                          const KineticsConditions<StateType,VectorStateType> & cond, 
+                                                                                          const StateType &n_molar_mixture) const
   {
 // if needed
 // \todo: if not needed, find a way to supress Ds building
-     StateType Ds = zero_clone(T);
-     _diffusion_set(s,T,n_molar_mixture,Ds);
+     StateType Ds = zero_clone(cond.T());
+     _diffusion_set(s,cond,n_molar_mixture,Ds);
 
-     StateType k = zero_clone(T);
-     _thermal_conduction_set(s,mu,Ds,T,n_molar_mixture * _transport_mixture.chemical_mixture().M(s),k);
+     StateType k = zero_clone(cond.T());
+     _thermal_conduction_set(s,mu,Ds,cond,n_molar_mixture * _transport_mixture.chemical_mixture().M(s),k);
 
      return k;
   }
@@ -298,7 +301,8 @@ namespace Antioch
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(const VectorStateType & mu, const KineticsConditions<StateType> & T, 
+  void WilkeMixture<Diffusion,Viscosity,ThermalConduction, ThermoEvaluator,CoeffType>::k(const VectorStateType & mu, 
+                                                                                         const KineticsConditions<StateType,VectorStateType> & cond, 
                                                                                          const VectorStateType & mass_fractions, 
                                                                                          const StateType &rho, VectorStateType & k) const
   {
@@ -309,7 +313,7 @@ namespace Antioch
     const StateType n_molar_mixture = rho / _transport_mixture.chemical_mixture().M(mass_fractions);
      for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
      {
-          k[s] = this->k(s,mu[s],T,n_molar_mixture);
+          k[s] = this->k(s,mu[s],cond,n_molar_mixture);
      }
   }
 
@@ -319,7 +323,9 @@ namespace Antioch
   template<typename Diffusion, typename Viscosity, typename ThermalConduction, typename ThermoEvaluator, typename CoeffType>
   template <typename StateType, typename VectorStateType>
   inline
-  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, ThermoEvaluator, CoeffType>::D_and_k(const VectorStateType & mu, const KineticsConditions<StateType> & T, const StateType & rho, 
+  void WilkeMixture<Diffusion, Viscosity, ThermalConduction, ThermoEvaluator, CoeffType>::D_and_k(const VectorStateType & mu, 
+                                                                                                  const KineticsConditions<StateType,VectorStateType> & cond, 
+                                                                                                  const StateType & rho, 
                                                                                                   const VectorStateType & mass_fractions, 
                                                                                                   VectorStateType & k, VectorStateType & ds) const
   {
@@ -334,16 +340,16 @@ namespace Antioch
 // \todo: initialization as full squared matrix, even though half is needed and used
      typename Antioch::rebind<VectorStateType,VectorStateType>::type Ds(mass_fractions.size());
      init_constant(Ds,ds);
-     _diffusion_set(T, n_molar_mixture, Ds);
+     _diffusion_set(cond, n_molar_mixture, Ds);
      wilke_diffusion_rule(_transport_mixture.chemical_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
 
 // thermal conduction
     for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
-         _thermal_conduction_set(s,mu[s],Ds[s][s],T,n_molar_mixture * _transport_mixture.chemical_mixture().M(s),k[s]);
+         _thermal_conduction_set(s,mu[s],Ds[s][s],cond,n_molar_mixture * _transport_mixture.chemical_mixture().M(s),k[s]);
 
 // diffusion comes last
     for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
-        _diffusion_set(rho, _thermo_evaluator.cp(T.temp_cache(),s), k[s], ds[s] );
+        _diffusion_set(rho, _thermo_evaluator.cp(cond.temp_cache(),s), k[s], ds[s] );
   }
 
 
