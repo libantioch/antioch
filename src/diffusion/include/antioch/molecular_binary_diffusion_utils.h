@@ -153,8 +153,8 @@ namespace Antioch
       // for the diffusion, it is required only
       // for the thermal conduction in case of
       // kinetics theory
-   template<typename Model, typename StateType, typename MatrixStateType>
-   void physical_set_operator_diffusion(const Model & set, const KineticsType<StateType> & cond, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag)
+   template<typename Model, typename StateType, typename VectorStateType, typename MatrixStateType>
+   void physical_set_operator_diffusion(const Model & set, const KineticsConditions<StateType,VectorStateType> & cond, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag)
    {
        antioch_assert_equal_to(Ds.size(),set.size());
 
@@ -169,8 +169,8 @@ namespace Antioch
    }
 
      // self-diffusion
-   template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(unsigned int s, const Model & set, const KineticsConditions<StateType> & cond, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_diffusion(unsigned int s, const Model & set, const KineticsConditions<StateType,VectorStateType> & cond, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
    {
        antioch_assert_equal_to(Ds.size(),set.size());
        Ds = (*set[s][s])(cond.T(),cTot);

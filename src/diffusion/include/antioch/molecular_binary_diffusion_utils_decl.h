@@ -80,11 +80,11 @@ namespace Antioch
    void physical_set_print(typename SetOrEquation<MolecularBinaryDiffusion<CoeffType,Interpolator>,true>::type & set, 
                             const std::map<unsigned int, std::string>& spec, std::ostream & out, bimolecular_diffusion_tag);
 
-   template<typename Model, typename StateType, typename MatrixStateType>
-   void physical_set_operator_diffusion(const Model & set, const KineticsConditions<StateType> & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag);
+   template<typename Model, typename StateType, typename VectorStateType, typename MatrixStateType>
+   void physical_set_operator_diffusion(const Model & set, const KineticsConditions<StateType,VectorStateType> & T, const StateType & cTot, MatrixStateType & Ds, bimolecular_diffusion_tag);
 
-   template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(unsigned int s, const Model & set, const KineticsConditions<StateType> & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag);
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_diffusion(unsigned int s, const Model & set, const KineticsConditions<StateType,VectorStateType> & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag);
 
         // template around mixture mainly to avoid 
         // ChemicalMixture<CoeffType> forward declaration
