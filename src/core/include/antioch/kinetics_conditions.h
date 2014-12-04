@@ -147,14 +147,14 @@ namespace Antioch{
   inline
   const StateType & KineticsConditions<StateType,VectorStateType>::T() const
   {
-     return _temperature::T;
+     return _temperature.T;
   }
 
   template <typename StateType, typename VectorStateType>
   inline
   const StateType & KineticsConditions<StateType,VectorStateType>::Tvib() const
   {
-     return _temperature::T;
+     return _temperature.T;
   }
 
   template <typename StateType, typename VectorStateType>
