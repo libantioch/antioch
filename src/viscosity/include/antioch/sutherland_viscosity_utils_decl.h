@@ -44,12 +44,12 @@ namespace Antioch
    struct is_physical_set<SutherlandViscosity<CoeffType> >;
 
    // species
-   template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const KineticsConditions<StateType> & T, StateType & mu, sutherland_viscosity_tag);
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, const KineticsConditions<StateType,VectorStateType> & T, StateType & mu, sutherland_viscosity_tag);
 
    // mixture
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType> & T, VectorStateType & mu, sutherland_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType,VectorStateType> & T, VectorStateType & mu, sutherland_viscosity_tag);
 }
 
 #endif

@@ -47,13 +47,13 @@ namespace Antioch
    void physical_set_initialize(ModelSet & mod, pure_species_viscosity_tag );
 
    // species
-   template<typename Model, typename StateType>
+   template<typename Model, typename StateType, typename VectorStateType>
    ANTIOCH_AUTO(StateType) 
-        physical_set_first_operator(const Model & set, unsigned int s, const KineticsConditions<StateType> & T, pure_species_viscosity_tag);
+        physical_set_first_operator(const Model & set, unsigned int s, const KineticsConditions<StateType,VectorStateType> & T, pure_species_viscosity_tag);
 
    // mixture
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType> & T, VectorStateType & mu, pure_species_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType,VectorStateType> & T, VectorStateType & mu, pure_species_viscosity_tag);
 }
 
 #endif

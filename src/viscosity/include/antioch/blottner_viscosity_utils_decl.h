@@ -44,12 +44,13 @@ namespace Antioch
    struct is_physical_set<BlottnerViscosity<CoeffType> >;
 
      // operator one species
-   template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const KineticsConditions<StateType> & T, StateType &k, blottner_viscosity_tag);
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, 
+                                        const KineticsConditions<StateType,VectorStateType> & T, StateType &k, blottner_viscosity_tag);
 
      // operator full mixture
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType> & T, VectorStateType & mu, blottner_viscosity_tag);
+   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType,VectorStateType> & T, VectorStateType & mu, blottner_viscosity_tag);
 }
 
 #endif

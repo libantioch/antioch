@@ -48,14 +48,14 @@ namespace Antioch
       static const bool value = true;
    };
 
-   template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const KineticsConditions<StateType> & T, StateType & mu, blottner_viscosity_tag)
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, const KineticsConditions<StateType,VectorStateType> & cond, StateType & mu, blottner_viscosity_tag)
    {
        mu = (*set[s])(cond.T());
    }
 
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType> & cond, VectorStateType & mu, blottner_viscosity_tag)
+   void physical_set_operator_viscosity(const Model & set, const KineticsConditions<StateType,VectorStateType> & cond, VectorStateType & mu, blottner_viscosity_tag)
    {
       antioch_assert_equal_to(mu.size(), set.size());
 
