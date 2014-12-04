@@ -129,42 +129,46 @@ namespace Antioch
 
    /// viscosity
    // keep it this way of void it?
-   template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType & mu, default_physical_tag)
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, 
+                                        const KineticsConditions<StateType,VectorStateType> & cond, StateType & mu, default_physical_tag)
    {}
 
    // supposed to disappear and be optimized out if not needed
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, default_physical_tag)
+   void physical_set_operator_viscosity(const Model & set, 
+                                        const KineticsConditions<StateType,VectorStateType> & cond, VectorStateType & mu, default_physical_tag)
    {}
 
    /// thermal conduction
    // keep it this way of void it?
-   template<typename Model, typename StateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, 
-                                                    StateType & k, default_physical_tag)
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho, 
+                                                   StateType & k, default_physical_tag)
    {}
 
    // supposed to disappear and be optimized out if not needed
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, 
-                                                   const VectorStateType & dss, const StateType & T, const StateType & rho, 
-                                                    default_physical_tag)
+   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho, 
+                                                   default_physical_tag)
    {}
 
 
    /// diffusion
 
    // supposed to disappear and be optimized out
-   template<typename Model, typename StateType, typename MatrixStateType>
-   void physical_set_operator_diffusion(const Model & set, const StateType & T, const StateType & cTot,
+   template<typename Model, typename StateType, typename VectorStateType, typename MatrixStateType>
+   void physical_set_operator_diffusion(const Model & set, const KineticsConditions<StateType,VectorStateType> & cond, const StateType & cTot,
                                         MatrixStateType & Ds, default_physical_tag)
    {}
 
    // suppose to disappear and be optimized out
-   template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot,
-                                         StateType & dss, default_physical_tag)
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_diffusion(unsigned int s, const Model & set, 
+                                        const KineticsConditions<StateType,VectorStateType> & cond, const StateType & cTot,
+                                        StateType & dss, default_physical_tag)
    {}
 
    // suppose to disappear and be optimized out

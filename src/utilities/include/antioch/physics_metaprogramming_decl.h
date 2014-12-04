@@ -28,6 +28,7 @@
 
 // Antioch
 #include "antioch/metaprogramming_decl.h"
+#include "antioch/kinetics_conditions.h"
 #include "antioch/antioch_asserts.h"
 
 // C++
@@ -169,13 +170,15 @@ namespace Antioch
         /// may or may not be used, though always
         /// defined
         /// should not be used when not concerned
-   template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType & k, default_physical_tag);
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, 
+                                        const KineticsConditions<StateType,VectorStateType> & cond, StateType & k, default_physical_tag);
 
         /// this one may or may not be used,
         /// void by default to skip it in concerned cases
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, default_physical_tag);
+   void physical_set_operator_viscosity(const Model & set, 
+                                        const KineticsConditions<StateType,VectorStateType> & cond, VectorStateType & mu, default_physical_tag);
 
 
     ///// thermal conduction
@@ -183,17 +186,17 @@ namespace Antioch
         /// may or may not be used, though always
         /// defined
         /// should not be used in not concerned
-   template<typename Model, typename StateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, 
-                                                   const StateType & dss, const StateType & T, const StateType & rho,
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho,
                                                    StateType & k,
                                                     default_physical_tag);
 
         /// this one may or may not be used
         /// nothing is not needed
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, 
-                                                   const VectorStateType & dss, const StateType & T, const StateType & rho, 
+   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho, 
                                                     default_physical_tag);
 
 
@@ -201,15 +204,17 @@ namespace Antioch
 
         /// this one may or may not be used,
         /// void by default to skip it in concerned cases
-   template<typename Model, typename StateType, typename MatrixStateType>
-   void physical_set_operator_diffusion(const Model & set, const StateType & T, const StateType & cTot,
-                                     MatrixStateType & Ds, default_physical_tag);
+   template<typename Model, typename StateType, typename VectorStateType, typename MatrixStateType>
+   void physical_set_operator_diffusion(const Model & set, 
+                                        const KineticsConditions<StateType,VectorStateType> & cond, const StateType & cTot,
+                                        MatrixStateType & Ds, default_physical_tag);
 
         /// this one may or may not be used,
         /// void by default to skip it in concerned cases
-   template<typename Model, typename StateType>
-   void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot,
-                                         StateType & dss, default_physical_tag);
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_diffusion(unsigned int s, const Model & set, 
+                                        const KineticsConditions<StateType,VectorStateType> & cond, const StateType & cTot,
+                                        StateType & dss, default_physical_tag);
 
         /// this one may or may not be used,
         /// void by default to skip it in concerned cases
