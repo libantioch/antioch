@@ -31,10 +31,11 @@
 // C++
 #include <limits>
 #include <vector>
+
 // Antioch
+#include "antioch/vector_utils_decl.h"
 #include "antioch/kinetics_parsing.h"
-//#include "antioch/physical_constants.h"
-//#include "antioch/units.h"
+#include "antioch/vector_utils.h"
 
 
 
@@ -55,12 +56,13 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
     const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(-Ea/(R*T) + D * T);
     const Scalar derive_exact = exp(-Ea/(R*T) + D * T) * pow(T/Tref,eta) * Cf * (Ea/(R*T*T) + eta/T + D );
 
-    Scalar rate1 = rate_base(T);
-    Scalar deriveRate1 = rate_base.derivative(T);
+    const Antioch::KineticsConditions<Scalar> cond(T);
+    Scalar rate1 = rate_base(cond);
+    Scalar deriveRate1 = rate_base.derivative(cond);
     Scalar rate;
     Scalar deriveRate;
 
-    rate_base.compute_rate_and_derivative(T,rate,deriveRate);
+    rate_base.compute_rate_and_derivative(cond,rate,deriveRate);
 
     if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
       {

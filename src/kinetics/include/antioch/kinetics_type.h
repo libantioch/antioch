@@ -85,7 +85,7 @@ namespace Antioch{
 
     //!
     template <typename StateType, typename VectorStateType>
-    StateType operator()(const KineticsConditions<StateType,VectorStateType> & conditions) const
+    StateType operator()(const KineticsConditions<StateType,VectorStateType> & conditions) const;
 
     KineticsModel::KineticsModel type() const;
 
