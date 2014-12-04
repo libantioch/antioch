@@ -81,6 +81,9 @@ namespace Antioch
     //! \returns a constant reference to reaction \p r.
     const Reaction<CoeffType>& reaction(const unsigned int r) const;
 
+    //! \returns a writeable reference to reaction \p r.
+    Reaction<CoeffType>& reaction(const unsigned int r);
+
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
     //! Compute the rates of progress for each reaction
@@ -177,6 +180,14 @@ namespace Antioch
   template<typename CoeffType>
   inline
   const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const      
+  {
+    antioch_assert_less(r, this->n_reactions());
+    return *_reactions[r];
+  }
+
+  template<typename CoeffType>
+  inline
+  Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r)
   {
     antioch_assert_less(r, this->n_reactions());
     return *_reactions[r];

@@ -182,6 +182,12 @@ namespace Antioch
                       const unsigned int stoichiometric_coeff);
 
     //!
+    void clear_reactant();
+
+    //!
+    void clear_product();
+
+    //!
     void set_efficiency( const std::string &,
                          const unsigned int s,
                          const CoeffType efficiency);
@@ -244,6 +250,13 @@ namespace Antioch
 
     //! Return writeable reference to the forward rate object
     KineticsType<CoeffType,VectorCoeffType>& forward_rate(unsigned int ir = 0);
+
+    //! Return writeable reference to the falloff object, test type
+    //
+    // just a wrapper around the FalloffType & F() method
+    // of the FalloffReaction object, test consistency of type
+    template <typename FalloffType>
+    FalloffType & falloff();
 
     //! Add a forward rate object
     void add_forward_rate(KineticsType<CoeffType,VectorCoeffType> *rate);
@@ -484,6 +497,24 @@ namespace Antioch
     _product_ids.push_back(p_id);
     _product_stoichiometry.push_back(stoichiometric_coeff);
     return;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::clear_reactant()
+  {
+    _reactant_names.clear();
+    _reactant_ids.clear();
+    _reactant_stoichiometry.clear();
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::clear_product()
+  {
+    _product_names.clear();
+    _product_ids.clear();
+    _product_stoichiometry.clear();
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -1028,6 +1059,36 @@ namespace Antioch
 
     return;
   }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename FalloffType>
+  inline
+  FalloffType & Reaction<CoeffType,VectorCoeffType>::falloff()
+  {
+      switch(_type)
+      {
+        case(ReactionType::LINDEMANN_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->F();
+        }
+        break;
+
+        case(ReactionType::TROE_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->F();
+        }
+        break;
+
+        default:
+        {
+          std::cerr << "You are trying to retrieve a Falloff object in a reaction that is not a falloff.\n"
+                    << "The reaction is " << *this << std::endl;
+          antioch_error();
+        }
+        
+      }
+  }
+  
     
 } // namespace Antioch
 
