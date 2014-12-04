@@ -94,8 +94,9 @@ namespace Antioch
 
 
    // operator
-   template<typename Model, typename StateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, const KineticsConditions<StateType> & cond, const StateType & rho, 
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho, 
                                                    StateType & k, pure_species_thermal_conductivity_tag)
    {
         antioch_assert(!set.empty());
@@ -104,7 +105,8 @@ namespace Antioch
    }
 
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & dss, const KineticsConditions<StateType> & cond, const StateType & rho, 
+   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & cond, const StateType & rho, 
                                                    VectorStateType & k, pure_species_thermal_conductivity_tag)
    {
       antioch_assert_equal_to(k.size(),set.size());

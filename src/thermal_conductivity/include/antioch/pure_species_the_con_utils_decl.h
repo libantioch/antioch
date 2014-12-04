@@ -48,12 +48,14 @@ namespace Antioch
    struct Initializer<PureSpeciesThermalConductivity<ThermoEvaluator,CoeffType>, pure_species_thermal_conductivity_tag >;
 
    // operator
-   template<typename Model, typename StateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, const KineticsConditions<StateType> & T, const StateType & rho, 
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & T, const StateType & rho, 
                                                    StateType & k, pure_species_thermal_conductivity_tag);
 
    template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & dss, const KineticsConditions<StateType> & T, const StateType & rho, 
+   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, const VectorStateType & dss, 
+                                                   const KineticsConditions<StateType,VectorStateType> & T, const StateType & rho, 
                                                    VectorStateType & k, pure_species_thermal_conductivity_tag);
 
    template <typename ModelSet>
