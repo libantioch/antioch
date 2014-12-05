@@ -214,7 +214,6 @@ TESTS += pure_species_thermal_conductivity_vec_unit
 TESTS += ideal_gas_internal_thermo_unit
 TESTS += sigma_bin_converter_unit
 TESTS += sigma_bin_converter_vec_unit
-TESTS += sigma_bin_converter_unit.sh
 TESTS += kinetics_settings_unit
 
 if ANTIOCH_ENABLE_EIGEN
