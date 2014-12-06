@@ -36,7 +36,7 @@
 #include "antioch/transport_species.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/transport_species_ascii_parsing.h"
+#include "antioch/transport_species_parsing.h"
 #include "antioch/default_filename.h"
 
 // C++
@@ -45,6 +45,11 @@
 
 namespace Antioch
 {
+  // forward declaration
+  template <typename CoeffType>
+  class ASCIIParser;
+
+
   //! Class storing chemical mixture properties
   /*!
     This class manages the list of TransportSpecies for a requested set
@@ -58,8 +63,9 @@ namespace Antioch
 
   public:
     
+    template <typename Parser = ASCIIParser<CoeffType> >
     TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
-                      const std::string & filename = DefaultFilename::transport_mixture());
+                      const std::string & filename = DefaultFilename::transport_mixture(), bool verbose = true);
 
     ~TransportMixture();
 
@@ -86,6 +92,8 @@ namespace Antioch
                       CoeffType dipole_moment, CoeffType polarizability, CoeffType rotational_relaxation, CoeffType mass);
 
     const std::vector<TransportSpecies<CoeffType>*>& transport_species() const;
+
+    void check() const;
 
   protected:
 
@@ -153,15 +161,17 @@ namespace Antioch
   }
 
   template<typename ThermoEvaluator,typename CoeffType>
+  template<typename Parser>
   inline
-  TransportMixture<ThermoEvaluator,CoeffType>::TransportMixture( const ChemicalMixture<CoeffType>& chem_mix, const ThermoEvaluator & t, const std::string & filename )
+  TransportMixture<ThermoEvaluator,CoeffType>::TransportMixture( const ChemicalMixture<CoeffType>& chem_mix, const ThermoEvaluator & t, 
+                                                                 const std::string & filename, bool verbose )
     : _chemical_mixture( chem_mix),
       _thermo(t),
       _transport_species(_chemical_mixture.n_species(), NULL )
   {
 
     // Now read in transport properties for the requested species and stash
-    read_transport_species_data_ascii(*this, filename);
+    read_transport_species_data<ThermoEvaluator,CoeffType,Parser>(*this, filename, verbose);
 
     // check we have everyone requested
     for( unsigned int s = 0; s < _transport_species.size(); ++s )
@@ -208,6 +218,38 @@ namespace Antioch
       new TransportSpecies<CoeffType>(name_enum, LJ_depth, LJ_diameter, dipole_moment, polarizability, rotational_relaxation,mass);
 
     return;
+  }
+
+  template<typename ThermoEvaluator,typename CoeffType>
+  inline
+  void TransportMixture<ThermoEvaluator,CoeffType>::check() const
+  {
+     for(unsigned int st = 0; st < _transport_species.size(); st++)
+     {
+         if(!_transport_species[st])
+         {
+            std::cerr << "Missing transport information for species\n";
+            std::vector<Species> specs;
+            for(unsigned int s = 0; s < _chemical_mixture.n_species(); s++)
+            {
+                specs.push_back(_chemical_mixture.species_list()[s]);
+                for(unsigned int jt = 0; jt < _transport_species.size(); jt++)
+                {
+                   if(_transport_species[jt])
+                   {
+                      if(_transport_species[jt]->species() == specs.back())
+                      {
+                         specs.pop_back();
+                         break;
+                      }
+                   }
+                }
+            }
+            for(unsigned int s = 0; s < specs.size(); s++)std::cerr << "\t" << _chemical_mixture.species_inverse_name_map().at(specs[s]) << std::endl;
+            antioch_error();
+         }
+     }
+    
   }
 
 } // end namespace Antioch
