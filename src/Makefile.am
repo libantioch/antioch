@@ -66,6 +66,7 @@ pkginclude_HEADERS += parsing/include/antioch/sutherland_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/cea_mixture_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/nasa_mixture_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/species_parsing.h
+pkginclude_HEADERS += parsing/include/antioch/transport_species_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/parsing_enum.h
 pkginclude_HEADERS += parsing/include/antioch/xml_parser.h
 pkginclude_HEADERS += parsing/include/antioch/chemkin_parser.h

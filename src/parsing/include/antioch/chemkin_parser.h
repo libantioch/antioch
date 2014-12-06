@@ -49,6 +49,9 @@ namespace Antioch{
   template <typename NumericType, typename CurveType>
   class NASAThermoMixture;
 
+  template <typename ThermoEvaluator, typename NumericType>
+  class TransportMixture;
+
   /*! ChemKin format file reader
    *
    * defaults unit:
@@ -91,6 +94,12 @@ namespace Antioch{
         //! reads the thermo, NASA generalist
         template <typename CurveType>
         void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
+
+///////////////// transport
+        
+        //! reads the transport data, not valid in CehmKin
+        template <typename ThermoEvaluator>
+        void read_transport_species(TransportMixture<ThermoEvaluator,NumericType> & transport_mixture);
 
 ///////////////// kinetics
 
@@ -1295,6 +1304,17 @@ namespace Antioch{
   template <typename NumericType>
   inline
   void ChemKinParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a ChemKin parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  template <typename TransportEval>
+  inline
+  void ChemKinParser<NumericType>::read_transport_species(TransportMixture<TransportEval,NumericType> & chem_mixture)
   {
       std::cerr << "This method is not available with a ChemKin parser.\n"
                 << "No format has been defined yet.  Maybe contribute?\n"

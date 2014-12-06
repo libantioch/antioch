@@ -43,45 +43,23 @@ namespace Antioch{
   class TransportMixture;
 
 
-  template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename);
+  template <typename ThermoEvaluator, typename NumericType, typename Parser>
+  void read_transport_species_data(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename, bool verbose = true);
 
 /*----------- inline functions ----------------*/
 
 
-  template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename)
+  template <typename ThermoEvaluator, typename NumericType, typename Parser>
+  void read_transport_species_data(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename, bool verbose)
   {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-      std::cerr << "ERROR: unable to load file " << filename << std::endl;
-      antioch_error();
-    }
 
+    Parser parser(filename,verbose);
 
-    skip_comment_lines(in, '#');
+    parser.read_transport_species(transport);
 
-    std::string name;
-    NumericType LJ_eps_kB;
-    NumericType LJ_sigma;
-    NumericType dipole_moment;
-    NumericType pol;
-    NumericType Zrot;
+    // sanity check
+    transport.check();
 
-    while (in.good())
-      {
-          in >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
-          if(transport.chemical_mixture().species_name_map().count(name))
-          {
-              unsigned int place = transport.chemical_mixture().species_name_map().at(name);
-                // TODO: better unit checking
-              NumericType mass = transport.chemical_mixture().M(place) * NumericType(1e-3); //to SI
-// adding species in mixture
-              transport.add_species(place,LJ_eps_kB,LJ_sigma,dipole_moment,pol,Zrot,mass);
-          }
-      }
-     in.close();
     return;
   }
 

@@ -58,6 +58,9 @@ namespace Antioch
   template <typename NumericType>
   class CEAThermodynamics;
 
+  template <typename ThermoEvaluator, typename NumericType>
+  class TransportMixture;
+
   template <typename NumericType>
   class ASCIIParser
   {
@@ -83,6 +86,10 @@ namespace Antioch
 
         //! read the thermodynamic data, deprecated object
         void read_thermodynamic_data(CEAThermodynamics<NumericType>& thermo);
+
+        //! read the transport data
+        template <typename ThermoEvaluator>
+        void read_transport_species(TransportMixture<ThermoEvaluator,NumericType> & transport_mixture);
 
 
      private:
@@ -396,6 +403,34 @@ namespace Antioch
               }
           }
       } // end while
+  }
+
+  template <typename NumericType>
+  template <typename ThermoEvaluator>
+  inline
+  void ASCIIParser<NumericType>::read_transport_species(TransportMixture<ThermoEvaluator,NumericType> & transport_mixture)
+  {
+      
+    std::string name;
+    NumericType LJ_eps_kB;
+    NumericType LJ_sigma;
+    NumericType dipole_moment;
+    NumericType pol;
+    NumericType Zrot;
+
+    while (_doc.good())
+    {
+        skip_comment_lines(_doc, '#');
+        _doc >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
+        if(transport_mixture.chemical_mixture().species_name_map().count(name))
+        {
+           unsigned int place = transport_mixture.chemical_mixture().species_name_map().at(name);
+           // TODO: better unit checking
+           NumericType mass = transport_mixture.chemical_mixture().M(place);
+// adding species in mixture
+           transport_mixture.add_species(place,LJ_eps_kB,LJ_sigma,dipole_moment,pol,Zrot,mass);
+        }
+    }
   }
 
 } // end namespace Antioch

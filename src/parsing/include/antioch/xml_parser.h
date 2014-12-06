@@ -47,6 +47,9 @@ namespace Antioch{
   template <typename NumericType, typename CurveType>
   class NASAThermoMixture;
 
+  template <typename ThermoEvaluator, typename NumericType>
+  class TransportMixture;
+
   template <typename NumericType = double>
   class XMLParser{
         public:
@@ -75,6 +78,12 @@ namespace Antioch{
         //! reads the thermo, NASA generalist
         template <typename CurveType>
         void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
+
+///////////////// transport
+        
+        //! reads the transport data, not valid in xml
+        template <typename ThermoEvaluator>
+        void read_transport_species(TransportMixture<ThermoEvaluator,NumericType> & transport_mixture);
 
 /// reaction
 
@@ -718,6 +727,17 @@ namespace Antioch{
   template <typename NumericType>
   inline
   void XMLParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a XML parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  template <typename ThermoEval>
+  inline
+  void XMLParser<NumericType>::read_transport_species(TransportMixture<ThermoEval,NumericType> & chem_mixture)
   {
       std::cerr << "This method is not available with a XML parser.\n"
                 << "No format has been defined yet.  Maybe contribute?\n"
