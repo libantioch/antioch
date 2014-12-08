@@ -80,8 +80,8 @@ int test_molecule(unsigned int spec, const Scalar & n_tr_dofs, const Scalar & R_
     return_flag = test_relative(thermo.cv_rot_over_R(spec), cv_rot, tol, "cv_rot_over_R of " + name)                   || return_flag;
     return_flag = test_relative(thermo.cv_rot(spec), R_spec * cv_rot, tol, "cv_rot of " + name)                        || return_flag;
 // vibration requires CEA fits, tolerance is somewhat loose...
-    return_flag = test_relative(thermo.cv_vib_over_R(T,spec), cv_vib, Scalar(200.L) * tol, "cv_vib_over_R of " + name) || return_flag;
-    return_flag = test_relative(thermo.cv_vib(T,spec),  R_spec * cv_vib, Scalar(200.L) * tol, "cv_vib of " + name)     || return_flag;
+    return_flag = test_relative(thermo.cv_vib_over_R(spec,T), cv_vib, Scalar(200.L) * tol, "cv_vib_over_R of " + name) || return_flag;
+    return_flag = test_relative(thermo.cv_vib(spec,T),  R_spec * cv_vib, Scalar(200.L) * tol, "cv_vib of " + name)     || return_flag;
 
     return return_flag;
 }
