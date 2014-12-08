@@ -46,16 +46,16 @@ namespace Antioch
         //! cv_vib
         template <typename StateType>
         const ANTIOCH_AUTO(StateType)
-           cv_vib(const StateType & T, unsigned int s) const
+           cv_vib(unsigned int s, const StateType & T) const
          ANTIOCH_AUTOFUNC(StateType, (_chem_mix.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))?zero_clone(T):
-                                                                                                    _ext_therm.cv(TempCache<CoeffType>(T),s) - this->cv_tr(s))
+                                                                                                    _ext_therm.cv(TempCache<StateType>(T),s) - this->cv_tr(s))
 
         //! cv_vib/R
         template <typename StateType>
         const ANTIOCH_AUTO(StateType)
-           cv_vib_over_R(const StateType & T, unsigned int s) const
+           cv_vib_over_R(unsigned int s, const StateType & T) const
          ANTIOCH_AUTOFUNC(StateType, (_chem_mix.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))?zero_clone(T):
-                                                                                                    _ext_therm.cv_over_R(TempCache<CoeffType>(T),s) - this->cv_tr_over_R(s))
+                                                                                                    _ext_therm.cv_over_R(TempCache<StateType>(T),s) - this->cv_tr_over_R(s))
 
         //! cv_rot
         const CoeffType cv_rot(unsigned int s) const;
