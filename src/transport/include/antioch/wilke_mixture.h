@@ -346,8 +346,8 @@ namespace Antioch
 // thermal conduction
     for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
     {
-      _diffusion_set(s,T,n_molar_mixture,Ds[s][s]);
-      _thermal_conduction_set(s,mu[s],Ds[s][s],T,n_molar_mixture * _transport_mixture.chemical_mixture().M(s),k[s]);
+      _diffusion_set(s,cond,n_molar_mixture,Ds[s][s]);
+      _thermal_conduction_set(s,mu[s],Ds[s][s],cond,n_molar_mixture * _transport_mixture.chemical_mixture().M(s),k[s]);
     }
 
 // diffusion comes last
