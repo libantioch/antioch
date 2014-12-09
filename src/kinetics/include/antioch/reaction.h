@@ -693,8 +693,6 @@ namespace Antioch
   StateType Reaction<CoeffType,VectorCoeffType>::equilibrium_constant( const StateType& P0_RT,
                                                        const VectorStateType& h_RT_minus_s_R ) const
   {
-    using std::exp;
-
     antioch_assert( this->initialized() );
     //!\todo Make this assertion vector-compatible
     // antioch_assert_greater( P0_RT, 0.0 );
@@ -702,16 +700,22 @@ namespace Antioch
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
 
-    StateType exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
-                            h_RT_minus_s_R[0] );
+    StateType exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[0]])*
+                            h_RT_minus_s_R[_reactant_ids[0]] );
 
-    for (unsigned int s=1; s < this->n_species(); s++)
+    for (unsigned int s=1; s < this->n_reactants(); s++)
       {
-        exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
-                       h_RT_minus_s_R[s] );
+        exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[s]])*
+                       h_RT_minus_s_R[_reactant_ids[s]] );
       }
 
-    return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*exp(exppower);
+    for (unsigned int s=0; s < this->n_products(); s++)
+      {
+        exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_product_ids[s]])*
+                       h_RT_minus_s_R[_product_ids[s]] );
+      }
+
+    return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) ) * ant_exp(exppower);
   }
 
 
@@ -738,12 +742,16 @@ namespace Antioch
     // get the equilibrium constant
     keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-    StateType ddT_exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
-                                ddT_h_RT_minus_s_R[0] );
+    StateType ddT_exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[0]])*
+                                ddT_h_RT_minus_s_R[_reactant_ids[0]] );
 
-    for (unsigned int s=1; s<this->n_species(); s++)
-      ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
-                         ddT_h_RT_minus_s_R[s] );
+    for (unsigned int s=1; s<this->n_reactants(); s++)
+      ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[s]])*
+                         ddT_h_RT_minus_s_R[_reactant_ids[s]] );
+
+    for (unsigned int s=0; s<this->n_products(); s++)
+      ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_product_ids[s]])*
+                         ddT_h_RT_minus_s_R[_product_ids[s]] );
 
     // compute its derivative
     dkeq_dT = keq*(-static_cast<CoeffType>(this->gamma())/T + ddT_exppower);
