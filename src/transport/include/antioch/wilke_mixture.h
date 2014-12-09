@@ -306,9 +306,9 @@ namespace Antioch
                                                                                          const VectorStateType & mass_fractions, 
                                                                                          const StateType &rho, VectorStateType & k) const
   {
-      antioch_assert_equal_to(k.size(),mu.size());
-      antioch_assert_equal_to(k.size(),mass_fractions.size());
-      antioch_assert_equal_to(k.size(),_transport_mixture.n_species());
+      antioxh_assert_equal_to(k.size(),mu.size());
+      antioxh_assert_equal_to(k.size(),mass_fractions.size());
+      antioxh_assert_equal_to(k.size(),_transport_mixture.n_species());
 
     const StateType n_molar_mixture = rho / _transport_mixture.chemical_mixture().M(mass_fractions);
      for(unsigned int s = 0; s < _transport_mixture.n_species(); s++)
