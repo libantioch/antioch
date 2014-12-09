@@ -42,11 +42,11 @@ int tester()
   const Scalar Cf1 = 1.4;
   const Scalar Ea1 = 5.0;
   const Scalar beta1 = 1.2;
-  const Scalar D1 = 2.5;
+  const Scalar D1 = 2.5e-2;
   const Scalar Cf2 = 2.0;
   const Scalar Ea2 = 3.0;
   const Scalar beta2 = 0.8;
-  const Scalar D2 = 3.0;
+  const Scalar D2 = 3.0e-2;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);
@@ -62,6 +62,9 @@ int tester()
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -133,12 +136,12 @@ int tester()
     Antioch::DuplicateReaction<Scalar> * dupl_reaction = new Antioch::DuplicateReaction<Scalar>(n_species,equation,true,kin_mod);
     dupl_reaction->add_forward_rate(rate_kinetics1);
     dupl_reaction->add_forward_rate(rate_kinetics2);
-    Scalar rate1 = dupl_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = dupl_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate(0.);
     Scalar drate_dT(0.);
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    dupl_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    dupl_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
     if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
       {

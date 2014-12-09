@@ -69,6 +69,7 @@ int tester(const std::string& testname)
 
   const Scalar T = 1500.0L; // K
   const Scalar P = 1.0e5L; // Pa
+  const Antioch::KineticsConditions<Scalar> conditions(T);
 
   const Scalar P0_RT(1.0e5/Antioch::Constants::R_universal<Scalar>()/T);
   std::vector<Scalar> h_RT_minus_s_R(n_species);
@@ -103,11 +104,11 @@ int tester(const std::string& testname)
   my_rxn->print();
 
 //
-  Scalar rate_reversible = my_rxn->compute_rate_of_progress(molar_densities,T,P0_RT,h_RT_minus_s_R);
+  Scalar rate_reversible = my_rxn->compute_rate_of_progress(molar_densities,conditions,P0_RT,h_RT_minus_s_R);
 
 //irreversible reaction
   my_rxn->set_reversibility(false);
-  Scalar rate_irreversible = my_rxn->compute_rate_of_progress(molar_densities,T,P0_RT,h_RT_minus_s_R);
+  Scalar rate_irreversible = my_rxn->compute_rate_of_progress(molar_densities,conditions,P0_RT,h_RT_minus_s_R);
 
   int return_flag = 0;
 

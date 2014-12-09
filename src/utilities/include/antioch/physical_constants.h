@@ -118,6 +118,71 @@ namespace Antioch
         return Units<CoeffType>("m/s");
     }
 
+    /*!
+     * Boltzmann constant
+     * 1.380 6488 x 10-23 J/K
+     * (http://physics.nist.gov/cgi-bin/cuu/Value?k)
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType Boltzmann_constant()
+    {
+       return 1.3806488e-23;
+    }
+
+    /*!
+     * Boltzmann constant unit
+     */
+    template<typename CoeffType>
+    inline
+    Units<CoeffType> Boltzmann_constant_unit()
+    {
+        return Units<CoeffType>("J/K");
+    }
+
+    /*!
+     * vacuum permeability
+     *  4 * pi * 10-7 m.kg.s2.A2
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType vacuum_permeability()
+    {
+       return 4.L * pi<CoeffType>() * 1e-7;
+    }
+
+    /*!
+     * vacuum permeability
+     */
+    template<typename CoeffType>
+    inline
+    Units<CoeffType> vacuum_permeability_unit()
+    {
+        return Units<CoeffType>("m.kg.s2.A2");
+    }
+
+    /*!
+     * vacuum permittivity
+     * 1/(vacuum_permeability * light_celerity^2) A2.s4/kg/m3
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType vacuum_permittivity()
+    {
+       return 1.L/ (vacuum_permeability<CoeffType>() * light_celerity<CoeffType>() 
+                                                     * light_celerity<CoeffType>());
+    }
+
+    /*!
+     * vacuum permeability unit
+     */
+    template<typename CoeffType>
+    inline
+    Units<CoeffType> vacuum_permittivity_unit()
+    {
+        return Units<CoeffType>("A2.s4/kg/m3");
+    }
+
   } // end namespace Constants
 } // end namespace Antioch
 

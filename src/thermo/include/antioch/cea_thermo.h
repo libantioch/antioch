@@ -34,7 +34,7 @@
 // Antioch
 #include "antioch_config.h"
 #include "antioch/cea_curve_fit.h"
-#include "antioch/cea_thermo_ascii_parsing.h"
+#include "antioch/cea_mixture_parsing.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
 #include "antioch/default_filename.h"
@@ -186,10 +186,13 @@ namespace Antioch
     : _chem_mixture(chem_mixture),
       _species_curve_fits(chem_mixture.n_species(), NULL)
   {
+
+ // should not use this object
+     antioch_deprecated();
+
     // Read in CEA coefficients. Note this assumes chem_mixture is fully constructed.
-    /*! \todo Generalize this to optionally read in a file instead of using the default here.
-        The method is there for the reading, just need to do input file foo. */
-    read_cea_thermo_data_ascii(*this, filename);
+    /*! deprecated*/  
+    read_cea_mixture_data_ascii(*this, filename);
 
     // Cache cp values at small temperatures
     _cp_at_200p1.reserve( _species_curve_fits.size() );

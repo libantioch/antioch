@@ -225,6 +225,24 @@ set_zero(_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& a)
     a.setConstant (zero_clone(a[0]));
 }
 
+/*
+template <template <typename, int, int, int, int, int> class _Matrix,
+          typename T, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols,
+  typename VectorScalar
+>
+inline
+_Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> 
+  custom_clone(const _Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & /example/, const VectorScalar& values, const _Matrix<unsigned int,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & indexes)
+{
+  _Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols>  returnval;
+  returnval.resize(indexes.size());
+  for(std::size_t i = 0; i < indexes.size(); i++)
+  {
+      returnval[i] = values[indexes[i]];
+  }
+  return returnval;
+}
+*/
 
 template <typename Condition, typename T1, typename T2>
 inline
@@ -239,6 +257,38 @@ const T1& if_true,
 const T2& if_false)
 {
   return condition.select(if_true, if_false);
+}
+
+
+template <typename VectorT, 
+  template <typename , int, int, int, int, int> class _Matrix,
+  typename _UIntT, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
+>
+inline
+typename enable_if_c<
+  is_eigen<typename value_type<VectorT>::type>::value,
+  typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const _Matrix<_UIntT, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& index)
+{
+  typename value_type<VectorT>::type returnval = vec[0];
+  for (unsigned int i=0; i != index.size(); ++i)
+    returnval[i] = vec[index[i]][i];
+  return returnval;
+}
+
+template <typename T>
+inline
+bool conjunction_root(const T & vec, eigen_library_tag)
+{
+  return vec.all();
+}
+
+template <typename T>
+inline
+bool disjunction_root(const T & vec, eigen_library_tag)
+{
+  return vec.any();
 }
 
 

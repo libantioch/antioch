@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROG="@top_builddir@/test/nasa_evaluator_unit"
+
+INPUT="@top_srcdir@/test/input_files/NASA_thermo.inp"
+
+$PROG $INPUT
+

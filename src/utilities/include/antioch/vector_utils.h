@@ -148,6 +148,17 @@ void set_zero(std::vector<T>& a)
     std::fill(a.begin(), a.end(), zero_clone(a[0]));
 }
 
+template <typename T, typename VectorScalar>
+inline
+std::vector<T> custom_clone(const std::vector<T> & /*vec*/, const VectorScalar & vecsrc, std::vector<unsigned int> & indexes)
+{
+  std::vector<T> returnval;
+  returnval.resize(indexes.size());
+  for (std::size_t i=0; i != indexes.size(); ++i)
+    returnval[i] = vecsrc[indexes[i]];
+  return returnval;
+}
+
 } // end namespace Antioch
 
 

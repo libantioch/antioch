@@ -5,5 +5,6 @@ antioch_default_files/antioch_default_chemical_species.dat \
 antioch_default_files/antioch_default_electronic_data.dat \
 antioch_default_files/antioch_default_sutherland_coefficient.dat \
 antioch_default_files/antioch_default_thermo_data.dat \
-antioch_default_files/antioch_default_vibrational_data.dat
+antioch_default_files/antioch_default_vibrational_data.dat \
+antioch_default_files/antioch_default_transport_species_data.dat
 

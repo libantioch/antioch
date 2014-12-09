@@ -151,12 +151,27 @@ inline
 void
 init_clone(std::valarray<T>& output, const std::valarray<T>& example);
 
+/*template <typename T, typename VectorScalar>
+inline
+std::valarray<T> custom_clone(const std::valarray<T>& example, const VectorScalar& values, const std::valarray<unsigned int> & indexes);
+*/
+
 template <typename T>
 inline
 std::valarray<T>
 if_else(const std::valarray<bool>& condition,
         const std::valarray<T>& if_true,
         const std::valarray<T>& if_false);
+
+
+template <typename VectorT>
+inline
+typename Antioch::enable_if_c<
+        Antioch::is_valarray<typename value_type<VectorT>::type>::value,
+        typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const std::valarray<unsigned int>& index);
+
 } // end namespace Antioch
 
 

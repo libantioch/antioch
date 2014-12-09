@@ -42,11 +42,11 @@ int tester()
   const Scalar Cf1 = 1.4;
   const Scalar Ea1 = 5.0;
   const Scalar beta1 = 1.2;
-  const Scalar D1 = 2.5;
+  const Scalar D1 = 2.5e-3;
   const Scalar Cf2 = 2.0;
   const Scalar Ea2 = 3.0;
   const Scalar beta2 = 0.8;
-  const Scalar D2 = 3.0;
+  const Scalar D2 = -3.0e-3;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);
@@ -63,10 +63,13 @@ int tester()
      M += mol_densities[i];
   }
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 500;
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -97,6 +100,7 @@ int tester()
         rate_kinetics2 = new Antioch::BerthelotRate<Scalar>(Cf2,D2);
         k0 = Cf1 * exp(D1*T); kinf = Cf2 * exp(D2*T);
         dk0_dT = Cf1 * exp(D1*T) * D1; dkinf_dT = Cf2 * exp(D2*T) * D2;
+
         break;
       }
       case 2:
@@ -150,12 +154,12 @@ int tester()
 
     fall_reaction->add_forward_rate(rate_kinetics1);
     fall_reaction->add_forward_rate(rate_kinetics2);
-    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
     for(unsigned int i = 0; i < n_species; i++)
     {
@@ -213,7 +217,6 @@ int tester()
       }
 
     delete fall_reaction;
-    if(return_flag)return return_flag;
     }
   }
 

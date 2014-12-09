@@ -136,6 +136,8 @@ namespace UnitBaseConstant{
     store.push_back(UnitBase<T>("Hz","herzt",    1.0L,   0.,0,0,-1));
     store.push_back(UnitBase<T>("Ci","curie",    3.7e10L,0.,0,0,-1));
     store.push_back(UnitBase<T>("Bq","becquerel",1.0L,   0.,0,0,-1));
+    // dipole moment C.m = A.s.m
+    store.push_back(UnitBase<T>("D","debye",3.335641e-30L,0.,1,0,1,1)); // http://cccbdb.nist.gov/debye.asp)
     //no unit
     store.push_back(UnitBase<T>("molecule","molecule",1.0L,0.,0,0,0,0,0,0));
     store.push_back(UnitBase<T>("photon",  "photon",  1.0L,0.,0,0,0,0,0,0));

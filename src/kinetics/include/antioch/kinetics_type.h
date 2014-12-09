@@ -30,6 +30,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/kinetics_enum.h"
 #include "antioch/metaprogramming.h"
+#include "antioch/kinetics_conditions.h"
 
 //C++
 #include <string>
@@ -83,19 +84,19 @@ namespace Antioch{
     virtual ~KineticsType();
 
     //!
-    template <typename StateType>
-    StateType operator()(const StateType& T) const;
+    template <typename StateType, typename VectorStateType>
+    StateType operator()(const KineticsConditions<StateType,VectorStateType> & conditions) const;
 
     //!
-    template <typename StateType>
-    StateType derivative( const StateType& T ) const;
+    template <typename StateType, typename VectorStateType>
+    StateType derivative( const KineticsConditions<StateType,VectorStateType> & conditions ) const;
 
     //!
-    template <typename StateType>
-    void compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+    template <typename StateType, typename VectorStateType>
+    void compute_rate_and_derivative(const KineticsConditions<StateType, VectorStateType>& conditions, StateType& rate, StateType& drate_dT) const;
 
-    //!Particles flux supports
-    void calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux, bool x_update);
+    //!
+    void set_index(unsigned int nr);
 
     virtual const std::string numeric() const = 0;
 
@@ -111,6 +112,7 @@ namespace Antioch{
 
   private:
     KineticsModel::KineticsModel my_type;
+    unsigned int                 my_index;
   };
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -124,7 +126,8 @@ namespace Antioch{
   template <typename CoeffType, typename VectorCoeffType>
   inline
   KineticsType<CoeffType,VectorCoeffType>::KineticsType(const KineticsModel::KineticsModel type):
-    my_type(type)
+    my_type(type),
+    my_index(0)
   {
     return;
   }
@@ -136,77 +139,65 @@ namespace Antioch{
     return;
   }
 
-
   template <typename CoeffType, typename VectorCoeffType>
   inline
-  void KineticsType<CoeffType,VectorCoeffType>::calculate_rate_constant(const VectorCoeffType &abs,const VectorCoeffType &flux, bool x_update)
+  void KineticsType<CoeffType,VectorCoeffType>::set_index(unsigned int nr)
   {
-    switch(my_type) 
-      {
-      case(KineticsModel::PHOTOCHEM):
-        {
-          (static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->calculate_rate_constant(abs,flux,x_update);
-        }
-      break;
-      default:
-        {
-          antioch_error();
-        }
-      }
+    my_index = nr;
   }
-
+    
   template <typename CoeffType, typename VectorCoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   inline
-  StateType KineticsType<CoeffType,VectorCoeffType>::operator()(const StateType& T) const
+  StateType KineticsType<CoeffType,VectorCoeffType>::operator()(const KineticsConditions<StateType,VectorStateType>& conditions) const
   {
     switch(my_type) 
       {
       case(KineticsModel::CONSTANT):
         {
-          return (static_cast<const ConstantRate<CoeffType>*>(this))->rate(T);
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->rate(conditions.T());
         }
         break;
 
       case(KineticsModel::HERCOURT_ESSEN):
         {
-          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate(T);
+          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate(conditions.T());
         }
         break;
 
       case(KineticsModel::BERTHELOT):
         {
-          return (static_cast<const BerthelotRate<CoeffType>*>(this))->rate(T);
+          return (static_cast<const BerthelotRate<CoeffType>*>(this))->rate(conditions.T());
         }
         break;
 
       case(KineticsModel::ARRHENIUS):
         {
-          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate(T);
+          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate(conditions.T());
         }
         break;
 
       case(KineticsModel::BHE):
         {
-          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate(T);
+          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::KOOIJ):
         {
-          return (static_cast<const KooijRate<CoeffType>*>(this))->rate(T);
+          return (static_cast<const KooijRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::VANTHOFF):
         {
-          return (static_cast<const VantHoffRate<CoeffType>*>(this))->rate(T);
+          return (static_cast<const VantHoffRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::PHOTOCHEM):
         {
-          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->rate(T);
+          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->rate(conditions.particle_flux(my_index));
         }
         break;
 
@@ -218,61 +209,61 @@ namespace Antioch{
       } // switch(my_type)
 
     // Dummy
-    return zero_clone(T);
+    return zero_clone(conditions.T());
   }
 
   template <typename CoeffType, typename VectorCoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   inline
-  StateType KineticsType<CoeffType,VectorCoeffType>::derivative( const StateType& T ) const
+  StateType KineticsType<CoeffType,VectorCoeffType>::derivative( const KineticsConditions<StateType, VectorStateType> & conditions ) const
   {
     switch(my_type) 
       {
       case(KineticsModel::CONSTANT):
         {
-          return (static_cast<const ConstantRate<CoeffType>*>(this))->derivative(T);
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->derivative(conditions.T());
         }
         break;
 
       case(KineticsModel::HERCOURT_ESSEN):
         {
-          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->derivative(T);
+          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->derivative(conditions.T());
         }
         break;
 
       case(KineticsModel::BERTHELOT):
         {
-          return (static_cast<const BerthelotRate<CoeffType>*>(this))->derivative(T);
+          return (static_cast<const BerthelotRate<CoeffType>*>(this))->derivative(conditions.T());
         }
         break;
 
       case(KineticsModel::ARRHENIUS):
         {
-          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->derivative(T);
+          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->derivative(conditions.T());
         }
         break;
 
       case(KineticsModel::BHE):
         {
-          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->derivative(T);
+          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::KOOIJ):
         {
-          return (static_cast<const KooijRate<CoeffType>*>(this))->derivative(T);
+          return (static_cast<const KooijRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::VANTHOFF):
         {
-          return (static_cast<const VantHoffRate<CoeffType>*>(this))->derivative(T);
+          return (static_cast<const VantHoffRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::PHOTOCHEM):
         {
-          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->derivative(T);
+          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->derivative(conditions.particle_flux(my_index)); 
         }
         break;
 
@@ -284,61 +275,62 @@ namespace Antioch{
       } // switch(my_type)
 
     // Dummy
-    return zero_clone(T);
+    return zero_clone(conditions.T());
   }
 
   template <typename CoeffType, typename VectorCoeffType>
-  template <typename StateType>
+  template <typename StateType, typename VectorStateType>
   inline
-  void KineticsType<CoeffType,VectorCoeffType>::compute_rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const
+  void KineticsType<CoeffType,VectorCoeffType>::compute_rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& conditions, 
+                                                                                  StateType& rate, StateType& drate_dT) const
   {
     switch (my_type) 
       {
       case(KineticsModel::CONSTANT):
         {
-          (static_cast<const ConstantRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const ConstantRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
         }
         break;
 
       case(KineticsModel::HERCOURT_ESSEN):
         {
-          (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
         }
         break;
 
       case(KineticsModel::BERTHELOT):
         {
-          (static_cast<const BerthelotRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const BerthelotRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
         }
         break;
 
       case(KineticsModel::ARRHENIUS):
         {
-          (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
         }
         break;
 
       case(KineticsModel::BHE):
         {
-          (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::KOOIJ):
         {
-          (static_cast<const KooijRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const KooijRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::VANTHOFF):
         {
-          (static_cast<const VantHoffRate<CoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const VantHoffRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::PHOTOCHEM):
         {
-          (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->rate_and_derivative(T,rate,drate_dT);
+          (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->rate_and_derivative(conditions.particle_flux(my_index),rate,drate_dT);
         }
         break;
 

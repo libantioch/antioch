@@ -33,24 +33,26 @@
 
 // Antioch
 #include "antioch/blottner_viscosity.h"
-#include "antioch/mixture_viscosity.h"
+#include "antioch/chemical_mixture.h"
+#include "antioch/physical_set.h"
 
 // C++
 #include <iostream>
 
 namespace Antioch
 {
+
   template<class NumericType>
-  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
+  void read_blottner_data_ascii( PhysicalSet<BlottnerViscosity<NumericType>, ChemicalMixture<NumericType> >& mu,
 				 const std::string &filename );
 
   template<class NumericType>
-  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu );
+  void read_blottner_data_ascii_default( PhysicalSet<BlottnerViscosity<NumericType>, ChemicalMixture<NumericType> >& mu );
 
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
   inline
-  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
+  void read_blottner_data_ascii( PhysicalSet<BlottnerViscosity<NumericType>,ChemicalMixture<NumericType> >& mu,
 				 const std::string &filename )
   {
     std::ifstream in(filename.c_str());
@@ -78,7 +80,7 @@ namespace Antioch
         // in the section above
         if (in.good())
           {
-	    const ChemicalMixture<NumericType>& chem_mixture = mu.chemical_mixture();
+	    const ChemicalMixture<NumericType>& chem_mixture = mu.mixture();
 	    
 	    // Check if this is a species we want.
 	    if( chem_mixture.species_name_map().find(name) !=
@@ -89,7 +91,7 @@ namespace Antioch
 		coeffs[0] = a;
 		coeffs[1] = b;
 		coeffs[2] = c;
-		mu.add(name, coeffs);
+		mu.add_model(name, coeffs);
 	      }
           }
 
@@ -99,7 +101,7 @@ namespace Antioch
   }
 
   template<class NumericType>
-  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu )
+  void read_blottner_data_ascii_default( PhysicalSet<BlottnerViscosity<NumericType>, ChemicalMixture<NumericType> >& mu )
   {
     antioch_deprecated();
     read_blottner_data_ascii(mu, DefaultFilename::blottner_data());

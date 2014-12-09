@@ -41,22 +41,23 @@
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction_set.h"
-#include "antioch/read_reaction_set_data_xml.h"
+#include "antioch/read_reaction_set_data.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/kinetics_evaluator.h"
 
 
 template <typename Scalar>
-int check_test(const Scalar &exact,const Scalar &cal,const std::string &words)
+int check_test(const Scalar &exact,const Scalar &cal,const std::string &words, unsigned int rxn)
 {
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
   if(std::abs(exact - cal)/exact > tol)
   {
      std::cout << std::scientific << std::setprecision(20)
-               << "Erreur in tests of "  << words << "\n"
-               << "Calculated value is " << cal << "\n"
-               << "Exact value is "      << exact << "\n"
+               << "Erreur in tests of "  << words                       << "\n"
+               << "of reaction #"        << rxn                         << "\n"
+               << "Calculated value is " << cal                         << "\n"
+               << "Exact value is "      << exact                       << "\n"
                << "Relative error is "   << std::abs(exact - cal)/exact << "\n"
                << "Tolerance is "        << tol << std::endl;
     return 1;
@@ -87,6 +88,8 @@ int tester(const std::string& input_name)
   const Scalar T = 1500.0; // K
   const Scalar P = 1.0e5; // Pa
 
+  const Antioch::KineticsConditions<Scalar> conditions(T);
+
   // Mass fractions
   std::vector<Scalar> Y(n_species,0.2);
 
@@ -104,7 +107,7 @@ int tester(const std::string& input_name)
 
   std::vector<Scalar> net_rates,kfwd_const,kbkwd_const,kfwd,kbkwd,fwd_conc,bkwd_conc;
 
-  reaction_set.get_reactive_scheme(T,molar_densities,h_RT_minus_s_R,net_rates,
+  reaction_set.get_reactive_scheme(conditions,molar_densities,h_RT_minus_s_R,net_rates,
                                    kfwd_const,kbkwd_const,kfwd,kbkwd,fwd_conc,bkwd_conc);
 
   std::vector<Scalar> net_rates_exact,
@@ -167,14 +170,24 @@ int tester(const std::string& input_name)
   int return_flag(0);
   for(unsigned int rxn = 0; rxn < 5; rxn++)
   {
-     return_flag = return_flag ||
-                   check_test(net_rates_exact[rxn],net_rates[rxn],"net rates") ||
-                   check_test(kfwd_const_exact[rxn],kfwd_const[rxn],"rate constant forward") ||
-                   check_test(kbkwd_const_exact[rxn],kbkwd_const[rxn],"rate constant backward") ||
-                   check_test(kfwd_exact[rxn],kfwd[rxn],"rate forward") ||
-                   check_test(kbkwd_exact[rxn],kbkwd[rxn],"rate backward") ||
-                   check_test(fwd_conc_exact[rxn],fwd_conc[rxn],"concentrations forward") ||
-                   check_test(bkwd_conc_exact[rxn],bkwd_conc[rxn],"concentrations backward");
+     return_flag = check_test(net_rates_exact[rxn],net_rates[rxn],"net rates",rxn)                  ||
+                   return_flag;
+     return_flag = check_test(kfwd_const_exact[rxn],kfwd_const[rxn],"rate constant forward",rxn)    ||
+                   return_flag;
+     return_flag = check_test(kfwd_exact[rxn],kfwd[rxn],"rate forward",rxn)                         ||
+                   return_flag;
+     return_flag = check_test(fwd_conc_exact[rxn],fwd_conc[rxn],"concentrations forward",rxn)       ||
+                   return_flag;
+
+     if(rxn < 3)
+     {
+        return_flag = check_test(kbkwd_const_exact[rxn],kbkwd_const[rxn],"rate constant backward",rxn) ||
+                      return_flag;
+        return_flag = check_test(kbkwd_exact[rxn],kbkwd[rxn],"rate backward",rxn)                      ||
+                      return_flag;
+        return_flag = check_test(bkwd_conc_exact[rxn],bkwd_conc[rxn],"concentrations backward",rxn)    ||
+                      return_flag;
+     }
   }
   return return_flag;
 }

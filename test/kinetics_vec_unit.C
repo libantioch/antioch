@@ -57,7 +57,7 @@
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction_set.h"
-#include "antioch/read_reaction_set_data_xml.h"
+#include "antioch/read_reaction_set_data.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/kinetics_evaluator.h"
 
@@ -146,6 +146,8 @@ int vectester(const std::string& input_name,
           T[2*tuple+1] = T[0]+T_inc/2;
 	}
 
+      Antioch::KineticsConditions<PairScalars> cond(T);
+
 #ifdef ANTIOCH_HAVE_GRVY
   const std::string testnormal = testname + "-normal";
   gt.BeginTimer(testnormal);
@@ -159,7 +161,7 @@ int vectester(const std::string& input_name,
 
       thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testnormal);
