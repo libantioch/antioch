@@ -68,6 +68,14 @@ if test "x$HAVE_GRVY" = "x1"; then
 else
   echo '  'GRVY........................ : no
 fi
+if test "x$HAVE_GSL" = "x1"; then
+  echo '  'GSL......................... : yes
+  echo '    'GSL_CPPFLAGS.............. : $GSL_CPPFLAGS
+  echo '    'GSL_LDFLAGS............... : $GSL_LDFLAGS
+  echo '    'GSL_LIBS.................. : $GSL_LIBS
+else
+  echo '  'GLS......................... : no
+fi
 echo
 echo '-------------------------------------------------------------------------------'
 

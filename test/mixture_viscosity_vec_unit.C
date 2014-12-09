@@ -55,7 +55,10 @@
 #include "antioch/default_filename.h"
 #include "antioch/sutherland_viscosity.h"
 #include "antioch/blottner_viscosity.h"
-#include "antioch/mixture_viscosity.h"
+#include "antioch/blottner_viscosity_utils.h"
+#include "antioch/sutherland_viscosity_utils.h"
+#include "antioch/physics_metaprogramming.h"
+#include "antioch/physical_set.h"
 #include "antioch/blottner_parsing.h"
 #include "antioch/sutherland_parsing.h"
 
@@ -87,9 +90,9 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar> s_mu_mixture(chem_mixture);
+  Antioch::PhysicalSet<Antioch::SutherlandViscosity<Scalar>, Antioch::ChemicalMixture<Scalar> > s_mu_mixture(chem_mixture);
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> b_mu_mixture(chem_mixture);
+  Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, Antioch::ChemicalMixture<Scalar> > b_mu_mixture(chem_mixture);
 
   Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
   Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
@@ -114,7 +117,7 @@ int vectester(const PairScalars& example, const std::string& testname)
       gt.BeginTimer(testblottner);
 #endif
 
-      mu = b_mu_mixture(s,T);
+      b_mu_mixture(s,T,mu);
 
 #ifdef ANTIOCH_HAVE_GRVY
       gt.EndTimer(testblottner);
@@ -131,7 +134,7 @@ int vectester(const PairScalars& example, const std::string& testname)
       gt.BeginTimer(testsutherland);
 #endif
 
-      mu = s_mu_mixture(s,T);
+      s_mu_mixture(s,T,mu);
 
 #ifdef ANTIOCH_HAVE_GRVY
       gt.EndTimer(testsutherland);
