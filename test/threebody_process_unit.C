@@ -41,7 +41,7 @@ int tester()
   const Scalar Cf = 1.4;
   const Scalar Ea = 5.0;
   const Scalar beta = 1.2;
-  const Scalar D = 2.5;
+  const Scalar D = 2.5e-2;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);

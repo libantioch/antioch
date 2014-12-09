@@ -202,19 +202,19 @@ namespace Antioch{
 
       case(KineticsModel::BHE):
         {
-          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate(conditions.T());
+          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::KOOIJ):
         {
-          return (static_cast<const KooijRate<CoeffType>*>(this))->rate(conditions.T());
+          return (static_cast<const KooijRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::VANTHOFF):
         {
-          return (static_cast<const VantHoffRate<CoeffType>*>(this))->rate(conditions.T());
+          return (static_cast<const VantHoffRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
@@ -279,19 +279,19 @@ namespace Antioch{
 
       case(KineticsModel::BHE):
         {
-          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->derivative(conditions.T());
+          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::KOOIJ):
         {
-          return (static_cast<const KooijRate<CoeffType>*>(this))->derivative(conditions.T());
+          return (static_cast<const KooijRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::VANTHOFF):
         {
-          return (static_cast<const VantHoffRate<CoeffType>*>(this))->derivative(conditions.T());
+          return (static_cast<const VantHoffRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
@@ -357,19 +357,19 @@ namespace Antioch{
 
       case(KineticsModel::BHE):
         {
-          (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
+          (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::KOOIJ):
         {
-          (static_cast<const KooijRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
+          (static_cast<const KooijRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::VANTHOFF):
         {
-          (static_cast<const VantHoffRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
+          (static_cast<const VantHoffRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 

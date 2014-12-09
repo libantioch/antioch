@@ -103,7 +103,7 @@ namespace Antioch
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
-    ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)*ant_exp(-_Ea/T)))
+    ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(_eta * ant_log(T) - _Ea/T)))
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
@@ -120,6 +120,30 @@ namespace Antioch
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+
+// KineticsConditions overloads
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    rate(const KineticsConditions<StateType,VectorStateType>& T) const
+    ANTIOCH_AUTOFUNC(StateType, _Cf * ant_exp(_eta * T.temp_cache().lnT - _Ea/T.T()))
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    operator()(const KineticsConditions<StateType,VectorStateType>& T) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
+
+    //! \return the derivative with respect to temperature evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    derivative( const KineticsConditions<StateType,VectorStateType>& T ) const
+    ANTIOCH_AUTOFUNC(StateType, (*this)(T)/T.T()*(_eta + _Ea/T.T()))
+
+    //! Simultaneously evaluate the rate and its derivative at \p T.
+    template <typename StateType,typename VectorStateType>
+    void rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& T, StateType& rate, StateType& drate_dT) const;
 
     //! print equation
     const std::string numeric() const;
@@ -139,7 +163,6 @@ namespace Antioch
       _Tref(Tref),
       _rscale(rscale)
   {
-    using std::pow;
 
     _Ea = _raw_Ea / _rscale;
     this->compute_cf();
@@ -266,6 +289,19 @@ namespace Antioch
   {
     rate     = (*this)(T);
     drate_dT = rate/T*(_eta + _Ea/T);
+
+    return;
+  }
+
+  template<typename CoeffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  void KooijRate<CoeffType>::rate_and_derivative( const KineticsConditions<StateType,VectorStateType>& T,
+                                                  StateType& rate,
+                                                  StateType& drate_dT) const
+  {
+    rate     = (*this)(T);
+    drate_dT = rate/T.T()*(_eta + _Ea/T.T());
 
     return;
   }

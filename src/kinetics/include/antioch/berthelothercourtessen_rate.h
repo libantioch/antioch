@@ -114,6 +114,30 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
+//KineticsConditions overloads
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+    rate(const KineticsConditions<StateType,VectorStateType>& T) const
+    ANTIOCH_AUTOFUNC(StateType, _Cf * ant_exp(_eta * T.temp_cache().lnT + _D*T.T()))
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+    operator()(const KineticsConditions<StateType,VectorStateType>& T) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
+
+    //! \return the derivative with respect to temperature evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+    derivative( const KineticsConditions<StateType,VectorStateType>& T ) const
+    ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_eta/T.T() + _D))
+
+    //! Simultaneously evaluate the rate and its derivative at \p T.
+    template <typename StateType,typename VectorStateType>
+    void rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& T, StateType& rate, StateType& drate_dT) const;
+
     //! print equation
     const std::string numeric() const;
 
@@ -130,7 +154,6 @@ namespace Antioch
       _D(D),
       _Tref(Tref)
   {
-    using std::pow;
     this->compute_cf();
     return;
   }
@@ -231,6 +254,18 @@ namespace Antioch
   {
     rate     = (*this)(T);
     drate_dT = rate*(_eta/T + _D);
+    return;
+  }
+
+  template<typename CoeffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::rate_and_derivative( const KineticsConditions<StateType,VectorStateType>& T,
+                                                                   StateType& rate,
+                                                                   StateType& drate_dT) const
+  {
+    rate     = (*this)(T);
+    drate_dT = rate*(_eta/T.T() + _D);
     return;
   }
 
