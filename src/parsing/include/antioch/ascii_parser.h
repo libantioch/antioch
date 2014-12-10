@@ -45,6 +45,7 @@
 namespace Antioch
 {
 
+   // backward compatibility
   typedef unsigned int Species;
 
   // Forward declarations
@@ -89,6 +90,7 @@ namespace Antioch
         //! not allowed
         ASCIIParser();
 
+        std::string   _file;
         std::ifstream _doc;
         bool          _verbose;
         std::map<ParsingUnit,std::string> _unit_map;
@@ -99,6 +101,7 @@ namespace Antioch
   template <typename NumericType>
   inline
   ASCIIParser<NumericType>::ASCIIParser(const std::string & file, bool verbose):
+        _file(file),
         _doc(file.c_str()),
         _verbose(verbose)
   {
@@ -130,6 +133,7 @@ namespace Antioch
   {
       std::vector<std::string> species_list;
       std::string spec;
+
       while(_doc.good())
       {
           skip_comment_lines(_doc, '#'); // if comments in the middle
@@ -159,7 +163,7 @@ namespace Antioch
           species_list.push_back(spec);
       }
 
-      if(_verbose)std::cout << "Found " << species_list.size() << " species" << std::endl;
+      if(_verbose)std::cout << "Found " << species_list.size() << " species\n\n" << std::endl;
       return species_list;
   }
 
@@ -174,16 +178,17 @@ namespace Antioch
     NumericType mw_unit = Units<NumericType>(_unit_map.at(MOL_WEIGHT)).get_SI_factor();
     NumericType ef_unit = 1.L;// Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor(); // not integrated yet the kg bugfix
 
+    if(_verbose)std::cout << "Reading species characteristics in file " << _file << std::endl;
     while (_doc.good())
       {
 
          skip_comment_lines(_doc, '#'); // if comment in the middle
 
-	_doc >> name;      // Species Name
-	_doc >> mol_wght;  // molecular weight (kg/kmol)
-	_doc >> h_form;    // heat of formation at Ok (J/kg)
-	_doc >> n_tr_dofs; // number of translational/rotational DOFs
-	_doc >> charge;    // charge number
+        _doc >> name;      // Species Name
+        _doc >> mol_wght;  // molecular weight (kg/kmol)
+        _doc >> h_form;    // heat of formation at Ok (J/kg)
+        _doc >> n_tr_dofs; // number of translational/rotational DOFs
+        _doc >> charge;    // charge number
 
         mol_wght *= mw_unit; // to SI (kg/mol)
         h_form *= ef_unit; // to SI (J/kg)
@@ -214,9 +219,9 @@ namespace Antioch
                               << "trans-rot degrees of freedom: " << n_tr_dofs << "\n\t"
                               << "charge: "                       << charge << std::endl;
                 }
-	      }
+              }
 
-	  }
+          }
       }
 
       return;
@@ -230,6 +235,7 @@ namespace Antioch
     NumericType theta_v;
     unsigned int n_degeneracies;
 
+    if(_verbose)std::cout << "Reading vibrational data in file " << _file << std::endl;
     while (_doc.good())
       {
 
@@ -246,7 +252,7 @@ namespace Antioch
           {
             // If we do not have this species, just keep going
             if (!chem_mixture.species_name_map().count(name))continue;
-	
+        
             // ... otherwise we add the data
             const unsigned int s = 
               chem_mixture.species_name_map().find(name)->second;
@@ -274,6 +280,7 @@ namespace Antioch
     NumericType theta_e;
     unsigned int n_degeneracies;
     
+    if(_verbose)std::cout << "Reading electronic data in file " << _file << std::endl;
     while (_doc.good())
       {
         _doc >> name;           // Species Name

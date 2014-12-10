@@ -124,6 +124,24 @@ class Units{
 /*!\brief Default destructor*/
         ~Units(){}
 
+    //! Formatted print
+    /*!
+     * Defaults to \p std::cout.
+     */
+        void print(std::ostream &os = std::cout) const;
+
+    //!Formatted print 
+    /*!
+     * Allows you to do std::cout << object << std::endl;
+     */
+       friend std::ostream& operator<<( std::ostream& os,
+				        const Units<T>& unit )
+       {
+         unit.print(os);
+         return os;
+       } 
+
+
 /*! \brief Comparison operator
  *
  * Compares the power vector and the coefficient, regardless
@@ -802,9 +820,10 @@ bool Units<T>::parse_single_unit(int signe,std::string unit,bool doConv)
 
   if(iUnit == -1)return false; //not found
 
-  T pre = 1.;
+  T pre = 1.L;
   if(iPre != -1)pre = UnitBaseStorage::known_prefixes().stored(iPre).value<T>();
-  if(UnitBaseStorage::known_units().stored(iUnit).symbol() == "kg")pre *= 1e-3; //rescale
+  if(UnitBaseStorage::known_units().stored(iUnit).symbol() == "kg" && 
+     unit != "kg")pre *= 1e-3L; //rescale
   InSI powerTmp = UnitBaseStorage::known_units().stored(iUnit).power_array();
   power += (powerTmp * signe * ipower);
   if(doConv)
@@ -1338,6 +1357,16 @@ Units<T> Units<T>::operator/(int r) const
 {
   return (Units<T>(*this) /= r);
 }
+
+  template <typename T>
+  void Units<T>::print(std::ostream &os) const
+  {
+     os << name << " (" << symbol << "), "
+        << toSI << ", "
+        << power << std::endl;
+  }
+
+
 } //Antioch namespace
 
 #endif
