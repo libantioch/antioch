@@ -123,6 +123,7 @@ namespace Antioch
 
     parser.read_vibrational_data(chem_mixture);
 
+
     // sanity check, we check these informations
     std::vector<std::string> missing;
     for(unsigned int s = 0; s < chem_mixture.chemical_species().size(); s++)
