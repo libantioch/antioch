@@ -77,7 +77,6 @@ AC_ARG_WITH([n_runs],
 	    [n_runs=1])
 AC_DEFINE_UNQUOTED(N_RUNS, $n_runs, [number of runs done in each vector test])
 
-
 dnl--------------------------
 dnl Checks for third-party libraries
 dnl--------------------------
@@ -123,6 +122,15 @@ if (test x$HAVE_GRVY = x1); then
   antioch_optional_test_INCLUDES="$GRVY_CFLAGS $antioch_optional_test_INCLUDES"
   antioch_optional_test_LIBS="$GRVY_LIBS $antioch_optional_test_LIBS"
 fi
+
+dnl GSL for spline method
+AX_PATH_GSL_NEW(1.10,no)
+if (test x$HAVE_GSL = x1); then
+  antioch_optional_test_INCLUDES="$GSL_CFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LIBS="$GSL_LIBS $antioch_optional_test_LIBS"
+  antioch_optional_test_LDFLAGS="$GSL_LDFLAGS $antioch_optional_test_LDFLAGS"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$enableeigen = xyes)
 
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
@@ -194,7 +202,9 @@ AC_CONFIG_FILES(test/kinetics_regression_vec_air_5sp.sh, [chmod +x test/kinetics
 AC_CONFIG_FILES(test/photochemical_rate_unit.sh,         [chmod +x test/photochemical_rate_unit.sh])
 AC_CONFIG_FILES(test/sigma_bin_converter_unit.sh,        [chmod +x test/sigma_bin_converter_unit.sh])
 AC_CONFIG_FILES(test/parsing_xml.sh,                     [chmod +x test/parsing_xml.sh])
+AC_CONFIG_FILES(test/parsing_chemkin.sh,                 [chmod +x test/parsing_chemkin.sh])
 AC_CONFIG_FILES(test/kinetics_reactive_scheme_unit.sh,   [chmod +x test/kinetics_reactive_scheme_unit.sh])
+AC_CONFIG_FILES(test/nasa_evaluator_unit.sh,             [chmod +x test/nasa_evaluator_unit.sh])
 
 dnl-----------------------------------------------
 dnl Generate header files
@@ -250,6 +260,7 @@ AC_DEFINE(DEFAULT_ELECTRONIC_DATA,"antioch_default_electronic_data.dat",[Electro
 AC_DEFINE(DEFAULT_THERMO_DATA,"antioch_default_thermo_data.dat",[Thermodynamic default data, NASA polynom])
 AC_DEFINE(DEFAULT_BLOTTNER_DATA,"antioch_default_blottner_coefficient.dat",[Blottner model, default data])
 AC_DEFINE(DEFAULT_SUTHERLAND_DATA,"antioch_default_sutherland_coefficient.dat",[Sutherland model, default data])
+AC_DEFINE(DEFAULT_TRANSPORT_DATA,"antioch_default_transport_species_data.dat",[Data needed for transport computations])
 
 
 # Must still call AC_OUTPUT() after generating all the files

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROG="@top_builddir@/test/parsing_chemkin"
+
+INPUT="@top_srcdir@/test/input_files"
+
+$PROG $INPUT
+
