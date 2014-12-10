@@ -323,7 +323,9 @@ namespace Antioch
     std::vector<unsigned int> _product_ids;
     std::vector<unsigned int> _reactant_stoichiometry;
     std::vector<unsigned int> _product_stoichiometry;
-    std::vector<CoeffType> _efficiencies;
+    std::vector<unsigned int> _species_reactant_stoichiometry;
+    std::vector<unsigned int> _species_product_stoichiometry;
+    std::vector<int>          _species_delta_stoichiometry;
     int _gamma;
     bool _initialized;
     bool _reversible;
@@ -552,14 +554,13 @@ namespace Antioch
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
-  void Reaction<CoeffType,VectorCoeffType>::set_efficiency (const std::string &,
+  void Reaction<CoeffType,VectorCoeffType>::set_efficiency (const std::string & useless, //? where does that come from?
                                             const unsigned int s,
                                             const CoeffType efficiency)
   {
     antioch_assert_less(s, this->n_species());
-    antioch_assert_less(s, _efficiencies.size());
     antioch_assert_equal_to(_type, ReactionType::THREE_BODY);
-    _efficiencies[s] = efficiency;
+    static_cast<ThreeBodyReaction<CoeffType>* >(this)->set_efficiency(useless,s,efficiency);
     return;
   }
 
@@ -567,9 +568,8 @@ namespace Antioch
   inline
   CoeffType Reaction<CoeffType,VectorCoeffType>::efficiency( const unsigned int s ) const
   {
-    antioch_assert_less(s, _efficiencies.size());
     antioch_assert_equal_to(_type, ReactionType::THREE_BODY);
-    return _efficiencies[s];
+    return static_cast<const ThreeBodyReaction<CoeffType>* >(this)->efficiency(s);
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -611,8 +611,7 @@ namespace Antioch
       _type(type),
       _kintype(kin)
   {
-    _efficiencies.resize(_n_species); 
-    std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
+     return;
   }
 
 
