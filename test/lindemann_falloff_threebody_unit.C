@@ -33,21 +33,23 @@
 #include "antioch/lindemann_falloff.h"
 
 template <typename Scalar>
-int tester()
+int tester(const std::string & type)
 {
   using std::abs;
   using std::exp;
   using std::pow;
 
 
-  const Scalar Cf1 = 1.4;
-  const Scalar Ea1 = 5.0;
-  const Scalar beta1 = 1.2;
-  const Scalar D1 = 2.5;
-  const Scalar Cf2 = 2.0;
-  const Scalar Ea2 = 3.0;
-  const Scalar beta2 = 0.8;
-  const Scalar D2 = 3.0;
+//values for 2 CH3 (+M) <=> C2H6 (+M) for the Kooij model, Ds are made up
+
+  const Scalar Cf1 = 1.135e36L * 1e6L * 1e-12L; //(cm3/mol)^2/s -> kmol -> m3
+  const Scalar beta1 = 1.246L; //true value is -5.246
+  const Scalar Ea1 = 1704.8L / 1.9858775L; //cal/mol
+  const Scalar D1 = -4e-2L; // K^-1
+  const Scalar Cf2 = 6.22e16L * 1e3L * 1e-12L; //cm3/mol/s -> kmol -> m3
+  const Scalar beta2 = -1.174L;
+  const Scalar Ea2 = 635.8L / 1.9858775L; //cal/mol
+  const Scalar D2 = -5e-3L;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);
@@ -71,7 +73,9 @@ int tester()
      M += epsilon[i] * mol_densities[i];
   }
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+  std::cout << type << ", tolerance = " << tol;
+  Scalar max_diff(-1.L);
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
@@ -172,7 +176,9 @@ int tester()
 
     for(unsigned int i = 0; i < n_species; i++)
     {
-      if( abs( (drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i] ) > tol )
+      Scalar diff = abs( (drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i] );
+      if(diff > max_diff)max_diff = diff;
+      if( diff > tol )
       {
           std::cout << std::scientific << std::setprecision(16)
                     << "Error: Mismatch in rate values." << std::endl
@@ -185,7 +191,9 @@ int tester()
           return_flag = 1;
       }
     }
-    if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
+    Scalar diff = abs( (rate1 - rate_exact)/rate_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error: Mismatch in rate values." << std::endl
@@ -198,7 +206,9 @@ int tester()
 
         return_flag = 1;
       }
-    if( abs( (rate - rate_exact)/rate_exact ) > tol )
+    diff = abs( (rate - rate_exact)/rate_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error: Mismatch in rate values." << std::endl
@@ -211,7 +221,9 @@ int tester()
 
         return_flag = 1;
       }
-    if( abs( (drate_dT - derive_exact)/derive_exact ) > tol )
+    diff = abs( (drate_dT - derive_exact)/derive_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error: Mismatch in rate derivative values." << std::endl
@@ -226,16 +238,16 @@ int tester()
       }
 
     delete fall_reaction;
-    if(return_flag)return return_flag;
     }
   }
 
+  std::cout << " and maximum difference = " << max_diff << std::endl;
   return return_flag;
 }
 
 int main()
 {
-  return (tester<double>() ||
-          tester<long double>() ||
-          tester<float>());
+  return (tester<double>("double") ||
+          tester<long double>("long double") ||
+          tester<float>("float"));
 }
