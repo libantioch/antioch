@@ -808,6 +808,7 @@ namespace Antioch{
         _duplicate_process = true;
      }else if(line.find(_spec.parser()) != std::string::npos) // "/"
      {
+        if(_chemical_process.find("Falloff") != std::string::npos)_chemical_process += "ThreeBody";
         this->parse_coefficients_line(line);
      }else
      {
@@ -914,7 +915,7 @@ namespace Antioch{
         }else if(out[i] == _spec.symbol().at(ChemKinDefinitions::TB))
         {
            if(_chemical_process.find("Falloff") != std::string::npos)
-                      antioch_parsing_error("ChemKin parser: it seems you want both a falloff and a three-body reaction:\n" + equation);
+                     std::cerr << "WARNING: ChemKin parser: it seems you want both a falloff and a three-body reaction in your equation:\n" << equation << std::endl;
 
            _chemical_process = "ThreeBody";
 
@@ -944,7 +945,7 @@ namespace Antioch{
      bool real(false);
      for(unsigned int i = 0; i < _reactants.size(); i++)
      {
-        if(this->after_coma_digits((_reactants[i].second)))
+        if(this->after_coma_digits(_reactants[i].second))
         {
            real = true;
            break;
@@ -1033,7 +1034,7 @@ namespace Antioch{
 
         _nrates++;
          
-      }else if(_chemical_process == "ThreeBody")// efficiencies
+      }else if(_chemical_process.find("ThreeBody") != std::string::npos)// efficiencies
  // in case it is superfluous (or we need to redesign pressure-dependance)
       {
         for(unsigned int i = 0; i < out.size(); i++)
