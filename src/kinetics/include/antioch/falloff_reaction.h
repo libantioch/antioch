@@ -175,6 +175,7 @@ namespace Antioch
         M += molar_densities[i];
     }
 
+
     return (*this->_forward_rate[0])(conditions) / (ant_pow(M,-1) + (*this->_forward_rate[0])(conditions) /(*this->_forward_rate[1])(conditions)) * 
             _F(conditions.T(),molar_densities,(*this->_forward_rate[0])(conditions),(*this->_forward_rate[1])(conditions));
   }
