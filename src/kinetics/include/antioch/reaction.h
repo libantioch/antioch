@@ -67,6 +67,9 @@ namespace Antioch
   template <typename CoeffType,typename FalloffType>
   class FalloffReaction;
 
+  template <typename CoeffType,typename FalloffType>
+  class FalloffThreeBodyReaction;
+
   template <typename CoeffType>
   class LindemannFalloff;
 
@@ -87,7 +90,7 @@ namespace Antioch
    - elementary process (ElementaryReaction),
    - duplicate process (DuplicateReaction),
    - three body process (ThreeBodyReaction)
-   - falloff processes (FalloffReaction) with:
+   - falloff processes (FalloffReaction) and falloff three-body processes (FalloffThreeBodyReaction) with:
       - Lindemann falloff (LindemannFalloff),
       - Troe falloff (TroeFalloff).
 
@@ -559,8 +562,34 @@ namespace Antioch
                                             const CoeffType efficiency)
   {
     antioch_assert_less(s, this->n_species());
-    antioch_assert_equal_to(_type, ReactionType::THREE_BODY);
-    static_cast<ThreeBodyReaction<CoeffType>* >(this)->set_efficiency(useless,s,efficiency);
+    switch(_type) 
+    {
+      case ReactionType::THREE_BODY:
+      {
+        static_cast<ThreeBodyReaction<CoeffType>* >(this)->set_efficiency(useless,s,efficiency);
+      }
+      break;
+
+      case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
+      {
+        (static_cast<FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->set_efficiency(useless,s,efficiency);
+      }
+      break;
+
+      case ReactionType::TROE_FALLOFF_THREE_BODY:
+      {
+        (static_cast<FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->set_efficiency(useless,s,efficiency);
+      }
+      break;
+
+      default:
+      {
+        std::cerr << "This model do not include efficiencies: " << _type << std::endl;
+        antioch_assert(0); //so it will not necessarily crash
+      }
+      break;
+
+    }
     return;
   }
 
@@ -568,8 +597,36 @@ namespace Antioch
   inline
   CoeffType Reaction<CoeffType,VectorCoeffType>::efficiency( const unsigned int s ) const
   {
-    antioch_assert_equal_to(_type, ReactionType::THREE_BODY);
-    return static_cast<const ThreeBodyReaction<CoeffType>* >(this)->efficiency(s);
+    
+    switch(_type) 
+    {
+      case ReactionType::THREE_BODY:
+      {
+        return static_cast<const ThreeBodyReaction<CoeffType>* >(this)->efficiency(s);
+      }
+      break;
+
+      case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
+      {
+        return (static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->efficiency(s);
+      }
+      break;
+
+      case ReactionType::TROE_FALLOFF_THREE_BODY:
+      {
+        return (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->efficiency(s);
+      }
+      break;
+
+      default:
+      {
+        std::cerr << "This model do not include efficiencies: " << _type << std::endl;
+        antioch_assert(0); //so it will not necessarily crash
+      }
+      break;
+
+    }
+    return CoeffType(0.); // keep compiler happy
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -805,6 +862,18 @@ namespace Antioch
         }
         break;
 
+      case(ReactionType::LINDEMANN_FALLOFF_THREE_BODY):
+        {
+          return (static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
+        break;
+
+      case(ReactionType::TROE_FALLOFF_THREE_BODY):
+        {
+          return (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+        }
+        break;
+
       default:
         {
           antioch_error();
@@ -866,6 +935,17 @@ namespace Antioch
       case(ReactionType::TROE_FALLOFF):
         {
           (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,conditions,kfwd,dkfwd_dT,dkfwd_dX);
+        }
+
+      case(ReactionType::LINDEMANN_FALLOFF_THREE_BODY):
+        {
+          (static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+        }
+        break;
+
+      case(ReactionType::TROE_FALLOFF_THREE_BODY):
+        {
+          (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
         }
         break;
 

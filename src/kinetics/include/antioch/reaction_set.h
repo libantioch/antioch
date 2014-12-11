@@ -39,6 +39,7 @@
 #include "antioch/duplicate_reaction.h"
 #include "antioch/threebody_reaction.h"
 #include "antioch/falloff_reaction.h"
+#include "antioch/falloff_threebody_reaction.h"
 #include "antioch/lindemann_falloff.h"
 #include "antioch/troe_falloff.h"
 

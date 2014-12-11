@@ -46,6 +46,7 @@ pkginclude_HEADERS += kinetics/include/antioch/elementary_reaction.h
 pkginclude_HEADERS += kinetics/include/antioch/duplicate_reaction.h
 pkginclude_HEADERS += kinetics/include/antioch/threebody_reaction.h
 pkginclude_HEADERS += kinetics/include/antioch/falloff_reaction.h
+pkginclude_HEADERS += kinetics/include/antioch/falloff_threebody_reaction.h
 pkginclude_HEADERS += kinetics/include/antioch/lindemann_falloff.h
 pkginclude_HEADERS += kinetics/include/antioch/troe_falloff.h
 # kinetics-other

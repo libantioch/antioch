@@ -38,6 +38,7 @@
 #include "antioch/duplicate_reaction.h"
 #include "antioch/threebody_reaction.h"
 #include "antioch/falloff_reaction.h"
+#include "antioch/falloff_threebody_reaction.h"
 
 namespace Antioch
 {
@@ -86,6 +87,16 @@ namespace Antioch
       case(ReactionType::TROE_FALLOFF):
         {
           reaction = new FalloffReaction<CoeffType,TroeFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
+        }
+        break;
+
+      case(ReactionType::LINDEMANN_FALLOFF_THREE_BODY):
+        {
+          reaction = new FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
+        }
+      case(ReactionType::TROE_FALLOFF_THREE_BODY):
+        {
+          reaction = new FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
         }
         break;
 

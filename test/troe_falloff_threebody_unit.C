@@ -29,12 +29,12 @@
 #include "antioch/vector_utils.h"
 
 #include "antioch/reaction.h"
-#include "antioch/falloff_reaction.h"
+#include "antioch/falloff_threebody_reaction.h"
+#include "antioch/troe_falloff.h"
 
 template <typename Scalar>
 int tester(const std::string & type)
 {
-
   using std::abs;
   using std::exp;
   using std::pow;
@@ -63,21 +63,24 @@ int tester(const std::string & type)
   mol_densities.push_back(1e-2L);
   mol_densities.push_back(1e-2L);
   mol_densities.push_back(1e-2L);
-  Scalar M = mol_densities[0];
+
+  std::vector<Scalar> epsilon;
+  epsilon.push_back(2.L);
+  epsilon.push_back(8.5L);
+  epsilon.push_back(40.L);
+
+  Scalar M = epsilon[0] * mol_densities[0];
   for(unsigned int i = 1; i < n_species; i++)
   {
-     M += mol_densities[i];
+     M += epsilon[i] * mol_densities[i];
   }
 
-  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 500);
-
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2000;
   std::cout << type << ", tolerance = " << tol;
   Scalar max_diff(-1.L);
+
   for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
-
-    const Antioch::KineticsConditions<Scalar> conditions(T);
-
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -178,8 +181,7 @@ int tester(const std::string & type)
                                  );
     Scalar F = exp(logF);
     Scalar dF_dT = F * dlogF_dT;
-    std::vector<Scalar> dF_dX;
-    dF_dX.resize(n_species);
+    std::vector<Scalar> dF_dX(n_species,0.L);
     for(unsigned int i = 0; i < n_species; i++)
     {
         dF_dX[i] = - F * logF * logF/log(Fcent) * dlog10Pr_dX[i] * (1.L - 1.L/(n - d * (log10Pr + c))) * (log10Pr + c);
@@ -187,38 +189,42 @@ int tester(const std::string & type)
 
     rate_exact = k0 / (1.L/M + k0/kinf);
 
-    derive_exact = rate_exact * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + k0 * dkinf_dT/(kinf*(kinf/M + k0))) * F 
-                 + dF_dT * rate_exact;
+    derive_exact = rate_exact * ( (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + k0 * dkinf_dT/(kinf*(kinf/M + k0))) * F + dF_dT );
 
     for(unsigned int i = 0; i < n_species; i++)
     {
-      derive_dX_exact[i] = rate_exact/(M + pow(M,2)*k0/kinf) * F + dF_dX[i] * rate_exact;
+      derive_dX_exact[i] = epsilon[i] * rate_exact * (F/(M + pow(M,2)*k0/kinf) + dF_dX[i]);
     }
 
     rate_exact *= F;
 
-    Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> > * fall_reaction = 
-        new Antioch::FalloffReaction<Scalar,Antioch::TroeFalloff<Scalar> >(n_species,equation,true,Antioch::ReactionType::TROE_FALLOFF,kin_mod);
+    Antioch::FalloffThreeBodyReaction<Scalar,Antioch::TroeFalloff<Scalar> > * fall_reaction = 
+        new Antioch::FalloffThreeBodyReaction<Scalar,Antioch::TroeFalloff<Scalar> >(n_species,equation,true,Antioch::ReactionType::TROE_FALLOFF_THREE_BODY,kin_mod);
+
     fall_reaction->add_forward_rate(rate_kinetics1);
     fall_reaction->add_forward_rate(rate_kinetics2);
     fall_reaction->F().set_alpha(alpha);
     fall_reaction->F().set_T1(T1);
     fall_reaction->F().set_T3(T3);
-    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
+    for(unsigned int s = 0; s < n_species; s++)
+    {
+        fall_reaction->set_efficiency("",s,epsilon[s]);
+    }
+
+    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
+    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
 
     for(unsigned int i = 0; i < n_species; i++)
     {
       Scalar diff = abs( (drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i] );
-      if(diff > max_diff)max_diff = diff;
-
-      if(diff > tol )
+      if(max_diff < diff)max_diff = diff;
+      if( diff > tol )
       {
-          std::cerr << std::scientific << std::setprecision(16)
+          std::cout << std::scientific << std::setprecision(16)
                     << "\nError: Mismatch in rate values." << std::endl
                     << "Kinetics model (see enum) " << kin_mod << std::endl
                     << "species " << i << std::endl
@@ -233,10 +239,10 @@ int tester(const std::string & type)
       }
     }
     Scalar diff = abs( (rate1 - rate_exact)/rate_exact );
-    if(diff > max_diff)max_diff = diff;
+    if(max_diff < diff)max_diff = diff;
     if(diff > tol ) 
       {
-        std::cerr << std::scientific << std::setprecision(16)
+        std::cout << std::scientific << std::setprecision(16)
                   << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
@@ -248,10 +254,10 @@ int tester(const std::string & type)
         return_flag = 1;
       }
     diff = abs( (rate - rate_exact)/rate_exact );
-    if(diff > max_diff)max_diff = diff;
+    if(max_diff < diff)max_diff = diff;
     if( diff > tol )
       {
-        std::cerr << std::scientific << std::setprecision(16)
+        std::cout << std::scientific << std::setprecision(16)
                   << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
@@ -263,10 +269,10 @@ int tester(const std::string & type)
         return_flag = 1;
       }
     diff = abs( (drate_dT - derive_exact)/derive_exact );
-    if(diff > max_diff)max_diff = diff;
+    if(max_diff < diff)max_diff = diff;
     if( diff > tol )
       {
-        std::cerr << std::scientific << std::setprecision(16)
+        std::cout << std::scientific << std::setprecision(16)
                   << "\nError: Mismatch in rate derivative values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl

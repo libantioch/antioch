@@ -40,7 +40,12 @@ namespace Antioch
                         DUPLICATE,
                         THREE_BODY, 
                         LINDEMANN_FALLOFF,
-                        TROE_FALLOFF};
+                        TROE_FALLOFF,
+// I'm crying inside... This is to support the
+// alliance of efficiencies and pressure dependance
+// I'm really unhappy about this...
+                        LINDEMANN_FALLOFF_THREE_BODY,
+                        TROE_FALLOFF_THREE_BODY};
 
   } // end namespace ReactionType
 
