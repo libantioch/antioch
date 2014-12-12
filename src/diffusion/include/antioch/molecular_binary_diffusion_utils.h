@@ -172,7 +172,6 @@ namespace Antioch
    template<typename Model, typename StateType, typename VectorStateType>
    void physical_set_operator_diffusion(unsigned int s, const Model & set, const KineticsConditions<StateType,VectorStateType> & cond, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
    {
-       antioch_assert_equal_to(Ds.size(),set.size());
        Ds = (*set[s][s])(cond.T(),cTot);
    }
 

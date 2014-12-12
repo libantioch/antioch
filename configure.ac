@@ -130,7 +130,7 @@ if (test x$HAVE_GSL = x1); then
   antioch_optional_test_LIBS="$GSL_LIBS $antioch_optional_test_LIBS"
   antioch_optional_test_LDFLAGS="$GSL_LDFLAGS $antioch_optional_test_LDFLAGS"
 fi
-AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$enableeigen = xyes)
+AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$HAVE_GSL = x1)
 
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
