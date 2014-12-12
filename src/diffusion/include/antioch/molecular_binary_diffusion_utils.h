@@ -172,7 +172,6 @@ namespace Antioch
    template<typename Model, typename StateType>
    void physical_set_operator_diffusion(unsigned int s, const Model & set, const StateType & T, const StateType & cTot, StateType & Ds, bimolecular_diffusion_tag)
    {
-       antioch_assert_equal_to(Ds.size(),set.size());
        Ds = (*set[s][s])(T,cTot);
    }
 
