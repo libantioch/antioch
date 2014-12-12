@@ -37,7 +37,10 @@
 #include "antioch/default_filename.h"
 #include "antioch/sutherland_viscosity.h"
 #include "antioch/blottner_viscosity.h"
-#include "antioch/mixture_viscosity.h"
+#include "antioch/blottner_viscosity_utils.h"
+#include "antioch/sutherland_viscosity_utils.h"
+#include "antioch/physics_metaprogramming.h"
+#include "antioch/physical_set.h"
 #include "antioch/blottner_parsing.h"
 #include "antioch/sutherland_parsing.h"
 
@@ -52,9 +55,9 @@ int tester()
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar> s_mu_mixture(chem_mixture);
+  Antioch::PhysicalSet<Antioch::SutherlandViscosity<Scalar>, Antioch::ChemicalMixture<Scalar> > s_mu_mixture(chem_mixture);
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> b_mu_mixture(chem_mixture);
+  Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, Antioch::ChemicalMixture<Scalar> > b_mu_mixture(chem_mixture);
 
   Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
   Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
@@ -63,17 +66,20 @@ int tester()
   std::cout << b_mu_mixture << std::endl;
 
   const Scalar T = 1500.1;
+  Scalar mu(-1);
 
   std::cout << "Blottner:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
     {
-      std::cout << "mu(" << species_str_list[s] << ") = " << b_mu_mixture(s, T) << std::endl;
+      b_mu_mixture(s, T, mu);
+      std::cout << "mu(" << species_str_list[s] << ") = " << mu << std::endl;
     }
 
   std::cout << "Sutherland:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
     {
-      std::cout << "mu(" << species_str_list[s] << ") = " << s_mu_mixture(s, T) << std::endl;
+      s_mu_mixture(s, T, mu);
+      std::cout << "mu(" << species_str_list[s] << ") = " << mu << std::endl;
     }
 
   int return_flag = 0;

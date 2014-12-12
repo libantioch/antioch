@@ -91,12 +91,19 @@ namespace Antioch
 
   template<typename CoeffType>
   BlottnerViscosity<CoeffType>::BlottnerViscosity( const std::vector<CoeffType>& coeffs )
-    : _a(-1.0), _b(-1.0), _c(-1.0)
+    : 
+#ifndef NDEBUG
+     _a(-1.0), _b(-1.0), _c(-1.0)
+#else
+     _a(coeffs[0]), _b(coeffs[1]), _c(coeffs[2])
+#endif
   {
+#ifndef NDEBUG
     antioch_assert_equal_to( coeffs.size(), 3);
     _a = coeffs[0];
     _b = coeffs[1];
     _c = coeffs[2];
+#endif
     return;
   }
 
@@ -152,5 +159,7 @@ namespace Antioch
   }
 
 } // end namespace Antioch
+
+#include "antioch/blottner_viscosity_utils_decl.h"
 
 #endif //ANTIOCH_BLOTTNER_VISCOSITY_H

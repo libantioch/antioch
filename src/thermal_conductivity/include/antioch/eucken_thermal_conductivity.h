@@ -46,6 +46,15 @@ namespace Antioch
 
     ~EuckenThermalConductivity() {}
 
+     // As seen coded in previous WilkeEvaluator, frankly, all Ts the same??
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    operator()( const unsigned int s, const StateType& mu, const StateType & T ) const
+    ANTIOCH_AUTOFUNC(StateType,
+		     mu * (typename Antioch::raw_value_type<StateType>::type(2.5) * _thermo.cv_trans(s) +
+                            _thermo.cv_rot(s) + _thermo.cv_vib(s,T) + _thermo.cv_el(s,T)) )
+
+
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
     trans( const unsigned int s, const StateType& mu ) const
@@ -72,7 +81,8 @@ namespace Antioch
     ANTIOCH_AUTOFUNC(StateType, mu*_thermo.cv_el(s, Te))
 
   };
-
 } // end namespace Antioch
+
+#include "antioch/eucken_thermal_conductivity_utils_decl.h"
 
 #endif // ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H
