@@ -125,19 +125,9 @@ namespace Antioch
     //! Return writeable reference to the falloff object
     FalloffType &F();
 
-    //!
-    void set_efficiency( const std::string &,
-                         const unsigned int s,
-                         const CoeffType efficiency);
-
-    //!
-    CoeffType efficiency( const unsigned int s ) const;
-
   protected:
 
     FalloffType _F;
-
-    std::vector<CoeffType> _efficiencies;
 
   };
 
@@ -153,8 +143,8 @@ namespace Antioch
      _F(n_species)
      
   {
-    _efficiencies.resize(n_species); 
-    std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
+    Reaction<CoeffType>::_efficiencies.resize(n_species); 
+    std::fill (Reaction<CoeffType>::_efficiencies.begin(), Reaction<CoeffType>::_efficiencies.end(), 1.);
   }
 
 
@@ -189,7 +179,7 @@ namespace Antioch
     StateType M = Antioch::zero_clone(T);
     for(unsigned int s = 0; s < molar_densities.size(); s++)
     {
-        M += _efficiencies[s] * molar_densities[s];
+        M += this->efficiency(s) * molar_densities[s];
     }
 
     return (*this->_forward_rate[0])(T) / (ant_pow(M,-1) + (*this->_forward_rate[0])(T) /(*this->_forward_rate[1])(T)) * 
@@ -206,7 +196,7 @@ namespace Antioch
                                                                                                  VectorStateType& dkfwd_dX) const 
   {
     //variables, k0,kinf and derivatives
-   StateType k0 = Antioch::zero_clone(T);
+    StateType k0 = Antioch::zero_clone(T);
     StateType dk0_dT = Antioch::zero_clone(T);
     StateType kinf = Antioch::zero_clone(T);
     StateType dkinf_dT = Antioch::zero_clone(T);
@@ -217,7 +207,7 @@ namespace Antioch
     StateType M = Antioch::zero_clone(T);
     for(unsigned int s = 0; s < molar_densities.size(); s++)
     {
-        M += _efficiencies[s] * molar_densities[s];
+        M += this->efficiency(s) * molar_densities[s];
     }
 
     //F
@@ -240,31 +230,12 @@ namespace Antioch
 //         = F * epsilon_i * kfwd / ([M] +  [M]^2 k0/kinf) + kfwd * dF_dX
     for(unsigned int ic = 0; ic < this->n_species(); ic++)
       {
-        dkfwd_dX[ic] = _efficiencies[ic] * ( f * kfwd / (M + ant_pow(M,2) * k0/kinf) + df_dX[ic] * kfwd );
+        dkfwd_dX[ic] = this->efficiency(ic) * ( f * kfwd / (M + ant_pow(M,2) * k0/kinf) + df_dX[ic] * kfwd );
       }
 
     kfwd *= f; //finalize
 
     return;
-  }
-
-
-  template<typename CoeffType, typename FalloffType>
-  inline
-  void FalloffThreeBodyReaction<CoeffType,FalloffType>::set_efficiency( const std::string &,
-                                                     const unsigned int s,
-                                                     const CoeffType efficiency)
-  {
-    antioch_assert_less(s, _efficiencies.size());
-    _efficiencies[s] = efficiency;
-  }
-
-  template<typename CoeffType, typename FalloffType>
-  inline
-  CoeffType FalloffThreeBodyReaction<CoeffType,FalloffType>::efficiency( const unsigned int s ) const
-  {
-     antioch_assert_less(s, _efficiencies.size());
-     return _efficiencies[s];
   }
   
 } // namespace Antioch

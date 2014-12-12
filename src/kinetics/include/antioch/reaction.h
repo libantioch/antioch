@@ -338,6 +338,9 @@ namespace Antioch
     //! The forward reaction rate modified Arrhenius form.
     std::vector<KineticsType<CoeffType,VectorCoeffType>* > _forward_rate;
 
+    //! efficiencies for three body reactions
+    std::vector<CoeffType> _efficiencies;
+
   private:
     Reaction();
 
@@ -557,40 +560,12 @@ namespace Antioch
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
-  void Reaction<CoeffType,VectorCoeffType>::set_efficiency (const std::string & useless, //? where does that come from?
+  void Reaction<CoeffType,VectorCoeffType>::set_efficiency (const std::string & , //? where does that come from?
                                             const unsigned int s,
                                             const CoeffType efficiency)
   {
-    antioch_assert_less(s, this->n_species());
-    switch(_type) 
-    {
-      case ReactionType::THREE_BODY:
-      {
-        static_cast<ThreeBodyReaction<CoeffType>* >(this)->set_efficiency(useless,s,efficiency);
-      }
-      break;
-
-      case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
-      {
-        (static_cast<FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->set_efficiency(useless,s,efficiency);
-      }
-      break;
-
-      case ReactionType::TROE_FALLOFF_THREE_BODY:
-      {
-        (static_cast<FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->set_efficiency(useless,s,efficiency);
-      }
-      break;
-
-      default:
-      {
-        std::cerr << "This model do not include efficiencies: " << _type << std::endl;
-        antioch_assert(0); //so it will not necessarily crash
-      }
-      break;
-
-    }
-    return;
+    antioch_assert_less(s, _efficiencies.size());
+    _efficiencies[s] = efficiency;
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -598,35 +573,8 @@ namespace Antioch
   CoeffType Reaction<CoeffType,VectorCoeffType>::efficiency( const unsigned int s ) const
   {
     
-    switch(_type) 
-    {
-      case ReactionType::THREE_BODY:
-      {
-        return static_cast<const ThreeBodyReaction<CoeffType>* >(this)->efficiency(s);
-      }
-      break;
-
-      case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
-      {
-        return (static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->efficiency(s);
-      }
-      break;
-
-      case ReactionType::TROE_FALLOFF_THREE_BODY:
-      {
-        return (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->efficiency(s);
-      }
-      break;
-
-      default:
-      {
-        std::cerr << "This model do not include efficiencies: " << _type << std::endl;
-        antioch_assert(0); //so it will not necessarily crash
-      }
-      break;
-
-    }
-    return CoeffType(0.); // keep compiler happy
+    antioch_assert(s < _efficiencies.size()); 
+    return _efficiencies[s];
   }
 
   template<typename CoeffType, typename VectorCoeffType>

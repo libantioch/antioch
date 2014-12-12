@@ -90,18 +90,6 @@ namespace Antioch
                                                            StateType& dkfwd_dT, 
                                                            VectorStateType& dkfwd_dX) const;
 
-    //!
-    void set_efficiency( const std::string &,
-                         const unsigned int s,
-                         const CoeffType efficiency);
-
-    //!
-    CoeffType efficiency( const unsigned int s ) const;
-
-  private:
-
-    std::vector<CoeffType> _efficiencies;
-    
   };
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -113,8 +101,8 @@ namespace Antioch
                                                    const KineticsModel::KineticsModel kin) 
     :Reaction<CoeffType>(n_species,equation,reversible,ReactionType::THREE_BODY,kin)
   {
-    _efficiencies.resize(n_species); 
-    std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
+    Reaction<CoeffType>::_efficiencies.resize(n_species); 
+    std::fill (Reaction<CoeffType>::_efficiencies.begin(), Reaction<CoeffType>::_efficiencies.end(), 1.);
     return;
   }
 
@@ -181,24 +169,6 @@ namespace Antioch
     return;
   }
 
-  template <typename CoeffType>
-  inline
-  void ThreeBodyReaction<CoeffType>::set_efficiency( const std::string &,
-                                                     const unsigned int s,
-                                                     const CoeffType efficiency)
-  {
-    antioch_assert_less(s, _efficiencies.size());
-    _efficiencies[s] = efficiency;
-  }
-
-  template <typename CoeffType>
-  inline
-  CoeffType ThreeBodyReaction<CoeffType>::efficiency( const unsigned int s ) const
-  {
-     antioch_assert_less(s, _efficiencies.size());
-     return _efficiencies[s];
-  }
-  
 } // namespace Antioch
 
 #endif // ANTIOCH_ELEMENTARY_REACTION_H
