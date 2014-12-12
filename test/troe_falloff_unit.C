@@ -72,6 +72,9 @@ int tester()
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -198,12 +201,12 @@ int tester()
     fall_reaction->F().set_alpha(alpha);
     fall_reaction->F().set_T1(T1);
     fall_reaction->F().set_T3(T3);
-    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
     for(unsigned int i = 0; i < n_species; i++)
     {

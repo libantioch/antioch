@@ -30,7 +30,7 @@
 #include "antioch/reaction_set.h"
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/read_reaction_set_data_xml.h"
+#include "antioch/read_reaction_set_data.h"
 #include "antioch/units.h"
 
 #include "antioch/vector_utils.h"
@@ -119,7 +119,7 @@ typename Antioch::value_type<VectorScalar>::type k_photo(const VectorScalar &sol
                                                          const VectorScalar &sigma_lambda, const VectorScalar &sigma_sigma)
 {
   Antioch::SigmaBinConverter<VectorScalar> bin;
-  VectorScalar sigma_rescaled;
+  VectorScalar sigma_rescaled(solar_lambda.size());
   bin.y_on_custom_grid(sigma_lambda,sigma_sigma,solar_lambda,sigma_rescaled);
 
   typename Antioch::value_type<VectorScalar>::type _k(0.L);
@@ -184,7 +184,7 @@ int tester(const std::string &root_name)
 
   Scalar T = 2000.L;
   Scalar Tr = 1.;
-  Antioch::Units<Scalar> unitA_m1("(m3/kmol)-1/s"),unitA_0("s-1"),unitA_1("m3/kmol/s"),unitA_2("(m3/kmol)2/s");
+  Antioch::Units<Scalar> unitA_m1("kmol/m3/s"),unitA_0("s-1"),unitA_1("m3/kmol/s"),unitA_2("m6/kmol2/s");
 
   Scalar Rcal = Antioch::Constants::R_universal<Scalar>() * Antioch::Constants::R_universal_unit<Scalar>().factor_to_some_unit("cal/mol/K");
   getline(CH4_file,line);
@@ -203,7 +203,8 @@ int tester(const std::string &root_name)
   CH4_file.close();
 
   Antioch::ParticleFlux<std::vector<Scalar> > photons(lambda,hv);
-  reaction_set.set_particle_flux(&photons);
+
+  Antioch::KineticsConditions<Scalar,std::vector<Scalar> > conditions(T);
 
 //
   // Molar densities
@@ -526,16 +527,19 @@ int tester(const std::string &root_name)
 //
 //photochemistry
   k.push_back(k_photo(lambda,hv,CH4_lambda,CH4_s));
+  conditions.add_particle_flux(photons,k.size()-1);
 //Constant
   k.push_back(2.5e11);
   
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?
+                      std::numeric_limits<Scalar>::epsilon() * 5000:
+                      std::numeric_limits<Scalar>::epsilon() * 100;
   int return_flag(0);
   for(unsigned int ir = 0; ir < k.size(); ir++)
   {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
-     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] > tol)
+     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] > tol)
      {
         std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
@@ -543,8 +547,8 @@ int tester(const std::string &root_name)
                   << "reaction #" << ir << "\n"
                   << "temperature: " << T << " K" << "\n"
                   << "theory: " << k[ir] << "\n"
-                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,T) << "\n"
-                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,T))/k[ir] << "\n"
+                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,conditions) << "\n"
+                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] << "\n"
                   << "tolerance = " <<  tol
                   << std::endl;
         return_flag = 1;
@@ -557,6 +561,6 @@ int tester(const std::string &root_name)
 int main(int argc, char* argv[])
 {
   return (tester<float>(std::string(argv[1])) ||
-          tester<double>(std::string(argv[1])));/* ||
-          tester<long double>(std::string(argv[1])));*/
+          tester<double>(std::string(argv[1])) ||
+          tester<long double>(std::string(argv[1])));
 }

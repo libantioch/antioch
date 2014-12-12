@@ -4,8 +4,8 @@ compiler:
   - clang
 before_script:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libeigen3-dev fglrx=2:8.960-0ubuntu1 opencl-headers libboost-chrono1.48-dev libboost-date-time1.48-dev libboost-filesystem1.48-dev libboost-system1.48-dev libboost-thread1.48-dev libboost-program-options1.48-dev libboost-test1.48-dev
+  - sudo apt-get install -qq libeigen3-dev libgsl0-dev
 script:
   - git clone https://github.com/ddemidov/vexcl
-  - ./bootstrap && ./configure --with-vexcl=${PWD}/vexcl
+  - ./bootstrap && ./configure 
   - make && make check || (cat test/test-suite.log && false)

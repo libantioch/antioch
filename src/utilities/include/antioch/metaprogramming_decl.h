@@ -126,6 +126,12 @@ namespace Antioch
   min (const T& in);
   */
 
+  template <typename T, typename Enable=void>
+  struct tag_type
+  {
+    typedef const numeric_library_tag type;
+  };
+
   template <typename T>
   struct value_type<const T>
   {
@@ -137,6 +143,19 @@ namespace Antioch
   {
     typedef const typename raw_value_type<T>::type type;
   };
+
+  template <typename T1, typename T2>
+  struct constructor_or_reference
+  {
+    typedef T1 type;
+  };
+
+  template <typename T>
+  struct constructor_or_reference<T,T>
+  {
+    typedef T & type;
+  };
+
 
   // A function for zero-initializing vectorized numeric types
   // while resizing them to match the example input
@@ -155,6 +174,18 @@ namespace Antioch
   template <typename T, typename Scalar>
   inline
   T constant_clone(const T& example, const Scalar& value);
+
+  // A function for initializing non vectorized numeric types to
+  // custom constants stored in vector
+  template <typename T, typename VectorScalar>
+  inline
+  T custom_clone(const T& example, const VectorScalar& values, unsigned int indexes);
+
+  // A function for initializing vectorized numeric types to
+  // custom constants stored in vector
+  template <typename T, typename VectorScalar>
+  inline
+  T custom_clone(const T& example, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes);
 
   // A function for filling already-initialized vectorized numeric
   // types with a constant.
@@ -193,6 +224,39 @@ namespace Antioch
   T if_else(bool condition,
 	    T if_true,
 	    T if_false);
+
+  // A function for indexing a vector type with an (integral) numeric
+  // type.
+  //
+  // The first argument should be a vector of (scalar or vectorized)
+  // numeric types; the second argument should be a similarly scalar
+  // or vectorized integer type with values valid as indices to the
+  // first argument.  The output will be a similarly scalar or
+  // vectorized numeric type.
+  template <typename VectorT>
+  inline
+  typename value_type<VectorT>::type
+  eval_index(const VectorT& vec, unsigned int index);
+
+  //Root function for conjunction
+  template <typename T>
+  inline
+  bool conjunction_root(const T & vec, numeric_library_tag);
+
+  //Root function for disjunction
+  template <typename T>
+  inline
+  bool disjunction_root(const T & vec, numeric_library_tag);
+
+  // A function to obtain the conjunction of boolean
+  template <typename T>
+  inline
+  bool conjunction(const T & vec);
+
+  // A function to obtain the disjunction of boolean
+  template <typename T>
+  inline
+  bool disjunction(const T & vec);
 
 } // end namespace Antioch
 

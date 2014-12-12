@@ -62,36 +62,35 @@ int tester(std::string path_to_files)
 
   while(!CH4.eof())
   {
-    Scalar cs,l;
+    Scalar cs,l(-1);
     CH4 >> l >> cs;
+    if(l == -1)break;
     CH4_lambda.push_back(l);
     CH4_cs.push_back(cs);
-    if(CH4_lambda.size() == 137)break;
   }
   CH4.close();
 
   while(!hv.eof())
   {
-    Scalar w,l,dw;
+    Scalar w,l(-1),dw;
     hv >> l >> w >> dw;
+    if(l == -1)break;
     hv_lambda.push_back(l * 10.L); //nm -> Angström
     hv_irr.push_back(w * 1e-4L  // * 1e-4: m-2 -> cm-2 
                        / (Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l)// /(h*c/lambda): energy -> number of photons
                        / 10.); // by Angström
-    if(hv_lambda.size() == 796)break;
   }
   hv.close();
 
-  Scalar T(1500.L);
+  Antioch::ParticleFlux<std::vector<Scalar> > part_flux(hv_lambda,hv_irr);
 
   Antioch::PhotochemicalRate<Scalar, std::vector<Scalar> > rate_hv(CH4_cs,CH4_lambda);
 
   Antioch::SigmaBinConverter<std::vector<Scalar> > bin;
-  std::vector<Scalar> sigma_rescaled;
+  std::vector<Scalar> sigma_rescaled(hv_lambda.size());
   bin.y_on_custom_grid(CH4_lambda,CH4_cs,hv_lambda,sigma_rescaled);
 
-  rate_hv.calculate_rate_constant(hv_irr, hv_lambda);
-  Scalar rate = rate_hv.rate(T);
+  Scalar rate = rate_hv.rate(part_flux);
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
   Scalar rate_exact(0.L);

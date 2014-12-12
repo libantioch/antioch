@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROG="@top_builddir@/test/sigma_bin_converter_unit"
+PROG="@top_builddir@/test/parsing_chemkin"
 
 INPUT="@top_srcdir@/test/input_files"
 
