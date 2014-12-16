@@ -172,7 +172,7 @@ int tester(const std::string & type)
       if( diff > tol )
       {
           std::cout << std::scientific << std::setprecision(16)
-                    << "Error: Mismatch in rate values." << std::endl
+                    << "\nError: Mismatch in rate values." << std::endl
                     << "Kinetics model (see enum) " << kin_mod << std::endl
                     << "species " << i << std::endl
                     << "drate_dc(T) = " << drate_dx[i] << std::endl
@@ -187,7 +187,7 @@ int tester(const std::string & type)
     if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
+                  << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate1 << std::endl
@@ -202,7 +202,7 @@ int tester(const std::string & type)
     if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
+                  << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate << std::endl
@@ -217,7 +217,7 @@ int tester(const std::string & type)
     if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate derivative values." << std::endl
+                  << "\nError: Mismatch in rate derivative values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "drate_dT(T) = " << drate_dT << std::endl
