@@ -224,15 +224,18 @@ namespace Antioch
 //dk_dT = F * dkfwd_dT + kfwd * dF_dT
 //      = F * kfwd * (dk0_dT/k0 - dk0_dT/(kinf/[M] + k0) + k0 * dkinf_dT/(kinf * (kinf/[M] + k0) ) )
 //      + dF_dT * kfwd
-    dkfwd_dT = f * kfwd * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + dkinf_dT * k0/(kinf * (kinf/M + k0)))
+    StateType temp = (kinf/M + k0);
+    dkfwd_dT = f * kfwd * (dk0_dT/k0 - dk0_dT/temp + dkinf_dT * k0/(kinf * temp))
              + df_dT * kfwd;
 
     dkfwd_dX.resize(this->n_species(), kfwd);
+
+    StateType tmp = f * kfwd / (M + ant_pow(M,2) * k0/kinf);
 //dkfwd_dX = F * dkfwd_dX + kfwd * dF_dX
 //         = F * epsilon_i * kfwd / ([M] +  [M]^2 k0/kinf) + kfwd * dF_dX
     for(unsigned int ic = 0; ic < this->n_species(); ic++)
       {
-        dkfwd_dX[ic] = this->efficiency(ic) * ( f * kfwd / (M + ant_pow(M,2) * k0/kinf) + df_dX[ic] * kfwd );
+        dkfwd_dX[ic] = this->efficiency(ic) * ( tmp + df_dX[ic] * kfwd );
       }
 
     kfwd *= f; //finalize
