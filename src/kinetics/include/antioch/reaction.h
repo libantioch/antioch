@@ -283,9 +283,9 @@ namespace Antioch
     std::vector<unsigned int> _reactant_stoichiometry;
     std::vector<unsigned int> _product_stoichiometry;
     std::vector<CoeffType> _efficiencies;
-    std::vector<unsigned int> _species_reactant_stoichiometry;
-    std::vector<unsigned int> _species_product_stoichiometry;
-    std::vector<int>          _species_delta_stoichiometry;
+//    std::vector<unsigned int> _species_reactant_stoichiometry;
+//    std::vector<unsigned int> _species_product_stoichiometry;
+//    std::vector<int>          _species_delta_stoichiometry;
     int _gamma;
     bool _initialized;
     bool _reversible;
@@ -609,43 +609,46 @@ namespace Antioch
   {
     // Stoichiometric coefficients, by species id
     {
-      _species_reactant_stoichiometry.resize(this->n_species());
-      _species_product_stoichiometry.resize(this->n_species());
-      _species_delta_stoichiometry.resize(this->n_species());
+//      _species_reactant_stoichiometry.resize(this->n_species());
+//      _species_product_stoichiometry.resize(this->n_species());
+//      _species_delta_stoichiometry.resize(this->n_species());
 
-      std::fill( _species_reactant_stoichiometry.begin(),
+/*      std::fill( _species_reactant_stoichiometry.begin(),
                  _species_reactant_stoichiometry.end(),
                  0 );
 
       std::fill( _species_product_stoichiometry.begin(),
                  _species_product_stoichiometry.end(),
                  0);
-    }
-    
+ */       }
+
+    _gamma = 0;
     for (unsigned int r=0; r< this->n_reactants(); r++)
       {
-        _species_reactant_stoichiometry[this->reactant_id(r)] =
-          this->reactant_stoichiometric_coefficient(r);
+        /*_species_reactant_stoichiometry[this->reactant_id(r)] =
+          this->reactant_stoichiometric_coefficient(r);*/
+        _gamma -= this->reactant_stoichiometric_coefficient(r);
       }
     
     for (unsigned int p=0; p < this->n_products(); p++)
       {
-        _species_product_stoichiometry[this->product_id(p)] =
-          this->product_stoichiometric_coefficient(p);
+        /*_species_product_stoichiometry[this->product_id(p)] =
+          this->product_stoichiometric_coefficient(p);*/
+        _gamma += this->product_stoichiometric_coefficient(p);
       }
     
     // find the delta stoichiometric coefficient for each species,
     // and the sum of the deltas 
-    _gamma = 0;
-    for (unsigned int s=0; s<this->n_species(); s++)
+    // Sylvain: useless
+/*    for (unsigned int s=0; s<this->n_species(); s++)
       {
         _species_delta_stoichiometry[s] =
           ( _species_product_stoichiometry[s] -
             _species_reactant_stoichiometry[s] );
         
-        _gamma += _species_delta_stoichiometry[s];
+       // _gamma += _species_delta_stoichiometry[s];
       }
-   
+  */ 
     // set initialization flag
     _initialized = true;
   }
@@ -662,20 +665,24 @@ namespace Antioch
     // antioch_assert_greater( P0_RT, 0.0 );
     antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
-    antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
+ //   antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
 
-    StateType exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[0]])*
+
+// DrG0 = - reactants + product
+// K = (P0/(RT))^gamma exp(-DrG0)
+// exppower = -DrG0 = reactants - products
+    StateType exppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
                             h_RT_minus_s_R[_reactant_ids[0]] );
 
     for (unsigned int s=1; s < this->n_reactants(); s++)
       {
-        exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[s]])*
+        exppower += ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
                        h_RT_minus_s_R[_reactant_ids[s]] );
       }
 
     for (unsigned int s=0; s < this->n_products(); s++)
       {
-        exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_product_ids[s]])*
+        exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
                        h_RT_minus_s_R[_product_ids[s]] );
       }
 
@@ -701,20 +708,20 @@ namespace Antioch
     antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( ddT_h_RT_minus_s_R.size(), this->n_species() );
-    antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
+ //   antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
 
     // get the equilibrium constant
     keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-    StateType ddT_exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[0]])*
+    StateType ddT_exppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
                                 ddT_h_RT_minus_s_R[_reactant_ids[0]] );
 
     for (unsigned int s=1; s<this->n_reactants(); s++)
-      ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_reactant_ids[s]])*
+      ddT_exppower +=  ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
                          ddT_h_RT_minus_s_R[_reactant_ids[s]] );
 
     for (unsigned int s=0; s<this->n_products(); s++)
-      ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[_product_ids[s]])*
+      ddT_exppower -=  ( static_cast<CoeffType>(_product_stoichiometry[s])*
                          ddT_h_RT_minus_s_R[_product_ids[s]] );
 
     // compute its derivative
