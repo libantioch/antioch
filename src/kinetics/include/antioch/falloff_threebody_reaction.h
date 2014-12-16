@@ -182,8 +182,10 @@ namespace Antioch
         M += this->efficiency(s) * molar_densities[s];
     }
 
-    return (*this->_forward_rate[0])(T) / (ant_pow(M,-1) + (*this->_forward_rate[0])(T) /(*this->_forward_rate[1])(T)) * 
-            _F(T,M,(*this->_forward_rate[0])(T),(*this->_forward_rate[1])(T));
+    const StateType k0   = (*this->_forward_rate[0])(T);
+    const StateType kinf = (*this->_forward_rate[1])(T);
+
+    return k0 / (ant_pow(M,-1) + k0 / kinf) * _F(T,M,k0,kinf);
   }
 
   template<typename CoeffType, typename FalloffType>
