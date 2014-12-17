@@ -553,7 +553,7 @@ namespace Antioch{
   inline
   bool ChemKinParser<NumericType>::Troe() const
   {
-      return (_chemical_process.find("TroeFalloff"));
+      return (_chemical_process.find("TroeFalloff") != std::string::npos);
   }
 
   template <typename NumericType>
