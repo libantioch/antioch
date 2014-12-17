@@ -130,7 +130,7 @@ namespace Antioch{
          bool rate_constant(const std::string & /* kinetics_model */);
 
          /*! return true if there's a Troe block*/
-         bool Troe();
+         bool Troe() const;
 
          /*! return reaction id, 0 if not provided*/
          const std::string reaction_id() const;
@@ -551,7 +551,7 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  bool ChemKinParser<NumericType>::Troe()
+  bool ChemKinParser<NumericType>::Troe() const
   {
       return (_chemical_process.find("TroeFalloff"));
   }
