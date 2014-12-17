@@ -553,7 +553,7 @@ namespace Antioch{
   inline
   bool ChemKinParser<NumericType>::Troe()
   {
-      return (_chemical_process == "TroeFalloff");
+      return (_chemical_process.find("TroeFalloff"));
   }
 
   template <typename NumericType>
@@ -744,7 +744,7 @@ namespace Antioch{
     alpha_unit = _default_unit.at(ParsingKey::TROE_F_ALPHA);
     def_unit = alpha_unit;
     
-    return (_chemical_process == "TroeFalloff");
+    return this->Troe();
   }
 
   template <typename NumericType>
@@ -755,7 +755,7 @@ namespace Antioch{
     T1_unit = _default_unit.at(ParsingKey::TROE_F_TS);
     def_unit = T1_unit;
 
-    return (_chemical_process == "TroeFalloff");
+    return this->Troe();
   }
 
   template <typename NumericType>
@@ -777,7 +777,7 @@ namespace Antioch{
     T3_unit = _default_unit.at(ParsingKey::TROE_F_TSSS);
     def_unit = T3_unit;
 
-    return (_chemical_process == "TroeFalloff");
+    return this->Troe();
   }
 
   template <typename NumericType>
@@ -808,7 +808,8 @@ namespace Antioch{
         _duplicate_process = true;
      }else if(line.find(_spec.parser()) != std::string::npos) // "/"
      {
-        if(_chemical_process.find("Falloff") != std::string::npos)_chemical_process += "ThreeBody";
+        if(_chemical_process.find("Falloff") != std::string::npos && 
+           _chemical_process.find("ThreeBody") == std::string::npos)_chemical_process += "ThreeBody";
         this->parse_coefficients_line(line);
      }else
      {
