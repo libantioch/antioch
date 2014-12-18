@@ -1341,6 +1341,9 @@ namespace Antioch{
         skip_comment_lines(_doc, '!'); // comments in middle
 
         if(!ascii_getline(_doc,line))break;
+
+        if(line.find(_spec.end_tag()) != std::string::npos)break; //END
+
         // question is: will we have temps or NASA coeffs
         // line is 80 character long for coeffs, so if not, it's temps
         if(line.size() != 80)
