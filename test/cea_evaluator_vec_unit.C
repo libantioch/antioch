@@ -55,7 +55,7 @@
 #include "antioch/cea_evaluator.h"
 #include "antioch/default_filename.h"
 #include "antioch/physical_constants.h"
-#include "antioch/cea_mixture_ascii_parsing.h"
+#include "antioch/cea_mixture_parsing.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
