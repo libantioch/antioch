@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROG="@top_builddir@/test/ascii_parser_unit"
+
+INPUT="@top_srcdir@/test/input_files/test_parsing.ASCII"
+
+$PROG $INPUT
+

@@ -56,6 +56,7 @@ check_PROGRAMS += kinetics_theory_thermal_conductivity_vec_unit
 check_PROGRAMS += rotational_relaxation_unit
 check_PROGRAMS += rotational_relaxation_vec_unit
 check_PROGRAMS += ideal_gas_micro_thermo_unit
+check_PROGRAMS += ascii_parser_unit
 
 #GSL Tests
 check_PROGRAMS += molecular_binary_diffusion_unit
@@ -141,6 +142,7 @@ kinetics_theory_thermal_conductivity_unit_SOURCES = kinetics_theory_thermal_cond
 kinetics_theory_thermal_conductivity_vec_unit_SOURCES = kinetics_theory_thermal_conductivity_vec_unit.C
 rotational_relaxation_unit_SOURCES = rotational_relaxation_unit.C
 rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
+ascii_parser_unit_SOURCES = ascii_parser_unit.C
 
 # GSL Tests
 molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
@@ -213,6 +215,7 @@ TESTS += kinetics_theory_thermal_conductivity_vec_unit
 TESTS += rotational_relaxation_unit
 TESTS += rotational_relaxation_vec_unit
 TESTS += ideal_gas_micro_thermo_unit
+TESTS += ascii_parser_unit.sh
 
 # GSL Tests
 TESTS += molecular_binary_diffusion_unit
