@@ -761,7 +761,9 @@ namespace Antioch
         os << "\n#   forward rate eqn: " << *_forward_rate[ir];
       }
 
-    if (_type == ReactionType::THREE_BODY)
+    if (_type == ReactionType::THREE_BODY ||
+        _type == ReactionType::LINDEMANN_FALLOFF_THREE_BODY ||
+        _type == ReactionType::TROE_FALLOFF_THREE_BODY)
       {
         os << "\n#   efficiencies: ";
         for (unsigned int s=0; s<this->n_species(); s++)
