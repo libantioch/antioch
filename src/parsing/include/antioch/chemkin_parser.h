@@ -75,6 +75,9 @@ namespace Antioch{
           ~ChemKinParser();
 
 
+        //! filename
+        const std::string & filename() const;
+
 ////////////// species
 
          /*! read SPECIES block*/
@@ -221,6 +224,7 @@ namespace Antioch{
 
           /*! Never use default constructor*/
           ChemKinParser();
+          std::string                      _file;
           std::ifstream                    _doc;
           bool                             _verbose;
           
@@ -352,6 +356,7 @@ namespace Antioch{
   template <typename NumericType>
   inline
   ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
+        _file(filename),
         _doc(filename.c_str()),
         _verbose(verbose),
         _duplicate_process(false),
@@ -1428,6 +1433,13 @@ namespace Antioch{
               }
           }
       } // end while
+  }
+
+  template <typename NumericType>
+  inline
+  const std::string & ChemKinParser<NumericType>::filename() const
+  {
+      return _file;
   }
   
 

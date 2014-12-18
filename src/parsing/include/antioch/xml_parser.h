@@ -56,6 +56,9 @@ namespace Antioch{
           XMLParser(const std::string &filename, bool verbose = true);
           ~XMLParser();
 
+        //! filename
+        const std::string & filename() const;
+
 //// first local pointers
          /*! Read header of file, go to interesting part*/
          bool initialize();
@@ -180,6 +183,7 @@ namespace Antioch{
           /*! Never use default constructor*/
           XMLParser();
           tinyxml2::XMLDocument _doc;
+          std::string           _file;
           bool                  _verbose;
 
 //
@@ -198,6 +202,7 @@ namespace Antioch{
   template <typename NumericType>
   inline
   XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
+        _file(filename),
         _verbose(verbose),
         _species_block(NULL),
         _reaction_block(NULL),
@@ -810,6 +815,13 @@ namespace Antioch{
      }
 
 
+  }
+
+  template <typename NumericType>
+  inline
+  const std::string & XMLParser<NumericType>::filename() const
+  {
+      return _file;
   }
 
 
