@@ -67,6 +67,10 @@ namespace Antioch
     TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
                       const std::string & filename = DefaultFilename::transport_mixture(), bool verbose = true);
 
+    template <typename Parser>
+    TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
+                      Parser & parser);
+
     ~TransportMixture();
 
     //! ChemicalMixture method
@@ -172,6 +176,35 @@ namespace Antioch
 
     // Now read in transport properties for the requested species and stash
     read_transport_species_data<ThermoEvaluator,CoeffType,Parser>(*this, filename, verbose);
+
+    // check we have everyone requested
+    for( unsigned int s = 0; s < _transport_species.size(); ++s )
+      {
+        if(!_transport_species[s]) // it is not mandatory, Blottner or Sutherland are self-sufficient
+        {
+           std::cerr << "Warning: missing transport data for species " << _chemical_mixture.species_inverse_name_map().at(
+                                                                          _chemical_mixture.species_list()[s]) << "\n"
+                     << "Be sure to use a transport model that does not require the default data"
+                     << std::endl;
+        }
+      }
+
+    return;
+
+  }
+
+  template<typename ThermoEvaluator,typename CoeffType>
+  template <typename Parser>
+  inline
+  TransportMixture<ThermoEvaluator,CoeffType>::TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
+                                                                 Parser & parser)
+    : _chemical_mixture( mixture),
+      _thermo(t),
+      _transport_species(_chemical_mixture.n_species(), NULL )
+  {
+
+    // Now read in transport properties for the requested species and stash
+    read_transport_species_data(*this, parser);
 
     // check we have everyone requested
     for( unsigned int s = 0; s < _transport_species.size(); ++s )

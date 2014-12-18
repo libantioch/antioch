@@ -68,6 +68,23 @@ namespace Antioch
                                     bool verbose,
                                     ChemicalMixture<NumericType>& chem_mixture);
 
+  template <typename NumericType,typename Parser>
+  void read_chemical_species_composition(Parser & parser,
+                                         ChemicalMixture<NumericType> & mixture);
+
+  template<class NumericType,typename Parser>
+  void read_species_data( Parser & parser,
+                          ChemicalMixture<NumericType>& chem_mixture);
+				
+
+  template<class NumericType,typename Parser>
+  void read_species_vibrational_data(Parser & parser,
+                                     ChemicalMixture<NumericType>& chem_mixture);
+
+  template<class NumericType,typename Parser>
+  void read_species_electronic_data(Parser & parser,
+                                    ChemicalMixture<NumericType>& chem_mixture);
+
 //----------------------------------------------------------------
 
    template <typename NumericType,typename Parser>
@@ -77,6 +94,14 @@ namespace Antioch
                                           ChemicalMixture<NumericType> & mixture)
    {
       Parser parser(filename,verbose);
+      read_chemical_species_composition(parser,mixture);
+   }
+
+   template <typename NumericType,typename Parser>
+   inline
+   void read_chemical_species_composition(Parser & parser,
+                                          ChemicalMixture<NumericType> & mixture)
+   {
       mixture.initialize_species(parser.species_list());
    }
   
@@ -88,13 +113,21 @@ namespace Antioch
 
     Parser parser(filename,verbose);
 
+    read_species_data(parser,chem_mixture);
+  }
+
+  template<class NumericType,typename Parser>
+  inline
+  void read_species_data(Parser & parser,
+                         ChemicalMixture<NumericType>& chem_mixture)
+  {
     parser.read_chemical_species(chem_mixture);
 
     // sanity check, we require these informations
     if(chem_mixture.chemical_species().size() != chem_mixture.species_list().size())
     {
        std::cerr << "Molecule(s) is(are) missing.  Please update the information."
-                 << "  Currently using file " << filename << ".\n"
+                 << "  Currently using file "      << parser.filename() << ".\n"
                  << "Missing molecule(s) is(are):" << std::endl;
        for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
        {
@@ -123,8 +156,15 @@ namespace Antioch
 
     Parser parser(filename,verbose);
 
-    parser.read_vibrational_data(chem_mixture);
+    read_species_vibrational_data(parser,chem_mixture);
+  }
 
+  template<class NumericType,typename Parser>
+  inline
+  void read_species_vibrational_data(Parser & parser,
+                                     ChemicalMixture<NumericType>& chem_mixture)
+  {
+    parser.read_vibrational_data(chem_mixture);
 
     // sanity check, we check these informations
     std::vector<std::string> missing;
@@ -135,7 +175,7 @@ namespace Antioch
     if(!missing.empty())
     {
        std::cerr << "WARNING:\nVibrational levels are missing.  Please update the information."
-                 << "  Currently using file " << filename << ".\n"
+                 << "  Currently using file "      << parser.filename() << ".\n"
                  << "Missing molecule(s) is(are):" << std::endl;
        for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
     }
@@ -147,11 +187,18 @@ namespace Antioch
   inline
   void read_species_electronic_data(const std::string & filename, bool verbose,
                                     ChemicalMixture<NumericType>& chem_mixture)
-                                           
   {
 
     Parser parser(filename,verbose);
 
+    read_species_electronic_data(parser,chem_mixture);
+  }
+
+  template<class NumericType,typename Parser>
+  inline
+  void read_species_electronic_data(Parser & parser,
+                                    ChemicalMixture<NumericType>& chem_mixture)
+  {
     parser.read_electronic_data(chem_mixture);
     
     // sanity check, we check these informations
@@ -163,7 +210,7 @@ namespace Antioch
     if(!missing.empty())
     {
        std::cerr << "WARNING:\nElectronic levels are missing.  Please update the information."
-                 << "  Currently using file " << filename << ".\n"
+                 << "  Currently using file "      << parser.filename() << ".\n"
                  << "Missing molecule(s) is(are):" << std::endl;
        for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
     }

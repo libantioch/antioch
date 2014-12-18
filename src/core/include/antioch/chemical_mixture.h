@@ -87,6 +87,10 @@ namespace Antioch
                      const std::string & vibration_data = DefaultFilename::vibrational_data(),
                      const std::string & electronic_data = DefaultFilename::electronic_data());
 
+    template <typename Parser>
+    ChemicalMixture( const std::vector<std::string>& species_list,
+                     Parser & parser);
+
     ~ChemicalMixture();
 
     //! method to initialize, backward compatibility
@@ -385,6 +389,20 @@ namespace Antioch
 
       return;
   }
+
+  template<typename CoeffType>
+  template<typename Parser>
+  inline
+  ChemicalMixture<CoeffType>::ChemicalMixture(const std::vector<std::string>& species_list,
+                                              Parser & parser)
+  {
+      this->initialize_species(species_list);
+
+      this->read_species_data(parser,*this);
+
+      return;
+  }
+
 
   template<typename CoeffType>
   inline

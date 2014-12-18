@@ -42,9 +42,11 @@ namespace Antioch{
   template <typename ThermoEvaluator, typename NumericType>
   class TransportMixture;
 
-
   template <typename ThermoEvaluator, typename NumericType, typename Parser>
   void read_transport_species_data(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename, bool verbose = true);
+
+  template <typename ThermoEvaluator, typename NumericType, typename Parser>
+  void read_transport_species_data(TransportMixture<ThermoEvaluator,NumericType> & transport, Parser & parser);
 
 /*----------- inline functions ----------------*/
 
@@ -55,6 +57,12 @@ namespace Antioch{
 
     Parser parser(filename,verbose);
 
+    read_transport_species_data(transport, parser);
+  }
+
+  template <typename ThermoEvaluator, typename NumericType, typename Parser>
+  void read_transport_species_data(TransportMixture<ThermoEvaluator,NumericType> & transport, Parser & parser)
+  {
     parser.read_transport_species(transport);
 
     // sanity check
