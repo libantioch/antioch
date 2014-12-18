@@ -54,6 +54,7 @@ check_PROGRAMS += pure_species_thermal_conductivity_unit
 check_PROGRAMS += rotational_relaxation_vec_unit
 check_PROGRAMS += pure_species_thermal_conductivity_vec_unit
 check_PROGRAMS += ideal_gas_internal_thermo_unit
+check_PROGRAMS += ascii_parser_unit
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -140,6 +141,7 @@ rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
 pure_species_thermal_conductivity_vec_unit_SOURCES = pure_species_thermal_conductivity_vec_unit.C
 pure_species_thermal_conductivity_unit_SOURCES = pure_species_thermal_conductivity_unit.C
 ideal_gas_internal_thermo_unit_SOURCES =  ideal_gas_internal_thermo_unit.C
+ascii_parser_unit_SOURCES = ascii_parser_unit.C
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -209,6 +211,7 @@ TESTS += pure_species_thermal_conductivity_unit
 TESTS += rotational_relaxation_vec_unit
 TESTS += pure_species_thermal_conductivity_vec_unit
 TESTS += ideal_gas_internal_thermo_unit
+TESTS += ascii_parser_unit.sh
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
 endif
