@@ -683,7 +683,7 @@ namespace Antioch{
   inline
   bool ChemKinParser<NumericType>::rate_constant_activation_energy_parameter(NumericType & Ea, std::string & Ea_unit, std::string & def_unit) const
   {
-     if(_crates <= _Ea.size());
+     if(_crates <= _Ea.size())
      {
        Ea = _Ea[_crates-1];
 // there is no default unit (or always default), anyway, units are
