@@ -63,7 +63,6 @@ namespace Antioch{
   {
         public:
 
-          KineticsConditions(const KineticsConditions<StateType,VectorStateType>& rhs);
           KineticsConditions(const StateType & temperature);
           ~KineticsConditions();
 
@@ -96,19 +95,6 @@ namespace Antioch{
         _temperature(&temperature)
   {
     return;
-  }
-
-  template <typename StateType, typename VectorStateType>
-  inline
-  KineticsConditions<StateType,VectorStateType>::KineticsConditions(const KineticsConditions<StateType,VectorStateType>& rhs)
-  {
-     if(this != &rhs)
-     {
-        _temperature = &rhs.T();
-        _map_pf      = rhs.map_pf();
-     }
-
-     return;
   }
 
   template <typename StateType, typename VectorStateType>
