@@ -80,7 +80,7 @@ int tester_N2N(const std::string& input_name)
 
   int return_flag = 0;
 
-  Antioch::KineticsConditions<Scalar> cond;
+  Antioch::KineticsConditions<Scalar> cond(T0); //init
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
@@ -170,7 +170,7 @@ int tester(const std::string& input_name)
 
   int return_flag = 0;
 
-  Antioch::KineticsConditions<Scalar> cond;
+  Antioch::KineticsConditions<Scalar> cond(T0); //init
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
