@@ -63,7 +63,6 @@ namespace Antioch{
   {
         public:
 
-          KineticsConditions();
           KineticsConditions(const KineticsConditions<StateType,VectorStateType>& rhs);
           KineticsConditions(const StateType & temperature);
           ~KineticsConditions();
@@ -81,6 +80,8 @@ namespace Antioch{
           const std::map<unsigned int, ParticleFlux<VectorStateType> const *> & map_pf() const;
 
         private:
+
+          KineticsConditions();
         // pointer's not const, temperature is
           StateType const * _temperature; 
         // pointer's not const, particle flux is
@@ -88,13 +89,6 @@ namespace Antioch{
 
   };
 
-  template <typename StateType, typename VectorStateType>
-  inline
-  KineticsConditions<StateType,VectorStateType>::KineticsConditions():
-        _temperature(NULL)
-  {
-    return;
-  }
 
   template <typename StateType, typename VectorStateType>
   inline
