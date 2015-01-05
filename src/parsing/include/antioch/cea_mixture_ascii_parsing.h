@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H
-#define ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H
+#ifndef ANTIOCH_NASA9_MIXTURE_ASCII_PARSING_H
+#define ANTIOCH_NASA9_MIXTURE_ASCII_PARSING_H
 
 // C++
 #include <iostream>
@@ -46,21 +46,21 @@ namespace Antioch
   class NASAThermoMixture;
 
   template <class NumericType>
-  class CEACurveFit;
+  class NASA9CurveFit;
 
   // New declarations
 
   template<class NumericType>
-  void read_cea_mixture_data_ascii( NASAThermoMixture<NumericType,CEACurveFit<NumericType> >& thermo, const std::string &filename );
+  void read_cea_mixture_data_ascii( NASAThermoMixture<NumericType,NASA9CurveFit<NumericType> >& thermo, const std::string &filename );
 
   template<class NumericType>
-  void read_cea_mixture_data_ascii_default( NASAThermoMixture<NumericType,CEACurveFit<NumericType> >& thermo );
+  void read_cea_mixture_data_ascii_default( NASAThermoMixture<NumericType,NASA9CurveFit<NumericType> >& thermo );
 
  
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
   inline
-  void read_cea_mixture_data_ascii( NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo, const std::string &filename )
+  void read_cea_mixture_data_ascii( NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo, const std::string &filename )
   {
     
     std::ifstream in(filename.c_str());
@@ -111,7 +111,7 @@ namespace Antioch
     // Make sure we actually populated everything
     if( !thermo.check() )
       {
-	std::cerr << "Error: CEA table not fully populated" << std::endl;
+	std::cerr << "Error: NASA9 table not fully populated" << std::endl;
 	antioch_error();
       }
 
@@ -121,7 +121,7 @@ namespace Antioch
   }
 
   template<class NumericType>
-  void read_cea_mixture_data_ascii_default( NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo )
+  void read_cea_mixture_data_ascii_default( NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo )
   {
     antioch_deprecated();
     read_cea_mixture_data_ascii(thermo, DefaultFilename::thermo_data());
@@ -129,4 +129,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H
+#endif // ANTIOCH_NASA9_MIXTURE_ASCII_PARSING_H

@@ -42,7 +42,7 @@ namespace Antioch
   template<typename CoeffType> 
   class NASACurveFit;
 
-  template<typename CoeffType=double, typename NASAFit = CEACurveFit<CoeffType> >
+  template<typename CoeffType=double, typename NASAFit = NASA9CurveFit<CoeffType> >
   class NASAEvaluator
   {
   public:

@@ -50,7 +50,7 @@ namespace Antioch
   template<typename CoeffType, typename NASAFit>
   class NASAEvaluator;
 
-  template<typename CoeffType=double, typename NASAFit = CEACurveFit<CoeffType> >
+  template<typename CoeffType=double, typename NASAFit = NASA9CurveFit<CoeffType> >
   class NASAThermoMixture
   {
   public:
@@ -61,7 +61,7 @@ namespace Antioch
     /*! virtual so this can be subclassed by the user. */
     virtual ~NASAThermoMixture();
 
-     //CEA friendly
+     //NASA9 friendly
     void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs );
 
      //NASA general

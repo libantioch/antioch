@@ -241,9 +241,9 @@ int tester(const std::string & nasa_filename)
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
 // backward compatibility
-  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::NASA9ThermoMixture<Scalar> cea_mixture( chem_mixture );
   Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
-  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
+  Antioch::NASA9Evaluator<Scalar> thermo( cea_mixture );
 
 // explicit
   Antioch::NASAThermoMixture<Scalar, Antioch::NASACurveFit<Scalar> > nasa_mixture( chem_mixture );

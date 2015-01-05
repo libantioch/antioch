@@ -185,11 +185,13 @@ int main()
     vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
+std::cout << "vexcl start" << std::endl;
   vex::Context ctx_f (vex::Filter::All);
+std::cout << "vexcl start" << std::endl;
   if (!ctx_f.empty())
     returnval = returnval ||
       vectester (vex::vector<float> (ctx_f, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
-
+std::cout << "vexcl float ok" << std::endl;
   vex::Context ctx_d (vex::Filter::DoublePrecision);
   if (!ctx_d.empty())
     returnval = returnval ||
