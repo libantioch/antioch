@@ -246,9 +246,9 @@ int tester(const std::string & nasa_filename)
   Antioch::NASA9Evaluator<Scalar> thermo( cea_mixture );
 
 // explicit
-  Antioch::NASAThermoMixture<Scalar, Antioch::NASACurveFit<Scalar> > nasa_mixture( chem_mixture );
+  Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
   Antioch::read_nasa_mixture_data_ascii( nasa_mixture, nasa_filename );
-  Antioch::NASAEvaluator<Scalar, Antioch::NASACurveFit<Scalar> > nasa_thermo( nasa_mixture );
+  Antioch::NASAEvaluator<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_thermo( nasa_mixture );
 
   //const Scalar P = 100000.0;
   const Scalar T1 = 190.0;

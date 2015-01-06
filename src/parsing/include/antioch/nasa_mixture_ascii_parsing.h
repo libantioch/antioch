@@ -45,18 +45,18 @@ namespace Antioch
   class NASAThermoMixture;
 
   template <class NumericType>
-  class NASACurveFit;
+  class NASA7CurveFit;
 
   // New declarations
 
   template<class NumericType>
-  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType,NASACurveFit<NumericType> >& thermo, const std::string &filename );
+  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType,NASA7CurveFit<NumericType> >& thermo, const std::string &filename );
 
  
   /* ------------------------- Inline Functions -------------------------*/
   template<class NumericType>
   inline
-  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType, NASACurveFit<NumericType> >& thermo, const std::string &filename )
+  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo, const std::string &filename )
   {
     
 // ChemKin style, except no headers, direct to
