@@ -83,6 +83,9 @@ namespace Antioch{
     virtual ~KineticsType();
 
     //!
+    KineticsModel::KineticsModel type() const;
+
+    //!
     template <typename StateType>
     StateType operator()(const StateType& T) const;
 
@@ -127,6 +130,13 @@ namespace Antioch{
     my_type(type)
   {
     return;
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
+  inline
+  KineticsModel::KineticsModel KineticsType<CoeffType,VectorCoeffType>::type() const
+  {
+    return my_type;
   }
 
   template <typename CoeffType, typename VectorCoeffType>

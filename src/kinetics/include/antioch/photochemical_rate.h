@@ -27,6 +27,7 @@
 #define ANTIOCH_PHOTOCHEMICAL_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/sigma_bin_converter.h"
 #include "antioch/kinetics_type.h"
@@ -59,6 +60,13 @@ namespace Antioch{
 
        //!
        void set_lambda_grid(const VectorCoeffType &l);
+
+       /*! reset the coefficients
+        *
+        *  Contrary to the other rate models, no choice here in the VectorCoeffType type.
+        *  The order assumed is lambda, cross-section
+        */
+       void reset_coefs(const VectorCoeffType & coefficients);
 
        //! calculate _k for a given photon flux
        template<typename VectorStateType>
@@ -131,6 +139,25 @@ namespace Antioch{
   void PhotochemicalRate<CoeffType,VectorCoeffType>::set_lambda_grid(const VectorCoeffType &l)
   {
      _lambda_grid = l;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+      // we require the two vectors being the same size
+      antioch_assert_equal_to(coefficients.size()%2,0);
+
+      const unsigned int subsize(coefficients.size()/2);
+      VectorCoeffType l(subsize);
+      VectorCoeffType cs(subsize);
+      for(unsigned int il = 0; il < subsize; il++)
+      {
+          l[il] = coefficients[il];
+          cs[il] = coefficients[il + subsize];
+      }
+      this->set_lambda_grid(l);
+      this->set_cross_section(cs);
   }
 
   template<typename CoeffType, typename VectorCoeffType>

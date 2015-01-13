@@ -48,6 +48,8 @@ namespace Antioch
   KineticsType<CoeffType, VectorCoeffType>* build_rate( const VectorCoeffType &data,
                                                         const KineticsModel::KineticsModel &kin );
 
+  template<typename CoeffType, typename VectorCoeffType, typename VectorType>
+  void reset_rate( KineticsType<CoeffType,VectorCoeffType> & kin, const VectorType & coefs);
 
   //! We take here the parameters as:
   //  - \f$A\f$, \f$\beta\f$, \f$E_a\f$, \f$D\f$, \f$\mathrm{T_{ref}}\f$, \f$\mathrm{scale}\f$.
@@ -138,6 +140,69 @@ namespace Antioch
 
     return rate;
   }
+
+  template<typename CoeffType, typename VectorCoeffType, typename VectorType>
+  void reset_rate( KineticsType<CoeffType,VectorCoeffType> & kin, const VectorType & coefs)
+  {
+
+    switch(kin.type())
+      {
+      case(KineticsModel::CONSTANT):
+        {
+          static_cast<ConstantRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::HERCOURT_ESSEN):
+        {
+          static_cast< HercourtEssenRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::BERTHELOT):
+        {
+          static_cast< BerthelotRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::ARRHENIUS):
+        {
+          static_cast< ArrheniusRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::BHE):
+        {
+          static_cast< BerthelotHercourtEssenRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::KOOIJ):
+        {
+          static_cast< KooijRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::VANTHOFF):
+        {
+          static_cast< VantHoffRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::PHOTOCHEM):
+        {
+          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(kin.type())
+  }
+
 
 } // end namespace Antioch
 
