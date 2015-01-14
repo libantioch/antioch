@@ -175,6 +175,7 @@ int vectester(const std::string& input_name,
       massfrac[2*tuple+1] = 0.2;
     }
 
+  const Antioch::KineticsConditions<PairScalars> conditions(T);
   const std::vector<PairScalars> Y(n_species,massfrac);
   std::vector<PairScalars> molar_densities(n_species, example);
   std::vector<PairScalars> h_RT_minus_s_R(n_species, example);
@@ -206,9 +207,9 @@ int vectester(const std::string& input_name,
   thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
   thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
 
-  kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
+  kinetics.compute_mass_sources( conditions, molar_densities, h_RT_minus_s_R, omega_dot );
 
-  kinetics.compute_mass_sources_and_derivs ( T,
+  kinetics.compute_mass_sources_and_derivs ( conditions,
 					     molar_densities,
 					     h_RT_minus_s_R,
 					     dh_RT_minus_s_R_dT,
@@ -230,6 +231,8 @@ int vectester(const std::string& input_name,
     const std::string testeigenA = testname + "-eigenA";
     gt.BeginTimer(testeigenA);
 #endif
+
+    const Antioch::KineticsConditions<PairScalars,SpeciesVecEigenType> eigen_conditions(T);
 
     SpeciesVecEigenType eigen_Y;
     Antioch::init_constant(eigen_Y, massfrac);
@@ -258,7 +261,7 @@ int vectester(const std::string& input_name,
 
     thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
 
-    kinetics.compute_mass_sources( T, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
+    kinetics.compute_mass_sources( eigen_conditions, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
     gt.EndTimer(testeigenA);
@@ -285,6 +288,8 @@ int vectester(const std::string& input_name,
 
   {
     typedef Eigen::Matrix<PairScalars,Eigen::Dynamic,1> SpeciesVecEigenType;
+    const Antioch::KineticsConditions<PairScalars,SpeciesVecEigenType> eigen_conditions(T);
+
     SpeciesVecEigenType eigen_Y(n_species,1);
     Antioch::init_constant(eigen_Y, massfrac);
 
@@ -318,7 +323,7 @@ int vectester(const std::string& input_name,
 
     thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
 
-    kinetics.compute_mass_sources( T, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
+    kinetics.compute_mass_sources( eigen_conditions, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
     gt.EndTimer(testeigenV);

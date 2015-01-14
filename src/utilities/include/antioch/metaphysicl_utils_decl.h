@@ -127,6 +127,14 @@ if_else(const Tbool& condition,
         const Ttrue& if_true,
         const Tfalse& if_false);
 
+template <typename VectorT, typename UIntType>
+inline
+typename Antioch::enable_if_c<
+   is_metaphysicl<typename Antioch::value_type<VectorT>::type>::value &&
+   is_metaphysicl<UIntType>::value,
+   typename Antioch::value_type<VectorT>::type
+>::type
+eval_index(const VectorT & vec, const UIntType & indexes);
 } // end namespace Antioch
 
 #endif // ANTIOCH_METAPHYSICL_UTILS_DECL_H
