@@ -211,18 +211,20 @@ namespace Antioch
 // k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
     kfwd = k0 / (ant_pow(M,-1) + k0/kinf); //temp variable here for calculations dk_d{T,X}
 
+    StateType temp = (kinf/M + k0);
 //dk_dT = F * dkfwd_dT + kfwd * dF_dT
 //      = F * kfwd * (dk0_dT/k0 - dk0_dT/(kinf/[M] + k0) + k0 * dkinf_dT/(kinf * (kinf/[M] + k0) ) )
 //      + dF_dT * kfwd
-    dkfwd_dT = f * kfwd * (dk0_dT/k0 - dk0_dT/(kinf/M + k0) + dkinf_dT * k0/(kinf * (kinf/M + k0)))
+    dkfwd_dT = f * kfwd * (dk0_dT/k0 - dk0_dT/temp + dkinf_dT * k0/(kinf * temp))
              + df_dT * kfwd;
 
     dkfwd_dX.resize(this->n_species(), kfwd);
 //dkfwd_dX = F * dkfwd_dX + kfwd * dF_dX
 //         = F * kfwd / ([M] +  [M]^2 k0/kinf) + kfwd * dF_dX
+    StateType tmp = f * kfwd / (M + ant_pow(M,2) * k0/kinf);
     for(unsigned int ic = 0; ic < this->n_species(); ic++)
       {
-        dkfwd_dX[ic] = f * kfwd / (M + ant_pow(M,2) * k0/kinf) + df_dX[ic] * kfwd;
+        dkfwd_dX[ic] = tmp + df_dX[ic] * kfwd;
       }
 
     kfwd *= f; //finalize
