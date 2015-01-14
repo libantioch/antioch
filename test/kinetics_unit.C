@@ -80,13 +80,12 @@ int tester_N2N(const std::string& input_name)
 
   int return_flag = 0;
 
-  Antioch::KineticsConditions<Scalar> cond(T0); //init
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
       const Scalar rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
-      cond.change_temperature(T);
+      const Antioch::KineticsConditions<Scalar> cond(T);
 
       typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
 
@@ -170,13 +169,12 @@ int tester(const std::string& input_name)
 
   int return_flag = 0;
 
-  Antioch::KineticsConditions<Scalar> cond(T0); //init
   for( unsigned int i = 0; i < n_T_samples; i++ )
     {
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
       const Scalar rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
-      cond.change_temperature(T);
+      const Antioch::KineticsConditions<Scalar> cond(T); 
 
       typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
 

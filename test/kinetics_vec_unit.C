@@ -146,7 +146,7 @@ int vectester(const std::string& input_name,
           T[2*tuple+1] = T[0]+T_inc/2;
 	}
 
-      Antioch::KineticsConditions<PairScalars> cond(T);
+      const Antioch::KineticsConditions<PairScalars> cond(T);
 
 #ifdef ANTIOCH_HAVE_GRVY
   const std::string testnormal = testname + "-normal";
