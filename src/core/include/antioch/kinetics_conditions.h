@@ -68,23 +68,17 @@ namespace Antioch{
 
           void add_particle_flux(const ParticleFlux<VectorStateType> & pf, unsigned int nr);
 
-          void change_temperature(const StateType & temperature);
-
-          void change_particle_flux(const ParticleFlux<VectorStateType> & pf, unsigned int nr);
-
           const StateType & T() const;
 
           const ParticleFlux<VectorStateType> & particle_flux(int nr) const;
 
-          const std::map<unsigned int, ParticleFlux<VectorStateType> const *> & map_pf() const;
-
         private:
 
           KineticsConditions();
-        // pointer's not const, temperature is
-          StateType const * _temperature; 
+        // const temperature is
+          const StateType & _temperature; 
         // pointer's not const, particle flux is
-          std::map<unsigned int,ParticleFlux<VectorStateType> const * > _map_pf; 
+          std::map<unsigned int,ParticleFlux<VectorStateType> const * const > _map_pf; 
 
   };
 
@@ -92,7 +86,7 @@ namespace Antioch{
   template <typename StateType, typename VectorStateType>
   inline
   KineticsConditions<StateType,VectorStateType>::KineticsConditions(const StateType & temperature):
-        _temperature(&temperature)
+        _temperature(temperature)
   {
     return;
   }
@@ -113,32 +107,9 @@ namespace Antioch{
 
   template <typename StateType, typename VectorStateType>
   inline
-  void KineticsConditions<StateType,VectorStateType>::change_temperature(const StateType & temperature)
-  {
-      _temperature = &temperature;
-  }
-
-  template <typename StateType, typename VectorStateType>
-  inline
-  void KineticsConditions<StateType,VectorStateType>::change_particle_flux(const ParticleFlux<VectorStateType> & pf, unsigned int nr)
-  {
-     antioch_assert(_map_pf.count(nr));
-     _map_pf[nr] = &pf;
-  }
-
-  template <typename StateType, typename VectorStateType>
-  inline
   const StateType & KineticsConditions<StateType,VectorStateType>::T() const
   {
-     antioch_assert(_temperature);
-     return *_temperature;
-  }
-
-  template <typename StateType, typename VectorStateType>
-  inline
-  const std::map<unsigned int, ParticleFlux<VectorStateType> const *> & KineticsConditions<StateType,VectorStateType>::map_pf() const
-  {
-      return _map_pf;
+     return _temperature;
   }
 
   template <typename StateType, typename VectorStateType>
