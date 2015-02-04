@@ -258,7 +258,12 @@ int tester()
       }
 
     Scalar phi_N;
-    phi_N = wilke.compute_phi( mu, chi, N_index );
+    std::vector<std::vector<Scalar> > mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+    Antioch::set_zero(mu_mu_sqrt);
+
+    wilke.compute_mu_mu_sqrt(mu,mu_mu_sqrt);
+    phi_N = wilke.compute_phi( mu_mu_sqrt, chi, N_index );
 
     return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
