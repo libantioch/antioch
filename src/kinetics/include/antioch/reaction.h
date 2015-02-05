@@ -214,6 +214,13 @@ namespace Antioch
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
                                                 const KineticsConditions<StateType,VectorStateType>& conditions) const;
     
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+                                                const StateType& temp)
+    const;
+
+    //!
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
@@ -221,6 +228,16 @@ namespace Antioch
                                                            StateType& kfwd, 
                                                            StateType& dkfwd_dT,
                                                            VectorStateType& dkfwd_dX) const;
+
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
+                                                           const
+                                                           StateType& temp,
+                                                           StateType& kfwd,
+                                                           StateType& dkfwd_dT,
+                                                           VectorStateType& dkfwd_dX) const;
+
     ////
     template <typename StateType, typename VectorStateType>
     StateType compute_rate_of_progress( const VectorStateType& molar_densities,
@@ -228,10 +245,29 @@ namespace Antioch
                                         const StateType& P0_RT,  
                                         const VectorStateType& h_RT_minus_s_R) const;
 
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    StateType compute_rate_of_progress( const VectorStateType& molar_densities,
+                                        const StateType& temp,
+                                        const StateType& P0_RT,
+                                        const VectorStateType& h_RT_minus_s_R) const;
+
     template <typename StateType, typename VectorStateType>
     void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
                                                    const ChemicalMixture<CoeffType>& chem_mixture,
                                                    const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                   const StateType &P0_RT,
+                                                   const VectorStateType &h_RT_minus_s_R,
+                                                   const VectorStateType &dh_RT_minus_s_R_dT,
+                                                   StateType& net_reaction_rate,
+                                                   StateType& dnet_rate_dT,
+                                                   VectorStateType& dnet_rate_dX_s ) const;
+
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
+                                                   const ChemicalMixture<CoeffType>& chem_mixture,
+                                                   const StateType& temp,
                                                    const StateType &P0_RT,
                                                    const VectorStateType &h_RT_minus_s_R,
                                                    const VectorStateType &dh_RT_minus_s_R_dT,
@@ -773,6 +809,19 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
   inline
+  StateType Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient
+  ( const VectorStateType& molar_densities,
+    const StateType& temp) const
+  {
+    antioch_deprecated();
+    return compute_forward_rate_coefficient
+      (molar_densities,
+       KineticsConditions<StateType,VectorStateType>(temp));
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
   void Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
                                                                               const KineticsConditions<StateType,VectorStateType>& conditions, 
                                                                               StateType& kfwd, 
@@ -821,6 +870,24 @@ namespace Antioch
     return;
   }
 
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void
+  Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient_and_derivatives
+  ( const VectorStateType& molar_densities,
+    const StateType& temp,
+    StateType& kfwd,
+    StateType& dkfwd_dT,
+    VectorStateType& dkfwd_dX) const
+  {
+    antioch_deprecated();
+    return compute_forward_rate_coefficient_and_derivatives
+      (molar_densities,
+       KineticsConditions<StateType,VectorStateType>(temp),
+       kfwd, dkfwd_dT, dkfwd_dX);
+  }
+
   //kfwd *prod_r [R]^nu_r - kbkwd * prod_p [P]^nu_p ( = - 1/nu_r d[R]/dt)
   template<typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
@@ -860,6 +927,21 @@ namespace Antioch
 
     return kfwd_times_reactants - kbkwd_times_products;
 
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  StateType Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
+                                                           const StateType& temp,
+                                                           const StateType& P0_RT,
+                                                           const VectorStateType& h_RT_minus_s_R) const
+  {
+    antioch_deprecated();
+    return compute_rate_of_progress
+      (molar_densities,
+       KineticsConditions<StateType,VectorStateType>(temp),
+       P0_RT, h_RT_minus_s_R);
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -1028,7 +1110,28 @@ namespace Antioch
 
     return;
   }
-    
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
+                                                                      const ChemicalMixture<CoeffType>& chem_mixture,
+                                                                      const StateType& temp,
+                                                                      const StateType &P0_RT,
+                                                                      const VectorStateType &h_RT_minus_s_R,
+                                                                      const VectorStateType &dh_RT_minus_s_R_dT,
+                                                                      StateType& net_reaction_rate,
+                                                                      StateType& dnet_rate_dT,
+                                                                      VectorStateType& dnet_rate_dX_s ) const
+  {
+    antioch_deprecated();
+    return compute_rate_of_progress_and_derivatives
+      (molar_densities, chem_mixture,
+       KineticsConditions<StateType,VectorStateType>(temp),
+       P0_RT, h_RT_minus_s_R, dh_RT_minus_s_R_dT, net_reaction_rate,
+       dnet_rate_dT, dnet_rate_dX_s);
+  }
+
 } // namespace Antioch
 
 #endif // ANTIOCH_REACTION_H
