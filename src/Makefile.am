@@ -106,6 +106,8 @@ pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conducti
 pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity_utils_decl.h
 pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity_utils.h
 pkginclude_HEADERS += thermal_conduction/include/antioch/kinetics_theory_thermal_conductivity.h
+pkginclude_HEADERS += thermal_conduction/include/antioch/kinetics_theory_thermal_cond_utils_decl.h
+pkginclude_HEADERS += thermal_conduction/include/antioch/kinetics_theory_thermal_conductivity_utils.h
 pkginclude_HEADERS += thermal_conduction/include/antioch/rotational_relaxation.h
 
 # utilities
