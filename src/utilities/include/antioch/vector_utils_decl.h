@@ -98,6 +98,10 @@ template <typename T>
 inline
 void set_zero(std::vector<T>& a);
 
+template <typename T, typename VectorScalar>
+inline
+std::vector<T> custom_clone(const std::vector<T> & vec, const VectorScalar & vecsrc, const std::vector<unsigned int> & indexes);
+
 } // end namespace Antioch
 
 

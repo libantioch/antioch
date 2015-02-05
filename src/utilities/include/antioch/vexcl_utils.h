@@ -43,7 +43,7 @@
 
 
 #ifdef ANTIOCH_HAVE_VEXCL
-// Though the following implementations are all valid without
+// Though the following implementations are almost all valid without
 // <vexcl/vexcl.hpp>, successfully using them with
 // VexCL types requires VexCL to be included first.
 // Configure-time VexCL support enforces this constraint but
@@ -54,12 +54,19 @@
 // Forward declaration instead
 namespace vex {
 template <typename T> class vector;
+template <typename T> class is_vector_expression;
 
 template<typename real, class RDC>
 class Reductor;
 
 class MAX;
 class MIN;
+
+  namespace detail
+  {
+     class get_expression_properties;
+     class extract_terminal;
+  }
 }
 namespace boost {
   namespace proto {
@@ -202,6 +209,57 @@ if_else(const vex::vector_expression<BoolInput> &condition,
 {
   return boost::proto::if_else(condition, if_true, if_false);
 }
+
+template <typename T>
+inline
+bool disjunction_root(const T & vec_input, vexcl_library_tag)
+{
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::detail::get_expression_properties prop;
+  vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
+
+  vex::any_of any_of(prop.queue);
+  return any_of(vec_input); // at least one true
+#else
+  antioch_error();
+  return false;
+#endif
+}
+
+template <typename T>
+inline
+bool conjunction_root(const  T & vec_input, vexcl_library_tag)
+{
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::detail::get_expression_properties prop;
+  vex::detail::extract_terminals()(boost::proto::as_child(vec_input),prop);
+
+  vex::all_of all_of(prop.queue);
+  return all_of(vec_input); // at least one false
+#else
+  antioch_error();
+  return false;
+#endif
+}
+
+template <typename VectorT, typename IntT>
+inline
+typename enable_if_c<
+  vex::is_vector_expression<typename value_type<VectorT>::type>::value &&
+  vex::is_vector_expression<IntT>::value,
+  typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const IntT& index)
+{
+  typename value_type<VectorT>::type returnval = zero_clone(vec[0]);
+
+  // FIXME - this will be painfully slow
+  for (unsigned int i=0; i != index.size(); ++i)
+    returnval[i] = vec[index[i]][i];
+
+  return returnval;
+}
+
 
 } // end namespace Antioch
 
