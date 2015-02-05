@@ -91,6 +91,8 @@ pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils_decl.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils_decl.h
+pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity.h
 
 # diffusion
