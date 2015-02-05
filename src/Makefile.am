@@ -97,6 +97,8 @@ pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity.h
 
 # diffusion
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
+pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils_decl.h
+pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils.h
 pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion.h
 
 # thermal conduction
