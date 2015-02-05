@@ -77,13 +77,19 @@ pkginclude_HEADERS += thermo/include/antioch/cea_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 
 # transport
-pkginclude_HEADERS += transport/include/antioch/blottner_viscosity.h
-pkginclude_HEADERS += transport/include/antioch/sutherland_viscosity.h
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
 pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
-pkginclude_HEADERS += transport/include/antioch/eucken_thermal_conductivity.h
 pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
-pkginclude_HEADERS += transport/include/antioch/constant_lewis_diffusivity.h
+
+# viscosity
+pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity.h
+
+# diffusion
+pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
+
+# thermal conduction
+pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity.h
 
 # utilities
 pkginclude_HEADERS += utilities/include/antioch/antioch_exceptions.h
