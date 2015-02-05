@@ -32,6 +32,7 @@
 
 // C++
 #include <map>
+#include <vector>
 
 namespace Antioch
 {
