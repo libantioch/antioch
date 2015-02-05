@@ -51,6 +51,19 @@ check_PROGRAMS += kinetics_reactive_scheme_unit
 check_PROGRAMS += sigma_bin_converter_unit
 check_PROGRAMS += sigma_bin_converter_vec_unit
 check_PROGRAMS += kinetics_settings_unit
+check_PROGRAMS += kinetics_theory_thermal_conductivity_unit
+check_PROGRAMS += kinetics_theory_thermal_conductivity_vec_unit
+check_PROGRAMS += rotational_relaxation_unit
+check_PROGRAMS += rotational_relaxation_vec_unit
+
+if ANTIOCH_ENABLE_GSL
+check_PROGRAMS += molecular_binary_diffusion_unit
+check_PROGRAMS += molecular_binary_diffusion_vec_unit
+check_PROGRAMS += kinetics_theory_viscosity_unit
+check_PROGRAMS += kinetics_theory_viscosity_vec_unit
+check_PROGRAMS += gsl_spline_unit
+check_PROGRAMS += gsl_spline_vec_unit
+endif
 
 if ANTIOCH_ENABLE_EIGEN
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -125,6 +138,19 @@ kinetics_reactive_scheme_unit_SOURCES = kinetics_reactive_scheme_unit.C
 sigma_bin_converter_unit_SOURCES = sigma_bin_converter_unit.C
 sigma_bin_converter_vec_unit_SOURCES = sigma_bin_converter_vec_unit.C
 kinetics_settings_unit_SOURCES = kinetics_settings_unit.C
+kinetics_theory_thermal_conductivity_unit_SOURCES = kinetics_theory_thermal_conductivity_unit.C
+kinetics_theory_thermal_conductivity_vec_unit_SOURCES = kinetics_theory_thermal_conductivity_vec_unit.C
+rotational_relaxation_unit_SOURCES = rotational_relaxation_unit.C
+rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
+
+if ANTIOCH_ENABLE_GSL
+molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
+molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
+kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
+kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
+gsl_spline_unit_SOURCES = gsl_spline_unit.C
+gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
+endif
 
 if ANTIOCH_ENABLE_EIGEN
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
@@ -182,6 +208,19 @@ TESTS += kinetics_reactive_scheme_unit.sh
 TESTS += sigma_bin_converter_unit
 TESTS += sigma_bin_converter_vec_unit
 TESTS += kinetics_settings_unit
+TESTS += kinetics_theory_thermal_conductivity_unit
+TESTS += kinetics_theory_thermal_conductivity_vec_unit
+TESTS += rotational_relaxation_unit
+TESTS += rotational_relaxation_vec_unit
+
+if ANTIOCH_ENABLE_GSL
+TESTS += molecular_binary_diffusion_unit
+TESTS += molecular_binary_diffusion_vec_unit
+TESTS += kinetics_theory_viscosity_unit
+TESTS += kinetics_theory_viscosity_vec_unit
+TESTS += gsl_spline_unit
+TESTS += gsl_spline_vec_unit
+endif
 
 if ANTIOCH_ENABLE_EIGEN
 TESTS += stat_mech_thermo_unit_eigen
