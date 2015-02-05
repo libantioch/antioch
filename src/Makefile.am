@@ -94,6 +94,8 @@ pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity.h
 pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils_decl.h
 pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity.h
+pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity_utils_decl.h
+pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity_utils.h
 
 # diffusion
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
