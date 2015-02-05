@@ -149,6 +149,6 @@ namespace Antioch{
 
 } //end namespace Antioch
 
-//#include "antioch/kinetics_theory_the_con_utils_decl.h"
+#include "antioch/kinetics_theory_thermal_conductivity_utils_decl.h"
 
 #endif
