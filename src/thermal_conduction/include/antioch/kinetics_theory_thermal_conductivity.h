@@ -30,7 +30,6 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h"
 #include "antioch/rotational_relaxation.h"
-#include "antioch/physics_metaprogramming_decl.h"
 
 //C++
 #include <vector>
@@ -150,6 +149,6 @@ namespace Antioch{
 
 } //end namespace Antioch
 
-#include "antioch/pure_species_the_con_utils_decl.h"
+//#include "antioch/kinetics_theory_the_con_utils_decl.h"
 
 #endif
