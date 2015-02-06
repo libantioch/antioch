@@ -74,6 +74,7 @@ pkginclude_HEADERS += parsing/include/antioch/constant_lewis_diffusivity_buildin
 pkginclude_HEADERS += parsing/include/antioch/eucken_thermal_conductivity_building.h
 pkginclude_HEADERS += parsing/include/antioch/molecular_binary_diffusion_building.h
 pkginclude_HEADERS += parsing/include/antioch/kinetics_theory_viscosity_building.h
+pkginclude_HEADERS += parsing/include/antioch/kinetics_theory_thermal_conductivity_building.h
 
 # thermo
 pkginclude_HEADERS += thermo/include/antioch/nasa_curve_fit.h
