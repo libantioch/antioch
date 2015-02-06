@@ -27,6 +27,7 @@
 #define ANTIOCH_VAN_T_HOFF_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/physical_constants.h"
@@ -83,6 +84,19 @@ namespace Antioch
     void set_Tref(  const CoeffType Tref );
     void set_rscale(const CoeffType rscale );
 
+    /*! reset the coeffs
+     *
+     * Two ways of modifying your rate:
+     *   - you change totally the rate, thus you 
+     *        require exactly six parameters, the order
+     *        assumed is Cf, eta, Ea, D, Tref, rscale 
+     *   - you just change the value, thus Tref and rscale are not
+     *        modified. You require exactly four parameters,
+     *        the order assumed is Cf, eta, Ea, D
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
+
     CoeffType Cf()     const;
     CoeffType eta()    const;
     CoeffType Ea()     const;
@@ -131,8 +145,6 @@ namespace Antioch
       _Tref(Tref),
       _rscale(rscale)
   {
-    using std::pow;
-
     _Ea = _raw_Ea / _rscale;
     this->compute_cf();
 
@@ -161,8 +173,6 @@ namespace Antioch
   inline
   void VantHoffRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    using std::pow;
-
     _raw_Cf = Cf;
     this->compute_cf();
 
@@ -173,8 +183,6 @@ namespace Antioch
   inline
   void VantHoffRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
-    using std::pow;
-
     _Tref = Tref;
     this->compute_cf();
 
@@ -186,6 +194,7 @@ namespace Antioch
   void VantHoffRate<CoeffType>::set_eta( const CoeffType eta )
   {
     _eta = eta;
+    this->compute_cf();
     return;
   }
 
@@ -213,6 +222,27 @@ namespace Antioch
   {
     _D = D;
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void VantHoffRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+       // 4 or 6
+     antioch_assert_greater(coefficients.size(),3);
+     antioch_assert_less(coefficients.size(),7);
+     antioch_assert_not_equal_to(coefficients.size(),5);
+
+     if(coefficients.size() == 6)
+     {
+        this->set_rscale(coefficients[5]);
+        this->set_Tref(coefficients[4]);
+     }
+     this->set_Cf(coefficients[0]);
+     this->set_eta(coefficients[1]);
+     this->set_Ea(coefficients[2]);
+     this->set_D(coefficients[3]);
   }
 
 
@@ -262,7 +292,7 @@ namespace Antioch
   inline
   void VantHoffRate<CoeffType>::compute_cf()
   {
-    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+    _Cf = _raw_Cf * ant_pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 

@@ -30,6 +30,7 @@
 #include "antioch/string_utils.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/units.h"
+#include "antioch/chemkin_definitions.h"
 
 //ChemKin
 
@@ -242,89 +243,7 @@ namespace Antioch{
           bool        _duplicate_process;
           bool        _next_is_reverse;
 
-/*ChemKin spec*/
-
-          class ChemKinSpec
-          {
-            public:
-              ChemKinSpec():_reversible("REV"),_duplicate("DUP"),_end_tag("END"),_comment("!"),_parser("/")
-                           {
-                               _delim[PLUS]           = "+";
-                               _delim[REVERSIBLE]     = "=";
-                               _delim[REVERSIBLE_ALT] = "<=>";
-                               _delim[IRREVERSIBLE]   = "=>";
-
-                               _symbol[TB]      = "M";
-                               _symbol[FAL]     = "(+M)";
-                               _symbol[PHOTO]   = "HV";
-                               _symbol[ELECTRO] = "E";
-                           };
-
-              ~ChemKinSpec(){}
-
-              enum Delim{ ERROR = -1,
-                          PLUS,
-                          IRREVERSIBLE,
-                          REVERSIBLE,
-                          REVERSIBLE_ALT
-                        };
-
-              enum Symbol{
-                          TB = 0,
-                          FAL,
-                          PHOTO,
-                          ELECTRO 
-                         };
-
-              const std::map<Delim,std::string> & delim()   const {return _delim;}
-
-              const std::map<Symbol,std::string> & symbol() const {return _symbol;}
-
-              const std::string & reversible()              const {return _reversible;}
-
-              const std::string & duplicate()               const {return _duplicate;}
-
-              const std::string & end_tag()                 const {return _end_tag;}
-
-              const std::string & comment()                 const {return _comment;}
-
-              const std::string & parser()                  const {return _parser;}
-
-              bool is_comment(const char & c)               const {return (c == _comment[0]);}
-
-              bool is_equation_delimiter(const std::string & test) const {return (test == _delim.at(REVERSIBLE)     || 
-                                                                                  test == _delim.at(REVERSIBLE_ALT) || 
-                                                                                  test == _delim.at(IRREVERSIBLE)
-                                                                                  );}
-
-              Delim equation_delimiter(const std::string & test) const 
-                                                                     {if(test.find(_delim.at(REVERSIBLE_ALT)) != std::string::npos)
-                                                                      {
-                                                                          return REVERSIBLE_ALT;
-                                                                      }else if(test.find(_delim.at(IRREVERSIBLE)) != std::string::npos)
-                                                                      {
-                                                                          return IRREVERSIBLE;
-                                                                      }else if(test.find(_delim.at(REVERSIBLE)) != std::string::npos)
-                                                                      {
-                                                                          return REVERSIBLE;
-                                                                      }else
-                                                                      {
-                                                                          return ERROR;
-                                                                      };
-                                                                     }
-
-            private:
-              const std::string            _reversible;
-              const std::string            _duplicate;
-              const std::string            _end_tag;
-              const std::string            _comment;
-              const std::string            _parser;
-              std::map<Delim,std::string>  _delim;
-              std::map<Symbol,std::string> _symbol;
-
-          };
-
-          const ChemKinSpec _spec;
+          const ChemKinDefinitions _spec;
 
   };
 
@@ -514,7 +433,7 @@ namespace Antioch{
         _products = tmp;
 
         // reverse the reaction
-        typename ChemKinSpec::Delim delim = _spec.equation_delimiter(_equation);
+        typename ChemKinDefinitions::Delim delim = _spec.equation_delimiter(_equation);
         std::string str_delim = _spec.delim().at(delim);
         std::size_t lim = _equation.find(str_delim);
         std::string reac_to_prod = _equation.substr(0,lim);
@@ -896,31 +815,31 @@ namespace Antioch{
      _equation = equation;
 
 // first we need to treat the (+M) case (falloff)
-// as it is not compatible with SplitString using ChemKinSpec::PLUS (+)
+// as it is not compatible with SplitString using ChemKinDefinitions::PLUS (+)
 // as delimiter
-     if(equation.find(_spec.symbol().at(ChemKinSpec::FAL)) != std::string::npos)
+     if(equation.find(_spec.symbol().at(ChemKinDefinitions::FAL)) != std::string::npos)
      {
         // Lindemann by default
         _chemical_process = "LindemannFalloff";
         // supress all occurences
-        while(equation.find(_spec.symbol().at(ChemKinSpec::FAL)) != std::string::npos)
+        while(equation.find(_spec.symbol().at(ChemKinDefinitions::FAL)) != std::string::npos)
         {
-           equation.erase(equation.find(_spec.symbol().at(ChemKinSpec::FAL)),4);
+           equation.erase(equation.find(_spec.symbol().at(ChemKinDefinitions::FAL)),4);
         }
      }
 
      std::vector<std::string> out;
 
 // now we're singling the equation separator (=, =>, <=>)
-     typename ChemKinSpec::Delim delim(_spec.equation_delimiter(equation));
-     if(delim == ChemKinSpec::ERROR)antioch_parsing_error("ChemKin parser: badly written equation:\n" + equation);
+     typename ChemKinDefinitions::Delim delim(_spec.equation_delimiter(equation));
+     if(delim == ChemKinDefinitions::ERROR)antioch_parsing_error("ChemKin parser: badly written equation:\n" + equation);
 
-//between ChemKinSpec::PLUS
-     equation.insert(equation.find(_spec.delim().at(delim)),_spec.delim().at(ChemKinSpec::PLUS));
-     equation.insert(equation.find(_spec.delim().at(delim)) + _spec.delim().at(delim).size(),_spec.delim().at(ChemKinSpec::PLUS));
+//between ChemKinDefinitions::PLUS
+     equation.insert(equation.find(_spec.delim().at(delim)),_spec.delim().at(ChemKinDefinitions::PLUS));
+     equation.insert(equation.find(_spec.delim().at(delim)) + _spec.delim().at(delim).size(),_spec.delim().at(ChemKinDefinitions::PLUS));
 
 
-     SplitString(equation,_spec.delim().at(ChemKinSpec::PLUS),out,true); //empties are cations charge, formatted as reac_i equation_separator prod_i
+     SplitString(equation,_spec.delim().at(ChemKinDefinitions::PLUS),out,true); //empties are cations charge, formatted as reac_i equation_separator prod_i
      if(out.size() < 3)antioch_parsing_error("ChemKin parser: unrecognized reaction equation:\n" + equation);
 /* cases are:
     - equation_separator => switch between reac and prod 
@@ -933,10 +852,10 @@ namespace Antioch{
      {
         if(out[i] == _spec.delim().at(delim))
         {
-           _reversible = !(delim == ChemKinSpec::IRREVERSIBLE);
+           _reversible = !(delim == ChemKinDefinitions::IRREVERSIBLE);
            prod = true;
          // is it a third-body reaction?
-        }else if(out[i] == _spec.symbol().at(ChemKinSpec::TB))
+        }else if(out[i] == _spec.symbol().at(ChemKinDefinitions::TB))
         {
            if(_chemical_process.find("Falloff") != std::string::npos)
                       antioch_parsing_error("ChemKin parser: it seems you want both a falloff and a three-body reaction:\n" + equation);
@@ -1174,14 +1093,14 @@ namespace Antioch{
   bool ChemKinParser<NumericType>::next_reaction(const std::string & input_line)
   {
      bool out(false);
-     if(input_line.find(_spec.delim().at(ChemKinSpec::REVERSIBLE)) != std::string::npos || 
+     if(input_line.find(_spec.delim().at(ChemKinDefinitions::REVERSIBLE)) != std::string::npos || 
         input_line.find(_spec.end_tag()) != std::string::npos) out = true;
 
      if(_next_is_reverse) out = true; // reversible given, get out
 
      if(input_line == _cached_line || _cached_line.empty()) out = false; // current reaction
 
-     if(_duplicate_process && input_line.find(_spec.delim().at(ChemKinSpec::REVERSIBLE)) != std::string::npos)// if we find a reaction and it is the same than the cached one
+     if(_duplicate_process && input_line.find(_spec.delim().at(ChemKinDefinitions::REVERSIBLE)) != std::string::npos)// if we find a reaction and it is the same than the cached one
      {
         out = false; // we suppose in duplicate reaction
         std::vector<std::string> inputs;
