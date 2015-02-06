@@ -444,9 +444,9 @@ namespace Antioch
   template<typename CoeffType=double>
   class CEACurveFit:public NASA9CurveFit<CoeffType>
   {
-      CEACurveFit( const std::vector<CoeffType>& coeffs ):NASA9CurveFit(coeffs){}
+      CEACurveFit( const std::vector<CoeffType>& coeffs ):NASA9CurveFit<CoeffType>(coeffs){}
       ~CEACurveFit(){}
-  }
+  };
 
 } // end namespace Antioch
 
