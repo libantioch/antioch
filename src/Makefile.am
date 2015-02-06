@@ -67,6 +67,7 @@ pkginclude_HEADERS += parsing/include/antioch/parsing_enum.h
 pkginclude_HEADERS += parsing/include/antioch/xml_parser.h
 pkginclude_HEADERS += parsing/include/antioch/chemkin_definitions.h
 pkginclude_HEADERS += parsing/include/antioch/chemkin_parser.h
+pkginclude_HEADERS += parsing/include/antioch/ascii_parser.h
 
 # thermo
 pkginclude_HEADERS += thermo/include/antioch/cea_curve_fit.h

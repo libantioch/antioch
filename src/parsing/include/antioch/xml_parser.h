@@ -49,6 +49,12 @@ namespace Antioch{
          /*! Read header of file, go to interesting part*/
          bool initialize();
 
+/// species
+
+        const std::vector<std::string> species_list() const;
+
+/// reaction
+
          /*! go to next reaction*/
          bool reaction();
 
@@ -142,6 +148,7 @@ namespace Antioch{
           /*! Never use default constructor*/
           XMLParser();
           tinyxml2::XMLDocument _doc;
+          tinyxml2::XMLElement * _species_block;
           tinyxml2::XMLElement * _reaction_block;
           tinyxml2::XMLElement * _reaction;
           tinyxml2::XMLElement * _rate_constant;
@@ -155,6 +162,7 @@ namespace Antioch{
   template <typename NumericType>
   inline
   XMLParser<NumericType>::XMLParser(const std::string &filename):
+        _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
         _rate_constant(NULL),
@@ -170,6 +178,8 @@ namespace Antioch{
         antioch_error();
       }
 
+      _map[ParsingKey::PHASE_BLOCK]           = "phase";
+      _map[ParsingKey::SPECIES_SET]           = "speciesArray";
       _map[ParsingKey::REACTION_DATA]         = "reactionData";
       _map[ParsingKey::REACTION]              = "reaction";
       _map[ParsingKey::REVERSIBLE]            = "reversible";
@@ -234,6 +244,11 @@ namespace Antioch{
           antioch_error();
         }
 
+      _species_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::PHASE_BLOCK).c_str());
+      if(_species_block)
+      {
+          _species_block = _species_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
+      }
       _reaction_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
 
       _reaction = NULL;
@@ -247,6 +262,20 @@ namespace Antioch{
   XMLParser<NumericType>::~XMLParser()
   {
      return;
+  }
+
+  template <typename NumericType>
+  inline
+  const std::vector<std::string> XMLParser<NumericType>::species_list() const
+  {
+      std::vector<std::string> molecules;
+
+      if(_species_block)
+      {
+         SplitString(std::string(_species_block->GetText())," ",molecules,false);
+      }
+
+      return molecules;
   }
 
   template <typename NumericType>

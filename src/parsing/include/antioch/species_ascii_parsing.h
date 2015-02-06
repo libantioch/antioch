@@ -32,11 +32,9 @@
 #define ANTIOCH_SPECIES_ASCII_PARSING_H
 
 // Antioch
-#include "antioch/input_utils.h"
-#include "antioch/string_utils.h"
+#include "antioch/ascii_parser.h"
 
 // C++
-#include <algorithm> // std::search_n
 #include <fstream>
 
 namespace Antioch
@@ -76,54 +74,8 @@ namespace Antioch
                                           bool verbose,
                                           ChemicalMixture<NumericType> & mixture)
    {
-      std::ifstream data(filename.c_str());
-      if(!data.is_open())
-      {
-        std::cerr << "ERROR: unable to load file " << filename << std::endl;
-        antioch_error();
-      }
-
-      skip_comment_lines(data, '#');
-
-      std::vector<std::string> species_list;
-      std::string line;
-      while(!data.eof())
-      {
-          if(!getline(data,line))break;
-          if(line[0] == '#' || line.empty())continue;
-          std::vector<std::string> tmp_spec;
-// in case several species on same line
-          int nspec = SplitString(line," ",tmp_spec,false);
-// in case only one
-          if(nspec == 0)tmp_spec.push_back(line);
-          for(unsigned int i = 0; i < tmp_spec.size(); i++)
-          {
-              // checking if multiple declaration
-              bool doublon(false);
-              for(unsigned int s = 0; s < species_list.size(); s++)
-              {
-                 if(tmp_spec[i] == species_list[s])
-                 {
-                    doublon = true;
-                    break;
-                 }
-              }
-              if(doublon)
-              {
-                 std::cerr << "Multiple declaration of " << tmp_spec[i]
-                           << ", skipping doublon" << std::endl;
-                 continue;
-              }
-              // adding
-              if(verbose)std::cout << tmp_spec[i] << std::endl;
-              species_list.push_back(tmp_spec[i]);
-          }
-      }
-      data.close();
-
-      if(verbose)std::cout << "Added " << species_list.size() << " species" << std::endl;
-
-      mixture.initialize_species(species_list);
+      ASCIIParser<NumericType> parser(filename,verbose);
+      mixture.initialize_species(parser.species_list());
    }
   
   template<class NumericType>
@@ -131,63 +83,10 @@ namespace Antioch
   void read_species_data_ascii(const std::string& filename, bool verbose, 
                                ChemicalMixture<NumericType>& chem_mixture)
   {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-       std::cerr << "ERROR: unable to load file " << filename << std::endl;
-       antioch_error();
-    }
-    
-    skip_comment_lines(in, '#');
 
-    std::string name;
-    NumericType mol_wght, h_form, n_tr_dofs;
-    int charge;
+    ASCIIParser<NumericType> parser(filename,verbose);
 
-    while (in.good())
-      {
-	in >> name;      // Species Name
-	in >> mol_wght;  // molecular weight (kg/kmol)
-	in >> h_form;    // heat of formation at Ok (J/kg)
-	in >> n_tr_dofs; // number of translational/rotational DOFs
-	in >> charge;    // charge number
-
-        mol_wght *= 1e-3L; // to SI (kg/mol)
-	
-	// If we are still good, we have a valid set of thermodynamic
-	// data for this species. Otherwise, we read past end-of-file 
-	// in the section above
-	if (in.good())
-	  {
-	    // If we do not have this species, just go on
-	    if (!chem_mixture.species_name_map().count(name))continue;
-
-
-	    /* Only add a ChemicalSpecies if the user supplied it to
-	       the ChemicalMixture. */
-	    Species species = chem_mixture.species_name_map().find(name)->second;
-
-	    // using default comparison:
-	    std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 
-								     chem_mixture.species_list().end(),
-								     1, species);
-	    if( it != chem_mixture.species_list().end() )
-	      {
-		unsigned int index = static_cast<unsigned int>(it - chem_mixture.species_list().begin());
-		chem_mixture.add_species( index, name, mol_wght, h_form, n_tr_dofs, charge );
-                if(verbose)
-                {
-                    std::cout << "Adding " << name << " informations:\n\t"
-                              << "molecular weight: "             << mol_wght << " kg/mol\n\t"
-                              << "formation enthalpy @0 K: "      << h_form << " J/mol\n\t"
-                              << "trans-rot degrees of freedom: " << n_tr_dofs << "\n\t"
-                              << "charge: "                       << charge << std::endl;
-                }
-	      }
-
-	  }
-      }
-    in.close();
+    parser.read_chemical_species(chem_mixture);
 
     // sanity check, we require these informations
     bool fail(false);
@@ -223,49 +122,11 @@ namespace Antioch
                                             bool verbose, 
                                             ChemicalMixture<NumericType>& chem_mixture)
   {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-       std::cerr << "ERROR: unable to load file " << filename << std::endl;
-       antioch_error();
-    }
-    // skip the header
-    skip_comment_lines(in, '#');
 
-    std::string name;
-    NumericType theta_v;
-    unsigned int n_degeneracies;
+    ASCIIParser<NumericType> parser(filename,verbose);
 
-    while (in.good())
-      {
-        in >> name;           // Species Name
-        in >> theta_v;        // characteristic vibrational temperature (K)
-        in >> n_degeneracies; // degeneracy of the mode
-      
-        // If we are still good, we have a valid set of thermodynamic
-        // data for this species. Otherwise, we read past end-of-file 
-        // in the section above
-        if (in.good())
-          {
-            // If we do not have this species, just keep going
-            if (!chem_mixture.species_name_map().count(name))continue;
-	
-            // ... otherwise we add the data
-            const unsigned int s = 
-              chem_mixture.species_name_map().find(name)->second;
+    parser.read_vibrational_data(chem_mixture);
 
-            antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
-        
-            chem_mixture.add_species_vibrational_data(s, theta_v, n_degeneracies);
-            if(verbose)
-            {
-                std::cout << "Adding vibrational data of species " << name << "\n\t"
-                          << "vibrational temperature: " << theta_v << " K\n\t"
-                          << "degeneracy: "              << n_degeneracies << std::endl;
-            }
-          }
-      }
-      in.close();
 
     // sanity check, we check these informations
     std::vector<std::string> missing;
@@ -290,50 +151,11 @@ namespace Antioch
                                            ChemicalMixture<NumericType>& chem_mixture)
                                            
   {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-       std::cerr << "ERROR: unable to load file " << filename << std::endl;
-       antioch_error();
-    }
-    // skip the header
-    skip_comment_lines(in, '#');
-    
-    std::string name;
-    NumericType theta_e;
-    unsigned int n_degeneracies;
-    
-    while (in.good())
-      {
-        in >> name;           // Species Name
-        in >> theta_e;        // characteristic electronic temperature (K)
-        in >> n_degeneracies; // number of degeneracies for this level
-        
-        // If we are still good, we have a valid set of thermodynamic
-        // data for this species. Otherwise, we read past end-of-file 
-        // in the section above
-        if (in.good())
-          {
-            // If we do not have this species, just go on
-            if (!chem_mixture.species_name_map().count(name))continue;
-            
-            // ... otherwise we add the data
-            const unsigned int s = 
-              chem_mixture.species_name_map().find(name)->second;
 
-            antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
-            
-            chem_mixture.add_species_electronic_data(s, theta_e, n_degeneracies);
-            if(verbose)
-            {
-                std::cout << "Adding electronic data of species " << name << "\n\t"
-                          << "electronic temperature: " << theta_e << " K\n\t"
-                          << "degeneracy: "             << n_degeneracies << std::endl;
-            }
-          }
-        
-      }
-      in.close();
+    ASCIIParser<NumericType> parser(filename,verbose);
+
+    parser.read_electronic_data(chem_mixture);
+    
     // sanity check, we check these informations
     std::vector<std::string> missing;
     for(unsigned int s = 0; s < chem_mixture.chemical_species().size(); s++)

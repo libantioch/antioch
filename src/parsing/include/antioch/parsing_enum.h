@@ -27,6 +27,7 @@
 namespace Antioch
 {
   enum ParsingKey{SPECIES_SET = 0,
+                  PHASE_BLOCK,
                   REACTION_DATA,
                   REACTION,
                   REVERSIBLE,
@@ -53,6 +54,12 @@ namespace Antioch
                   TROE_F_TSS,
                   TROE_F_TSSS
                  };
+
+  enum ParsingUnit{
+                    MOL_WEIGHT = 0,
+                    MASS_ENTHALPY
+                   };
+
 }
 
 #endif
