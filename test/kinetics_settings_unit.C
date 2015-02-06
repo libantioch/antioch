@@ -32,9 +32,14 @@
 #include <limits>
 #include <vector>
 // Antioch
+
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/kinetics_parsing.h"
 //#include "antioch/physical_constants.h"
 //#include "antioch/units.h"
+
+#include "antioch/vector_utils.h"
 
 
 
