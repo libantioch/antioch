@@ -33,6 +33,7 @@
 
 // Antioch
 #include "antioch/nasa_mixture.h"
+#include "antioch/cea_evaluator.h"
 
 // C++
 
