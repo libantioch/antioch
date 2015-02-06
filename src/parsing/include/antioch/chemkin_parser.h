@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -61,15 +63,29 @@ namespace Antioch{
   template <typename NumericType = double>
   class ChemKinParser{
         public:
-          ChemKinParser(const std::string &filename);
+          ChemKinParser(const std::string &filename, bool verbose = true);
           ~ChemKinParser();
 
 //// first local pointers
          /*! Read header of file, go to interesting part*/
          bool initialize();
 
+
+////////////// species
          /*! read SPECIES block*/
-         const std::vector<std::string> species_set();
+         const std::vector<std::string> species_list();
+
+        //! reads the mandatory data, not valid in ChemKin
+        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+
+        //! reads the vibrational data, not valid in ChemKin
+        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+
+        //! reads the electronic data, not valid in ChemKin
+        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+
+
+///////////////// kinetics
 
          /*! go to next reaction*/
          bool reaction();
@@ -187,6 +203,8 @@ namespace Antioch{
           /*! Never use default constructor*/
           ChemKinParser();
           std::ifstream                    _doc;
+          bool                             _verbose;
+          
 
           bool                             _reversible;
           unsigned int                     _nrates; // total number of rates
@@ -232,16 +250,19 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  ChemKinParser<NumericType>::ChemKinParser(const std::string &filename):
+  ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
+        _doc(filename.c_str()),
+        _verbose(verbose),
         _duplicate_process(false),
         _next_is_reverse(false)
   {
-    _doc.open(filename.c_str());
     if(!_doc.good())
       {
         std::cerr << "ERROR: unable to load ChemKin file " << filename << std::endl;
         antioch_error();
       }
+
+      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
 
       _map[ParsingKey::SPECIES_SET]      = "SPECIES";
       _map[ParsingKey::REACTION_DATA]    = "REAC"; //REACTIONS || REAC
@@ -331,7 +352,7 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  const std::vector<std::string> ChemKinParser<NumericType>::species_set()
+  const std::vector<std::string> ChemKinParser<NumericType>::species_list()
   {
       std::string line;
       ascii_getline(_doc,line);
@@ -347,7 +368,7 @@ namespace Antioch{
 
       std::vector<std::string> species;
       ascii_getline(_doc,line);
-      while(line.find("END") == std::string::npos)
+      while(line.find(_spec.end_tag()) == std::string::npos)
       {
          std::vector<std::string> tmp;
          SplitString(line," ",tmp,false);
@@ -1156,6 +1177,36 @@ namespace Antioch{
       }
 
       return out;
+  }
+
+  template <typename NumericType>
+  inline
+  void ChemKinParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a ChemKin parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  inline
+  void ChemKinParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a ChemKin parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  inline
+  void ChemKinParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a ChemKin parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
   }
   
 

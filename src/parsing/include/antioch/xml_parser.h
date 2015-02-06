@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -39,10 +41,14 @@
 
 namespace Antioch{
 
+  template <typename CoeffType>
+  class ChemicalMixture;
+
+
   template <typename NumericType = double>
   class XMLParser{
         public:
-          XMLParser(const std::string &filename);
+          XMLParser(const std::string &filename, bool verbose = true);
           ~XMLParser();
 
 //// first local pointers
@@ -50,8 +56,17 @@ namespace Antioch{
          bool initialize();
 
 /// species
-
+        //! reads the species set
         const std::vector<std::string> species_list() const;
+
+        //! reads the mandatory data, not valid in xml
+        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+
+        //! reads the vibrational data, not valid in xml
+        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+
+        //! reads the electronic data, not valid in xml
+        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
 
 /// reaction
 
@@ -148,6 +163,9 @@ namespace Antioch{
           /*! Never use default constructor*/
           XMLParser();
           tinyxml2::XMLDocument _doc;
+          bool                  _verbose;
+
+//
           tinyxml2::XMLElement * _species_block;
           tinyxml2::XMLElement * _reaction_block;
           tinyxml2::XMLElement * _reaction;
@@ -161,7 +179,8 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  XMLParser<NumericType>::XMLParser(const std::string &filename):
+  XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
+        _verbose(verbose),
         _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
@@ -177,6 +196,9 @@ namespace Antioch{
                   << "\tError String2 = " << _doc.GetErrorStr2() << std::endl;
         antioch_error();
       }
+
+      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
+
 
       _map[ParsingKey::PHASE_BLOCK]           = "phase";
       _map[ParsingKey::SPECIES_SET]           = "speciesArray";
@@ -660,6 +682,36 @@ namespace Antioch{
   {
       def_unit = _default_unit.at(ParsingKey::TROE_F_TSSS);
       return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSSS),T3,T3_unit);
+  }
+
+  template <typename NumericType>
+  inline
+  void XMLParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a XML parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  inline
+  void XMLParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a XML parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
+  }
+
+  template <typename NumericType>
+  inline
+  void XMLParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
+  {
+      std::cerr << "This method is not available with a XML parser.\n"
+                << "No format has been defined yet.  Maybe contribute?\n"
+                << "https://github.com/libantioch/antioch" << std::endl;
+      return;
   }
 
 
