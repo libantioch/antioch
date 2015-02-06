@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_NASA9_EVALUATOR_H
-#define ANTIOCH_NASA9_EVALUATOR_H
+#ifndef ANTIOCH_CEA_EVALUATOR_H
+#define ANTIOCH_CEA_EVALUATOR_H
 
 // Antioch
 #include "antioch/nasa_evaluator.h"
@@ -44,17 +44,17 @@ namespace Antioch
   // a partial specialization
 
   template<typename CoeffType=double>
-  class NASA9Evaluator : public NASAEvaluator<CoeffType,NASA9CurveFit<CoeffType> >
+  class CEAEvaluator : public NASAEvaluator<CoeffType,CEACurveFit<CoeffType> >
   {
   public:
 
-    NASA9Evaluator( const NASA9ThermoMixture<CoeffType>& cea_mixture ):
-        NASAEvaluator<CoeffType,NASA9CurveFit<CoeffType> >(cea_mixture)
+    CEAEvaluator( const CEAThermoMixture<CoeffType>& cea_mixture ):
+        NASAEvaluator<CoeffType,CEACurveFit<CoeffType> >(cea_mixture)
         {antioch_deprecated();}
-    ~NASA9Evaluator(){}
+    ~CEAEvaluator(){}
 
   };
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_NASA9_EVALUATOR_H
+#endif // ANTIOCH_CEA_EVALUATOR_H

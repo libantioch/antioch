@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_NASA9_MIXTURE_H
-#define ANTIOCH_NASA9_MIXTURE_H
+#ifndef ANTIOCH_CEA_MIXTURE_H
+#define ANTIOCH_CEA_MIXTURE_H
 
 // Antioch
 #include "antioch/nasa_mixture.h"
@@ -44,17 +44,17 @@ namespace Antioch
   // this is but a name for
   // a partial specialization
   template<typename CoeffType=double>
-  class NASA9ThermoMixture: public NASAThermoMixture<CoeffType,NASA9CurveFit<CoeffType> >
+  class CEAThermoMixture: public NASAThermoMixture<CoeffType,CEACurveFit<CoeffType> >
   {
   public:
 
-    NASA9ThermoMixture( const ChemicalMixture<CoeffType>& chem_mixture ):
-        NASAThermoMixture<CoeffType,NASA9CurveFit<CoeffType> >(chem_mixture)
+    CEAThermoMixture( const ChemicalMixture<CoeffType>& chem_mixture ):
+        NASAThermoMixture<CoeffType,CEACurveFit<CoeffType> >(chem_mixture)
         {antioch_deprecated();}
-    ~NASA9ThermoMixture(){}
+    ~CEAThermoMixture(){}
 
   };
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_NASA9_MIXTURE_H
+#endif // ANTIOCH_CEA_MIXTURE_H
