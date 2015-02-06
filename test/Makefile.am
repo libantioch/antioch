@@ -178,7 +178,6 @@ TESTS += units_unit
 TESTS += kinetics_reactive_scheme_unit.sh
 TESTS += sigma_bin_converter_unit
 TESTS += sigma_bin_converter_vec_unit
-TESTS += sigma_bin_converter_unit.sh
 TESTS += kinetics_settings_unit
 
 if ANTIOCH_ENABLE_EIGEN
