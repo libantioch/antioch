@@ -38,6 +38,7 @@
 #include "antioch/cea_curve_fit.h"
 #include "antioch/nasa_curve_fit.h"
 #include "antioch/temp_cache.h"
+#include "antioch/nasa_evaluator.h"
 
 // C++
 #include <iomanip>
