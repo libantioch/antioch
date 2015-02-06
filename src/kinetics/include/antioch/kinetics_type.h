@@ -28,9 +28,9 @@
 
 //Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/kinetics_conditions.h"
 #include "antioch/kinetics_enum.h"
 #include "antioch/metaprogramming.h"
-#include "antioch/kinetics_conditions.h"
 
 //C++
 #include <string>
@@ -89,13 +89,27 @@ namespace Antioch{
     template <typename StateType, typename VectorStateType>
     StateType operator()(const KineticsConditions<StateType,VectorStateType> & conditions) const;
 
+    // Deprecated API for backwards compatibility
+    template <typename StateType>
+    StateType operator()(const StateType& temp) const;
+
     //!
     template <typename StateType, typename VectorStateType>
     StateType derivative( const KineticsConditions<StateType,VectorStateType> & conditions ) const;
 
+    // Deprecated API for backwards compatibility
+    template <typename StateType>
+    StateType derivative( const StateType & conditions ) const;
+
     //!
     template <typename StateType, typename VectorStateType>
     void compute_rate_and_derivative(const KineticsConditions<StateType, VectorStateType>& conditions, StateType& rate, StateType& drate_dT) const;
+
+    // Deprecated API for backwards compatibility
+    template <typename StateType>
+    void compute_rate_and_derivative(const StateType & temp,
+                                     StateType & rate,
+                                     StateType& drate_dT) const;
 
     //!
     void set_index(unsigned int nr);
@@ -222,6 +236,17 @@ namespace Antioch{
   }
 
   template <typename CoeffType, typename VectorCoeffType>
+  template <typename StateType>
+  inline
+  StateType KineticsType<CoeffType,VectorCoeffType>::operator()
+  (const StateType & temp) const
+  {
+    antioch_deprecated();
+    return operator()
+      (KineticsConditions<StateType>(temp) );
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
   inline
   StateType KineticsType<CoeffType,VectorCoeffType>::derivative( const KineticsConditions<StateType, VectorStateType> & conditions ) const
@@ -288,6 +313,17 @@ namespace Antioch{
   }
 
   template <typename CoeffType, typename VectorCoeffType>
+  template <typename StateType>
+  inline
+  StateType KineticsType<CoeffType,VectorCoeffType>::derivative
+  ( const StateType & temp ) const
+  {
+    antioch_deprecated();
+    return derivative
+      ( KineticsConditions<StateType> (temp) );
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
   inline
   void KineticsType<CoeffType,VectorCoeffType>::compute_rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& conditions, 
@@ -351,6 +387,18 @@ namespace Antioch{
       } // switch(my_type)
     
     return;
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
+  template <typename StateType>
+  inline
+  void KineticsType<CoeffType,VectorCoeffType>::compute_rate_and_derivative
+  (const StateType & temp,
+   StateType& rate, StateType& drate_dT) const
+  {
+    antioch_deprecated();
+    return compute_rate_and_derivative
+      (KineticsConditions<StateType> (temp), rate, drate_dT);
   }
 
 } // end namespace Antioch
