@@ -398,6 +398,56 @@ namespace Antioch
         
    }
 
+
+/*
+    CEACurveFit is a synomym of NASA9CurveFit.
+
+    Sylvain (06/02/2015 - european date format - dd/mm/yyyy):
+    Food for the mind:
+        the NASA7CurveFit has custom temperature
+        ranges, while, as far as I know, the 
+        9 coefficients form is solely encountered
+        in the CEA program. This implementation
+        acknowledge this and NASA9 and CEA are
+        complete synomyms, there is no custom
+        temperature ranges possible for them.
+
+        As far as future developement goes, the
+        question is ``will be want someday to
+        pick that lock?''. The thing at stake here is
+        the possible antioch_deprecated() in the
+        CEA constructor. As of now, they're full
+        synomyms, so an antioch_deprecated() should
+        be in order, but I personnaly prefers more
+        general things, specially if we can sort
+        them out at compile time by template and
+        metaprogramming shims. I'm all for it Paul
+        is not, history shows I win if I find a
+        real case where it's needed...
+
+        So I'm choosing the middle ground: no
+        antioch_deprecated() when they are
+        full synomyms.
+*/
+
+
+  /*!\class CEACurveFit
+
+     This is a synomym for NASA9CurveFit, the NASA9
+     name ensures consistency with the NASA7 objects
+     while the CEA name provides backward compatiblity
+     and a more `physics-based' name.
+
+     Note that as nothing happens in the destructor (and
+     nothing should ever), no need to get virtual in NASA9.
+  */
+  template<typename CoeffType=double>
+  class CEACurveFit:public NASA9CurveFit<CoeffType>
+  {
+      CEACurveFit( const std::vector<CoeffType>& coeffs ):NASA9CurveFit(coeffs){}
+      ~CEACurveFit(){}
+  }
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_NASA9_CURVE_FIT_H
