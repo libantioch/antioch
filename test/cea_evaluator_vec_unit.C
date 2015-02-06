@@ -75,7 +75,7 @@ GRVY::GRVY_Timer_Class gt;
 template <typename Scalar, typename TrioScalars>
 int test_cp( const std::string& species_name, unsigned int species,
 	     TrioScalars cp_exact, TrioScalars T,
-	     const Antioch::NASA9Evaluator<Scalar>& thermo,
+	     const Antioch::CEAEvaluator<Scalar>& thermo,
              const std::string& testname )
 {
   using std::abs;
@@ -153,9 +153,9 @@ int vectester(const TrioScalars& example, const std::string& testname)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::NASA9ThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
   Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
-  Antioch::NASA9Evaluator<Scalar> thermo( cea_mixture );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   //const Scalar P = 100000.0;
   TrioScalars T = example;
