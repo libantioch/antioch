@@ -30,23 +30,18 @@
 
 // C++
 #include <limits>
+#include <vector>
 // Antioch
 #include "antioch/constant_rate.h"
 
 template <typename Scalar>
-int tester()
+int test_values(const Scalar & Cf, const Antioch::ConstantRate<Scalar> & constant_rate)
 {
-  using std::abs;
-
-  const Scalar Cf = 1.4;
-
-  Antioch::ConstantRate<Scalar> constant_rate(Cf);
-
-  int return_flag = 0;
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-
+  int return_flag = 0;
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
+
     const Scalar rate_exact = Cf;
     const Scalar derive_exact = 0.L;
 
@@ -98,8 +93,32 @@ int tester()
         return_flag = 1;
       }
    if(return_flag)break;
-
   }
+  return return_flag;
+}
+
+template <typename Scalar>
+int tester()
+{
+  using std::abs;
+
+  Scalar Cf = 1.4;
+
+  Antioch::ConstantRate<Scalar> constant_rate(Cf);
+
+  int return_flag = 0;
+
+  return_flag = test_values(Cf,constant_rate) || return_flag;
+
+  Cf = 1e-7;
+  constant_rate.set_Cf(Cf);
+  return_flag = test_values(Cf,constant_rate) || return_flag;
+
+  Cf = 2.5e-11;
+  std::vector<Scalar> values(1,Cf);
+  constant_rate.reset_coefs(values);
+  return_flag = test_values(Cf,constant_rate) || return_flag;
+
   return return_flag;
 }
 

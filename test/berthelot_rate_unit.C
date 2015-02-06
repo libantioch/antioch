@@ -30,20 +30,15 @@
 
 // C++
 #include <limits>
+#include <vector>
 // Antioch
 #include "antioch/berthelot_rate.h"
 
 template <typename Scalar>
-int tester()
+int test_values(const Scalar & Cf, const Scalar & D, const Antioch::BerthelotRate<Scalar> & berthelot_rate)
 {
   using std::abs;
   using std::exp;
-
-  const Scalar Cf = 1.4;
-  const Scalar D  = -5.0;
-
-  Antioch::BerthelotRate<Scalar> berthelot_rate(Cf,D);
-
   int return_flag = 0;
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
@@ -101,6 +96,33 @@ int tester()
       }
     if(return_flag)break;
   }
+  return return_flag;
+}
+
+template <typename Scalar>
+int tester()
+{
+  Scalar Cf = 1.4;
+  Scalar D  = -5.0;
+
+  Antioch::BerthelotRate<Scalar> berthelot_rate(Cf,D);
+
+  int return_flag = test_values(Cf,D,berthelot_rate);
+
+  Cf = 1e-7;
+  D = 1e-3;
+  berthelot_rate.set_Cf(Cf);
+  berthelot_rate.set_D(D);
+  return_flag = test_values(Cf,D,berthelot_rate) || return_flag;
+
+  
+  Cf = 2.1e-11;
+  D = -1.2;
+  std::vector<Scalar> values(2);
+  values[0] = Cf;
+  values[1] = D;
+  berthelot_rate.reset_coefs(values);
+  return_flag = test_values(Cf,D,berthelot_rate) || return_flag;
 
   return return_flag;
 }

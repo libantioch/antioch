@@ -124,6 +124,16 @@ if (test x$HAVE_GRVY = x1); then
   antioch_optional_test_LIBS="$GRVY_LIBS $antioch_optional_test_LIBS"
 fi
 
+dnl GSL for spline method
+AX_PATH_GSL_NEW(1.10,no)
+if (test x$HAVE_GSL = x1); then
+  antioch_optional_test_INCLUDES="$GSL_CFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LIBS="$GSL_LIBS $antioch_optional_test_LIBS"
+  antioch_optional_test_LDFLAGS="$GSL_LDFLAGS $antioch_optional_test_LDFLAGS"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$HAVE_GSL = x1)
+
+
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
 AC_SUBST(antioch_optional_test_LDFLAGS)
@@ -192,7 +202,6 @@ AC_CONFIG_FILES(test/kinetics_vec_unit_air_5sp.sh,       [chmod +x test/kinetics
 AC_CONFIG_FILES(test/kinetics_regression_air_5sp.sh,     [chmod +x test/kinetics_regression_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_vec_air_5sp.sh, [chmod +x test/kinetics_regression_vec_air_5sp.sh])
 AC_CONFIG_FILES(test/photochemical_rate_unit.sh,         [chmod +x test/photochemical_rate_unit.sh])
-AC_CONFIG_FILES(test/sigma_bin_converter_unit.sh,        [chmod +x test/sigma_bin_converter_unit.sh])
 AC_CONFIG_FILES(test/parsing_xml.sh,                     [chmod +x test/parsing_xml.sh])
 AC_CONFIG_FILES(test/parsing_chemkin.sh,                 [chmod +x test/parsing_chemkin.sh])
 AC_CONFIG_FILES(test/kinetics_reactive_scheme_unit.sh,   [chmod +x test/kinetics_reactive_scheme_unit.sh])

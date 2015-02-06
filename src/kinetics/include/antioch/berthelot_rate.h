@@ -27,6 +27,7 @@
 #define ANTIOCH_BERTHELOT_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/cmath_shims.h"
 
@@ -66,6 +67,14 @@ namespace Antioch
     void set_Cf( const CoeffType Cf );
     void set_D( const CoeffType D );
 
+    /*! reset the coeffs
+     *
+     * You require exactly two parameters, the order assumed is Cf, D
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
+
+    // \todo delete this method, why does it exist?
     void scale_D( const CoeffType scale );
 
     CoeffType Cf() const;
@@ -137,6 +146,16 @@ namespace Antioch
   {
     _D = D;
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void BerthelotRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+     antioch_assert_equal_to(coefficients.size(),2);
+     this->set_Cf(coefficients[0]);
+     this->set_D(coefficients[1]);
   }
 
   template<typename CoeffType>
