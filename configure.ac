@@ -205,6 +205,7 @@ AC_CONFIG_FILES(test/photochemical_rate_unit.sh,         [chmod +x test/photoche
 AC_CONFIG_FILES(test/parsing_xml.sh,                     [chmod +x test/parsing_xml.sh])
 AC_CONFIG_FILES(test/parsing_chemkin.sh,                 [chmod +x test/parsing_chemkin.sh])
 AC_CONFIG_FILES(test/kinetics_reactive_scheme_unit.sh,   [chmod +x test/kinetics_reactive_scheme_unit.sh])
+AC_CONFIG_FILES(test/nasa_evaluator_unit.sh,             [chmod +x test/nasa_evaluator_unit.sh])
 
 dnl-----------------------------------------------
 dnl Generate header files
