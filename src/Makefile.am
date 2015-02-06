@@ -70,6 +70,7 @@ pkginclude_HEADERS += parsing/include/antioch/xml_parser.h
 pkginclude_HEADERS += parsing/include/antioch/chemkin_definitions.h
 pkginclude_HEADERS += parsing/include/antioch/chemkin_parser.h
 pkginclude_HEADERS += parsing/include/antioch/ascii_parser.h
+pkginclude_HEADERS += parsing/include/antioch/constant_lewis_diffusivity_building.h
 
 # thermo
 pkginclude_HEADERS += thermo/include/antioch/nasa_curve_fit.h
