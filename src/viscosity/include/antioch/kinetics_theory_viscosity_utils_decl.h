@@ -22,42 +22,37 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
-#define ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
+#ifndef ANTIOCH_KINETICS_THEORY_VISCOSITY_UTILS_DECL_H
+#define ANTIOCH_KINETICS_THEORY_VISCOSITY_UTILS_DECL_H
 
-#include "antioch/metaprogramming_decl.h" // ANTIOCH_AUTO*
+#include "antioch/physics_metaprogramming_decl.h"
 
 namespace Antioch
 {
+   // tag
+   struct kinetics_theory_viscosity_tag{};
 
-  template<typename CoeffType=double>
-  class ConstantLewisDiffusivity
-  {
-  protected:
+   // getting tag
+   template <typename CoeffType, typename Interpolator>
+   struct physical_tag<KineticsTheoryViscosity<CoeffType, Interpolator> >;
 
-    CoeffType _Le;
-    
-  public:
-    
-    ConstantLewisDiffusivity( const CoeffType Le ) : _Le(Le) {}
+   // physical set boolean
+   template<typename CoeffType, typename Interpolator>
+   struct is_physical_set<KineticsTheoryViscosity<CoeffType, Interpolator> >;
 
-    ~ConstantLewisDiffusivity() {}
-    
-    template<typename StateType>
-    ANTIOCH_AUTO(StateType)
-    D( const StateType& rho, const StateType& cp, const StateType& k ) const
-    ANTIOCH_AUTOFUNC(StateType, _Le*k/(rho*cp))
+   // we can initialize without the user's help,
+   template <typename ModelSet>
+   void physical_set_initialize(ModelSet & mod, kinetics_theory_viscosity_tag );
 
-  };
+   // species
+   template<typename Model, typename StateType>
+   ANTIOCH_AUTO(StateType) 
+        physical_set_first_operator(const Model & set, unsigned int s, const StateType & T, kinetics_theory_viscosity_tag);
 
-} // end namespace Antioch
+   // mixture
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, kinetics_theory_viscosity_tag);
+}
 
-#include "antioch/constant_lewis_diffusivity_utils_decl.h"
-
-#endif // ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
+#endif

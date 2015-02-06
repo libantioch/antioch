@@ -22,42 +22,33 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
-#define ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
+#ifndef ANTIOCH_BLOTTNER_VISCOSITY_UTILS_DECL_H
+#define ANTIOCH_BLOTTNER_VISCOSITY_UTILS_DECL_H
 
-#include "antioch/metaprogramming_decl.h" // ANTIOCH_AUTO*
+#include "antioch/physics_metaprogramming_decl.h"
 
 namespace Antioch
 {
+// metaprogramming for physics
+   // tag
+   struct blottner_viscosity_tag{};
 
-  template<typename CoeffType=double>
-  class ConstantLewisDiffusivity
-  {
-  protected:
+   // getting tag
+   template <typename CoeffType>
+   struct physical_tag<BlottnerViscosity<CoeffType> >;
 
-    CoeffType _Le;
-    
-  public:
-    
-    ConstantLewisDiffusivity( const CoeffType Le ) : _Le(Le) {}
+   // physical set boolean
+   template<typename CoeffType>
+   struct is_physical_set<BlottnerViscosity<CoeffType> >;
 
-    ~ConstantLewisDiffusivity() {}
-    
-    template<typename StateType>
-    ANTIOCH_AUTO(StateType)
-    D( const StateType& rho, const StateType& cp, const StateType& k ) const
-    ANTIOCH_AUTOFUNC(StateType, _Le*k/(rho*cp))
+     // operator one species
+   template<typename Model, typename StateType>
+   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType &k, blottner_viscosity_tag);
 
-  };
+     // operator full mixture
+   template<typename Model, typename StateType, typename VectorStateType>
+   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, blottner_viscosity_tag);
+}
 
-} // end namespace Antioch
-
-#include "antioch/constant_lewis_diffusivity_utils_decl.h"
-
-#endif // ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
+#endif
