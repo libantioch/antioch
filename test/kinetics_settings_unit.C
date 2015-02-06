@@ -32,31 +32,40 @@
 #include <limits>
 #include <vector>
 // Antioch
-#include "antioch/vanthoff_rate.h"
-#include "antioch/physical_constants.h"
-#include "antioch/units.h"
+
+#include "antioch/vector_utils_decl.h"
+
+#include "antioch/kinetics_parsing.h"
+//#include "antioch/physical_constants.h"
+//#include "antioch/units.h"
+
+#include "antioch/vector_utils.h"
+
+
 
 template <typename Scalar>
-int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const Scalar& D, const Scalar & Tref, const Scalar & R, const Antioch::VantHoffRate<Scalar> & vanthoff_rate)
+int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const Scalar & D, const Scalar & Tref, const Scalar & R, const Antioch::KineticsType<Scalar> & rate_base)
 {
   using std::abs;
   using std::exp;
   using std::pow;
 
   int return_flag = 0;
+
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
   for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
-    const Scalar rate_exact = Cf * pow(T/Tref,eta) * exp(-Ea/(R*T) + D*T);
-    const Scalar derive_exact = Cf * pow(T/Tref,eta) * exp(-Ea/(R*T) + D*T) * (D + eta/T + Ea/(R*T*T)); 
+  
+    const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(-Ea/(R*T) + D * T);
+    const Scalar derive_exact = exp(-Ea/(R*T) + D * T) * pow(T/Tref,eta) * Cf * (Ea/(R*T*T) + eta/T + D );
 
-    Scalar rate1 = vanthoff_rate(T);
-    Scalar deriveRate1 = vanthoff_rate.derivative(T);
+    Scalar rate1 = rate_base(T);
+    Scalar deriveRate1 = rate_base.derivative(T);
     Scalar rate;
     Scalar deriveRate;
 
-    vanthoff_rate.rate_and_derivative(T,rate,deriveRate);
+    rate_base.compute_rate_and_derivative(T,rate,deriveRate);
 
     if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
       {
@@ -65,7 +74,7 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
                     << "T = " << T << " K" << std::endl
                     << "rate(T) = " << rate1 << std::endl
                     << "rate_exact = " << rate_exact << std::endl
-                    << "Van't Hoff: " << vanthoff_rate << std::endl;
+                    << "on rate " << rate_base << std::endl;
 
           return_flag = 1;
       }
@@ -76,7 +85,7 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
                     << "T = " << T << " K" << std::endl
                     << "rate(T) = " << rate << std::endl
                     << "rate_exact = " << rate_exact << std::endl
-                    << "Van't Hoff: " << vanthoff_rate << std::endl;
+                    << "on rate " << rate_base << std::endl;
 
           return_flag = 1;
       }
@@ -87,10 +96,10 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
                     << "T = " << T << " K" << std::endl
                     << "drate_dT(T) = " << deriveRate1 << std::endl
                     << "derive_exact = " << derive_exact << std::endl
-                    << "Van't Hoff: " << vanthoff_rate << std::endl;
+                    << "on rate " << rate_base << std::endl;
 
           return_flag = 1;
-      }
+     }
     if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
       {
           std::cout << std::scientific << std::setprecision(16)
@@ -98,13 +107,13 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
                     << "T = " << T << " K" << std::endl
                     << "drate_dT(T) = " << deriveRate << std::endl
                     << "derive_exact = " << derive_exact << std::endl
-                    << "Van't Hoff: " << vanthoff_rate << std::endl;
+                    << "on rate " << rate_base << std::endl;
 
           return_flag = 1;
-      }
-    if(return_flag)break;
-  }
+     }
 
+     if(return_flag)break;
+  }
   return return_flag;
 }
 
@@ -112,63 +121,112 @@ template <typename Scalar>
 int tester()
 {
 
+  const Scalar zero(0.L);
   Scalar Cf = 1.4L;
   Scalar eta = 1.2L;
-  Scalar Ea = 298.L;
-  Scalar D = 2.50L;
+  Scalar Ea = 298.0L;
+  Scalar D = 0.05L;
   Scalar Tref = 1.L;
   Scalar R = 1.L;
 
-  Antioch::VantHoffRate<Scalar> vanthoff_rate(Cf,eta,Ea,D,Tref,R);
+/// building only here
 
-  int return_flag = test_values(Cf,eta,Ea,D,Tref,R,vanthoff_rate);
+   // constant
+  std::vector<Scalar> coeffs(1,Cf); 
 
-  Cf = 1e-7L;
-  eta = 0.8L;
-  Ea = 36000.L;
-  D = -5.0L;
-  Tref = 298.;
-  R = Antioch::Constants::R_universal<Scalar>() * Antioch::Units<Scalar>("cal").get_SI_factor();
+  Antioch::KineticsType<Scalar> * kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::CONSTANT);
 
-  vanthoff_rate.set_Cf(Cf);
-  vanthoff_rate.set_eta(eta);
-  vanthoff_rate.set_Ea(Ea);
-  vanthoff_rate.set_D(D);
-  vanthoff_rate.set_Tref(Tref);
-  vanthoff_rate.set_rscale(R);
+  int return_flag = test_values(Cf,zero,zero,zero,Tref,R,*kin_base);
 
-  return_flag = test_values(Cf,eta,Ea,D,Tref,R,vanthoff_rate) || return_flag;
+   // Hercourt-Essen
+  coeffs.resize(3);
+  coeffs[0] = Cf;
+  coeffs[1] = eta;
+  coeffs[2] = Tref;
 
-  Cf = 2.8e-7L;
-  eta = 0.3L;
-  Ea = 45000.L;
-  D = -4.2L;
-  std::vector<Scalar> values(4);
-  values[0] = Cf;
-  values[1] = eta;
-  values[2] = Ea;
-  values[3] = D;
-  vanthoff_rate.reset_coefs(values);
+  delete kin_base;
+  kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::HERCOURT_ESSEN);
+  
+  return_flag = test_values(Cf,eta,zero,zero,Tref,R,*kin_base) || return_flag;
 
-  return_flag = test_values(Cf,eta,Ea,D,Tref,R,vanthoff_rate) || return_flag;
+   // Arrhenius
+  coeffs.resize(3);
+  coeffs[0] = Cf;
+  coeffs[1] = Ea;
+  coeffs[2] = R;
 
-  Cf = 3.6e-11L;
-  eta = 0.235L;
-  Ea = 100000.L;
-  D = 0.025L;
-  Tref = 300.L;
-  R = Antioch::Constants::R_universal<Scalar>();
-  values.resize(6);
-  values[0] = Cf;
-  values[1] = eta;
-  values[2] = Ea;
-  values[3] = D;
-  values[4] = Tref;
-  values[5] = R;
-  vanthoff_rate.reset_coefs(values);
+  delete kin_base;
+  kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::ARRHENIUS);
+  
+  return_flag = test_values(Cf,zero,Ea,zero,Tref,R,*kin_base) || return_flag;
 
-  return_flag = test_values(Cf,eta,Ea,D,Tref,R,vanthoff_rate) || return_flag;
+   // Berthelot
+  coeffs.resize(2);
+  coeffs[0] = Cf;
+  coeffs[1] = D;
 
+  delete kin_base;
+  kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::BERTHELOT);
+  
+  return_flag = test_values(Cf,zero,zero,D,Tref,R,*kin_base) || return_flag;
+
+   // Berthelot Hercourt-Essen
+  coeffs.resize(4);
+  coeffs[0] = Cf;
+  coeffs[1] = eta;
+  coeffs[2] = D;
+  coeffs[3] = Tref;
+
+  delete kin_base;
+  kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::BHE);
+  
+  return_flag = test_values(Cf,eta,zero,D,Tref,R,*kin_base) || return_flag;
+
+   // Kooij
+  coeffs.resize(5);
+  coeffs[0] = Cf;
+  coeffs[1] = eta;
+  coeffs[2] = Ea;
+  coeffs[3] = Tref;
+  coeffs[4] = R;
+
+  delete kin_base;
+  kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::KOOIJ);
+  
+  return_flag = test_values(Cf,eta,Ea,zero,Tref,R,*kin_base) || return_flag;
+
+   // Van't Hoff
+  coeffs.resize(6);
+  coeffs[0] = Cf;
+  coeffs[1] = eta;
+  coeffs[2] = Ea;
+  coeffs[3] = D;
+  coeffs[4] = Tref;
+  coeffs[5] = R;
+
+  delete kin_base;
+  kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::VANTHOFF);
+  
+  return_flag = test_values(Cf,eta,Ea,D,Tref,R,*kin_base) || return_flag;
+
+
+//// reset
+  Scalar Cf_reset = 1e-7L;
+  Scalar eta_reset = 0.8L;
+  Scalar Ea_reset = 36000.L;
+  Scalar D_reset = -5.e-2L;
+  Scalar Tref_reset = 298.;
+  Scalar R_reset = Antioch::Constants::R_universal<Scalar>() * Antioch::Units<Scalar>("cal").get_SI_factor();
+
+  coeffs[0] = Cf_reset;
+  coeffs[1] = eta_reset;
+  coeffs[2] = Ea_reset;
+  coeffs[3] = D_reset;
+  coeffs[4] = Tref_reset;
+  coeffs[5] = R_reset;
+  Antioch::reset_rate(*kin_base,coeffs);
+
+  return_flag = test_values(Cf_reset,eta_reset,Ea_reset,D_reset,Tref_reset,R_reset,*kin_base) || return_flag;
 
   return return_flag;
 }

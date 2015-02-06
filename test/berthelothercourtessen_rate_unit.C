@@ -30,29 +30,24 @@
 
 // C++
 #include <limits>
+#include <vector>
 // Antioch
 #include "antioch/berthelothercourtessen_rate.h"
 
+
 template <typename Scalar>
-int tester()
+int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & D, const Scalar & Tref, const Antioch::BerthelotHercourtEssenRate<Scalar> & berthelothercourtessen_rate)
 {
   using std::abs;
   using std::exp;
   using std::pow;
-
-  const Scalar Cf  = 1.4;
-  const Scalar eta = 1.2;
-  const Scalar D   = -5.0;
-
-  Antioch::BerthelotHercourtEssenRate<Scalar> berthelothercourtessen_rate(Cf,eta,D);
-
   int return_flag = 0;
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
-  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+  for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
-    const Scalar rate_exact = Cf*pow(T,eta)*exp(D*T);
-    const Scalar derive_exact = Cf * pow(T,eta) * exp(D*T) * (D + eta/T);
+    const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(D*T);
+    const Scalar derive_exact = Cf * pow(T/Tref,eta) * exp(D*T) * (D + eta/T);
 
     Scalar rate1 = berthelothercourtessen_rate(T);
     Scalar deriveRate1 = berthelothercourtessen_rate.derivative(T);
@@ -104,6 +99,58 @@ int tester()
 
     if(return_flag)break;
   }
+  return return_flag;
+
+}
+
+
+template <typename Scalar>
+int tester()
+{
+  Scalar Cf  = 1.4L;
+  Scalar eta = 1.2L;
+  Scalar D   = -5.0L;
+  Scalar Tref   = 1.0L;
+
+  Antioch::BerthelotHercourtEssenRate<Scalar> berthelothercourtessen_rate(Cf,eta,D);
+
+  int return_flag = test_values(Cf,eta,D,Tref,berthelothercourtessen_rate);
+
+  Cf  = 1e-7L;
+  eta = 0.6L;
+  D   = 1e-3L;
+  Tref   = 298.0L;
+  berthelothercourtessen_rate.set_Cf(Cf);
+  berthelothercourtessen_rate.set_eta(eta);
+  berthelothercourtessen_rate.set_D(D);
+  berthelothercourtessen_rate.set_Tref(Tref);
+
+  return_flag = test_values(Cf,eta,D,Tref,berthelothercourtessen_rate) || return_flag;
+
+  Cf  = 2.1e-7L;
+  eta = 0.35L;
+  D   = 8.1e-3L;
+  std::vector<Scalar> values(3);
+  values[0] = Cf;
+  values[1] = eta;
+  values[2] = D;
+  berthelothercourtessen_rate.reset_coefs(values);
+
+  return_flag = test_values(Cf,eta,D,Tref,berthelothercourtessen_rate) || return_flag;
+
+  Cf  = 2.1e-11L;
+  eta = -0.35L;
+  D   = -2.1;
+  Tref   = 300.L;
+  values.resize(4);
+  values[0] = Cf;
+  values[1] = eta;
+  values[2] = D;
+  values[3] = Tref;
+  berthelothercourtessen_rate.reset_coefs(values);
+
+  return_flag = test_values(Cf,eta,D,Tref,berthelothercourtessen_rate) || return_flag;
+
 
   return return_flag;
 }

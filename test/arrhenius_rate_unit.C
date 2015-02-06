@@ -30,27 +30,25 @@
 
 // C++
 #include <limits>
+#include <vector>
 // Antioch
 #include "antioch/arrhenius_rate.h"
+#include "antioch/physical_constants.h"
+#include "antioch/units.h"
 
 template <typename Scalar>
-int tester()
+int test_values(const Scalar & Cf, const Scalar & Ea, const Scalar & R, const Antioch::ArrheniusRate<Scalar> & arrhenius_rate)
 {
   using std::abs;
   using std::exp;
-
-  const Scalar Cf = 1.4;
-  const Scalar Ea = 5.0;
-
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea,1.);
-
   int return_flag = 0;
+
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
-    const Scalar rate_exact = Cf*exp(-Ea/T);
-    const Scalar derive_exact = Ea/(T*T) * Cf * exp(-Ea/T);
+    const Scalar rate_exact = Cf*exp(-Ea/(R*T));
+    const Scalar derive_exact = Ea/(R*T*T) * Cf * exp(-Ea/(R*T));
 
     Scalar rate1 = arrhenius_rate(T);
     Scalar deriveRate1 = arrhenius_rate.derivative(T);
@@ -101,6 +99,50 @@ int tester()
       }
     if(return_flag)break;
   }
+
+  return return_flag;
+
+}
+
+template <typename Scalar>
+int tester()
+{
+  Scalar Cf = 1.4L;
+  Scalar Ea = 298.0L;
+  Scalar R = 1.0L; // Ea in K
+
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea,R);
+
+  int return_flag = test_values(Cf,Ea,R,arrhenius_rate);
+
+  Cf = 1e-7L;
+  Ea = 36000.L;
+  R = Antioch::Constants::R_universal<Scalar>() * Antioch::Units<Scalar>("cal").get_SI_factor();
+  arrhenius_rate.set_Cf(Cf);
+  arrhenius_rate.set_Ea(Ea);
+  arrhenius_rate.set_rscale(R);
+
+  return_flag = test_values(Cf,Ea,R,arrhenius_rate) || return_flag;
+
+  Cf = 2.5e-7L;
+  Ea = 43000.L; //still in cal
+  std::vector<Scalar> values(2);
+  values[0] = Cf;
+  values[1] = Ea;
+  arrhenius_rate.reset_coefs(values);
+
+  return_flag = test_values(Cf,Ea,R,arrhenius_rate) || return_flag;
+
+  Cf = 2.1e-11L;
+  Ea = 100000.L;
+  R = Antioch::Constants::R_universal<Scalar>();
+  values.resize(3);
+  values[0] = Cf;
+  values[1] = Ea;
+  values[2] = R;
+  arrhenius_rate.reset_coefs(values);
+
+  return_flag = test_values(Cf,Ea,R,arrhenius_rate) || return_flag;
 
   return return_flag;
 }
