@@ -124,6 +124,16 @@ if (test x$HAVE_GRVY = x1); then
   antioch_optional_test_LIBS="$GRVY_LIBS $antioch_optional_test_LIBS"
 fi
 
+dnl GSL for spline method
+AX_PATH_GSL_NEW(1.10,no)
+if (test x$HAVE_GSL = x1); then
+  antioch_optional_test_INCLUDES="$GSL_CFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LIBS="$GSL_LIBS $antioch_optional_test_LIBS"
+  antioch_optional_test_LDFLAGS="$GSL_LDFLAGS $antioch_optional_test_LDFLAGS"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$HAVE_GSL = x1)
+
+
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
 AC_SUBST(antioch_optional_test_LDFLAGS)
