@@ -67,6 +67,8 @@ GRVY::GRVY_Timer_Class gt;
 #include <cmath>
 #include <limits>
 
+#ifdef ANTIOCH_HAVE_GSL
+
 template <typename Scalar, typename Element, typename ElementOrScalar>
 int test_diff( const Element & dij, const ElementOrScalar & dij_exact, const Scalar & tol, const std::string & words )
 {
@@ -123,7 +125,7 @@ int vectester(const PairScalars& example, const std::string& testname)
                                     H2O(2,H2O_LJ_eps,H2O_LJ_depth,H2O_dipole,H2O_polar,H2O_Zrot,H2O_mass);
 
 
-   Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner> 
+   Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>
                 D00(N2,N2),  D01(N2,CH4),  D02(N2,H2O),
                 D10(CH4,N2), D11(CH4,CH4), D12(CH4,H2O),
                 D20(H2O,N2), D21(H2O,CH4), D22(H2O,H2O);
@@ -157,7 +159,7 @@ int vectester(const PairScalars& example, const std::string& testname)
 #ifdef ANTIOCH_HAVE_GRVY
   gt.BeginTimer(testname);
 #endif
-  
+
   PairScalars d00 = D00(T,cTot) * D00.Stockmayer(T);
   PairScalars d11 = D11(T,cTot) * D11.Stockmayer(T);
   PairScalars d22 = D22(T,cTot) * D22.Stockmayer(T);
@@ -201,11 +203,13 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   return return_flag;
 }
-
+#endif // ANTIOCH_HAVE_GSL
 
 int main()
 {
   int returnval = 0;
+
+#ifdef ANTIOCH_HAVE_GSL
 
   returnval = returnval ||
     vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
@@ -244,6 +248,11 @@ int main()
 #ifdef ANTIOCH_HAVE_GRVY
   gt.Finalize();
   gt.Summarize();
+#endif
+
+#else // ANTIOCH_HAVE_GSL
+  // 77 return code tells Automake we skipped this.
+  returnval = 77;
 #endif
 
   return returnval;

@@ -207,7 +207,7 @@ HAVE_GSL=0
           AC_MSG_ERROR([GSL not found.  Try either --with-gsl or setting GSL_DIR.])
        else
           AC_MSG_NOTICE([optional GSL library not found])
-          GSL_CPPFLAGS=""   # GSL_CFLAGS empty on failure
+          GSL_CPPFLAGS=""   # GSL_CPPFLAGS empty on failure
           GSL_LDFLAGS=""    # GSL_LDFLAGS empty on failure
           GSL_LIBS=""       # GSL_LIBS empty on failure
        fi

@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------el-
 
+#include "antioch_config.h"
+
 // Antioch
 #include "antioch/vector_utils_decl.h"
 #include "antioch/gsl_spliner.h"
@@ -36,6 +38,8 @@
 #include <vector>
 #include <string>
 #include <fstream>
+
+#ifdef ANTIOCH_HAVE_GSL
 
 template <typename Scalar>
 int check_value(const Scalar & ref, const Scalar & candidate, const Scalar & x, const std::string & words)
@@ -108,11 +112,17 @@ int tester()
 
   return return_flag;
 }
+#endif // ANTIOCH_HAVE_GSL
 
 int main()
 {
+#ifdef ANTIOCH_HAVE_GSL
 // gsl work in double...
   return (tester<float>() ||
           tester<double>());
  //         tester<long double>() ||
+#else
+  // 77 return code tells Automake we skipped this.
+  return 77;
+#endif
 }

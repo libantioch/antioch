@@ -68,6 +68,7 @@ GRVY::GRVY_Timer_Class gt;
 #include <cmath>
 #include <limits>
 
+#ifdef ANTIOCH_HAVE_GSL
 template <typename Scalar, typename Element>
 int test_viscosity( const Element & mu, const Scalar  & mu_exact, const Scalar & tol )
 {
@@ -114,7 +115,7 @@ int vectester(const PairScalars& example, const std::string& testname)
       T[2*tuple]   = 1500.1;
       T[2*tuple+1] = 1600.1;
     }
-  
+
   const Scalar mu_exact0 = 0.0000417395098853601937871105407365424874568203066945573066;
   const Scalar mu_exact1 = 0.0000431082906407300464864929380770860406892212065614947462;
 
@@ -141,11 +142,13 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   return return_flag;
 }
-
+#endif // ANTIOCH_HAVE_GSL
 
 int main()
 {
   int returnval = 0;
+
+#ifdef ANTIOCH_HAVE_GSL
 
   returnval = returnval ||
     vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
@@ -184,6 +187,11 @@ int main()
 #ifdef ANTIOCH_HAVE_GRVY
   gt.Finalize();
   gt.Summarize();
+#endif
+
+#else // ANTIOCH_HAVE_GSL
+  // 77 return code tells Automake we skipped this.
+  returnval = 77;
 #endif
 
   return returnval;

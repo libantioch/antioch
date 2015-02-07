@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------el-
 
+#include "antioch_config.h"
+
 // C++
 #include <iostream>
 #include <iomanip>
@@ -34,6 +36,8 @@
 #include "antioch/physical_constants.h"
 #include "antioch/kinetics_theory_viscosity.h"
 #include "antioch/vector_utils.h"
+
+#ifdef ANTIOCH_HAVE_GSL
 
 template <typename Scalar>
 int test_viscosity( const Scalar mu, const Scalar mu_exact, const Scalar tol )
@@ -82,10 +86,16 @@ int tester()
 
   return return_flag;
 }
+#endif // ANTIOCH_HAVE_GSL
 
 int main()
 {
+#ifdef ANTIOCH_HAVE_GSL
   return tester<double>() ||
          tester<long double>() ||
          tester<float>();
+#else
+  // 77 return code tells Automake we skipped this.
+  return 77;
+#endif
 };
