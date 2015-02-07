@@ -58,6 +58,7 @@ pkginclude_HEADERS += kinetics/include/antioch/kinetics_evaluator.h
 pkginclude_HEADERS += parsing/include/antioch/tinyxml2.h
 pkginclude_HEADERS += parsing/include/antioch/tinyxml2_imp.h
 pkginclude_HEADERS += parsing/include/antioch/read_reaction_set_data.h
+pkginclude_HEADERS += parsing/include/antioch/read_reaction_set_data_xml.h
 pkginclude_HEADERS += parsing/include/antioch/blottner_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/sutherland_parsing.h
 pkginclude_HEADERS += parsing/include/antioch/cea_thermo_ascii_parsing.h
