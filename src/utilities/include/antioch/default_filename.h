@@ -93,6 +93,13 @@ public:
       std::string(ANTIOCH_DEFAULT_BLOTTNER_DATA);
     return filename;
   }
+
+  static const std::string& transport_mixture() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_PATH) +
+      std::string(ANTIOCH_DEFAULT_TRANSPORT_DATA);
+    return filename;
+  }
 };
 
 } // end namespace Antioch
