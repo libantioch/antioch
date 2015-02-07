@@ -27,7 +27,7 @@
 #define ANTIOCH_KINETICS_THEORY_THERMAL_CONDUCTIVITY_UTILS_H
 
 #include "antioch/antioch_asserts.h"
-#include "antioch/kinetics_theory_the_con_utils_decl.h"
+#include "antioch/kinetics_theory_thermal_cond_utils_decl.h"
 #include "antioch/kinetics_theory_thermal_conductivity_building.h"
 
 namespace Antioch
