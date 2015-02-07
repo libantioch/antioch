@@ -39,7 +39,7 @@ namespace Antioch
 {
   //forward declaration
   template <typename ThermoEval, typename NumericType>
-  TransportMixture;
+  class TransportMixture;
 
 
   template<class ThermoEvaluator, class NumericType>
