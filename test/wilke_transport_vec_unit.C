@@ -51,13 +51,29 @@
 #include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/chemical_mixture.h"
+#include "antioch/transport_mixture.h"
 #include "antioch/default_filename.h"
+
 #include "antioch/stat_mech_thermo.h"
+#include "antioch/cea_mixture.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
+
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
+#include "antioch/constant_lewis_diffusivity.h"
+#include "antioch/eucken_thermal_conductivity_utils.h"
+#include "antioch/blottner_viscosity_utils.h"
+#include "antioch/constant_lewis_diffusivity_utils.h"
+
+#include "antioch/physical_set.h"
+#include "antioch/physics_metaprogramming.h"
+
 #include "antioch/wilke_mixture.h"
 #include "antioch/wilke_evaluator.h"
 #include "antioch/blottner_parsing.h"
+#include "antioch/eucken_thermal_conductivity_building.h"
+#include "antioch/constant_lewis_diffusivity_building.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
@@ -118,19 +134,42 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::WilkeMixture<Scalar> wilke_mixture( chem_mixture );
-  
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> > k( thermo );
+  Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> tran_mixture( chem_mixture, thermo );
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar> mu( chem_mixture );
+  typedef Antioch::TransportMixture<Antioch::StatMechThermodynamics<Scalar>,Scalar> TransportType;
+  typedef Antioch::ChemicalMixture<Scalar>                                          ChemicalType;
+  typedef Antioch::StatMechThermodynamics<Scalar>                                   ThermoType;
+
+// thermo for cp (diffusion)
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo_mix( cea_mixture );
+
+  typedef Antioch::CEAEvaluator<Scalar>  ThermoMixType;
+
+  Antioch::PhysicalSet< Antioch::EuckenThermalConductivity<ThermoType>, TransportType > k( tran_mixture );
+
+  Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, ChemicalType> mu( chem_mixture );
+
+  Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType > D( chem_mixture );
+
 
   Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
-  Antioch::WilkeEvaluator< Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar>,
-                           Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >,
-                           Scalar > wilke( wilke_mixture, mu, k );
+  Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
+
+  typedef Antioch::PhysicalSet< Antioch::EuckenThermalConductivity<ThermoType>, TransportType > TCType;
+  typedef Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, ChemicalType>                VType;
+  typedef Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType >        DType;
+
+
+  Antioch::WilkeMixture<TransportType,ThermoMixType,Scalar> wilke_mixture( tran_mixture, thermo_mix );
+
+  typedef Antioch::WilkeMixture<TransportType,ThermoMixType,Scalar>  WilkeMixType;
+
+  Antioch::WilkeEvaluator< DType, VType, TCType, WilkeMixType, Scalar > wilke( wilke_mixture, D, mu, k );
 
   int return_flag = 0;
 
