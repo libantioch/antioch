@@ -56,20 +56,18 @@ check_PROGRAMS += kinetics_theory_thermal_conductivity_vec_unit
 check_PROGRAMS += rotational_relaxation_unit
 check_PROGRAMS += rotational_relaxation_vec_unit
 
-if ANTIOCH_ENABLE_GSL
+#GSL Tests
 check_PROGRAMS += molecular_binary_diffusion_unit
 check_PROGRAMS += molecular_binary_diffusion_vec_unit
 check_PROGRAMS += kinetics_theory_viscosity_unit
 check_PROGRAMS += kinetics_theory_viscosity_vec_unit
 check_PROGRAMS += gsl_spline_unit
 check_PROGRAMS += gsl_spline_vec_unit
-endif
 
-if ANTIOCH_ENABLE_EIGEN
+# Eigen Tests
 check_PROGRAMS += stat_mech_thermo_unit_eigen
-endif
 
-AM_CPPFLAGS  = 
+AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/units/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/particles_flux/include
@@ -143,18 +141,18 @@ kinetics_theory_thermal_conductivity_vec_unit_SOURCES = kinetics_theory_thermal_
 rotational_relaxation_unit_SOURCES = rotational_relaxation_unit.C
 rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
 
-if ANTIOCH_ENABLE_GSL
+# GSL Tests
 molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
 molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
 kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
 kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
 gsl_spline_unit_SOURCES = gsl_spline_unit.C
 gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
-endif
 
-if ANTIOCH_ENABLE_EIGEN
+
+# Eigen Tests
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
-endif
+
 
 #Define tests to actually be run
 TESTS  =
@@ -213,18 +211,18 @@ TESTS += kinetics_theory_thermal_conductivity_vec_unit
 TESTS += rotational_relaxation_unit
 TESTS += rotational_relaxation_vec_unit
 
-if ANTIOCH_ENABLE_GSL
+# GSL Tests
 TESTS += molecular_binary_diffusion_unit
 TESTS += molecular_binary_diffusion_vec_unit
 TESTS += kinetics_theory_viscosity_unit
 TESTS += kinetics_theory_viscosity_vec_unit
 TESTS += gsl_spline_unit
 TESTS += gsl_spline_vec_unit
-endif
 
-if ANTIOCH_ENABLE_EIGEN
+
+# Eigen Tests
 TESTS += stat_mech_thermo_unit_eigen
-endif
+
 
 CLEANFILES =
 if CODE_COVERAGE_ENABLED

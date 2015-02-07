@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------el-
 
+#include "antioch_config.h"
+
 // C++
 #include <iostream>
 #include <iomanip>
@@ -34,6 +36,8 @@
 #include "antioch/transport_species.h"
 #include "antioch/molecular_binary_diffusion.h"
 #include "antioch/vector_utils.h"
+
+#ifdef ANTIOCH_HAVE_GSL
 
 template <typename Scalar>
 int test_diff( const Scalar dij, const Scalar dij_exact, const Scalar tol, const std::string & words )
@@ -94,7 +98,7 @@ H2O                   572.400     2.605     1.844     0.000     4.000
                                     H2O(2,H2O_LJ_eps,H2O_LJ_depth,H2O_dipole,H2O_polar,H2O_Zrot,H2O_mass);
 
 
-  Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner> 
+  Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>
                 D00(N2,N2),  D01(N2,CH4),  D02(N2,H2O),
                 D10(CH4,N2), D11(CH4,CH4), D12(CH4,H2O),
                 D20(H2O,N2), D21(H2O,CH4), D22(H2O,H2O);
@@ -117,7 +121,7 @@ H2O                   572.400     2.605     1.844     0.000     4.000
 
 // symetric consistency
   std::cout << "***  Testing symetry ...";
-            
+
   return_flag = test_diff( D10(T,cTot) , D01(T,cTot), tol, "N2 - CH4 symetry" )  || return_flag;
   return_flag = test_diff( D12(T,cTot) , D21(T,cTot), tol, "CH4 - H2O symetry" ) || return_flag;
   return_flag = test_diff( D20(T,cTot) , D02(T,cTot), tol, "H2O - N2 symetry" )  || return_flag;
@@ -135,10 +139,17 @@ H2O                   572.400     2.605     1.844     0.000     4.000
 
   return return_flag;
 }
+#endif // ANTIOCH_HAVE_GSL
+
 
 int main()
 {
+#ifdef ANTIOCH_HAVE_GSL
   return tester<double>()    ||
          tester<long double>() ||
          tester<float>();
+#else
+  // 77 return code tells Automake we skipped this.
+  return 77;
+#endif
 };

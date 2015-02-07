@@ -70,6 +70,8 @@ GRVY::GRVY_Timer_Class gt;
 #include <cmath>
 #include <limits>
 
+#ifdef ANTIOCH_HAVE_GSL
+
 template <typename Scalar,typename Element>
 int check_value(const Element & ref, const Element & candidate, const Element & x, const std::string & words)
 {
@@ -136,7 +138,7 @@ int vectester(const PairScalars& example, const std::string& testname)
       x[2*tuple]   = -3.5;
       x[2*tuple+1] = 5.1;
     }
-  
+
   int return_flag = 0;
 
 #ifdef ANTIOCH_HAVE_GRVY
@@ -157,11 +159,13 @@ int vectester(const PairScalars& example, const std::string& testname)
       }
   return return_flag;
 }
-
+#endif // ANTIOCH_HAVE_GSL
 
 int main()
 {
   int returnval = 0;
+
+#ifdef ANTIOCH_HAVE_GSL
 
   returnval = returnval ||
     vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
@@ -200,6 +204,11 @@ int main()
 #ifdef ANTIOCH_HAVE_GRVY
   gt.Finalize();
   gt.Summarize();
+#endif
+
+#else // ANTIOCH_HAVE_GSL
+  // 77 return code tells Automake we skipped this.
+  returnval = 77;
 #endif
 
   return returnval;
