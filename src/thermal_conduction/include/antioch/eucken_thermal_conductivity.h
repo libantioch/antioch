@@ -46,6 +46,12 @@ namespace Antioch
 
     ~EuckenThermalConductivity() {}
 
+     // Suppose thermal equilibrium Tv = Te = T:w
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+      operator()( const unsigned int s, const StateType& mu, const StateType & T ) const
+    ANTIOCH_AUTOFUNC(StateType, trans(s,mu) + rot(s,mu) + vib(s,mu,T) + elec(s,mu,T))
+
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
     trans( const unsigned int s, const StateType& mu ) const
