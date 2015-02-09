@@ -12,7 +12,7 @@
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/ideal_gas_internal_thermo.h"
-#include "antioch/nasa_evaluator.h"
+#include "antioch/cea_evaluator.h"
 #include "antioch/cea_curve_fit.h"
 #include "antioch/cea_mixture_ascii_parsing.h"
 
@@ -106,9 +106,9 @@ int tester()
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
 // required for Cv, we take default CEA
-  Antioch::NASAThermoMixture<Scalar, Antioch::CEACurveFit<Scalar> > nasa_mixture( chem_mixture );
+  Antioch::CEAThermoMixture<Scalar> nasa_mixture( chem_mixture );
   Antioch::read_cea_mixture_data_ascii( nasa_mixture, Antioch::DefaultFilename::thermo_data() );
-  Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> > nasa_thermo( nasa_mixture );
+  Antioch::CEAEvaluator<Scalar> nasa_thermo( nasa_mixture );
 
   Antioch::IdealGasInternalThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
                                    Scalar > id_thermo( nasa_thermo, chem_mixture );
