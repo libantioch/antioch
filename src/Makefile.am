@@ -82,7 +82,7 @@ pkginclude_HEADERS += thermo/include/antioch/cea_evaluator.h
 pkginclude_HEADERS += thermo/include/antioch/cea_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/ideal_gas_micro_thermo.h
-pkginclude_HEADERS += thermo/include/antioch/thermo_evaluator.h
+pkginclude_HEADERS += thermo/include/antioch/thermo_handler.h
 
 # transport
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
