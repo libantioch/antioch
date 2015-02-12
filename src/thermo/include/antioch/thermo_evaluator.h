@@ -47,11 +47,11 @@ namespace Antioch
      mixture properties, fetch the concerned
      object.
   */
-  template <typename CoeffType, typename ExternalThermo, typename InternalThermo = IdealGasInternalThermo<ExternalThermo,CoeffType> >
+  template <typename CoeffType, typename MacroThermo, typename MicroThermo = IdealGasMicroThermo<MacroThermo,CoeffType> >
   class ThermoEvaluator
   {
       public:
-        ThermoEvaluator(const ExternalThermo & external_thermo, const InternalThermo & internal_thermo);
+        ThermoEvaluator(const MacroThermo & external_thermo, const MicroThermo & internal_thermo);
         ~ThermoEvaluator();
 
 // external values
@@ -133,48 +133,48 @@ namespace Antioch
 
 // objects
 
-        const ExternalThermo & external_thermo() const;
+        const MacroThermo & external_thermo() const;
 
-        const InternalThermo & internal_thermo() const;
+        const MicroThermo & internal_thermo() const;
 
 
       private:
         // huhu, don't use it
         ThermoEvaluator();
 
-        const ExternalThermo & _ext_therm;
-        const InternalThermo & _int_therm;
+        const MacroThermo & _ext_therm;
+        const MicroThermo & _int_therm;
   };
 
 
-   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
+   template <typename CoeffType, typename MacroThermo, typename MicroThermo>
    inline
-   ThermoEvaluator<CoeffType,ExternalThermo, InternalThermo>::ThermoEvaluator(const ExternalThermo & external_thermo, const InternalThermo & internal_thermo):
+   ThermoEvaluator<CoeffType,MacroThermo, MicroThermo>::ThermoEvaluator(const MacroThermo & external_thermo, const MicroThermo & internal_thermo):
         _ext_therm(external_thermo),
         _int_therm(internal_thermo)
    {
       return;
    }
 
-   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
+   template <typename CoeffType, typename MacroThermo, typename MicroThermo>
    inline
-   ThermoEvaluator<CoeffType, ExternalThermo, InternalThermo>::~ThermoEvaluator()
+   ThermoEvaluator<CoeffType, MacroThermo, MicroThermo>::~ThermoEvaluator()
    {
      return;
    }
 
 
-   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
+   template <typename CoeffType, typename MacroThermo, typename MicroThermo>
    inline
-   const ExternalThermo & ThermoEvaluator<CoeffType, ExternalThermo, InternalThermo>::external_thermo() const
+   const MacroThermo & ThermoEvaluator<CoeffType, MacroThermo, MicroThermo>::external_thermo() const
    {
       return _ext_therm;
    }
    
 
-   template <typename CoeffType, typename ExternalThermo, typename InternalThermo>
+   template <typename CoeffType, typename MacroThermo, typename MicroThermo>
    inline
-   const InternalThermo &  ThermoEvaluator<CoeffType, ExternalThermo, InternalThermo>::internal_thermo() const
+   const MicroThermo &  ThermoEvaluator<CoeffType, MacroThermo, MicroThermo>::internal_thermo() const
    {
       return _int_therm;
    }

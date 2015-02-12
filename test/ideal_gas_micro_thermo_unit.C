@@ -11,7 +11,7 @@
 
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/ideal_gas_internal_thermo.h"
+#include "antioch/ideal_gas_micro_thermo.h"
 #include "antioch/cea_evaluator.h"
 #include "antioch/cea_curve_fit.h"
 #include "antioch/cea_mixture_ascii_parsing.h"
@@ -55,7 +55,7 @@ int test_relative(const Scalar val, const Scalar truth, const Scalar tol, const 
 template <typename Scalar>
 int test_molecule(unsigned int spec, const Scalar & n_tr_dofs, const Scalar & R_spec, 
                    const Scalar & cv_over_R, const Scalar & T,
-                   const Antioch::IdealGasInternalThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
+                   const Antioch::IdealGasMicroThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
                                                           Scalar 
                                                         > & thermo,
                    const std::string & name)
@@ -110,7 +110,7 @@ int tester()
   Antioch::read_cea_mixture_data_ascii( nasa_mixture, Antioch::DefaultFilename::thermo_data() );
   Antioch::CEAEvaluator<Scalar> nasa_thermo( nasa_mixture );
 
-  Antioch::IdealGasInternalThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
+  Antioch::IdealGasMicroThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
                                    Scalar > id_thermo( nasa_thermo, chem_mixture );
 
   // Mass fractions

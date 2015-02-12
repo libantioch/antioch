@@ -23,8 +23,8 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_IDEAL_GAS_INTERNAL_THERMO_H
-#define ANTIOCH_IDEAL_GAS_INTERNAL_THERMO_H
+#ifndef ANTIOCH_IDEAL_GAS_MICRO_THERMO_H
+#define ANTIOCH_IDEAL_GAS_MICRO_THERMO_H
 
 namespace Antioch
 {
@@ -36,12 +36,12 @@ namespace Antioch
   class TempCache;
 
 
-  template <typename ExternalThermo, typename CoeffType = double>
-  class IdealGasInternalThermo
+  template <typename MacroThermo, typename CoeffType = double>
+  class IdealGasMicroThermo
   {
        public:
-         IdealGasInternalThermo(const ExternalThermo & ext_thermo, const ChemicalMixture<CoeffType> & chem_mix);
-         ~IdealGasInternalThermo();
+         IdealGasMicroThermo(const MacroThermo & ext_thermo, const ChemicalMixture<CoeffType> & chem_mix);
+         ~IdealGasMicroThermo();
 
         //! cv_vib
         template <typename StateType>
@@ -77,65 +77,65 @@ namespace Antioch
 
        private:
         const ChemicalMixture<CoeffType> & _chem_mix;
-        const ExternalThermo             & _ext_therm;
+        const MacroThermo             & _ext_therm;
   };
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  IdealGasInternalThermo<ExternalThermo, CoeffType>::IdealGasInternalThermo(const ExternalThermo & ext_therm, const ChemicalMixture<CoeffType> & chem_mix):
+  IdealGasMicroThermo<MacroThermo, CoeffType>::IdealGasMicroThermo(const MacroThermo & ext_therm, const ChemicalMixture<CoeffType> & chem_mix):
     _chem_mix(chem_mix),
     _ext_therm(ext_therm)
   {
      return;
   }
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  IdealGasInternalThermo<ExternalThermo, CoeffType>::~IdealGasInternalThermo()
+  IdealGasMicroThermo<MacroThermo, CoeffType>::~IdealGasMicroThermo()
   {
      return;
   }
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr_over_R(unsigned int s) const
+  const CoeffType IdealGasMicroThermo<MacroThermo, CoeffType>::cv_tr_over_R(unsigned int s) const
   {
      return _chem_mix.chemical_species()[s]->n_tr_dofs();
   }
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_tr(unsigned int s) const
+  const CoeffType IdealGasMicroThermo<MacroThermo, CoeffType>::cv_tr(unsigned int s) const
   {
     return _chem_mix.R(s) * (_chem_mix.chemical_species()[s])->n_tr_dofs();
   }
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_rot(unsigned int s) const
+  const CoeffType IdealGasMicroThermo<MacroThermo, CoeffType>::cv_rot(unsigned int s) const
   {
     using std::max;
 
     return max(this->cv_tr(s) - this->cv_trans(s), CoeffType(0) ); 
   }
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_rot_over_R(unsigned int s) const
+  const CoeffType IdealGasMicroThermo<MacroThermo, CoeffType>::cv_rot_over_R(unsigned int s) const
   {
     return std::max(this->cv_tr_over_R(s) - this->cv_trans_over_R(s), CoeffType(0) ); 
   }
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_trans( const unsigned int species ) const
+  const CoeffType IdealGasMicroThermo<MacroThermo, CoeffType>::cv_trans( const unsigned int species ) const
   {
     return CoeffType(1.5)*_chem_mix.R(species);
   }
 
-  template <typename ExternalThermo, typename CoeffType>
+  template <typename MacroThermo, typename CoeffType>
   inline
-  const CoeffType IdealGasInternalThermo<ExternalThermo, CoeffType>::cv_trans_over_R( const unsigned int /*species*/ ) const
+  const CoeffType IdealGasMicroThermo<MacroThermo, CoeffType>::cv_trans_over_R( const unsigned int /*species*/ ) const
   {
     return CoeffType(1.5);
   }

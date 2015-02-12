@@ -55,7 +55,7 @@ check_PROGRAMS += kinetics_theory_thermal_conductivity_unit
 check_PROGRAMS += kinetics_theory_thermal_conductivity_vec_unit
 check_PROGRAMS += rotational_relaxation_unit
 check_PROGRAMS += rotational_relaxation_vec_unit
-check_PROGRAMS += ideal_gas_internal_thermo_unit
+check_PROGRAMS += ideal_gas_micro_thermo_unit
 
 #GSL Tests
 check_PROGRAMS += molecular_binary_diffusion_unit
@@ -149,7 +149,7 @@ kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
 kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
 gsl_spline_unit_SOURCES = gsl_spline_unit.C
 gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
-ideal_gas_internal_thermo_unit_SOURCES =  ideal_gas_internal_thermo_unit.C
+ideal_gas_micro_thermo_unit_SOURCES =  ideal_gas_micro_thermo_unit.C
 
 
 # Eigen Tests
@@ -212,7 +212,7 @@ TESTS += kinetics_theory_thermal_conductivity_unit
 TESTS += kinetics_theory_thermal_conductivity_vec_unit
 TESTS += rotational_relaxation_unit
 TESTS += rotational_relaxation_vec_unit
-TESTS += ideal_gas_internal_thermo_unit
+TESTS += ideal_gas_micro_thermo_unit
 
 # GSL Tests
 TESTS += molecular_binary_diffusion_unit
