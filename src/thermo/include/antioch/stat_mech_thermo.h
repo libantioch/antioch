@@ -551,7 +551,7 @@ namespace Antioch
     return _chem_mixture.R(species)*(_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
 
-   template<typename CoeffType>
+  template<typename CoeffType>
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_tr_over_R (const unsigned int species) const
   {
