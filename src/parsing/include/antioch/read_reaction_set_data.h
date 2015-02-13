@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_REACTION_SET_DATA_XML_H
-#define ANTIOCH_REACTION_SET_DATA_XML_H
+#ifndef ANTIOCH_READ_REACTION_SET_DATA_H
+#define ANTIOCH_READ_REACTION_SET_DATA_H
 
 // Antioch
 #include "antioch/antioch_asserts.h"
@@ -768,4 +768,4 @@ namespace Antioch
  
 } // end namespace Antioch
 
-#endif // ANTIOCH_REACTION_SET_DATA_XML_H
+#endif // ANTIOCH_READ_REACTION_SET_DATA_H

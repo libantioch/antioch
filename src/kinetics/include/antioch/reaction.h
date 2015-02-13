@@ -44,8 +44,8 @@
 #include "antioch/vanthoff_rate.h"
 #include "antioch/photochemical_rate.h"
 #include "antioch/reaction_enum.h"
-#include "antioch/particle_flux.h"
 #include "antioch/chemical_mixture.h"
+#include "antioch/kinetics_conditions.h"
 
 //C++
 #include <string>
@@ -182,6 +182,12 @@ namespace Antioch
                       const unsigned int stoichiometric_coeff);
 
     //!
+    void clear_reactant();
+
+    //!
+    void clear_product();
+
+    //!
     void set_efficiency( const std::string &,
                          const unsigned int s,
                          const CoeffType efficiency);
@@ -189,12 +195,8 @@ namespace Antioch
     //!
     CoeffType efficiency( const unsigned int s) const;
 
-    //! Sets the particle flux
-    template <typename VectorStateType>
-    void set_particle_flux(ParticleFlux<VectorStateType> *pf);
-
     //! Computes derived quantities.
-    void initialize();    
+    void initialize(unsigned int index = 0);
 
     //!
     int gamma() const;
@@ -213,33 +215,65 @@ namespace Antioch
                                               StateType& keq,
                                               StateType& dkeq_dT) const;
 
-
-    //// in reaction set
-    void update_particles_flux();
-
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                const StateType& T) const;
+                                                const KineticsConditions<StateType,VectorStateType>& conditions) const;
     
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+                                                const StateType& temp)
+    const;
+
+    //!
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const StateType& T, 
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions, 
                                                            StateType& kfwd, 
                                                            StateType& dkfwd_dT,
                                                            VectorStateType& dkfwd_dX) const;
+
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
+                                                           const
+                                                           StateType& temp,
+                                                           StateType& kfwd,
+                                                           StateType& dkfwd_dT,
+                                                           VectorStateType& dkfwd_dX) const;
+
     ////
     template <typename StateType, typename VectorStateType>
     StateType compute_rate_of_progress( const VectorStateType& molar_densities,
-                                        const StateType& T,  
+                                        const KineticsConditions<StateType,VectorStateType>& conditions,  
                                         const StateType& P0_RT,  
+                                        const VectorStateType& h_RT_minus_s_R) const;
+
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    StateType compute_rate_of_progress( const VectorStateType& molar_densities,
+                                        const StateType& temp,
+                                        const StateType& P0_RT,
                                         const VectorStateType& h_RT_minus_s_R) const;
 
     template <typename StateType, typename VectorStateType>
     void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
                                                    const ChemicalMixture<CoeffType>& chem_mixture,
-                                                   const StateType& T,
+                                                   const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                   const StateType &P0_RT,
+                                                   const VectorStateType &h_RT_minus_s_R,
+                                                   const VectorStateType &dh_RT_minus_s_R_dT,
+                                                   StateType& net_reaction_rate,
+                                                   StateType& dnet_rate_dT,
+                                                   VectorStateType& dnet_rate_dX_s ) const;
+
+    // Deprecated API for backwards compatibility
+    template <typename StateType, typename VectorStateType>
+    void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
+                                                   const ChemicalMixture<CoeffType>& chem_mixture,
+                                                   const StateType& temp,
                                                    const StateType &P0_RT,
                                                    const VectorStateType &h_RT_minus_s_R,
                                                    const VectorStateType &dh_RT_minus_s_R_dT,
@@ -252,6 +286,13 @@ namespace Antioch
 
     //! Return writeable reference to the forward rate object
     KineticsType<CoeffType,VectorCoeffType>& forward_rate(unsigned int ir = 0);
+
+    //! Return writeable reference to the falloff object, test type
+    //
+    // just a wrapper around the FalloffType & F() method
+    // of the FalloffReaction object, test consistency of type
+    template <typename FalloffType>
+    FalloffType & falloff();
 
     //! Add a forward rate object
     void add_forward_rate(KineticsType<CoeffType,VectorCoeffType> *rate);
@@ -283,16 +324,11 @@ namespace Antioch
     std::vector<unsigned int> _reactant_stoichiometry;
     std::vector<unsigned int> _product_stoichiometry;
     std::vector<CoeffType> _efficiencies;
-    std::vector<unsigned int> _species_reactant_stoichiometry;
-    std::vector<unsigned int> _species_product_stoichiometry;
-    std::vector<int>          _species_delta_stoichiometry;
     int _gamma;
     bool _initialized;
     bool _reversible;
     ReactionType::ReactionType _type;
     KineticsModel::KineticsModel _kintype;
-
-    ParticleFlux<VectorCoeffType> * _particle_flux;
 
     //! The forward reaction rate modified Arrhenius form.
     std::vector<KineticsType<CoeffType,VectorCoeffType>* > _forward_rate;
@@ -498,6 +534,24 @@ namespace Antioch
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
+  void Reaction<CoeffType,VectorCoeffType>::clear_reactant()
+  {
+    _reactant_names.clear();
+    _reactant_ids.clear();
+    _reactant_stoichiometry.clear();
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::clear_product()
+  {
+    _product_names.clear();
+    _product_ids.clear();
+    _product_stoichiometry.clear();
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
   void Reaction<CoeffType,VectorCoeffType>::set_efficiency (const std::string &,
                                             const unsigned int s,
                                             const CoeffType efficiency)
@@ -516,33 +570,6 @@ namespace Antioch
     antioch_assert_less(s, _efficiencies.size());
     antioch_assert_equal_to(_type, ReactionType::THREE_BODY);
     return _efficiencies[s];
-  }
-
-  template<typename CoeffType, typename VectorCoeffType>
-  template<typename VectorStateType>
-  inline
-  void Reaction<CoeffType,VectorCoeffType>::set_particle_flux(ParticleFlux<VectorStateType> *pf)
-  {
-
-   antioch_assert_equal_to(_type,ReactionType::ELEMENTARY);//elementary reaction
-
-///first deal with the particle_flux pointer, if there was another, tell him it loses a reaction
-    if(_particle_flux)_particle_flux->remove_a_reaction();
-//then we set it and tell the new one it's got a new reaction
-    _particle_flux = pf;
-
-    if(_particle_flux) //enable to give only a NULL pointer and deal with it later
-    {
-      _particle_flux->add_a_reaction();
-
-      if(_particle_flux->updated())
-      {
-        _forward_rate[0]->calculate_rate_constant(_particle_flux->flux(),_particle_flux->abscissa(),true);
-        _particle_flux->update_done();
-      }
-    }
-
-    return;
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -582,8 +609,7 @@ namespace Antioch
       _initialized(false),
       _reversible(reversible),
       _type(type),
-      _kintype(kin),
-      _particle_flux(NULL)
+      _kintype(kin)
   {
     _efficiencies.resize(_n_species); 
     std::fill (_efficiencies.begin(), _efficiencies.end(), 1.);
@@ -605,46 +631,25 @@ namespace Antioch
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
-  void Reaction<CoeffType,VectorCoeffType>::initialize()
+  void Reaction<CoeffType,VectorCoeffType>::initialize(unsigned int index)
   {
-    // Stoichiometric coefficients, by species id
-    {
-      _species_reactant_stoichiometry.resize(this->n_species());
-      _species_product_stoichiometry.resize(this->n_species());
-      _species_delta_stoichiometry.resize(this->n_species());
-
-      std::fill( _species_reactant_stoichiometry.begin(),
-                 _species_reactant_stoichiometry.end(),
-                 0 );
-
-      std::fill( _species_product_stoichiometry.begin(),
-                 _species_product_stoichiometry.end(),
-                 0);
-    }
-    
+    _gamma = 0;
     for (unsigned int r=0; r< this->n_reactants(); r++)
       {
-        _species_reactant_stoichiometry[this->reactant_id(r)] =
-          this->reactant_stoichiometric_coefficient(r);
+        _gamma -= this->reactant_stoichiometric_coefficient(r);
       }
     
     for (unsigned int p=0; p < this->n_products(); p++)
       {
-        _species_product_stoichiometry[this->product_id(p)] =
-          this->product_stoichiometric_coefficient(p);
+        _gamma += this->product_stoichiometric_coefficient(p);
       }
     
-    // find the delta stoichiometric coefficient for each species,
-    // and the sum of the deltas 
-    _gamma = 0;
-    for (unsigned int s=0; s<this->n_species(); s++)
-      {
-        _species_delta_stoichiometry[s] =
-          ( _species_product_stoichiometry[s] -
-            _species_reactant_stoichiometry[s] );
-        
-        _gamma += _species_delta_stoichiometry[s];
-      }
+     // gives kinetics object index in reaction set
+     for(typename std::vector<KineticsType<CoeffType,VectorCoeffType>* >::iterator it = _forward_rate.begin();
+                it != _forward_rate.end(); it++)
+     {
+        (*it)->set_index(index);
+     }
    
     // set initialization flag
     _initialized = true;
@@ -657,25 +662,32 @@ namespace Antioch
   StateType Reaction<CoeffType,VectorCoeffType>::equilibrium_constant( const StateType& P0_RT,
                                                        const VectorStateType& h_RT_minus_s_R ) const
   {
-    using std::exp;
-
     antioch_assert( this->initialized() );
     //!\todo Make this assertion vector-compatible
     // antioch_assert_greater( P0_RT, 0.0 );
     antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
-    antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
 
-    StateType exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
-                            h_RT_minus_s_R[0] );
 
-    for (unsigned int s=1; s < this->n_species(); s++)
+// DrG0 = - reactants + product
+// K = (P0/(RT))^gamma exp(-DrG0)
+// exppower = -DrG0 = reactants - products
+    StateType exppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
+                            h_RT_minus_s_R[_reactant_ids[0]] );
+
+    for (unsigned int s=1; s < this->n_reactants(); s++)
       {
-        exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
-                       h_RT_minus_s_R[s] );
+        exppower += ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
+                       h_RT_minus_s_R[_reactant_ids[s]] );
       }
 
-    return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) )*exp(exppower);
+    for (unsigned int s=0; s < this->n_products(); s++)
+      {
+        exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
+                       h_RT_minus_s_R[_product_ids[s]] );
+      }
+
+    return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) ) * ant_exp(exppower);
   }
 
 
@@ -697,17 +709,20 @@ namespace Antioch
     antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
     antioch_assert_equal_to( ddT_h_RT_minus_s_R.size(), this->n_species() );
-    antioch_assert_equal_to( _species_delta_stoichiometry.size(), this->n_species() );
 
     // get the equilibrium constant
     keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
 
-    StateType ddT_exppower = -( static_cast<CoeffType>(_species_delta_stoichiometry[0])*
-                                ddT_h_RT_minus_s_R[0] );
+    StateType ddT_exppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
+                                ddT_h_RT_minus_s_R[_reactant_ids[0]] );
 
-    for (unsigned int s=1; s<this->n_species(); s++)
-      ddT_exppower += -( static_cast<CoeffType>(_species_delta_stoichiometry[s])*
-                         ddT_h_RT_minus_s_R[s] );
+    for (unsigned int s=1; s<this->n_reactants(); s++)
+      ddT_exppower +=  ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
+                         ddT_h_RT_minus_s_R[_reactant_ids[s]] );
+
+    for (unsigned int s=0; s<this->n_products(); s++)
+      ddT_exppower -=  ( static_cast<CoeffType>(_product_stoichiometry[s])*
+                         ddT_h_RT_minus_s_R[_product_ids[s]] );
 
     // compute its derivative
     dkeq_dT = keq*(-static_cast<CoeffType>(this->gamma())/T + ddT_exppower);
@@ -754,56 +769,40 @@ namespace Antioch
 
 
   template<typename CoeffType, typename VectorCoeffType>
-  inline
-  void Reaction<CoeffType,VectorCoeffType>::update_particles_flux()
-  {
-    //if we have a photochemical rate, deal with it here
-    if(_particle_flux)
-    {
-      antioch_assert_equal_to(_type,ReactionType::ELEMENTARY);//elementary reaction
-      if(_particle_flux->updated())
-      {
-        _forward_rate[0]->calculate_rate_constant(_particle_flux->flux(),_particle_flux->abscissa(),_particle_flux->x_updated());
-        _particle_flux->update_done();
-      }
-    }
-  }
-
-  template<typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                                   const StateType& T) const
+                                                                   const KineticsConditions<StateType,VectorStateType>& conditions) const
   {
     switch(_type)
       {
       case(ReactionType::ELEMENTARY):
         {
-          return (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+          return (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,conditions);
         }
         break;
 
       case(ReactionType::DUPLICATE):
         {
-          return (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+          return (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,conditions);
         }
         break;
 
       case(ReactionType::THREE_BODY):
         {
-          return (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+          return (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient(molar_densities,conditions);
         }
         break;
 
       case(ReactionType::LINDEMANN_FALLOFF):
         {
-          return (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+          return (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,conditions);
         }
         break;
 
       case(ReactionType::TROE_FALLOFF):
         {
-          return (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,T);
+          return (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient(molar_densities,conditions);
         }
         break;
 
@@ -814,14 +813,27 @@ namespace Antioch
       } // switch(_type)
 
     // Dummy
-    return zero_clone(T);
+    return zero_clone(conditions.T());
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  StateType Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient
+  ( const VectorStateType& molar_densities,
+    const StateType& temp) const
+  {
+    antioch_deprecated();
+    return compute_forward_rate_coefficient
+      (molar_densities,
+       KineticsConditions<StateType,VectorStateType>(temp));
   }
 
   template<typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
   inline
   void Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                                              const StateType& T, 
+                                                                              const KineticsConditions<StateType,VectorStateType>& conditions, 
                                                                               StateType& kfwd, 
                                                                               StateType& dkfwd_dT,
                                                                               VectorStateType& dkfwd_dX) const
@@ -830,31 +842,31 @@ namespace Antioch
       {
       case(ReactionType::ELEMENTARY):
         {
-          (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+          (static_cast<const ElementaryReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,conditions,kfwd,dkfwd_dT,dkfwd_dX);
         }
         break;
 
       case(ReactionType::DUPLICATE):
         {
-          (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+          (static_cast<const DuplicateReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,conditions,kfwd,dkfwd_dT,dkfwd_dX);
         }
         break;
 
       case(ReactionType::THREE_BODY):
         {
-          (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+          (static_cast<const ThreeBodyReaction<CoeffType>*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,conditions,kfwd,dkfwd_dT,dkfwd_dX);
         }
         break;
 
       case(ReactionType::LINDEMANN_FALLOFF):
         {
-          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,conditions,kfwd,dkfwd_dT,dkfwd_dX);
         }
         break;
 
       case(ReactionType::TROE_FALLOFF):
         {
-          (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,T,kfwd,dkfwd_dT,dkfwd_dX);
+          (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->compute_forward_rate_coefficient_and_derivatives(molar_densities,conditions,kfwd,dkfwd_dT,dkfwd_dX);
         }
         break;
 
@@ -868,16 +880,34 @@ namespace Antioch
     return;
   }
 
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void
+  Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient_and_derivatives
+  ( const VectorStateType& molar_densities,
+    const StateType& temp,
+    StateType& kfwd,
+    StateType& dkfwd_dT,
+    VectorStateType& dkfwd_dX) const
+  {
+    antioch_deprecated();
+    return compute_forward_rate_coefficient_and_derivatives
+      (molar_densities,
+       KineticsConditions<StateType,VectorStateType>(temp),
+       kfwd, dkfwd_dT, dkfwd_dX);
+  }
+
   //kfwd *prod_r [R]^nu_r - kbkwd * prod_p [P]^nu_p ( = - 1/nu_r d[R]/dt)
   template<typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
-                                                           const StateType& T,  
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions,  
                                                            const StateType& P0_RT,  
                                                            const VectorStateType& h_RT_minus_s_R) const
   {
-    StateType kfwd = this->compute_forward_rate_coefficient(molar_densities,T);
+    StateType kfwd = this->compute_forward_rate_coefficient(molar_densities,conditions);
     StateType kfwd_times_reactants = kfwd;
 
     // Rfwd
@@ -912,9 +942,24 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType>
   template <typename StateType, typename VectorStateType>
   inline
+  StateType Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
+                                                           const StateType& temp,
+                                                           const StateType& P0_RT,
+                                                           const VectorStateType& h_RT_minus_s_R) const
+  {
+    antioch_deprecated();
+    return compute_rate_of_progress
+      (molar_densities,
+       KineticsConditions<StateType,VectorStateType>(temp),
+       P0_RT, h_RT_minus_s_R);
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
   void Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
                                                                       const ChemicalMixture<CoeffType>& chem_mixture,
-                                                                      const StateType& T,
+                                                                      const KineticsConditions<StateType,VectorStateType>& conditions,
                                                                       const StateType &P0_RT,
                                                                       const VectorStateType &h_RT_minus_s_R,
                                                                       const VectorStateType &dh_RT_minus_s_R_dT,
@@ -926,12 +971,12 @@ namespace Antioch
 
 // First the forward component, if reversible, compute and add the backward component
 
-    StateType kfwd = Antioch::zero_clone(T);
-    StateType dkfwd_dT = Antioch::zero_clone(T);
+    StateType kfwd = Antioch::zero_clone(conditions.T());
+    StateType dkfwd_dT = Antioch::zero_clone(conditions.T());
     VectorStateType dkfwd_dX_s = Antioch::zero_clone(molar_densities);
     VectorStateType dkbkwd_dX_s = Antioch::zero_clone(molar_densities);
 
-    this->compute_forward_rate_coefficient_and_derivatives(molar_densities, T, kfwd, dkfwd_dT ,dkfwd_dX_s);
+    this->compute_forward_rate_coefficient_and_derivatives(molar_densities, conditions, kfwd, dkfwd_dT ,dkfwd_dX_s);
 
     // If users want to use valarrays, then the output reference sizes
     // had better already match the input value sizes...
@@ -953,7 +998,7 @@ namespace Antioch
       }
     
     //init
-    StateType facfwd = constant_clone(T,1);
+    StateType facfwd = constant_clone(conditions.T(),1);
     dRfwd_dT = dkfwd_dT;
 
     // Rfwd & derivatives
@@ -997,10 +1042,10 @@ namespace Antioch
 
     //backward to be computed and added
 
-      StateType keq = Antioch::zero_clone(T);
-      StateType dkeq_dT = Antioch::zero_clone(T);
+      StateType keq = Antioch::zero_clone(conditions.T());
+      StateType dkeq_dT = Antioch::zero_clone(conditions.T());
 
-      equilibrium_constant_and_derivative( T, P0_RT, h_RT_minus_s_R,
+      equilibrium_constant_and_derivative( conditions.T(), P0_RT, h_RT_minus_s_R,
                                            dh_RT_minus_s_R_dT,
                                            keq, dkeq_dT );
 
@@ -1031,7 +1076,7 @@ namespace Antioch
         }
 
       //init
-      StateType facbkwd = constant_clone(T,1);
+      StateType facbkwd = constant_clone(conditions.T(),1);
       dRbkwd_dT = dkbkwd_dT;
 
       // Rbkwd & derivatives
@@ -1075,7 +1120,57 @@ namespace Antioch
 
     return;
   }
-    
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
+                                                                      const ChemicalMixture<CoeffType>& chem_mixture,
+                                                                      const StateType& temp,
+                                                                      const StateType &P0_RT,
+                                                                      const VectorStateType &h_RT_minus_s_R,
+                                                                      const VectorStateType &dh_RT_minus_s_R_dT,
+                                                                      StateType& net_reaction_rate,
+                                                                      StateType& dnet_rate_dT,
+                                                                      VectorStateType& dnet_rate_dX_s ) const
+  {
+    antioch_deprecated();
+    return compute_rate_of_progress_and_derivatives
+      (molar_densities, chem_mixture,
+       KineticsConditions<StateType,VectorStateType>(temp),
+       P0_RT, h_RT_minus_s_R, dh_RT_minus_s_R_dT, net_reaction_rate,
+       dnet_rate_dT, dnet_rate_dX_s);
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename FalloffType>
+  inline
+  FalloffType & Reaction<CoeffType,VectorCoeffType>::falloff()
+  {
+      switch(_type)
+      {
+        case(ReactionType::LINDEMANN_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->F();
+        }
+        break;
+
+        case(ReactionType::TROE_FALLOFF):
+        {
+          (static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->F();
+        }
+        break;
+
+        default:
+        {
+          std::cerr << "You are trying to retrieve a Falloff object in a reaction that is not a falloff.\n"
+                    << "The reaction is " << *this << std::endl;
+          antioch_error();
+        }
+        
+      }
+  }
+
 } // namespace Antioch
 
 #endif // ANTIOCH_REACTION_H

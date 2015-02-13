@@ -30,27 +30,22 @@
 
 // C++
 #include <limits>
+#include <vector>
 // Antioch
 #include "antioch/hercourtessen_rate.h"
 
 template <typename Scalar>
-int tester()
+int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Tref, const Antioch::HercourtEssenRate<Scalar> & hercourtessen_rate)
 {
   using std::abs;
   using std::pow;
-
-  const Scalar Cf = 1.4;
-  const Scalar eta = 1.2;
-
-  Antioch::HercourtEssenRate<Scalar> hercourtessen_rate(Cf,eta);
-
   int return_flag = 0;
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
-  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+  for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
-    const Scalar rate_exact = Cf*pow(T,eta);
-    const Scalar derive_exact = eta * Cf * pow(T,eta)/T;
+    const Scalar rate_exact = Cf * pow(T/Tref,eta);
+    const Scalar derive_exact = Cf * eta * pow(T/Tref,eta)/T;
 
     Scalar rate1 = hercourtessen_rate(T);
     Scalar deriveRate1 = hercourtessen_rate.derivative(T);
@@ -65,7 +60,10 @@ int tester()
                   << "Error: Mismatch in rate values." << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate1 << std::endl
-                  << "rate_exact = " << rate_exact << std::endl;
+                  << "rate_exact = " << rate_exact << std::endl
+                  << "tol = " << tol << std::endl
+                  << "relative error = " << abs( (rate1 - rate_exact)/rate_exact ) << std::endl
+                  << "object: " << hercourtessen_rate << std::endl;
  
         return_flag = 1;
       }
@@ -75,7 +73,10 @@ int tester()
                   << "Error: Mismatch in rate values." << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate << std::endl
-                  << "rate_exact = " << rate_exact << std::endl;
+                  << "rate_exact = " << rate_exact << std::endl
+                  << "tol = " << tol << std::endl
+                  << "relative error = " << abs( (rate1 - rate_exact)/rate_exact ) << std::endl
+                  << "object: " << hercourtessen_rate << std::endl;
  
         return_flag = 1;
       }
@@ -85,7 +86,10 @@ int tester()
                   << "Error: Mismatch in rate derivative values." << std::endl
                   << "T = " << T << " K" << std::endl
                   << "drate_dT(T) = " << deriveRate1 << std::endl
-                  << "derive_exact = " << derive_exact << std::endl;
+                  << "derive_exact = " << derive_exact << std::endl
+                  << "tol = " << tol << std::endl
+                  << "relative error = " << abs( (rate1 - rate_exact)/rate_exact ) << std::endl
+                  << "object: " << hercourtessen_rate << std::endl;
 
         return_flag = 1;
       }
@@ -95,14 +99,53 @@ int tester()
                   << "Error: Mismatch in rate derivative values." << std::endl
                   << "T = " << T << " K" << std::endl
                   << "drate_dT(T) = " << deriveRate << std::endl
-                  << "derive_exact = " << derive_exact << std::endl;
+                  << "derive_exact = " << derive_exact << std::endl
+                  << "tol = " << tol << std::endl
+                  << "relative error = " << abs( (rate1 - rate_exact)/rate_exact ) << std::endl
+                  << "object: " << hercourtessen_rate << std::endl;
 
         return_flag = 1;
       }
    if(return_flag)break;
-
   }
-//  std::cout << "Hercourt-Essen rate: " << hercourtessen_rate << std::endl;
+  return return_flag;
+}
+
+template <typename Scalar>
+int tester()
+{
+
+  Scalar Cf = 1.4L;
+  Scalar eta = 1.2L;
+  Scalar Tref = 1.L;
+
+  Antioch::HercourtEssenRate<Scalar> hercourtessen_rate(Cf,eta); // default
+
+  int return_flag = test_values(Cf,eta,Tref,hercourtessen_rate);
+  Cf = 1e-7L;
+  eta = 0.7L;
+  Tref = 300.L;
+  hercourtessen_rate.set_Cf(Cf);
+  hercourtessen_rate.set_eta(eta);
+  hercourtessen_rate.set_Tref(Tref);
+  return_flag = test_values(Cf,eta,Tref,hercourtessen_rate) || return_flag;
+
+  Cf = 2.1e-11L;
+  eta = -2.3L;
+  std::vector<Scalar> values(2);
+  values[0] = Cf;
+  values[1] = eta;
+  hercourtessen_rate.reset_coefs(values);
+  return_flag = test_values(Cf,eta,Tref,hercourtessen_rate) || return_flag;
+
+  Tref = 298.L;
+  values.resize(3);
+  values[0] = Cf;
+  values[1] = eta;
+  values[2] = Tref;
+  hercourtessen_rate.reset_coefs(values);
+  return_flag = test_values(Cf,eta,Tref,hercourtessen_rate) || return_flag;
+
   return return_flag;
 }
 

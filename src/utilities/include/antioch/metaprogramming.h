@@ -135,6 +135,82 @@ template <typename T, typename Scalar>
 inline
 void constant_fill(T& output, const Scalar& value) { output = value; }
 
+template <typename T, typename VectorScalar>
+inline
+T custom_clone(const T& /*example*/, const VectorScalar& values, unsigned int indexes) {return values[indexes];}
+
+template <typename T, typename VectorScalar>
+inline
+T custom_clone(const T& /*example*/, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes)
+{
+  T returnval(indexes.size()); //bof bof - metaphysicl has size within type, this suppose that size_type<indexes>::type can be changed in value_type<T>::type
+  
+  for(unsigned int i = 0; i < indexes.size(); i++)
+  {
+      returnval[i] = values[indexes[i]];
+  }
+  return returnval;
+}
+
+
+template <typename VectorT>
+inline
+typename value_type<VectorT>::type
+eval_index(const VectorT& vec, unsigned int index)
+{
+  return vec[index];
+}
+
+inline
+bool conjunction(const bool & vec)
+{
+  return vec;
+}
+
+template <typename T>
+inline
+bool conjunction(const T & vec)
+{
+  typedef typename tag_type<T>::type tag;
+  return conjunction_root(vec,tag());
+}
+
+template <typename T>
+inline
+bool conjunction_root(const T & vec, numeric_library_tag)
+{
+  for(unsigned int i = 0; i < vec.size(); i++)
+  {
+    if(!vec[i])return false;
+  }
+  return true;
+}
+
+inline
+bool disjunction(const bool & vec)
+{
+  return vec;
+}
+
+template <typename T>
+inline
+bool disjunction(const T & vec)
+{
+  typedef typename tag_type<T>::type tag;
+  return disjunction_root(vec,tag());
+}
+
+template <typename T>
+inline
+bool disjunction_root(const T & vec, numeric_library_tag)
+{
+  for(unsigned int i = 0; i < vec.size(); i++)
+  {
+    if(vec[i])return true;
+  }
+  return false;
+}
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_METAPROGRAMMING_H

@@ -91,29 +91,29 @@ namespace Antioch
     parser.read_chemical_species(chem_mixture);
 
     // sanity check, we require these informations
-     bool fail(false);
-     for(unsigned int s = 0; s < chem_mixture.chemical_species().size(); s++)
-     {
-         if(!chem_mixture.chemical_species()[s])
-         {
-             fail = true;
-             break;
-         }
-     }
-     if(fail)
-     {
-       std::cerr << "Molecule(s) is(are) missing.  Please update the information."
-                 << "  Currently using file " << filename << ".\n"
-                 << "Missing molecule(s) is(are):" << std::endl;
-       for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
-       {
-         if(!chem_mixture.chemical_species()[i])
-         {
-            std::cerr << chem_mixture.species_inverse_name_map().at(i) << std::endl;
-         }
-       }
-       antioch_error();
-     }
+    bool fail(false);
+    for(unsigned int s = 0; s < chem_mixture.chemical_species().size(); s++)
+    {
+        if(!chem_mixture.chemical_species()[s])
+        {
+            fail = true;
+            break;
+        }
+    }
+    if(fail)
+    {
+      std::cerr << "Molecule(s) is(are) missing.  Please update the information."
+                << "  Currently using file " << filename << ".\n"
+                << "Missing molecule(s) is(are):" << std::endl;
+      for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
+      {
+        if(!chem_mixture.chemical_species()[i])
+        {
+           std::cerr << chem_mixture.species_inverse_name_map().at(i) << std::endl;
+        }
+      }
+      antioch_error();
+    }
 
     return;
   }

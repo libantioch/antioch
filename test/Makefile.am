@@ -3,7 +3,7 @@ EXTRA_DIST = input_files
 check_PROGRAMS  =
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
-check_PROGRAMS += cea_evaluator_unit
+check_PROGRAMS += nasa_evaluator_unit
 check_PROGRAMS += cea_evaluator_vec_unit
 check_PROGRAMS += cea_thermo_unit
 check_PROGRAMS += cea_thermo_vec_unit
@@ -49,18 +49,35 @@ check_PROGRAMS += parsing_chemkin
 check_PROGRAMS += units_unit
 check_PROGRAMS += kinetics_reactive_scheme_unit
 check_PROGRAMS += sigma_bin_converter_unit
+check_PROGRAMS += sigma_bin_converter_vec_unit
+check_PROGRAMS += kinetics_settings_unit
+check_PROGRAMS += kinetics_theory_thermal_conductivity_unit
+check_PROGRAMS += kinetics_theory_thermal_conductivity_vec_unit
+check_PROGRAMS += rotational_relaxation_unit
+check_PROGRAMS += rotational_relaxation_vec_unit
+check_PROGRAMS += ideal_gas_micro_thermo_unit
 
-if ANTIOCH_ENABLE_EIGEN
+#GSL Tests
+check_PROGRAMS += molecular_binary_diffusion_unit
+check_PROGRAMS += molecular_binary_diffusion_vec_unit
+check_PROGRAMS += kinetics_theory_viscosity_unit
+check_PROGRAMS += kinetics_theory_viscosity_vec_unit
+check_PROGRAMS += gsl_spline_unit
+check_PROGRAMS += gsl_spline_vec_unit
+
+# Eigen Tests
 check_PROGRAMS += stat_mech_thermo_unit_eigen
-endif
 
-AM_CPPFLAGS  = 
+AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/units/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/particles_flux/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/viscosity/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/diffusion/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/thermal_conduction/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
@@ -72,7 +89,7 @@ LIBS = $(antioch_optional_test_LIBS)
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
 chem_mixture_vec_unit_SOURCES = chem_mixture_vec_unit.C
-cea_evaluator_unit_SOURCES = cea_evaluator_unit.C
+nasa_evaluator_unit_SOURCES = nasa_evaluator_unit.C
 cea_evaluator_vec_unit_SOURCES = cea_evaluator_vec_unit.C
 cea_thermo_unit_SOURCES = cea_thermo_unit.C
 cea_thermo_vec_unit_SOURCES = cea_thermo_vec_unit.C
@@ -118,16 +135,32 @@ parsing_chemkin_SOURCES = parsing_chemkin.C
 units_unit_SOURCES = units_unit.C
 kinetics_reactive_scheme_unit_SOURCES = kinetics_reactive_scheme_unit.C
 sigma_bin_converter_unit_SOURCES = sigma_bin_converter_unit.C
+sigma_bin_converter_vec_unit_SOURCES = sigma_bin_converter_vec_unit.C
+kinetics_settings_unit_SOURCES = kinetics_settings_unit.C
+kinetics_theory_thermal_conductivity_unit_SOURCES = kinetics_theory_thermal_conductivity_unit.C
+kinetics_theory_thermal_conductivity_vec_unit_SOURCES = kinetics_theory_thermal_conductivity_vec_unit.C
+rotational_relaxation_unit_SOURCES = rotational_relaxation_unit.C
+rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
 
-if ANTIOCH_ENABLE_EIGEN
+# GSL Tests
+molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
+molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
+kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
+kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
+gsl_spline_unit_SOURCES = gsl_spline_unit.C
+gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
+ideal_gas_micro_thermo_unit_SOURCES =  ideal_gas_micro_thermo_unit.C
+
+
+# Eigen Tests
 stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
-endif
+
 
 #Define tests to actually be run
 TESTS  =
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
-TESTS += cea_evaluator_unit
+TESTS += nasa_evaluator_unit.sh
 TESTS += cea_evaluator_vec_unit
 TESTS += cea_thermo_unit
 TESTS += cea_thermo_vec_unit
@@ -172,11 +205,27 @@ TESTS += parsing_xml.sh
 TESTS += parsing_chemkin.sh
 TESTS += units_unit
 TESTS += kinetics_reactive_scheme_unit.sh
-TESTS += sigma_bin_converter_unit.sh
+TESTS += sigma_bin_converter_unit
+TESTS += sigma_bin_converter_vec_unit
+TESTS += kinetics_settings_unit
+TESTS += kinetics_theory_thermal_conductivity_unit
+TESTS += kinetics_theory_thermal_conductivity_vec_unit
+TESTS += rotational_relaxation_unit
+TESTS += rotational_relaxation_vec_unit
+TESTS += ideal_gas_micro_thermo_unit
 
-if ANTIOCH_ENABLE_EIGEN
+# GSL Tests
+TESTS += molecular_binary_diffusion_unit
+TESTS += molecular_binary_diffusion_vec_unit
+TESTS += kinetics_theory_viscosity_unit
+TESTS += kinetics_theory_viscosity_vec_unit
+TESTS += gsl_spline_unit
+TESTS += gsl_spline_vec_unit
+
+
+# Eigen Tests
 TESTS += stat_mech_thermo_unit_eigen
-endif
+
 
 CLEANFILES =
 if CODE_COVERAGE_ENABLED

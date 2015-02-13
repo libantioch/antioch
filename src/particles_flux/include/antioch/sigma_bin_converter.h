@@ -28,6 +28,7 @@
 
 //Antioch
 #include "antioch/metaprogramming.h"
+#include "antioch/antioch_asserts.h"
 
 //C++
 #include <vector>
@@ -43,10 +44,18 @@ class SigmaBinConverter
         SigmaBinConverter();
         ~SigmaBinConverter();
 
+        template <typename VectorStateType>
         void y_on_custom_grid(const VectorCoeffType &x_old, const VectorCoeffType &y_old, 
-                              const VectorCoeffType &x_new,       VectorCoeffType &y_new);
+                              const VectorStateType &x_new,       VectorStateType &y_new) const;
 
      private:
+
+        template <typename StateType, typename VUIntType>
+        StateType custom_bin_value(const StateType & custom_head, const StateType & custom_tail,
+                                   const VUIntType & index_heads, unsigned int custom_head_index,
+                                   const VectorCoeffType & list_ref_head_tails,
+                                   const VectorCoeffType & list_ref_values) const;
+
 };
 
 template <typename VectorCoeffType>
@@ -64,72 +73,146 @@ SigmaBinConverter<VectorCoeffType>::~SigmaBinConverter()
 }
 
 template <typename VectorCoeffType>
+template <typename VectorStateType>
 inline
 void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType &x_old, const VectorCoeffType &y_old,  
-                                                          const VectorCoeffType &x_custom,    VectorCoeffType &y_custom)
+                                                          const VectorStateType &x_custom,    VectorStateType &y_custom) const
 {
-  
-  y_custom.clear();
-  y_custom.resize(x_custom.size(),0.L);
-  Antioch::set_zero(y_custom);
+// data consistency
+  antioch_assert_not_equal_to(x_custom.size(),0);
+  antioch_assert_equal_to(y_custom.size(),x_custom.size());
+  antioch_assert_not_equal_to(x_old.size(),0);
+  antioch_assert_equal_to(x_old.size(),y_old.size());
 
-  unsigned int ilow(0);
-  while(x_custom[ilow] < x_old[0])ilow++; //skipping too low bins
 
-  unsigned int j(1);
-  for(unsigned int i = ilow; i < x_custom.size() - 1; i++)//bin per bin, right stairs: y_old[i] from x_old[i] to x_old[i+1]
+// first meta-prog needed stuff
+  typedef typename Antioch::rebind<typename Antioch::value_type<VectorStateType>::type, 
+                                               unsigned int>::type UIntType;
+  typedef typename Antioch::rebind<VectorStateType,UIntType>::type VUIntType;
+
+// find all the indexes of old that are just after all
+// the custom values
+// todo: better way to build the indexes container?
+  UIntType example;
+  Antioch::zero_clone(example,x_custom[0]);
+// two levels needed to obtain correct fixed-sized vexcl vector
+// within eigen vector (VIntType = Eigen<vexcl<unsigned int> >):
+//   Eigen => can't initialize in constructor VUIntType
+//   vexcl => fixed size accessible only within constructor
+  VUIntType ihead(x_custom.size()); 
+  Antioch::init_constant(ihead,example);
+
+  UIntType unfound = Antioch::constant_clone(example,x_old.size()-1);
+
+  for(unsigned int ic = 0; ic < x_custom.size(); ic++)
   {
-//equality check here
-     while(x_old[j-1] == x_custom[i] && x_old[j] == x_custom[i+1])
-     {
-        y_custom[i] = y_old[j-1];
-        j++;
-        i++;
-        if(i == x_custom.size() - 1)return;
-     }
+    UIntType ihigh = Antioch::constant_clone(example,x_old.size()-1);
+    for (unsigned int i = 0; i != x_old.size() - 1; ++i)
+    {
+      UIntType icus  = Antioch::constant_clone(example,ic);
 
-     if(x_old.back() < x_custom[i])return;
-     while(x_old[j] <= x_custom[i]) //find lowest j / x_custom[i] < x_old[j]
-     {
-       j++;
-       if(!(j < x_old.size()))return;
-     }
-     typename Antioch::value_type<VectorCoeffType>::type bin;
-     Antioch::set_zero(bin);
+      ihigh = Antioch::if_else (Antioch::eval_index(x_custom,icus) < x_old[i] && ihigh == unfound,
+                                Antioch::constant_clone(example,i),
+                                ihigh);
 
-// here we are: x_old[j-1] =< x_custom[i] < x_old[j] with j-1 >= 0
-     // targeted bin within stored bin: x_old[j-1] =< x_custom[i] < x_custom[i+1] =< x_old[j], take all of them
-     if(i < x_custom.size() - 2) //if allowed
-     {
-       while(x_custom[i+1] <= x_old[j])
-       {
-         y_custom[i] = y_old[j-1]; //rectangle from i to i+1, same height
-         i = i + 1;
-         if(i >= x_custom.size() - 2)break;
-       }
-     }
+      if(Antioch::conjunction(ihigh != unfound))break; // once we found everyone, don't waste time
+    }
+    ihead[ic] = ihigh;
+  }
 
-     // x_old[j-1] < x_custom[i] < x_old[j] < x_custom[i+1], calculating rectangle from x_custom[i] to x_old[j], height is y_old[j-1]
-     bin = y_old[j-1] * (x_old[j] - x_custom[i]); 
-
-// finding lowest j / x_custom[i+1] < x_old[j], 
-// adding all the k cases x_old[j-1] < x_custom[i] < x_old[j] < x_old[j+1] < ... < x_old[j+k] < x_custom[i+1]
-     while(j < x_old.size() - 1)
-     {
-        j++;
-        if(x_old[j] > x_custom[i+1])break;
-        bin += y_old[j-1] * (x_old[j] - x_old[j-1]); // adding contained bins
-     }
-
-// now we have found k_max, we calculate the rectangle from x_old[j + k_max] to x_custom[i+1]
-     if(j < x_old.size() - 1)bin += y_old[j-2] * (x_custom[i+1] - x_old[j-1]); //if exist, above rectangle
-     y_custom[i] = bin/(x_custom[i+1] - x_custom[i]); //rectangle from i to i+1
-
+  // bin
+  for(unsigned int ic = 0; ic < x_custom.size() - 1; ic++) // right stairs, last one = 0
+  {
+    y_custom[ic] = this->custom_bin_value(x_custom[ic], x_custom[ic + 1],ihead, ic, x_old, y_old);
   }
 
   return;
+
 }
 
+   template <typename VectorCoeffType>
+   template <typename StateType, typename VUIntType>
+   inline
+   StateType SigmaBinConverter<VectorCoeffType>::custom_bin_value(const StateType & custom_head, const StateType & custom_tail,
+                                                                  const VUIntType  & index_heads, unsigned int custom_head_index,
+                                                                  const VectorCoeffType & list_ref_head_tails,
+                                                                  const VectorCoeffType & list_ref_values) const
+   {
+
+       using std::min;
+       using Antioch::min;
+       using std::max;
+       using Antioch::max;
+
+       antioch_assert_equal_to(list_ref_head_tails.size(),list_ref_values.size());
+
+       StateType surf = Antioch::zero_clone(custom_head);
+
+       typedef typename Antioch::value_type<VUIntType>::type UIntType;
+
+       UIntType start_head = index_heads[custom_head_index];
+
+       UIntType value_head = Antioch::if_else(start_head > (typename Antioch::value_type<typename Antioch::value_type<VUIntType>::type>::type)0,
+                                               (UIntType)(start_head - Antioch::constant_clone(start_head,1)),
+                                               (UIntType)(index_heads[index_heads.size() - 1])); // right stairs, value never used
+
+       UIntType ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) ,
+                                   (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
+
+        // if StateType is vectorized, it takes care of it here
+       StateType ref_head  = Antioch::custom_clone(custom_head,list_ref_head_tails,start_head);
+       StateType ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
+       StateType ref_value = Antioch::custom_clone(custom_head,list_ref_values,value_head);
+
+       // head from custom head to ref head
+       // super not efficient, everything is calculated every time...
+       surf += Antioch::if_else(Antioch::constant_clone(custom_head,list_ref_head_tails[0]) > custom_head ||
+                                Antioch::constant_clone(custom_head,list_ref_head_tails[list_ref_head_tails.size() - 1]) < custom_head, // custom is outside ref
+                                Antioch::zero_clone(surf),
+                                (StateType)
+                                        Antioch::if_else(ref_head < custom_tail,   // custom is within ref bin
+                                                         (StateType)(ref_value * (ref_head - custom_head)),
+                                                         (StateType)(ref_value * (custom_tail - custom_head)))
+                       );
+
+       //body from ref head to ref last tail
+       while(Antioch::disjunction(ref_tail < custom_tail &&                     // ref is below tail (<=> start_head < index_heads[custom_head_index + 1])
+                                   start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1))) // ref is still defined
+       {
+           ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) ,
+                              (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
+
+           ref_head  = Antioch::custom_clone(custom_head,list_ref_head_tails,start_head);
+           ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
+           ref_value = Antioch::custom_clone(custom_head,list_ref_values,start_head);
+
+           surf += Antioch::if_else(ref_tail < custom_tail && start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size()),
+                                        (StateType)((ref_tail - ref_head) * ref_value),
+                                        Antioch::zero_clone(surf));
+
+           start_head += Antioch::if_else(ref_tail < custom_tail && start_head < Antioch::constant_clone(start_head,list_ref_head_tails.size()),
+                                            Antioch::constant_clone(start_head,1),
+                                            Antioch::zero_clone(start_head));
+       }
+
+      ref_end_tail = min((UIntType)(start_head + Antioch::constant_clone(start_head,1)) , 
+                         (UIntType)(Antioch::constant_clone(start_head,list_ref_head_tails.size() - 1)));
+                                                                                 
+      ref_head  = Antioch::custom_clone(custom_head,list_ref_head_tails,start_head);
+      ref_tail  = Antioch::custom_clone(custom_head,list_ref_head_tails,ref_end_tail);
+      ref_value = Antioch::custom_clone(custom_head,list_ref_values,start_head);
+
+       // tail from ref_head to custom_tail
+       // super not efficient, everything is calculated every time...
+      surf += Antioch::if_else(
+                        Antioch::constant_clone(custom_tail,list_ref_head_tails[list_ref_head_tails.size() - 1]) < custom_tail || // custom is outside ref
+                        Antioch::constant_clone(custom_tail,list_ref_head_tails.front()) > custom_tail || // custom is outside ref
+                                ref_head > custom_tail,   // custom is fully inside ref bin (already taken into account in head)
+                                   Antioch::zero_clone(surf),
+                                   (StateType)(ref_value * (custom_tail - ref_head)));
+
+      return surf / (custom_tail - custom_head);
+   }
 }
 
 #endif
