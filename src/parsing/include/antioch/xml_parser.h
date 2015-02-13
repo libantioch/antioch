@@ -41,9 +41,23 @@
 
 namespace Antioch{
 
+
   template <typename CoeffType>
   class ChemicalMixture;
 
+  /*!\class XMLParser
+
+     Nothing is stored, this parser is based on the tinyxml2
+     implementation. Please note that no other file should include
+     the `tinyxml2_imp.h' header.
+
+     The defaults units are based and derived on Cantera:
+       -   pre-exponential parameters in (m3/kmol)^(m-1)/s
+       -   activation energy in cal/mol,
+       -   power parameter without unit
+       -   cross-section typically in cm2/nm, 
+       -   lambda typically in nm, 
+   */
 
   template <typename NumericType = double>
   class XMLParser{
