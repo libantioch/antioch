@@ -38,6 +38,8 @@ namespace Antioch
         public physical_tag_base<KineticsTheoryViscosity<CoeffType, Interpolator> >
    {
       typedef kinetics_theory_viscosity_tag type;
+        // we might have to extend the temperature range of Stockmayer
+     typedef kinetics_theory_viscosity_tag temperature_limitation_type;
         // some models require specific initialization
         // (typically automatic initialization)
      typedef kinetics_theory_viscosity_tag init_type;
@@ -74,6 +76,15 @@ namespace Antioch
       for(unsigned int s = 0; s < mu.size(); s++)
       {
           mu[s] = (*set[s])(T);
+      }
+   }
+
+   template <typename Model, typename StateType>
+   extrapolate_T(Model & set,const StateType & T_max, kinetics_theory_viscosity_tag)
+   {
+      for(unsigned int s = 0; s < set.size(); s++)
+      {
+          set[s].build_extrapolation(T_max);
       }
    }
 
