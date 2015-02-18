@@ -182,6 +182,11 @@ namespace Antioch
    void wilke_diffusion_rule(const Mixture & mixture, const VectorStateType & mass_fractions, const MatrixStateType & Ds, VectorStateType & ds, default_physical_tag)
    {}
 
+   // no extrapolation required
+   template <typename Model, typename StateType>
+   void extrapolate_T(Model & set,const StateType & T_max, default_physical_tag)
+   {}
+
 }
 
 #endif
