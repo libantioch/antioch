@@ -28,6 +28,7 @@
 //Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/string_utils.h"
+#include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
 
 //XML
@@ -60,7 +61,8 @@ namespace Antioch{
    */
 
   template <typename NumericType = double>
-  class XMLParser{
+  class XMLParser: public ParserBase
+  {
         public:
           XMLParser(const std::string &filename, bool verbose = true);
           ~XMLParser();
@@ -73,14 +75,14 @@ namespace Antioch{
         //! reads the species set
         const std::vector<std::string> species_list() const;
 
-        //! reads the mandatory data, not valid in xml
-        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the mandatory data, not valid yet in xml
+//        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the vibrational data, not valid in xml
-        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the vibrational data, not valid yet in xml
+//        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the electronic data, not valid in xml
-        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the electronic data, not valid yet in xml
+//        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
 
 /// reaction
 
@@ -177,7 +179,6 @@ namespace Antioch{
           /*! Never use default constructor*/
           XMLParser();
           tinyxml2::XMLDocument _doc;
-          bool                  _verbose;
 
 //
           tinyxml2::XMLElement * _species_block;
@@ -194,7 +195,7 @@ namespace Antioch{
   template <typename NumericType>
   inline
   XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
-        _verbose(verbose),
+        ParserBase("XML",filename,verbose),
         _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
@@ -697,37 +698,6 @@ namespace Antioch{
       def_unit = _default_unit.at(ParsingKey::TROE_F_TSSS);
       return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSSS),T3,T3_unit);
   }
-
-  template <typename NumericType>
-  inline
-  void XMLParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a XML parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void XMLParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a XML parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void XMLParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a XML parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
 
 }//end namespace Antioch
 

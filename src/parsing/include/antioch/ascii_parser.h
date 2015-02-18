@@ -28,6 +28,7 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/input_utils.h"
 #include "antioch/string_utils.h"
@@ -53,7 +54,7 @@ namespace Antioch
   class ChemicalMixture;
 
   template <typename NumericType>
-  class ASCIIParser
+  class ASCIIParser: public ParserBase
   {
       public:
         ASCIIParser(const std::string& file, bool verbose = true);
@@ -76,9 +77,7 @@ namespace Antioch
         //! not allowed
         ASCIIParser();
 
-        std::string   _file;
         std::ifstream _doc;
-        bool          _verbose;
         std::map<ParsingUnit,std::string> _unit_map;
 
   };
@@ -87,9 +86,8 @@ namespace Antioch
   template <typename NumericType>
   inline
   ASCIIParser<NumericType>::ASCIIParser(const std::string & file, bool verbose):
-        _file(file),
-        _doc(file.c_str()),
-        _verbose(verbose)
+        ParserBase("ascii",file,verbose),
+        _doc(file.c_str())
   {
       if(!_doc.is_open())
       {

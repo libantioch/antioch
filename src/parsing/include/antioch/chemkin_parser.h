@@ -28,6 +28,7 @@
 //Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/string_utils.h"
+#include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/units.h"
 #include "antioch/chemkin_definitions.h"
@@ -61,7 +62,8 @@ namespace Antioch{
    *  - SRI falloff (not supported)
    */
   template <typename NumericType = double>
-  class ChemKinParser{
+  class ChemKinParser: public ParserBase
+  {
         public:
           ChemKinParser(const std::string &filename, bool verbose = true);
           ~ChemKinParser();
@@ -75,14 +77,14 @@ namespace Antioch{
          /*! read SPECIES block*/
          const std::vector<std::string> species_list();
 
-        //! reads the mandatory data, not valid in ChemKin
-        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the mandatory data, not valid yet in ChemKin
+//        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the vibrational data, not valid in ChemKin
-        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the vibrational data, not valid yet in ChemKin
+//        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the electronic data, not valid in ChemKin
-        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the electronic data, not valid yet in ChemKin
+//        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
 
 
 ///////////////// kinetics
@@ -203,7 +205,6 @@ namespace Antioch{
           /*! Never use default constructor*/
           ChemKinParser();
           std::ifstream                    _doc;
-          bool                             _verbose;
           
 
           bool                             _reversible;
@@ -251,8 +252,8 @@ namespace Antioch{
   template <typename NumericType>
   inline
   ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
+        ParserBase("ChemKin",filename,verbose),
         _doc(filename.c_str()),
-        _verbose(verbose),
         _duplicate_process(false),
         _next_is_reverse(false)
   {
@@ -1179,36 +1180,6 @@ namespace Antioch{
       return out;
   }
 
-  template <typename NumericType>
-  inline
-  void ChemKinParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a ChemKin parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void ChemKinParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a ChemKin parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void ChemKinParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a ChemKin parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-  
 
 }//end namespace Antioch
 
