@@ -80,11 +80,11 @@ namespace Antioch
    }
 
    template <typename Model, typename StateType>
-   extrapolate_T(Model & set,const StateType & T_max, kinetics_theory_viscosity_tag)
+   void extrapolate_T(Model & set,const StateType & T_max, kinetics_theory_viscosity_tag)
    {
       for(unsigned int s = 0; s < set.size(); s++)
       {
-          set[s].build_extrapolation(T_max);
+          set[s]->build_interpolation(T_max);
       }
    }
 

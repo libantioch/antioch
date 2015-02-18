@@ -94,7 +94,7 @@ namespace Antioch
 
    // if temperature extrapolation required
    template <typename Model, typename StateType>
-   extrapolate_T(Model & set,const StateType & T_max, bimolecular_diffusion_tag);
+   void extrapolate_T(Model & set,const StateType & T_max, bimolecular_diffusion_tag);
 }
 
 #endif

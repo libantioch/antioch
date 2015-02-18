@@ -207,7 +207,7 @@ namespace Antioch
 
   
    template <typename Model, typename StateType>
-   extrapolate_T(Model & set,const StateType & T_max, bimolecular_diffusion_tag)
+   void extrapolate_T(Model & set,const StateType & T_max, bimolecular_diffusion_tag)
    {
        for(unsigned int i = 0; i < set.size(); i++)
        {

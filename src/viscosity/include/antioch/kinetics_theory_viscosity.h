@@ -232,8 +232,8 @@ namespace Antioch
      return;
   }
 
-  template <typename StateType>
   template <typename CoeffType, typename Interpolator>
+  template <typename StateType>
   inline
   void KineticsTheoryViscosity<CoeffType,Interpolator>::build_interpolation(const StateType & Tmax)
   {
@@ -241,7 +241,7 @@ namespace Antioch
      StockmayerPotential<CoeffType> surface;
     // Stockmayer is where the test is performed
      surface.extrapolate_to(Tmax/_LJ.depth());
-     build_spline(surface)
+     build_spline(surface);
   }
 
   template <typename CoeffType, typename Interpolator>

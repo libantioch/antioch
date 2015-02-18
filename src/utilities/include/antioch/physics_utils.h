@@ -8,6 +8,7 @@
 
 // Antioch
 #include "antioch/physical_set.h"
+#include "antioch/transport_mixture.h"
 
 //C++
 
@@ -31,7 +32,7 @@ namespace Antioch
 
   template <typename Physics, typename ThermoEvaluator, typename CoeffType, typename StateType>
   inline
-  void extrapolate_to_high_temperatures(PhysicalSet<Physics,TransportMixture<ThermoEvaluator,CoeffType> > & physics, const StateType & T_max);
+  void extrapolate_to_high_temperatures(PhysicalSet<Physics,TransportMixture<ThermoEvaluator,CoeffType> > & physics, const StateType & T_max)
   {
      extrapolate_T(physics.set(),T_max,typename physical_tag<Physics>::temperature_limitation_type() );
   }

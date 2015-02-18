@@ -146,7 +146,7 @@ namespace Antioch{
 
           void build_interpolation();
 
-          void build_spline(const StockmayerPotential<CoeffType> & surface)
+          void build_spline(const StockmayerPotential<CoeffType> & surface);
 
 
           Interpolator _interp;
@@ -316,8 +316,8 @@ namespace Antioch{
      _interp.spline_init(rescaled_temp,interp_surf);
   }
 
-  template <typename StateType>
   template <typename CoeffType, typename Interpolator>
+  template <typename StateType>
   inline
   void MolecularBinaryDiffusion<CoeffType,Interpolator>::build_interpolation(const StateType & Tmax)
   {

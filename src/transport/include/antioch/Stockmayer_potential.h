@@ -99,8 +99,8 @@ namespace Antioch{
 
   };
 
-  template <typename StateType>
   template <typename CoeffType>
+  template <typename StateType>
   inline
   StockmayerPotential<CoeffType>::StockmayerPotential(const StateType & T):
         _T_size(37),
@@ -110,7 +110,6 @@ namespace Antioch{
         _omega_1_1(_T_size,std::vector<CoeffType>(_delta_size,0.)),
         _omega_2_2(_T_size,std::vector<CoeffType>(_delta_size,0.)),
         _max_reduced_T(100.)
-
   {
      this->init();
 
@@ -143,8 +142,8 @@ namespace Antioch{
      return;
   }
 
-  template <typename StateType>
   template <typename CoeffType>
+  template <typename StateType>
   inline
   void StockmayerPotential<CoeffType>::extrapolate_to(const StateType & T)
   {
@@ -163,10 +162,10 @@ namespace Antioch{
       {
 
         //resize
-        _omega_1_1.push_back(std::vector<CoeffType>(_delta_size)) // + Delta T/2
-        _omega_1_1.push_back(std::vector<CoeffType>(_delta_size)) // + Delta T
-        _omega_2_2.push_back(std::vector<CoeffType>(_delta_size)) // + Delta T/2
-        _omega_2_2.push_back(std::vector<CoeffType>(_delta_size)) // + Delta T
+        _omega_1_1.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T/2
+        _omega_1_1.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T
+        _omega_2_2.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T/2
+        _omega_2_2.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T
 
         _T_size += 2;
         _T.push_back(_max_reduced_T + Delta_T/2.);
