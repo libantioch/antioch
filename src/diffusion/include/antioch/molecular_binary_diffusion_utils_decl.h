@@ -91,6 +91,10 @@ namespace Antioch
         // d_s = 1 - y_s / (sum_{j \neq s} x_j/D_{sj})
    template <typename Mixture, typename MatrixStateType, typename VectorStateType>
    void wilke_diffusion_rule(const Mixture & mixture, const VectorStateType & mass_fractions, const MatrixStateType & Ds, VectorStateType & ds, bimolecular_diffusion_tag);
+
+   // if temperature extrapolation required
+   template <typename Model, typename StateType>
+   extrapolate_T(Model & set,const StateType & T_max, bimolecular_diffusion_tag);
 }
 
 #endif
