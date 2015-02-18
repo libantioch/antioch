@@ -7,42 +7,33 @@
 #define ANTIOCH_PHYSICS_UTILS_H
 
 // Antioch
-#include "antioch/Stockmayer_potential.h"
-#include "antioch/transport_mixture.h"
+#include "antioch/physical_set.h"
 
 //C++
 
 namespace Antioch
 {
-  //! check if the highest reduced temperature is within boundaries
-  template <typename ThermoEvaluator,typename CoeffType>
-  bool verify_highest_reduced_temperature(const TransportMixture<ThermoEvaluator, CoeffType> & mix, const StateType & T, StateType & Tmax);
 
-  template <typename PhysicsModel, typename StateType>
-  void extrapolate_Stockmayer(PhysicsModel & to_extrapolate, const StateType & T);
+  /*! a free fonction to extrapolate to high temperatures
+      
+     Only the Stockmayer potential imposes a maximal temperature,
+     which means only the kinetics theory on transport is
+     limited by it.
+  */
 
-//---------------------------------
+  // We are explicit on the mixture
+  template <typename Physics, typename ThermoEvaluator, typename CoeffType, typename StateType>
+  void extrapolate_to_high_temperatures(PhysicalSet<Physics,TransportMixture<ThermoEvaluator,CoeffType> > & physics, const StateType & T_max);
 
-  template <typename ThermoEvaluator,typename CoeffType>
+
+// ---------------------------
+
+
+  template <typename Physics, typename ThermoEvaluator, typename CoeffType, typename StateType>
   inline
-  bool verify_highest_reduced_temperature(const TransportMixture<ThermoEvaluator, CoeffType> & mix, const StateType & T, StateType & Tmax)
+  void extrapolate_to_high_temperatures(PhysicalSet<Physics,TransportMixture<ThermoEvaluator,CoeffType> > & physics, const StateType & T_max);
   {
-     Tmax = Antioch::zero_clone(T);
-     for(unsigned int s = 0; s < mix.n_species(); s++)
-     {
-        const TransportSpecies<CoeffType> & spec = *mix.transport_species()[s]; // convenient method
-
-        if( Tmax < T / spec.LJ_depth() )Tmax = T/spec.LJ_depth();
-     }
-
-     return (Tmax > Stockmayer<CoeffType>().max_reduced_temperature());
-  }
-
-  template <typename PhysicsModel, typename StateType>
-  inline
-  void extrapolate_Stockmayer(PhysicsModel & to_extrapolate, const StateType & T)
-  {
-     to_extrapolate.built_extrapolation(T);
+     extrapolate_T(physics.set(),T_max,typename physical_tag<Physics>::temperature_limitation_type() );
   }
 
 }//end namespace Antioch
