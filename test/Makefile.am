@@ -65,6 +65,7 @@ check_PROGRAMS += kinetics_theory_viscosity_unit
 check_PROGRAMS += kinetics_theory_viscosity_vec_unit
 check_PROGRAMS += gsl_spline_unit
 check_PROGRAMS += gsl_spline_vec_unit
+check_PROGRAMS += Stockmayer_unit
 
 # Eigen Tests
 check_PROGRAMS += stat_mech_thermo_unit_eigen
@@ -152,6 +153,7 @@ kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.
 gsl_spline_unit_SOURCES = gsl_spline_unit.C
 gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
 ideal_gas_micro_thermo_unit_SOURCES =  ideal_gas_micro_thermo_unit.C
+Stockmayer_unit_SOURCES = Stockmayer_unit.C
 
 
 # Eigen Tests
@@ -224,6 +226,7 @@ TESTS += kinetics_theory_viscosity_unit
 TESTS += kinetics_theory_viscosity_vec_unit
 TESTS += gsl_spline_unit
 TESTS += gsl_spline_vec_unit
+TESTS += Stockmayer_unit
 
 
 # Eigen Tests
