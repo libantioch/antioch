@@ -62,6 +62,8 @@ namespace Antioch
 
         void change_file(const std::string & filename);
 
+        bool initialize() {return false;}
+
         //! read species list
         const std::vector<std::string>  species_list();
 

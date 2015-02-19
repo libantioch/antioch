@@ -51,6 +51,9 @@ namespace Antioch
         ParserBase(const std::string & type, const std::string & file, bool verbose = true);
         virtual ~ParserBase();
 
+        // initialize kinetics, mandatory
+        virtual bool initialize() = 0;
+
         // to reinitialize, mandatory
         virtual void change_file(const std::string & filename) = 0;
 
