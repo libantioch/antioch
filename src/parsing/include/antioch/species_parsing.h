@@ -47,48 +47,78 @@ namespace Antioch
   template <class NumericType>
   class ChemicalMixture;
 
-  template <typename NumericType,typename Parser>
-  void read_chemical_species_composition(const std::string & filename,
-                                         bool verbose,
+    
+  template <typename NumericType>
+  void read_chemical_species_composition(ParserBase<NumericType> * parser,
                                          ChemicalMixture<NumericType> & mixture);
 
-  template<class NumericType,typename Parser>
-  void read_species_data( const std::string& filename,
-                          bool verbose,
+  template<class NumericType>
+  void read_species_data( ParserBase<NumericType> * parser,
                           ChemicalMixture<NumericType>& chem_mixture);
 				
 
-  template<class NumericType,typename Parser>
-  void read_species_vibrational_data(const std::string &filename,
-                                     bool verbose,
+  template<class NumericType>
+  void read_species_vibrational_data(ParserBase<NumericType> * parser,
                                      ChemicalMixture<NumericType>& chem_mixture);
 
-  template<class NumericType,typename Parser>
-  void read_species_electronic_data(const std::string &filename,
-                                    bool verbose,
+  template<class NumericType>
+  void read_species_electronic_data(ParserBase<NumericType> * parser,
                                     ChemicalMixture<NumericType>& chem_mixture);
 
 //----------------------------------------------------------------
 
-   template <typename NumericType,typename Parser>
+   template <typename NumericType>
    inline
-   void read_chemical_species_composition(const std::string & filename,
-                                          bool verbose,
+   void read_chemical_species_composition(ParserBase<NumericType> * parser,
                                           ChemicalMixture<NumericType> & mixture)
    {
-      Parser parser(filename,verbose);
-      mixture.initialize_species(parser.species_list());
+      std::vector<std::string> species;
+      switch(parser->enum_type())
+      {
+        case ASCII:
+        {
+           species = (static_cast<ASCIIParser<NumericType> *>(parser))->species_list();
+           break;
+        }case CHEMKIN:
+        {
+           species = static_cast<ChemKinParser<NumericType> *>(parser)->species_list();
+           break;
+        }case XML:
+        {
+           species = static_cast<XMLParser<NumericType> *>(parser)->species_list();
+           break;
+        }default:
+        {
+           antioch_parsing_error("unknown parser type \"" + parser->type() + "\"!!!");
+        }
+      }
+      mixture.initialize_species(species);
    }
   
-  template<class NumericType,typename Parser>
+  template<class NumericType>
   inline
-  void read_species_data(const std::string& filename, bool verbose, 
+  void read_species_data(ParserBase<NumericType> * parser,
                          ChemicalMixture<NumericType>& chem_mixture)
   {
-
-    Parser parser(filename,verbose);
-
-    parser.read_chemical_species(chem_mixture);
+    switch(parser->enum_type())
+    {
+      case ASCII:
+      {
+        (static_cast<ASCIIParser<NumericType> *>(parser))->read_chemical_species(chem_mixture);
+        break;
+      }case CHEMKIN:
+      {
+        (static_cast<ChemKinParser<NumericType> *>(parser))->read_chemical_species(chem_mixture);
+        break;
+      }case XML:
+      {
+        (static_cast<XMLParser<NumericType> *>(parser))->read_chemical_species(chem_mixture);
+        break;
+      }default:
+      {
+        antioch_parsing_error("unknown parser type \"" + parser->type() + "\"!!!");
+      }
+    }
 
     // sanity check, we require these informations
     bool fail(false);
@@ -103,7 +133,7 @@ namespace Antioch
     if(fail)
     {
       std::cerr << "Molecule(s) is(are) missing.  Please update the information."
-                << "  Currently using file " << filename << ".\n"
+                << "  Currently using file " << parser->file() << ".\n"
                 << "Missing molecule(s) is(are):" << std::endl;
       for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
       {
@@ -118,16 +148,30 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType,typename Parser>
+  template<class NumericType>
   inline
-  void read_species_vibrational_data(const std::string & filename, 
-                                     bool verbose, 
+  void read_species_vibrational_data(ParserBase<NumericType> * parser,
                                      ChemicalMixture<NumericType>& chem_mixture)
   {
-
-    Parser parser(filename,verbose);
-
-    parser.read_vibrational_data(chem_mixture);
+    switch(parser->enum_type())
+    {
+      case ASCII:
+      {
+        (static_cast<ASCIIParser<NumericType> *>(parser))->read_vibrational_data(chem_mixture);
+        break;
+      }case CHEMKIN:
+      {
+        (static_cast<ChemKinParser<NumericType> *>(parser))->read_vibrational_data(chem_mixture);
+        break;
+      }case XML:
+      {
+        (static_cast<XMLParser<NumericType> *>(parser))->read_vibrational_data(chem_mixture);
+        break;
+      }default:
+      {
+        antioch_parsing_error("unknown parser type \"" + parser->type() + "\"!!!");
+      }
+    }
 
 
     // sanity check, we check these informations
@@ -139,7 +183,7 @@ namespace Antioch
     if(!missing.empty())
     {
        std::cerr << "WARNING:\nVibrational levels are missing.  Please update the information."
-                 << "  Currently using file " << filename << ".\n"
+                 << "  Currently using file " << parser->file() << ".\n"
                  << "Missing molecule(s) is(are):" << std::endl;
        for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
     }
@@ -147,16 +191,31 @@ namespace Antioch
   }
 
   
-  template<class NumericType,typename Parser>
+  template<class NumericType>
   inline
-  void read_species_electronic_data(const std::string & filename, bool verbose,
+  void read_species_electronic_data(ParserBase<NumericType> * parser,
                                     ChemicalMixture<NumericType>& chem_mixture)
                                            
   {
-
-    Parser parser(filename,verbose);
-
-    parser.read_electronic_data(chem_mixture);
+    switch(parser->enum_type())
+    {
+      case ASCII:
+      {
+        (static_cast<ASCIIParser<NumericType> *>(parser))->read_electronic_data(chem_mixture);
+        break;
+      }case CHEMKIN:
+      {
+        (static_cast<ChemKinParser<NumericType> *>(parser))->read_electronic_data(chem_mixture);
+        break;
+      }case XML:
+      {
+        (static_cast<XMLParser<NumericType> *>(parser))->read_electronic_data(chem_mixture);
+        break;
+      }default:
+      {
+        antioch_parsing_error("unknown parser type \"" + parser->type() + "\"!!!");
+      }
+    }
     
     // sanity check, we check these informations
     std::vector<std::string> missing;
@@ -167,7 +226,7 @@ namespace Antioch
     if(!missing.empty())
     {
        std::cerr << "WARNING:\nElectronic levels are missing.  Please update the information."
-                 << "  Currently using file " << filename << ".\n"
+                 << "  Currently using file " << parser->file() << ".\n"
                  << "Missing molecule(s) is(are):" << std::endl;
        for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
     }
