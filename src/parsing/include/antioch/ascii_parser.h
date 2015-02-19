@@ -160,7 +160,7 @@ namespace Antioch
     NumericType mol_wght, h_form, n_tr_dofs;
     int charge;
     NumericType mw_unit = Units<NumericType>(_unit_map.at(MOL_WEIGHT)).get_SI_factor();
-    NumericType ef_unit = 1.L;// Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor(); // not integrated yet the kg bugfix
+    NumericType ef_unit = Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor(); // not integrated yet the kg bugfix
 
     if(_verbose)std::cout << "Reading species characteristics in file " << _file << std::endl;
     while (_doc.good())
