@@ -61,11 +61,13 @@ namespace Antioch{
    */
 
   template <typename NumericType = double>
-  class XMLParser: public ParserBase
+  class XMLParser: public ParserBase<NumericType>
   {
         public:
           XMLParser(const std::string &filename, bool verbose = true);
           ~XMLParser();
+
+          void change_file(const std::string & filename);
 
 //// first local pointers
          /*! Read header of file, go to interesting part*/
@@ -178,7 +180,7 @@ namespace Antioch{
 
           /*! Never use default constructor*/
           XMLParser();
-          tinyxml2::XMLDocument _doc;
+          tinyxml2::XMLDocument * _doc;
 
 //
           tinyxml2::XMLElement * _species_block;
@@ -195,24 +197,25 @@ namespace Antioch{
   template <typename NumericType>
   inline
   XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
-        ParserBase("XML",filename,verbose),
+        ParserBase<NumericType>("XML",filename,verbose),
         _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
         _rate_constant(NULL),
         _Troe(NULL)
   {
-    if(_doc.LoadFile(filename.c_str()))
+    _doc = new tinyxml2::XMLDocument;
+    if(_doc->LoadFile(filename.c_str()))
       {
         std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
         std::cerr << "Error of tinyxml2 library:\n"
-                  << "\tID = "            << _doc.ErrorID() << "\n"
-                  << "\tError String1 = " << _doc.GetErrorStr1() << "\n"
-                  << "\tError String2 = " << _doc.GetErrorStr2() << std::endl;
+                  << "\tID = "            << _doc->ErrorID() << "\n"
+                  << "\tError String1 = " << _doc->GetErrorStr1() << "\n"
+                  << "\tError String2 = " << _doc->GetErrorStr2() << std::endl;
         antioch_error();
       }
 
-      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
 
       _map[ParsingKey::PHASE_BLOCK]           = "phase";
@@ -270,10 +273,37 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
+  void XMLParser<NumericType>::change_file(const std::string & filename)
+  {
+     ParserBase<NumericType>::_file = filename;
+     _species_block  = NULL;
+     _reaction_block = NULL;
+     _reaction       = NULL;
+     _rate_constant  = NULL;
+     _Troe           = NULL;
+
+     delete _doc;
+    _doc = new tinyxml2::XMLDocument;
+    if(_doc->LoadFile(filename.c_str()))
+      {
+        std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
+        std::cerr << "Error of tinyxml2 library:\n"
+                  << "\tID = "            << _doc->ErrorID() << "\n"
+                  << "\tError String1 = " << _doc->GetErrorStr1() << "\n"
+                  << "\tError String2 = " << _doc->GetErrorStr2() << std::endl;
+        antioch_error();
+      }
+
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
+      
+  }
+
+  template <typename NumericType>
+  inline
   bool XMLParser<NumericType>::initialize()
   {
         //we start here
-      _reaction_block = _doc.FirstChildElement("ctml");
+      _reaction_block = _doc->FirstChildElement("ctml");
       if (!_reaction_block) 
         {
           std::cerr << "ERROR:  no <ctml> tag found in input file"
@@ -298,6 +328,7 @@ namespace Antioch{
   inline
   XMLParser<NumericType>::~XMLParser()
   {
+     delete _doc;
      return;
   }
 

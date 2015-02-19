@@ -62,11 +62,13 @@ namespace Antioch{
    *  - SRI falloff (not supported)
    */
   template <typename NumericType = double>
-  class ChemKinParser: public ParserBase
+  class ChemKinParser: public ParserBase<NumericType>
   {
         public:
           ChemKinParser(const std::string &filename, bool verbose = true);
           ~ChemKinParser();
+
+         void change_file(const std::string & filename);
 
 //// first local pointers
          /*! Read header of file, go to interesting part*/
@@ -252,7 +254,7 @@ namespace Antioch{
   template <typename NumericType>
   inline
   ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
-        ParserBase("ChemKin",filename,verbose),
+        ParserBase<NumericType>("ChemKin",filename,verbose),
         _doc(filename.c_str()),
         _duplicate_process(false),
         _next_is_reverse(false)
@@ -263,7 +265,7 @@ namespace Antioch{
         antioch_error();
       }
 
-      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
       _map[ParsingKey::SPECIES_SET]      = "SPECIES";
       _map[ParsingKey::REACTION_DATA]    = "REAC"; //REACTIONS || REAC
@@ -303,6 +305,22 @@ namespace Antioch{
       _unit_custom_A["MOLES"]                          = "cm3/mol";
       _unit_custom_A["MOLECULES"]                      = "cm3/molecule";
 
+  }
+
+  template <typename NumericType>
+  inline
+  void ChemKinParser<NumericType>::change_file(const std::string & filename)
+  {
+    _doc.close();
+    _doc.open(filename.c_str());
+    ParserBase<NumericType>::_file = filename;
+    if(!_doc.good())
+      {
+        std::cerr << "ERROR: unable to load ChemKin file " << filename << std::endl;
+        antioch_error();
+      }
+
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
   }
 
   template <typename NumericType>

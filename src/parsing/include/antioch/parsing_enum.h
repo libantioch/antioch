@@ -28,6 +28,10 @@
 
 namespace Antioch
 {
+  enum ParsingType{ASCII = 0,
+                   XML,
+                   CHEMKIN};
+
   enum ParsingKey{SPECIES_SET = 0,
                   PHASE_BLOCK,
                   REACTION_DATA,
