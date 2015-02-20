@@ -85,6 +85,7 @@ namespace Antioch
 
   };
 
+  inline
   ChemKinDefinitions::ChemKinDefinitions():
      _reversible("REV"),
      _duplicate("DUP"),
@@ -103,46 +104,55 @@ namespace Antioch
     _symbol[ELECTRO] = "E";
   };
 
+  inline
   const std::map<ChemKinDefinitions::Delim,std::string> & ChemKinDefinitions::delim()   const 
   {
     return _delim;
   }
 
+  inline
   const std::map<ChemKinDefinitions::Symbol,std::string> & ChemKinDefinitions::symbol() const 
   {
     return _symbol;
   }
 
+  inline
   const std::string & ChemKinDefinitions::reversible() const 
   {
     return _reversible;
   }
 
+  inline
   const std::string & ChemKinDefinitions::duplicate() const 
   {
     return _duplicate;
   }
 
+  inline
   const std::string & ChemKinDefinitions::end_tag() const 
   {
     return _end_tag;
   }
 
+  inline
   const std::string & ChemKinDefinitions::comment() const 
   {
     return _comment;
   }
 
+  inline
   const std::string & ChemKinDefinitions::parser() const 
   {
     return _parser;
   }
 
+  inline
   bool ChemKinDefinitions::is_comment(const char & c) const 
   {
     return (c == _comment[0]);
   }
 
+  inline
   bool ChemKinDefinitions::is_equation_delimiter(const std::string & test) const 
   {
     return (test == _delim.at(REVERSIBLE)     || 
@@ -151,6 +161,7 @@ namespace Antioch
            );
   }
 
+  inline
   ChemKinDefinitions::Delim ChemKinDefinitions::equation_delimiter(const std::string & test) const 
   {
     if(test.find(_delim.at(REVERSIBLE_ALT)) != std::string::npos)
