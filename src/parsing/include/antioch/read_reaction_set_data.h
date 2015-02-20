@@ -355,7 +355,7 @@ namespace Antioch
 
                 if(verbose) std::cout  << "\n    " << molecules_pairs[p].first << " " << molecules_pairs[p].second;
 
-                if( !chem_mixture.active_species_name_map().count( molecules_pairs[p].first ) )
+                if( !chem_mixture.species_name_map().count( molecules_pairs[p].first ) )
                   {
                     relevant_reaction = false;
                     if (verbose) std::cout << "\n     -> skipping this reaction (no reactant " << molecules_pairs[p].first << ")";
@@ -363,7 +363,7 @@ namespace Antioch
                 else
                   {
                     my_rxn->add_reactant( molecules_pairs[p].first,
-                                         chem_mixture.active_species_name_map().find( molecules_pairs[p].first )->second,
+                                         chem_mixture.species_name_map().find( molecules_pairs[p].first )->second,
                                          molecules_pairs[p].second );
                     order_reaction += molecules_pairs[p].second;
                   }
@@ -383,7 +383,7 @@ namespace Antioch
 
                 if(verbose) std::cout  << "\n    " << molecules_pairs[p].first << " " << molecules_pairs[p].second;
 
-                if( !chem_mixture.active_species_name_map().count( molecules_pairs[p].first ) )
+                if( !chem_mixture.species_name_map().count( molecules_pairs[p].first ) )
                   {
                     relevant_reaction = false;
                     if (verbose) std::cout << "\n     -> skipping this reaction (no product " << molecules_pairs[p].first << ")";
@@ -391,7 +391,7 @@ namespace Antioch
                 else
                   {
                     my_rxn->add_product( molecules_pairs[p].first,
-                                        chem_mixture.active_species_name_map().find( molecules_pairs[p].first )->second,
+                                        chem_mixture.species_name_map().find( molecules_pairs[p].first )->second,
                                         molecules_pairs[p].second );
                   }
               }
@@ -715,10 +715,10 @@ namespace Antioch
 
                     // it is possible that the efficiency is specified for a species we are not
                     // modeling - so only add the efficiency if it is included in our list
-                    if( chem_mixture.active_species_name_map().count( efficiencies[p].first ) )
+                    if( chem_mixture.species_name_map().count( efficiencies[p].first ) )
                       {
                         my_rxn->set_efficiency( efficiencies[p].first,
-                                               chem_mixture.active_species_name_map().find( efficiencies[p].first )->second,
+                                               chem_mixture.species_name_map().find( efficiencies[p].first )->second,
                                                efficiencies[p].second );
                       }
                }
