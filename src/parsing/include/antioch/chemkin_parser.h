@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -26,6 +28,7 @@
 //Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/string_utils.h"
+#include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/units.h"
 #include "antioch/chemkin_definitions.h"
@@ -59,17 +62,34 @@ namespace Antioch{
    *  - SRI falloff (not supported)
    */
   template <typename NumericType = double>
-  class ChemKinParser{
+  class ChemKinParser: public ParserBase<NumericType>
+  {
         public:
-          ChemKinParser(const std::string &filename);
+          ChemKinParser(const std::string &filename, bool verbose = true);
           ~ChemKinParser();
+
+         void change_file(const std::string & filename);
 
 //// first local pointers
          /*! Read header of file, go to interesting part*/
          bool initialize();
 
+
+////////////// species
          /*! read SPECIES block*/
-         const std::vector<std::string> species_set();
+         const std::vector<std::string> species_list();
+
+        // reads the mandatory data, not valid yet in ChemKin
+//        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+
+        // reads the vibrational data, not valid yet in ChemKin
+//        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+
+        // reads the electronic data, not valid yet in ChemKin
+//        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+
+
+///////////////// kinetics
 
          /*! go to next reaction*/
          bool reaction();
@@ -187,6 +207,7 @@ namespace Antioch{
           /*! Never use default constructor*/
           ChemKinParser();
           std::ifstream                    _doc;
+          
 
           bool                             _reversible;
           unsigned int                     _nrates; // total number of rates
@@ -232,16 +253,19 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  ChemKinParser<NumericType>::ChemKinParser(const std::string &filename):
+  ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
+        ParserBase<NumericType>("ChemKin",filename,verbose),
+        _doc(filename.c_str()),
         _duplicate_process(false),
         _next_is_reverse(false)
   {
-    _doc.open(filename.c_str());
     if(!_doc.good())
       {
         std::cerr << "ERROR: unable to load ChemKin file " << filename << std::endl;
         antioch_error();
       }
+
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
       _map[ParsingKey::SPECIES_SET]      = "SPECIES";
       _map[ParsingKey::REACTION_DATA]    = "REAC"; //REACTIONS || REAC
@@ -281,6 +305,22 @@ namespace Antioch{
       _unit_custom_A["MOLES"]                          = "cm3/mol";
       _unit_custom_A["MOLECULES"]                      = "cm3/molecule";
 
+  }
+
+  template <typename NumericType>
+  inline
+  void ChemKinParser<NumericType>::change_file(const std::string & filename)
+  {
+    _doc.close();
+    _doc.open(filename.c_str());
+    ParserBase<NumericType>::_file = filename;
+    if(!_doc.good())
+      {
+        std::cerr << "ERROR: unable to load ChemKin file " << filename << std::endl;
+        antioch_error();
+      }
+
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
   }
 
   template <typename NumericType>
@@ -331,7 +371,7 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  const std::vector<std::string> ChemKinParser<NumericType>::species_set()
+  const std::vector<std::string> ChemKinParser<NumericType>::species_list()
   {
       std::string line;
       ascii_getline(_doc,line);
@@ -347,7 +387,7 @@ namespace Antioch{
 
       std::vector<std::string> species;
       ascii_getline(_doc,line);
-      while(line.find("END") == std::string::npos)
+      while(line.find(_spec.end_tag()) == std::string::npos)
       {
          std::vector<std::string> tmp;
          SplitString(line," ",tmp,false);
@@ -1157,7 +1197,7 @@ namespace Antioch{
 
       return out;
   }
-  
+
 
 }//end namespace Antioch
 
