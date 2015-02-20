@@ -70,6 +70,7 @@ pkginclude_HEADERS += parsing/include/antioch/xml_parser.h
 pkginclude_HEADERS += parsing/include/antioch/chemkin_definitions.h
 pkginclude_HEADERS += parsing/include/antioch/chemkin_parser.h
 pkginclude_HEADERS += parsing/include/antioch/ascii_parser.h
+pkginclude_HEADERS += parsing/include/antioch/parser_base.h
 pkginclude_HEADERS += parsing/include/antioch/constant_lewis_diffusivity_building.h
 pkginclude_HEADERS += parsing/include/antioch/eucken_thermal_conductivity_building.h
 pkginclude_HEADERS += parsing/include/antioch/molecular_binary_diffusion_building.h
