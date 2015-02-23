@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_REACTION_SET_DATA_XML_H
-#define ANTIOCH_REACTION_SET_DATA_XML_H
+#ifndef ANTIOCH_READ_REACTION_SET_DATA_H
+#define ANTIOCH_READ_REACTION_SET_DATA_H
 
 // Antioch
 #include "antioch/antioch_asserts.h"
@@ -39,8 +39,7 @@
 #include "antioch/reaction_parsing.h"
 #include "antioch/physical_constants.h"
 #include "antioch/units.h"
-#include "antioch/xml_parser.h"
-#include "antioch/chemkin_parser.h"
+#include "antioch/parsing_enum.h"
 
 // C++
 #include <string>
@@ -49,6 +48,15 @@
 
 namespace Antioch
 {
+
+  template <typename NumericType>
+  class ASCIIParser;
+
+  template <typename NumericType>
+  class ChemKinParser;
+
+  template <typename NumericType>
+  class ChemKinParser;
 
  /*!\file read_reaction_set_data.h
   *
@@ -120,10 +128,11 @@ namespace Antioch
                                        ReactionSet<NumericType>& reaction_set );
 
 
-  template<typename NumericType, typename ParserType>
+  template<typename NumericType>
   void read_reaction_set_data(const std::string &filename,
                               const bool verbose,
-                              ReactionSet<NumericType>& reaction_set );
+                              ReactionSet<NumericType>& reaction_set,
+                              ParsingType type = ASCII );
 
   template <typename NumericType>
   void verify_unit_of_parameter(Units<NumericType> & default_unit, const std::string & provided_unit,
@@ -138,7 +147,7 @@ namespace Antioch
                                    const bool verbose,
                                    ReactionSet<NumericType>& reaction_set )
   {
-     read_reaction_set_data<NumericType,XMLParser<NumericType> >(filename,verbose,reaction_set);
+     read_reaction_set_data<NumericType >(filename,verbose,reaction_set,XML);
   }
 
   template<class NumericType>
@@ -147,7 +156,7 @@ namespace Antioch
                                        const bool verbose,
                                        ReactionSet<NumericType>& reaction_set )
   {
-     read_reaction_set_data<NumericType,ChemKinParser<NumericType> >(filename,verbose,reaction_set);
+     read_reaction_set_data<NumericType>(filename,verbose,reaction_set,CHEMKIN);
   }
 
   template <typename NumericType>
@@ -182,16 +191,31 @@ namespace Antioch
      }
   }
 
-  template<typename NumericType, typename ParserType>
+  template<typename NumericType>
   inline
   void read_reaction_set_data( const std::string& filename,
                                const bool verbose,
-                               ReactionSet<NumericType>& reaction_set )
+                               ReactionSet<NumericType>& reaction_set,
+                               ParsingType type )
   {
-    ParserType parser(filename);
+    ParserBase<NumericType> * parser(NULL);
+    switch(type)
+    {
+      case ASCII:
+         parser = new ASCIIParser<NumericType>(filename,verbose);
+         break;
+      case CHEMKIN:
+         parser = new ChemKinParser<NumericType>(filename,verbose);
+         break;
+      case XML:
+         parser = new XMLParser<NumericType>(filename,verbose);
+         break;
+      default:
+         antioch_parsing_error("unknown type");
+    }
 
     //error or no reaction data
-    if(!parser.initialize())return;
+    if(!parser->initialize())return;
 
     const ChemicalMixture<NumericType>& chem_mixture = reaction_set.chemical_mixture();
     unsigned int n_species = chem_mixture.n_species();
@@ -259,19 +283,19 @@ namespace Antioch
     proc_keyword["LindemannFalloff"]  = ReactionType::LINDEMANN_FALLOFF;
     proc_keyword["TroeFalloff"]       = ReactionType::TROE_FALLOFF;
 
-    while (parser.reaction())
+    while (parser->reaction())
       {
-        if (verbose) std::cout << "Reaction #" << parser.reaction_id() << ":\n"
-                               << " eqn: " << parser.reaction_equation()
+        if (verbose) std::cout << "Reaction #" << parser->reaction_id() << ":\n"
+                               << " eqn: " << parser->reaction_equation()
                                << std::endl;
 
         ReactionType::ReactionType typeReaction(ReactionType::ELEMENTARY);
         KineticsModel::KineticsModel kineticsModel(KineticsModel::HERCOURT_ESSEN); // = 0
 
-        if (!parser.reaction_chemical_process().empty())
+        if (!parser->reaction_chemical_process().empty())
           {
-            if (verbose) std::cout << " type: " << parser.reaction_chemical_process() << std::endl;
-            if(!proc_keyword.count(parser.reaction_chemical_process()))
+            if (verbose) std::cout << " type: " << parser->reaction_chemical_process() << std::endl;
+            if(!proc_keyword.count(parser->reaction_chemical_process()))
             {
                 std::cerr << "Implemented chemical processes are:\n"
                           << "  Elementary (default)\n"
@@ -283,22 +307,22 @@ namespace Antioch
                           << std::endl;
                 antioch_not_implemented();
             }
-            typeReaction = proc_keyword[parser.reaction_chemical_process()];
+            typeReaction = proc_keyword[parser->reaction_chemical_process()];
           }
             
-        bool reversible(parser.reaction_reversible());
+        bool reversible(parser->reaction_reversible());
         if (verbose) std::cout << "reversible: " << reversible << std::endl;
        
-        kineticsModel = kin_keyword[parser.reaction_kinetics_model(models)];
-        const std::string reading_kinetics_model = parser.reaction_kinetics_model(models);
+        kineticsModel = kin_keyword[parser->reaction_kinetics_model(models)];
+        const std::string reading_kinetics_model = parser->reaction_kinetics_model(models);
 
         // usually Kooij is called Arrhenius, check here
         if(kineticsModel == KineticsModel::ARRHENIUS)
         {
-          if(parser.verify_Kooij_in_place_of_Arrhenius())
+          if(parser->verify_Kooij_in_place_of_Arrhenius())
           {
                kineticsModel = KineticsModel::KOOIJ;
-               std::cerr << "In reaction " << parser.reaction_id() << "\n"
+               std::cerr << "In reaction " << parser->reaction_id() << "\n"
                          << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
                          << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
                          << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
@@ -307,7 +331,7 @@ namespace Antioch
         }
 
         // construct a Reaction object    
-        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, parser.reaction_equation(),
+        Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, parser->reaction_equation(),
                                                                                reversible,typeReaction,kineticsModel);
 
         // We will add the reaction, unless we do not have a 
@@ -316,7 +340,7 @@ namespace Antioch
         unsigned int order_reaction(0);
         std::vector<std::pair<std::string,int> > molecules_pairs;
 
-        if(parser.reactants_pairs(molecules_pairs))
+        if(parser->reactants_pairs(molecules_pairs))
           {
             if (verbose)
             {
@@ -331,7 +355,7 @@ namespace Antioch
 
                 if(verbose) std::cout  << "\n    " << molecules_pairs[p].first << " " << molecules_pairs[p].second;
 
-                if( !chem_mixture.active_species_name_map().count( molecules_pairs[p].first ) )
+                if( !chem_mixture.species_name_map().count( molecules_pairs[p].first ) )
                   {
                     relevant_reaction = false;
                     if (verbose) std::cout << "\n     -> skipping this reaction (no reactant " << molecules_pairs[p].first << ")";
@@ -339,7 +363,7 @@ namespace Antioch
                 else
                   {
                     my_rxn->add_reactant( molecules_pairs[p].first,
-                                         chem_mixture.active_species_name_map().find( molecules_pairs[p].first )->second,
+                                         chem_mixture.species_name_map().find( molecules_pairs[p].first )->second,
                                          molecules_pairs[p].second );
                     order_reaction += molecules_pairs[p].second;
                   }
@@ -347,7 +371,7 @@ namespace Antioch
           }
 
         molecules_pairs.clear();
-        if(parser.products_pairs(molecules_pairs))
+        if(parser->products_pairs(molecules_pairs))
           {
             if(verbose) std::cout << "\n   products: ";
               for(unsigned int ir = 0; ir < molecules_pairs.size(); ir++)
@@ -359,7 +383,7 @@ namespace Antioch
 
                 if(verbose) std::cout  << "\n    " << molecules_pairs[p].first << " " << molecules_pairs[p].second;
 
-                if( !chem_mixture.active_species_name_map().count( molecules_pairs[p].first ) )
+                if( !chem_mixture.species_name_map().count( molecules_pairs[p].first ) )
                   {
                     relevant_reaction = false;
                     if (verbose) std::cout << "\n     -> skipping this reaction (no product " << molecules_pairs[p].first << ")";
@@ -367,7 +391,7 @@ namespace Antioch
                 else
                   {
                     my_rxn->add_product( molecules_pairs[p].first,
-                                        chem_mixture.active_species_name_map().find( molecules_pairs[p].first )->second,
+                                        chem_mixture.species_name_map().find( molecules_pairs[p].first )->second,
                                         molecules_pairs[p].second );
                   }
               }
@@ -381,7 +405,7 @@ namespace Antioch
           continue;
         }
 
-        while(parser.rate_constant(reading_kinetics_model)) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
+        while(parser->rate_constant(reading_kinetics_model)) //for duplicate and falloff models, several kinetics rate to load, no mixing allowed
         {
 
          /* Any data is formatted by the parser method.
@@ -409,7 +433,7 @@ namespace Antioch
              my_rxn->type() == ReactionType::TROE_FALLOFF)
           {
              //k0 is either determined by an explicit name, or is the first of unnamed rate constants
-             if(parser.is_k0(my_rxn->n_rate_constants(),reading_kinetics_model))pow_unit++;
+             if(parser->is_k0(my_rxn->n_rate_constants(),reading_kinetics_model))pow_unit++;
           }
 
           NumericType par_value(-1.);
@@ -422,7 +446,7 @@ namespace Antioch
           if(verbose)std::cout << " rate: " << models[kinetics_model_map[kineticsModel]] << " model\n";
 
 // pre-exponential
-          if(parser.rate_constant_preexponential_parameter(par_value, par_unit, default_unit))
+          if(parser->rate_constant_preexponential_parameter(par_value, par_unit, default_unit))
           {
             // using Units object to build accepted_unit
             accepted_unit.clear();
@@ -458,7 +482,7 @@ namespace Antioch
          }
 
 // beta
-         if(parser.rate_constant_power_parameter(par_value,par_unit,default_unit))
+         if(parser->rate_constant_power_parameter(par_value,par_unit,default_unit))
          {
             accepted_unit.clear();
             accepted_unit.push_back("");
@@ -466,7 +490,7 @@ namespace Antioch
             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "beta");
             if(par_value == 0.)//if ARRHENIUS parameterized as KOOIJ, bad test, need to rethink it
             {
-               std::cerr << "In reaction " << parser.reaction_id() << "\n"
+               std::cerr << "In reaction " << parser->reaction_id() << "\n"
                          << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
                          << "and most certainly not a Kooij one\n"
                          << "it has been corrected, but please, change that in your file.\n"
@@ -483,7 +507,7 @@ namespace Antioch
          }
 
 // activation energy
-          if(parser.rate_constant_activation_energy_parameter(par_value,par_unit,default_unit))
+          if(parser->rate_constant_activation_energy_parameter(par_value,par_unit,default_unit))
           {
             accepted_unit.clear();
             accepted_unit.push_back("J/mol");
@@ -500,7 +524,7 @@ namespace Antioch
 
 
 // Berthelot coefficient (D)
-          if(parser.rate_constant_Berthelot_coefficient_parameter(par_value,par_unit,default_unit))
+          if(parser->rate_constant_Berthelot_coefficient_parameter(par_value,par_unit,default_unit))
           {
             accepted_unit.clear();
             accepted_unit.push_back("K");
@@ -521,7 +545,7 @@ namespace Antioch
              kineticsModel == KineticsModel::VANTHOFF) 
           {
             par_value = 1.;
-            if(parser.rate_constant_Tref_parameter(par_value,par_unit,default_unit))
+            if(parser->rate_constant_Tref_parameter(par_value,par_unit,default_unit))
             {
               accepted_unit.clear();
               accepted_unit.push_back("K");
@@ -539,7 +563,7 @@ namespace Antioch
              kineticsModel == KineticsModel::KOOIJ     ||
              kineticsModel == KineticsModel::VANTHOFF)
           {
-            parser.rate_constant_activation_energy_parameter(par_value,par_unit,default_unit);
+            parser->rate_constant_activation_energy_parameter(par_value,par_unit,default_unit);
             (par_unit.empty())?def_unit.set_unit(default_unit):def_unit.set_unit(par_unit);
         // now finding R unit: [Ea] / [K]
             def_unit.substract("K");
@@ -561,7 +585,7 @@ namespace Antioch
 
           // starting with lambda (for bin unit in cross-section)
           // lambda is not in SI (m is really to violent), it will be nm
-          if(parser.rate_constant_lambda_parameter(par_values,par_unit,default_unit))
+          if(parser->rate_constant_lambda_parameter(par_values,par_unit,default_unit))
           {
              antioch_assert_equal_to(kineticsModel,KineticsModel::PHOTOCHEM);
              accepted_unit.clear();
@@ -590,7 +614,7 @@ namespace Antioch
 
              NumericType bin_coefficient = (def_unit.is_homogeneous("nm"))?def_unit.factor_to_some_unit("nm"):
                                                                            def_unit.factor_to_some_unit("nm-1");
-             if(!parser.rate_constant_cross_section_parameter(par_values,par_unit,default_unit))
+             if(!parser->rate_constant_cross_section_parameter(par_values,par_unit,default_unit))
              {
                 std::cerr << "Where is the cross-section?  In what universe have you photochemistry with a wavelength grid and no cross-section on it?" << std::endl;
                 antioch_error();
@@ -670,7 +694,7 @@ namespace Antioch
            my_rxn->type() == ReactionType::TROE_FALLOFF)
         {
            antioch_assert_equal_to(my_rxn->n_rate_constants(),2);
-           if(parser.where_is_k0(reading_kinetics_model) == 1) // second given is k0
+           if(parser->where_is_k0(reading_kinetics_model) == 1) // second given is k0
            { 
                my_rxn->swap_forward_rates(0,1);
            }
@@ -679,7 +703,7 @@ namespace Antioch
 
         std::vector<std::pair<std::string,NumericType> > efficiencies;
         //efficiencies are only for three body reactions
-        if(parser.efficiencies(efficiencies))
+        if(parser->efficiencies(efficiencies))
           {
              antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn->type());
 
@@ -691,10 +715,10 @@ namespace Antioch
 
                     // it is possible that the efficiency is specified for a species we are not
                     // modeling - so only add the efficiency if it is included in our list
-                    if( chem_mixture.active_species_name_map().count( efficiencies[p].first ) )
+                    if( chem_mixture.species_name_map().count( efficiencies[p].first ) )
                       {
                         my_rxn->set_efficiency( efficiencies[p].first,
-                                               chem_mixture.active_species_name_map().find( efficiencies[p].first )->second,
+                                               chem_mixture.species_name_map().find( efficiencies[p].first )->second,
                                                efficiencies[p].second );
                       }
                }
@@ -702,7 +726,7 @@ namespace Antioch
           }
 
         //F parameters only for Troe falloff
-        if(parser.Troe())
+        if(parser->Troe())
         {
            antioch_assert_equal_to (ReactionType::TROE_FALLOFF, my_rxn->type());
            FalloffReaction<NumericType,TroeFalloff<NumericType> > *my_fall_rxn =
@@ -715,7 +739,7 @@ namespace Antioch
            std::vector<std::string> accepted_unit;
 
         // alpha
-           if(!parser.Troe_alpha_parameter(par_value,par_unit,default_unit))
+           if(!parser->Troe_alpha_parameter(par_value,par_unit,default_unit))
            {
                 std::cerr << "alpha parameter of Troe falloff missing!" << std::endl;
                 antioch_error();
@@ -727,7 +751,7 @@ namespace Antioch
            my_fall_rxn->F().set_alpha(par_value * def_unit.get_SI_factor());
 
         // T***
-           if(!parser.Troe_T3_parameter(par_value,par_unit,default_unit))
+           if(!parser->Troe_T3_parameter(par_value,par_unit,default_unit))
            {
                 std::cerr << "T*** parameter of Troe falloff missing!" << std::endl;
                 antioch_error();
@@ -739,7 +763,7 @@ namespace Antioch
            my_fall_rxn->F().set_T3(par_value * def_unit.get_SI_factor());
 
         // T*
-           if(!parser.Troe_T1_parameter(par_value,par_unit,default_unit))
+           if(!parser->Troe_T1_parameter(par_value,par_unit,default_unit))
            {
                 std::cerr << "T* parameter of Troe falloff missing!" << std::endl;
                 antioch_error();
@@ -750,7 +774,7 @@ namespace Antioch
            my_fall_rxn->F().set_T1(par_value * def_unit.get_SI_factor());
 
         // T** is optional
-           if(parser.Troe_T2_parameter(par_value,par_unit,default_unit))
+           if(parser->Troe_T2_parameter(par_value,par_unit,default_unit))
            {
              def_unit.set_unit(default_unit);
              verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "T**");
@@ -763,9 +787,10 @@ namespace Antioch
         if(verbose) std::cout << "\n\n";
       }
 
+    if(parser)delete parser;
     return;
   }
  
 } // end namespace Antioch
 
-#endif // ANTIOCH_REACTION_SET_DATA_XML_H
+#endif // ANTIOCH_READ_REACTION_SET_DATA_H

@@ -34,7 +34,7 @@
 // Antioch
 #include "antioch_config.h"
 #include "antioch/cea_curve_fit.h"
-#include "antioch/cea_mixture_parsing.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/chemical_species.h"
 #include "antioch/default_filename.h"
@@ -50,7 +50,7 @@ namespace Antioch
 {
   // Forward declarations
   template<typename CoeffType>
-  class CEACurveFit;
+  class NASA9CurveFit;
 
   template<typename CoeffType=double>
   class CEAThermodynamics
@@ -166,7 +166,7 @@ namespace Antioch
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
-    std::vector<CEACurveFit<CoeffType>* > _species_curve_fits;
+    std::vector<NASA9CurveFit<CoeffType>* > _species_curve_fits;
 
     std::vector<CoeffType> _cp_at_200p1;
 
@@ -210,8 +210,8 @@ namespace Antioch
   inline
   CEAThermodynamics<CoeffType>::~CEAThermodynamics()
   {
-    // Clean up all the CEACurveFits we created
-    for( typename std::vector<CEACurveFit<CoeffType>* >::iterator it = _species_curve_fits.begin();
+    // Clean up all the NASA9CurveFits we created
+    for( typename std::vector<NASA9CurveFit<CoeffType>* >::iterator it = _species_curve_fits.begin();
 	 it < _species_curve_fits.end(); ++it )
       {
 	delete (*it);
@@ -234,7 +234,7 @@ namespace Antioch
     antioch_assert_less_equal( s, _species_curve_fits.size() );
     antioch_assert( !_species_curve_fits[s] );
 
-    _species_curve_fits[s] = new CEACurveFit<CoeffType>(coeffs);
+    _species_curve_fits[s] = new NASA9CurveFit<CoeffType>(coeffs);
     return;
   }
 
@@ -245,7 +245,7 @@ namespace Antioch
   {
     bool valid = true;
 
-    for( typename std::vector<CEACurveFit<CoeffType>* >::const_iterator it = _species_curve_fits.begin();
+    for( typename std::vector<NASA9CurveFit<CoeffType>* >::const_iterator it = _species_curve_fits.begin();
 	 it != _species_curve_fits.end(); ++ it )
       {
 	if( !(*it) )

@@ -28,7 +28,10 @@
 //Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/string_utils.h"
+#include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
+#include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
+#include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
 
 //XML
 #include "antioch/tinyxml2_imp.h"
@@ -38,8 +41,10 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <limits> 
 
 namespace Antioch{
+
 
   template <typename CoeffType>
   class ChemicalMixture;
@@ -47,11 +52,37 @@ namespace Antioch{
   template <typename NumericType, typename CurveType>
   class NASAThermoMixture;
 
+  template <typename NumericType>
+  class NASA7CurveFit;
+
+  template <typename NumericType>
+  class NASA9CurveFit;
+
+  // backward compatibility
+  template <typename NumericType>
+  class CEACurveFit;
+
+  /*!\class XMLParser
+
+     Nothing is stored, this parser is based on the tinyxml2
+     implementation. Please note that no other file should include
+     the `tinyxml2_imp.h' header.
+
+     The defaults units are based and derived on Cantera:
+       -   pre-exponential parameters in (m3/kmol)^(m-1)/s
+       -   activation energy in cal/mol,
+       -   power parameter without unit
+       -   cross-section typically in cm2/nm, 
+       -   lambda typically in nm, 
+   */
   template <typename NumericType = double>
-  class XMLParser{
+  class XMLParser: public ParserBase<NumericType>
+  {
         public:
           XMLParser(const std::string &filename, bool verbose = true);
           ~XMLParser();
+
+          void change_file(const std::string & filename);
 
 //// first local pointers
          /*! Read header of file, go to interesting part*/
@@ -59,22 +90,31 @@ namespace Antioch{
 
 /// species
         //! reads the species set
-        const std::vector<std::string> species_list() const;
+        const std::vector<std::string> species_list() ;
 
-        //! reads the mandatory data, not valid in xml
-        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the mandatory data, not valid yet in xml
+//        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the vibrational data, not valid in xml
-        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the vibrational data, not valid yet in xml
+//        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the electronic data, not valid in xml
-        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the electronic data, not valid yet in xml
+//        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
 
 ////////////////// thermo
 
-        //! reads the thermo, NASA generalist
-        template <typename CurveType>
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
+//global overload
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  
+                {this->read_thermodynamic_data_root(thermo);}
 
 /// reaction
 
@@ -155,6 +195,10 @@ namespace Antioch{
 
         private:
 
+         //! reads the thermo, NASA generalist
+         template <typename CurveType>
+         void read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo);
+
          /*! return pairs of molecules and stoichiometric coefficients*/
          bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & products_pair) const;
 
@@ -170,8 +214,7 @@ namespace Antioch{
 
           /*! Never use default constructor*/
           XMLParser();
-          tinyxml2::XMLDocument _doc;
-          bool                  _verbose;
+          tinyxml2::XMLDocument * _doc;
 
 //
           tinyxml2::XMLElement * _species_block;
@@ -189,24 +232,25 @@ namespace Antioch{
   template <typename NumericType>
   inline
   XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
-        _verbose(verbose),
+        ParserBase<NumericType>("XML",filename,verbose),
         _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
         _rate_constant(NULL),
         _Troe(NULL)
   {
-    if(_doc.LoadFile(filename.c_str()))
+    _doc = new tinyxml2::XMLDocument;
+    if(_doc->LoadFile(filename.c_str()))
       {
         std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
         std::cerr << "Error of tinyxml2 library:\n"
-                  << "\tID = "            << _doc.ErrorID() << "\n"
-                  << "\tError String1 = " << _doc.GetErrorStr1() << "\n"
-                  << "\tError String2 = " << _doc.GetErrorStr2() << std::endl;
+                  << "\tID = "            << _doc->ErrorID() << "\n"
+                  << "\tError String1 = " << _doc->GetErrorStr1() << "\n"
+                  << "\tError String2 = " << _doc->GetErrorStr2() << std::endl;
         antioch_error();
       }
 
-      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
 
       _map[ParsingKey::PHASE_BLOCK]           = "phase";
@@ -265,10 +309,37 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
+  void XMLParser<NumericType>::change_file(const std::string & filename)
+  {
+     ParserBase<NumericType>::_file = filename;
+     _species_block  = NULL;
+     _reaction_block = NULL;
+     _reaction       = NULL;
+     _rate_constant  = NULL;
+     _Troe           = NULL;
+
+     delete _doc;
+    _doc = new tinyxml2::XMLDocument;
+    if(_doc->LoadFile(filename.c_str()))
+      {
+        std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
+        std::cerr << "Error of tinyxml2 library:\n"
+                  << "\tID = "            << _doc->ErrorID() << "\n"
+                  << "\tError String1 = " << _doc->GetErrorStr1() << "\n"
+                  << "\tError String2 = " << _doc->GetErrorStr2() << std::endl;
+        antioch_error();
+      }
+
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
+      
+  }
+
+  template <typename NumericType>
+  inline
   bool XMLParser<NumericType>::initialize()
   {
         //we start here
-      _reaction_block = _doc.FirstChildElement("ctml");
+      _reaction_block = _doc->FirstChildElement("ctml");
       if (!_reaction_block) 
         {
           std::cerr << "ERROR:  no <ctml> tag found in input file"
@@ -294,12 +365,13 @@ namespace Antioch{
   inline
   XMLParser<NumericType>::~XMLParser()
   {
+     delete _doc;
      return;
   }
 
   template <typename NumericType>
   inline
-  const std::vector<std::string> XMLParser<NumericType>::species_list() const
+  const std::vector<std::string> XMLParser<NumericType>::species_list()
   {
       std::vector<std::string> molecules;
 
@@ -695,40 +767,11 @@ namespace Antioch{
       return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSSS),T3,T3_unit);
   }
 
-  template <typename NumericType>
-  inline
-  void XMLParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a XML parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void XMLParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a XML parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void XMLParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a XML parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
 
   template <typename NumericType>
   template <typename CurveType>
   inline
-  void XMLParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo)
+  void XMLParser<NumericType>::read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo)
   {
      if(!_thermo_block)
      {
@@ -740,9 +783,9 @@ namespace Antioch{
      const NumericType tol = std::numeric_limits<NumericType>::epsilon() * 10.;
 
      const ChemicalMixture<NumericType> & chem_mixture = thermo.chemical_mixture();
-     for(unsigned int s = 0; s < chem_mixture->n_species(); s++)
+     for(unsigned int s = 0; s < chem_mixture.n_species(); s++)
      {
-        std::string name = chem_mixture.species_name_map().at(s);
+        std::string name = chem_mixture.species_inverse_name_map().at(s);
         tinyxml2::XMLElement * spec = _thermo_block->FirstChildElement(name.c_str());
         if(!spec)
         {
@@ -791,7 +834,6 @@ namespace Antioch{
 
 
   }
-
 
 }//end namespace Antioch
 

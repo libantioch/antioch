@@ -75,4 +75,6 @@ namespace Antioch
 
 } // end namespace Antioch
 
+#include "antioch/eucken_thermal_conductivity_utils_decl.h"
+
 #endif // ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H

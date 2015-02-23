@@ -28,8 +28,13 @@
 //Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/string_utils.h"
+#include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/units.h"
+#include "antioch/chemkin_definitions.h"
+#include "antioch/nasa_mixture.h" // because not templated, therefore should be entirely known
+#include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
+#include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
 
 //ChemKin
 
@@ -49,6 +54,16 @@ namespace Antioch{
   template <typename NumericType, typename CurveType>
   class NASAThermoMixture;
 
+  template <typename NumericType>
+  class NASA7CurveFit;
+
+  template <typename NumericType>
+  class NASA9CurveFit;
+
+  // backward compatibility
+  template <typename NumericType>
+  class CEACurveFit;
+
   /*! ChemKin format file reader
    *
    * defaults unit:
@@ -66,31 +81,42 @@ namespace Antioch{
    *  - SRI falloff (not supported)
    */
   template <typename NumericType = double>
-  class ChemKinParser{
+  class ChemKinParser: public ParserBase<NumericType>
+  {
         public:
           ChemKinParser(const std::string &filename, bool verbose = true);
           ~ChemKinParser();
 
+         void change_file(const std::string & filename);
 
 ////////////// species
 
          /*! read SPECIES block*/
          const std::vector<std::string> species_list();
 
-        //! reads the mandatory data, not valid in ChemKin
-        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the mandatory data, not valid yet in ChemKin
+//        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the vibrational data, not valid in ChemKin
-        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the vibrational data, not valid yet in ChemKin
+//        void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);
 
-        //! reads the electronic data, not valid in ChemKin
-        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+        // reads the electronic data, not valid yet in ChemKin
+//        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
 
 ////////////////// thermo
 
-        //! reads the thermo, NASA generalist
-        template <typename CurveType>
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
+//global overload
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  
+                {this->read_thermodynamic_data_root(thermo);}
 
 ///////////////// kinetics
 
@@ -174,6 +200,10 @@ namespace Antioch{
 
         private:
 
+          //! reads the thermo, NASA generalist
+          template <typename CurveType>
+          void read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo);
+
           /*! Convenient method */
           void parse_a_line(const std::string & line);
 
@@ -213,7 +243,6 @@ namespace Antioch{
           /*! Never use default constructor*/
           ChemKinParser();
           std::ifstream                    _doc;
-          bool                             _verbose;
           
 
           bool                             _reversible;
@@ -253,89 +282,7 @@ namespace Antioch{
           bool        _duplicate_process;
           bool        _next_is_reverse;
 
-/*ChemKin spec*/
-
-          class ChemKinSpec
-          {
-            public:
-              ChemKinSpec():_reversible("REV"),_duplicate("DUP"),_end_tag("END"),_comment("!"),_parser("/")
-                           {
-                               _delim[PLUS]           = "+";
-                               _delim[REVERSIBLE]     = "=";
-                               _delim[REVERSIBLE_ALT] = "<=>";
-                               _delim[IRREVERSIBLE]   = "=>";
-
-                               _symbol[TB]      = "M";
-                               _symbol[FAL]     = "(+M)";
-                               _symbol[PHOTO]   = "HV";
-                               _symbol[ELECTRO] = "E";
-                           };
-
-              ~ChemKinSpec(){}
-
-              enum Delim{ ERROR = -1,
-                          PLUS,
-                          IRREVERSIBLE,
-                          REVERSIBLE,
-                          REVERSIBLE_ALT
-                        };
-
-              enum Symbol{
-                          TB = 0,
-                          FAL,
-                          PHOTO,
-                          ELECTRO 
-                         };
-
-              const std::map<Delim,std::string> & delim()   const {return _delim;}
-
-              const std::map<Symbol,std::string> & symbol() const {return _symbol;}
-
-              const std::string & reversible()              const {return _reversible;}
-
-              const std::string & duplicate()               const {return _duplicate;}
-
-              const std::string & end_tag()                 const {return _end_tag;}
-
-              const std::string & comment()                 const {return _comment;}
-
-              const std::string & parser()                  const {return _parser;}
-
-              bool is_comment(const char & c)               const {return (c == _comment[0]);}
-
-              bool is_equation_delimiter(const std::string & test) const {return (test == _delim.at(REVERSIBLE)     || 
-                                                                                  test == _delim.at(REVERSIBLE_ALT) || 
-                                                                                  test == _delim.at(IRREVERSIBLE)
-                                                                                  );}
-
-              Delim equation_delimiter(const std::string & test) const 
-                                                                     {if(test.find(_delim.at(REVERSIBLE_ALT)) != std::string::npos)
-                                                                      {
-                                                                          return REVERSIBLE_ALT;
-                                                                      }else if(test.find(_delim.at(IRREVERSIBLE)) != std::string::npos)
-                                                                      {
-                                                                          return IRREVERSIBLE;
-                                                                      }else if(test.find(_delim.at(REVERSIBLE)) != std::string::npos)
-                                                                      {
-                                                                          return REVERSIBLE;
-                                                                      }else
-                                                                      {
-                                                                          return ERROR;
-                                                                      };
-                                                                     }
-
-            private:
-              const std::string            _reversible;
-              const std::string            _duplicate;
-              const std::string            _end_tag;
-              const std::string            _comment;
-              const std::string            _parser;
-              std::map<Delim,std::string>  _delim;
-              std::map<Symbol,std::string> _symbol;
-
-          };
-
-          const ChemKinSpec _spec;
+          const ChemKinDefinitions _spec;
 
   };
 
@@ -343,8 +290,8 @@ namespace Antioch{
   template <typename NumericType>
   inline
   ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
+        ParserBase<NumericType>("ChemKin",filename,verbose),
         _doc(filename.c_str()),
-        _verbose(verbose),
         _duplicate_process(false),
         _next_is_reverse(false)
   {
@@ -354,7 +301,7 @@ namespace Antioch{
         antioch_error();
       }
 
-      if(_verbose)std::cout << "Having opened file " << filename << std::endl;
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
       _map[ParsingKey::SPECIES_SET]      = "SPECIES";
       _map[ParsingKey::THERMO]           = "THERMO";
@@ -395,6 +342,22 @@ namespace Antioch{
       _unit_custom_A["MOLES"]                          = "cm3/mol";
       _unit_custom_A["MOLECULES"]                      = "cm3/molecule";
 
+  }
+
+  template <typename NumericType>
+  inline
+  void ChemKinParser<NumericType>::change_file(const std::string & filename)
+  {
+    _doc.close();
+    _doc.open(filename.c_str());
+    ParserBase<NumericType>::_file = filename;
+    if(!_doc.good())
+      {
+        std::cerr << "ERROR: unable to load ChemKin file " << filename << std::endl;
+        antioch_error();
+      }
+
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
   }
 
   template <typename NumericType>
@@ -526,7 +489,7 @@ namespace Antioch{
         _products = tmp;
 
         // reverse the reaction
-        typename ChemKinSpec::Delim delim = _spec.equation_delimiter(_equation);
+        typename ChemKinDefinitions::Delim delim = _spec.equation_delimiter(_equation);
         std::string str_delim = _spec.delim().at(delim);
         std::size_t lim = _equation.find(str_delim);
         std::string reac_to_prod = _equation.substr(0,lim);
@@ -908,31 +871,31 @@ namespace Antioch{
      _equation = equation;
 
 // first we need to treat the (+M) case (falloff)
-// as it is not compatible with SplitString using ChemKinSpec::PLUS (+)
+// as it is not compatible with SplitString using ChemKinDefinitions::PLUS (+)
 // as delimiter
-     if(equation.find(_spec.symbol().at(ChemKinSpec::FAL)) != std::string::npos)
+     if(equation.find(_spec.symbol().at(ChemKinDefinitions::FAL)) != std::string::npos)
      {
         // Lindemann by default
         _chemical_process = "LindemannFalloff";
         // supress all occurences
-        while(equation.find(_spec.symbol().at(ChemKinSpec::FAL)) != std::string::npos)
+        while(equation.find(_spec.symbol().at(ChemKinDefinitions::FAL)) != std::string::npos)
         {
-           equation.erase(equation.find(_spec.symbol().at(ChemKinSpec::FAL)),4);
+           equation.erase(equation.find(_spec.symbol().at(ChemKinDefinitions::FAL)),4);
         }
      }
 
      std::vector<std::string> out;
 
 // now we're singling the equation separator (=, =>, <=>)
-     typename ChemKinSpec::Delim delim(_spec.equation_delimiter(equation));
-     if(delim == ChemKinSpec::ERROR)antioch_parsing_error("ChemKin parser: badly written equation:\n" + equation);
+     typename ChemKinDefinitions::Delim delim(_spec.equation_delimiter(equation));
+     if(delim == ChemKinDefinitions::ERROR)antioch_parsing_error("ChemKin parser: badly written equation:\n" + equation);
 
-//between ChemKinSpec::PLUS
-     equation.insert(equation.find(_spec.delim().at(delim)),_spec.delim().at(ChemKinSpec::PLUS));
-     equation.insert(equation.find(_spec.delim().at(delim)) + _spec.delim().at(delim).size(),_spec.delim().at(ChemKinSpec::PLUS));
+//between ChemKinDefinitions::PLUS
+     equation.insert(equation.find(_spec.delim().at(delim)),_spec.delim().at(ChemKinDefinitions::PLUS));
+     equation.insert(equation.find(_spec.delim().at(delim)) + _spec.delim().at(delim).size(),_spec.delim().at(ChemKinDefinitions::PLUS));
 
 
-     SplitString(equation,_spec.delim().at(ChemKinSpec::PLUS),out,true); //empties are cations charge, formatted as reac_i equation_separator prod_i
+     SplitString(equation,_spec.delim().at(ChemKinDefinitions::PLUS),out,true); //empties are cations charge, formatted as reac_i equation_separator prod_i
      if(out.size() < 3)antioch_parsing_error("ChemKin parser: unrecognized reaction equation:\n" + equation);
 /* cases are:
     - equation_separator => switch between reac and prod 
@@ -945,10 +908,10 @@ namespace Antioch{
      {
         if(out[i] == _spec.delim().at(delim))
         {
-           _reversible = !(delim == ChemKinSpec::IRREVERSIBLE);
+           _reversible = !(delim == ChemKinDefinitions::IRREVERSIBLE);
            prod = true;
          // is it a third-body reaction?
-        }else if(out[i] == _spec.symbol().at(ChemKinSpec::TB))
+        }else if(out[i] == _spec.symbol().at(ChemKinDefinitions::TB))
         {
            if(_chemical_process.find("Falloff") != std::string::npos)
                       antioch_parsing_error("ChemKin parser: it seems you want both a falloff and a three-body reaction:\n" + equation);
@@ -1186,14 +1149,14 @@ namespace Antioch{
   bool ChemKinParser<NumericType>::next_reaction(const std::string & input_line)
   {
      bool out(false);
-     if(input_line.find(_spec.delim().at(ChemKinSpec::REVERSIBLE)) != std::string::npos || 
+     if(input_line.find(_spec.delim().at(ChemKinDefinitions::REVERSIBLE)) != std::string::npos || 
         input_line.find(_spec.end_tag()) != std::string::npos) out = true;
 
      if(_next_is_reverse) out = true; // reversible given, get out
 
      if(input_line == _cached_line || _cached_line.empty()) out = false; // current reaction
 
-     if(_duplicate_process && input_line.find(_spec.delim().at(ChemKinSpec::REVERSIBLE)) != std::string::npos)// if we find a reaction and it is the same than the cached one
+     if(_duplicate_process && input_line.find(_spec.delim().at(ChemKinDefinitions::REVERSIBLE)) != std::string::npos)// if we find a reaction and it is the same than the cached one
      {
         out = false; // we suppose in duplicate reaction
         std::vector<std::string> inputs;
@@ -1273,39 +1236,9 @@ namespace Antioch{
   }
 
   template <typename NumericType>
-  inline
-  void ChemKinParser<NumericType>::read_chemical_species(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a ChemKin parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void ChemKinParser<NumericType>::read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a ChemKin parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void ChemKinParser<NumericType>::read_electronic_data(ChemicalMixture<NumericType> & chem_mixture)
-  {
-      std::cerr << "This method is not available with a ChemKin parser.\n"
-                << "No format has been defined yet.  Maybe contribute?\n"
-                << "https://github.com/libantioch/antioch" << std::endl;
-      return;
-  }
-
-  template <typename NumericType>
   template <typename CurveType>
   inline
-  void ChemKinParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo)
+  void ChemKinParser<NumericType>::read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo)
   {
 
 // finding thermo

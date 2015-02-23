@@ -28,6 +28,7 @@
 
 // Antioch
 #include "antioch/reaction.h"
+#include "antioch/kinetics_conditions.h"
 
 //C++
 #include <string>
@@ -74,12 +75,12 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                const StateType& T ) const; 
+                                                const KineticsConditions<StateType,VectorStateType>& conditions ) const; 
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const StateType& T, 
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions, 
                                                            StateType& kfwd,  
                                                            StateType& dkfwd_dT, 
                                                            VectorStateType& dkfwd_dX) const;
@@ -115,12 +116,12 @@ namespace Antioch
   inline
   StateType ElementaryReaction<CoeffType>::compute_forward_rate_coefficient
     ( const VectorStateType& /* molar_densities */,
-      const StateType& T) const
+      const KineticsConditions<StateType,VectorStateType>& conditions) const
   {
     antioch_assert_equal_to(1, Reaction<CoeffType>::_forward_rate.size());
 
     //k(T,[M]) = alpha(T)
-    return (*this->_forward_rate[0])(T);
+    return (*this->_forward_rate[0])(conditions);
   }
 
   template<typename CoeffType>
@@ -128,13 +129,13 @@ namespace Antioch
   inline
   void ElementaryReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives
     ( const VectorStateType& /* molar_densities */,
-      const StateType& T,
+      const KineticsConditions<StateType,VectorStateType>& conditions,
       StateType& kfwd,
       StateType& dkfwd_dT,
       VectorStateType& dkfwd_dX) const
   {
     //dk_dT = dalpha_dT(T)
-    this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+    this->_forward_rate[0]->compute_rate_and_derivative(conditions,kfwd,dkfwd_dT);
 
     //dk_dCi = 0.
     antioch_assert_equal_to(dkfwd_dX.size(),this->n_species());

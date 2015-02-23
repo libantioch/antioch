@@ -66,6 +66,16 @@ namespace Antioch
      * \f]
      */
     CoeffType cv_trans( const unsigned int species ) const;
+ 
+     /**
+     * @returns species translational specific over R heat at constant volume.
+     * Since the translational modes are assumed to be fully polulated
+     * this is simply 
+     * \f[
+     *   \frac{C^{trans}_{v,s}}{\mathrm{R}} = \frac{3}{2}
+     * \f]
+     */
+    CoeffType cv_trans_over_R( const unsigned int species ) const;
 
     /**
      * @returns species rotational specific heat at constant volume.
@@ -80,30 +90,24 @@ namespace Antioch
      */
     CoeffType cv_rot( const unsigned int species ) const;
 
-    /**
-     * @returns species translational/rotational specific heat at
-     * constant volume.
-     */
-    CoeffType cv_tr (const unsigned int species) const;
-
-    /**
-     * @returns species translational specific heat over R at constant volume.
-     * Since the translational modes are assumed to be fully polulated
-     * this is simply 
-     * \f[
-     *   \frac{C^{trans}_{v,s}}{\mathrm{R}}  = \frac{3}{2}
-     * \f]
-     */
-    CoeffType cv_trans_over_R( const unsigned int species ) const;
-
-    /**
-     * @returns species rotational specific heat over R at constant volume.
+     /**
+     * @returns species rotational specific heat at constant volume.
      * By convention, we lump the translational/rotational components
+     * \f[
+     *   C^{tr}_{v,s} \equiv C^{trans}_{v,s} + C^{rot}_{v,s}
+     * \f]
+     * so then
      * \f[
      *   \frac{C^{rot}_{v,s}}{\mathrm{R}} \equiv \frac{C^{tr}_{v,s}}{\mathrm{R}} - \frac{C^{trans}_{v,s}}{\mathrm{R}}
      * \f]
      */
     CoeffType cv_rot_over_R( const unsigned int species ) const;
+
+    /**
+     * @returns species translational/rotational specific heat at
+     * constant volume.
+     */
+    CoeffType cv_tr (const unsigned int species) const;
 
     /**
      * @returns species translational/rotational specific heat over R at
@@ -515,8 +519,8 @@ namespace Antioch
     return CoeffType(1.5)*_chem_mixture.R(species);
   }
 
-  template<typename CoeffType>
-  inline
+   template<typename CoeffType>
+   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_trans_over_R( const unsigned int species ) const
   {
     return CoeffType(1.5);
@@ -531,8 +535,8 @@ namespace Antioch
     return max(this->cv_tr(species) - this->cv_trans(species), CoeffType(0) ); 
   }
 
-  template<typename CoeffType>
-  inline
+   template<typename CoeffType>
+   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_rot_over_R( const unsigned int species ) const
   {
     using std::max;
@@ -580,10 +584,9 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_vib (const unsigned int species, 
                                                        const StateType& Tv) const
   {
-      return (this->cv_vib_over_R(species,Tv) * _chem_mixture.chemical_species()[species]->gas_constant());
+      return this->cv_vib_over_R(species,Tv) * (_chem_mixture.chemical_species()[species])->gas_constant();
   }
-
-
+       
   template<typename CoeffType>
   template<typename StateType>
   inline
@@ -600,10 +603,10 @@ namespace Antioch
     antioch_assert_equal_to(ndg_v.size(), theta_v.size());
     
     // Use an input datum to make sure we get the size right
-    StateType cv_vib = Antioch::zero_clone(Tv);
+    StateType cv_vib_over_R = Antioch::zero_clone(Tv);
 	
     if (theta_v.empty())
-      return cv_vib;
+      return cv_vib_over_R;
 
     for (unsigned int level=0; level<ndg_v.size(); level++)
       {
@@ -611,11 +614,11 @@ namespace Antioch
         const StateType expval = exp(theta_v[level]/Tv);
         const StateType expvalminusone = expval - raw_type(1);
       
-        cv_vib += (static_cast<CoeffType>(ndg_v[level])*
-                        theta_v[level]*theta_v[level]*expval/(expvalminusone*expvalminusone)/(Tv*Tv));
+        cv_vib_over_R += (static_cast<CoeffType>(ndg_v[level])*
+                          theta_v[level]*theta_v[level]*expval/(expvalminusone*expvalminusone)/(Tv*Tv));
       }
     
-    return cv_vib;
+    return cv_vib_over_R;
   }
       
   template<typename CoeffType>

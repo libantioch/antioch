@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_CURVE_FIT_H
-#define ANTIOCH_CEA_CURVE_FIT_H
+#ifndef ANTIOCH_NASA9_CURVE_FIT_H
+#define ANTIOCH_NASA9_CURVE_FIT_H
 
 // Antioch
 #include "antioch/antioch_asserts.h"
@@ -41,21 +41,57 @@
 
 namespace Antioch
 {
+  /*! \class NASA9CurveFit
+   *
+   *  This class stores the CEA polynomial fit to
+   *  the thermodynamics quantities \f$\frac{C_p}{\mathrm{R}}\f$
+   *  \f$\frac{h}{\mathrm{R}T}\f$ and \f$\frac{s}{\mathrm{R}T}\f$.
+   *  This formulation requires nine coefficients, from \f$a_0\f$
+   *  to \f$a_9\f$, \f$a_7\f$ is always equals to zero.
+   *
+   *  The temperature intervals are imposed as: 
+   *   [200--1,000], [1,000--6,000], [6,000--20,000] K.
+   *
+   *  The equations are:
+   *    \f[
+   *       \frac{Cp}{\mathrm{R}} = \frac{a_0}{T^2} + \frac{a_1}{T} + a_2 + a_3 T +
+   *                                a_4  T^2 + a_5 T^3 + a_6 T^4
+   *    \f]
+   *
+   *    \f[
+   *        \frac{h}{\mathrm{R}T} = -\frac{a_0}{T^2} + \frac{a_1}{T} \ln(T) 
+   *                                + a2  + \frac{a_3}{2} T + \frac{a_4}{3} T^2 
+   *                                + \frac{a_5}{4} T^3 + \frac{a_6}{5} T^4 
+   *                                + \frac{a_8}{T}
+   *    \f]
+   *
+   *    \f[
+   *        \frac{s}{\mathrm{R}} = -\frac{a_0}{2T^2} - \frac{a_1}{T}
+   *                                + a_2 \ln(T) + a_3 T + \frac{a_4}{2} T^2 
+   *                                + \frac{a_5}{3} T^3 + \frac{a_6}{4} T^4 
+   *                                + a_9
+   *    \f]
+   *
+   */
+
   template<typename CoeffType=double>
-  class CEACurveFit
+  class NASA9CurveFit
   {
   public:
     
-    CEACurveFit( const std::vector<CoeffType>& coeffs );
-    ~CEACurveFit();
+    // for compatibility with NASA, not used
+    NASA9CurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> &temps ):_n_coeffs(0) {antioch_error();}
 
-    //! The number of intervals for this CEA curve fit
+    NASA9CurveFit( const std::vector<CoeffType>& coeffs );
+    ~NASA9CurveFit();
+
+    //! The number of intervals for this NASA9 curve fit
     unsigned int n_intervals() const;
 
     //! The interval the input temperature lies in
     /*!
       @returns which curve fit interval the input temperature 
-      lies in.  The CEA thermodynamic intervals are 
+      lies in.  The NASA9 thermodynamic intervals are 
       [200-1,000], [1,000-6,000], [6,000-20,000] K
      */
     template <typename StateType>
@@ -65,8 +101,8 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{Cp}{\mathrm{R}}\f$
         \f[
-	   \frac{Cp}{\mathrm{R}} = \frac{a_0}{T^2} + \frac{a_1}{T} + a_2 + a_3 T +
-	                            a_4  T^2 + a_5 T^3 + a_6 T^4
+           \frac{Cp}{\mathrm{R}} = \frac{a_0}{T^2} + \frac{a_1}{T} + a_2 + a_3 T +
+                                    a_4  T^2 + a_5 T^3 + a_6 T^4
         \f]
      */
     template <typename StateType>
@@ -125,7 +161,7 @@ namespace Antioch
 
     //! @returns a pointer to the coefficients in the interval specified.
     /*!   
-      The CEA-style equilibrium curve fits are defined in terms of
+      The NASA9-style equilibrium curve fits are defined in terms of
       _n_coeffs coefficients for each range fit.
     */
     const CoeffType* coefficients(const unsigned int interval) const;
@@ -143,9 +179,6 @@ namespace Antioch
      */
     const std::vector<CoeffType> _coefficients;
 
-   private:
-    // for compatibility with NASA, not used
-    CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> &temps );
   };
 
 
@@ -153,7 +186,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs )
+  NASA9CurveFit<CoeffType>::NASA9CurveFit( const std::vector<CoeffType>& coeffs )
     : _n_coeffs(10),
       _coefficients(coeffs)
   {
@@ -163,7 +196,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  CEACurveFit<CoeffType>::~CEACurveFit()
+  NASA9CurveFit<CoeffType>::~NASA9CurveFit()
   {
     return;
   }
@@ -173,7 +206,7 @@ namespace Antioch
   template<typename StateType>
   inline
   typename Antioch::rebind<StateType, unsigned int>::type
-  CEACurveFit<CoeffType>::interval(const StateType& T) const
+  NASA9CurveFit<CoeffType>::interval(const StateType& T) const
   {
     typedef typename 
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -182,7 +215,7 @@ namespace Antioch
 
     typedef typename Antioch::value_type<StateType>::type ScalarType;
 
-    /* CEA thermodynamic intervals are:
+    /* NASA9 thermodynamic intervals are:
        [200-1,000], [1,000-6,000], [6,000-20,000] K */
     interval = Antioch::if_else
       (T > ScalarType(6000.),
@@ -190,8 +223,8 @@ namespace Antioch
        UIntType
          (Antioch::if_else
             (T > ScalarType(1000.),
-	     Antioch::constant_clone(interval,1),
-	     Antioch::constant_clone(interval,0))));
+             Antioch::constant_clone(interval,1),
+             Antioch::constant_clone(interval,0))));
 
     return interval;
   }
@@ -199,13 +232,13 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  unsigned int CEACurveFit<CoeffType>::n_intervals() const 
+  unsigned int NASA9CurveFit<CoeffType>::n_intervals() const 
   { return _coefficients.size() / _n_coeffs; }
 
 
   template<typename CoeffType>
   inline
-  const CoeffType* CEACurveFit<CoeffType>::coefficients(const unsigned int interval) const
+  const CoeffType* NASA9CurveFit<CoeffType>::coefficients(const unsigned int interval) const
   {
     antioch_assert_less( interval, this->n_intervals() );
     antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
@@ -216,7 +249,7 @@ namespace Antioch
   template<typename CoeffType>
   template <typename StateType>
   inline
-  const StateType CEACurveFit<CoeffType>::cp_over_R(const TempCache<StateType>& cache) const
+  const StateType NASA9CurveFit<CoeffType>::cp_over_R(const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -232,11 +265,11 @@ namespace Antioch
       {
         const CoeffType * const a =
           this->coefficients(i);
-	returnval = Antioch::if_else
-	  (interval == i,
-	   StateType(a[0]/cache.T2 + a[1]/cache.T + a[2] + a[3]*cache.T +
-	             a[4]*cache.T2 + a[5]*cache.T3 + a[6]*cache.T4),
-	   returnval);
+        returnval = Antioch::if_else
+          (interval == i,
+           StateType(a[0]/cache.T2 + a[1]/cache.T + a[2] + a[3]*cache.T +
+                     a[4]*cache.T2 + a[5]*cache.T3 + a[6]*cache.T4),
+           returnval);
       }
 
     return returnval;
@@ -246,7 +279,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEACurveFit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
+  StateType NASA9CurveFit<CoeffType>::h_over_RT( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -274,7 +307,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType CEACurveFit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
+  StateType NASA9CurveFit<CoeffType>::s_over_R( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -303,7 +336,7 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType
-  CEACurveFit<CoeffType>::h_RT_minus_s_R( const TempCache<StateType>& cache) const
+  NASA9CurveFit<CoeffType>::h_RT_minus_s_R( const TempCache<StateType>& cache) const
   {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -321,11 +354,11 @@ namespace Antioch
        s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
         returnval = Antioch::if_else
         ( interval == i,
-	   StateType(-a[0]/cache.T2/2.0 + (a[1] + a[8])/cache.T +
-		     a[1]*cache.lnT/cache.T - a[2]*cache.lnT + 
-		     (a[2] - a[9]) - a[3]*cache.T/2.0 -
-		     a[4]*cache.T2/6.0 - a[5]*cache.T3/12.0 -
-		     a[6]*cache.T4/20.0),
+           StateType(-a[0]/cache.T2/2.0 + (a[1] + a[8])/cache.T +
+                     a[1]*cache.lnT/cache.T - a[2]*cache.lnT + 
+                     (a[2] - a[9]) - a[3]*cache.T/2.0 -
+                     a[4]*cache.T2/6.0 - a[5]*cache.T3/12.0 -
+                     a[6]*cache.T4/20.0),
            returnval);
        }
        return returnval;
@@ -334,7 +367,7 @@ namespace Antioch
    template <typename CoeffType>
    template <typename StateType>
    inline
-   StateType CEACurveFit<CoeffType>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache) const
+   StateType NASA9CurveFit<CoeffType>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache) const
    {
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
@@ -352,19 +385,71 @@ namespace Antioch
       {
         const CoeffType * const a =
           this->coefficients(i);
-	returnval = Antioch::if_else
-	  (interval == i,
-	   StateType(a[0]/cache.T3 - a[8]/cache.T2 -
-		     a[1]*cache.lnT/cache.T2 - a[2]/cache.T -
-		     a[3]/2.  - a[4]*cache.T/3. - a[5]*cache.T2/4. -
-		     a[6]*cache.T3/5.),
-	   returnval);
+        returnval = Antioch::if_else
+          (interval == i,
+           StateType(a[0]/cache.T3 - a[8]/cache.T2 -
+                     a[1]*cache.lnT/cache.T2 - a[2]/cache.T -
+                     a[3]/2.  - a[4]*cache.T/3. - a[5]*cache.T2/4. -
+                     a[6]*cache.T3/5.),
+           returnval);
       }
 
     return returnval;
         
    }
 
+
+/*
+    CEACurveFit is a synomym of NASA9CurveFit.
+
+    Sylvain (06/02/2015 - european date format - dd/mm/yyyy):
+    Food for the mind:
+        the NASA7CurveFit has custom temperature
+        ranges, while, as far as I know, the 
+        9 coefficients form is solely encountered
+        in the CEA program. This implementation
+        acknowledge this and NASA9 and CEA are
+        complete synomyms, there is no custom
+        temperature ranges possible for them.
+
+        As far as future developement goes, the
+        question is ``will be want someday to
+        pick that lock?''. The thing at stake here is
+        the possible antioch_deprecated() in the
+        CEA constructor. As of now, they're full
+        synomyms, so an antioch_deprecated() should
+        be in order, but I personnaly prefers more
+        general things, specially if we can sort
+        them out at compile time by template and
+        metaprogramming shims. I'm all for it Paul
+        is not, history shows I win if I find a
+        real case where it's needed...
+
+        So I'm choosing the middle ground: no
+        antioch_deprecated() when they are
+        full synomyms.
+*/
+
+
+  /*!\class CEACurveFit
+
+     This is a synomym for NASA9CurveFit, the NASA9
+     name ensures consistency with the NASA7 objects
+     while the CEA name provides backward compatiblity
+     and a more `physics-based' name.
+
+     Note that as nothing happens in the destructor (and
+     nothing should ever), no need to get virtual in NASA9.
+  */
+  template<typename CoeffType=double>
+  class CEACurveFit:public NASA9CurveFit<CoeffType>
+  {
+      public:
+      CEACurveFit( const std::vector<CoeffType>& coeffs ):NASA9CurveFit<CoeffType>(coeffs){}
+      CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temps ):NASA9CurveFit<CoeffType>(coeffs,temps){}
+      ~CEACurveFit(){}
+  };
+
 } // end namespace Antioch
 
-#endif //ANTIOCH_CEA_CURVE_FIT_H
+#endif //ANTIOCH_NASA9_CURVE_FIT_H

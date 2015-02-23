@@ -57,6 +57,9 @@ int tester()
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -119,12 +122,12 @@ int tester()
 
     Antioch::ElementaryReaction<Scalar> * elem_reaction = new Antioch::ElementaryReaction<Scalar>(n_species,equation,true,kin_mod);
     elem_reaction->add_forward_rate(rate_kinetics);
-    Scalar rate1 = elem_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = elem_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    elem_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    elem_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
     if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
       {

@@ -27,6 +27,7 @@
 #define ANTIOCH_KOOIJ_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/physical_constants.h"
@@ -78,6 +79,19 @@ namespace Antioch
     void set_Ea(    const CoeffType Ea );
     void set_Tref(  const CoeffType Tref );
     void set_rscale(const CoeffType scale );
+
+    /*! reset the coeffs
+     *
+     * Two ways of modifying your rate:
+     *   - you change totally the rate, thus you 
+     *        require exactly five parameters, the order
+     *        assumed is Cf, eta, Ea, Tref, rscale 
+     *   - you just change the value, thus Tref and rscale are not
+     *        modified. You require exactly three parameters,
+     *        the order assumed is Cf, eta, Ea
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
 
     CoeffType Cf()     const;
     CoeffType eta()    const;
@@ -155,8 +169,6 @@ namespace Antioch
   inline
   void KooijRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    using std::pow;
-
     _raw_Cf = Cf;
     this->compute_cf();
 
@@ -167,8 +179,6 @@ namespace Antioch
   inline
   void KooijRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
-    using std::pow;
-
     _Tref = Tref;
     this->compute_cf();
 
@@ -180,6 +190,7 @@ namespace Antioch
   void KooijRate<CoeffType>::set_eta( const CoeffType eta )
   {
     _eta = eta;
+    this->compute_cf();
     return;
   }
 
@@ -199,6 +210,26 @@ namespace Antioch
     _rscale = rscale;
     _Ea = _raw_Ea / _rscale;
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void KooijRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+       // 3 or 5
+     antioch_assert_greater(coefficients.size(),2);
+     antioch_assert_less(coefficients.size(),6);
+     antioch_assert_not_equal_to(coefficients.size(),4);
+
+     if(coefficients.size() == 5)
+     {
+        this->set_rscale(coefficients[4]);
+        this->set_Tref(coefficients[3]);
+     }
+     this->set_Cf(coefficients[0]);
+     this->set_eta(coefficients[1]);
+     this->set_Ea(coefficients[2]);
   }
 
   template<typename CoeffType>
@@ -243,7 +274,7 @@ namespace Antioch
   inline
   void KooijRate<CoeffType>::compute_cf()
   {
-    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+    _Cf = _raw_Cf * ant_pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 

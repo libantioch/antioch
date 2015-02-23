@@ -28,10 +28,14 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/input_utils.h"
 #include "antioch/string_utils.h"
 #include "antioch/units.h"
+#include "antioch/cea_thermo.h" // because not templated, therefore should be entirely known
+#include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
+#include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
 
 // C++
 #include <iostream>
@@ -52,22 +56,30 @@ namespace Antioch
   template <class NumericType>
   class ChemicalMixture;
 
-  template <typename NumericType, typename CurveType>
-  class NASAThermoMixture;
+  // backward compatibility
+  template <typename NumericType>
+  class CEACurveFit;
 
   // deprecated
   template <typename NumericType>
   class CEAThermodynamics;
 
   template <typename NumericType>
-  class ASCIIParser
+  class ASCIIParser: public ParserBase<NumericType>
   {
       public:
         ASCIIParser(const std::string& file, bool verbose = true);
         ~ASCIIParser();
 
+        void change_file(const std::string & filename);
+
+        bool initialize() {return false;}
+
+/////////////////
+// species
+////////////////
         //! read species list
-        const std::vector<std::string>  species_list();
+        const std::vector<std::string>  species_list() ;
 
         //! read the mandatory data
         void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
@@ -78,21 +90,44 @@ namespace Antioch
         //! read the electronic data
         void read_electronic_data(ChemicalMixture<NumericType>& chem_mixture);
 
-        //! read the thermodynamic data
-        template <typename CurveType>
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo);
+///////////////
+// thermo
+///////////////
+
+//global overload
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  
+                {this->read_thermodynamic_data_root(thermo);}
 
         //! read the thermodynamic data, deprecated object
         void read_thermodynamic_data(CEAThermodynamics<NumericType>& thermo);
 
 
+
+//////////////
+//kinetics
+//////////////
+
+
      private:
+
+// templated thermo version
+        //! read the thermodynamic data
+        template <typename CurveType>
+        void read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo);
+
         //! not allowed
         ASCIIParser();
 
-        std::string   _file;
         std::ifstream _doc;
-        bool          _verbose;
         std::map<ParsingUnit,std::string> _unit_map;
 
   };
@@ -101,9 +136,8 @@ namespace Antioch
   template <typename NumericType>
   inline
   ASCIIParser<NumericType>::ASCIIParser(const std::string & file, bool verbose):
-        _file(file),
-        _doc(file.c_str()),
-        _verbose(verbose)
+        ParserBase<NumericType>("ascii",file,verbose),
+        _doc(file.c_str())
   {
       if(!_doc.is_open())
       {
@@ -111,7 +145,7 @@ namespace Antioch
         antioch_error();
       }
 
-      if(_verbose)std::cout << "Having opened file " << file << std::endl;
+      if(this->verbose())std::cout << "Having opened file " << file << std::endl;
 
       skip_comment_lines(_doc, '#');
 
@@ -124,6 +158,24 @@ namespace Antioch
   ASCIIParser<NumericType>::~ASCIIParser()
   {
      _doc.close();
+  }
+
+  template <typename NumericType>
+  inline
+  void ASCIIParser<NumericType>::change_file(const std::string & filename)
+  {
+    _doc.close();
+    _doc.open(filename.c_str());
+    ParserBase<NumericType>::_file = filename;
+    if(!_doc.is_open())
+      {
+        std::cerr << "ERROR: unable to load file " << filename << std::endl;
+        antioch_error();
+      }
+
+      if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
+
+      skip_comment_lines(_doc, '#');
   }
 
 
@@ -159,11 +211,11 @@ namespace Antioch
               }
               // adding
           }
-          if(_verbose)std::cout << spec << std::endl;
+          if(this->verbose())std::cout << spec << std::endl;
           species_list.push_back(spec);
       }
 
-      if(_verbose)std::cout << "Found " << species_list.size() << " species\n\n" << std::endl;
+      if(this->verbose())std::cout << "Found " << species_list.size() << " species\n\n" << std::endl;
       return species_list;
   }
 
@@ -176,9 +228,9 @@ namespace Antioch
     NumericType mol_wght, h_form, n_tr_dofs;
     int charge;
     NumericType mw_unit = Units<NumericType>(_unit_map.at(MOL_WEIGHT)).get_SI_factor();
-    NumericType ef_unit = 1.L;// Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor(); // not integrated yet the kg bugfix
+    NumericType ef_unit = Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor(); // not integrated yet the kg bugfix
 
-    if(_verbose)std::cout << "Reading species characteristics in file " << _file << std::endl;
+    if(this->verbose())std::cout << "Reading species characteristics in file " << this->file() << std::endl;
     while (_doc.good())
       {
 
@@ -192,26 +244,26 @@ namespace Antioch
 
         mol_wght *= mw_unit; // to SI (kg/mol)
         h_form *= ef_unit; // to SI (J/kg)
-	
-	// If we are still good, we have a valid set of thermodynamic
-	// data for this species. Otherwise, we read past end-of-file 
-	// in the section above
-	if (_doc.good())
-	  {
-	    // If we do not have this species, just go on
-	    if (!chem_mixture.species_name_map().count(name))continue;
+        
+        // If we are still good, we have a valid set of thermodynamic
+        // data for this species. Otherwise, we read past end-of-file 
+        // in the section above
+        if (_doc.good())
+          {
+            // If we do not have this species, just go on
+            if (!chem_mixture.species_name_map().count(name))continue;
 
             Species species = chem_mixture.species_name_map().at(name);
 
-	    // using default comparison:
-	    std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 
-								     chem_mixture.species_list().end(),
-								     1, species);
-	    if( it != chem_mixture.species_list().end() )
-	      {
-		unsigned int index = static_cast<unsigned int>(it - chem_mixture.species_list().begin());
-		chem_mixture.add_species( index, name, mol_wght, h_form, n_tr_dofs, charge );
-                if(_verbose)
+            // using default comparison:
+            std::vector<Species>::const_iterator it = std::search_n( chem_mixture.species_list().begin(), 
+                                                                     chem_mixture.species_list().end(),
+                                                                     1, species);
+            if( it != chem_mixture.species_list().end() )
+              {
+                unsigned int index = static_cast<unsigned int>(it - chem_mixture.species_list().begin());
+                chem_mixture.add_species( index, name, mol_wght, h_form, n_tr_dofs, charge );
+                if(this->verbose())
                 {
                     std::cout << "Adding " << name << " informations:\n\t"
                               << "molecular weight: "             << mol_wght << " kg/mol\n\t"
@@ -235,7 +287,7 @@ namespace Antioch
     NumericType theta_v;
     unsigned int n_degeneracies;
 
-    if(_verbose)std::cout << "Reading vibrational data in file " << _file << std::endl;
+    if(this->verbose())std::cout << "Reading vibrational data in file " << this->file() << std::endl;
     while (_doc.good())
       {
 
@@ -260,7 +312,7 @@ namespace Antioch
             antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
         
             chem_mixture.add_species_vibrational_data(s, theta_v, n_degeneracies);
-            if(_verbose)
+            if(this->verbose())
             {
                 std::cout << "Adding vibrational data of species " << name << "\n\t"
                           << "vibrational temperature: " << theta_v << " K\n\t"
@@ -280,7 +332,7 @@ namespace Antioch
     NumericType theta_e;
     unsigned int n_degeneracies;
     
-    if(_verbose)std::cout << "Reading electronic data in file " << _file << std::endl;
+    if(this->verbose())std::cout << "Reading electronic data in file " << this->file() << std::endl;
     while (_doc.good())
       {
         _doc >> name;           // Species Name
@@ -302,7 +354,7 @@ namespace Antioch
             antioch_assert_equal_to((chem_mixture.chemical_species()[s])->species(), name);
             
             chem_mixture.add_species_electronic_data(s, theta_e, n_degeneracies);
-            if(_verbose)
+            if(this->verbose())
             {
                 std::cout << "Adding electronic data of species " << name << "\n\t"
                           << "electronic temperature: " << theta_e << " K\n\t"
@@ -316,7 +368,7 @@ namespace Antioch
   template <typename NumericType>
   template <typename CurveType>
   inline
-  void ASCIIParser<NumericType>::read_thermodynamic_data(NASAThermoMixture<NumericType, CurveType >& thermo)
+  void ASCIIParser<NumericType>::read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo)
   {
     std::string name;
     unsigned int n_int;
@@ -352,7 +404,7 @@ namespace Antioch
             if( chem_mixture.species_name_map().find(name) !=
                 chem_mixture.species_name_map().end() )
               {
-                if(_verbose)std::cout << "Adding curve fit " << name << std::endl;
+                if(this->verbose())std::cout << "Adding curve fit " << name << std::endl;
                 thermo.add_curve_fit(name, coeffs);
               }
           }
@@ -364,7 +416,6 @@ namespace Antioch
   inline
   void ASCIIParser<NumericType>::read_thermodynamic_data(CEAThermodynamics<NumericType>& thermo)
   {
-    
     std::string name;
     unsigned int n_int;
     std::vector<NumericType> coeffs;

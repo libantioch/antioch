@@ -682,6 +682,7 @@ int main()
 #else // don't have eigen
 int main()
 {
-  return 0; // NOP
+  // 77 return code tells Automake we skipped this.
+  return 77;
 }
 #endif // ANTIOCH_HAVE_EIGEN

@@ -32,6 +32,7 @@
 #define ANTIOCH_ARRHENIUS_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/physical_constants.h"
@@ -77,6 +78,19 @@ namespace Antioch
     void set_Cf(     const CoeffType Cf );
     void set_Ea(     const CoeffType Ea );
     void set_rscale( const CoeffType rscale );
+
+    /*! reset the coeffs
+     *
+     * Two ways of modifying your rate:
+     *   - you change totally the rate, thus you 
+     *        require exactly three parameters, the order
+     *        assumed is Cf, Ea, rscale 
+     *   - you just change the value, thus rscale is not
+     *        modified. You require exactly two parameters,
+     *        the order assumed is Cf, Ea
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
 
     CoeffType Cf()     const;
     CoeffType Ea()     const;
@@ -161,6 +175,18 @@ namespace Antioch
     _rscale = rscale;
     _Ea = _raw_Ea / _rscale;
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void ArrheniusRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+     antioch_assert_greater(coefficients.size(),1);
+     antioch_assert_less(coefficients.size(),4);
+     if(coefficients.size() == 3)this->set_rscale(coefficients[2]);
+     this->set_Cf(coefficients[0]);
+     this->set_Ea(coefficients[1]);
   }
 
   template<typename CoeffType>

@@ -37,6 +37,10 @@
 // Antioch
 #include "antioch/input_utils.h"
 #include "antioch/chemical_mixture.h"
+#include "antioch/parsing_enum.h"
+#include "antioch/ascii_parser.h"
+#include "antioch/xml_parser.h"
+#include "antioch/chemkin_parser.h"
 
 namespace Antioch
 {
@@ -44,22 +48,44 @@ namespace Antioch
   template <class NumericType, class NASAFit>
   class NASAThermoMixture;
 
+  // definition problems du to backward compatibilities...
+  /*
+     ASCIIParser -> CEAThermodynamics 
+                 ->  "antioch/cea_mixture_ascii_parsing.h" 
+                 ->  "antioch/cea_mixture_parsing.h" 
+                 ->  "antioch/nasa_mixture_parsing.h" 
+                 -> ASCIIParser
+   */
   template <class NumericType>
-  class NASACurveFit;
+  class ASCIIParser;
 
-  template<class NumericType, typename CurveType = NASACurveFit<NumericType>, typename Parser = ASCIIParser<NumericType> >
-  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType > & thermo, const std::string &filename );
+  template<class NumericType, typename CurveType >
+  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType > & thermo, const std::string &filename, ParsingType = ASCII, bool verbose = true );
 
  
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType, typename CurveType, typename Parser>
+  template<class NumericType, typename CurveType>
   inline
-  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType >& thermo, const std::string &filename )
+  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType >& thermo, const std::string &filename, ParsingType type, bool verbose )
   {
     
-   Parser parser(filename);
+    ParserBase<NumericType> * parser(NULL);
+    switch(type)
+    {
+      case ASCII:
+         parser = new ASCIIParser<NumericType>(filename,verbose);
+         break;
+      case CHEMKIN:
+         parser = new ChemKinParser<NumericType>(filename,verbose);
+         break;
+      case XML:
+         parser = new XMLParser<NumericType>(filename,verbose);
+         break;
+      default:
+         antioch_parsing_error("unknown type");
+    }
 
-   parser.read_thermodynamic_data(thermo);
+   parser->read_thermodynamic_data(thermo);
 
    // Make sure we actually populated everything
    if( !thermo.check() )
