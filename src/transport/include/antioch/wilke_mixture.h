@@ -34,6 +34,7 @@
 // Antioch
 #include "antioch/wilke_transport_mixture.h"
 #include "antioch/physics_placeholder.h"
+#include "antioch/antioch_asserts.h"
 
 // C++
 #include <vector>
@@ -54,36 +55,18 @@ namespace Antioch
     WilkeMixture( const ChemicalMixture<CoeffType> & mixture);
     ~WilkeMixture();
 
-    //! chemical mixture, mostly for backward compatibility
-    const ChemicalMixture<CoeffType>& chem_mixture() const;
-
-    //! transport mixture
-    const Mixture & transport_mixture() const;  // contains the macro thermo for species
-
-  protected:
-
-    const Mixture         & _mixture;
-
-    //! Cache for numerator term
-    /*! \todo We should use a more efficient data structure */
-    std::vector<std::vector<CoeffType> > _Mr_Ms_to_the_one_fourth;
-    
-    //! Cache for denominator term
-    /*! \todo We should use a more efficient data structure */
-    std::vector<std::vector<CoeffType> > _denom;
-
   };
 
-  template<class Mixture, class CoeffType>
-  WilkeMixture<Mixture,CoeffType>::WilkeMixture( const Mixture& mixture)
-    : WilkeTransportMixture(mixture,PhysicsPlaceholder(),CoeffType)
+  template<class CoeffType>
+  WilkeMixture<CoeffType>::WilkeMixture( const ChemicalMixture<CoeffType>& mixture)
+    : WilkeTransportMixture<ChemicalMixture<CoeffType>,PhysicsPlaceholder,CoeffType>(mixture,PhysicsPlaceholder())
   {
     antioch_deprecated();
     return;
   }
 
-  template<class Mixture, class CoeffType>
-  WilkeMixture<Mixture,CoeffType>::~WilkeMixture()
+  template<class CoeffType>
+  WilkeMixture<CoeffType>::~WilkeMixture()
   {
     return;
   }
