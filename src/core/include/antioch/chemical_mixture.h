@@ -37,7 +37,8 @@
 #include "antioch/chemical_species.h"
 #include "antioch/default_filename.h"
 #include "antioch/metaprogramming.h"
-#include "antioch/species_ascii_parsing.h"
+#include "antioch/species_parsing.h"
+#include "antioch/ascii_parser.h"
 
 // C++
 #include <vector>
@@ -73,14 +74,22 @@ namespace Antioch
   class ChemicalMixture
   {
   public:
+    //! ascii parser by default
     ChemicalMixture( const std::string & filename = DefaultFilename::species_list(),
                      const bool verbose = true,
                      const std::string & species_data = DefaultFilename::chemical_mixture(),
                      const std::string & vibration_data = DefaultFilename::vibrational_data(),
                      const std::string & electronic_data = DefaultFilename::electronic_data());
 
+    //! ascii parser by default
     ChemicalMixture( const std::vector<std::string>& species_list,
                      const bool verbose = true,
+                     const std::string & species_data = DefaultFilename::chemical_mixture(),
+                     const std::string & vibration_data = DefaultFilename::vibrational_data(),
+                     const std::string & electronic_data = DefaultFilename::electronic_data());
+
+    //! explicit parser, file in parser must contains species list
+    ChemicalMixture( ParserBase<CoeffType> * parser,
                      const std::string & species_data = DefaultFilename::chemical_mixture(),
                      const std::string & vibration_data = DefaultFilename::vibrational_data(),
                      const std::string & electronic_data = DefaultFilename::electronic_data());
@@ -97,6 +106,21 @@ namespace Antioch
 
     //! method to initialize, backward compatibility
     void initialize_species(const std::vector<std::string> & species_list);
+
+    //! method to read characteristics, using one parser
+    void read_species_characteristics(ParserBase<CoeffType> * parser,
+                                      const std::string & species_data,
+                                      const std::string & vibration_data,
+                                      const std::string & electronic_data);
+
+    //! method to read mandatory characteristics
+    void read_species_mandatory_characteristics(ParserBase<CoeffType> * parser);
+
+    //! method to read vibrational characteristics
+    void read_species_vibrational_characteristics(ParserBase<CoeffType> * parser);
+
+    //! method to read electronic characteristics
+    void read_species_electronic_characteristics(ParserBase<CoeffType> * parser);
 
     //! Returns the number of species in this mixture.
     unsigned int n_species() const;
@@ -200,8 +224,6 @@ namespace Antioch
 
     void init_species_name_map(const std::vector<std::string> & species_list);
     void build_inverse_name_map();
-    void read_species_data();
-    void read_species_data( std::istream& in );
 
     std::vector<Species> _species_list;
 //    std::map<Species,unsigned int> _species_list_map;
@@ -298,7 +320,6 @@ namespace Antioch
     return;
   }
 
-
   template<typename CoeffType>
   inline
   ChemicalMixture<CoeffType>::ChemicalMixture(const std::string & filename, const bool verbose, 
@@ -306,16 +327,71 @@ namespace Antioch
                                               const std::string & vibration_data,
                                               const std::string & electronic_data)
   {
-      read_chemical_species_composition(filename, verbose,*this);
+      ASCIIParser<CoeffType> parser(filename,verbose);
 
-      read_species_data_ascii(species_data, verbose, *this);
+      read_chemical_species_composition<CoeffType>(static_cast<ParserBase<CoeffType> *> (&parser), *this);
+
+      parser.change_file(species_data);
+      this->read_species_characteristics(&parser,species_data,vibration_data,electronic_data);
+
+      return;
+  }
+
+  template<typename CoeffType>
+  inline
+  ChemicalMixture<CoeffType>::ChemicalMixture(ParserBase<CoeffType> * parser,
+                                              const std::string & species_data,
+                                              const std::string & vibration_data,
+                                              const std::string & electronic_data)
+  {
+      read_chemical_species_composition<CoeffType>(parser, *this);
+
+      this->read_species_characteristics(parser,species_data,vibration_data,electronic_data);
+
+      return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void ChemicalMixture<CoeffType>::read_species_characteristics(ParserBase<CoeffType> * parser,
+                                                                const std::string & species_data,
+                                                                const std::string & vibration_data,
+                                                                const std::string & electronic_data)
+  {
+   // species file is already in parser object
+     this->read_species_mandatory_characteristics(parser);
 
     //... and any vibrational data
-      read_species_vibrational_data_ascii(vibration_data, verbose, *this);
+     parser->change_file(vibration_data);
+     this->read_species_vibrational_characteristics(parser);
 
     //... and any electronic data
-      read_species_electronic_data_ascii(electronic_data, verbose, *this);
-      return;
+     parser->change_file(electronic_data);
+     this->read_species_electronic_characteristics(parser);
+
+    return;
+  }
+
+
+  template <typename CoeffType>
+  inline
+  void ChemicalMixture<CoeffType>::read_species_mandatory_characteristics(ParserBase<CoeffType> * parser)
+  {
+      read_species_data<CoeffType>(parser, *this);
+  }
+
+  template <typename CoeffType>
+  inline
+  void ChemicalMixture<CoeffType>::read_species_vibrational_characteristics(ParserBase<CoeffType> * parser)
+  {
+      read_species_vibrational_data<CoeffType>(parser, *this);
+  }
+
+  template <typename CoeffType>
+  inline
+  void ChemicalMixture<CoeffType>::read_species_electronic_characteristics(ParserBase<CoeffType> * parser)
+  {
+      read_species_electronic_data<CoeffType>(parser, *this);
   }
 
   template<typename CoeffType>
@@ -328,13 +404,10 @@ namespace Antioch
   {
       this->initialize_species(species_list);
 
-      read_species_data_ascii(species_data, verbose, *this);
+      Antioch::ASCIIParser<CoeffType> parser(species_data,verbose);
 
-    //... and any vibrational data
-      read_species_vibrational_data_ascii(vibration_data, verbose, *this);
+      this->read_species_characteristics(static_cast<ParserBase<CoeffType> *>(&parser),species_data,vibration_data,electronic_data);
 
-    //... and any electronic data
-      read_species_electronic_data_ascii(electronic_data, verbose, *this);
       return;
   }
 

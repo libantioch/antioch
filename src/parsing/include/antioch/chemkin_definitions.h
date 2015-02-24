@@ -1,5 +1,26 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
+//
+// Antioch - A Gas Dynamics Thermochemistry Library
+//
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
+// Copyright (C) 2013 The PECOS Development Team
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the Version 2.1 GNU Lesser General
+// Public License as published by the Free Software Foundation.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc. 51 Franklin Street, Fifth Floor,
+// Boston, MA  02110-1301  USA
+//
 //-----------------------------------------------------------------------el-
 
 //Antioch
@@ -64,6 +85,7 @@ namespace Antioch
 
   };
 
+  inline
   ChemKinDefinitions::ChemKinDefinitions():
      _reversible("REV"),
      _duplicate("DUP"),
@@ -82,46 +104,55 @@ namespace Antioch
     _symbol[ELECTRO] = "E";
   };
 
+  inline
   const std::map<ChemKinDefinitions::Delim,std::string> & ChemKinDefinitions::delim()   const 
   {
     return _delim;
   }
 
+  inline
   const std::map<ChemKinDefinitions::Symbol,std::string> & ChemKinDefinitions::symbol() const 
   {
     return _symbol;
   }
 
+  inline
   const std::string & ChemKinDefinitions::reversible() const 
   {
     return _reversible;
   }
 
+  inline
   const std::string & ChemKinDefinitions::duplicate() const 
   {
     return _duplicate;
   }
 
+  inline
   const std::string & ChemKinDefinitions::end_tag() const 
   {
     return _end_tag;
   }
 
+  inline
   const std::string & ChemKinDefinitions::comment() const 
   {
     return _comment;
   }
 
+  inline
   const std::string & ChemKinDefinitions::parser() const 
   {
     return _parser;
   }
 
+  inline
   bool ChemKinDefinitions::is_comment(const char & c) const 
   {
     return (c == _comment[0]);
   }
 
+  inline
   bool ChemKinDefinitions::is_equation_delimiter(const std::string & test) const 
   {
     return (test == _delim.at(REVERSIBLE)     || 
@@ -130,6 +161,7 @@ namespace Antioch
            );
   }
 
+  inline
   ChemKinDefinitions::Delim ChemKinDefinitions::equation_delimiter(const std::string & test) const 
   {
     if(test.find(_delim.at(REVERSIBLE_ALT)) != std::string::npos)

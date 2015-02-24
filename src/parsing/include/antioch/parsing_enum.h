@@ -3,6 +3,8 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -26,8 +28,14 @@
 
 namespace Antioch
 {
+  enum ParsingType{ASCII = 0,
+                   XML,
+                   CHEMKIN};
+
   enum ParsingKey{SPECIES_SET = 0,
+                  THERMO,
                   PHASE_BLOCK,
+//
                   REACTION_DATA,
                   REACTION,
                   REVERSIBLE,

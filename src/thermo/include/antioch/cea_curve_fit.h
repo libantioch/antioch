@@ -79,6 +79,9 @@ namespace Antioch
   {
   public:
     
+    // for compatibility with NASA, not used
+    NASA9CurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> &temps ):_n_coeffs(0) {antioch_error();}
+
     NASA9CurveFit( const std::vector<CoeffType>& coeffs );
     ~NASA9CurveFit();
 
@@ -176,9 +179,6 @@ namespace Antioch
      */
     const std::vector<CoeffType> _coefficients;
 
-   private:
-    // for compatibility with NASA, not used
-    NASA9CurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> &temps );
   };
 
 
@@ -446,6 +446,7 @@ namespace Antioch
   {
       public:
       CEACurveFit( const std::vector<CoeffType>& coeffs ):NASA9CurveFit<CoeffType>(coeffs){}
+      CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temps ):NASA9CurveFit<CoeffType>(coeffs,temps){}
       ~CEACurveFit(){}
   };
 

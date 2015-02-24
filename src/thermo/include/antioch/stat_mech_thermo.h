@@ -551,7 +551,7 @@ namespace Antioch
     return _chem_mixture.R(species)*(_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
 
-   template<typename CoeffType>
+  template<typename CoeffType>
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_tr_over_R (const unsigned int species) const
   {
@@ -660,8 +660,7 @@ namespace Antioch
     StateType cv_el = Antioch::zero_clone(Te);
     
     // Really < 2?  Yes, b/c theta_e[0] = 0.0 always.  See
-    // read_species_electronic_data_ascii_default in
-    // species_ascii_parsing.h
+    // antioch_default_electronic_data.dat
     if (theta_e.size() < 2) return cv_el;
     
     typedef typename Antioch::raw_value_type<StateType>::type raw_type;
