@@ -1,5 +1,26 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
+//
+// Antioch - A Gas Dynamics Thermochemistry Library
+//
+// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
+//                    Roy H. Stonger
+// Copyright (C) 2013 The PECOS Development Team
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the Version 2.1 GNU Lesser General
+// Public License as published by the Free Software Foundation.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc. 51 Franklin Street, Fifth Floor,
+// Boston, MA  02110-1301  USA
+//
 //-----------------------------------------------------------------------el-
 
 #ifndef ANTIOCH_PARSER_BASE_H
@@ -18,6 +39,22 @@ namespace Antioch
   // Forward declarations
   template <class NumericType>
   class ChemicalMixture;
+
+  template <typename NumericType, typename CurveFit>
+  class NASAThermoMixture;
+
+  template <typename NumericType>
+  class NASA7CurveFit;
+
+  template <typename NumericType>
+  class NASA9CurveFit;
+
+  // backward compatibility
+  template <typename NumericType>
+  class CEACurveFit;
+
+  template <typename NumericType>
+  class CEAThermodynamics;
 
   /*!\class ParserBase
 
@@ -59,7 +96,7 @@ namespace Antioch
 
 /// species
         //! reads the species set
-        virtual const std::vector<std::string> species_list() const {not_implemented(); return std::vector<std::string>();}
+        virtual const std::vector<std::string> species_list() {not_implemented(); return std::vector<std::string>();}
 
         //! reads the mandatory data, not valid in xml
         virtual void read_chemical_species(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
@@ -69,6 +106,21 @@ namespace Antioch
 
         //! reads the electronic data, not valid in xml
         virtual void read_electronic_data(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
+
+/// thermo
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)  {not_implemented();}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)  {not_implemented();}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  {not_implemented();}
+
+        //! reads the thermo, CEA deprecated 
+        virtual void read_thermodynamic_data(CEAThermodynamics<NumericType >& thermo)  {not_implemented();}
+
 
 /// reaction
 

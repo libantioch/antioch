@@ -38,7 +38,7 @@
 #include "antioch/default_filename.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/species_parsing.h"
-#include "antioch/parser_base.h"
+#include "antioch/ascii_parser.h"
 
 // C++
 #include <vector>

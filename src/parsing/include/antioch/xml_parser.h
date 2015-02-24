@@ -30,6 +30,8 @@
 #include "antioch/string_utils.h"
 #include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
+#include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
+#include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
 
 //XML
 #include "antioch/tinyxml2_imp.h"
@@ -39,12 +41,26 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <limits> 
 
 namespace Antioch{
 
 
   template <typename CoeffType>
   class ChemicalMixture;
+
+  template <typename NumericType, typename CurveType>
+  class NASAThermoMixture;
+
+  template <typename NumericType>
+  class NASA7CurveFit;
+
+  template <typename NumericType>
+  class NASA9CurveFit;
+
+  // backward compatibility
+  template <typename NumericType>
+  class CEACurveFit;
 
   /*!\class XMLParser
 
@@ -59,7 +75,6 @@ namespace Antioch{
        -   cross-section typically in cm2/nm, 
        -   lambda typically in nm, 
    */
-
   template <typename NumericType = double>
   class XMLParser: public ParserBase<NumericType>
   {
@@ -75,7 +90,7 @@ namespace Antioch{
 
 /// species
         //! reads the species set
-        const std::vector<std::string> species_list() const;
+        const std::vector<std::string> species_list() ;
 
         // reads the mandatory data, not valid yet in xml
 //        void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);
@@ -85,6 +100,21 @@ namespace Antioch{
 
         // reads the electronic data, not valid yet in xml
 //        void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);
+
+////////////////// thermo
+
+//global overload
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
+        //! reads the thermo, NASA generalist, no templates for virtual
+        void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  
+                {this->read_thermodynamic_data_root(thermo);}
 
 /// reaction
 
@@ -165,6 +195,10 @@ namespace Antioch{
 
         private:
 
+         //! reads the thermo, NASA generalist
+         template <typename CurveType>
+         void read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo);
+
          /*! return pairs of molecules and stoichiometric coefficients*/
          bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & products_pair) const;
 
@@ -184,6 +218,7 @@ namespace Antioch{
 
 //
           tinyxml2::XMLElement * _species_block;
+          tinyxml2::XMLElement * _thermo_block;
           tinyxml2::XMLElement * _reaction_block;
           tinyxml2::XMLElement * _reaction;
           tinyxml2::XMLElement * _rate_constant;
@@ -220,6 +255,7 @@ namespace Antioch{
 
       _map[ParsingKey::PHASE_BLOCK]           = "phase";
       _map[ParsingKey::SPECIES_SET]           = "speciesArray";
+      _map[ParsingKey::THERMO]                = "species"; // thermo in <species> <thermo> <NASA> <floatArray> </floatArray></NASA> </thermo> </species>
       _map[ParsingKey::REACTION_DATA]         = "reactionData";
       _map[ParsingKey::REACTION]              = "reaction";
       _map[ParsingKey::REVERSIBLE]            = "reversible";
@@ -316,6 +352,7 @@ namespace Antioch{
       {
           _species_block = _species_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
       }
+      _thermo_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::THERMO).c_str());
       _reaction_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
 
       _reaction = NULL;
@@ -334,7 +371,7 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  const std::vector<std::string> XMLParser<NumericType>::species_list() const
+  const std::vector<std::string> XMLParser<NumericType>::species_list()
   {
       std::vector<std::string> molecules;
 
@@ -728,6 +765,74 @@ namespace Antioch{
   {
       def_unit = _default_unit.at(ParsingKey::TROE_F_TSSS);
       return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSSS),T3,T3_unit);
+  }
+
+
+  template <typename NumericType>
+  template <typename CurveType>
+  inline
+  void XMLParser<NumericType>::read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo)
+  {
+     if(!_thermo_block)
+     {
+        std::cerr << "No thermodynamics data found!" << std::endl;
+        antioch_error();
+     }
+
+        // just a temp value to compare NumericType
+     const NumericType tol = std::numeric_limits<NumericType>::epsilon() * 10.;
+
+     const ChemicalMixture<NumericType> & chem_mixture = thermo.chemical_mixture();
+     for(unsigned int s = 0; s < chem_mixture.n_species(); s++)
+     {
+        std::string name = chem_mixture.species_inverse_name_map().at(s);
+        tinyxml2::XMLElement * spec = _thermo_block->FirstChildElement(name.c_str());
+        if(!spec)
+        {
+           std::cerr << "Species " << name << " has not been found" << std::endl;
+        }else
+        {
+          // temp containers
+           std::vector<NumericType> temps;
+           std::vector<NumericType> values;
+
+         // xml place
+           tinyxml2::XMLElement * nasa = spec->FirstChildElement("NASA");
+         // temperature
+           temps.push_back(std::atof(nasa->Attribute("Tmin")));
+           temps.push_back(std::atof(nasa->Attribute("Tmax")));
+
+         // now coefs
+           std::vector<std::string> coefs_str;
+           SplitString(std::string(nasa->GetText())," ",coefs_str,false);
+           for(unsigned int d = 0; d < coefs_str.size(); d++)
+               values.push_back(std::atof(coefs_str[d].c_str()));
+        // looping
+           while(nasa->NextSiblingElement("NASA"))
+           {
+             nasa = nasa->NextSiblingElement("NASA");
+              // temperatures, only Tmax as Tmin is suppose to be last Tmax
+             temps.push_back(std::atof(nasa->Attribute("Tmax")));
+
+              // now coefs
+             SplitString(std::string(nasa->GetText())," ",coefs_str,false);
+             for(unsigned int d = 0; d < coefs_str.size(); d++)
+                 values.push_back(std::atof(coefs_str[d].c_str()));
+
+             // checking this Tmin = last Tmax thing
+             if(std::abs(NumericType(std::atof(nasa->Attribute("Tmin"))) - temps[temps.size() - 2] )/temps[temps.size() - 2] > tol)
+             {
+                std::cerr << "No temperature connection between intervals in xml file description"
+                          << std::endl;
+                antioch_error();
+             }
+           }
+
+           thermo.add_curve_fit(name, values, temps);
+        }
+     }
+
+
   }
 
 }//end namespace Antioch

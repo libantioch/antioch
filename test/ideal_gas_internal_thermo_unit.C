@@ -32,10 +32,10 @@
 
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/ideal_gas_micro_thermo.h"
-#include "antioch/cea_evaluator.h"
+#include "antioch/ideal_gas_internal_thermo.h"
+#include "antioch/nasa_evaluator.h"
 #include "antioch/cea_curve_fit.h"
-#include "antioch/cea_mixture_parsing.h"
+#include "antioch/nasa_mixture_parsing.h"
 
 #include "antioch/vector_utils.h"
 
@@ -76,7 +76,7 @@ int test_relative(const Scalar val, const Scalar truth, const Scalar tol, const 
 template <typename Scalar>
 int test_molecule(unsigned int spec, const Scalar & n_tr_dofs, const Scalar & R_spec, 
                    const Scalar & cv_over_R, const Scalar & T,
-                   const Antioch::IdealGasMicroThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
+                   const Antioch::IdealGasInternalThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
                                                           Scalar 
                                                         > & thermo,
                    const std::string & name)
@@ -127,11 +127,11 @@ int tester()
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
 // required for Cv, we take default CEA
-  Antioch::CEAThermoMixture<Scalar> nasa_mixture( chem_mixture );
-  Antioch::read_cea_mixture_data( nasa_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII,true );
-  Antioch::CEAEvaluator<Scalar> nasa_thermo( nasa_mixture );
+  Antioch::NASAThermoMixture<Scalar, Antioch::CEACurveFit<Scalar> > nasa_mixture( chem_mixture );
+  Antioch::read_nasa_mixture_data( nasa_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> > nasa_thermo( nasa_mixture );
 
-  Antioch::IdealGasMicroThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
+  Antioch::IdealGasInternalThermo< Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> >,
                                    Scalar > id_thermo( nasa_thermo, chem_mixture );
 
   // Mass fractions
