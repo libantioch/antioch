@@ -71,6 +71,8 @@
 
 #include "antioch/wilke_mixture.h"
 #include "antioch/wilke_evaluator.h"
+#include "antioch/wilke_transport_mixture.h"
+#include "antioch/wilke_transport_evaluator.h"
 #include "antioch/blottner_parsing.h"
 #include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/constant_lewis_diffusivity_building.h"
@@ -165,11 +167,11 @@ int tester(const PairScalars& example, const std::string& testname)
   typedef Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType >        DType;
 
 
-  Antioch::WilkeMixture<TransportType,ThermoMixType,Scalar> wilke_mixture( tran_mixture, thermo_mix );
+  Antioch::WilkeTransportMixture<TransportType,ThermoMixType,Scalar> wilke_mixture( tran_mixture, thermo_mix );
 
-  typedef Antioch::WilkeMixture<TransportType,ThermoMixType,Scalar>  WilkeMixType;
+  typedef Antioch::WilkeTransportMixture<TransportType,ThermoMixType,Scalar>  WilkeMixType;
 
-  Antioch::WilkeEvaluator< DType, VType, TCType, WilkeMixType, Scalar > wilke( wilke_mixture, D, mu, k );
+  Antioch::WilkeTransportEvaluator< DType, VType, TCType, WilkeMixType, Scalar > wilke( wilke_mixture, D, mu, k );
 
   int return_flag = 0;
 
