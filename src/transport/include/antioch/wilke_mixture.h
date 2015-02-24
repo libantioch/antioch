@@ -31,6 +31,10 @@
 #ifndef ANTIOCH_WILKE_MIXTURE_H
 #define ANTIOCH_WILKE_MIXTURE_H
 
+// Antioch
+#include "antioch/wilke_transport_mixture.h"
+#include "antioch/physics_placeholder.h"
+
 // C++
 #include <vector>
 
@@ -42,32 +46,13 @@ namespace Antioch
   template <typename CoeffType>
   class ChemicalMixture;
 
-  /*
-      This somewhat ridicule thermodynamics
-      construct is because StatMechThermodynamics
-      can't give cp, and NASA9 can't give
-      the vibrational, translational, etc.,
-      parts of this same quantity.
-      Notice that the internal R used is the
-      massic one, thus Cp is in J/kg/K
-
-      \todo make Wilke rules be computed here?
-  */
-  template<class Mixture, class ThermoEvaluator,                      // mixture + thermo
-           class CoeffType = double>                                  // type
-  class WilkeMixture
+  template<class CoeffType = double>  // type
+  class WilkeMixture:public WilkeTransportMixture<ChemicalMixture<CoeffType>,PhysicsPlaceholder,CoeffType>
   {
   public:
 
-    WilkeMixture( const Mixture & mixture,
-                  const ThermoEvaluator & thermo_eval );
+    WilkeMixture( const ChemicalMixture<CoeffType> & mixture);
     ~WilkeMixture();
-
-    CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
-                                       const unsigned int s ) const;
-    
-    CoeffType denominator( const unsigned int r,
-                           const unsigned int s ) const;
 
     //! chemical mixture, mostly for backward compatibility
     const ChemicalMixture<CoeffType>& chem_mixture() const;
@@ -75,14 +60,9 @@ namespace Antioch
     //! transport mixture
     const Mixture & transport_mixture() const;  // contains the macro thermo for species
 
-    //! const ref to thermo evaluator, internal computations only (vib, rot, trans)
-    const ThermoEvaluator & thermo_evaluator() const; // contains the micro thermo
-
   protected:
 
     const Mixture         & _mixture;
-
-    const ThermoEvaluator & _thermo_evaluator;
 
     //! Cache for numerator term
     /*! \todo We should use a more efficient data structure */
@@ -94,76 +74,18 @@ namespace Antioch
 
   };
 
-  template<class Mixture, class ThermoEvaluator, class CoeffType>
-  WilkeMixture<Mixture,ThermoEvaluator,CoeffType>::WilkeMixture( const Mixture& mixture, const ThermoEvaluator & thermo_eval )
-    : _mixture(mixture),
-      _thermo_evaluator(thermo_eval),
-      _Mr_Ms_to_the_one_fourth(mixture.n_species()),
-      _denom(mixture.n_species())
+  template<class Mixture, class CoeffType>
+  WilkeMixture<Mixture,CoeffType>::WilkeMixture( const Mixture& mixture)
+    : WilkeTransportMixture(mixture,PhysicsPlaceholder(),CoeffType)
   {
-    using std::pow;
-
-    for( unsigned int r = 0; r < mixture.n_species(); r++ )
-      {
-        _Mr_Ms_to_the_one_fourth[r].resize(mixture.n_species());
-        _denom[r].resize(mixture.n_species());
-
-        for( unsigned int s = 0; s < mixture.n_species(); s++ )
-          {
-            const CoeffType Mr = mixture.chemical_mixture().M(r);
-            const CoeffType Ms = mixture.chemical_mixture().M(s);
-
-            _Mr_Ms_to_the_one_fourth[r][s] = pow( Mr/Ms, CoeffType(0.25) );
-            _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
-          }
-      }
-
+    antioch_deprecated();
     return;
   }
 
-  template<class Mixture, class ThermoEvaluator, class CoeffType>
-  WilkeMixture<Mixture,ThermoEvaluator,CoeffType>::~WilkeMixture()
+  template<class Mixture, class CoeffType>
+  WilkeMixture<Mixture,CoeffType>::~WilkeMixture()
   {
     return;
-  }
-
-  
-  template<class Mixture, class ThermoEvaluator, class CoeffType>
-  inline
-  CoeffType WilkeMixture<Mixture,ThermoEvaluator,CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
-                                                              const unsigned int s ) const
-  {
-    return _Mr_Ms_to_the_one_fourth[r][s];
-  }
-    
-  
-  template<class Mixture, class ThermoEvaluator, class CoeffType>
-  inline
-  CoeffType WilkeMixture<Mixture,ThermoEvaluator,CoeffType>::denominator( const unsigned int r,
-                                                  const unsigned int s ) const
-  {
-    return _denom[r][s];
-  }
-
-  template<class Mixture, class ThermoEvaluator, class CoeffType>
-  inline
-  const ChemicalMixture<CoeffType>& WilkeMixture<Mixture,ThermoEvaluator,CoeffType>::chem_mixture() const
-  {
-    return _mixture.chemical_mixture();
-  }
-
-  template<class Mixture, class ThermoEvaluator, class CoeffType>
-  inline
-  const Mixture & WilkeMixture<Mixture,ThermoEvaluator,CoeffType>::transport_mixture() const
-  {
-    return _mixture;
-  }
-
-  template<class Mixture, class ThermoEvaluator, class CoeffType>
-  inline
-  const ThermoEvaluator & WilkeMixture<Mixture,ThermoEvaluator,CoeffType>::thermo_evaluator() const
-  {
-      return _thermo_evaluator;
   }
 
 } // end namespace Antioch
