@@ -32,6 +32,7 @@
 #define ANTIOCH_MIXTURE_VISCOSITY_H
 
 // Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/chemical_mixture.h"
 
 // C++
@@ -48,6 +49,9 @@ namespace Antioch
     MixtureViscosity( const ChemicalMixture<CoeffType>& chem_mixture );
     ~MixtureViscosity();
 
+   // forward compatibility
+    typedef Viscosity Model;
+
     template <typename StateType>
     StateType operator()( const unsigned int s, const StateType& T ) const;
 
@@ -58,6 +62,12 @@ namespace Antioch
                        const std::vector<CoeffType> coeffs );
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
+
+    // forward compatibility
+    const ChemicalMixture<CoeffType>& mixture() const;
+
+    // backward compatibility
+    const std::vector<Viscosity*> & species_viscosities() const;
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -82,6 +92,7 @@ namespace Antioch
     :  _chem_mixture(chem_mixture),
        _species_viscosities( chem_mixture.n_species(), NULL )
   {
+    antioch_deprecated();
     return;
   }
 
@@ -140,6 +151,20 @@ namespace Antioch
   }
 
   template<typename Viscosity, class CoeffType>
+  inline
+  const ChemicalMixture<CoeffType>& MixtureViscosity<Viscosity,CoeffType>::mixture() const
+  {
+    return _chem_mixture;
+  }
+
+  template<typename Viscosity, class CoeffType>
+  inline
+  const std::vector<Viscosity*>& MixtureViscosity<Viscosity,CoeffType>::species_viscosities() const
+  {
+    return _species_viscosities;
+  }
+
+  template<typename Viscosity, class CoeffType>
   void MixtureViscosity<Viscosity,CoeffType>::print(std::ostream& os) const
   {
     antioch_assert_equal_to( _species_viscosities.size(), _chem_mixture.n_species() );
@@ -154,6 +179,20 @@ namespace Antioch
 
     return;
   }
+
+/// now the forward compatibility to make it alright with PhysicalSet
+
+ // tag is the tag of the physical model
+ template <typename Viscosity,typename CoeffType>
+ struct physical_tag<MixtureViscosity<Viscosity,CoeffType> >:
+        public physical_tag<Viscosity>
+ {};
+
+ // physical set boolean
+ template<typename Viscosity, typename CoeffType>
+ struct is_physical_set<MixtureViscosity<Viscosity,CoeffType> >:
+      public is_physical_set<Viscosity>
+ {};
 
 } // end namespace Antioch
 
