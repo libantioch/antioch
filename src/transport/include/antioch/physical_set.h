@@ -34,6 +34,32 @@
 
 namespace Antioch
 {
+
+  // backward compatibility can be complicated...
+  // set = Model * : case thermo cond
+  template<typename Physics, typename Model, bool B>
+  struct CopyModel
+  {
+      CopyModel(typename SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set, const Model & model, unsigned int /* nspec */)
+      {
+         physical_set_add<Physics>(set,model,typename physical_tag<Physics>::set_type());
+      }
+  };
+
+  // set = std::vector<Model *> : case viscosity
+  template<typename Physics, typename Model>
+  struct CopyModel<Physics,Model,true>
+  {
+      CopyModel(typename SetOrEquation<Physics, is_physical_set<Physics>::value>::type & set, const Model & model, unsigned int nspec)
+      {
+         for(unsigned int s = 0; s < nspec; s++)
+         {
+            physical_set_add<Physics>(s,set,*(model.species_viscosities()[s]),typename physical_tag<Physics>::set_type());
+         }
+      }
+  };
+
+
   /*
      !\class PhysicalSet
 
@@ -57,6 +83,10 @@ namespace Antioch
         typedef Physics model;
 
         PhysicalSet(const Mixture & mix);
+        // backward compatibility, model already exists
+
+        template <typename PriorModel> //because MixtureViscosity is not the model
+        PhysicalSet(const Mixture & mix, const PriorModel & model);
 
         ~PhysicalSet();
 
@@ -131,6 +161,15 @@ namespace Antioch
   PhysicalSet<Physics,Mixture>::PhysicalSet(const Mixture & mix):_mixture(mix)
   {
     physical_set_initialize(*this, typename physical_tag<Physics>::init_type ());
+  }
+
+  template<typename Physics, typename Mixture>
+  template <typename PriorModel> //because MixtureViscosity is not the model
+  inline
+  PhysicalSet<Physics,Mixture>::PhysicalSet(const Mixture & mix, const PriorModel & model):_mixture(mix)
+  {
+    physical_set_initialize(*this, typename physical_tag<Physics>::init_type ());
+    CopyModel<Physics,PriorModel,is_physical_set<PriorModel>::value> copy(_set, model,_mixture.n_species());
   }
 
   template<typename Physics, typename Mixture>
@@ -281,5 +320,8 @@ namespace Antioch
     physical_set_operator_thermal_conductivity(_set, mu, dss, T, rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
   }
 }
+
+// default
+#include "antioch/physics_metaprogramming.h"
 
 #endif
