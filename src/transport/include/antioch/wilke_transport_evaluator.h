@@ -209,7 +209,7 @@ namespace Antioch
         StateType phi_s = this->compute_phi( mu, chi, s );
         
         StateType k_s = zero_clone(T);
-        _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(T),zero_clone(T), zero_clone(T), k_s); //\todo, better management
+        _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(T),T, zero_clone(T), k_s); //\todo, better management
 
         k_mix += k_s*chi[s]/phi_s;
       }
@@ -237,7 +237,7 @@ namespace Antioch
         StateType phi_s = this->compute_phi( mu, chi, s );
         
         StateType k_s = zero_clone(T);
-        _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(T),zero_clone(T), zero_clone(T), k_s); //\todo, better management
+        _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(T),T, zero_clone(T), k_s); //\todo, better management
 
         mu_mix += mu[s]*chi[s]/phi_s;
         k_mix += k_s*chi[s]/phi_s;
