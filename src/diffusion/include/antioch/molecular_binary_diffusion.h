@@ -364,6 +364,7 @@ namespace Antioch{
 }
 
 #include "antioch/molecular_binary_diffusion_utils_decl.h"
+#include "antioch/molecular_binary_diffusion_utils.h"
 #endif // ANTIOCH_BIMOL_DIFF
 
 #endif // ifdef ANTIOCH_HAVE_GSL

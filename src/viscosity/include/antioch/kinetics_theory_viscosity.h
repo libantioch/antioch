@@ -304,6 +304,7 @@ namespace Antioch
 } // end namespace Antioch
 
 #include "antioch/kinetics_theory_viscosity_utils_decl.h"
+#include "antioch/kinetics_theory_viscosity_utils.h"
 
 #endif //ANTIOCH_KINETICS_THEORY_VISCOSITY_H
 
