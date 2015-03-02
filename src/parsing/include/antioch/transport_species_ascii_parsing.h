@@ -53,38 +53,8 @@ namespace Antioch{
   template <typename ThermoEvaluator, typename NumericType>
   void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename)
   {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-      std::cerr << "ERROR: unable to load file " << filename << std::endl;
-      antioch_error();
-    }
-
-
-    skip_comment_lines(in, '#');
-
-    std::string name;
-    NumericType LJ_eps_kB;
-    NumericType LJ_sigma;
-    NumericType dipole_moment;
-    NumericType pol;
-    NumericType Zrot;
-    NumericType SI_coeff = Antioch::Units<NumericType>("g/mol").get_SI_factor();
-
-    while (in.good())
-      {
-          in >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
-          if(transport.chemical_mixture().species_name_map().count(name))
-          {
-              unsigned int place = transport.chemical_mixture().species_name_map().at(name);
-                // TODO: better unit checking
-              NumericType mass = transport.chemical_mixture().M(place) * SI_coeff;
-// adding species in mixture
-              transport.add_species(place,LJ_eps_kB,LJ_sigma,dipole_moment,pol,Zrot,mass);
-          }
-      }
-     in.close();
-    return;
+    ASCIIParser<NumericType> parser(filename,true);
+    parser.read_transport_data(transport);
   }
 
 } //end namespace Antioch

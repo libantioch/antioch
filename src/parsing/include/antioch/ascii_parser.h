@@ -36,6 +36,7 @@
 #include "antioch/cea_thermo.h" // because not templated, therefore should be entirely known
 #include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
 #include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
+#include "antioch/transport_mixture.h" // because not templated, therefore should be entirely known
 
 // C++
 #include <iostream>
@@ -56,13 +57,41 @@ namespace Antioch
   template <class NumericType>
   class ChemicalMixture;
 
+  template <class ThermoEval,class NumericType>
+  class TransportMixture;
+
+  template <typename NumericType, typename Macro,typename Micro>
+  class ThermoHandler;
+
+// macro
+  template <typename NumericType, typename CurveFit>
+  class NASAThermoMixture;
+
+  template <typename NumericType, typename CurveFit>
+  class NASAEvaluator;
+
+  template <typename NumericType>
+  class NASA7CurveFit;
+
+  template <typename NumericType>
+  class NASA9CurveFit;
+
   // backward compatibility
   template <typename NumericType>
   class CEACurveFit;
 
-  // deprecated
   template <typename NumericType>
   class CEAThermodynamics;
+
+  template <typename NumericType>
+  class CEAEvaluator;
+
+// micro
+  template <typename NumericType>
+  class StatMechThermodynamics;
+
+  template <typename Macro, typename NumericType>
+  class IdealGasKineticsTheory;
 
   template <typename NumericType>
   class ASCIIParser: public ParserBase<NumericType>
@@ -89,6 +118,57 @@ namespace Antioch
 
         //! read the electronic data
         void read_electronic_data(ChemicalMixture<NumericType>& chem_mixture);
+
+// transport, the thermo is explicit...
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA7 + StatMech
+        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
+                                                                   NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
+                                                                   StatMechThermodynamics<NumericType> 
+                                                                 > ,
+                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA9 + StatMech
+        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
+                                                                   NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
+                                                                   StatMechThermodynamics<NumericType>
+                                                                 >,
+                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  CEA + StatMech for backward compat
+        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
+                                                                   CEAEvaluator<NumericType>,
+                                                                   StatMechThermodynamics<NumericType> 
+                                                                 >,
+                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA7 + Ideal Gas
+        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
+                                                                   NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
+                                                                   IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
+                                                                 >,
+                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA9 + Ideal Gas
+        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
+                                                                   NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
+                                                                   IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
+                                                                 >,
+                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  CEA + Ideal Gas for backward compat
+        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
+                                                                   CEAEvaluator<NumericType>,
+                                                                   IdealGasKineticsTheory<CEAEvaluator<NumericType>,NumericType>
+                                                                 >,
+                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
+
 
 ///////////////
 // thermo
@@ -123,6 +203,11 @@ namespace Antioch
         //! read the thermodynamic data
         template <typename CurveType>
         void read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo);
+
+// templated transport version
+        //! read the thermodynamic data
+        template <typename Mixture>
+        void read_transport_data_root(Mixture & transport);
 
         //! not allowed
         ASCIIParser();
@@ -454,6 +539,35 @@ namespace Antioch
               }
           }
       } // end while
+  }
+
+  template <typename NumericType>
+  template <typename Mixture>
+  inline
+  void ASCIIParser<NumericType>::read_transport_data_root(Mixture & transport)
+  {
+        
+    std::string name;
+    NumericType LJ_eps_kB;
+    NumericType LJ_sigma;
+    NumericType dipole_moment;
+    NumericType pol;
+    NumericType Zrot;
+    NumericType SI_coeff = Antioch::Units<NumericType>("g/mol").get_SI_factor();
+
+    while (_doc.good())
+      {
+          skip_comment_lines(_doc, '#');
+
+          _doc >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
+          if(transport.chemical_mixture().species_name_map().count(name))
+          {
+              unsigned int place = transport.chemical_mixture().species_name_map().at(name);
+              NumericType mass = transport.chemical_mixture().M(place) * SI_coeff;
+// adding species in mixture
+              transport.add_species(place,LJ_eps_kB,LJ_sigma,dipole_moment,pol,Zrot,mass);
+          }
+      }
   }
 
 } // end namespace Antioch
