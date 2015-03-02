@@ -53,8 +53,37 @@ namespace Antioch{
   template <typename ThermoEvaluator, typename NumericType>
   void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename)
   {
+    antioch_deprecated();
+
     ASCIIParser<NumericType> parser(filename,true);
     parser.read_transport_data(transport);
+
+    // sanity check, we may require these informations
+    bool fail(false);
+    for(unsigned int s = 0; s < transport.chemical_species().size(); s++)
+    {
+        if(!transport.transport_species()[s])
+        {
+            fail = true;
+            break;
+        }
+    }
+    if(fail)
+    {
+      std::cerr << "Molecule(s) is(are) missing in transport description.  Please update the information."
+                << "  Currently using file " << parser->file() << ".\n"
+                << "You might have some problem later if you need these description.  "
+                << "Missing molecule(s) is(are):" << std::endl;
+      for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
+      {
+        if(!transport.transport_species()[i])
+        {
+           std::cerr << transport.chem_mixture.species_inverse_name_map().at(i) << std::endl;
+        }
+      }
+    }
+
+    return;
   }
 
 } //end namespace Antioch
