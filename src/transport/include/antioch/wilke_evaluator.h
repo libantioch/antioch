@@ -94,7 +94,7 @@ namespace Antioch
        Antioch::value_type<VectorStateType>::type
         compute_phi( const VectorStateType& mu,
                      const VectorStateType& chi,
-                     const unsigned int s ) const {return _wilke_eval->compute_chi(mu,chi,s);}
+                     const unsigned int s ) const;
 
 
   private:
@@ -131,6 +131,23 @@ namespace Antioch
     delete _therm;
     delete _wilke_eval;
     return;
+  }
+
+  template<class Viscosity, class ThermalConductivity, class CoeffType>
+  template <typename VectorStateType>
+  typename
+    Antioch::value_type<VectorStateType>::type
+        WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_phi( const VectorStateType& mu,
+                     const VectorStateType& chi,
+                     const unsigned int s ) const
+  {
+    
+    typename Antioch::rebind<VectorStateType,VectorStateType>::type mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+
+    _wilke_eval->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
+
+    return _wilke_eval->compute_phi( mu_mu_sqrt, chi, s );
   }
 
 } // end namespace Antioch
