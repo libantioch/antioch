@@ -231,7 +231,12 @@ int tester(const PairScalars& example, const std::string& testname)
   gt.BeginTimer(testname);
 #endif
 
-    const PairScalars phi_N = wilke.compute_phi( mu, chi, N_index );
+    std::vector<std::vector<PairScalars> > mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+    Antioch::set_zero(mu_mu_sqrt);
+
+    wilke.compute_mu_mu_sqrt( mu, mu_mu_sqrt);
+    const PairScalars phi_N = wilke.compute_phi( mu_mu_sqrt, chi, N_index );
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testname);
