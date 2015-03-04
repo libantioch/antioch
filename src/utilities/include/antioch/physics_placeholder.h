@@ -22,40 +22,38 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
+//
+// $Id$
+//
+//--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_BUILDING_H
-#define ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_BUILDING_H
+#ifndef ANTIOCH_PHYSICS_PLACEHOLDER_H
+#define ANTIOCH_PHYSICS_PLACEHOLDER_H
 
 // Antioch
-#include "antioch/eucken_thermal_conductivity.h"
-#include "antioch/physical_set.h"
+#include "antioch/physics_metaprogramming_decl.h"
 
 // C++
-#include <iostream>
-#include <vector>
-
 
 namespace Antioch
 {
-  //forward declaration
-  template <typename ThermoEval, typename NumericType>
-  class TransportMixture;
-
-  // backward compatibility
-  template<class ThermoEvaluator, class Mixture>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator> , Mixture>& k){}
-
-  template<class ThermoEvaluator, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator> , TransportMixture<ThermoEvaluator,NumericType> >& k);
-
-// ----------------------------------------- //
-
-  template<class ThermoEvaluator, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator>, TransportMixture<ThermoEvaluator,NumericType> >& k)
+  /*
+     An empty all default physics class
+   */
+  class PhysicsPlaceholder
   {
-       k.add_model(k.mixture().thermo());
-  }
+  public:
 
-}
+      PhysicsPlaceholder(){}
+      ~PhysicsPlaceholder(){}
+  };
 
-#endif
+// physics tag, all defaults, nothing happens
+   template <>
+   struct physical_tag< PhysicsPlaceholder >:
+        public physical_tag_base<PhysicsPlaceholder >
+   {};
+
+} // namespace Antioch
+#endif // ANTIOCH_PHYSICS_PLACEHOLDER_H

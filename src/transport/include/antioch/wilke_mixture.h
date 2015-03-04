@@ -31,68 +31,37 @@
 #ifndef ANTIOCH_WILKE_MIXTURE_H
 #define ANTIOCH_WILKE_MIXTURE_H
 
+// Antioch
+#include "antioch/wilke_transport_mixture.h"
+#include "antioch/physics_placeholder.h"
+#include "antioch/antioch_asserts.h"
+
 // C++
 #include <vector>
 
 namespace Antioch
 {
-  // Forward declarations
-  template<class CoeffType>
+
+  // forward declaration to keep the call to 
+  // the ChemicalMixture object
+  template <typename CoeffType>
   class ChemicalMixture;
 
-  template<class CoeffType=double>
-  class WilkeMixture
+  template<class CoeffType = double>  // type
+  class WilkeMixture:public WilkeTransportMixture<ChemicalMixture<CoeffType>,PhysicsPlaceholder,CoeffType>
   {
   public:
 
-    WilkeMixture( const ChemicalMixture<CoeffType>& chem_mixture );
+    WilkeMixture( const ChemicalMixture<CoeffType> & mixture);
     ~WilkeMixture();
-
-    CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
-                                       const unsigned int s ) const;
-    
-    CoeffType denominator( const unsigned int r,
-                           const unsigned int s ) const;
-
-    const ChemicalMixture<CoeffType>& chem_mixture() const;
-
-  protected:
-
-    const ChemicalMixture<CoeffType>& _chem_mixture;
-
-    //! Cache for numerator term
-    /*! \todo We should use a more efficient data structure */
-    std::vector<std::vector<CoeffType> > _Mr_Ms_to_the_one_fourth;
-    
-    //! Cache for denominator term
-    /*! \todo We should use a more efficient data structure */
-    std::vector<std::vector<CoeffType> > _denom;
 
   };
 
   template<class CoeffType>
-  WilkeMixture<CoeffType>::WilkeMixture( const ChemicalMixture<CoeffType>& chem_mixture )
-    : _chem_mixture(chem_mixture),
-      _Mr_Ms_to_the_one_fourth(chem_mixture.n_species()),
-      _denom(chem_mixture.n_species())
+  WilkeMixture<CoeffType>::WilkeMixture( const ChemicalMixture<CoeffType>& mixture)
+    : WilkeTransportMixture<ChemicalMixture<CoeffType>,PhysicsPlaceholder,CoeffType>(mixture,PhysicsPlaceholder())
   {
-    using std::pow;
-
-    for( unsigned int r = 0; r < chem_mixture.n_species(); r++ )
-      {
-        _Mr_Ms_to_the_one_fourth[r].resize(chem_mixture.n_species());
-        _denom[r].resize(chem_mixture.n_species());
-
-        for( unsigned int s = 0; s < chem_mixture.n_species(); s++ )
-          {
-            const CoeffType Mr = chem_mixture.M(r);
-            const CoeffType Ms = chem_mixture.M(s);
-
-            _Mr_Ms_to_the_one_fourth[r][s] = pow( Mr/Ms, CoeffType(0.25) );
-            _denom[r][s] = std::sqrt(8.0*(1.0+Ms/Mr));
-          }
-      }
-
+    antioch_deprecated();
     return;
   }
 
@@ -100,31 +69,6 @@ namespace Antioch
   WilkeMixture<CoeffType>::~WilkeMixture()
   {
     return;
-  }
-
-  
-  template<class CoeffType>
-  inline
-  CoeffType WilkeMixture<CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
-                                                              const unsigned int s ) const
-  {
-    return _Mr_Ms_to_the_one_fourth[r][s];
-  }
-    
-  
-  template<class CoeffType>
-  inline
-  CoeffType WilkeMixture<CoeffType>::denominator( const unsigned int r,
-                                                  const unsigned int s ) const
-  {
-    return _denom[r][s];
-  }
-
-  template<class CoeffType>
-  inline
-  const ChemicalMixture<CoeffType>& WilkeMixture<CoeffType>::chem_mixture() const
-  {
-    return _chem_mixture;
   }
 
 } // end namespace Antioch

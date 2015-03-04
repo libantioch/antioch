@@ -154,5 +154,6 @@ namespace Antioch
 } // end namespace Antioch
 
 #include "antioch/blottner_viscosity_utils_decl.h"
+#include "antioch/blottner_viscosity_utils.h"
 
 #endif //ANTIOCH_BLOTTNER_VISCOSITY_H

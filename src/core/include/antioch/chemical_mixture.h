@@ -96,6 +96,14 @@ namespace Antioch
 
     ~ChemicalMixture();
 
+    /*! method to send this back
+
+        added for backward compatibility for WilkeMixture v/s
+        WilkeTransportMixture, the idea is to send a chemical mixture
+        whatever mixture is provided
+     */
+    const ChemicalMixture<CoeffType> & chemical_mixture() const;
+
     //! method to initialize, backward compatibility
     void initialize_species(const std::vector<std::string> & species_list);
 
@@ -567,6 +575,13 @@ namespace Antioch
       }
 
     return;
+  }
+
+  template<typename CoeffType>
+  inline
+  const ChemicalMixture<CoeffType> & ChemicalMixture<CoeffType>::chemical_mixture() const
+  {
+     return *this;
   }
 
 

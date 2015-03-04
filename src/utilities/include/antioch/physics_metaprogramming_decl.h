@@ -127,10 +127,10 @@ namespace Antioch
 
    // add species model
    template <typename Model, typename InitType>
-   void physical_set_add(unsigned int s, Model & set, const InitType & init, default_physical_tag);
+   void physical_set_add(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, default_physical_tag);
 
    template <typename Model, typename InitType>
-   void physical_set_add(unsigned int s, Model & set, const InitType & init, default_physical_set_tag);
+   void physical_set_add(unsigned int s, typename SetOrEquation<Model,is_physical_set<Model>::value>::type & set, const InitType & init, default_physical_set_tag);
 
    // reset general model
    template <typename Model, typename InitType>
