@@ -598,7 +598,15 @@ namespace Antioch
   inline
   const ThermoEvaluator & ChemicalMixture<CoeffType>::thermo_evaluator() const
   {
-     std::cerr << "What the hell are you doing here? This backward compatibility place should not be explored" << std::endl;
+     /* Alright let's still have a description.
+
+        The deprecated WilkeEvaluator has a ChemicalMixture,
+        the newer WilkeTransportEvaluator has a TransportMixture.
+        To keep the compiler happy, ChemicalMixture thus needs
+        this method that exists (and should only exists) in
+        TransportMixture
+      */
+     antioch_deprecated();
      antioch_error();
      return ThermoEvaluator(); // default constructor is private
   }
