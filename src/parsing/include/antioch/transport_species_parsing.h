@@ -23,13 +23,13 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_ASCII_PARSING_H
-#define ANTIOCH_TRANSPORT_ASCII_PARSING_H
+#ifndef ANTIOCH_TRANSPORT_PARSING_H
+#define ANTIOCH_TRANSPORT_PARSING_H
 
 // Antioch
-#include "antioch/input_utils.h"
-#include "antioch/physical_constants.h"
-#include "antioch/units.h"
+#include "antioch/ascii_parser.h"
+#include "antioch/chemkin_parser.h"
+#include "antioch/xml_parser.h"
 
 //C++
 #include <iostream>
@@ -45,18 +45,35 @@ namespace Antioch{
 
 
   template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename);
+  void read_transport_species_data(ParserBase<NumericType> * parser,
+                                   TransportMixture<ThermoEvaluator,NumericType> & transport);
 
 /*----------- inline functions ----------------*/
 
 
   template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename)
+  void read_transport_species_data_ascii(ParserBase<NumericType> * parser, TransportMixture<ThermoEvaluator,NumericType> & transport)
   {
-    antioch_deprecated();
 
-    ASCIIParser<NumericType> parser(filename,true);
-    parser.read_transport_data(transport);
+    switch(parser->enum_type())
+    {
+      case ASCII:
+      {
+        (static_cast<ASCIIParser<NumericType> *>(parser))->read_transport_data(transport);
+        break;
+      }case CHEMKIN:
+      {
+        (static_cast<ChemKinParser<NumericType> *>(parser))->read_transport_data(transport);
+        break;
+      }case XML:
+      {
+        (static_cast<XMLParser<NumericType> *>(parser))->read_transport_data(transport);
+        break;
+      }default:
+      {
+        antioch_parsing_error("unknown parser type \"" + parser->type() + "\"!!!");
+      }
+    }
 
     // sanity check, we may require these informations
     bool fail(false);
@@ -71,7 +88,7 @@ namespace Antioch{
     if(fail)
     {
       std::cerr << "Molecule(s) is(are) missing in transport description.  Please update the information."
-                << "  Currently using file " << parser.file() << ".\n"
+                << "  Currently using file " << parser->file() << ".\n"
                 << "You might have some problem later if you need these description.  "
                 << "Missing molecule(s) is(are):" << std::endl;
       for(unsigned int i = 0; i < transport.n_species(); i++)
@@ -89,3 +106,4 @@ namespace Antioch{
 } //end namespace Antioch
 
 #endif
+

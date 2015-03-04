@@ -40,6 +40,16 @@ namespace Antioch
   template <class NumericType>
   class ChemicalMixture;
 
+  template <class ThermoEval,class NumericType>
+  class TransportMixture;
+
+  template <typename NumericType, typename Macro,typename Micro>
+  class ThermoHandler;
+
+// macro
+  template <typename NumericType, typename CurveFit>
+  class NASAEvaluator;
+
   template <typename NumericType, typename CurveFit>
   class NASAThermoMixture;
 
@@ -55,6 +65,16 @@ namespace Antioch
 
   template <typename NumericType>
   class CEAThermodynamics;
+
+  template <typename NumericType>
+  class CEAEvaluator;
+
+// micro
+  template <typename NumericType>
+  class StatMechThermodynamics;
+
+  template <typename Macro, typename NumericType>
+  class IdealGasKineticsTheory;
 
   /*!\class ParserBase
 
@@ -98,14 +118,62 @@ namespace Antioch
         //! reads the species set
         virtual const std::vector<std::string> species_list() {not_implemented(); return std::vector<std::string>();}
 
-        //! reads the mandatory data, not valid in xml
+        //! reads the mandatory data, not valid in xml && chemkin
         virtual void read_chemical_species(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
 
-        //! reads the vibrational data, not valid in xml
+        //! reads the vibrational data, not valid in xml && chemkin
         virtual void read_vibrational_data(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
 
-        //! reads the electronic data, not valid in xml
+        //! reads the electronic data, not valid in xml && chemkin
         virtual void read_electronic_data(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
+
+// transport, the thermo is explicit...
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA7 + StatMech
+        virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
+                                                                           NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
+                                                                           StatMechThermodynamics<NumericType> >,
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA9 + StatMech
+        virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
+                                                                           NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
+                                                                           StatMechThermodynamics<NumericType> >,
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  CEA + StatMech for backward compat
+        virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
+                                                                           CEAEvaluator<NumericType>,
+                                                                           StatMechThermodynamics<NumericType> >,
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA7 + Ideal Gas
+        virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
+                                                                           NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
+                                                                           IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
+                                                                         >,
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  NASA9 + Ideal Gas
+        virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
+                                                                           NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
+                                                                           IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
+                                                                         >,
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+
+        //! reads the transport data, not valid in xml && chemkin
+        //  CEA + Ideal Gas for backward compat
+        virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
+                                                                           CEAEvaluator<NumericType>,
+                                                                           IdealGasKineticsTheory<CEAEvaluator<NumericType>,NumericType> 
+                                                                         >,
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+
 
 /// thermo
 
