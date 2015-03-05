@@ -31,6 +31,9 @@
 #ifndef ANTIOCH_TEMP_CACHE_H
 #define ANTIOCH_TEMP_CACHE_H
 
+// Antioch
+#include "antioch/cmath_shims.h"
+
 namespace Antioch
 {
   template<typename StateType=double>
@@ -62,9 +65,8 @@ namespace Antioch
   TempCache<StateType>::TempCache(const StateType& T_in)
     : T(T_in), T2(T*T), T3(T2*T), T4(T2*T2), lnT(T_in)
   {
-    using std::log;
 
-    lnT = log(T);
+    lnT = ant_log(T);
     return;
   }
 
