@@ -28,6 +28,7 @@
 
 //Antioch
 #include "antioch/parsing_enum.h"
+#include "antioch/input_utils.h"
 
 //C++
 #include <vector>
@@ -282,9 +283,12 @@ namespace Antioch
 
      protected:
 
+        void skip_comments_lines(std::ifstream & doc);
+
         std::string _type;
         std::string _file;
         bool        _verbose;
+        std::string _comments;
 
         void not_implemented() const;
 
@@ -293,10 +297,11 @@ namespace Antioch
   };
 
   template <typename NumericType>
-  ParserBase<NumericType>::ParserBase(const std::string & type, const std::string & file, bool verbose):
+  ParserBase<NumericType>::ParserBase(const std::string & type, const std::string & file, bool verbose, const std::string & comments):
         _type(type),
         _file(file),
-        _verbose(verbose)
+        _verbose(verbose),
+        _comments(comments)
   {
       return;
   }
@@ -305,6 +310,16 @@ namespace Antioch
   ParserBase<NumericType>::~ParserBase()
   {
       return;
+  }
+
+  template <typename NumericType>
+  inline
+  void ParserBase<NumericType>::skip_comments_lines(std::ifstream & doc)
+  {
+     for(unsigned int c = 0; c < _comments.size(); c++)
+     {
+        skip_comment_lines(doc, _comments[c]);
+     }
   }
 
   template <typename NumericType>

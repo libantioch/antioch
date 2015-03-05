@@ -221,7 +221,7 @@ namespace Antioch
   template <typename NumericType>
   inline
   ASCIIParser<NumericType>::ASCIIParser(const std::string & file, bool verbose):
-        ParserBase<NumericType>("ascii",file,verbose),
+        ParserBase<NumericType>("ascii",file,verbose,"#!"),
         _doc(file.c_str())
   {
       if(!_doc.is_open())
@@ -232,7 +232,7 @@ namespace Antioch
 
       if(this->verbose())std::cout << "Having opened file " << file << std::endl;
 
-      skip_comment_lines(_doc, '#');
+      skip_comment_lines(_doc);
 
       _unit_map[MOL_WEIGHT]    = "g/mol";
       _unit_map[MASS_ENTHALPY] = "J/kg";
@@ -260,7 +260,7 @@ namespace Antioch
 
       if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
-      skip_comment_lines(_doc, '#');
+      skip_comment_lines(_doc);
   }
 
 
@@ -273,7 +273,7 @@ namespace Antioch
 
       while(_doc.good())
       {
-          skip_comment_lines(_doc, '#'); // if comments in the middle
+          skip_comment_lines(_doc); // if comments in the middle
           
           _doc >> spec;
 
@@ -319,7 +319,7 @@ namespace Antioch
     while (_doc.good())
       {
 
-         skip_comment_lines(_doc, '#'); // if comment in the middle
+         skip_comment_lines(_doc); // if comment in the middle
 
         _doc >> name;      // Species Name
         _doc >> mol_wght;  // molecular weight (kg/kmol)
@@ -376,7 +376,7 @@ namespace Antioch
     while (_doc.good())
       {
 
-        skip_comment_lines(_doc, '#'); // if comment in the middle
+        skip_comment_lines(_doc); // if comment in the middle
 
         _doc >> name;           // Species Name
         _doc >> theta_v;        // characteristic vibrational temperature (K)
@@ -465,7 +465,7 @@ namespace Antioch
 // \todo: only cea, should do NASA
     while (_doc.good())
       {
-        skip_comment_lines(_doc, '#');
+        skip_comment_lines(_doc);
 
         _doc >> name;   // Species Name
         _doc >> n_int;  // Number of T intervals: [200-1000], [1000-6000], ([6000-20000])
@@ -511,7 +511,7 @@ namespace Antioch
 // \todo: only cea, should do NASA
     while (_doc.good())
       {
-        skip_comment_lines(_doc, '#');
+        skip_comment_lines(_doc);
 
         _doc >> name;   // Species Name
         _doc >> n_int;  // Number of T intervals: [200-1000], [1000-6000], ([6000-20000])
@@ -557,7 +557,7 @@ namespace Antioch
 
     while (_doc.good())
       {
-          skip_comment_lines(_doc, '#');
+          skip_comment_lines(_doc);
 
           _doc >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
           if(transport.chemical_mixture().species_name_map().count(name))

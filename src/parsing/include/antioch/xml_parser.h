@@ -232,7 +232,7 @@ namespace Antioch{
   template <typename NumericType>
   inline
   XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
-        ParserBase<NumericType>("XML",filename,verbose),
+        ParserBase<NumericType>("XML",filename,verbose,""),
         _species_block(NULL),
         _reaction_block(NULL),
         _reaction(NULL),
