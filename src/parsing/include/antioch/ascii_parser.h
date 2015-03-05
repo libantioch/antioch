@@ -104,6 +104,9 @@ namespace Antioch
 
         bool initialize() {return false;}
 
+        //! set the indexes of to-be-ignored columns
+        void set_ignored_columns(const std::vector<unsigned int> & ignored);
+
 /////////////////
 // species
 ////////////////
@@ -209,12 +212,18 @@ namespace Antioch
         template <typename Mixture>
         void read_transport_data_root(Mixture & transport);
 
+        //! find the index of the wanted data
+        void find_first(unsigned int & index,unsigned int n_data) const;
+
         //! not allowed
         ASCIIParser();
 
         std::ifstream _doc;
         std::map<ParsingUnit,std::string> _unit_map;
-
+        const unsigned int _n_columns_chemical_species;
+        const unsigned int _n_columns_vib_data;
+        const unsigned int _n_columns_el_data;
+        const unsigned int _n_columns_transport_species;
   };
 
 
@@ -222,7 +231,11 @@ namespace Antioch
   inline
   ASCIIParser<NumericType>::ASCIIParser(const std::string & file, bool verbose):
         ParserBase<NumericType>("ascii",file,verbose,"#!"),
-        _doc(file.c_str())
+        _doc(file.c_str()),
+        _n_columns_chemical_species(4), // Spec.     Mol. Wt.,     Hform (0K),  cfs,   zns
+        _n_columns_vib_data(2),  // Species     Theta_v  degeneracy
+        _n_columns_el_data(2),  // Species     ThetaE     edg  #elevels
+        _n_columns_transport_species(5) // Species, eps/kB (K), sigma (ang), alpha (D), alpha (ang^3), Zrot@298 K
   {
       if(!_doc.is_open())
       {
@@ -263,6 +276,44 @@ namespace Antioch
       skip_comment_lines(_doc);
   }
 
+  template <typename NumericType>
+  inline
+  void ASCIIParser<NumericType>::find_first(unsigned int & index,unsigned int n_data) const
+  {
+        // slow algorithm so whatever order of ignored column is fine
+       bool find(true);
+       while(find)
+       {
+          find = false;
+          for(unsigned int ii = 0; ii < _ignored.size(); ii++)
+          {
+             if(index == _ignored[ii])
+             {
+                find = true;
+                index++;
+                break;
+             }
+          }
+       }
+
+       if(index > n_data)
+       {
+          std::cerr << "Error while reading " << _file << std::endl
+                    << "Total number of columns provided is " << n_data
+                    << " with " << _ignored.size() << " ignored column." << std::endl
+                    << "The provided ignored index are:\n";
+          for(unsigned int i = 0; i < _ignored.size(); i++)std::cerr << _ignored[i] << std::endl;
+          std::cerr << "Indexes start at zero, maybe try decreasing them?" << std::endl;
+          antioch_parsing_error("Error in ASCII parser");
+       }
+  }
+
+  template <typename NumericType>
+  inline
+  void ASCIIParser<NumericType>::set_ignored_columns(const std::vector<unsigned int> & ignored)
+  {
+      _ignored = ignored;
+  }
 
   template <typename NumericType>
   inline
@@ -313,7 +364,19 @@ namespace Antioch
     NumericType mol_wght, h_form, n_tr_dofs;
     int charge;
     NumericType mw_unit = Units<NumericType>(_unit_map.at(MOL_WEIGHT)).get_SI_factor();
-    NumericType ef_unit = Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor(); // not integrated yet the kg bugfix
+    NumericType ef_unit = Units<NumericType>(_unit_map.at(MASS_ENTHALPY)).get_SI_factor();
+
+    const unsigned int n_data = _n_columns_chemical_species + _ignored.size(); // we read all those columns
+    unsigned int imw(0);
+    this->find_first(imw,n_data);
+    unsigned int ihf(imw+1);
+    this->find_first(ihf,n_data);
+    unsigned int itrdofs(ihf+1);
+    this->find_first(itrdofs,n_data);
+    unsigned int ic(itrdofs+1);
+    this->find_first(ic,n_data);
+
+    std::vector<NumericType> read(n_data,0.);
 
     if(this->verbose())std::cout << "Reading species characteristics in file " << this->file() << std::endl;
     while (_doc.good())
@@ -322,10 +385,11 @@ namespace Antioch
          skip_comment_lines(_doc); // if comment in the middle
 
         _doc >> name;      // Species Name
-        _doc >> mol_wght;  // molecular weight (kg/kmol)
-        _doc >> h_form;    // heat of formation at Ok (J/kg)
-        _doc >> n_tr_dofs; // number of translational/rotational DOFs
-        _doc >> charge;    // charge number
+        for(unsigned int i = 0; i < n_data; i++)_doc >> read[i];
+        mol_wght  = read[imw];     // molecular weight (kg/kmol)
+        h_form    = read[ihf];     // heat of formation at Ok (J/kg)
+        n_tr_dofs = read[itrdofs]; // number of translational/rotational DOFs
+        charge    = int(read[ic]); // charge number
 
         mol_wght *= mw_unit; // to SI (kg/mol)
         h_form *= ef_unit; // to SI (J/kg)
@@ -372,6 +436,12 @@ namespace Antioch
     NumericType theta_v;
     unsigned int n_degeneracies;
 
+    const unsigned int n_data = _n_columns_vib_data + _ignored.size(); // we read all those columns
+    unsigned int itv(0);
+    this->find_first(itv,n_data);
+    unsigned int ide(itv+1);
+    this->find_first(ide,n_data);
+
     if(this->verbose())std::cout << "Reading vibrational data in file " << this->file() << std::endl;
     while (_doc.good())
       {
@@ -379,8 +449,9 @@ namespace Antioch
         skip_comment_lines(_doc); // if comment in the middle
 
         _doc >> name;           // Species Name
-        _doc >> theta_v;        // characteristic vibrational temperature (K)
-        _doc >> n_degeneracies; // degeneracy of the mode
+        for(unsigned int i = 0; i < n_data; i++)_doc >> read[i];
+        theta_v        = read[itv];                 // characteristic vibrational temperature (K)
+        n_degeneracies = (unsigned int)(read[ide]); // degeneracy of the mode
       
         // If we are still good, we have a valid set of thermodynamic
         // data for this species. Otherwise, we read past end-of-file 
@@ -416,13 +487,20 @@ namespace Antioch
     std::string name;
     NumericType theta_e;
     unsigned int n_degeneracies;
+
+    const unsigned int n_data = _n_columns_el_data + _ignored.size(); // we read all those columns
+    unsigned int ite(0);
+    this->find_first(ite,n_data);
+    unsigned int ide(ite+1);
+    this->find_first(ide,n_data);
     
     if(this->verbose())std::cout << "Reading electronic data in file " << this->file() << std::endl;
     while (_doc.good())
       {
         _doc >> name;           // Species Name
-        _doc >> theta_e;        // characteristic electronic temperature (K)
-        _doc >> n_degeneracies; // number of degeneracies for this level
+        for(unsigned int i = 0; i < n_data; i++)_doc >> read[i];
+        theta_e        = read[ite];                 // characteristic electronic temperature (K)
+        n_degeneracies = (unsigned int)(read[ide]); // number of degeneracies for this level
         
         // If we are still good, we have a valid set of thermodynamic
         // data for this species. Otherwise, we read past end-of-file 
