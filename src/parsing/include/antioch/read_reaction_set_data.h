@@ -56,7 +56,7 @@ namespace Antioch
   class ChemKinParser;
 
   template <typename NumericType>
-  class ChemKinParser;
+  class XMLParser;
 
  /*!\file read_reaction_set_data.h
   *

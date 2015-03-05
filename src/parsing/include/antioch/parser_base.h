@@ -75,7 +75,7 @@ namespace Antioch
   class StatMechThermodynamics;
 
   template <typename Macro, typename NumericType>
-  class IdealGasKineticsTheory;
+  class IdealGasMicroThermo;
 
   /*!\class ParserBase
 
@@ -106,7 +106,7 @@ namespace Antioch
   class ParserBase
   {
      public:
-        ParserBase(const std::string & type, const std::string & file, bool verbose = true);
+        ParserBase(const std::string & type, const std::string & file, bool verbose = true, const std::string & comments = "");
         virtual ~ParserBase();
 
         // initialize kinetics, mandatory
@@ -155,7 +155,7 @@ namespace Antioch
         //  NASA7 + Ideal Gas
         virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
                                                                            NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
-                                                                           IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
+                                                                           IdealGasMicroThermo<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
                                                                          >,
                                                            NumericType > & /*transport_mixture*/)  {not_implemented();}
 
@@ -163,7 +163,7 @@ namespace Antioch
         //  NASA9 + Ideal Gas
         virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
                                                                            NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
-                                                                           IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
+                                                                           IdealGasMicroThermo<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
                                                                          >,
                                                            NumericType > & /*transport_mixture*/)  {not_implemented();}
 
@@ -171,7 +171,7 @@ namespace Antioch
         //  CEA + Ideal Gas for backward compat
         virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
                                                                            CEAEvaluator<NumericType>,
-                                                                           IdealGasKineticsTheory<CEAEvaluator<NumericType>,NumericType> 
+                                                                           IdealGasMicroThermo<CEAEvaluator<NumericType>,NumericType> 
                                                                          >,
                                                            NumericType > & /*transport_mixture*/)  {not_implemented();}
 
@@ -283,7 +283,7 @@ namespace Antioch
 
      protected:
 
-        void skip_comments_lines(std::ifstream & doc);
+        void skip_comments(std::istream & doc);
 
         std::string _type;
         std::string _file;
@@ -314,7 +314,7 @@ namespace Antioch
 
   template <typename NumericType>
   inline
-  void ParserBase<NumericType>::skip_comments_lines(std::ifstream & doc)
+  void ParserBase<NumericType>::skip_comments(std::istream & doc)
   {
      for(unsigned int c = 0; c < _comments.size(); c++)
      {
