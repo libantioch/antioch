@@ -126,14 +126,14 @@
     </reaction>
     
     
-    <!-- reaction 0006    -->
+    <!-- reaction 0006 <E units="cal/mol"> 138812.8</E>, computed with bc    -->
     <reaction reversible="yes" type="Elementary" id="0006">
       <equation>C2 [=] 2 C </equation>
       <rateCoeff>
         <ModifiedArrhenius>
            <A>3.7e+11</A>
            <b>-0.42</b>
-           <E units="cal/mol">138812.8</E>
+           <E units="K">69900</E>
         </ModifiedArrhenius>
       </rateCoeff>
       <reactants>C2:1</reactants>
