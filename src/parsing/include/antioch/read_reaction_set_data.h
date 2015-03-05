@@ -173,7 +173,7 @@ namespace Antioch
         bool found(false);
         for(unsigned int i = 0; i < accepted_unit.size(); i++)
         {
-           if(default_unit.is_homogeneous(provided_unit))
+           if(Units<NumericType>(accepted_unit[i]).is_homogeneous(provided_unit))
            {
               found = true;
               break;
