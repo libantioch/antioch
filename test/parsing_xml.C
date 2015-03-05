@@ -247,8 +247,9 @@ int tester(const std::string &root_name)
 //C2 -> 2 C
   A = 3.7e11 * unitA_0.get_SI_factor();
   beta = -0.42;
-  Ea = 138812.8;
-  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal));
+//  Ea = 138812.8; // cal/mol
+  Ea = 69900; // K
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Scalar(1)));
 
 //CN -> C + N
   A = 2.5e11 * unitA_0.get_SI_factor();
