@@ -36,8 +36,10 @@
 #include "antioch/transport_species.h"
 #include "antioch/metaprogramming.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/transport_species_ascii_parsing.h"
+#include "antioch/parsing_enum.h"
+#include "antioch/transport_species_parsing.h"
 #include "antioch/default_filename.h"
+#include "antioch/parser_base.h"
 
 // C++
 #include <vector>
@@ -45,6 +47,16 @@
 
 namespace Antioch
 {
+
+  template <typename CoeffType>
+  class ASCIIParser;
+
+  template <typename CoeffType>
+  class ChemKinParser;
+
+  template <typename CoeffType>
+  class XMLParser;
+
   //! Class storing chemical mixture properties
   /*!
     This class manages the list of TransportSpecies for a requested set
@@ -59,7 +71,11 @@ namespace Antioch
   public:
     
     TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
-                      const std::string & filename = DefaultFilename::transport_mixture());
+                      const std::string & filename = DefaultFilename::transport_mixture(), 
+                      bool verbose = true, ParsingType type = ASCII );
+
+    TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
+                      ParserBase<CoeffType> * parser);
 
     ~TransportMixture();
 
@@ -154,14 +170,60 @@ namespace Antioch
 
   template<typename ThermoEvaluator,typename CoeffType>
   inline
-  TransportMixture<ThermoEvaluator,CoeffType>::TransportMixture( const ChemicalMixture<CoeffType>& chem_mix, const ThermoEvaluator & t, const std::string & filename )
+  TransportMixture<ThermoEvaluator,CoeffType>::TransportMixture( const ChemicalMixture<CoeffType>& chem_mix, const ThermoEvaluator & t, 
+                                                                 const std::string & filename, bool verbose, ParsingType type )
     : _chemical_mixture( chem_mix),
       _thermo(t),
       _transport_species(_chemical_mixture.n_species(), NULL )
   {
 
+   ParserBase<CoeffType> * parser(NULL);
+    switch(type)
+    {
+      case ASCII:
+         parser = new ASCIIParser<CoeffType>(filename,verbose);
+         break;
+      case CHEMKIN:
+         parser = new ChemKinParser<CoeffType>(filename,verbose);
+         break;
+      case XML:
+         parser = new XMLParser<CoeffType>(filename,verbose);
+         break;
+      default:
+         antioch_parsing_error("unknown type");
+    }
+
     // Now read in transport properties for the requested species and stash
-    read_transport_species_data_ascii(*this, filename);
+    read_transport_species_data(parser,*this);
+
+    // check we have everyone requested
+    for( unsigned int s = 0; s < _transport_species.size(); ++s )
+      {
+        if(!_transport_species[s]) // it is not mandatory, Blottner or Sutherland are self-sufficient
+        {
+           std::cerr << "Warning: missing transport data for species " << _chemical_mixture.species_inverse_name_map().at(
+                                                                          _chemical_mixture.species_list()[s]) << "\n"
+                     << "Be sure to use a transport model that does not require the default data"
+                     << std::endl;
+        }
+      }
+
+    delete parser;
+
+    return;
+
+  }
+
+  template<typename ThermoEvaluator,typename CoeffType>
+  inline
+  TransportMixture<ThermoEvaluator,CoeffType>::TransportMixture( const ChemicalMixture<CoeffType> &mixture, const ThermoEvaluator & t,
+                                                                 ParserBase<CoeffType> * parser)
+    : _chemical_mixture( mixture),
+      _thermo(t),
+      _transport_species(_chemical_mixture.n_species(), NULL )
+  {
+    // Now read in transport properties for the requested species and stash
+    read_transport_species_data(parser,*this);
 
     // check we have everyone requested
     for( unsigned int s = 0; s < _transport_species.size(); ++s )
