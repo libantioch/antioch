@@ -91,7 +91,7 @@ namespace Antioch
   class StatMechThermodynamics;
 
   template <typename Macro, typename NumericType>
-  class IdealGasKineticsTheory;
+  class IdealGasMicroThermo;
 
   template <typename NumericType>
   class ASCIIParser: public ParserBase<NumericType>
@@ -152,7 +152,7 @@ namespace Antioch
         //  NASA7 + Ideal Gas
         void read_transport_data(TransportMixture< ThermoHandler < NumericType,
                                                                    NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
-                                                                   IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
+                                                                   IdealGasMicroThermo<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
                                                                  >,
                                                    NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
 
@@ -160,7 +160,7 @@ namespace Antioch
         //  NASA9 + Ideal Gas
         void read_transport_data(TransportMixture< ThermoHandler < NumericType,
                                                                    NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
-                                                                   IdealGasKineticsTheory<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
+                                                                   IdealGasMicroThermo<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
                                                                  >,
                                                    NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
 
@@ -168,7 +168,7 @@ namespace Antioch
         //  CEA + Ideal Gas for backward compat
         void read_transport_data(TransportMixture< ThermoHandler < NumericType,
                                                                    CEAEvaluator<NumericType>,
-                                                                   IdealGasKineticsTheory<CEAEvaluator<NumericType>,NumericType>
+                                                                   IdealGasMicroThermo<CEAEvaluator<NumericType>,NumericType>
                                                                  >,
                                                    NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
 
@@ -220,6 +220,8 @@ namespace Antioch
 
         std::ifstream _doc;
         std::map<ParsingUnit,std::string> _unit_map;
+
+        std::vector<unsigned int> _ignored;
         const unsigned int _n_columns_chemical_species;
         const unsigned int _n_columns_vib_data;
         const unsigned int _n_columns_el_data;
@@ -245,7 +247,7 @@ namespace Antioch
 
       if(this->verbose())std::cout << "Having opened file " << file << std::endl;
 
-      skip_comment_lines(_doc);
+      this->skip_comments(_doc);
 
       _unit_map[MOL_WEIGHT]    = "g/mol";
       _unit_map[MASS_ENTHALPY] = "J/kg";
@@ -273,7 +275,7 @@ namespace Antioch
 
       if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
-      skip_comment_lines(_doc);
+      this->skip_comments(_doc);
   }
 
   template <typename NumericType>
@@ -298,7 +300,7 @@ namespace Antioch
 
        if(index > n_data)
        {
-          std::cerr << "Error while reading " << _file << std::endl
+          std::cerr << "Error while reading " << this->file() << std::endl
                     << "Total number of columns provided is " << n_data
                     << " with " << _ignored.size() << " ignored column." << std::endl
                     << "The provided ignored index are:\n";
@@ -324,7 +326,7 @@ namespace Antioch
 
       while(_doc.good())
       {
-          skip_comment_lines(_doc); // if comments in the middle
+          this->skip_comments(_doc); // if comments in the middle
           
           _doc >> spec;
 
@@ -382,7 +384,7 @@ namespace Antioch
     while (_doc.good())
       {
 
-         skip_comment_lines(_doc); // if comment in the middle
+         this->skip_comments(_doc); // if comment in the middle
 
         _doc >> name;      // Species Name
         for(unsigned int i = 0; i < n_data; i++)_doc >> read[i];
@@ -442,11 +444,13 @@ namespace Antioch
     unsigned int ide(itv+1);
     this->find_first(ide,n_data);
 
+    std::vector<NumericType> read(n_data,0);
+
     if(this->verbose())std::cout << "Reading vibrational data in file " << this->file() << std::endl;
     while (_doc.good())
       {
 
-        skip_comment_lines(_doc); // if comment in the middle
+        this->skip_comments(_doc); // if comment in the middle
 
         _doc >> name;           // Species Name
         for(unsigned int i = 0; i < n_data; i++)_doc >> read[i];
@@ -493,6 +497,8 @@ namespace Antioch
     this->find_first(ite,n_data);
     unsigned int ide(ite+1);
     this->find_first(ide,n_data);
+
+    std::vector<NumericType> read(n_data,0);
     
     if(this->verbose())std::cout << "Reading electronic data in file " << this->file() << std::endl;
     while (_doc.good())
@@ -543,7 +549,7 @@ namespace Antioch
 // \todo: only cea, should do NASA
     while (_doc.good())
       {
-        skip_comment_lines(_doc);
+        this->skip_comments(_doc);
 
         _doc >> name;   // Species Name
         _doc >> n_int;  // Number of T intervals: [200-1000], [1000-6000], ([6000-20000])
@@ -589,7 +595,7 @@ namespace Antioch
 // \todo: only cea, should do NASA
     while (_doc.good())
       {
-        skip_comment_lines(_doc);
+        this->skip_comments(_doc);
 
         _doc >> name;   // Species Name
         _doc >> n_int;  // Number of T intervals: [200-1000], [1000-6000], ([6000-20000])
@@ -633,11 +639,31 @@ namespace Antioch
     NumericType Zrot;
     NumericType SI_coeff = Antioch::Units<NumericType>("g/mol").get_SI_factor();
 
+    const unsigned int n_data = _n_columns_transport_species + _ignored.size(); // we read all those columns
+    unsigned int iLJeps(0);
+    this->find_first(iLJeps,n_data);
+    unsigned int iLJsig(iLJeps+1);
+    this->find_first(iLJsig,n_data);
+    unsigned int idip(iLJsig+1);
+    this->find_first(idip,n_data);
+    unsigned int ipol(idip+1);
+    this->find_first(ipol,n_data);
+    unsigned int irot(ipol+1);
+    this->find_first(irot,n_data);
+
+    std::vector<NumericType> read(n_data,0.);
+
     while (_doc.good())
       {
-          skip_comment_lines(_doc);
+          this->skip_comments(_doc);
 
-          _doc >> name >> LJ_eps_kB >> LJ_sigma >> dipole_moment>> pol >> Zrot;
+          _doc >> name;
+          for(unsigned int i = 0; i < n_data; i++)_doc >> read[i];
+          LJ_eps_kB     = read[iLJeps];
+          LJ_sigma      = read[iLJsig];
+          dipole_moment = read[idip];
+          pol           = read[ipol];
+          Zrot          = read[irot];
           if(transport.chemical_mixture().species_name_map().count(name))
           {
               unsigned int place = transport.chemical_mixture().species_name_map().at(name);
