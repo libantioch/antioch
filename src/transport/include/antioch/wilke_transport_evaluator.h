@@ -36,6 +36,7 @@
 #include "antioch/physics_metaprogramming_decl.h"
 #include "antioch/kinetics_conditions.h"
 #include "antioch/wilke_mixture.h"
+#include "antioch/cmath_shims.h"
 
 namespace Antioch
 {
@@ -104,9 +105,15 @@ namespace Antioch
     template <typename VectorStateType>
     typename
     Antioch::value_type<VectorStateType>::type
-    compute_phi( const VectorStateType& mu,
+    compute_phi( typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
                  const VectorStateType& chi,
                  const unsigned int s ) const;
+
+    //! Helper function to reduce code duplication.
+    /*! Computes the intermediate \mu,\mu matrix needed for Wilke's mixing rule.  */
+    template <typename VectorStateType>
+    void compute_mu_mu_sqrt( const VectorStateType & mu, 
+                             typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const;
 
   protected:
 
@@ -189,11 +196,17 @@ namespace Antioch
     VectorStateType mu  = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
     
+
+    typename Antioch::rebind<VectorStateType,VectorStateType>::type mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+
     this->compute_mu_chi( transport_conditions, mass_fractions, mu, chi );
+
+    this->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
 
     for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
-        typename value_type<VectorStateType>::type phi_s = this->compute_phi( mu, chi, s );
+        typename value_type<VectorStateType>::type phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
         
         mu_mix += mu[s]*chi[s]/phi_s;
       }
@@ -217,11 +230,16 @@ namespace Antioch
     VectorStateType mu  = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
 
+    typename Antioch::rebind<VectorStateType,VectorStateType>::type mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+
     this->compute_mu_chi( transport_conditions, mass_fractions, mu, chi );
+
+    this->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
 
     for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
-        typename value_type<VectorStateType>::type  phi_s = this->compute_phi( mu, chi, s );
+        typename value_type<VectorStateType>::type  phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
         
         typename value_type<VectorStateType>::type  k_s = zero_clone(transport_conditions.T());
         _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(transport_conditions.T()),transport_conditions, zero_clone(transport_conditions.T()), k_s); //\todo, better management
@@ -248,11 +266,16 @@ namespace Antioch
     VectorStateType mu  = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
 
+    typename Antioch::rebind<VectorStateType,VectorStateType>::type mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+
     this->compute_mu_chi( transport_conditions, mass_fractions, mu, chi );
+
+    this->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
 
     for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
       {
-        StateType phi_s = this->compute_phi( mu, chi, s );
+        StateType phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
         
         StateType k_s = zero_clone(transport_conditions.T());
         _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(transport_conditions.T()),transport_conditions, zero_clone(transport_conditions.T()), k_s); //\todo, better management
@@ -318,13 +341,18 @@ namespace Antioch
     VectorStateType k  = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
 
+    typename Antioch::rebind<VectorStateType,VectorStateType>::type mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+
     this->compute_mu_chi( transport_conditions, mass_fractions, mu, chi );
 
     this->D_and_k(mu, transport_conditions, rho , mass_fractions, k, ds );
 
+    this->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
+
     for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
       {
-        StateType phi_s = this->compute_phi( mu, chi, s );
+        StateType phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
 
         mu_mix += mu[s]*chi[s]/phi_s;
         k_mix += k[s]*chi[s]/phi_s;
@@ -361,7 +389,7 @@ namespace Antioch
   template <typename VectorStateType>
   typename
   Antioch::value_type<VectorStateType>::type
-  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::compute_phi( const VectorStateType& mu,
+  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::compute_phi(typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
                                                                         const VectorStateType& chi,
                                                                         const unsigned int s ) const
   {
@@ -374,17 +402,55 @@ namespace Antioch
        since some StateTypes have a hard time initializing from
        a constant. */
     // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/sqrt(8*(1+Ms/Mr))
-    const StateType dummy = 1 + sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
+    const StateType dummy = 1 + mu_mu_sqrt[s][0]*_mixture.Mr_Ms_to_the_one_fourth(0,s);
     StateType phi_s = chi[0]*dummy*dummy/_mixture.denominator(0,s);
 
     for(unsigned int r = 1; r < _mixture.chem_mixture().n_species(); r++ )
       {
-        const StateType numerator = 1 + sqrt(mu[s]/mu[r])*_mixture.Mr_Ms_to_the_one_fourth(r,s);
+        const StateType numerator = 1 + mu_mu_sqrt[s][r]*_mixture.Mr_Ms_to_the_one_fourth(r,s);
         phi_s += chi[r]*numerator*numerator/_mixture.denominator(r,s);
       }
 
     return phi_s;
   }
+
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template <typename VectorStateType>
+  inline
+  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::compute_mu_mu_sqrt( const VectorStateType & mu, 
+                                                    typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const
+                                        
+  {
+    antioch_assert_equal_to(mu.size(),mu_mu_sqrt.size()); // indeed square matrix
+    antioch_assert_greater(mu.size(),0); // not empty
+#ifndef NDEBUG
+    for(unsigned int i = 0; i < mu.size(); i++)
+    {
+        antioch_assert_equal_to(mu.size(),mu_mu_sqrt[i].size());
+    }
+#endif
+
+/// first the diagonal
+    for(unsigned int s = 0; s < mu.size(); s++)
+    {
+       mu_mu_sqrt[s][s] = Antioch::constant_clone(mu[s],1);
+    }
+///then the square roots and the inversion (first row, first column)
+   for(unsigned int s = 1; s < mu.size(); s++)
+   {
+      mu_mu_sqrt[0][s] = ant_sqrt(mu[0]/mu[s]);
+      mu_mu_sqrt[s][0] = Antioch::constant_clone(mu[0],1)/mu_mu_sqrt[0][s];
+   }
+/// now the remaining n-2 matrix, using the fact that mu[i]/mu[j] = mu[i]/mu[0] * mu[0]/mu[j]
+  for(unsigned int s = 1; s < mu.size(); s++)
+  {
+    for(unsigned int l = 1; l < mu.size(); l++)
+    {
+        if(l == s)continue;
+        mu_mu_sqrt[s][l] = mu_mu_sqrt[s][0] * mu_mu_sqrt[0][l];
+    }
+  }
+ }
 
 } // end namespace Antioch
 
