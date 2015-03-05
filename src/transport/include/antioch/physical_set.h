@@ -28,6 +28,7 @@
 
 // Antioch
 #include "antioch/physics_metaprogramming_decl.h"
+#include "antioch/kinetics_conditions.h"
 
 // C++
 #include <iostream>
@@ -111,20 +112,22 @@ namespace Antioch
         void reset_model(const InitType & initMe);
 
         // viscosity one species
-        template<typename StateType>
-        void compute_viscosity(unsigned int s, const StateType & T, StateType & mu) const;
+        template<typename StateType, typename VectorStateType>
+        void compute_viscosity(unsigned int s, const KineticsConditions<StateType,VectorStateType> & conditions, StateType & mu) const;
 
         // viscosity full set
         template<typename StateType, typename VectorStateType>
-        void compute_viscosities(const StateType & T, VectorStateType & mu) const;
+        void compute_viscosities(const KineticsConditions<StateType,VectorStateType> & conditions, VectorStateType & mu) const;
 
         // diffusion full set (set level, matrix)
-        template<typename StateType, typename MatrixStateType>
-        void compute_binary_diffusion_matrix(const StateType & T, const StateType & cTot, MatrixStateType & Ds) const;
+        template<typename StateType, typename VectorStateType, typename MatrixStateType>
+        void compute_binary_diffusion_matrix(const KineticsConditions<StateType, VectorStateType> & conditions, 
+                                             const StateType & cTot, MatrixStateType & Ds) const;
 
         // diffusion self coefficient
-        template<typename StateType>
-        void compute_self_diffusion(unsigned int s, const StateType & T, const StateType & cTot, StateType & dss) const;
+        template<typename StateType, typename VectorStateType>
+        void compute_self_diffusion(unsigned int s, const KineticsConditions<StateType,VectorStateType> & conditions, 
+                                    const StateType & cTot, StateType & dss) const;
 
         // diffusion species (mixture level, scalar)
         template<typename StateType>
@@ -135,12 +138,14 @@ namespace Antioch
         void compute_diffusivities(const StateType & rho, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds) const;
 
         // thermal conduction one species
-        template<typename StateType>
-        void compute_thermal_conductivity(unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, StateType & k) const;
+        template<typename StateType, typename VectorStateType>
+        void compute_thermal_conductivity(unsigned int s, const StateType & mu, const StateType & dss, 
+                                          const KineticsConditions<StateType, VectorStateType> & conditions, const StateType & rho, StateType & k) const;
 
         // thermal conduction full set
         template<typename StateType, typename VectorStateType>
-        void compute_thermal_conductivities(const VectorStateType & mu, const VectorStateType & dss, const StateType & T, const StateType & rho, VectorStateType & k) const;
+        void compute_thermal_conductivities(const VectorStateType & mu, const VectorStateType & dss, 
+                                            const KineticsConditions<StateType, VectorStateType> & conditions, const StateType & rho, VectorStateType & k) const;
 
         void print(std::ostream & out = std::cout) const;
 
@@ -250,38 +255,38 @@ namespace Antioch
 
   // viscosity one
   template<typename Physics, typename Mixture>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
-  void PhysicalSet<Physics,Mixture>::compute_viscosity(unsigned int s, const StateType & T, StateType & mu) const
+  void PhysicalSet<Physics,Mixture>::compute_viscosity(unsigned int s, const KineticsConditions<StateType, VectorStateType> & conditions, StateType & mu) const
   {
-     physical_set_operator_viscosity(_set,s,T, mu, typename physical_tag<Physics>::viscosity_type());
+     physical_set_operator_viscosity(_set,s,conditions.T(), mu, typename physical_tag<Physics>::viscosity_type());
   }
 
   // viscosity full
   template<typename Physics, typename Mixture>
   template<typename StateType, typename VectorStateType >
   inline
-  void PhysicalSet<Physics,Mixture>::compute_viscosities(const StateType & T, VectorStateType &mu) const
+  void PhysicalSet<Physics,Mixture>::compute_viscosities(const KineticsConditions<StateType,VectorStateType> & conditions, VectorStateType &mu) const
   {
-      physical_set_operator_viscosity(_set,T,mu, typename physical_tag<Physics>::viscosity_type());
+      physical_set_operator_viscosity(_set,conditions.T(),mu, typename physical_tag<Physics>::viscosity_type());
   }
 
   // diffusion full
   template<typename Physics, typename Mixture>
-  template<typename StateType, typename MatrixStateType>
+  template<typename StateType, typename VectorStateType, typename MatrixStateType>
   inline
-  void PhysicalSet<Physics,Mixture>::compute_binary_diffusion_matrix(const StateType & T, const StateType & cTot, MatrixStateType & Ds) const 
+  void PhysicalSet<Physics,Mixture>::compute_binary_diffusion_matrix(const KineticsConditions<StateType,VectorStateType> & conditions, const StateType & cTot, MatrixStateType & Ds) const 
   {
-    physical_set_operator_diffusion(_set, T, cTot, Ds, typename physical_tag<Physics>::diffusion_species_type());
+    physical_set_operator_diffusion(_set, conditions.T(), cTot, Ds, typename physical_tag<Physics>::diffusion_species_type());
   }
 
   // diffusion self-diffusion
   template<typename Physics, typename Mixture>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
-  void PhysicalSet<Physics,Mixture>::compute_self_diffusion(unsigned int s, const StateType & T, const StateType & cTot, StateType & dss) const 
+  void PhysicalSet<Physics,Mixture>::compute_self_diffusion(unsigned int s, const KineticsConditions<StateType,VectorStateType> & conditions, const StateType & cTot, StateType & dss) const 
   {
-    physical_set_operator_diffusion(s,_set, T, cTot, dss, typename physical_tag<Physics>::diffusion_species_type());
+    physical_set_operator_diffusion(s,_set, conditions.T(), cTot, dss, typename physical_tag<Physics>::diffusion_species_type());
   }
 
   // diffusion one, mixture level
@@ -304,20 +309,22 @@ namespace Antioch
 
   // thermal conductivity one
   template<typename Physics, typename Mixture>
-  template<typename StateType>
+  template<typename StateType, typename VectorStateType>
   inline
-  void PhysicalSet<Physics,Mixture>::compute_thermal_conductivity(unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, StateType & k) const
+  void PhysicalSet<Physics,Mixture>::compute_thermal_conductivity(unsigned int s, const StateType & mu, const StateType & dss, 
+                                                                  const KineticsConditions<StateType,VectorStateType> & conditions, const StateType & rho, StateType & k) const
   {
-    physical_set_operator_thermal_conductivity(_set, s, mu, dss, T, rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
+    physical_set_operator_thermal_conductivity(_set, s, mu, dss, conditions.T(), rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
   }
 
   // thermal conductivity full
   template<typename Physics, typename Mixture>
   template<typename StateType, typename VectorStateType>
   inline
-  void PhysicalSet<Physics,Mixture>::compute_thermal_conductivities(const VectorStateType & mu, const VectorStateType & dss, const StateType & T, const StateType & rho, VectorStateType & k) const
+  void PhysicalSet<Physics,Mixture>::compute_thermal_conductivities(const VectorStateType & mu, const VectorStateType & dss, 
+                                                                    const KineticsConditions<StateType,VectorStateType> & conditions, const StateType & rho, VectorStateType & k) const
   {
-    physical_set_operator_thermal_conductivity(_set, mu, dss, T, rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
+    physical_set_operator_thermal_conductivity(_set, mu, dss, conditions.T(), rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
   }
 }
 
