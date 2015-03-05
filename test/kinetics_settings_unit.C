@@ -212,7 +212,7 @@ int tester()
 
 //// reset
   Scalar Cf_reset = 1e-7L;
-  Scalar eta_reset = 0.8L;
+  Scalar eta_reset = 1.5L;
   Scalar Ea_reset = 36000.L;
   Scalar D_reset = -5.e-2L;
   Scalar Tref_reset = 298.;
