@@ -29,6 +29,7 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/particle_flux.h"
+#include "antioch/temp_cache.h"
 
 // C++
 #include <vector>
@@ -69,14 +70,19 @@ namespace Antioch{
           void add_particle_flux(const ParticleFlux<VectorStateType> & pf, unsigned int nr);
 
           const StateType & T() const;
+ 
+          const StateType & Tvib() const;
+
+          const TempCache<StateType> & temp_cache() const;
 
           const ParticleFlux<VectorStateType> & particle_flux(int nr) const;
 
         private:
 
           KineticsConditions();
-        // const temperature is
-          const StateType & _temperature; 
+
+          TempCache<StateType> _temperature; 
+
         // pointer's not const, particle flux is
           std::map<unsigned int,ParticleFlux<VectorStateType> const * const > _map_pf; 
 
@@ -109,7 +115,14 @@ namespace Antioch{
   inline
   const StateType & KineticsConditions<StateType,VectorStateType>::T() const
   {
-     return _temperature;
+     return _temperature.T;
+  }
+
+  template <typename StateType, typename VectorStateType>
+  inline
+  const StateType & KineticsConditions<StateType,VectorStateType>::Tvib() const
+  {
+     return _temperature.T;
   }
 
   template <typename StateType, typename VectorStateType>
@@ -120,6 +133,12 @@ namespace Antioch{
      return *(_map_pf.at(nr));
   }
 
+  template <typename StateType, typename VectorStateType>
+  inline
+  const TempCache<StateType> & KineticsConditions<StateType,VectorStateType>::temp_cache() const
+  {
+     return _temperature;
+  }
 
 } //end namespace Antioch
 
