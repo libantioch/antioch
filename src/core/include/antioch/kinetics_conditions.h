@@ -70,7 +70,10 @@ namespace Antioch{
           void add_particle_flux(const ParticleFlux<VectorStateType> & pf, unsigned int nr);
 
           const StateType & T() const;
- 
+
+          //! returns the temperature T,
+          //
+          // \todo generalize
           const StateType & Tvib() const;
 
           const TempCache<StateType> & temp_cache() const;
