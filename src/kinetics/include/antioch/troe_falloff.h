@@ -297,7 +297,7 @@ namespace Antioch
     // Compute log(Fcent) once
     StateType logFcent = ant_log(Fcent);
     // n and c and derivatives
-    StateType  d = Antioch::constant_clone(T, 0.14L);
+    StateType  d = Antioch::constant_clone(T, CoeffType(0.14L));
     StateType  c = - CoeffType(0.4L) - _c_coeff * logFcent;
     StateType  n = CoeffType(0.75L) - _n_coeff * logFcent;
     StateType dc_dT = - _c_coeff * dFcent_dT/Fcent;
