@@ -43,7 +43,12 @@ namespace Antioch
   /*!\class FalloffThreeBodyReaction
   * Base class for falloff processes coupled with efficiencies
   *
-  * This class encapsulates a bastard between falloff and three-body reaction.
+  * This class encapsulates a model between falloff and three-body reaction.
+  *
+  * Sylvain: I strongly disapprove using this model, 
+  *   see section ``A twist in the physics: three-body falloff" in section 2.2.2 Kinetics computing
+  *   of the [model documentation](https://github.com/libantioch/model_doc).
+  *
   * It performs the common operations.
   * A falloff rate constant is defined by the equation
   * \f[
