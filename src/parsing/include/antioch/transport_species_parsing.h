@@ -52,7 +52,7 @@ namespace Antioch{
 
 
   template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data_ascii(ParserBase<NumericType> * parser, TransportMixture<ThermoEvaluator,NumericType> & transport)
+  void read_transport_species_data(ParserBase<NumericType> * parser, TransportMixture<ThermoEvaluator,NumericType> & transport)
   {
 
     switch(parser->enum_type())

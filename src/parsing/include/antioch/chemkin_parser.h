@@ -290,7 +290,7 @@ namespace Antioch{
   template <typename NumericType>
   inline
   ChemKinParser<NumericType>::ChemKinParser(const std::string &filename, bool verbose):
-        ParserBase<NumericType>("ChemKin",filename,verbose),
+        ParserBase<NumericType>("ChemKin",filename,verbose,"!"),
         _doc(filename.c_str()),
         _duplicate_process(false),
         _next_is_reverse(false)
@@ -1262,7 +1262,7 @@ namespace Antioch{
     std::vector<NumericType> coeffs;
     std::vector<NumericType> temps(3,0.);
 
-    skip_comment_lines(_doc, '!');
+    this->skip_comments(_doc);
 
 // chemkin classic
 // only two intervals
@@ -1271,7 +1271,7 @@ namespace Antioch{
     while (_doc.good())
       {
         std::stringstream tmp;
-        skip_comment_lines(_doc, '!'); // comments in middle
+        this->skip_comments(_doc); // comments in middle
 
         if(!ascii_getline(_doc,line))break;
 
