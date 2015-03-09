@@ -38,20 +38,20 @@ int tester()
   using std::exp;
   using std::pow;
 
-  const Scalar Cf = 1.4;
-  const Scalar Ea = 5.0;
-  const Scalar beta = 1.2;
-  const Scalar D = 2.5;
+  const Scalar Cf = 1.4L;
+  const Scalar Ea = 5.0L;
+  const Scalar beta = 1.2L;
+  const Scalar D = 2.5e-2L;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);
 
   int return_flag = 0;
   std::vector<Scalar> mol_densities;
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
