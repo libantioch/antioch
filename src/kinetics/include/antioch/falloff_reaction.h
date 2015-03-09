@@ -178,7 +178,7 @@ namespace Antioch
     const StateType k0   = (*this->_forward_rate[0])(conditions);
     const StateType kinf = (*this->_forward_rate[1])(conditions);
 
-    return k0 / (ant_pow(M,-1) + k0 / kinf) * _F(T,M,k0,kinf);
+    return k0 / (ant_pow(M,-1) + k0 / kinf) * _F(conditions.T(),M,k0,kinf);
   }
 
   template<typename CoeffType, typename FalloffType>
@@ -209,7 +209,7 @@ namespace Antioch
     StateType f = Antioch::zero_clone(M);
     StateType df_dT = Antioch::zero_clone(M);
     VectorStateType df_dX = Antioch::zero_clone(molar_densities);
-    _F.F_and_derivatives(conditions.T(),molar_densities,k0,dk0_dT,kinf,dkinf_dT,f,df_dT,df_dX);
+    _F.F_and_derivatives(conditions.T(),M,k0,dk0_dT,kinf,dkinf_dT,f,df_dT,df_dX);
 
 // k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
     kfwd = k0 / (ant_pow(M,-1) + k0/kinf); //temp variable here for calculations dk_d{T,X}
