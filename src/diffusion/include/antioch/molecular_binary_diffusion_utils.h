@@ -191,9 +191,28 @@ namespace Antioch
        VectorStateType molar_fractions = zero_clone(mass_fractions);
        mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
 
+// EGlib traces management, see doc: http://blanche.polytechnique.fr/www.eglib/manual.ps
+// page 5
+       typename value_type<VectorStateType>::type eps(1e-16);
+       typename value_type<VectorStateType>::type mol_frac_sum = zero_clone(mass_fractions[0]);
+       for(unsigned int s = 0; s < molar_fractions.size(); s++)
+       {
+         mol_frac_sum += molar_fractions[s];
+       }
+       mol_frac_sum /= (typename rebind< unsigned int, typename value_type<VectorStateType>::type >::type)(molar_fractions.size());
+
+       typename value_type<VectorStateType>::type M_tr = zero_clone(mass_fractions[0]);
+       for(unsigned int s = 0; s < molar_fractions.size(); s++)
+       {
+         molar_fractions[s] += eps * (mol_frac_sum - molar_fractions[s]); // add perturbation
+         M_tr += molar_fractions[s] * mixture.M(s);
+       }
+           
+
+// mass_fraction = molar_fraction * molar_mass / perturbed_molar_mass
        for(unsigned int s = 0; s < ds.size(); s++)
        {
-          ds[s] = constant_clone(mass_fractions[s],1) - mass_fractions[s];
+          ds[s] = constant_clone(mass_fractions[s],1) - mixture.M(s) / M_tr * molar_fractions[s];
           typename value_type<VectorStateType>::type denom = zero_clone(mass_fractions[0]);
           for(unsigned int j = 0; j < ds.size(); j++)
           {
