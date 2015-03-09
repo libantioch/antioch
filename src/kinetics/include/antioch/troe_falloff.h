@@ -109,8 +109,8 @@ namespace Antioch
   class TroeFalloff
   {
   public:
-    TroeFalloff(const unsigned int nspec, const CoeffType alpha=0.,
-                const CoeffType T3 = 0., const CoeffType T1 = 0.,
+    TroeFalloff(const unsigned int nspec, const CoeffType alpha=0,
+                const CoeffType T3 = 0, const CoeffType T1 = 0,
                 const CoeffType T2 = 1e50);
 
     ~TroeFalloff();
@@ -211,19 +211,19 @@ namespace Antioch
     ANTIOCH_AUTO(StateType) Pr = M * k0/kinf;
     // c = -0.4 - 0.67 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    StateType  c = - 0.4L - _c_coeff*logFcent;
+    StateType  c = - CoeffType(0.4L) - _c_coeff*logFcent;
 
     // n = 0.75 - 1.27 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    ANTIOCH_AUTO(StateType) n = 0.75L - _n_coeff*logFcent;
-    ANTIOCH_AUTO(StateType) d = Antioch::constant_clone(T, 0.14);
+    ANTIOCH_AUTO(StateType) n = CoeffType(0.75L) - _n_coeff*logFcent;
+    ANTIOCH_AUTO(StateType) d = constant_clone(T,0.14L);
 
     StateType log10Pr = Constants::log10_to_log<CoeffType>() * ant_log(Pr);
 
     //log10F =  log10(Fcent) / [1+((log10(Pr) + c)/(n - d*(log10(Pr) + c) ))^2]
     //logF =  log(Fcent) / [1+((log10(Pr) + c)/(n - d*(log10(Pr) + c) ))^2]
     ANTIOCH_AUTO(StateType) logF =
-      logFcent/(1.L + ant_pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2) );
+      logFcent/(1 + ant_pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2) );
 
     return ant_exp(logF);
   }
@@ -236,7 +236,7 @@ namespace Antioch
   {
      
     // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
-    StateType Fc = (1.L - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
+    StateType Fc = (1 - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
 
     if(_T2 != 1e50)Fc += ant_exp(-_T2/T);
 
@@ -250,8 +250,8 @@ namespace Antioch
   {
     
     // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
-    Fc = (1.L - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
-    dFc_dT = (_alpha - 1.L)/_T3 * ant_exp(-T/_T3) - _alpha/_T1 * ant_exp(-T/_T1);
+    Fc = (1 - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
+    dFc_dT = (_alpha - 1)/_T3 * ant_exp(-T/_T3) - _alpha/_T1 * ant_exp(-T/_T1);
 
     if(_T2 != 1e50)
       {
@@ -298,24 +298,24 @@ namespace Antioch
     StateType logFcent = ant_log(Fcent);
     // n and c and derivatives
     StateType  d = Antioch::constant_clone(T, 0.14L);
-    StateType  c = - 0.4L - _c_coeff * logFcent;
-    StateType  n = 0.75L - _n_coeff * logFcent;
+    StateType  c = - CoeffType(0.4L) - _c_coeff * logFcent;
+    StateType  n = CoeffType(0.75L) - _n_coeff * logFcent;
     StateType dc_dT = - _c_coeff * dFcent_dT/Fcent;
     ANTIOCH_AUTO(StateType) dn_dT = - _n_coeff * dFcent_dT/Fcent;
 
     //log10F
-    StateType logF = logFcent/(1.L + ant_pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2));
+    StateType logF = logFcent/(1 + ant_pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2));
     StateType dlogF_dT = logF * (dlog10Fcent_dT / Fcent 
-                                     - 2.L * ant_pow((log10Pr + c)/(n - d * (log10Pr + c)),2)
+                                     - 2 * ant_pow((log10Pr + c)/(n - d * (log10Pr + c)),2)
                                        * ((dlog10Pr_dT + dc_dT)/(log10Pr + c) -
                                           (dn_dT - d * (dlog10Pr_dT + dc_dT))/(n - d * (log10Pr + c))
                                          )
-                                       / (1.L + ant_pow((log10Pr + c)/(n - d * (log10Pr + c)),2))
+                                       / (1 + ant_pow((log10Pr + c)/(n - d * (log10Pr + c)),2))
                                     );
     VectorStateType dlogF_dX = Antioch::zero_clone(dF_dX);
     for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
       {//dlogF_dX = - logF^2/log(Fcent) * dlog10Pr_dX * (1 - 1/(n - d * (log10Pr + c))) * (log10Pr + c)
-        dlogF_dX[ip] = - ant_pow(logF,2)/logFcent * dlog10Pr_dX[ip] *(1.L - 1.L/(n - d * (log10Pr + c))) * (log10Pr + c);
+        dlogF_dX[ip] = - ant_pow(logF,2)/logFcent * dlog10Pr_dX[ip] *(1 - 1/(n - d * (log10Pr + c))) * (log10Pr + c);
       }
 
     F = ant_exp(logF);
@@ -338,8 +338,8 @@ namespace Antioch
     _T3(T3),
     _T1(T1),
     _T2(T2),
-    _c_coeff( 0.67L*Constants::log10_to_log<CoeffType>() ),
-    _n_coeff( 1.27L*Constants::log10_to_log<CoeffType>() )
+    _c_coeff( 0.67L * Constants::log10_to_log<CoeffType>() ),
+    _n_coeff( 1.27L * Constants::log10_to_log<CoeffType>() )
   {
     return;
   }
