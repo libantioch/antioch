@@ -109,10 +109,10 @@ namespace Antioch{
   KineticsTheoryThermalConductivity<ThermoEvaluator,CoeffType>::KineticsTheoryThermalConductivity(const ThermoEvaluator & t, const CoeffType & Z_298K, const CoeffType & LJ_depth):
         _thermo(t),
         _rot(Z_298K,LJ_depth),
-        five_over_two(5.L/2.L),
-        five_over_three(5.L/3.L),
-        two_over_pi(2.L/Constants::pi<CoeffType>()),
-        one(1.L)
+        five_over_two(CoeffType(5)/CoeffType(2)),
+        five_over_three(CoeffType(5)/CoeffType(3)),
+        two_over_pi(2/Constants::pi<CoeffType>()),
+        one(1)
   {
       return;
   }

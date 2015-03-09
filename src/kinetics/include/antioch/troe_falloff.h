@@ -211,11 +211,11 @@ namespace Antioch
     ANTIOCH_AUTO(StateType) Pr = M * k0/kinf;
     // c = -0.4 - 0.67 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    StateType  c = - CoeffType(0.4L) - _c_coeff*logFcent;
+    StateType  c = - CoeffType(0.4L) - _c_coeff * logFcent;
 
     // n = 0.75 - 1.27 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    ANTIOCH_AUTO(StateType) n = CoeffType(0.75L) - _n_coeff*logFcent;
+    ANTIOCH_AUTO(StateType) n = CoeffType(0.75L) - _n_coeff * logFcent;
     ANTIOCH_AUTO(StateType) d = constant_clone(T,0.14L);
 
     StateType log10Pr = Constants::log10_to_log<CoeffType>() * ant_log(Pr);
@@ -338,8 +338,8 @@ namespace Antioch
     _T3(T3),
     _T1(T1),
     _T2(T2),
-    _c_coeff( 0.67L * Constants::log10_to_log<CoeffType>() ),
-    _n_coeff( 1.27L * Constants::log10_to_log<CoeffType>() )
+    _c_coeff( CoeffType(0.67L) * Constants::log10_to_log<CoeffType>() ),
+    _n_coeff( CoeffType(1.27L) * Constants::log10_to_log<CoeffType>() )
   {
     return;
   }

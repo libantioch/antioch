@@ -44,10 +44,12 @@ namespace Antioch
 
         void reset_coeffs(const CoeffType & rot, const CoeffType & depth);
 
+        // \todo
+        // cache _eps_kb / 298
         template <typename StateType>
         ANTIOCH_AUTO(StateType)
           operator()(const StateType & T) const
-        ANTIOCH_AUTOFUNC(StateType, _z_298 * this->F(_eps_kb/CoeffType(298.L)) / this->F(StateType(_eps_kb/T)))
+        ANTIOCH_AUTOFUNC(StateType, _z_298 * this->F(_eps_kb / 298) / this->F(StateType(_eps_kb/T)))
 
         //!
         const CoeffType & Z_298() const;
@@ -76,10 +78,10 @@ namespace Antioch
   RotationalRelaxation<CoeffType>::RotationalRelaxation(const CoeffType & z_298, const CoeffType & eps_kb):
                 _z_298(z_298),
                 _eps_kb(eps_kb),
-                _one((CoeffType)1.L),
-                _pi32_2(ant_pow(Constants::pi<CoeffType>(),1.5) / 2.L),
-                _pi2_4_plus_2(Constants::pi<CoeffType>() * Constants::pi<CoeffType>() / 4.L + 2.L),
-                _pi32(ant_pow(Constants::pi<CoeffType>(),1.5))
+                _one(1),
+                _pi32_2(ant_pow(Constants::pi<CoeffType>(),CoeffType(1.5)) / 2),
+                _pi2_4_plus_2(Constants::pi<CoeffType>() * Constants::pi<CoeffType>() / 4 + 2),
+                _pi32(ant_pow(Constants::pi<CoeffType>(),CoeffType(1.5)))
   {
      return;
   }
