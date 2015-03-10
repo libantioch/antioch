@@ -26,9 +26,13 @@
 #ifndef ANTIOCH_MOLECULAR_BINARY_DIFFUSION_UTILS_H
 #define ANTIOCH_MOLECULAR_BINARY_DIFFUSION_UTILS_H
 
+// Antioch
 #include "antioch/transport_species.h"
 #include "antioch/molecular_binary_diffusion_utils_decl.h"
 #include "antioch/molecular_binary_diffusion_building.h"
+
+// C++
+#include <limits>
 
 namespace Antioch
 {
@@ -188,20 +192,26 @@ namespace Antioch
        antioch_assert_equal_to(ds.size(),mixture.n_species());
        antioch_assert_equal_to(ds.size(),mass_fractions.size());
 
+        // convenient
+       typedef typename value_type<VectorStateType>::type StateType;
+
        VectorStateType molar_fractions = zero_clone(mass_fractions);
        mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
 
 // EGlib traces management, see doc: http://blanche.polytechnique.fr/www.eglib/manual.ps
 // page 5
-       typename value_type<VectorStateType>::type eps(1e-16);
-       typename value_type<VectorStateType>::type mol_frac_sum = zero_clone(mass_fractions[0]);
+// EGlib uses eps = 1e-16
+       typename raw_type<StateType>::type eps(std::numeric_limits<StateType>::epsilon() * 10);
+       StateType mol_frac_sum = zero_clone(mass_fractions[0]);
        for(unsigned int s = 0; s < molar_fractions.size(); s++)
        {
          mol_frac_sum += molar_fractions[s];
        }
-       mol_frac_sum /= (typename rebind< unsigned int, typename value_type<VectorStateType>::type >::type)(molar_fractions.size());
+       mol_frac_sum /= (typename rebind< unsigned int, StateType >::type)(molar_fractions.size());
 
-       typename value_type<VectorStateType>::type M_tr = zero_clone(mass_fractions[0]);
+// (i) evaluate perturbed mole fractions
+// (ii) evaluate the perturbed mean molar weight ...
+       StateType M_tr = zero_clone(mass_fractions[0]);
        for(unsigned int s = 0; s < molar_fractions.size(); s++)
        {
          molar_fractions[s] += eps * (mol_frac_sum - molar_fractions[s]); // add perturbation
@@ -209,11 +219,12 @@ namespace Antioch
        }
            
 
-// mass_fraction = molar_fraction * molar_mass / perturbed_molar_mass
+// (ii) .. evaluate perturbed mass_fraction [= molar_fraction * molar_mass / perturbed_molar_mass]
+// (iii) use perturbed values to evaluate the transport properties [ (1 - y_s) / sum_i x_i / D_{is} ]
        for(unsigned int s = 0; s < ds.size(); s++)
        {
-          ds[s] = constant_clone(mass_fractions[s],1) - mixture.M(s) / M_tr * molar_fractions[s];
-          typename value_type<VectorStateType>::type denom = zero_clone(mass_fractions[0]);
+          ds[s] = StateType(1) - mixture.M(s) / M_tr * molar_fractions[s];
+          StateType denom = zero_clone(mass_fractions[0]);
           for(unsigned int j = 0; j < ds.size(); j++)
           {
              if(j == s)continue;
