@@ -76,8 +76,8 @@ int tester(const std::string & type)
      M += epsilon[i] * mol_densities[i];
   }
 
-  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 300 < 5e-16)?5e-16:
-                                                                            std::numeric_limits<Scalar>::epsilon() * 300;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 800;
+
   std::cout << type << ", tolerance = " << tol;
   Scalar max_diff(-1.L);
 
