@@ -12,14 +12,14 @@
 #include "antioch/molecular_binary_diffusion.h"
 #include "antioch/kinetics_theory_viscosity.h"
 #include "antioch/cea_curve_fit.h"
-#include "antioch/cea_mixture.h"
-#include "antioch/cea_evaluator.h"
+#include "antioch/nasa_mixture.h"
+#include "antioch/nasa_evaluator.h"
 #include "antioch/ideal_gas_micro_thermo.h"
 #include "antioch/thermo_handler.h"
 #include "antioch/transport_mixture.h"
 #include "antioch/gsl_spliner.h"
 #include "antioch/physical_set.h"
-#include "antioch/cea_mixture_ascii_parsing.h"
+#include "antioch/cea_mixture_parsing.h"
 #include "antioch/kinetics_theory_viscosity_building.h"
 #include "antioch/molecular_binary_diffusion_building.h"
 #include "antioch/default_filename.h"
@@ -68,11 +68,11 @@ int tester()
   Antioch::ChemicalMixture<Scalar> chem_mixture( molecules );
 
   // macro thermo
-  Antioch::CEAThermoMixture<Scalar> nasa_mixture( chem_mixture );
-  Antioch::read_cea_mixture_data_ascii( nasa_mixture, Antioch::DefaultFilename::thermo_data());
-  Antioch::CEAEvaluator<Scalar > nasa_thermo( nasa_mixture );
+  Antioch::NASAThermoMixture<Scalar, Antioch::NASA9CurveFit<Scalar> > nasa_mixture( chem_mixture );
+  Antioch::read_nasa_mixture_data( nasa_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true); // ASCII and true are default, but let's be verbose
+  Antioch::NASAEvaluator<Scalar, Antioch::NASA9CurveFit<Scalar> > nasa_thermo( nasa_mixture );
 
-  typedef Antioch::CEAEvaluator<Scalar> MacroThermo;
+  typedef Antioch::NASAEvaluator<Scalar, Antioch::NASA9CurveFit<Scalar> > MacroThermo;
 
   // micro thermo 
   Antioch::IdealGasMicroThermo<MacroThermo,Scalar> micro_thermo(nasa_thermo, chem_mixture);
@@ -86,7 +86,8 @@ int tester()
 
   // transport
   Antioch::TransportMixture<Thermo,Scalar> transport(chem_mixture, thermo);
-  Antioch::read_transport_species_data_ascii(transport, Antioch::DefaultFilename::transport_mixture());
+  Antioch::ASCIIParser<Scalar> transport_parser(Antioch::DefaultFilename::transport_mixture(),true);
+  Antioch::read_transport_species_data(&transport_parser,transport);
 
   typedef Antioch::TransportMixture<Thermo,Scalar> Transport;
 
