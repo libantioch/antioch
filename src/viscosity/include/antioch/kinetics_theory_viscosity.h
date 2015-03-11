@@ -36,9 +36,9 @@
 #include "antioch/math_constants.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/Stockmayer_potential.h"
+#include "antioch/stockmayer_potential.h"
 #include "antioch/gsl_spliner.h"
-#include "antioch/Lennard_Jones_potential.h"
+#include "antioch/lennard_jones_potential.h"
 #include "antioch/physical_constants.h"
 
 // C++

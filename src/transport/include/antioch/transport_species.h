@@ -34,7 +34,7 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/physical_constants.h"
-#include "antioch/Lennard_Jones_potential.h"
+#include "antioch/lennard_jones_potential.h"
 
 // C++
 #include <vector>
