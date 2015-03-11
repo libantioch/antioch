@@ -174,8 +174,8 @@ namespace Antioch
         _mass(mass),
         _delta_star(CoeffType(1e-7) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
                     ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
-                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * CoeffType(2.L) * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
-        _a(0.3125e-14L * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
+        _a(CoeffType(0.3125e-14L) * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
                 / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))  
           ) /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2) 
                 ~ 10^-14 float can't take 10^-28 in sqrt*/
@@ -199,8 +199,8 @@ namespace Antioch
         _mass(coeffs[3]),
         _delta_star(CoeffType(1e-7) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
                     ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
-                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * CoeffType(2.L) * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
-        _a(0.3125e-14L * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
+        _a(CoeffType(0.3125e-14L) * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
                 / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))  
           ) /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2)
                 ~ 10^-14 float can't take 10^-28 in sqrt*/
@@ -254,7 +254,7 @@ namespace Antioch
      _mass = mass;
      _delta_star = CoeffType(1e-7) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
                     ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
-                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * CoeffType(2.L) * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) );
+                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) );
      _a = CoeffType(0.3125L) * ant_sqrt(Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
                 / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2));
           

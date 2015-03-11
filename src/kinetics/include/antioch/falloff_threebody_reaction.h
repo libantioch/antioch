@@ -23,14 +23,14 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_FALLOFF_REACTION_H
-#define ANTIOCH_FALLOFF_REACTION_H
+#ifndef ANTIOCH_FALLOFF_THREE_BODY_REACTION_H
+#define ANTIOCH_FALLOFF_THREE_BODY_REACTION_H
 
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
-#include "antioch/reaction.h"
 #include "antioch/kinetics_conditions.h"
+#include "antioch/reaction.h"
 #include "antioch/lindemann_falloff.h"
 #include "antioch/troe_falloff.h"
 
@@ -41,10 +41,16 @@
 
 namespace Antioch
 {
-  /*!\class FalloffReaction
-  * Base class for falloff processes
+  /*!\class FalloffThreeBodyReaction
+  * Base class for falloff processes coupled with efficiencies
   *
-  * This class encapsulates a falloff reaction.  It performs the common operations.
+  * This class encapsulates a model between falloff and three-body reaction.
+  *
+  * Sylvain: I strongly disapprove using this model, 
+  *   see section ``A twist in the physics: three-body falloff" in section 2.2.2 Kinetics computing
+  *   of the [model documentation](https://github.com/libantioch/model_doc).
+  *
+  * It performs the common operations.
   * A falloff rate constant is defined by the equation
   * \f[
   *     k(T,[M]) = \frac{[M] k_0(T)}{1+[M]\frac{k_0(T)}{k_\infty(T)}}\times F
@@ -69,7 +75,10 @@ namespace Antioch
   * kinetics model (see base class KineticsType), and \f$[M]\f$
   * the mixture concentration (or pressure, it's equivalent, \f$[M] = \frac{P}{\mathrm{R}T}\f$
   * in the ideal gas model).  All reactions are assumed to be reversible, the kinetics models are
-  * assumed to be the same.
+  * assumed to be the same.  The three-body part is for the computations of \f$[M]\f$
+  * \f[
+  *     [M] = \sum_{s=1}^{n} \epsilon_sc_n
+  * \f]
   *
   * We have:
   * \f[
@@ -81,31 +90,26 @@ namespace Antioch
   *                                                                     \frac{k_0(T)}{k_\infty \left(k_0(T) + \frac{k_\infty(T)}{[M]}\right)}
   *                                                           \right) +
   *                                                 k(T,[M]) \frac{\partial F}{\partial T} \\[10pt]
-  *       \frac{\partial k(T,[M])}{\partial c_i} & = F \frac{k(T,[M])}{[M] + [M]^2\frac{k_0(T)}{k_\infty(T)}} +
+  *       \frac{\partial k(T,[M])}{\partial c_i} & = F \epsilon_i\frac{k(T,[M])}{[M] + [M]^2\frac{k_0(T)}{k_\infty(T)}} +
   *                                                  k(T,[M]) \frac{\partial F}{\partial c_i}
   *     \end{split}
   * \f]
   *
   * By default, the falloff is LindemannFalloff and the kinetics model KooijRate.
-  *
-  * \todo Document the limiting accuracy of the denominator part at the float precision.
-  *       See the tests for the values, I (Sylvain) propose to make a paragraph in
-  *       the model doc explaining throughfully this issue.
-  *
   */
   template<typename CoeffType=double, typename FalloffType = LindemannFalloff<CoeffType> >
-  class FalloffReaction: public Reaction<CoeffType>
+  class FalloffThreeBodyReaction: public Reaction<CoeffType>
   {
   public:
 
     //! Construct a single reaction mechanism.
-    FalloffReaction( const unsigned int n_species,
+    FalloffThreeBodyReaction( const unsigned int n_species,
                      const std::string &equation, 
                      const bool &reversible = true,
-                     const ReactionType::ReactionType &falloffType = ReactionType::LINDEMANN_FALLOFF,
+                     const ReactionType::ReactionType &falloffType = ReactionType::LINDEMANN_FALLOFF_THREE_BODY,
                      const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
     
-    virtual ~FalloffReaction();
+    ~FalloffThreeBodyReaction();
 
     //!
     template <typename StateType, typename VectorStateType>
@@ -115,7 +119,7 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const KineticsConditions<StateType,VectorStateType>& conditions,  
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions,
                                                            StateType& kfwd,  
                                                            StateType& dkfwd_dT, 
                                                            VectorStateType& dkfkwd_dX) const;
@@ -123,6 +127,7 @@ namespace Antioch
 
     //! Return const reference to the falloff object
     const FalloffType &F() const;
+
     //! Return writeable reference to the falloff object
     FalloffType &F();
 
@@ -135,7 +140,7 @@ namespace Antioch
   /* ------------------------- Inline Functions -------------------------*/
   template<typename CoeffType, typename FalloffType>
   inline
-  FalloffReaction<CoeffType,FalloffType>::FalloffReaction( const unsigned int n_species,
+  FalloffThreeBodyReaction<CoeffType,FalloffType>::FalloffThreeBodyReaction( const unsigned int n_species,
                                                            const std::string &equation,
                                                            const bool &reversible,
                                                            const ReactionType::ReactionType &falloffType, 
@@ -143,26 +148,29 @@ namespace Antioch
     :Reaction<CoeffType>(n_species,equation,reversible,falloffType,kin),
      _F(n_species)
      
-  {}
+  {
+    Reaction<CoeffType>::_efficiencies.resize(n_species); 
+    std::fill (Reaction<CoeffType>::_efficiencies.begin(), Reaction<CoeffType>::_efficiencies.end(), 1.);
+  }
 
 
   template<typename CoeffType, typename FalloffType>
   inline
-  FalloffReaction<CoeffType,FalloffType>::~FalloffReaction()
+  FalloffThreeBodyReaction<CoeffType,FalloffType>::~FalloffThreeBodyReaction()
   {
     return;
   }
 
   template<typename CoeffType, typename FalloffType>
   inline
-  FalloffType &FalloffReaction<CoeffType,FalloffType>::F()
+  FalloffType &FalloffThreeBodyReaction<CoeffType,FalloffType>::F()
   {
     return _F;
   }
 
   template<typename CoeffType, typename FalloffType>
   inline
-  const FalloffType &FalloffReaction<CoeffType,FalloffType>::F() const
+  const FalloffType &FalloffThreeBodyReaction<CoeffType,FalloffType>::F() const
   {
     return _F;
   }
@@ -170,14 +178,14 @@ namespace Antioch
   template<typename CoeffType, typename FalloffType>
   template<typename StateType, typename VectorStateType>
   inline
-  StateType FalloffReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
+  StateType FalloffThreeBodyReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient( const VectorStateType& molar_densities,
                                                                                       const KineticsConditions<StateType,VectorStateType>& conditions  ) const
   {
 //falloff is k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
     StateType M = Antioch::zero_clone(conditions.T());
-    for(unsigned int i = 0; i < molar_densities.size(); i++)
+    for(unsigned int s = 0; s < molar_densities.size(); s++)
     {
-        M += molar_densities[i];
+        M += this->efficiency(s) * molar_densities[s];
     }
 
     const StateType k0   = (*this->_forward_rate[0])(conditions);
@@ -189,7 +197,7 @@ namespace Antioch
   template<typename CoeffType, typename FalloffType>
   template<typename StateType, typename VectorStateType>
   inline
-  void FalloffReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
+  void FalloffThreeBodyReaction<CoeffType,FalloffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
                                                                                                  const KineticsConditions<StateType,VectorStateType>& conditions,
                                                                                                  StateType& kfwd, 
                                                                                                  StateType& dkfwd_dT,
@@ -205,34 +213,35 @@ namespace Antioch
     this->_forward_rate[1]->compute_rate_and_derivative(conditions,kinf,dkinf_dT);
 
     StateType M = Antioch::zero_clone(conditions.T());
-    for(unsigned int i = 0; i < molar_densities.size(); i++)
+    for(unsigned int s = 0; s < molar_densities.size(); s++)
     {
-        M += molar_densities[i];
+        M += this->efficiency(s) * molar_densities[s];
     }
 
     //F
-    StateType f = Antioch::zero_clone(M);
-    StateType df_dT = Antioch::zero_clone(M);
+    StateType f = Antioch::zero_clone(conditions.T());
+    StateType df_dT = Antioch::zero_clone(conditions.T());
     VectorStateType df_dX = Antioch::zero_clone(molar_densities);
     _F.F_and_derivatives(conditions.T(),M,k0,dk0_dT,kinf,dkinf_dT,f,df_dT,df_dX);
 
 // k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
     kfwd = k0 / (ant_pow(M,-1) + k0/kinf); //temp variable here for calculations dk_d{T,X}
 
-    StateType temp = (kinf/M + k0);
 //dk_dT = F * dkfwd_dT + kfwd * dF_dT
 //      = F * kfwd * (dk0_dT/k0 - dk0_dT/(kinf/[M] + k0) + k0 * dkinf_dT/(kinf * (kinf/[M] + k0) ) )
 //      + dF_dT * kfwd
+    StateType temp = (kinf/M + k0);
     dkfwd_dT = f * kfwd * (dk0_dT/k0 - dk0_dT/temp + dkinf_dT * k0/(kinf * temp))
              + df_dT * kfwd;
 
     dkfwd_dX.resize(this->n_species(), kfwd);
-//dkfwd_dX = F * dkfwd_dX + kfwd * dF_dX
-//         = F * kfwd / ([M] +  [M]^2 k0/kinf) + kfwd * dF_dX
+
     StateType tmp = f * kfwd / (M + ant_pow(M,2) * k0/kinf);
+//dkfwd_dX = F * dkfwd_dX + kfwd * dF_dX
+//         = F * epsilon_i * kfwd / ([M] +  [M]^2 k0/kinf) + kfwd * dF_dX
     for(unsigned int ic = 0; ic < this->n_species(); ic++)
       {
-        dkfwd_dX[ic] = tmp + df_dX[ic] * kfwd;
+        dkfwd_dX[ic] = this->efficiency(ic) * ( tmp + df_dX[ic] * kfwd );
       }
 
     kfwd *= f; //finalize

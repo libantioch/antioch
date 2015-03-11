@@ -245,10 +245,11 @@ H+OH+M=H2O+M               3.800E+22 -2.00  0.000E+00
   A  = 1.475e12L * unitA_1.get_SI_factor();
   b  = 0.60L;
   Ea = 0.00L * unitEa_cal.get_SI_factor(); 
+  Scalar M = tot_dens + Scalar(5.39e-3L);
   Scalar kinf = Kooij(T,A,b,Ea);
-  Scalar Pr = tot_dens * k0/kinf;
+  Scalar Pr = M * k0/kinf;
   Scalar Fc = FcentTroe(T,(Scalar)0.8L,(Scalar)1e-30L,(Scalar)1e30L);
-  k.push_back(k0 / (1.L/tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+  k.push_back(k0 / (1.L/M + k0/kinf) * FTroe(Fc,Pr));
 
 /*
 ! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986) [modified]
@@ -308,10 +309,11 @@ H2O2(+M)=OH+OH(+M)         2.951e+14   0.00  4.843E+04
  k0 = Arrh(T,A,Ea);
  A  = 2.951e14L * unitA_0.get_SI_factor();
  Ea = 4.843e4L * unitEa_cal.get_SI_factor(); 
+ M = tot_dens + 6.25e-3;
  kinf = Arrh(T,A,Ea);
- Pr = tot_dens * k0/kinf;
+ Pr = M * k0/kinf;
  Fc = FcentTroe(T,(Scalar)0.5L,(Scalar)1e-30L,(Scalar)1e30L);
- k.push_back(k0 / (1.L/tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+ k.push_back(k0 / (1.L/M + k0/kinf)  * FTroe(Fc,Pr));
 //
 
 /*
@@ -366,9 +368,8 @@ CH3 + H <=>  CH4 1e12 1.2 3.125e4
   k.push_back(Kooij(T,A,b,Ea));
 
 
-  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?
-                      std::numeric_limits<Scalar>::epsilon() * 6500:
-                      std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?7e-16L:
+                                                                       std::numeric_limits<Scalar>::epsilon() * 100;
   int return_flag(0);
 
   if(reaction_set.n_reactions() != k.size())

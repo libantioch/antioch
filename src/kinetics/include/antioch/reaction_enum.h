@@ -40,7 +40,9 @@ namespace Antioch
                         DUPLICATE,
                         THREE_BODY, 
                         LINDEMANN_FALLOFF,
-                        TROE_FALLOFF};
+                        TROE_FALLOFF,
+                        LINDEMANN_FALLOFF_THREE_BODY,
+                        TROE_FALLOFF_THREE_BODY};
 
   } // end namespace ReactionType
 

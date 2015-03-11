@@ -130,7 +130,7 @@ namespace Antioch{
          bool rate_constant(const std::string & /* kinetics_model */);
 
          /*! return true if there's a Troe block*/
-         bool Troe();
+         bool Troe() const;
 
          /*! return reaction id, 0 if not provided*/
          const std::string reaction_id() const;
@@ -551,9 +551,9 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  bool ChemKinParser<NumericType>::Troe()
+  bool ChemKinParser<NumericType>::Troe() const
   {
-      return (_chemical_process == "TroeFalloff");
+      return (_chemical_process.find("TroeFalloff") != std::string::npos);
   }
 
   template <typename NumericType>
@@ -744,7 +744,7 @@ namespace Antioch{
     alpha_unit = _default_unit.at(ParsingKey::TROE_F_ALPHA);
     def_unit = alpha_unit;
     
-    return (_chemical_process == "TroeFalloff");
+    return this->Troe();
   }
 
   template <typename NumericType>
@@ -755,7 +755,7 @@ namespace Antioch{
     T1_unit = _default_unit.at(ParsingKey::TROE_F_TS);
     def_unit = T1_unit;
 
-    return (_chemical_process == "TroeFalloff");
+    return this->Troe();
   }
 
   template <typename NumericType>
@@ -777,7 +777,7 @@ namespace Antioch{
     T3_unit = _default_unit.at(ParsingKey::TROE_F_TSSS);
     def_unit = T3_unit;
 
-    return (_chemical_process == "TroeFalloff");
+    return this->Troe();
   }
 
   template <typename NumericType>
@@ -808,6 +808,8 @@ namespace Antioch{
         _duplicate_process = true;
      }else if(line.find(_spec.parser()) != std::string::npos) // "/"
      {
+        if(_chemical_process.find("Falloff") != std::string::npos && 
+           _chemical_process.find("ThreeBody") == std::string::npos)_chemical_process += "ThreeBody";
         this->parse_coefficients_line(line);
      }else
      {
@@ -914,7 +916,7 @@ namespace Antioch{
         }else if(out[i] == _spec.symbol().at(ChemKinDefinitions::TB))
         {
            if(_chemical_process.find("Falloff") != std::string::npos)
-                      antioch_parsing_error("ChemKin parser: it seems you want both a falloff and a three-body reaction:\n" + equation);
+                     std::cerr << "WARNING: ChemKin parser: it seems you want both a falloff and a three-body reaction in your equation:\n" << equation << std::endl;
 
            _chemical_process = "ThreeBody";
 
@@ -944,7 +946,7 @@ namespace Antioch{
      bool real(false);
      for(unsigned int i = 0; i < _reactants.size(); i++)
      {
-        if(this->after_coma_digits((_reactants[i].second)))
+        if(this->after_coma_digits(_reactants[i].second))
         {
            real = true;
            break;
@@ -1033,7 +1035,7 @@ namespace Antioch{
 
         _nrates++;
          
-      }else if(_chemical_process == "ThreeBody")// efficiencies
+      }else if(_chemical_process.find("ThreeBody") != std::string::npos)// efficiencies
  // in case it is superfluous (or we need to redesign pressure-dependance)
       {
         for(unsigned int i = 0; i < out.size(); i++)

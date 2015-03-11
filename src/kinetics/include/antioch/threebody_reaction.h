@@ -90,8 +90,6 @@ namespace Antioch
                                                            StateType& dkfwd_dT, 
                                                            VectorStateType& dkfwd_dX) const;
 
-  private:
-    
   };
 
   /* ------------------------- Inline Functions -------------------------*/
@@ -103,6 +101,8 @@ namespace Antioch
                                                    const KineticsModel::KineticsModel kin) 
     :Reaction<CoeffType>(n_species,equation,reversible,ReactionType::THREE_BODY,kin)
   {
+    Reaction<CoeffType>::_efficiencies.resize(n_species); 
+    std::fill (Reaction<CoeffType>::_efficiencies.begin(), Reaction<CoeffType>::_efficiencies.end(), 1.);
     return;
   }
 
@@ -168,7 +168,7 @@ namespace Antioch
 
     return;
   }
-  
+
 } // namespace Antioch
 
 #endif // ANTIOCH_ELEMENTARY_REACTION_H

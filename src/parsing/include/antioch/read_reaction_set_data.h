@@ -276,12 +276,14 @@ namespace Antioch
     models.push_back("photochemistry");
 
     std::map<std::string,ReactionType::ReactionType> proc_keyword;
-    proc_keyword["Elementary"]        = ReactionType::ELEMENTARY;
-    proc_keyword["Duplicate"]         = ReactionType::DUPLICATE;
-    proc_keyword["ThreeBody"]         = ReactionType::THREE_BODY;
-    proc_keyword["threeBody"]         = ReactionType::THREE_BODY; // Cantera/backward compatiblity
-    proc_keyword["LindemannFalloff"]  = ReactionType::LINDEMANN_FALLOFF;
-    proc_keyword["TroeFalloff"]       = ReactionType::TROE_FALLOFF;
+    proc_keyword["Elementary"]                 = ReactionType::ELEMENTARY;
+    proc_keyword["Duplicate"]                  = ReactionType::DUPLICATE;
+    proc_keyword["ThreeBody"]                  = ReactionType::THREE_BODY;
+    proc_keyword["threeBody"]                  = ReactionType::THREE_BODY; // Cantera/backward compatiblity
+    proc_keyword["LindemannFalloff"]           = ReactionType::LINDEMANN_FALLOFF;
+    proc_keyword["TroeFalloff"]                = ReactionType::TROE_FALLOFF;
+    proc_keyword["LindemannFalloffThreeBody"]  = ReactionType::LINDEMANN_FALLOFF_THREE_BODY;
+    proc_keyword["TroeFalloffThreeBody"]       = ReactionType::TROE_FALLOFF_THREE_BODY;
 
     while (parser->reaction())
       {
@@ -303,6 +305,8 @@ namespace Antioch
                           << "  ThreeBody\n"
                           << "  LindemannFalloff\n"
                           << "  TroeFalloff\n" 
+                          << "  LindemannFalloffThreeBody\n"
+                          << "  TroeFalloffThreeBody\n" 
                           << "See Antioch documentation for more details."
                           << std::endl;
                 antioch_not_implemented();
@@ -430,7 +434,9 @@ namespace Antioch
           if(my_rxn->type() == ReactionType::THREE_BODY)pow_unit++;
           //falloff for k0
           if(my_rxn->type() == ReactionType::LINDEMANN_FALLOFF ||
-             my_rxn->type() == ReactionType::TROE_FALLOFF)
+             my_rxn->type() == ReactionType::TROE_FALLOFF      ||
+             my_rxn->type() == ReactionType::LINDEMANN_FALLOFF_THREE_BODY ||
+             my_rxn->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              //k0 is either determined by an explicit name, or is the first of unnamed rate constants
              if(parser->is_k0(my_rxn->n_rate_constants(),reading_kinetics_model))pow_unit++;
@@ -690,8 +696,10 @@ namespace Antioch
         // the first rate constant encountered is the low limit,
         // so we need to change something only if the second rate constant has a "name" attribute
         // of value "k0"
-        if(my_rxn->type() == ReactionType::LINDEMANN_FALLOFF ||
-           my_rxn->type() == ReactionType::TROE_FALLOFF)
+        if(my_rxn->type() == ReactionType::LINDEMANN_FALLOFF            ||
+           my_rxn->type() == ReactionType::TROE_FALLOFF                 ||
+           my_rxn->type() == ReactionType::LINDEMANN_FALLOFF_THREE_BODY ||
+           my_rxn->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
         {
            antioch_assert_equal_to(my_rxn->n_rate_constants(),2);
            if(parser->where_is_k0(reading_kinetics_model) == 1) // second given is k0
@@ -705,7 +713,9 @@ namespace Antioch
         //efficiencies are only for three body reactions
         if(parser->efficiencies(efficiencies))
           {
-             antioch_assert_equal_to (ReactionType::THREE_BODY, my_rxn->type());
+             antioch_assert(ReactionType::THREE_BODY == my_rxn->type()                   || 
+                            ReactionType::LINDEMANN_FALLOFF_THREE_BODY == my_rxn->type() || 
+                            ReactionType::TROE_FALLOFF_THREE_BODY == my_rxn->type());
 
              for(unsigned int p = 0; p < efficiencies.size(); p++)
                {
@@ -728,7 +738,9 @@ namespace Antioch
         //F parameters only for Troe falloff
         if(parser->Troe())
         {
-           antioch_assert_equal_to (ReactionType::TROE_FALLOFF, my_rxn->type());
+           antioch_assert(ReactionType::TROE_FALLOFF == my_rxn->type() ||
+                          ReactionType::TROE_FALLOFF_THREE_BODY == my_rxn->type());
+
            FalloffReaction<NumericType,TroeFalloff<NumericType> > *my_fall_rxn =
                 static_cast<FalloffReaction<NumericType,TroeFalloff<NumericType> > *> (my_rxn);
 
