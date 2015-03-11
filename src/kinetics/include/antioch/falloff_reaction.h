@@ -87,6 +87,11 @@ namespace Antioch
   * \f]
   *
   * By default, the falloff is LindemannFalloff and the kinetics model KooijRate.
+  *
+  * \todo Document the limiting accuracy of the denominator part at the float precision.
+  *       See the tests for the values, I (Sylvain) propose to make a paragraph in
+  *       the model doc explaining throughfully this issue.
+  *
   */
   template<typename CoeffType=double, typename FalloffType = LindemannFalloff<CoeffType> >
   class FalloffReaction: public Reaction<CoeffType>
