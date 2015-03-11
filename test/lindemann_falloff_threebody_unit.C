@@ -78,7 +78,7 @@ int tester(const std::string & type)
   std::cout << type << ", tolerance = " << tol;
   Scalar max_diff(-1.L);
 
-  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+  for(Scalar T = 300.1; T <= 1500.1; T += 10.)
   {
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
@@ -250,6 +250,6 @@ int tester(const std::string & type)
 int main()
 {
   return (tester<double>("double") ||
-          tester<long double>("long double"));/* ||
-          tester<float>("float"));*/
+          tester<long double>("long double") ||
+          tester<float>("float"));
 }

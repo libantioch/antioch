@@ -73,7 +73,7 @@ int tester(const std::string & type)
 
   std::cout << type << ", tolerance = " << tol;
   Scalar max_diff(-1.L);
-  for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
+  for(Scalar T = 300.1L; T <= 1500.1L; T += 10.L)
   {
 
     const Antioch::KineticsConditions<Scalar> conditions(T);
@@ -289,6 +289,6 @@ int tester(const std::string & type)
 int main()
 {
   return (tester<double>("double") ||
-          tester<long double>("long double"));/* ||
-          tester<float>("float"));*/
+          tester<long double>("long double") ||
+          tester<float>("float"));
 }

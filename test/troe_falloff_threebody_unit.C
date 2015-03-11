@@ -76,12 +76,12 @@ int tester(const std::string & type)
      M += epsilon[i] * mol_densities[i];
   }
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 800;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2000;
 
   std::cout << type << ", tolerance = " << tol;
   Scalar max_diff(-1.L);
 
-  for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
+  for(Scalar T = 300.1L; T <= 1500.1L; T += 10.L)
   {
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
@@ -298,6 +298,6 @@ int tester(const std::string & type)
 int main()
 {
   return (tester<double>("double") ||
-          tester<long double>("long double"));/* ||
-          tester<float>("float"));*/
+          tester<long double>("long double") ||
+          tester<float>("float"));
 }
