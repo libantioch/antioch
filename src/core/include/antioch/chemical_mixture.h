@@ -362,7 +362,7 @@ namespace Antioch
   template<typename CoeffType>
   inline
   void ChemicalMixture<CoeffType>::read_species_characteristics(ParserBase<CoeffType> * parser,
-                                                                const std::string & species_data,
+                                                                const std::string & /*species_data*/,
                                                                 const std::string & vibration_data,
                                                                 const std::string & electronic_data)
   {
