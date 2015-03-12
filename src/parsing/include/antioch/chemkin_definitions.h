@@ -102,7 +102,7 @@ namespace Antioch
     _symbol[FAL]     = "(+M)";
     _symbol[PHOTO]   = "HV";
     _symbol[ELECTRO] = "E";
-  };
+  }
 
   inline
   const std::map<ChemKinDefinitions::Delim,std::string> & ChemKinDefinitions::delim()   const 
