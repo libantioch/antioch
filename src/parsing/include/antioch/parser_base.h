@@ -179,16 +179,16 @@ namespace Antioch
 /// thermo
 
         //! reads the thermo, NASA generalist, no templates for virtual
-        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)  {not_implemented();}
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& /*thermo*/)  {not_implemented();}
 
         //! reads the thermo, NASA generalist, no templates for virtual
-        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)  {not_implemented();}
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& /*thermo*/)  {not_implemented();}
 
         //! reads the thermo, NASA generalist, no templates for virtual
-        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  {not_implemented();}
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)  {not_implemented();}
 
-        //! reads the thermo, CEA deprecated 
-        virtual void read_thermodynamic_data(CEAThermodynamics<NumericType >& thermo)  {not_implemented();}
+        //! reads the thermo, CEA deprecated
+        virtual void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)  {not_implemented();}
 
 
 /// reaction
@@ -224,7 +224,7 @@ namespace Antioch
          virtual bool products_pairs(std::vector<std::pair<std::string,int> > & /*products_pair*/) const {not_implemented(); return false;}
 
          /*! \return true if "name" attribute is found with value "k0"*/
-         virtual bool is_k0(unsigned int nrc, const std::string & /*kin_model*/) const {not_implemented(); return false;}
+         virtual bool is_k0(unsigned int /*nrc*/, const std::string & /*kin_model*/) const {not_implemented(); return false;}
 
          /*! \return index of k0 (0 or 1)*/
          virtual unsigned int where_is_k0(const std::string & /*kin_model*/) const {not_implemented(); return -1;}
