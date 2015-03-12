@@ -80,7 +80,7 @@ namespace Antioch
     ~TransportSpecies();
 
     //! returns a descriptive name for this species.
-    const Species species() const;
+    Species species() const;
 
     //!returns the Lennard-Jones depth in (K), this is \f$\frac{\epsilon}{\mathrm{k_B}}\f$.
     CoeffType LJ_depth() const;
@@ -148,13 +148,13 @@ namespace Antioch
 
   /* ------------------------- Friend Functions ------------------------- */
 
-  
+
 
   /* ------------------------- Inline Functions ------------------------- */
 
   template<typename CoeffType>
   inline
-  const Species TransportSpecies<CoeffType>::species() const 
+  Species TransportSpecies<CoeffType>::species() const
   { return _name; }
 
   template<typename CoeffType>
