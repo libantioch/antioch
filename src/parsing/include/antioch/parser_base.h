@@ -275,7 +275,7 @@ namespace Antioch
         const std::string type() const {return _type;}
 
          /*! \return verbosity*/
-        const bool     verbose() const {return _verbose;}
+         bool verbose() const {return _verbose;}
 
         /*! \return enum*/
         ParsingType enum_type() const;
