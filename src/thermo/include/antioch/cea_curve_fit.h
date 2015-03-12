@@ -78,9 +78,9 @@ namespace Antioch
   class NASA9CurveFit
   {
   public:
-    
+
     // for compatibility with NASA, not used
-    NASA9CurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> &temps ):_n_coeffs(0) {antioch_error();}
+    NASA9CurveFit( const std::vector<CoeffType>& /*coeffs*/, const std::vector<CoeffType> &/*temps*/ ):_n_coeffs(0) {antioch_error();}
 
     NASA9CurveFit( const std::vector<CoeffType>& coeffs );
     ~NASA9CurveFit();
