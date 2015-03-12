@@ -201,7 +201,7 @@ namespace Antioch
 // EGlib traces management, see doc: http://blanche.polytechnique.fr/www.eglib/manual.ps
 // page 5
 // EGlib uses eps = 1e-16
-       typename raw_type<StateType>::type eps(std::numeric_limits<StateType>::epsilon() * 10);
+       typename raw_value_type<StateType>::type eps(std::numeric_limits<StateType>::epsilon() * 10);
        StateType mol_frac_sum = zero_clone(mass_fractions[0]);
        for(unsigned int s = 0; s < molar_fractions.size(); s++)
        {
