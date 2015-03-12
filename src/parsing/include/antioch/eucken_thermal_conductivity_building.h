@@ -43,7 +43,7 @@ namespace Antioch
 
   // backward compatibility
   template<class ThermoEvaluator, class Mixture>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator> , Mixture>& k){}
+  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator> , Mixture>& /*k*/){}
 
   template<class ThermoEucken,class ThermoTran, class NumericType>
   void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEucken> , TransportMixture<ThermoTran,NumericType> >& k);
