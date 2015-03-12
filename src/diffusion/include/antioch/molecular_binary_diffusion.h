@@ -35,7 +35,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/math_constants.h"
 #include "antioch/cmath_shims.h"
-#include "antioch/Stockmayer_potential.h"
+#include "antioch/stockmayer_potential.h"
 #include "antioch/transport_species.h"
 #include "antioch/gsl_spliner.h"
 
@@ -130,6 +130,9 @@ namespace Antioch{
             return out;
           }
         
+          //! temperature extrapolation
+          template <typename StateType>
+          void build_interpolation(const StateType & T);
 
         private:
 
@@ -142,6 +145,8 @@ namespace Antioch{
           const CoeffType composed_xi(const TransportSpecies<SpeciesType> & si, const TransportSpecies<SpeciesType> & sj);
 
           void build_interpolation();
+
+          void build_spline(const StockmayerPotential<CoeffType> & surface);
 
 
           Interpolator _interp;
@@ -295,10 +300,8 @@ namespace Antioch{
 
   template <typename CoeffType, typename Interpolator>
   inline
-  void MolecularBinaryDiffusion<CoeffType,Interpolator>::build_interpolation()
+  void MolecularBinaryDiffusion<CoeffType,Interpolator>::build_spline(const StockmayerPotential<CoeffType> & surface)
   {
-     _interp.spline_delete();
-     StockmayerPotential<CoeffType> surface;
      std::vector<CoeffType> interp_surf(surface.log_temperature().size(),0);
      std::vector<CoeffType> rescaled_temp(surface.log_temperature().size(),0);
      for(unsigned int iT = 0; iT < surface.temperature().size(); iT++)
@@ -309,7 +312,26 @@ namespace Antioch{
         rescaled_temp[iT] = surface.temperature()[iT] * _reduced_LJ_depth;
      }
 
+     _interp.spline_delete();
      _interp.spline_init(rescaled_temp,interp_surf);
+  }
+
+  template <typename CoeffType, typename Interpolator>
+  template <typename StateType>
+  inline
+  void MolecularBinaryDiffusion<CoeffType,Interpolator>::build_interpolation(const StateType & Tmax)
+  {
+     StockmayerPotential<CoeffType> surface;
+    // Stockmayer is where the test is performed
+     surface.extrapolate_to(Tmax/_reduced_LJ_depth);
+     build_spline(surface);
+  }
+
+  template <typename CoeffType, typename Interpolator>
+  inline
+  void MolecularBinaryDiffusion<CoeffType,Interpolator>::build_interpolation()
+  {
+     build_spline(StockmayerPotential<CoeffType>());
   }
 
   template <typename CoeffType, typename Interpolator>

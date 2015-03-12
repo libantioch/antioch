@@ -46,6 +46,8 @@ namespace Antioch
         // some models require specific initialization
         // but not specific deletion
      typedef bimolecular_diffusion_tag del_type;
+        // if Stockmayer needs to be expanded
+     typedef bimolecular_diffusion_tag temperature_limitation_type;
         // for operators, diffusion is special, see comment below
      typedef bimolecular_diffusion_tag diffusion_species_type;
    };
@@ -200,6 +202,19 @@ namespace Antioch
                      denom += molar_fractions[j] / Ds[j][s];
           }
           ds[s] /= denom;
+       }
+   }
+
+  
+   template <typename Model, typename StateType>
+   void extrapolate_T(Model & set,const StateType & T_max, bimolecular_diffusion_tag)
+   {
+       for(unsigned int i = 0; i < set.size(); i++)
+       {
+         for(unsigned int j = 0; j <= i; j++)
+         {
+             set[i][j]->build_interpolation(T_max);
+         }
        }
    }
 

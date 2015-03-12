@@ -36,9 +36,9 @@
 #include "antioch/math_constants.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/Stockmayer_potential.h"
+#include "antioch/stockmayer_potential.h"
 #include "antioch/gsl_spliner.h"
-#include "antioch/Lennard_Jones_potential.h"
+#include "antioch/lennard_jones_potential.h"
 #include "antioch/physical_constants.h"
 
 // C++
@@ -144,10 +144,18 @@ namespace Antioch
         return os;
       }
       
+        //! Stockmayer interpolation, checking temperature version
+      template <typename StateType>
+      void build_interpolation(const StateType & T);
 
     private:
 
+        //! Stockmayer interpolation, no temperature check
       void build_interpolation();
+
+
+        //! building the spline
+      void build_spline(const StockmayerPotential<CoeffType> & surface);
 
       /*! never ever use it*/
       KineticsTheoryViscosity();
@@ -225,12 +233,29 @@ namespace Antioch
   }
 
   template <typename CoeffType, typename Interpolator>
+  template <typename StateType>
+  inline
+  void KineticsTheoryViscosity<CoeffType,Interpolator>::build_interpolation(const StateType & Tmax)
+  {
+
+     StockmayerPotential<CoeffType> surface;
+    // Stockmayer is where the test is performed
+     surface.extrapolate_to(Tmax/_LJ.depth());
+     build_spline(surface);
+  }
+
+  template <typename CoeffType, typename Interpolator>
   inline
   void KineticsTheoryViscosity<CoeffType,Interpolator>::build_interpolation()
   {
+     build_spline(StockmayerPotential<CoeffType>());
+  }
 
-     _interp.spline_delete();
-     StockmayerPotential<CoeffType> surface;
+   
+  template <typename CoeffType, typename Interpolator>
+  inline
+  void KineticsTheoryViscosity<CoeffType,Interpolator>::build_spline(const StockmayerPotential<CoeffType> & surface)
+  {
      std::vector<CoeffType> interp_surf(surface.log_temperature().size(),0);
      std::vector<CoeffType> rescaled_temp(surface.log_temperature().size(),0);
      for(unsigned int iT = 0; iT < surface.log_temperature().size(); iT++)
@@ -241,6 +266,7 @@ namespace Antioch
         rescaled_temp[iT] = surface.temperature()[iT] * _LJ.depth();
      }
 
+     _interp.spline_delete();
      _interp.spline_init(rescaled_temp,interp_surf); // T, sqrt(T)/Omega<(2,2)>(log(T*))
   }
 

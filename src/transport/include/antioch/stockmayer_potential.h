@@ -39,12 +39,26 @@ namespace Antioch{
 
   /* Stockmayer potential from
      Monchich & Mason 1961, surface[T][delta]
+
+     In case of temperatures that are too high
+     (\f$T > 100 \eps_{\mathrm{LJ}}\f$), we extrapolate using the
+     following expression:
+     \f[
+         \left<\Omega^{(l,s)*}\right> \proto \sqrt[6]{T^{*}}
+     \f]
+     The proportionality factor is found using the last data point at \f$T^* = 100\f$
+
+     Two points are added when extrapolating to \f$T^* + \Delta T^*\f$ is required,
+     \f$100 + \Delta T^*\f$ and \f$100 + frac{\Delta T^*}{2}\f$.
    */
   template <typename CoeffType> //typename VectorCoeffType, typename MatrixCoeffType>
   class StockmayerPotential
   {
         public:
           StockmayerPotential();
+          //! In case of temperature extrapolation, T is tested
+          template<typename StateType>
+          StockmayerPotential(const StateType & T);
           ~StockmayerPotential();
 
           const std::vector<CoeffType> temperature()     const {return _T;}
@@ -55,6 +69,12 @@ namespace Antioch{
 
           const std::vector<std::vector<CoeffType> > omega_1_1() const {return _omega_1_1;}
           const std::vector<std::vector<CoeffType> > omega_2_2() const {return _omega_2_2;}
+
+          /*! Extrapolation*/
+          template <typename StateType>
+          void extrapolate_to(const StateType &T);
+
+          CoeffType max_reduced_temperature() const {return _max_reduced_T;}
 
         private:
 
@@ -67,16 +87,37 @@ namespace Antioch{
           template <typename Scalar>
           const Scalar omega_1_1(const Scalar & T_red, const Scalar & dipole_red) const {antioch_not_implemented();}
 
-          const unsigned int _T_size;
-          const unsigned int _delta_size;
-
+                unsigned int _T_size;
+          const unsigned int _delta_size; // never changes, no extrapolation (yet?) in this direction
+//
           std::vector<CoeffType>               _T, _logT;
           std::vector<CoeffType>               _delta;
           std::vector<std::vector<CoeffType> > _omega_1_1;
           std::vector<std::vector<CoeffType> > _omega_2_2;
 
+          const CoeffType _max_reduced_T;
+
   };
 
+  template <typename CoeffType>
+  template <typename StateType>
+  inline
+  StockmayerPotential<CoeffType>::StockmayerPotential(const StateType & T):
+        _T_size(37),
+        _delta_size(8),
+        _T(_T_size,0.),_logT(_T_size,0.),
+        _delta(_delta_size,0.),
+        _omega_1_1(_T_size,std::vector<CoeffType>(_delta_size,0.)),
+        _omega_2_2(_T_size,std::vector<CoeffType>(_delta_size,0.)),
+        _max_reduced_T(100.)
+  {
+     this->init();
+
+      // tested here
+     this->extrapolate_to(T);
+
+     return;
+  }
 
   template <typename CoeffType>
   inline
@@ -86,8 +127,8 @@ namespace Antioch{
         _T(_T_size,0.),_logT(_T_size,0.),
         _delta(_delta_size,0.),
         _omega_1_1(_T_size,std::vector<CoeffType>(_delta_size,0.)),
-        _omega_2_2(_T_size,std::vector<CoeffType>(_delta_size,0.))
-
+        _omega_2_2(_T_size,std::vector<CoeffType>(_delta_size,0.)),
+        _max_reduced_T(100.)
   {
      this->init();
 
@@ -99,6 +140,50 @@ namespace Antioch{
   StockmayerPotential<CoeffType>::~StockmayerPotential()
   {
      return;
+  }
+
+  template <typename CoeffType>
+  template <typename StateType>
+  inline
+  void StockmayerPotential<CoeffType>::extrapolate_to(const StateType & T)
+  {
+      // !\todo better vectorization management
+      //
+      //  we need to have something as a raw_max,
+      //  probably in the form of rawify<StateType,Operation>()
+      //  to avoid repetition. Note that two non equivalent
+      //  strategies are possible here:
+      //     - VectorType<raw_type<StateType> >: all raw_values are equivalent, looking for global Operation
+      //     - Operation<StateType>() at each level, looking for local Operation at every level
+      CoeffType Delta_T = (max(T) - _max_reduced_T);
+
+        // extrapolation required
+      if(Delta_T > 0)
+      {
+
+        //resize
+        _omega_1_1.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T/2
+        _omega_1_1.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T
+        _omega_2_2.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T/2
+        _omega_2_2.push_back(std::vector<CoeffType>(_delta_size)); // + Delta T
+
+        _T_size += 2;
+        _T.push_back(_max_reduced_T + Delta_T/2.);
+        _T.push_back(_max_reduced_T + Delta_T);
+        _logT.push_back(ant_log(_T[_T_size - 2]));
+        _logT.push_back(ant_log(_T[_T_size - 1]));
+
+        for(unsigned int d = 0; d < _delta_size; d++)
+        {
+           CoeffType K = _omega_1_1[_T_size - 3][d] / (ant_pow(_T[_T_size - 3],CoeffType(1.L/6.L)));
+           _omega_1_1[_T_size - 2][d] = K * _T[_T_size - 2];
+           _omega_1_1[_T_size - 1][d] = K * _T[_T_size - 1];
+
+           K = _omega_2_2[_T_size - 3][d] / (ant_pow(_T[_T_size - 3],CoeffType(1.L/6.L)));
+           _omega_2_2[_T_size - 2][d] = K * _T[_T_size - 2];
+           _omega_2_2[_T_size - 1][d] = K * _T[_T_size - 1];
+        }
+     }
   }
 
   template <typename CoeffType>

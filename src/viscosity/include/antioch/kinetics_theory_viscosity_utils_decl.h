@@ -53,6 +53,10 @@ namespace Antioch
    // mixture
    template<typename Model, typename StateType, typename VectorStateType>
    void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, kinetics_theory_viscosity_tag);
+
+   // if temperature needs to be extrapolated
+   template <typename Model, typename StateType>
+   void extrapolate_T(Model & set,const StateType & T_max, kinetics_theory_viscosity_tag);
 }
 
 #endif

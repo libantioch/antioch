@@ -71,6 +71,8 @@ namespace Antioch
                                      default_physical_set_tag,
                                      default_physical_tag
                                    >::type del_type;
+        // some models are temperature limited (Stockmayer interpolation)
+     typedef default_physical_tag temperature_limitation_type;
         // for operators, diffusion is special, see comment below
      typedef default_physical_tag viscosity_type;
      typedef default_physical_tag diffusion_species_type;
@@ -227,6 +229,11 @@ namespace Antioch
         /// skip it in concerned cases
    template <typename Mixture, typename MatrixStateType, typename VectorStateType>
    void wilke_diffusion_rule(const Mixture & mixture, const VectorStateType & mass_fractions, const MatrixStateType & Ds, VectorStateType & ds, default_physical_tag);
+
+   // if temperature needs to be extrapolated
+   template <typename Model, typename StateType>
+   void extrapolate_T(Model & set,const StateType & T_max, default_physical_tag);
+
 }
 
 #endif
