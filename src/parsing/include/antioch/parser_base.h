@@ -192,11 +192,15 @@ namespace Antioch
 
 /// reaction
 
+// non const
+
          /*! read & store current reaction and go to next reaction*/
          virtual bool reaction() {not_implemented(14); return false;}
 
          /*! go to next rate constant*/
          virtual bool rate_constant(const std::string & /*kinetics_model*/) {not_implemented(15); return false;}
+
+// const
 
          /*! \return true if there's a Troe block*/
          virtual bool Troe() const {not_implemented(16); return false;}
