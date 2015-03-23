@@ -117,16 +117,16 @@ namespace Antioch
 
 /// species
         //! reads the species set
-        virtual const std::vector<std::string> species_list() {not_implemented(); return std::vector<std::string>();}
+        virtual const std::vector<std::string> species_list() {not_implemented(0); return std::vector<std::string>();}
 
         //! reads the mandatory data, not valid in xml && chemkin
-        virtual void read_chemical_species(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
+        virtual void read_chemical_species(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented(1);}
 
         //! reads the vibrational data, not valid in xml && chemkin
-        virtual void read_vibrational_data(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
+        virtual void read_vibrational_data(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented(2);}
 
         //! reads the electronic data, not valid in xml && chemkin
-        virtual void read_electronic_data(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented();}
+        virtual void read_electronic_data(ChemicalMixture<NumericType> & /*chem_mixture*/)  {not_implemented(3);}
 
 // transport, the thermo is explicit...
 
@@ -135,21 +135,21 @@ namespace Antioch
         virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
                                                                            NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
                                                                            StatMechThermodynamics<NumericType> >,
-                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented(4);}
 
         //! reads the transport data, not valid in xml && chemkin
         //  NASA9 + StatMech
         virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
                                                                            NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
                                                                            StatMechThermodynamics<NumericType> >,
-                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented(5);}
 
         //! reads the transport data, not valid in xml && chemkin
         //  CEA + StatMech for backward compat
         virtual void read_transport_data(TransportMixture< ThermoHandler < NumericType, 
                                                                            CEAEvaluator<NumericType>,
                                                                            StatMechThermodynamics<NumericType> >,
-                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented(6);}
 
         //! reads the transport data, not valid in xml && chemkin
         //  NASA7 + Ideal Gas
@@ -157,7 +157,7 @@ namespace Antioch
                                                                            NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
                                                                            IdealGasMicroThermo<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
                                                                          >,
-                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented(7);}
 
         //! reads the transport data, not valid in xml && chemkin
         //  NASA9 + Ideal Gas
@@ -165,7 +165,7 @@ namespace Antioch
                                                                            NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
                                                                            IdealGasMicroThermo<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
                                                                          >,
-                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented(8);}
 
         //! reads the transport data, not valid in xml && chemkin
         //  CEA + Ideal Gas for backward compat
@@ -173,100 +173,99 @@ namespace Antioch
                                                                            CEAEvaluator<NumericType>,
                                                                            IdealGasMicroThermo<CEAEvaluator<NumericType>,NumericType> 
                                                                          >,
-                                                           NumericType > & /*transport_mixture*/)  {not_implemented();}
+                                                           NumericType > & /*transport_mixture*/)  {not_implemented(9);}
 
 
 /// thermo
 
         //! reads the thermo, NASA generalist, no templates for virtual
-        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& /*thermo*/)  {not_implemented();}
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& /*thermo*/)  {not_implemented(10);}
 
         //! reads the thermo, NASA generalist, no templates for virtual
-        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& /*thermo*/)  {not_implemented();}
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& /*thermo*/)  {not_implemented(11);}
 
         //! reads the thermo, NASA generalist, no templates for virtual
-        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)  {not_implemented();}
+        virtual void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)  {not_implemented(12);}
 
         //! reads the thermo, CEA deprecated
-        virtual void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)  {not_implemented();}
-
+        virtual void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)  {not_implemented(13);}
 
 /// reaction
 
          /*! read & store current reaction and go to next reaction*/
-         virtual bool reaction() {not_implemented(); return false;}
+         virtual bool reaction() {not_implemented(14); return false;}
 
          /*! go to next rate constant*/
-         virtual bool rate_constant(const std::string & /*kinetics_model*/) {not_implemented(); return false;}
+         virtual bool rate_constant(const std::string & /*kinetics_model*/) {not_implemented(15); return false;}
 
          /*! \return true if there's a Troe block*/
-         virtual bool Troe() const {not_implemented(); return false;}
+         virtual bool Troe() const {not_implemented(16); return false;}
 
          /*! \return reaction id, 0 if not provided*/
-         virtual const std::string reaction_id() const  {not_implemented(); return std::string();}
+         virtual const std::string reaction_id() const  {not_implemented(17); return std::string();}
 
          /*! \return reaction equation */
-         virtual const std::string reaction_equation() const {not_implemented(); return std::string();}
+         virtual const std::string reaction_equation() const {not_implemented(18); return std::string();}
 
          /*! \return reaction chemical process*/
-         virtual const std::string reaction_chemical_process() const {not_implemented(); return std::string();}
+         virtual const std::string reaction_chemical_process() const {not_implemented(19); return std::string();}
 
          /*! \return reaction kinetics model*/
-         virtual const std::string reaction_kinetics_model(const std::vector<std::string> & /*kinetics_models*/) const  {not_implemented(); return std::string();}
+         virtual const std::string reaction_kinetics_model(const std::vector<std::string> & /*kinetics_models*/) const  {not_implemented(20); return std::string();}
 
          /*! \return reversible state*/
-         virtual bool reaction_reversible() const {not_implemented(); return false;}
+         virtual bool reaction_reversible() const {not_implemented(21); return false;}
 
          /*! \return pairs of reactants and stoichiometric coefficients*/
-         virtual bool reactants_pairs(std::vector<std::pair<std::string,int> > & /*reactants_pair*/) const  {not_implemented(); return false;}
+         virtual bool reactants_pairs(std::vector<std::pair<std::string,int> > & /*reactants_pair*/) const  {not_implemented(22); return false;}
 
          /*! \return pairs of products and stoichiometric coefficients*/
-         virtual bool products_pairs(std::vector<std::pair<std::string,int> > & /*products_pair*/) const {not_implemented(); return false;}
+         virtual bool products_pairs(std::vector<std::pair<std::string,int> > & /*products_pair*/) const {not_implemented(23); return false;}
 
          /*! \return true if "name" attribute is found with value "k0"*/
-         virtual bool is_k0(unsigned int /*nrc*/, const std::string & /*kin_model*/) const {not_implemented(); return false;}
+         virtual bool is_k0(unsigned int /*nrc*/, const std::string & /*kin_model*/) const {not_implemented(24); return false;}
 
          /*! \return index of k0 (0 or 1)*/
-         virtual unsigned int where_is_k0(const std::string & /*kin_model*/) const {not_implemented(); return -1;}
+         virtual unsigned int where_is_k0(const std::string & /*kin_model*/) const {not_implemented(25); return -1;}
 
          /*! \return true if pre exponentiel coefficient*/
-         virtual bool rate_constant_preexponential_parameter(NumericType & /*A*/, std::string & /*A_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool rate_constant_preexponential_parameter(NumericType & /*A*/, std::string & /*A_unit*/, std::string & /*def_unit*/) const {not_implemented(26); return false;}
 
          /*! \return true if beta coefficient*/
-         virtual bool rate_constant_power_parameter(NumericType & /*b*/, std::string & /*b_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool rate_constant_power_parameter(NumericType & /*b*/, std::string & /*b_unit*/, std::string & /*def_unit*/) const {not_implemented(27); return false;}
 
          /*! \return true if activation energie*/
-         virtual bool rate_constant_activation_energy_parameter(NumericType & /*Ea*/, std::string & /*Ea_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool rate_constant_activation_energy_parameter(NumericType & /*Ea*/, std::string & /*Ea_unit*/, std::string & /*def_unit*/) const {not_implemented(28); return false;}
 
          /*! \return true if D coefficient*/
-         virtual bool rate_constant_Berthelot_coefficient_parameter(NumericType & /*D*/, std::string & /*D_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool rate_constant_Berthelot_coefficient_parameter(NumericType & /*D*/, std::string & /*D_unit*/, std::string & /*def_unit*/) const {not_implemented(29); return false;}
 
          /*! \return true if Tref*/
-         virtual bool rate_constant_Tref_parameter( NumericType & /*Tref*/, std::string & /*Tref_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool rate_constant_Tref_parameter( NumericType & /*Tref*/, std::string & /*Tref_unit*/, std::string & /*def_unit*/) const {not_implemented(30); return false;}
 
          /*! \return true if lambda*/
-         virtual bool rate_constant_lambda_parameter(std::vector<NumericType> & /*lambda*/, std::string & /*lambda_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool rate_constant_lambda_parameter(std::vector<NumericType> & /*lambda*/, std::string & /*lambda_unit*/, std::string & /*def_unit*/) const {not_implemented(31); return false;}
 
          /*! \return true if sigma*/
-         virtual bool rate_constant_cross_section_parameter(std::vector<NumericType> & /*sigma*/,  std::string & /*sigma_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool rate_constant_cross_section_parameter(std::vector<NumericType> & /*sigma*/,  std::string & /*sigma_unit*/, std::string & /*def_unit*/) const {not_implemented(32); return false;}
 
          /*! \return true if a Kooij is called Arrhenuis*/
-         virtual bool verify_Kooij_in_place_of_Arrhenius() const {not_implemented(); return false;}
+         virtual bool verify_Kooij_in_place_of_Arrhenius() const {not_implemented(33); return false;}
 
          /*! \return true if efficiencies are found*/
-         virtual bool efficiencies(std::vector<std::pair<std::string,NumericType> > & /*par_values*/) const {not_implemented(); return false;}
+         virtual bool efficiencies(std::vector<std::pair<std::string,NumericType> > & /*par_values*/) const {not_implemented(34); return false;}
 
          /*! \return true is alpha*/
-         virtual bool Troe_alpha_parameter(NumericType & /*alpha*/, std::string & /*alpha_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool Troe_alpha_parameter(NumericType & /*alpha*/, std::string & /*alpha_unit*/, std::string & /*def_unit*/) const {not_implemented(35); return false;}
 
          /*! \return true is alpha*/
-         virtual bool Troe_T1_parameter(NumericType & /*T1*/, std::string & /*T1_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool Troe_T1_parameter(NumericType & /*T1*/, std::string & /*T1_unit*/, std::string & /*def_unit*/) const {not_implemented(36); return false;}
 
          /*! \return true is alpha*/
-         virtual bool Troe_T2_parameter(NumericType & /*T2*/, std::string & /*T2_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool Troe_T2_parameter(NumericType & /*T2*/, std::string & /*T2_unit*/, std::string & /*def_unit*/) const {not_implemented(37); return false;}
 
          /*! \return true is alpha*/
-         virtual bool Troe_T3_parameter(NumericType & /*T3*/, std::string & /*T3_unit*/, std::string & /*def_unit*/) const {not_implemented(); return false;}
+         virtual bool Troe_T3_parameter(NumericType & /*T3*/, std::string & /*T3_unit*/, std::string & /*def_unit*/) const {not_implemented(38); return false;}
 
          /*! \return name of file*/
         const std::string file() const {return _file;}
@@ -290,7 +289,7 @@ namespace Antioch
         bool        _verbose;
         std::string _comments;
 
-        void not_implemented() const;
+        void not_implemented(unsigned int i) const;
 
      private:
         ParserBase();
@@ -343,14 +342,15 @@ namespace Antioch
   }
 
   template <typename NumericType>
-  void ParserBase<NumericType>::not_implemented() const
+  void ParserBase<NumericType>::not_implemented(unsigned int i) const
   {
       std::cerr << "\n*********************************************************\n"
                 << "This method is not available with a " << _type << " parser.\n"
                 << "Parsing file " << _file << ".\n"
                 << "No format has been defined yet.  Maybe contribute?\n"
                 << "https://github.com/libantioch/antioch\n" 
-                << "\n*********************************************************\n"
+                << "\nMethod code: " << i
+                << "\n\n*********************************************************\n"
                 << std::endl;
   }
 
