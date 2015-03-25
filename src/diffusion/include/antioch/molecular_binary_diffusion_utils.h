@@ -223,7 +223,7 @@ namespace Antioch
 // (iii) use perturbed values to evaluate the transport properties [ (1 - y_s) / sum_i x_i / D_{is} ]
        for(unsigned int s = 0; s < ds.size(); s++)
        {
-          ds[s] = StateType(1) - mixture.M(s) / M_tr * molar_fractions[s];
+          ds[s] = constant_clone(mass_fractions[0],1) - mixture.M(s) / M_tr * molar_fractions[s];
           StateType denom = zero_clone(mass_fractions[0]);
           for(unsigned int j = 0; j < ds.size(); j++)
           {
