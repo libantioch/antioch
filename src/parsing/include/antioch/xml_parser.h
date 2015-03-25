@@ -204,8 +204,8 @@ namespace Antioch{
         private:
 
          //! reads the thermo, NASA generalist
-         template <typename CurveType>
-         void read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo);
+         template <typename ThermoType>
+         void read_thermodynamic_data_root(ThermoType & thermo);
 
          /*! return pairs of molecules and stoichiometric coefficients*/
          bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & products_pair) const;
@@ -779,9 +779,9 @@ namespace Antioch{
 
 
   template <typename NumericType>
-  template <typename CurveType>
+  template <typename ThermoType>
   inline
-  void XMLParser<NumericType>::read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo)
+  void XMLParser<NumericType>::read_thermodynamic_data_root(ThermoType & thermo)
   {
      if(!_thermo_block)
      {
