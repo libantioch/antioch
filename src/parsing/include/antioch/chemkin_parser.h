@@ -106,17 +106,25 @@ namespace Antioch{
 ////////////////// thermo
 
 //global overload
+// it seems that they're all linked in
+// a way so they shadow themselves
+// => we need to implement all or nothing
+
         //! reads the thermo, NASA generalist, no templates for virtual
         void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
                 {this->read_thermodynamic_data_root(thermo);}
 
         //! reads the thermo, NASA generalist, no templates for virtual
         void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
-                {this->read_thermodynamic_data_root(thermo);}
+                {ParserBase<NumericType>::not_implemented(11);}
 
         //! reads the thermo, NASA generalist, no templates for virtual
         void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  
-                {this->read_thermodynamic_data_root(thermo);}
+                {ParserBase<NumericType>::not_implemented(12);}
+
+        //! reads the thermo, CEA deprecated 
+        void read_thermodynamic_data(CEAThermodynamics<NumericType >& thermo)  
+                {ParserBase<NumericType>::not_implemented(13);}
 
 ///////////////// kinetics
 
