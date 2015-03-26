@@ -263,7 +263,7 @@ namespace Antioch
 
     template <typename StateType, typename VectorStateType>
     void compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
-                                                   const ChemicalMixture<CoeffType>& chem_mixture,
+                                                   const ChemicalMixture<CoeffType>& /*chem_mixture*/, // fully useless, why is it here?
                                                    const KineticsConditions<StateType,VectorStateType>& conditions,
                                                    const StateType &P0_RT,
                                                    const VectorStateType &h_RT_minus_s_R,
@@ -987,7 +987,7 @@ namespace Antioch
   template <typename StateType, typename VectorStateType>
   inline
   void Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress_and_derivatives( const VectorStateType &molar_densities,
-                                                                      const ChemicalMixture<CoeffType>& chem_mixture,
+                                                                      const ChemicalMixture<CoeffType>& /*chem_mixture*/,
                                                                       const KineticsConditions<StateType,VectorStateType>& conditions,
                                                                       const StateType &P0_RT,
                                                                       const VectorStateType &h_RT_minus_s_R,
