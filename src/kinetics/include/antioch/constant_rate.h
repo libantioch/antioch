@@ -152,7 +152,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  void ConstantRate<CoeffType>::rate_and_derivative( const StateType& T,
+  void ConstantRate<CoeffType>::rate_and_derivative( const StateType& /*T*/,
                                                           StateType& rate,
                                                           StateType& drate_dT) const
   {

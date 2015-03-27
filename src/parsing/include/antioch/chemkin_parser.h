@@ -692,21 +692,21 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  bool ChemKinParser<NumericType>::rate_constant_Berthelot_coefficient_parameter(NumericType & D, std::string & D_unit, std::string & def_unit) const
+  bool ChemKinParser<NumericType>::rate_constant_Berthelot_coefficient_parameter(NumericType & /*D*/, std::string & /*D_unit*/, std::string & /*def_unit*/) const
   {
       return false; //not a chemkin model
   }
 
   template <typename NumericType>
   inline
-  bool ChemKinParser<NumericType>::rate_constant_lambda_parameter(std::vector<NumericType> & lambda, std::string & lambda_unit, std::string & def_unit) const
+  bool ChemKinParser<NumericType>::rate_constant_lambda_parameter(std::vector<NumericType> & /*lambda*/, std::string & /*lambda_unit*/, std::string & /*def_unit*/) const
   {
       return false; //not a supported chemkin model yet
   }
 
   template <typename NumericType>
   inline
-  bool ChemKinParser<NumericType>::rate_constant_cross_section_parameter(std::vector<NumericType> & sigma, std::string & sigma_unit, std::string & def_unit) const
+  bool ChemKinParser<NumericType>::rate_constant_cross_section_parameter(std::vector<NumericType> & /*sigma*/, std::string & /*sigma_unit*/, std::string & /*def_unit*/) const
   {
       return false; //not a supported chemkin model yet
   }
