@@ -339,6 +339,7 @@ namespace Antioch
         // construct a Reaction object    
         Reaction<NumericType>* my_rxn = build_reaction<NumericType>(n_species, parser->reaction_equation(),
                                                                                reversible,typeReaction,kineticsModel);
+        my_rxn->set_id(parser->reaction_id());
 
         // We will add the reaction, unless we do not have a 
         // reactant or product

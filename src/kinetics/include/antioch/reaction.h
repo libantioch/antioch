@@ -123,6 +123,12 @@ namespace Antioch
     //! \returns the equation for this reaction.
     std::string equation() const;
 
+    //! \returns the reaction id.
+    std::string id() const;
+
+    //! set the reaction id.
+    void set_id(const std::string & id);
+
     /*! Type of reaction.
      *  reversible reactions are considered.
      */
@@ -319,6 +325,7 @@ namespace Antioch
   protected:
 
     unsigned int _n_species;
+    std::string _id;
     std::string _equation;
     std::vector<std::string> _reactant_names;
     std::vector<std::string> _product_names;
@@ -352,6 +359,20 @@ namespace Antioch
   unsigned int Reaction<CoeffType,VectorCoeffType>::n_species() const
   {
     return _n_species;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  std::string Reaction<CoeffType,VectorCoeffType>::id() const
+  {
+    return _id;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::set_id(const std::string & id)
+  {
+    _id = id;
   }
 
   template<typename CoeffType, typename VectorCoeffType>
