@@ -168,7 +168,7 @@ namespace Antioch
      typename rebind<VectorStateType,VectorStateType>::type Ds(ds.size());
      init_constant(Ds,ds);
      _diffusion.compute_binary_diffusion_matrix(transport_conditions,cTot,Ds );
-     wilke_diffusion_rule(_mixture().transport_mixture().chemical_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
+     wilke_diffusion_rule(_mixture().chem_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
 
 // second way
 // \todo: if not needed, find a way to supress k building
@@ -176,7 +176,7 @@ namespace Antioch
      StateType k = zero_clone(transport_conditions.T());
      for(unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++)
      {
-        _conductivity.compute_thermal_conductivity(s,mu[s],Ds[s][s],transport_conditions,cTot * _mixture().transport_mixture().chemical_mixture().M(s),k);
+        _conductivity.compute_thermal_conductivity(s,mu[s],Ds[s][s],transport_conditions,cTot * _mixture().chem_mixture().M(s),k);
         _diffusion.compute_diffusivity(_mixture.thermo_evaluator().cp(transport_conditions.temp_cache(),s), k, ds[s]); // \todo, solve this by KineticsConditions
      }
   }
@@ -299,7 +299,7 @@ namespace Antioch
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const TC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
                 transport_conditions(conditions);
 
-     const StateType n_molar_mixture = rho / _mixture.transport_mixture().chemical_mixture().M(mass_fractions); // total molar density
+     const StateType n_molar_mixture = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
 
 // diffusion comes first
 // \todo: if not needed, find a way to supress Ds building
@@ -307,13 +307,13 @@ namespace Antioch
      typename Antioch::rebind<VectorStateType,VectorStateType>::type Ds(mass_fractions.size());
      init_constant(Ds,ds);
      _diffusion.compute_binary_diffusion_matrix(transport_conditions, n_molar_mixture, Ds);
-     wilke_diffusion_rule(_mixture.transport_mixture().chemical_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
+     wilke_diffusion_rule(_mixture.chem_mixture(), mass_fractions, Ds, ds, typename physical_tag<typename Diffusion::model>::diffusion_species_type ());
 
 // thermal conduction
     for(unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++)
     {
       _diffusion.compute_self_diffusion(s,transport_conditions,n_molar_mixture,Ds[s][s]);
-      _conductivity.compute_thermal_conductivity(s,mu[s],Ds[s][s],transport_conditions,n_molar_mixture * _mixture.transport_mixture().chemical_mixture().M(s),k[s]);
+      _conductivity.compute_thermal_conductivity(s,mu[s],Ds[s][s],transport_conditions,n_molar_mixture * _mixture.chem_mixture().M(s),k[s]);
     }
 
 // diffusion comes last
@@ -372,14 +372,14 @@ namespace Antioch
     typename constructor_or_reference<const KineticsConditions<typename value_type<VectorStateType>::type,VectorStateType>, const TC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
                 transport_conditions(conditions);
 
-    const typename value_type<VectorStateType>::type M = _viscosity.mixture().M(mass_fractions);
+    const typename value_type<VectorStateType>::type M = _mixture.chem_mixture().M(mass_fractions);
 
     // Precompute needed quantities
     // chi_s = w_s*M/M_s
     for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
         _viscosity.compute_viscosity(s,transport_conditions,mu[s]);
-        chi[s] = mass_fractions[s]*M/_viscosity.mixture().M(s);
+        chi[s] = mass_fractions[s]*M/_mixture.chem_mixture().M(s);
       }
 
     return;
