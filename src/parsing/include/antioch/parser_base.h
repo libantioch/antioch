@@ -33,6 +33,7 @@
 //C++
 #include <vector>
 #include <string>
+#include <sstream>
 
 namespace Antioch
 {
@@ -306,12 +307,15 @@ namespace Antioch
         _verbose(verbose),
         _comments(comments)
   {
-      _not_implemented =   "\n*********************************************************\n"
-                         + "This method is not available with a " << _type << " parser.\n"
-                         + "Parsing file " << _file << ".\n"
-                         + "No format has been defined yet.  Maybe contribute?\n"
-                         + "https://github.com/libantioch/antioch\n" 
-                         + "\n\n*********************************************************\n\n";
+       std::stringstream os;
+       os <<  "\n*********************************************************\n"
+          << "This method is not available with a " << _type << " parser.\n"
+          << "Parsing file " << _file << ".\n"
+          << "No format has been defined yet.  Maybe contribute?\n"
+          << "https://github.com/libantioch/antioch\n" 
+          << "\n\n*********************************************************\n\n";
+
+      _not_implemented = os.str();
                         
       return;
   }

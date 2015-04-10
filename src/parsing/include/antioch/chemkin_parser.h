@@ -116,15 +116,15 @@ namespace Antioch{
 
         //! reads the thermo, NASA generalist, no templates for virtual
         void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
-                {ParserBase<NumericType>::not_implemented(11);}
+                {antioch_not_implemented_msg(ParserBase<NumericType>::_not_implemented);}
 
         //! reads the thermo, NASA generalist, no templates for virtual
         void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  
-                {ParserBase<NumericType>::not_implemented(12);}
+                {antioch_not_implemented_msg(ParserBase<NumericType>::_not_implemented);}
 
         //! reads the thermo, CEA deprecated 
         void read_thermodynamic_data(CEAThermodynamics<NumericType >& thermo)  
-                {ParserBase<NumericType>::not_implemented(13);}
+                {antioch_not_implemented_msg(ParserBase<NumericType>::_not_implemented);}
 
 ///////////////// kinetics
 
