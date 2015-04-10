@@ -102,5 +102,8 @@
 #define antioch_deprecated() \
           do  {std::cerr << "\n*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
                          << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;} while(0)
+// Just outputing to std::cerr
+#define antioch_msg_error(errmsg)           do { std::cerr << errmsg << std::endl; }                   while(0)
+#define antioch_not_implemented_msg(errmsg) do {antioch_msg_error(errmsg); antioch_not_implemented();} while(0) 
 
 #endif // ANTIOCH_ASSERTS_H
