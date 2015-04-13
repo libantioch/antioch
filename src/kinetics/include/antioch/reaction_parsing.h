@@ -50,6 +50,15 @@ namespace Antioch
                                        const ReactionType::ReactionType& type , 
                                        const KineticsModel::KineticsModel& kin );
 
+
+  template <typename CoeffType>
+  void reset_parameter_of_chemical_process(Reaction<CoeffType> * reac,
+                                           ReactionType::Parameters parameter,
+                                           const CoeffType & new_value,
+                                           unsigned int species = 0); // if resetting epsilon
+
+// ----------------------
+
   template<typename CoeffType>
   inline
   Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
@@ -110,6 +119,58 @@ namespace Antioch
     // Dummy
     return reaction;
   }
+
+
+  template <typename CoeffType>
+  inline
+  void reset_parameter_of_chemical_process(Reaction<CoeffType> * reac,
+                                           ReactionType::Parameters parameter,
+                                           const CoeffType & new_value,
+                                           unsigned int species)
+  {
+      switch(parameter)
+      {
+        case ReactionType::EFFICIENCIES:
+        {
+          reac->set_efficiency(std::string(),species,new_value); // tests inside, if not three-body or species wrong
+        }
+          break;
+        case ReactionType::TROE_ALPHA:
+        {
+          antioch_assert( (reac->type() == ReactionType::TROE_FALLOFF) || 
+                          (reac->type() == ReactionType::TROE_FALLOFF_THREE_BODY) );
+          reac->falloff().set_alpha(new_value);
+        }
+          break;
+        case ReactionType::TROE_T1:
+        {
+          antioch_assert( (reac->type() == ReactionType::TROE_FALLOFF) || 
+                          (reac->type() == ReactionType::TROE_FALLOFF_THREE_BODY) );
+          reac->falloff().set_T1(new_value);
+        }
+          break;
+        case ReactionType::TROE_T2:
+        {
+          antioch_assert( (reac->type() == ReactionType::TROE_FALLOFF) || 
+                          (reac->type() == ReactionType::TROE_FALLOFF_THREE_BODY) );
+          reac->falloff().set_T2(new_value);
+        }
+          break;
+        case ReactionType::TROE_T3:
+        {
+          antioch_assert( (reac->type() == ReactionType::TROE_FALLOFF) || 
+                          (reac->type() == ReactionType::TROE_FALLOFF_THREE_BODY) );
+          reac->falloff().set_T3(new_value);
+        }
+          break;
+        default:
+        {
+          antioch_error();
+        }
+          break;
+      }
+  }
+
 
 } // end namespace Antioch
 
