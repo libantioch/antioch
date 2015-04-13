@@ -1211,6 +1211,18 @@ namespace Antioch
         }
         break;
 
+        case(ReactionType::LINDEMANN_FALLOFF_THREE_BODY):
+        {
+          (static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->F();
+        }
+        break;
+
+        case(ReactionType::TROE_FALLOFF_THREE_BODY):
+        {
+          (static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >*>(this))->F();
+        }
+        break;
+
         default:
         {
           std::cerr << "You are trying to retrieve a Falloff object in a reaction that is not a falloff.\n"
