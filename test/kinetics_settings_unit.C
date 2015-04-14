@@ -60,54 +60,64 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
     const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(-Ea/(R*T) + D * T);
     const Scalar derive_exact = exp(-Ea/(R*T) + D * T) * pow(T/Tref,eta) * Cf * (Ea/(R*T*T) + eta/T + D );
 
-    Scalar rate1 = rate_base(T);
-    Scalar deriveRate1 = rate_base.derivative(T);
+    Antioch::KineticsConditions<Scalar> cond(T);
+
+    Scalar rate1 = rate_base(cond);
+    Scalar deriveRate1 = rate_base.derivative(cond);
     Scalar rate;
     Scalar deriveRate;
 
-    rate_base.compute_rate_and_derivative(T,rate,deriveRate);
+    rate_base.compute_rate_and_derivative(cond,rate,deriveRate);
 
     if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
       {
-          std::cout << std::scientific << std::setprecision(16)
+          std::cerr << std::scientific << std::setprecision(16)
                     << "Error: Mismatch in rate values." << std::endl
                     << "T = " << T << " K" << std::endl
                     << "rate(T) = " << rate1 << std::endl
                     << "rate_exact = " << rate_exact << std::endl
-                    << "on rate " << rate_base << std::endl;
+                    << "relative difference = " << abs( (rate1 - rate_exact)/rate_exact ) << std::endl
+                    << "tolerance = " << tol << std::endl
+                    << "on rate " << rate_base << std::endl << std::endl;
 
           return_flag = 1;
       }
     if( abs( (rate - rate_exact)/rate_exact ) > tol )
       {
-          std::cout << std::scientific << std::setprecision(16)
+          std::cerr << std::scientific << std::setprecision(16)
                     << "Error: Mismatch in rate values." << std::endl
                     << "T = " << T << " K" << std::endl
                     << "rate(T) = " << rate << std::endl
                     << "rate_exact = " << rate_exact << std::endl
-                    << "on rate " << rate_base << std::endl;
+                    << "relative difference = " << abs( (rate - rate_exact)/rate_exact ) << std::endl
+                    << "tolerance = " << tol << std::endl
+                    << "on rate " << rate_base << std::endl << std::endl;
 
           return_flag = 1;
       }
     if( abs( (deriveRate1 - derive_exact)/derive_exact ) > tol )
       {
-          std::cout << std::scientific << std::setprecision(16)
+          std::cerr << std::scientific << std::setprecision(16)
                     << "Error: Mismatch in rate derivative values." << std::endl
                     << "T = " << T << " K" << std::endl
                     << "drate_dT(T) = " << deriveRate1 << std::endl
                     << "derive_exact = " << derive_exact << std::endl
-                    << "on rate " << rate_base << std::endl;
+                    << "relative difference = " << abs( (deriveRate1 - derive_exact)/derive_exact ) << std::endl
+                    << "tolerance = " << tol << std::endl
+                    << "on rate " << rate_base << std::endl << std::endl;
 
           return_flag = 1;
      }
     if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
       {
-          std::cout << std::scientific << std::setprecision(16)
+          std::cerr << std::scientific << std::setprecision(16)
                     << "Error: Mismatch in rate derivative values." << std::endl
                     << "T = " << T << " K" << std::endl
                     << "drate_dT(T) = " << deriveRate << std::endl
                     << "derive_exact = " << derive_exact << std::endl
-                    << "on rate " << rate_base << std::endl;
+                    << "relative difference = " << abs( (deriveRate - derive_exact)/derive_exact ) << std::endl
+                    << "tolerance = " << tol << std::endl
+                    << "on rate " << rate_base << std::endl << std::endl;
 
           return_flag = 1;
      }
@@ -124,10 +134,17 @@ int tester()
   const Scalar zero(0.L);
   Scalar Cf = 1.4L;
   Scalar eta = 1.2L;
-  Scalar Ea = 298.0L;
+  Scalar Ea = 298;
   Scalar D = 0.05L;
-  Scalar Tref = 1.L;
-  Scalar R = 1.L;
+  Scalar Tref = 1;
+  Scalar R = 1;
+
+  Scalar Cf_reset = 1e-7L;
+  Scalar eta_reset = 1.5L;
+  Scalar Ea_reset = 36000.L;
+  Scalar D_reset = -5.e-2L;
+  Scalar Tref_reset = 298;
+  Scalar R_reset = Antioch::Constants::R_universal<Scalar>() * Antioch::Units<Scalar>("cal").get_SI_factor();
 
 /// building only here
 
@@ -138,16 +155,27 @@ int tester()
 
   int return_flag = test_values(Cf,zero,zero,zero,Tref,R,*kin_base);
 
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::A,Cf_reset);
+
+  return_flag = test_values(Cf_reset,zero,zero,zero,Tref,R,*kin_base) || return_flag;
+
+  delete kin_base;
+
    // Hercourt-Essen
   coeffs.resize(3);
   coeffs[0] = Cf;
   coeffs[1] = eta;
   coeffs[2] = Tref;
 
-  delete kin_base;
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::HERCOURT_ESSEN);
   
   return_flag = test_values(Cf,eta,zero,zero,Tref,R,*kin_base) || return_flag;
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::T_REF,Tref_reset);
+
+  return_flag = test_values(Cf,eta,zero,zero,Tref_reset,R,*kin_base) || return_flag;
+
+  delete kin_base;
 
    // Arrhenius
   coeffs.resize(3);
@@ -155,20 +183,30 @@ int tester()
   coeffs[1] = Ea;
   coeffs[2] = R;
 
-  delete kin_base;
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::ARRHENIUS);
   
   return_flag = test_values(Cf,zero,Ea,zero,Tref,R,*kin_base) || return_flag;
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::E,Ea_reset);
+
+  return_flag = test_values(Cf,zero,Ea_reset,zero,Tref,R,*kin_base) || return_flag;
+
+  delete kin_base;
 
    // Berthelot
   coeffs.resize(2);
   coeffs[0] = Cf;
   coeffs[1] = D;
 
-  delete kin_base;
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::BERTHELOT);
   
   return_flag = test_values(Cf,zero,zero,D,Tref,R,*kin_base) || return_flag;
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::D,D_reset);
+
+  return_flag = test_values(Cf,zero,zero,D_reset,Tref,R,*kin_base) || return_flag;
+
+  delete kin_base;
 
    // Berthelot Hercourt-Essen
   coeffs.resize(4);
@@ -177,10 +215,17 @@ int tester()
   coeffs[2] = D;
   coeffs[3] = Tref;
 
-  delete kin_base;
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::BHE);
   
   return_flag = test_values(Cf,eta,zero,D,Tref,R,*kin_base) || return_flag;
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::A,Cf_reset);
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::D,D_reset);
+
+  return_flag = test_values(Cf_reset,eta,zero,D_reset,Tref,R,*kin_base) || return_flag;
+
+  delete kin_base;
 
    // Kooij
   coeffs.resize(5);
@@ -190,10 +235,17 @@ int tester()
   coeffs[3] = Tref;
   coeffs[4] = R;
 
-  delete kin_base;
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::KOOIJ);
   
   return_flag = test_values(Cf,eta,Ea,zero,Tref,R,*kin_base) || return_flag;
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::R_SCALE,R_reset);
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::E,Ea_reset);
+
+  return_flag = test_values(Cf,eta,Ea_reset,zero,Tref,R_reset,*kin_base) || return_flag;
+
+  delete kin_base;
 
    // Van't Hoff
   coeffs.resize(6);
@@ -204,19 +256,19 @@ int tester()
   coeffs[4] = Tref;
   coeffs[5] = R;
 
-  delete kin_base;
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::VANTHOFF);
   
   return_flag = test_values(Cf,eta,Ea,D,Tref,R,*kin_base) || return_flag;
 
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::A,Cf_reset);
 
-//// reset
-  Scalar Cf_reset = 1e-7L;
-  Scalar eta_reset = 1.5L;
-  Scalar Ea_reset = 36000.L;
-  Scalar D_reset = -5.e-2L;
-  Scalar Tref_reset = 298.;
-  Scalar R_reset = Antioch::Constants::R_universal<Scalar>() * Antioch::Units<Scalar>("cal").get_SI_factor();
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::T_REF,Tref_reset);
+
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::D,D_reset);
+
+  return_flag = test_values(Cf_reset,eta,Ea,D_reset,Tref_reset,R,*kin_base) || return_flag;
+
+//// reset the whole kinetics
 
   coeffs[0] = Cf_reset;
   coeffs[1] = eta_reset;
