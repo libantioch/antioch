@@ -51,6 +51,15 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType, typename VectorType>
   void reset_rate( KineticsType<CoeffType,VectorCoeffType> & kin, const VectorType & coefs);
 
+  // ParamType is either VectorCoeffType or CoeffType
+  template <typename CoeffType, typename VectorCoeffType, typename ParamType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const ParamType & new_value);
+
+
+//----------------------------------------
+
   //! We take here the parameters as:
   //  - \f$A\f$, \f$\beta\f$, \f$E_a\f$, \f$D\f$, \f$\mathrm{T_{ref}}\f$, \f$\mathrm{scale}\f$.
   //  The \f$\mathrm{scale}\f$ parameter is the factor of \f$E_a\f$ from its unit
@@ -202,6 +211,71 @@ namespace Antioch
 
       } // switch(kin.type())
   }
+
+
+  template <typename CoeffType, typename VectorCoeffType, typename ParamType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const ParamType & new_value)
+  {
+    switch(rate.type())
+      {
+      case(KineticsModel::CONSTANT):
+        {
+          static_cast<ConstantRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      case(KineticsModel::HERCOURT_ESSEN):
+        {
+          static_cast< HercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      case(KineticsModel::BERTHELOT):
+        {
+          static_cast< BerthelotRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      case(KineticsModel::ARRHENIUS):
+        {
+          static_cast< ArrheniusRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      case(KineticsModel::BHE):
+        {
+          static_cast< BerthelotHercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      case(KineticsModel::KOOIJ):
+        {
+          static_cast< KooijRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      case(KineticsModel::VANTHOFF):
+        {
+          static_cast< VantHoffRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      case(KineticsModel::PHOTOCHEM):
+        {
+          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&rate)->set_parameter(parameter,new_value);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(kin.type())
+  }
+
 
 
 } // end namespace Antioch

@@ -67,6 +67,9 @@ namespace Antioch
     void set_Cf( const CoeffType Cf );
     void set_D( const CoeffType D );
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value);
+
     /*! reset the coeffs
      *
      * You require exactly two parameters, the order assumed is Cf, D
@@ -157,6 +160,31 @@ namespace Antioch
      this->set_Cf(coefficients[0]);
      this->set_D(coefficients[1]);
   }
+
+  template<typename CoeffType>
+  inline
+  void BerthelotRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value)
+  {
+     switch(parameter)
+     {
+       case KineticsModel::Parameters::A:
+       {
+         this->set_Cf(new_value);
+       }
+         break;
+       case KineticsModel::Parameters::D:
+       {
+         this->set_D(new_value);
+       }
+         break;
+       default:
+       {
+         antioch_error();
+       }
+        break;
+     }
+  }
+
 
   template<typename CoeffType>
   inline

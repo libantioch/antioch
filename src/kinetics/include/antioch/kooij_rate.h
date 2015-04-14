@@ -80,6 +80,9 @@ namespace Antioch
     void set_Tref(  const CoeffType Tref );
     void set_rscale(const CoeffType scale );
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value);
+
     /*! reset the coeffs
      *
      * Two ways of modifying your rate:
@@ -253,6 +256,45 @@ namespace Antioch
      this->set_Cf(coefficients[0]);
      this->set_eta(coefficients[1]);
      this->set_Ea(coefficients[2]);
+  }
+
+  template<typename CoeffType>
+  inline
+  void KooijRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value)
+  {
+    switch(parameter)
+    {
+       case KineticsModel::Parameters::R_SCALE:
+       {
+          this->set_rscale(new_value);
+       }
+        break;
+       case KineticsModel::Parameters::T_REF:
+       {
+         this->set_Tref(new_value);
+       }
+        break;
+       case KineticsModel::Parameters::A:
+       {
+        this->set_Cf(new_value);
+       }
+        break;
+       case KineticsModel::Parameters::B:
+       {
+        this->set_eta(new_value);
+       }
+        break;
+       case KineticsModel::Parameters::E:
+       {
+        this->set_Ea(new_value);
+       }
+        break;
+       default:
+       {
+         antioch_error();
+       }
+        break;
+    }
   }
 
   template<typename CoeffType>

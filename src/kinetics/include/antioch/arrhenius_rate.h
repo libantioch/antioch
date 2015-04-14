@@ -79,6 +79,9 @@ namespace Antioch
     void set_Ea(     const CoeffType Ea );
     void set_rscale( const CoeffType rscale );
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value);
+
     /*! reset the coeffs
      *
      * Two ways of modifying your rate:
@@ -187,6 +190,30 @@ namespace Antioch
      if(coefficients.size() == 3)this->set_rscale(coefficients[2]);
      this->set_Cf(coefficients[0]);
      this->set_Ea(coefficients[1]);
+  }
+
+  template<typename CoeffType>
+  inline
+  void ArrheniusRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value)
+  {
+      switch(parameter)
+      {
+        case KineticsModel::Parameters::A:
+        {
+          this->set_Cf(new_value);
+        }
+          break;
+        case KineticsModel::Parameters::E:
+        {
+         this->set_Ea(new_value);
+        }
+          break;
+        default:
+        {
+          antioch_error();
+        }
+        break;
+      }
   }
 
   template<typename CoeffType>

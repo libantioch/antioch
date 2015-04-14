@@ -68,6 +68,16 @@ namespace Antioch{
        //!
        void set_lambda_grid(const VectorCoeffType &l);
 
+       //! set one parameter, characterized by enum
+       void set_parameter(KineticsModel::Parameters parameter, const VectorCoeffType & new_value);
+       //! compatibility, this is wrong
+       //
+       // \todo, we need a way to give the VectorCoeffType by
+       // the user at high level. At the moment it is necessarily
+       // std::vector<CoeffType>, as defined (and imposed) in
+       // read_reaction_set_data.h (l. 430) by the data vector.
+       void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value) {antioch_error();}
+
        /*! reset the coefficients
         *
         *  Contrary to the other rate models, no choice here in the VectorCoeffType type.
@@ -162,6 +172,32 @@ namespace Antioch{
       }
       this->set_lambda_grid(l);
       this->set_cross_section(cs);
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::set_parameter(KineticsModel::Parameters parameter, const VectorCoeffType & new_value)
+  {
+    antioch_assert_equal_to(new_value.size(),_lambda_grid.size());
+
+    switch(parameter)
+    {
+      case KineticsModel::Parameters::LAMBDA:
+      {
+         this->set_lambda_grid(new_value);
+      }
+       break;
+      case KineticsModel::Parameters::SIGMA:
+      {
+         this->set_cross_section(new_value);
+      }
+        break;
+      default:
+      {
+        antioch_error();
+      }
+       break;
+    }
   }
 
   template<typename CoeffType, typename VectorCoeffType>

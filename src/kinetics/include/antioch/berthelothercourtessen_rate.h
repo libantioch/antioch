@@ -74,6 +74,9 @@ namespace Antioch
     void set_D(   const CoeffType D );
     void set_Tref(const CoeffType Tref );
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value);
+
     /*! reset the coeffs
      *
      * Two ways of modifying your rate:
@@ -223,6 +226,35 @@ namespace Antioch
     this->set_Cf(coefficients[0]);
     this->set_eta(coefficients[1]);
     this->set_D(coefficients[2]);
+  }
+
+  template<typename CoeffType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value)
+  {
+    switch(parameter)
+    {
+     case KineticsModel::Parameters::A:
+     {
+       this->set_Cf(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::B:
+     {
+       this->set_eta(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::D:
+     {
+       this->set_D(new_value);
+     }
+      break;
+     default:
+     {
+       antioch_error();
+     }
+      break;
+     }
   }
 
   template<typename CoeffType>
