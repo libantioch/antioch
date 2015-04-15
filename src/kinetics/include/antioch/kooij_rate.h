@@ -81,7 +81,7 @@ namespace Antioch
     void set_rscale(const CoeffType scale );
 
     //! set one parameter, characterized by enum
-    void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value);
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
 
     /*! reset the coeffs
      *
@@ -260,7 +260,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void KooijRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value)
+  void KooijRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
   {
     switch(parameter)
     {

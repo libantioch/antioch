@@ -75,7 +75,7 @@ namespace Antioch
     CoeffType Cf()   const;
 
     //! set one parameter, characterized by enum
-    void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value);
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
@@ -139,7 +139,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void ConstantRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value)
+  void ConstantRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
   {
     antioch_assert_equal_to(parameter,KineticsModel::Parameters::A);
 

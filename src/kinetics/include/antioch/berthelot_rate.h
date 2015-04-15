@@ -68,7 +68,7 @@ namespace Antioch
     void set_D( const CoeffType D );
 
     //! set one parameter, characterized by enum
-    void set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value);
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
 
     /*! reset the coeffs
      *
@@ -163,7 +163,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void BerthelotRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, const CoeffType & new_value)
+  void BerthelotRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
   {
      switch(parameter)
      {

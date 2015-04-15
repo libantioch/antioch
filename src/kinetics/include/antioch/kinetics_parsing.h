@@ -55,7 +55,7 @@ namespace Antioch
   template <typename CoeffType, typename VectorCoeffType, typename ParamType>
   void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
                                KineticsModel::Parameters parameter,
-                               const ParamType & new_value);
+                               const ParamType new_value);
 
 
 //----------------------------------------
@@ -216,7 +216,7 @@ namespace Antioch
   template <typename CoeffType, typename VectorCoeffType, typename ParamType>
   void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
                                KineticsModel::Parameters parameter,
-                               const ParamType & new_value)
+                               const ParamType new_value)
   {
     switch(rate.type())
       {
