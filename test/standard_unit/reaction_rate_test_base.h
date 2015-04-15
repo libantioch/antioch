@@ -44,12 +44,25 @@ namespace AntiochTesting
     {
       for(Scalar T = 300.1; T <= 2500.1; T += 10.)
         {
-          Scalar rate = reaction_rate(T);
-          Scalar exact_rate = this->exact_rate(T);
+          {
+            Scalar rate = reaction_rate(T);
+            Scalar exact_rate = this->exact_rate(T);
 
-          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
-                                        exact_rate,
-                                        tol );
+            CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
+                                          exact_rate,
+                                          tol );
+          }
+
+          {
+            Antioch::KineticsConditions<Scalar> cond(T);
+            Scalar rate = reaction_rate(cond);
+            Scalar exact_rate = this->exact_rate(T);
+
+            CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
+                                          exact_rate,
+                                          tol );
+          }
+
         }
     }
 
@@ -58,12 +71,24 @@ namespace AntiochTesting
     {
       for(Scalar T = 300.1; T <= 2500.1; T += 10.)
         {
-          Scalar deriv = reaction_rate.derivative(T);
-          Scalar exact_deriv = this->exact_deriv(T);
+          {
+            Scalar deriv = reaction_rate.derivative(T);
+            Scalar exact_deriv = this->exact_deriv(T);
 
-          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
-                                        exact_deriv,
-                                        tol );
+            CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
+                                          exact_deriv,
+                                          tol );
+          }
+
+          {
+            Antioch::KineticsConditions<Scalar> cond(T);
+            Scalar deriv = reaction_rate.derivative(cond);
+            Scalar exact_deriv = this->exact_deriv(T);
+
+            CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
+                                          exact_deriv,
+                                          tol );
+          }
         }
     }
 
@@ -72,21 +97,24 @@ namespace AntiochTesting
     {
       for(Scalar T = 300.1; T <= 2500.1; T += 10.)
         {
-          Scalar rate;
-          Scalar deriv;
+          {
+            Scalar rate;
+            Scalar deriv;
+            Antioch::KineticsConditions<Scalar> cond(T);
 
-          reaction_rate.rate_and_derivative(T,rate,deriv);
+            reaction_rate.rate_and_derivative(cond,rate,deriv);
 
-          Scalar exact_rate = this->exact_rate(T);
-          Scalar exact_deriv = this->exact_deriv(T);
+            Scalar exact_rate = this->exact_rate(T);
+            Scalar exact_deriv = this->exact_deriv(T);
 
-          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
-                                        exact_rate,
-                                        tol );
+            CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
+                                          exact_rate,
+                                          tol );
 
-          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
-                                        exact_deriv,
-                                        tol );
+            CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
+                                          exact_deriv,
+                                          tol );
+          }
         }
     }
 
