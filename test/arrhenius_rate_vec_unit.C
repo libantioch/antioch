@@ -69,6 +69,69 @@ GRVY::GRVY_Timer_Class gt;
 #include <limits>
 
 template <typename PairScalars>
+int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars & derive_exact, 
+                              const PairScalars & rate,       const PairScalars & derive, const PairScalars & T)
+{
+    typedef typename Antioch::value_type<PairScalars>::type  Scalar;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+
+    int return_flag(0);
+   for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+   {
+    if( abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "rate(T) = " << rate[2*tuple] << std::endl
+                  << "rate_exact = " << rate_exact[2*tuple] << std::endl
+                  << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+ 
+        return_flag = 1;
+      }
+    if( abs( (rate[2*tuple+1] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "rate(T) = " << rate[2*tuple] << std::endl
+                  << "rate_exact = " << rate_exact[2*tuple+1] << std::endl
+                  << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+ 
+        return_flag = 1;
+      }
+    if( abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate derivative values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "drate_dT(T) = " << derive[2*tuple] << std::endl
+                  << "derive_exact = " << derive_exact[2*tuple] << std::endl
+                  << "relative difference = " <<  abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+
+        return_flag = 1;
+      }
+    if( abs( (derive[2*tuple+1] - derive_exact[2*tuple+1])/derive_exact[2*tuple+1] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate derivative values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "drate_dT(T) = " << derive[2*tuple+1] << std::endl
+                  << "derive_exact = " << derive_exact[2*tuple+1] << std::endl
+                  << "relative difference = " <<  abs( (derive[2*tuple+1] - derive_exact[2*tuple+1])/derive_exact[2*tuple+1] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+
+        return_flag = 1;
+      }
+
+   }
+   return return_flag;
+}
+
+template <typename PairScalars>
 int vectester(const PairScalars& example, const std::string& testname)
 {
   using std::abs;
@@ -83,74 +146,72 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;
+  PairScalars rate_exact = example;
+  PairScalars derive_exact = example;
   for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
     {
       T[2*tuple]   = 1500.1;
       T[2*tuple+1] = 1600.1;
+      rate_exact[2*tuple] = Cf*exp(-Ea/1500.1);
+      rate_exact[2*tuple+1] = Cf*exp(-Ea/1600.1);
+      derive_exact[2*tuple] = Ea/(Scalar(1500.1)*Scalar(1500.1)) * Cf * exp(-Ea/Scalar(1500.1));
+      derive_exact[2*tuple+1] = Ea/(Scalar(1600.1)*Scalar(1600.1)) * Cf * exp(-Ea/Scalar(1600.1));
     }
-  
-  const Scalar rate_exact0 = Cf*exp(-Ea/1500.1);
-  const Scalar rate_exact1 = Cf*exp(-Ea/1600.1);
-  const Scalar derive_exact0 = Ea/(Scalar(1500.1)*Scalar(1500.1)) * Cf * exp(-Ea/Scalar(1500.1));
-  const Scalar derive_exact1 = Ea/(Scalar(1600.1)*Scalar(1600.1)) * Cf * exp(-Ea/Scalar(1600.1));
+  Antioch::KineticsConditions<PairScalars> cond(T);
 
   int return_flag = 0;
 
+// KineticsConditions
 #ifdef ANTIOCH_HAVE_GRVY
   gt.BeginTimer(testname);
 #endif
 
-  const PairScalars rate = arrhenius_rate(T);
-  const PairScalars deriveRate = arrhenius_rate.derivative(T);
+  PairScalars rate = arrhenius_rate(cond);
+  PairScalars derive = arrhenius_rate.derivative(cond);
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testname);
 #endif
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
 
-  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-    {
-      if( abs( (rate[2*tuple] - rate_exact0)/rate_exact0 ) > tol )
-        {
-          std::cout << "Error: Mismatch in rate values." << std::endl
-		    << "rate(T0)   = " << rate[2*tuple] << std::endl
-		    << "rate_exact = " << rate_exact0 << std::endl
-		    << "difference = " << rate[2*tuple] - rate_exact0 << std::endl;
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
 
-          return_flag = 1;
-	  break;
-        }
+  arrhenius_rate.rate_and_derivative(cond,rate,derive);
 
-      if( abs( (rate[2*tuple+1] - rate_exact1)/rate_exact1 ) > tol )
-        {
-          std::cout << "Error: Mismatch in rate values." << std::endl
-		    << "rate(T1)   = " << rate[2*tuple+1] << std::endl
-		    << "rate_exact = " << rate_exact1 << std::endl
-		    << "difference = " << rate[2*tuple+1] - rate_exact1 << std::endl;
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
 
-          return_flag = 1;
-	  break;
-        }
-    }
-  if( abs( (deriveRate[0] - derive_exact0)/derive_exact0 ) > tol )
-    {
-      std::cout << std::scientific << std::setprecision(16)
-                << "Error: Mismatch in rate derivative values." << std::endl
-		<< "drate_dT(T0) = " << deriveRate[0] << std::endl
-		<< "derive_exact = " << derive_exact0 << std::endl;
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
 
-      return_flag = 1;
-    }
-  if( abs( (deriveRate[1] - derive_exact1)/derive_exact1 ) > tol )
-    {
-      std::cout << std::scientific << std::setprecision(16)
-                << "Error: Mismatch in rate derivative values." << std::endl
-		<< "drate_dT(T1) = " << deriveRate[1] << std::endl
-		<< "derive_exact = " << derive_exact1 << std::endl;
+// T
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
 
-      return_flag = 1;
-    }
+  rate = arrhenius_rate(T);
+  derive = arrhenius_rate.derivative(T);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
+
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
+
+  arrhenius_rate.rate_and_derivative(T,rate,derive);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
+
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
 
   std::cout << "Arrhenius rate: " << arrhenius_rate << std::endl;
 
@@ -185,13 +246,11 @@ int main()
     vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
 #endif
 #ifdef ANTIOCH_HAVE_VEXCL
-std::cout << "vexcl start" << std::endl;
   vex::Context ctx_f (vex::Filter::All);
-std::cout << "vexcl start" << std::endl;
   if (!ctx_f.empty())
     returnval = returnval ||
       vectester (vex::vector<float> (ctx_f, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
-std::cout << "vexcl float ok" << std::endl;
+
   vex::Context ctx_d (vex::Filter::DoublePrecision);
   if (!ctx_d.empty())
     returnval = returnval ||
