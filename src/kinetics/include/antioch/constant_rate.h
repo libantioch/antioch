@@ -108,6 +108,29 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
+   // KineticsConditions overloads
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    rate(const KineticsConditions<StateType,VectorStateType>& cond) const
+    ANTIOCH_AUTOFUNC(StateType, constant_clone(cond.T(),_Cf))
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    operator()(const KineticsConditions<StateType,VectorStateType>& cond) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(cond))
+
+    //! \return the derivative with respect to temperature evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    derivative( const KineticsConditions<StateType,VectorStateType>& cond ) const
+    ANTIOCH_AUTOFUNC(StateType, zero_clone(cond.T()))
+
+    //! Simultaneously evaluate the rate and its derivative at \p T.
+    template <typename StateType, typename VectorStateType>
+    void rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& cond, StateType& rate, StateType& drate_dT) const;
+
     //! print equation
     const std::string numeric() const;
 
@@ -187,6 +210,18 @@ namespace Antioch
   void ConstantRate<CoeffType>::rate_and_derivative( const StateType& /*T*/,
                                                           StateType& rate,
                                                           StateType& drate_dT) const
+  {
+    Antioch::constant_fill(rate, _Cf);
+    Antioch::set_zero(drate_dT);
+    return;
+  }
+
+  template<typename CoeffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  void ConstantRate<CoeffType>::rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& /*cond*/, 
+                                                    StateType& rate, 
+                                                    StateType& drate_dT) const
   {
     Antioch::constant_fill(rate, _Cf);
     Antioch::set_zero(drate_dT);
