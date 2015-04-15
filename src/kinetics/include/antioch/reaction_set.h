@@ -79,6 +79,11 @@ namespace Antioch
     // object, they are deleted in the desctructor.
     void add_reaction(Reaction<CoeffType>* reaction);
 
+    //! remove a reaction from the system.
+    //
+    // The corresponding pointer is deleted
+    void remove_reaction(unsigned int nr);
+
     //! \returns a constant reference to reaction \p r.
     const Reaction<CoeffType>& reaction(const unsigned int r) const;
 
@@ -176,6 +181,19 @@ namespace Antioch
     _reactions.back()->initialize(_reactions.size() - 1);
 
     return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void ReactionSet<CoeffType>::remove_reaction(unsigned int nr)
+  {
+     antioch_assert_less(nr,_reactions.size());
+
+     //first clear the memory
+     delete _reactions[nr];
+
+     //second, release the spot
+     _reactions.erase(_reactions.begin() + nr);
   }
   
   template<typename CoeffType>
