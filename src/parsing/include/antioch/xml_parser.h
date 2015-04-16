@@ -104,6 +104,10 @@ namespace Antioch{
 ////////////////// thermo
 
 //global overload
+// it seems that they're all linked in
+// a way so they shadow themselves
+// => we need to implement all or nothing
+
         //! reads the thermo, NASA generalist, no templates for virtual
         void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
                 {this->read_thermodynamic_data_root(thermo);}
@@ -116,6 +120,10 @@ namespace Antioch{
         void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)  
                 {this->read_thermodynamic_data_root(thermo);}
 
+        //! reads the thermo, CEA deprecated 
+        void read_thermodynamic_data(CEAThermodynamics<NumericType >& thermo)
+                {this->read_thermodynamic_data_root(thermo);}
+
 /// reaction
 
          /*! go to next reaction*/
@@ -125,7 +133,7 @@ namespace Antioch{
          bool rate_constant(const std::string & kinetics_model);
 
          /*! return true if there's a Troe block*/
-         bool Troe();
+         bool Troe() const;
 
          /*! return reaction id, 0 if not provided*/
          const std::string reaction_id() const;
@@ -196,8 +204,8 @@ namespace Antioch{
         private:
 
          //! reads the thermo, NASA generalist
-         template <typename CurveType>
-         void read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo);
+         template <typename ThermoType>
+         void read_thermodynamic_data_root(ThermoType & thermo);
 
          /*! return pairs of molecules and stoichiometric coefficients*/
          bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & products_pair) const;
@@ -221,8 +229,10 @@ namespace Antioch{
           tinyxml2::XMLElement * _thermo_block;
           tinyxml2::XMLElement * _reaction_block;
           tinyxml2::XMLElement * _reaction;
+
           tinyxml2::XMLElement * _rate_constant;
           tinyxml2::XMLElement * _Troe;
+
           std::map<ParsingKey,std::string> _map;
           std::map<ParsingKey,std::string> _default_unit;
 
@@ -393,6 +403,7 @@ namespace Antioch{
                         _reaction_block->FirstChildElement(_map.at(ParsingKey::REACTION).c_str());
 
       _rate_constant = NULL;
+      _Troe          = NULL;
 
       return _reaction;
   }
@@ -401,15 +412,22 @@ namespace Antioch{
   inline
   bool XMLParser<NumericType>::rate_constant(const std::string & kinetics_model)
   {
+        // if in a reaction
       if(_reaction)
       {
+        // not the first one
         if(_rate_constant)
         {
            _rate_constant = _rate_constant->NextSiblingElement(kinetics_model.c_str());
         }else
         {
+        // first one, we need to set _rate_constant and _Troe, because they contain environments
+        // we suppose that there is a rateCoeff environement
+        // _rate_constant => <rateCoeff> <kin model> </kin model> </rateCoeff>
+        // _Troe          => <rateCoeff> <Troe> </Troe> </rateCoeff>
             antioch_assert(_reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str()));
             _rate_constant = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(kinetics_model.c_str());
+            _Troe          = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(_map[ParsingKey::TROE_FALLOFF].c_str());
         }
       }else
       {
@@ -421,16 +439,8 @@ namespace Antioch{
 
   template <typename NumericType>
   inline
-  bool XMLParser<NumericType>::Troe()
+  bool XMLParser<NumericType>::Troe() const
   {
-     if(_rate_constant)
-     {
-         _Troe = _rate_constant->FirstChildElement(_map[ParsingKey::TROE_FALLOFF].c_str());
-     }else
-     {
-        _Troe = NULL;
-     }
-
      return _Troe;
   }
 
@@ -769,9 +779,9 @@ namespace Antioch{
 
 
   template <typename NumericType>
-  template <typename CurveType>
+  template <typename ThermoType>
   inline
-  void XMLParser<NumericType>::read_thermodynamic_data_root(NASAThermoMixture<NumericType, CurveType >& thermo)
+  void XMLParser<NumericType>::read_thermodynamic_data_root(ThermoType & thermo)
   {
      if(!_thermo_block)
      {
