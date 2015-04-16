@@ -77,6 +77,12 @@ namespace Antioch
     //! set one parameter, characterized by enum
     void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
 
+    //! for compatibility purpose with photochemistry (particle flux reactions)
+    //
+    // \todo, solve this
+    template <typename VectorCoeffType>
+    void set_parameter(KineticsModel::Parameters parameter, VectorCoeffType new_value){antioch_error();}
+
     /*! reset the coeffs
      *
      * Two ways of modifying your rate:
