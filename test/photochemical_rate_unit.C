@@ -41,8 +41,30 @@
 #include "antioch/particle_flux.h"
 #include "antioch/photochemical_rate.h"
 #include "antioch/physical_constants.h"
+#include "antioch/kinetics_parsing.h"
 
 #include "antioch/vector_utils.h"
+
+template <typename Scalar>
+int check_rate(const Scalar & rate_exact, const Scalar & rate)
+{
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  int return_flag = (rate_exact > tol); // not zero
+  if(return_flag)std::cout << "Error: rate is null" << std::endl;
+  if( std::abs( (rate - rate_exact)/rate_exact ) > tol )
+  {
+    std::cout << std::scientific << std::setprecision(16)
+              << "Error: Mismatch in rate values."     << std::endl
+              << "rate = "           << rate           << std::endl
+              << "rate_exact = "     << rate_exact     << std::endl
+              << "relative error = " << std::abs(rate_exact - rate)/rate_exact << std::endl
+              << "tolerance = "      << tol            << std::endl;
+
+    return_flag = 1;
+  }
+
+  return return_flag;
+}
 
 template <typename Scalar>
 int tester(std::string path_to_files)
@@ -64,7 +86,7 @@ int tester(std::string path_to_files)
   {
     Scalar cs,l(-1);
     CH4 >> l >> cs;
-    if(l == -1)break;
+    if(!CH4.good())break;
     CH4_lambda.push_back(l);
     CH4_cs.push_back(cs);
   }
@@ -74,11 +96,11 @@ int tester(std::string path_to_files)
   {
     Scalar w,l(-1),dw;
     hv >> l >> w >> dw;
-    if(l == -1)break;
-    hv_lambda.push_back(l * 10.L); //nm -> Angström
+    if(!hv.good())break;
+    hv_lambda.push_back(l * 10); //nm -> Angström
     hv_irr.push_back(w * 1e-4L  // * 1e-4: m-2 -> cm-2 
                        / (Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l)// /(h*c/lambda): energy -> number of photons
-                       / 10.); // by Angström
+                       / 10); // by Angström
   }
   hv.close();
 
@@ -92,27 +114,52 @@ int tester(std::string path_to_files)
 
   Scalar rate = rate_hv.rate(part_flux);
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-  Scalar rate_exact(0.L);
+  Scalar rate_exact(0);
 
   for(unsigned int il = 0; il < hv_lambda.size() - 1; il++)
   {
       rate_exact += sigma_rescaled[il] * hv_irr[il] * (hv_lambda[il+1] - hv_lambda[il]);
   }
 
-  int return_flag = (rate_exact == Scalar(0.L));
-  if(return_flag)std::cout << "Error: rate is null" << std::endl;
-  if( std::abs( (rate - rate_exact)/rate_exact ) > tol )
-  {
-    std::cout << std::scientific << std::setprecision(16)
-              << "Error: Mismatch in rate values."     << std::endl
-              << "rate = "           << rate           << std::endl
-              << "rate_exact = "     << rate_exact     << std::endl
-              << "relative error = " << std::abs(rate_exact - rate)/rate_exact << std::endl
-              << "tolerance = "      << tol            << std::endl;
+  int return_flag = check_rate(rate_exact,rate);
 
-    return_flag = 1;
+ // multiplying by 2 the cross-section
+  for(unsigned int l = 0; l < CH4_cs.size(); l++)
+  {
+     CH4_cs[l] *= 2;
   }
+
+  bin.y_on_custom_grid(CH4_lambda,CH4_cs,hv_lambda,sigma_rescaled);
+
+  Antioch::set_zero(rate_exact);
+  for(unsigned int il = 0; il < hv_lambda.size() - 1; il++)
+  {
+      rate_exact += sigma_rescaled[il] * hv_irr[il] * (hv_lambda[il+1] - hv_lambda[il]);
+  }
+  rate_hv.set_parameter(Antioch::KineticsModel::Parameters::SIGMA,CH4_cs);
+  rate = rate_hv.rate(part_flux);
+
+  return_flag = check_rate(rate_exact,rate) || return_flag;
+
+ // multiplying by 2 the cross-section again
+  for(unsigned int l = 0; l < CH4_cs.size(); l++)
+  {
+     CH4_cs[l] *= 2;
+  }
+
+  bin.y_on_custom_grid(CH4_lambda,CH4_cs,hv_lambda,sigma_rescaled);
+
+  Antioch::set_zero(rate_exact);
+  for(unsigned int il = 0; il < hv_lambda.size() - 1; il++)
+  {
+      rate_exact += sigma_rescaled[il] * hv_irr[il] * (hv_lambda[il+1] - hv_lambda[il]);
+  }
+
+// the other way to reset
+  Antioch::reset_parameter_of_rate(rate_hv,Antioch::KineticsModel::Parameters::SIGMA,CH4_cs);
+  rate = rate_hv.rate(part_flux);
+
+  return_flag = check_rate(rate_exact,rate) || return_flag;
 
   return return_flag;
 }
