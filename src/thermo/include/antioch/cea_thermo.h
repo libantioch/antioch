@@ -94,6 +94,10 @@ namespace Antioch
     
     void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs );
 
+    // ! compatibility for parsers
+    void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & /*temps */ )
+                        {this->add_curve_fit(species_name,coeffs);}
+
     //! Checks that curve fits have been specified for all species in the mixture.
     bool check() const;
 
