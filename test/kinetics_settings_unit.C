@@ -141,10 +141,10 @@ int tester()
 
   Scalar Cf_reset = 1e-7L;
   Scalar eta_reset = 1.5L;
-  Scalar Ea_reset = 36000.L;
-  Scalar D_reset = -5.e-2L;
+  Scalar Ea_reset = 36000;
+  Scalar D_reset = -5e-2L;
   Scalar Tref_reset = 298;
-  Scalar R_reset = Antioch::Constants::R_universal<Scalar>() * Antioch::Units<Scalar>("cal").get_SI_factor();
+  Scalar R_reset = Antioch::Constants::R_universal<Scalar>() / Antioch::Units<Scalar>("cal").get_SI_factor();
 
 /// building only here
 
@@ -187,7 +187,7 @@ int tester()
   
   return_flag = test_values(Cf,zero,Ea,zero,Tref,R,*kin_base) || return_flag;
 
-  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::E,Ea_reset);
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::E,Ea_reset,"K");
 
   return_flag = test_values(Cf,zero,Ea_reset,zero,Tref,R,*kin_base) || return_flag;
 
@@ -241,7 +241,7 @@ int tester()
 
   Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::R_SCALE,R_reset);
 
-  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::E,Ea_reset);
+  Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::E,Ea_reset,"cal/mol");
 
   return_flag = test_values(Cf,eta,Ea_reset,zero,Tref,R_reset,*kin_base) || return_flag;
 
@@ -269,7 +269,7 @@ int tester()
   return_flag = test_values(Cf_reset,eta,Ea,D_reset,Tref_reset,R,*kin_base) || return_flag;
 
 //// reset the whole kinetics
-
+  Ea_reset = -50000; // sensitive here...
   coeffs[0] = Cf_reset;
   coeffs[1] = eta_reset;
   coeffs[2] = Ea_reset;

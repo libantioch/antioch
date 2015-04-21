@@ -29,6 +29,7 @@
 //Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h"
+#include "antioch/physical_constants.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/constant_rate.h"
 #include "antioch/hercourtessen_rate.h"
@@ -226,6 +227,18 @@ namespace Antioch
 // custom internal unit system with appropriate testing
     ParamType new_coef = (unit == "SI")?new_value:
                                         new_value * Units<typename value_type<ParamType>::type>(unit).get_SI_factor();
+
+// Ea management, we want K, two possibilities now
+// 1 - Ea is already in K
+// 2 - Ea is in J.mol-1
+   if(parameter == KineticsModel::Parameters::E)
+   {
+      if(unit != "K")
+      {
+         new_coef = new_coef / Constants::R_universal<typename value_type<ParamType>::type>();
+      }
+   }
+   
 
     switch(rate.type())
       {
