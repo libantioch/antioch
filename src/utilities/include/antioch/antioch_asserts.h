@@ -39,6 +39,9 @@
 #include <iostream>
 #include <iomanip>
 
+// Most of the following macros are "savagely copy and pasted from libMesh"
+// then modified to avoid name collisions
+
 #define antioch_here()     do { std::cerr << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << std::endl; } while (0)
 
 // The antioch_assert() macro acts like C's assert(), but throws a
@@ -84,24 +87,40 @@
 #endif // NDEBUG
 
 
+// The antioch_do_once macro helps us avoid redundant repeated
+// repetitions of the same warning messages
+#undef antioch_do_once
+#define antioch_do_once(do_this)                \
+  do {                                          \
+    static bool did_this_already = false;       \
+    if (!did_this_already) {                    \
+      did_this_already = true;                  \
+      do_this;                                  \
+    } } while (0)
+
+
+#define antioch_warning(message)                                        \
+  antioch_do_once(std::cerr << message                               \
+                  << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;)
+
+
 #define antioch_error()                    do { antioch_here(); ANTIOCH_THROW(Antioch::LogicError()); }              while(0)
 #define antioch_not_implemented()          do { antioch_here(); ANTIOCH_THROW(Antioch::NotImplemented()); }          while(0)
 #define antioch_file_error(filename)       do { antioch_here(); ANTIOCH_THROW(Antioch::FileError(filename)); }       while(0)
 #define antioch_unit_error(description)    do { antioch_here(); ANTIOCH_THROW(Antioch::UnitError(description)); }    while(0)
 #define antioch_parsing_error(description) do { antioch_here(); ANTIOCH_THROW(Antioch::ParsingError(description)); } while(0)
+
 #define antioch_parameter_required(parameter,defaultpar) \
-         do { std::cerr <<  "\n*** Warning, The parameter " << parameter << " is not provided\n" \
-                        <<  "default parameter is " << defaultpar << std::endl \
-                        << __FILE__ << ", line " << __LINE__ << std::endl;} while(0)
+  antioch_warning("\n*** Warning, The parameter " << parameter << " is not provided\n" << "default parameter is " << defaultpar << std::endl)
+
 #define antioch_unit_required(parameter,defaultunit) \
-         do { std::cerr <<  "\n*** Warning, The parameter " << parameter << " is not given a unit\n" \
-                        <<  "default unit given is " << defaultunit << std::endl \
-                        << __FILE__ << ", line " << __LINE__ << std::endl;} while(0)
-// The antioch_deprecated macro warns that you are using obsoleted code,
-// savagely copy/pasted from libmesh
+  antioch_warning("\n*** Warning, The parameter " << parameter << " is not given a unit\n" <<  "default unit given is " << defaultunit << std::endl)
+
+// The antioch_deprecated macro warns that you are using obsoleted code
 #define antioch_deprecated() \
-          do  {std::cerr << "\n*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
-                         << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;} while(0)
+  antioch_warning( "\n*** Warning, This code is deprecated, and likely to be removed in future library versions!\n")
+
+
 // Just outputing to std::cerr
 #define antioch_msg_error(errmsg)           do { std::cerr << errmsg << std::endl; }                   while(0)
 #define antioch_not_implemented_msg(errmsg) do {antioch_msg_error(errmsg); antioch_not_implemented();} while(0) 
