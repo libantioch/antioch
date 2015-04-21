@@ -68,7 +68,8 @@ namespace Antioch
       return 1.0; // this HAS to stay this way because it is hard-coded for performances (see eq. above)
     }
 
-    enum Parameters{ A = 0,
+    enum Parameters{ NOT_FOUND = 0,
+                     A,
                      B,
                      E,
                      D,

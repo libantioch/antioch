@@ -44,7 +44,8 @@ namespace Antioch
                         LINDEMANN_FALLOFF_THREE_BODY,
                         TROE_FALLOFF_THREE_BODY};
 
-  enum Parameters{ EFFICIENCIES = 0,
+  enum Parameters{ NOT_FOUND = 0,
+                   EFFICIENCIES,
                    TROE_ALPHA,
                    TROE_T1,
                    TROE_T2,
