@@ -349,11 +349,53 @@ namespace Antioch
 // index of species if chemical
       if(paramKin != KineticsModel::Parameters::NOT_FOUND)
       {
-          // which rate?
+          // which rate? Duplicate want an unsigned int, falloff a keyword
            unsigned int nr(0);
            std::string unit("SI");
-           if(keywords.size() > 1)nr = std::stoi(keywords[1]); //C++11, throws an exception on error
-           if(keywords.size() > 2)unit = keywords[2];
+// now we need to know a few things:
+//  if we are in a falloff or duplicate, next keyword is which rate we want, then unit
+//  else we may have a unit
+           switch(this->reaction(r).type())
+           {
+              case ReactionType::DUPLICATE:
+              {
+                 nr = std::stoi(keywords[1]);           // C++11, throws an exception on error
+                 if(keywords.size() > 2)unit = keywords[2];
+              }
+                break;
+              case ReactionType::LINDEMANN_FALLOFF:
+              case ReactionType::TROE_FALLOFF:
+              case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
+              case ReactionType::TROE_FALLOFF_THREE_BODY:
+              {
+                 switch(string_to_kin_enum(keywords[1])) // falloff, if here by error, NOT_FOUND is get (0)
+                 {
+                     case KineticsModel::Parameters::LOW_PRESSURE:
+                     {
+                       nr = 0;
+                     }
+                       break;
+                     case KineticsModel::Parameters::HIGH_PRESSURE:
+                     {
+                       nr = 1;
+                     }
+                       break;
+                     default:
+                     {
+                       antioch_error();
+                     }
+                       break;
+                 }
+                 if(keywords.size() > 2)unit = keywords[2];
+              }
+                break;
+              default:
+              {
+                 if(keywords.size() > 1)unit = keywords[1];
+              }
+                break;
+           }
+
            this->reaction(r).set_parameter_of_rate(paramKin, value, nr, unit);
       }else if(paramChem != ReactionType::Parameters::NOT_FOUND)
       {

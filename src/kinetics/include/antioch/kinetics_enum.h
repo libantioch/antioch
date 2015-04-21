@@ -76,7 +76,11 @@ namespace Antioch
                      T_REF,
                      R_SCALE,
                      SIGMA,
-                     LAMBDA
+                     LAMBDA,
+        // now for the falloff, we need to know if we want
+        // the low-pressure limit or HIGH
+                     LOW_PRESSURE,
+                     HIGH_PRESSURE
                    };
 
   } // end namespace KineticsModel

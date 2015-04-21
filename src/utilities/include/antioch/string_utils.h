@@ -217,6 +217,12 @@ namespace Antioch
       }else if(str == "lambda")
       {
         return KineticsModel::Parameters::LAMBDA;
+      }else if(str == "0")
+      {
+        return KineticsModel::Parameters::LOW_PRESSURE;
+      }else if(str == "inf")
+      {
+        return KineticsModel::Parameters::HIGH_PRESSURE;
       }else
       {
         return KineticsModel::Parameters::NOT_FOUND;
