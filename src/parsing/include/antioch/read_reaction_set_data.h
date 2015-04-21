@@ -287,7 +287,7 @@ namespace Antioch
 
     while (parser->reaction())
       {
-        if (verbose) std::cout << "Reaction #" << parser->reaction_id() << ":\n"
+        if (verbose) std::cout << "Reaction \"" << parser->reaction_id() << "\":\n"
                                << " eqn: " << parser->reaction_equation()
                                << std::endl;
 
