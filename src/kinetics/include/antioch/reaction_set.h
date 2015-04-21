@@ -42,12 +42,14 @@
 #include "antioch/falloff_threebody_reaction.h"
 #include "antioch/lindemann_falloff.h"
 #include "antioch/troe_falloff.h"
+#include "antioch/string_utils.h"
 
 // C++
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include <limits>
 
 namespace Antioch
 {
@@ -89,6 +91,12 @@ namespace Antioch
 
     //! \returns a writeable reference to reaction \p r.
     Reaction<CoeffType>& reaction(const unsigned int r);
+
+    //! change a parameter of a reaction
+    //
+    // in charge of the human-to-antioch translation
+    template <typename ParamType>
+    void set_parameter_of_reaction(const std::string & reaction_id, const std::vector<std::string> & keywords, ParamType value);
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
@@ -308,6 +316,58 @@ namespace Antioch
       }
     
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename ParamType>
+  inline
+  void ReactionSet<CoeffType>::set_parameter_of_reaction(const std::string & reaction_id, const std::vector<std::string> & keywords, ParamType value)
+  {
+      // 1 find the reaction, just loop
+      unsigned int r(0);
+      for(r = 0; r < this->n_reactions(); r++)
+      {
+          if(this->reaction(r).id() == reaction_id)
+          break;
+      }
+      if(r >= this->n_reactions())
+      {
+        std::cerr << "Error: did not find reaction \"" << reaction_id << "\"\nIds are:";
+        for(r = 0; r < this->n_reactions(); r++)
+        {
+          std::cerr << this->reaction(r).id() << "," << std::endl;
+        }
+        
+        antioch_error();
+      }
+
+      // 1 parse high level
+      KineticsModel::Parameters paramKin = string_to_kin_enum(keywords[0]);
+      ReactionType::Parameters paramChem = string_to_chem_enum(keywords[0]);
+// provide the necessary enum,
+// index of reaction rate if kinetics
+// index of species if chemical
+      if(paramKin != KineticsModel::Parameters::NOT_FOUND)
+      {
+          // which rate?
+           unsigned int nr(0);
+           if(keywords.size() > 1)nr = std::stoi(keywords[1]); //C++11, throws an exception on error
+           this->reaction(r).set_parameter_of_rate(paramKin, value, nr);
+      }else if(paramChem != ReactionType::Parameters::NOT_FOUND)
+      {
+           unsigned int species = std::numeric_limits<unsigned int>::max(); // sensible default
+           if(paramChem == ReactionType::Parameters::EFFICIENCIES) // who?
+           {
+              antioch_assert_greater(keywords.size(),1); // we need a name
+              if(!this->chemical_mixture().species_name_map().count(keywords[1]))antioch_error(); //who's this?
+              species = this->chemical_mixture().species_name_map().at(keywords[1]);
+           }
+           this->reaction(r).set_parameter_of_chemical_process(paramChem, value, species);
+      }else
+      {
+          antioch_error();
+      }
+      
   }
 
   template<typename CoeffType>
