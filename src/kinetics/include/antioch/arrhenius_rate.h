@@ -76,10 +76,15 @@ namespace Antioch
     ~ArrheniusRate();
     
     void set_Cf(     const CoeffType Cf );
+    //! set Ea, rescale the value, unit is known
     void set_Ea(     const CoeffType Ea );
+    //! set Ea, no rescaling, unit is K
+    void reset_Ea(     const CoeffType Ea );
     void set_rscale( const CoeffType rscale );
 
     //! set one parameter, characterized by enum
+    //
+    // Beware of the Ea parameter, it \e must be in Kelvin
     void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
 
     //! for compatibility purpose with photochemistry (particle flux reactions)
@@ -179,6 +184,15 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  void ArrheniusRate<CoeffType>::reset_Ea( const CoeffType Ea )
+  {
+    _Ea = Ea;
+    _raw_Ea = _Ea * _rscale;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
   void ArrheniusRate<CoeffType>::set_rscale( const CoeffType rscale )
   {
     _rscale = rscale;
@@ -211,7 +225,7 @@ namespace Antioch
           break;
         case KineticsModel::Parameters::E:
         {
-         this->set_Ea(new_value);
+         this->reset_Ea(new_value);
         }
           break;
         default:

@@ -79,7 +79,10 @@ namespace Antioch
     
     void set_Cf(    const CoeffType Cf );
     void set_eta(   const CoeffType eta );
+    //! set _raw_Ea, unit is known (cal.mol-1, J.mol-1, whatever), _Ea is computed
     void set_Ea(    const CoeffType Ea );
+    //! set _Ea, unit is K, _raw_Ea is computed
+    void reset_Ea(    const CoeffType Ea );
     void set_D(     const CoeffType D );
     void set_Tref(  const CoeffType Tref );
     void set_rscale(const CoeffType rscale );
@@ -242,6 +245,15 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  void VantHoffRate<CoeffType>::reset_Ea( const CoeffType Ea )
+  {
+    _Ea = Ea;
+    _raw_Ea = _Ea * _rscale;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
   void VantHoffRate<CoeffType>::set_rscale( const CoeffType rscale )
   {
     _rscale = rscale;
@@ -306,7 +318,7 @@ namespace Antioch
         break;
       case KineticsModel::Parameters::E:
       {
-        this->set_Ea(new_value);
+        this->reset_Ea(new_value);
       }
         break;
       case KineticsModel::Parameters::D:
