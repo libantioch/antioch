@@ -65,6 +65,32 @@ operator<< (std::ostream& output, const std::vector<T>& a)
   return output;
 }
 
+template <typename T>
+inline
+std::vector<T>
+operator* (const std::vector<T>& src, const T & mul)
+{
+  std::vector<T> output(src);
+  const std::size_t size = src.size();
+  for (std::size_t i=1; i<size; ++i)
+    output[i] = src[i] * mul;
+  
+  return output;
+}
+
+template <typename T>
+inline
+std::vector<T>
+operator/ (const std::vector<T>& src, const T & mul)
+{
+  std::vector<T> output(src);
+  const std::size_t size = src.size();
+  for (std::size_t i=1; i<size; ++i)
+    output[i] = src[i] / mul;
+  
+  return output;
+}
+
 } // end namespace std
 
 namespace Antioch

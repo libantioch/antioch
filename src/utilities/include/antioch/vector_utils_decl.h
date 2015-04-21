@@ -52,6 +52,16 @@ inline
 std::ostream&
 operator<< (std::ostream& output, const std::vector<T>& a);
 
+template <typename T>
+inline
+std::vector<T>
+operator* (const std::vector<T>& src, const T & mul);
+
+template <typename T>
+inline
+std::vector<T>
+operator/ (const std::vector<T>& src, const T & mul);
+
 } // end namespace std
 
 namespace Antioch
