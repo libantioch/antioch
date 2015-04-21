@@ -351,10 +351,19 @@ namespace Antioch
       {
           // which rate?
            unsigned int nr(0);
+           std::string unit("SI");
            if(keywords.size() > 1)nr = std::stoi(keywords[1]); //C++11, throws an exception on error
-           this->reaction(r).set_parameter_of_rate(paramKin, value, nr);
+           if(keywords.size() > 2)unit = keywords[2];
+           this->reaction(r).set_parameter_of_rate(paramKin, value, nr, unit);
       }else if(paramChem != ReactionType::Parameters::NOT_FOUND)
       {
+// there's not really a unit issue here:
+//   * efficiencies: unitless
+//   * Troe alpha: unitless
+//   * Troe T*:   temperature, if it's other than K, you're a bad (like really really bad) scientist, get off my library
+//   * Troe T**:  temperature, if it's other than K, you're a bad (like really really bad) scientist, get off my library
+//   * Troe T***: temperature, if it's other than K, you're a bad (like really really bad) scientist, get off my library
+
            unsigned int species = std::numeric_limits<unsigned int>::max(); // sensible default
            if(paramChem == ReactionType::Parameters::EFFICIENCIES) // who?
            {

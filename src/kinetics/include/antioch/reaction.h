@@ -154,7 +154,7 @@ namespace Antioch
 
     //! reset a parameter from the rate constant
     template <typename ParamType>
-    void set_parameter_of_rate(KineticsModel::Parameters parameter, ParamType new_value, unsigned int n_reaction = 0);
+    void set_parameter_of_rate(KineticsModel::Parameters parameter, ParamType new_value, unsigned int n_reaction = 0, const std::string & unit = "SI");
 
     //! reset a parameter from the chemical process
     void set_parameter_of_chemical_process(ReactionType::Parameters parameter, CoeffType new_value, unsigned int species = std::numeric_limits<unsigned int>::max() );
@@ -1244,10 +1244,10 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType>
   template <typename ParamType>
   inline
-  void Reaction<CoeffType,VectorCoeffType>::set_parameter_of_rate(KineticsModel::Parameters parameter, ParamType new_value, unsigned int n_kin)
+  void Reaction<CoeffType,VectorCoeffType>::set_parameter_of_rate(KineticsModel::Parameters parameter, ParamType new_value, unsigned int n_kin, const std::string & unit)
   {
       antioch_assert_less(n_kin,_forward_rate.size());
-      reset_parameter_of_rate(*_forward_rate[n_kin], parameter, new_value);
+      reset_parameter_of_rate(*_forward_rate[n_kin], parameter, new_value, unit);
   }
 
   template<typename CoeffType, typename VectorCoeffType>

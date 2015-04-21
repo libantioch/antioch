@@ -28,6 +28,7 @@
 
 //Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/metaprogramming_decl.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/constant_rate.h"
 #include "antioch/hercourtessen_rate.h"
@@ -55,7 +56,7 @@ namespace Antioch
   template <typename CoeffType, typename VectorCoeffType, typename ParamType>
   void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
                                KineticsModel::Parameters parameter,
-                               const ParamType new_value);
+                               const ParamType new_value, const std::string & unit = "SI");
 
 
 //----------------------------------------
@@ -216,55 +217,63 @@ namespace Antioch
   template <typename CoeffType, typename VectorCoeffType, typename ParamType>
   void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
                                KineticsModel::Parameters parameter,
-                               const ParamType new_value)
+                               const ParamType new_value, const std::string & unit)
   {
+
+// this is crude at the moment, no test
+// this will be replaced by a unit manager
+// at some point, to be able to have an explicit
+// custom internal unit system with appropriate testing
+    ParamType new_coef = (unit == "SI")?new_value:
+                                        new_value * Units<typename value_type<ParamType>::type>(unit).get_SI_factor();
+
     switch(rate.type())
       {
       case(KineticsModel::CONSTANT):
         {
-          static_cast<ConstantRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast<ConstantRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
       case(KineticsModel::HERCOURT_ESSEN):
         {
-          static_cast< HercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast< HercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
       case(KineticsModel::BERTHELOT):
         {
-          static_cast< BerthelotRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast< BerthelotRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
       case(KineticsModel::ARRHENIUS):
         {
-          static_cast< ArrheniusRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast< ArrheniusRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
       case(KineticsModel::BHE):
         {
-          static_cast< BerthelotHercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast< BerthelotHercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
       case(KineticsModel::KOOIJ):
         {
-          static_cast< KooijRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast< KooijRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
       case(KineticsModel::VANTHOFF):
         {
-          static_cast< VantHoffRate<CoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast< VantHoffRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
       case(KineticsModel::PHOTOCHEM):
         {
-          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&rate)->set_parameter(parameter,new_value);
+          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&rate)->set_parameter(parameter,new_coef);
         }
         break;
 
