@@ -70,6 +70,9 @@ namespace Antioch
     //! set one parameter, characterized by enum
     void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
 
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
     //! for compatibility purpose with photochemistry (particle flux reactions)
     //
     // \todo, solve this
@@ -191,6 +194,30 @@ namespace Antioch
      }
   }
 
+  template<typename CoeffType>
+  inline
+  CoeffType BerthelotRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+     switch(parameter)
+     {
+       case KineticsModel::Parameters::A:
+       {
+         return this->Cf();
+       }
+         break;
+       case KineticsModel::Parameters::D:
+       {
+         return this->D();
+       }
+         break;
+       default:
+       {
+         antioch_error();
+       }
+        break;
+     }
+     return 0;
+  }
 
   template<typename CoeffType>
   inline

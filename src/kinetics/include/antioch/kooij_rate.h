@@ -86,6 +86,9 @@ namespace Antioch
     //! set one parameter, characterized by enum
     void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
 
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
     //! for compatibility purpose with photochemistry (particle flux reactions)
     //
     // \todo, solve this
@@ -108,6 +111,7 @@ namespace Antioch
     CoeffType Cf()     const;
     CoeffType eta()    const;
     CoeffType Ea()     const;
+    CoeffType Ea_K()   const;
     CoeffType Tref()   const;
     CoeffType rscale() const;
 
@@ -317,6 +321,47 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  CoeffType KooijRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+    switch(parameter)
+    {
+       case KineticsModel::Parameters::R_SCALE:
+       {
+          return this->rscale();
+       }
+        break;
+       case KineticsModel::Parameters::T_REF:
+       {
+         return this->Tref();
+       }
+        break;
+       case KineticsModel::Parameters::A:
+       {
+         return this->Cf();
+       }
+        break;
+       case KineticsModel::Parameters::B:
+       {
+         return this->eta();
+       }
+        break;
+       case KineticsModel::Parameters::E:
+       {
+         return this->Ea();
+       }
+        break;
+       default:
+       {
+         antioch_error();
+       }
+        break;
+    }
+
+    return 0;
+  }
+
+  template<typename CoeffType>
+  inline
   CoeffType KooijRate<CoeffType>::Cf() const
   { return _Cf; }
 
@@ -328,6 +373,11 @@ namespace Antioch
   template<typename CoeffType>
   inline
   CoeffType KooijRate<CoeffType>::Ea() const
+  { return _raw_Ea; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType KooijRate<CoeffType>::Ea_K() const
   { return _Ea; }
 
   template<typename CoeffType>
