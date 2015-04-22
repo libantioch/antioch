@@ -53,11 +53,16 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType, typename VectorType>
   void reset_rate( KineticsType<CoeffType,VectorCoeffType> & kin, const VectorType & coefs);
 
-  // ParamType is either VectorCoeffType or CoeffType
-  template <typename CoeffType, typename VectorCoeffType, typename ParamType>
+  template <typename CoeffType, typename VectorCoeffType>
   void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
                                KineticsModel::Parameters parameter,
-                               const ParamType new_value, const std::string & unit = "SI");
+                               const CoeffType new_value, const std::string & unit = "SI");
+
+  // vectorized parameter
+  template <typename CoeffType, typename VectorCoeffType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const CoeffType new_value, int l, const std::string & unit = "SI");
 
 
 //----------------------------------------
@@ -215,18 +220,18 @@ namespace Antioch
   }
 
 
-  template <typename CoeffType, typename VectorCoeffType, typename ParamType>
+  template <typename CoeffType, typename VectorCoeffType>
   void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
                                KineticsModel::Parameters parameter,
-                               const ParamType new_value, const std::string & unit)
+                               const CoeffType new_value, const std::string & unit)
   {
 
 // this is crude at the moment, no test
 // this will be replaced by a unit manager
 // at some point, to be able to have an explicit
 // custom internal unit system with appropriate testing
-    ParamType new_coef = (unit == "SI")?new_value:
-                                        new_value * Units<typename value_type<ParamType>::type>(unit).get_SI_factor();
+    CoeffType new_coef = (unit == "SI")?new_value:
+                                        new_value * Units<typename value_type<CoeffType>::type>(unit).get_SI_factor();
 
 // Ea management, we want K, two possibilities now
 // 1 - Ea is already in K
@@ -235,7 +240,7 @@ namespace Antioch
    {
       if(unit != "K")
       {
-         new_coef = new_coef / Constants::R_universal<typename value_type<ParamType>::type>();
+         new_coef = new_coef / Constants::R_universal<typename value_type<CoeffType>::type>();
       }
    }
    
@@ -284,9 +289,32 @@ namespace Antioch
         }
         break;
 
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(kin.type())
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const CoeffType new_value, int l, const std::string & unit)
+  {
+
+// this is crude at the moment, no test
+// this will be replaced by a unit manager
+// at some point, to be able to have an explicit
+// custom internal unit system with appropriate testing
+    CoeffType new_coef = (unit == "SI")?new_value:
+                                        new_value * Units<typename value_type<CoeffType>::type>(unit).get_SI_factor();
+
+    switch(rate.type())
+    {
       case(KineticsModel::PHOTOCHEM):
         {
-          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&rate)->set_parameter(parameter,l,new_coef);
         }
         break;
 

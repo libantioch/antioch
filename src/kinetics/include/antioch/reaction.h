@@ -153,11 +153,23 @@ namespace Antioch
     bool initialized() const;
 
     //! reset a parameter from the rate constant
-    template <typename ParamType>
-    void set_parameter_of_rate(KineticsModel::Parameters parameter, ParamType new_value, unsigned int n_reaction = 0, const std::string & unit = "SI");
+    void set_parameter_of_rate(KineticsModel::Parameters parameter, CoeffType new_value, unsigned int n_reaction = 0, const std::string & unit = "SI");
+
+    //! reset a parameter from the rate constant, vector parameters
+    void set_parameter_of_rate(KineticsModel::Parameters parameter, CoeffType new_value, unsigned int n_reaction, int l, const std::string & unit = "SI");
+
+
+    //! get a parameter from the rate constant
+    CoeffType get_parameter_of_rate(KineticsModel::Parameters parameter, unsigned int n_reaction = 0, const std::string & unit = "SI") const;
+
+    //! get a parameter from the rate constant, vectorized version
+    CoeffType get_parameter_of_rate(KineticsModel::Parameters parameter, unsigned int n_reaction, const std::string &  unit, int l) const;
 
     //! reset a parameter from the chemical process
     void set_parameter_of_chemical_process(ReactionType::Parameters parameter, CoeffType new_value, unsigned int species = std::numeric_limits<unsigned int>::max() );
+
+    //! get a parameter from the chemical process
+    CoeffType get_parameter_of_chemical_process(ReactionType::Parameters parameter, unsigned int species = std::numeric_limits<unsigned int>::max() ) const;
 
     /*! \return the reversibility state of reaction.
      */
@@ -207,6 +219,9 @@ namespace Antioch
     void set_efficiency( const std::string &,
                          const unsigned int s,
                          const CoeffType efficiency);
+
+    //!
+    CoeffType get_efficiency( const unsigned int s) const;
 
     //!
     CoeffType efficiency( const unsigned int s) const;
@@ -594,6 +609,14 @@ namespace Antioch
   {
     antioch_assert_less(s, _efficiencies.size());
     _efficiencies[s] = efficiency;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType Reaction<CoeffType,VectorCoeffType>::get_efficiency (const unsigned int s) const
+  {
+    antioch_assert_less(s, _efficiencies.size());
+    return _efficiencies[s];
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -1242,12 +1265,35 @@ namespace Antioch
   }
 
   template<typename CoeffType, typename VectorCoeffType>
-  template <typename ParamType>
   inline
-  void Reaction<CoeffType,VectorCoeffType>::set_parameter_of_rate(KineticsModel::Parameters parameter, ParamType new_value, unsigned int n_kin, const std::string & unit)
+  void Reaction<CoeffType,VectorCoeffType>::set_parameter_of_rate(KineticsModel::Parameters parameter, CoeffType new_value, unsigned int n_kin, const std::string & unit)
   {
       antioch_assert_less(n_kin,_forward_rate.size());
       reset_parameter_of_rate(*_forward_rate[n_kin], parameter, new_value, unit);
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::set_parameter_of_rate(KineticsModel::Parameters parameter, CoeffType new_value, unsigned int n_kin, int l, const std::string & unit)
+  {
+      antioch_assert_less(n_kin,_forward_rate.size());
+      reset_parameter_of_rate(*_forward_rate[n_kin], parameter, new_value, l, unit);
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType Reaction<CoeffType,VectorCoeffType>::get_parameter_of_rate(KineticsModel::Parameters parameter, unsigned int n_reaction, const std::string & /* unit*/) const
+  {
+      antioch_assert_less(n_reaction,_forward_rate.size());
+      return _forward_rate[n_reaction]->get_parameter(parameter);
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType Reaction<CoeffType,VectorCoeffType>::get_parameter_of_rate(KineticsModel::Parameters parameter, unsigned int n_reaction, const std::string & /* unit*/, int l) const
+  {
+      antioch_assert_less(n_reaction,_forward_rate.size());
+      return _forward_rate[n_reaction]->get_parameter(parameter,l);
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -1327,6 +1373,88 @@ namespace Antioch
         }
           break;
       }
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType Reaction<CoeffType,VectorCoeffType>::get_parameter_of_chemical_process(ReactionType::Parameters parameter, unsigned int species) const
+  {
+      CoeffType value(0);
+      switch(parameter)
+      {
+        case ReactionType::EFFICIENCIES:
+        {
+          value = this->get_efficiency(species); // tests inside, if not three-body or species wrong
+        }
+          break;
+        case ReactionType::TROE_ALPHA:
+        {
+          if(this->type() == ReactionType::TROE_FALLOFF)
+          {
+             value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_alpha();
+          }
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          {
+             value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_alpha();
+          }else
+          {
+            antioch_error();
+          }
+        }
+          break;
+        case ReactionType::TROE_T1:
+        {
+          if(this->type() == ReactionType::TROE_FALLOFF)
+          {
+             value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T1();
+          }
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          {
+             value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T1();
+          }else
+          {
+            antioch_error();
+          }
+        }
+          break;
+        case ReactionType::TROE_T2:
+        {
+          if(this->type() == ReactionType::TROE_FALLOFF)
+          {
+             value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T2();
+          }
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          {
+             value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T2();
+          }else
+          {
+            antioch_error();
+          }
+        }
+          break;
+        case ReactionType::TROE_T3:
+        {
+          if(this->type() == ReactionType::TROE_FALLOFF)
+          {
+             value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T3();
+          }
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          {
+             value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T3();
+          }else
+          {
+            antioch_error();
+          }
+        }
+          break;
+        default:
+        {
+          antioch_error();
+        }
+          break;
+      }
+
+    return value;
   }
 
 } // namespace Antioch

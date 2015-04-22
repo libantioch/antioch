@@ -78,7 +78,7 @@ namespace Antioch
     //! Add a reaction to the system.
     //
     // The ownership is transfered to the ReactionSet
-    // object, they are deleted in the desctructor.
+    // object, they are deleted in the destructor.
     void add_reaction(Reaction<CoeffType>* reaction);
 
     //! remove a reaction from the system.
@@ -92,11 +92,19 @@ namespace Antioch
     //! \returns a writeable reference to reaction \p r.
     Reaction<CoeffType>& reaction(const unsigned int r);
 
+    //! \returns the index of a reaction given its id
+    unsigned int reaction_by_id(const std::string & reaction_id) const;
+
     //! change a parameter of a reaction
     //
     // in charge of the human-to-antioch translation
     template <typename ParamType>
     void set_parameter_of_reaction(const std::string & reaction_id, const std::vector<std::string> & keywords, ParamType value);
+
+    //! \return a parameter of a reaction
+    //
+    // in charge of the human-to-antioch translation
+    CoeffType get_parameter_of_reaction(const std::string & reaction_id, const std::vector<std::string> & keywords) const;
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
@@ -154,6 +162,24 @@ namespace Antioch
   private:
      
     ReactionSet();
+
+    //! helper function
+    //
+    // It finds the kinetics model parameter given keywords and reaction:
+    //   - nr is the index of the rate to change
+    //   - unit is the unit if provided
+    //
+    // This function is used for both getter and setter.
+    void find_kinetics_model_parameter(const unsigned int r,const std::vector<std::string> & keywords, unsigned int & nr, std::string & unit, int & l) const;
+
+    //! helper function
+    //
+    // It finds the chemical process parameter given keywords and reaction type:
+    //   - species is the species whose efficiency we want to change
+    //
+    // If we want to change anything other than an efficiency, well nothing happens here.
+    // This function is used for both getter and setter.
+    void find_chemical_process_parameter(ReactionType::Parameters paramChem ,const std::vector<std::string> & keywords, unsigned int & species) const;
      
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
@@ -318,12 +344,11 @@ namespace Antioch
     return;
   }
 
+
   template<typename CoeffType>
-  template <typename ParamType>
   inline
-  void ReactionSet<CoeffType>::set_parameter_of_reaction(const std::string & reaction_id, const std::vector<std::string> & keywords, ParamType value)
+  unsigned int ReactionSet<CoeffType>::reaction_by_id(const std::string & reaction_id) const
   {
-      // 1 find the reaction, just loop
       unsigned int r(0);
       for(r = 0; r < this->n_reactions(); r++)
       {
@@ -332,14 +357,167 @@ namespace Antioch
       }
       if(r >= this->n_reactions())
       {
-        std::cerr << "Error: did not find reaction \"" << reaction_id << "\"\nIds are:";
+        std::string errmsg = "Error: did not find reaction \"" + reaction_id + "\"\nIds are: ";
         for(r = 0; r < this->n_reactions(); r++)
         {
-          std::cerr << this->reaction(r).id() << "," << std::endl;
+          errmsg += this->reaction(r).id() + ", ";
+          if(r%10 == 0)errmsg += "\n"; // a few formatting is nice
         }
-        
+        antioch_warning(errmsg);
         antioch_error();
       }
+
+    return r;
+  }
+
+
+  
+  template<typename CoeffType>
+  inline
+  void ReactionSet<CoeffType>::find_kinetics_model_parameter(const unsigned int r,const std::vector<std::string> & keywords, unsigned int & nr, std::string & unit, int & l) const
+  {
+// now we need to know a few things:
+//  if we are in a falloff or duplicate, next keyword is which rate we want, then unit
+//  if we are in an elementary photochemistry, next keyword is which index of sigma or lamba we want, then unit
+//  else we may have a unit
+    switch(this->reaction(r).type())
+    {
+       case ReactionType::DUPLICATE:
+       {
+          nr = std::stoi(keywords[1]);           // C++11, throws an exception on error
+          if(keywords.size() > 2)unit = keywords[2];
+       }
+          break;
+       case ReactionType::LINDEMANN_FALLOFF:
+       case ReactionType::TROE_FALLOFF:
+       case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
+       case ReactionType::TROE_FALLOFF_THREE_BODY:
+       {
+          switch(string_to_kin_enum(keywords[1])) // falloff, if here by error, NOT_FOUND is get (0)
+          {
+             // This is hard-coded (because we want a vector and not a map)
+             // low pressure is the first, high pressure the second
+             // see FalloffReaction object
+             case KineticsModel::Parameters::LOW_PRESSURE:
+             {
+                nr = 0;
+             }
+                break;
+             case KineticsModel::Parameters::HIGH_PRESSURE:
+             {
+                nr = 1;
+             }
+                break;
+              default: // ?
+              {
+                 antioch_error();
+              }
+                 break;
+           }
+           if(keywords.size() > 2)unit = keywords[2]; // unit baby!
+       }
+          break;
+       case ReactionType::ELEMENTARY: // photochem only
+       {
+          if(this->reaction(r).kinetics_model() == KineticsModel::PHOTOCHEM)
+          {
+             l = std::stoi(keywords[1]);           // C++11, throws an exception on error
+             if(keywords.size() > 2)unit = keywords[2];
+          }
+       }
+          break;
+       default:
+       {
+          if(keywords.size() > 1)unit = keywords[1];  // unit baby!
+       }
+           break;
+    }
+
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void ReactionSet<CoeffType>::find_chemical_process_parameter(ReactionType::Parameters paramChem ,const std::vector<std::string> & keywords, unsigned int & species) const
+  {
+// there's not really a unit issue here:
+//   * efficiencies: unitless
+//   * Troe alpha: unitless
+//   * Troe T*:   temperature, if it's other than K, you're a bad (like really really bad) scientist, get off my library
+//   * Troe T**:  temperature, see above
+//   * Troe T***: temperature, do I really need to say anything?
+
+     if(paramChem == ReactionType::Parameters::EFFICIENCIES) // who?
+     {
+       antioch_assert_greater(keywords.size(),1); // we need a name
+
+       if(!this->chemical_mixture().species_name_map().count(keywords[1]))
+                antioch_error(); //who's this?
+
+       species = this->chemical_mixture().species_name_map().at(keywords[1]);
+     }
+
+     return;
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType ReactionSet<CoeffType>::get_parameter_of_reaction(const std::string & reaction_id, const std::vector<std::string> & keywords) const
+  {
+     antioch_assert(keywords.size()); // not zero
+
+     CoeffType parameter;
+     // when CoeffType is vectorizable, we want
+     // to have as little rewriting as possible
+     set_zero(parameter);
+
+     unsigned int r = this->reaction_by_id(reaction_id);
+
+     // 1 parse high level
+     KineticsModel::Parameters paramKin = string_to_kin_enum(keywords[0]);
+     ReactionType::Parameters paramChem = string_to_chem_enum(keywords[0]);
+
+// provide the necessary enum,
+// index of reaction rate if kinetics
+// index of species if chemical
+     if(paramKin != KineticsModel::Parameters::NOT_FOUND)
+     {
+          // which rate? Duplicate want an unsigned int, falloff a keyword
+          unsigned int nr(0); // default is one rate
+          std::string unit("SI"); // default internal parameter unit system
+          int l(-1); // if vectorized parameter
+
+          this->find_kinetics_model_parameter(r,keywords,nr,unit,l);
+
+          // let's get this
+          parameter = reaction(r).get_parameter_of_rate(paramKin, nr, unit);
+
+     }else if(paramChem != ReactionType::Parameters::NOT_FOUND)
+     {
+          unsigned int species = std::numeric_limits<unsigned int>::max(); // sensible default
+
+          this->find_chemical_process_parameter(paramChem, keywords, species);
+
+          // let's get this
+          parameter = reaction(r).get_parameter_of_chemical_process(paramChem, species);
+     }else
+     {
+         antioch_error();
+     }
+
+     return parameter;     
+ 
+  }
+
+  template<typename CoeffType>
+  template <typename ParamType>
+  inline
+  void ReactionSet<CoeffType>::set_parameter_of_reaction(const std::string & reaction_id, const std::vector<std::string> & keywords, ParamType value)
+  {
+     antioch_assert(keywords.size()); // not zero
+
+      // 1 find the reaction
+      unsigned int r = this->reaction_by_id(reaction_id);
 
       // 1 parse high level
       KineticsModel::Parameters paramKin = string_to_kin_enum(keywords[0]);
@@ -350,69 +528,23 @@ namespace Antioch
       if(paramKin != KineticsModel::Parameters::NOT_FOUND)
       {
           // which rate? Duplicate want an unsigned int, falloff a keyword
-           unsigned int nr(0);
-           std::string unit("SI");
-// now we need to know a few things:
-//  if we are in a falloff or duplicate, next keyword is which rate we want, then unit
-//  else we may have a unit
-           switch(this->reaction(r).type())
-           {
-              case ReactionType::DUPLICATE:
-              {
-                 nr = std::stoi(keywords[1]);           // C++11, throws an exception on error
-                 if(keywords.size() > 2)unit = keywords[2];
-              }
-                break;
-              case ReactionType::LINDEMANN_FALLOFF:
-              case ReactionType::TROE_FALLOFF:
-              case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
-              case ReactionType::TROE_FALLOFF_THREE_BODY:
-              {
-                 switch(string_to_kin_enum(keywords[1])) // falloff, if here by error, NOT_FOUND is get (0)
-                 {
-                     case KineticsModel::Parameters::LOW_PRESSURE:
-                     {
-                       nr = 0;
-                     }
-                       break;
-                     case KineticsModel::Parameters::HIGH_PRESSURE:
-                     {
-                       nr = 1;
-                     }
-                       break;
-                     default:
-                     {
-                       antioch_error();
-                     }
-                       break;
-                 }
-                 if(keywords.size() > 2)unit = keywords[2];
-              }
-                break;
-              default:
-              {
-                 if(keywords.size() > 1)unit = keywords[1];
-              }
-                break;
-           }
+           unsigned int nr(0); // default is one rate
+           std::string unit("SI"); // default internal parameter unit system
+           int l(-1); // for vectorized parameter
 
-           this->reaction(r).set_parameter_of_rate(paramKin, value, nr, unit);
+           this->find_kinetics_model_parameter(r,keywords,nr,unit,l);
+
+           // let's set this
+           (l < 0)?this->reaction(r).set_parameter_of_rate(paramKin, value, nr, unit):
+                   this->reaction(r).set_parameter_of_rate(paramKin, value, nr, l, unit);
+
       }else if(paramChem != ReactionType::Parameters::NOT_FOUND)
       {
-// there's not really a unit issue here:
-//   * efficiencies: unitless
-//   * Troe alpha: unitless
-//   * Troe T*:   temperature, if it's other than K, you're a bad (like really really bad) scientist, get off my library
-//   * Troe T**:  temperature, if it's other than K, you're a bad (like really really bad) scientist, get off my library
-//   * Troe T***: temperature, if it's other than K, you're a bad (like really really bad) scientist, get off my library
-
            unsigned int species = std::numeric_limits<unsigned int>::max(); // sensible default
-           if(paramChem == ReactionType::Parameters::EFFICIENCIES) // who?
-           {
-              antioch_assert_greater(keywords.size(),1); // we need a name
-              if(!this->chemical_mixture().species_name_map().count(keywords[1]))antioch_error(); //who's this?
-              species = this->chemical_mixture().species_name_map().at(keywords[1]);
-           }
+
+           this->find_chemical_process_parameter(paramChem, keywords, species);
+
+           // let's set this
            this->reaction(r).set_parameter_of_chemical_process(paramChem, value, species);
       }else
       {
