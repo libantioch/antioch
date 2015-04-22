@@ -97,6 +97,12 @@ namespace Antioch{
     template <typename StateType, typename VectorStateType>
     StateType derivative( const KineticsConditions<StateType,VectorStateType> & conditions ) const;
 
+    //! get one parameter, characterized by enum 
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
+    //! get one parameter, characterized by enum, for vectorized parameter 
+    CoeffType get_parameter(KineticsModel::Parameters parameter, int l) const;
+
     // Deprecated API for backwards compatibility
     template <typename StateType>
     StateType derivative( const StateType & conditions ) const;
@@ -387,6 +393,85 @@ namespace Antioch{
       } // switch(my_type)
     
     return;
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
+  CoeffType KineticsType<CoeffType,VectorCoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+    switch (my_type) 
+      {
+      case(KineticsModel::CONSTANT):
+        {
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->get_parameter(parameter);
+        }
+        break;
+
+      case(KineticsModel::HERCOURT_ESSEN):
+        {
+          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->get_parameter(parameter);
+        }
+        break;
+
+      case(KineticsModel::BERTHELOT):
+        {
+          return (static_cast<const BerthelotRate<CoeffType>*>(this))->get_parameter(parameter);
+        }
+        break;
+
+      case(KineticsModel::ARRHENIUS):
+        {
+          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->get_parameter(parameter);
+        }
+        break;
+
+      case(KineticsModel::BHE):
+        {
+          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->get_parameter(parameter);
+        }
+        break;
+
+      case(KineticsModel::KOOIJ):
+        {
+          return (static_cast<const KooijRate<CoeffType>*>(this))->get_parameter(parameter);
+        }
+        break;
+
+      case(KineticsModel::VANTHOFF):
+        {
+          return (static_cast<const VantHoffRate<CoeffType>*>(this))->get_parameter(parameter);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(my_type)
+
+      return 0;
+  }
+
+
+  template <typename CoeffType, typename VectorCoeffType>
+  CoeffType KineticsType<CoeffType,VectorCoeffType>::get_parameter(KineticsModel::Parameters parameter, int l) const
+  {
+    switch(my_type)
+      {
+      case(KineticsModel::PHOTOCHEM):
+        {
+          return (static_cast<const PhotochemicalRate<CoeffType,VectorCoeffType>*>(this))->get_parameter(parameter,l);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(my_type)
+
+      return 0;
   }
 
   template <typename CoeffType, typename VectorCoeffType>
