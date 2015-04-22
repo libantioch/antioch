@@ -124,10 +124,8 @@ int tester(std::string path_to_files)
   int return_flag = check_rate(rate_exact,rate);
 
  // multiplying by 2 the cross-section
-  for(unsigned int l = 0; l < CH4_cs.size(); l++)
-  {
-     CH4_cs[l] *= 2;
-  }
+  int il = CH4_cs.size() * 2 / 3; 
+  CH4_cs[il] *= 2;
 
   bin.y_on_custom_grid(CH4_lambda,CH4_cs,hv_lambda,sigma_rescaled);
 
@@ -136,16 +134,14 @@ int tester(std::string path_to_files)
   {
       rate_exact += sigma_rescaled[il] * hv_irr[il] * (hv_lambda[il+1] - hv_lambda[il]);
   }
-  rate_hv.set_parameter(Antioch::KineticsModel::Parameters::SIGMA,CH4_cs);
+  rate_hv.set_parameter(Antioch::KineticsModel::Parameters::SIGMA, il, CH4_cs[il]);
   rate = rate_hv.rate(part_flux);
 
   return_flag = check_rate(rate_exact,rate) || return_flag;
 
- // multiplying by 2 the cross-section again
-  for(unsigned int l = 0; l < CH4_cs.size(); l++)
-  {
-     CH4_cs[l] *= 2;
-  }
+ // multiplying by 2 one value of the cross-section
+  il = CH4_cs.size()/2;
+  CH4_cs[il] *= 2;
 
   bin.y_on_custom_grid(CH4_lambda,CH4_cs,hv_lambda,sigma_rescaled);
 
@@ -156,7 +152,7 @@ int tester(std::string path_to_files)
   }
 
 // the other way to reset
-  Antioch::reset_parameter_of_rate(rate_hv,Antioch::KineticsModel::Parameters::SIGMA,CH4_cs);
+  Antioch::reset_parameter_of_rate(rate_hv,Antioch::KineticsModel::Parameters::SIGMA, CH4_cs[il] , il, "SI");
   rate = rate_hv.rate(part_flux);
 
   return_flag = check_rate(rate_exact,rate) || return_flag;

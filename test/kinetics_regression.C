@@ -270,6 +270,31 @@ int tester(const std::string& input_name)
     {
       return_flag = checker(omega_dot_reg[s],omega_dot[s] ,"resetted omega dot of species "  + chem_mixture.chemical_species()[s]->species()) || return_flag;
     }
+
+// and now a get/set loop
+  reaction_id = "0004";
+  const Scalar val(1.1L);
+  keywords.clear();
+  keywords.push_back("E");
+//  keywords.push_back("cal/mol"); // no, you only get SI
+  reaction_set.set_parameter_of_reaction(reaction_id,keywords,
+                                               val * reaction_set.get_parameter_of_reaction(reaction_id,keywords) );
+
+//recomputing
+  Antioch::set_zero(omega_dot);
+  kinetics.compute_mass_sources( conditions , molar_densities, h_RT_minus_s_R, omega_dot);
+
+// new values, SI
+  omega_dot_reg[0] =  1.541307374714467399842142e4;
+  omega_dot_reg[1] = -3.345669367278851525665733e5;
+  omega_dot_reg[2] = -1.723780168437354542966397e5;
+  omega_dot_reg[3] =  1.552808795073360031682657e5;
+  omega_dot_reg[4] =  3.362510003171399296965259e5;
+
+  for( unsigned int s = 0; s < n_species; s++)
+    {
+      return_flag = checker(omega_dot_reg[s],omega_dot[s] ,"loop-resetted omega dot of species "  + chem_mixture.chemical_species()[s]->species()) || return_flag;
+    }
  
   return return_flag;
 }
