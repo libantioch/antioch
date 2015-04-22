@@ -53,6 +53,16 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType, typename VectorType>
   void reset_rate( KineticsType<CoeffType,VectorCoeffType> & kin, const VectorType & coefs);
 
+  /*!
+   * The rate constant models derived from the Arrhenius model have
+   * an activation energy which is stored and used, for efficiency reasons,
+   * in the reduced \f$\frac{E_a}{\mathrm{R}}\f$ form in K.
+   * This calls for a subtle management of the get/set function.
+   * This is done by a unit management, by default an activation energy is
+   * an energy by quantity, so the default is to consider the SI unit
+   * for an energy, (J/mol). Therefore if the provided value is in Kelvin,
+   * it should be explicitely provided.
+   */
   template <typename CoeffType, typename VectorCoeffType>
   void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
                                KineticsModel::Parameters parameter,
