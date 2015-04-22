@@ -182,7 +182,7 @@ namespace Antioch
     }
     if(!missing.empty())
     {
-       std::cerr << "WARNING:\nVibrational levels are missing.  Please update the information."
+       std::cout << "WARNING:\nVibrational levels are missing.  Please update the information."
                  << "  Currently using file " << parser->file() << ".\n"
                  << "Missing molecule(s) is(are):" << std::endl;
        for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;

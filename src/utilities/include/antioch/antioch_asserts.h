@@ -99,8 +99,9 @@
     } } while (0)
 
 
+// Using cout for less redundancy in parallel
 #define antioch_warning(message)                                        \
-  antioch_do_once(std::cerr << message                               \
+  antioch_do_once(std::cout << message                               \
                   << __FILE__ << ", line " << __LINE__ << ", compiled " << __DATE__ << " at " << __TIME__ << " ***" << std::endl;)
 
 

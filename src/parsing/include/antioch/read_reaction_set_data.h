@@ -326,11 +326,13 @@ namespace Antioch
           if(parser->verify_Kooij_in_place_of_Arrhenius())
           {
                kineticsModel = KineticsModel::KOOIJ;
-               std::cerr << "In reaction " << parser->reaction_id() << "\n"
+               antioch_do_once(
+               std::cout << "In reaction(s) including " << parser->reaction_id() << "\n"
                          << "An equation of the form \"A * (T/Tref)^beta * exp(-Ea/(R*T))\" is a Kooij equation,\n"
                          << "I guess a modified Arrhenius could be a name too.  Whatever, the correct label is\n"
                          << "\"Kooij\", or, << à la limite >> \"ModifiedArrhenius\".  Please use those terms instead,\n"
                          << "thanks and a good day to you, user." << std::endl;
+               ); // antioch_do_once
           }
         }
 
