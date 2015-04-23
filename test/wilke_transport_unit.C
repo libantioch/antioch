@@ -89,7 +89,8 @@ int test_val( const Scalar val, const Scalar val_exact, const Scalar tol, const 
 
   if( rel_error  > tol )
     {
-      std::cerr << "Error: Mismatch in " << val_name << std::endl
+      std::cerr << std::setprecision(20) << std::scientific
+                << "Error: Mismatch in " << val_name << std::endl
 		<< val_name << "    = " << val << std::endl
 		<< val_name+"_exact = " << val_exact << std::endl
 		<< "rel_error = " << rel_error << std::endl
@@ -202,7 +203,7 @@ int tester()
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
 
   // First check phi calculation
   // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/sqrt(8*(1+Ms/Mr))
@@ -250,6 +251,9 @@ int tester()
   //const Scalar mu_exact = ;
 
   const Scalar T = 1000.0L;
+  const Scalar P = 1e5;
+  const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
+  const Scalar rho = P/(R_mix*T); // kg.m-3
 
   Scalar wilke_mu = wilke.mu(T, mass_fractions );
   Scalar wilke_k = wilke.k(T, mass_fractions );
@@ -259,6 +263,37 @@ int tester()
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );
   if( return_flag_temp != 0 ) return_flag = 1;
+
+#if ANTIOCH_HAVE_GSL
+/* \todo better the test
+   Alright we need something to test, so here's the sorry version.
+   It is the long double values, we're thus just verifying that
+   future development won't change them.
+
+   the smart test would be to make up molecules where the
+   reduced dipole moment fall into a node (easy part, 0 works)
+   and the reduced temperature falls also on a node (less easy).
+   Then we will have a theoretical independant value.
+*/
+  const Scalar mu_long_double   = 1.42263765441134073137e-06L;
+  const Scalar k_long_double    = 1.49857974915476905594e-01L;
+  std::vector<Scalar> D_long_double(5,0);
+  D_long_double[0] = 6.17968346993552034664e-03L;
+  D_long_double[1] = 6.08349222628094511511e-03L;
+  D_long_double[2] = 9.42378174449347986520e-03L;
+  D_long_double[3] = 9.74548942086199659631e-03L;
+  D_long_double[4] = 6.02441229367125800371e-03L;
+  Scalar mu_kt, k_kt;
+  std::vector<Scalar> D_kt(5,0);
+  wilke_ps_evaluator.mu_and_k_and_D( T, rho, mass_fractions, mu_kt, k_kt, D_kt );
+
+  
+  return_flag = test_val( mu_kt, mu_long_double, tol, "kinetics theory viscosity") || return_flag;
+  return_flag = test_val( k_kt, k_long_double, tol, "kinetics theory thermal conduction") || return_flag;
+  for(unsigned int s = 0; s < D_kt.size(); s++)
+    return_flag = test_val( D_kt[s], D_long_double[s], tol, "kinetics theory diffusion for a species") || return_flag;
+
+#endif
 
   return return_flag;
 }
