@@ -385,14 +385,9 @@ namespace Antioch
            return this->sensitivity_Tref(T);
         }
           break;
-        default:
-        {
-          antioch_error();
-        }
-          break;
      }
 
-    return 0;
+    return typename return_type<InputType>::type(0);
   }
 
   template<typename CoeffType>

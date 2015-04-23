@@ -522,14 +522,9 @@ namespace Antioch
            return this->sensitivity_Rscale(T);
         }
           break;
-        default:
-        {
-          antioch_error();
-        }
-          break;
      }
 
-    return 0;
+    return typename return_type<InputType>::type(0);
   }
 
 } // end namespace Antioch
