@@ -41,8 +41,9 @@
 namespace Antioch
 {
 
-  
-  template<class Diffusion, class Viscosity, class ThermalConductivity, 
+
+  template<class Diffusion, class Viscosity, class ThermalConductivity,
+           class ThermoEvaluator,
            class Mixture,  // this is a WilkeMixture, but let's stop the templates here...
            class CoeffType=double>
   class WilkeTransportEvaluator
@@ -50,6 +51,7 @@ namespace Antioch
   public:
 
     WilkeTransportEvaluator( const Mixture& mixture,
+                             const ThermoEvaluator & thermo_evaluator,
                     const Diffusion& diffusion,
                     const Viscosity& viscosity,
                     const ThermalConductivity& conductivity );
@@ -119,6 +121,8 @@ namespace Antioch
 
     const Mixture& _mixture;
 
+    const ThermoEvaluator& _thermo;
+
     const Diffusion& _diffusion;
 
     const Viscosity& _viscosity;
@@ -131,12 +135,14 @@ namespace Antioch
 
   };
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
-  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::WilkeTransportEvaluator( const Mixture& mixture,
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
+  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::WilkeTransportEvaluator( const Mixture& mixture,
+                                                                           const ThermoEvaluator & thermo_evaluator,
                                                                            const Diffusion& diffusion,
                                                                            const Viscosity& viscosity,
                                                                            const ThermalConductivity& conductivity )
     : _mixture(mixture),
+      _thermo(thermo_evaluator),
       _diffusion(diffusion),
       _viscosity(viscosity),
       _conductivity(conductivity)
@@ -144,15 +150,15 @@ namespace Antioch
     return;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
-  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::~WilkeTransportEvaluator()
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator,class Mixture, class CoeffType>
+  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::~WilkeTransportEvaluator()
   {
     return;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator,class Mixture, class CoeffType>
   template <typename TC, typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::D( const TC& conditions,
+  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::D( const TC& conditions,
                                                                                         const StateType & rho, const StateType & cTot,
                                                                                         const VectorStateType& mass_fractions,
                                                                                         const VectorStateType& mu,
@@ -186,10 +192,10 @@ namespace Antioch
      }
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename TC, typename VectorStateType>
   typename value_type<VectorStateType>::type
-         WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::mu( const TC& conditions,
+         WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::mu( const TC& conditions,
                                                                          const VectorStateType& mass_fractions ) const
   {
 
@@ -212,17 +218,17 @@ namespace Antioch
     for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
         typename value_type<VectorStateType>::type phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
-        
+
         mu_mix += mu[s]*chi[s]/phi_s;
       }
 
     return mu_mix;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename TC, typename VectorStateType>
   typename value_type<VectorStateType>::type
-        WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::k( const TC& conditions,
+        WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::k( const TC& conditions,
                                                                         const VectorStateType& mass_fractions ) const
   {
     antioch_assert_equal_to(mass_fractions.size(), _mixture.chem_mixture().n_species());
@@ -258,9 +264,9 @@ namespace Antioch
     return k_mix;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename TC, typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::mu_and_k( const TC& conditions,
+  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::mu_and_k( const TC& conditions,
                                                                           const VectorStateType& mass_fractions,
                                                                           StateType& mu_mix,
                                                                           StateType& k_mix ) const
@@ -298,9 +304,9 @@ namespace Antioch
     return;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename TC, typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::D_and_k(const VectorStateType & mu, const TC & conditions, const StateType & rho, 
+  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::D_and_k(const VectorStateType & mu, const TC & conditions, const StateType & rho,
                                                                                   const VectorStateType & mass_fractions, VectorStateType & k, VectorStateType & ds) const
   {
      antioch_assert_equal_to(ds.size(),mass_fractions.size());
@@ -334,12 +340,12 @@ namespace Antioch
 
 // diffusion comes last
     for(unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++)
-        _diffusion.compute_diffusivity(rho, _mixture.thermo_evaluator().cp(transport_conditions.temp_cache(),s), k[s], ds[s] );
+        _diffusion.compute_diffusivity(rho, _thermo.cp(transport_conditions.temp_cache(),s), k[s], ds[s] );
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename TC, typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::mu_and_k_and_D( const TC& conditions, const StateType & rho,
+  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::mu_and_k_and_D( const TC& conditions, const StateType & rho,
                                                                                           const VectorStateType& mass_fractions,
                                                                                                 StateType& mu_mix,
                                                                                                 StateType& k_mix,
@@ -377,9 +383,9 @@ namespace Antioch
     return;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename TC, typename VectorStateType>
-  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::compute_mu_chi( const TC& conditions,
+  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::compute_mu_chi( const TC& conditions,
                                                                                 const VectorStateType& mass_fractions,
                                                                                 VectorStateType& mu,
                                                                                 VectorStateType& chi ) const
@@ -401,11 +407,11 @@ namespace Antioch
     return;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename VectorStateType>
   typename
   Antioch::value_type<VectorStateType>::type
-  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::compute_phi(typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
+  WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::compute_phi(typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
                                                                         const VectorStateType& chi,
                                                                         const unsigned int s ) const
   {
@@ -430,10 +436,10 @@ namespace Antioch
     return phi_s;
   }
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity, class Mixture, class CoeffType>
+  template<class Diffusion, class Viscosity, class ThermalConductivity, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename VectorStateType>
   inline
-  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,Mixture,CoeffType>::compute_mu_mu_sqrt( const VectorStateType & mu, 
+  void WilkeTransportEvaluator<Diffusion,Viscosity,ThermalConductivity,ThermoEvaluator,Mixture,CoeffType>::compute_mu_mu_sqrt( const VectorStateType & mu,
                                                     typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const
                                         
   {

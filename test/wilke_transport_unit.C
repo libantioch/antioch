@@ -186,9 +186,10 @@ int tester()
                                                         Thermo,
                                                         MicroThermo,
                                                         Scalar>,                   /* Thermal conduction */
+                           Thermo, /* ThermoEvaluator */
                            Antioch::WilkeTransportMixture< Thermo, Scalar >,              /*  mixture*/
                            Scalar                                                         // type
-                         > wilke( wilke_mixture, D, mu, k );
+                           > wilke( wilke_mixture, thermo_handler, D, mu, k );
 
 // kinetics theory full
 #ifdef ANTIOCH_HAVE_GSL
@@ -201,9 +202,12 @@ int tester()
                                                                  Thermo,
                                                                  MicroThermo,
                                                                  Scalar>,
-                                    Antioch::WilkeTransportMixture< Thermo,Scalar >,
-                                    Scalar>
-        wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);
+                        Thermo,
+                        Antioch::WilkeTransportMixture< Thermo,   /*  */
+                                                        Scalar >,                        /*  */
+                         Scalar
+                       >
+                       wilke_ps_evaluator(wilke_mixture,thermo_handler,bimol_D,ps_mu,ps_k);
 
 #else //only thermal conduction then
 
@@ -213,6 +217,7 @@ int tester()
                                                                  Thermo,
                                                                  MicroThermo,
                                                                  Scalar>,
+                                    Thermo,
                                     Antioch::WilkeTransportMixture< Thermo,Scalar >,
                                     Scalar>
         wilke_ps_evaluator(wilke_mixture,D,mu,ps_k);

@@ -180,7 +180,7 @@ int tester(const PairScalars& example, const std::string& testname)
 
   typedef Antioch::WilkeTransportMixture<Thermo,Scalar>  WilkeMixType;
 
-  Antioch::WilkeTransportEvaluator< DType, VType, TCType, WilkeMixType, Scalar > wilke( wilke_mixture, D, mu, k );
+  Antioch::WilkeTransportEvaluator< DType, VType, TCType, Thermo, WilkeMixType, Scalar > wilke( wilke_mixture, thermo_handler, D, mu, k );
 
   int return_flag = 0;
 
