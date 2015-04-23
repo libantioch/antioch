@@ -33,6 +33,9 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
+// some enum
+#include "antioch/kinetics_enum.h"
+#include "antioch/reaction_enum.h"
 
 // C++
 #include <iostream>
@@ -186,6 +189,70 @@ namespace Antioch
      return buf.good();
   }
 
+  inline
+  KineticsModel::Parameters string_to_kin_enum(const std::string & str)
+  {
+// kinetics 
+      if(str == "A")
+      {
+        return KineticsModel::Parameters::A;
+      }else if(str == "E")
+      {
+        return KineticsModel::Parameters::E;
+      }else if(str == "B")
+      {
+        return KineticsModel::Parameters::B;
+      }else if(str == "D")
+      {
+        return KineticsModel::Parameters::D;
+      }else if(str == "Tref")
+      {
+        return KineticsModel::Parameters::T_REF;
+      }else if(str == "Rscale")
+      {
+        return KineticsModel::Parameters::R_SCALE;
+      }else if(str == "sigma")
+      {
+        return KineticsModel::Parameters::SIGMA;
+      }else if(str == "lambda")
+      {
+        return KineticsModel::Parameters::LAMBDA;
+      }else if(str == "0")
+      {
+        return KineticsModel::Parameters::LOW_PRESSURE;
+      }else if(str == "inf")
+      {
+        return KineticsModel::Parameters::HIGH_PRESSURE;
+      }else
+      {
+        return KineticsModel::Parameters::NOT_FOUND;
+      }
+   }
+
+  inline
+  ReactionType::Parameters string_to_chem_enum(const std::string & str)
+  {
+// chemical
+      if(str == "efficiencies")
+      {
+        return ReactionType::Parameters::EFFICIENCIES;
+      }else if(str == "alpha")
+      {
+        return ReactionType::Parameters::TROE_ALPHA;
+      }else if(str == "T1")
+      {
+        return ReactionType::Parameters::TROE_T1;
+      }else if(str == "T2")
+      {
+        return ReactionType::Parameters::TROE_T2;
+      }else if(str == "T3")
+      {
+        return ReactionType::Parameters::TROE_T3;
+      }else
+      {
+        return ReactionType::Parameters::NOT_FOUND;
+      }
+  } 
 
 } // end namespace Antioch
 

@@ -79,10 +79,25 @@ namespace Antioch
     
     void set_Cf(    const CoeffType Cf );
     void set_eta(   const CoeffType eta );
+    //! set _raw_Ea, unit is known (cal.mol-1, J.mol-1, whatever), _Ea is computed
     void set_Ea(    const CoeffType Ea );
+    //! set _Ea, unit is K, _raw_Ea is computed
+    void reset_Ea(    const CoeffType Ea );
     void set_D(     const CoeffType D );
     void set_Tref(  const CoeffType Tref );
     void set_rscale(const CoeffType rscale );
+
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
+
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
+    //! for compatibility purpose with photochemistry (particle flux reactions)
+    //
+    // \todo, solve this
+    template <typename VectorCoeffType>
+    void set_parameter(KineticsModel::Parameters parameter, VectorCoeffType new_value){antioch_error();}
 
     /*! reset the coeffs
      *
@@ -100,6 +115,7 @@ namespace Antioch
     CoeffType Cf()     const;
     CoeffType eta()    const;
     CoeffType Ea()     const;
+    CoeffType Ea_K()   const;
     CoeffType D()      const;
     CoeffType Tref()   const;
     CoeffType rscale() const;
@@ -233,6 +249,15 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  void VantHoffRate<CoeffType>::reset_Ea( const CoeffType Ea )
+  {
+    _Ea = Ea;
+    _raw_Ea = _Ea * _rscale;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
   void VantHoffRate<CoeffType>::set_rscale( const CoeffType rscale )
   {
     _rscale = rscale;
@@ -269,6 +294,95 @@ namespace Antioch
      this->set_D(coefficients[3]);
   }
 
+  template<typename CoeffType>
+  inline
+  void VantHoffRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
+  {
+    switch(parameter)
+    {
+      case KineticsModel::Parameters::R_SCALE:
+      {
+        this->set_rscale(new_value);
+      }
+       break;
+      case KineticsModel::Parameters::T_REF:
+      {
+        this->set_Tref(new_value);
+      }
+       break;
+      case KineticsModel::Parameters::A:
+      {
+        this->set_Cf(new_value);
+      }
+        break;
+      case KineticsModel::Parameters::B:
+      {
+        this->set_eta(new_value);
+      }
+        break;
+      case KineticsModel::Parameters::E:
+      {
+        this->reset_Ea(new_value);
+      }
+        break;
+      case KineticsModel::Parameters::D:
+      {
+        this->set_D(new_value);
+      }
+        break;
+      default:
+      {
+        antioch_error();
+      }
+       break;
+    }
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType VantHoffRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+    switch(parameter)
+    {
+      case KineticsModel::Parameters::R_SCALE:
+      {
+         return this->rscale();
+      }
+       break;
+      case KineticsModel::Parameters::T_REF:
+      {
+         return this->Tref();
+      }
+       break;
+      case KineticsModel::Parameters::A:
+      {
+         return this->Cf();
+      }
+        break;
+      case KineticsModel::Parameters::B:
+      {
+         return this->eta();
+      }
+        break;
+      case KineticsModel::Parameters::E:
+      {
+         return this->Ea();
+      }
+        break;
+      case KineticsModel::Parameters::D:
+      {
+        return this->D();
+      }
+        break;
+      default:
+      {
+        antioch_error();
+      }
+       break;
+    }
+
+    return 0;
+  }
 
   template<typename CoeffType>
   inline
@@ -283,6 +397,11 @@ namespace Antioch
   template<typename CoeffType>
   inline
   CoeffType VantHoffRate<CoeffType>::Ea() const
+  { return _raw_Ea; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType VantHoffRate<CoeffType>::Ea_K() const
   { return _Ea; }
 
   template<typename CoeffType>

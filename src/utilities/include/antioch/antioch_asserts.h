@@ -123,7 +123,6 @@
 
 
 // Just outputing to std::cerr
-#define antioch_msg_error(errmsg)           do { std::cerr << errmsg << std::endl; }                   while(0)
-#define antioch_not_implemented_msg(errmsg) do {antioch_msg_error(errmsg); antioch_not_implemented();} while(0) 
+#define antioch_not_implemented_msg(errmsg) do {antioch_warning(errmsg); antioch_not_implemented();} while(0) 
 
 #endif // ANTIOCH_ASSERTS_H

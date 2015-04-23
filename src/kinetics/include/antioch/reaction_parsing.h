@@ -50,6 +50,8 @@ namespace Antioch
                                        const ReactionType::ReactionType& type , 
                                        const KineticsModel::KineticsModel& kin );
 
+// ----------------------
+
   template<typename CoeffType>
   inline
   Reaction<CoeffType>* build_reaction( const unsigned int n_species, 

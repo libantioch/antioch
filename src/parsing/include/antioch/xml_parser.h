@@ -449,7 +449,7 @@ namespace Antioch{
   const std::string XMLParser<NumericType>::reaction_id() const
   {
     std::stringstream id;
-    id << _reaction->IntAttribute(_map.at(ParsingKey::ID).c_str());
+    id << _reaction->Attribute(_map.at(ParsingKey::ID).c_str());
     return id.str();
   }
 

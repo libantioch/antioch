@@ -68,6 +68,21 @@ namespace Antioch
       return 1.0; // this HAS to stay this way because it is hard-coded for performances (see eq. above)
     }
 
+    enum Parameters{ NOT_FOUND = 0,
+                     A,
+                     B,
+                     E,
+                     D,
+                     T_REF,
+                     R_SCALE,
+                     SIGMA,
+                     LAMBDA,
+        // now for the falloff, we need to know if we want
+        // the low-pressure limit or HIGH
+                     LOW_PRESSURE,
+                     HIGH_PRESSURE
+                   };
+
   } // end namespace KineticsModel
 
 } // end namespace Antioch

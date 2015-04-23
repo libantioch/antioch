@@ -76,8 +76,25 @@ namespace Antioch
     ~ArrheniusRate();
     
     void set_Cf(     const CoeffType Cf );
+    //! set Ea, rescale the value, unit is known
     void set_Ea(     const CoeffType Ea );
+    //! set Ea, no rescaling, unit is K
+    void reset_Ea(     const CoeffType Ea );
     void set_rscale( const CoeffType rscale );
+
+    //! set one parameter, characterized by enum
+    //
+    // Beware of the Ea parameter, it \e must be in Kelvin
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
+
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
+    //! for compatibility purpose with photochemistry (particle flux reactions)
+    //
+    // \todo, solve this
+    template <typename VectorCoeffType>
+    void set_parameter(KineticsModel::Parameters parameter, VectorCoeffType new_value){antioch_error();}
 
     /*! reset the coeffs
      *
@@ -94,6 +111,7 @@ namespace Antioch
 
     CoeffType Cf()     const;
     CoeffType Ea()     const;
+    CoeffType Ea_K()   const;
     CoeffType rscale() const;
 
     //! \return the rate evaluated at \p T.
@@ -170,6 +188,15 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  void ArrheniusRate<CoeffType>::reset_Ea( const CoeffType Ea )
+  {
+    _Ea = Ea;
+    _raw_Ea = _Ea * _rscale;
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
   void ArrheniusRate<CoeffType>::set_rscale( const CoeffType rscale )
   {
     _rscale = rscale;
@@ -191,12 +218,76 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
+  void ArrheniusRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
+  {
+      switch(parameter)
+      {
+        case KineticsModel::Parameters::A:
+        {
+          this->set_Cf(new_value);
+        }
+          break;
+        case KineticsModel::Parameters::E:
+        {
+         this->reset_Ea(new_value);
+        }
+          break;
+        case KineticsModel::Parameters::R_SCALE:
+        {
+         this->set_rscale(new_value);
+        }
+          break;
+        default:
+        {
+          antioch_error();
+        }
+        break;
+      }
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType ArrheniusRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+      switch(parameter)
+      {
+        case KineticsModel::Parameters::A:
+        {
+          return this->Cf();
+        }
+          break;
+        case KineticsModel::Parameters::E:
+        {
+         return this->Ea();
+        }
+          break;
+        case KineticsModel::Parameters::R_SCALE:
+        {
+         return this->rscale();
+        }
+          break;
+        default:
+        {
+          antioch_error();
+        }
+        break;
+      }
+      return 0;
+  }
+
+  template<typename CoeffType>
+  inline
   CoeffType ArrheniusRate<CoeffType>::Cf() const
   { return _Cf; }
 
   template<typename CoeffType>
   inline
   CoeffType ArrheniusRate<CoeffType>::Ea() const
+  { return _raw_Ea; }
+
+  template<typename CoeffType>
+  inline
+  CoeffType ArrheniusRate<CoeffType>::Ea_K() const
   { return _Ea; }
 
   template<typename CoeffType>

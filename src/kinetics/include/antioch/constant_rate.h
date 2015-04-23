@@ -74,6 +74,18 @@ namespace Antioch
 
     CoeffType Cf()   const;
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
+
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
+    //! for compatibility purpose with photochemistry (particle flux reactions)
+    //
+    // \todo, solve this
+    template <typename VectorCoeffType>
+    void set_parameter(KineticsModel::Parameters parameter, VectorCoeffType new_value){antioch_error();}
+
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
@@ -132,6 +144,26 @@ namespace Antioch
     _Cf = Cf;
 
     return;
+  }
+
+  template<typename CoeffType>
+  inline
+  void ConstantRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
+  {
+    antioch_assert_equal_to(parameter,KineticsModel::Parameters::A);
+
+    this->set_Cf(new_value);
+
+    return;
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType ConstantRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+    antioch_assert_equal_to(parameter,KineticsModel::Parameters::A);
+
+    return this->Cf();
   }
 
   template<typename CoeffType>

@@ -74,6 +74,18 @@ namespace Antioch
     void set_D(   const CoeffType D );
     void set_Tref(const CoeffType Tref );
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
+
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
+    //! for compatibility purpose with photochemistry (particle flux reactions)
+    //
+    // \todo, solve this
+    template <typename VectorCoeffType>
+    void set_parameter(KineticsModel::Parameters parameter, VectorCoeffType new_value){antioch_error();}
+
     /*! reset the coeffs
      *
      * Two ways of modifying your rate:
@@ -223,6 +235,75 @@ namespace Antioch
     this->set_Cf(coefficients[0]);
     this->set_eta(coefficients[1]);
     this->set_D(coefficients[2]);
+  }
+
+  template<typename CoeffType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
+  {
+    switch(parameter)
+    {
+     case KineticsModel::Parameters::A:
+     {
+       this->set_Cf(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::B:
+     {
+       this->set_eta(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::D:
+     {
+       this->set_D(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::T_REF:
+     {
+       this->set_Tref(new_value);
+     }
+      break;
+     default:
+     {
+       antioch_error();
+     }
+      break;
+     }
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType BerthelotHercourtEssenRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+    switch(parameter)
+    {
+     case KineticsModel::Parameters::A:
+     {
+       return this->Cf();
+     }
+      break;
+     case KineticsModel::Parameters::B:
+     {
+       return this->eta();
+     }
+      break;
+     case KineticsModel::Parameters::D:
+     {
+       return this->D();
+     }
+      break;
+     case KineticsModel::Parameters::T_REF:
+     {
+       return this->Tref();
+     }
+      break;
+     default:
+     {
+       antioch_error();
+     }
+      break;
+     }
+     return 0;
   }
 
   template<typename CoeffType>

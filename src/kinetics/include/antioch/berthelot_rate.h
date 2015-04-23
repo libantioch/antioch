@@ -67,6 +67,18 @@ namespace Antioch
     void set_Cf( const CoeffType Cf );
     void set_D( const CoeffType D );
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
+
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
+    //! for compatibility purpose with photochemistry (particle flux reactions)
+    //
+    // \todo, solve this
+    template <typename VectorCoeffType>
+    void set_parameter(KineticsModel::Parameters parameter, VectorCoeffType new_value){antioch_error();}
+
     /*! reset the coeffs
      *
      * You require exactly two parameters, the order assumed is Cf, D
@@ -156,6 +168,55 @@ namespace Antioch
      antioch_assert_equal_to(coefficients.size(),2);
      this->set_Cf(coefficients[0]);
      this->set_D(coefficients[1]);
+  }
+
+  template<typename CoeffType>
+  inline
+  void BerthelotRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
+  {
+     switch(parameter)
+     {
+       case KineticsModel::Parameters::A:
+       {
+         this->set_Cf(new_value);
+       }
+         break;
+       case KineticsModel::Parameters::D:
+       {
+         this->set_D(new_value);
+       }
+         break;
+       default:
+       {
+         antioch_error();
+       }
+        break;
+     }
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType BerthelotRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+     switch(parameter)
+     {
+       case KineticsModel::Parameters::A:
+       {
+         return this->Cf();
+       }
+         break;
+       case KineticsModel::Parameters::D:
+       {
+         return this->D();
+       }
+         break;
+       default:
+       {
+         antioch_error();
+       }
+        break;
+     }
+     return 0;
   }
 
   template<typename CoeffType>

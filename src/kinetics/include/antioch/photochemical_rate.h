@@ -62,11 +62,28 @@ namespace Antioch{
        PhotochemicalRate();
        ~PhotochemicalRate();
 
+
+       VectorCoeffType cross_section() const;
+       VectorCoeffType lambda_grid()   const;
+
+
        //!
        void set_cross_section(const VectorCoeffType &cs);
 
        //!
        void set_lambda_grid(const VectorCoeffType &l);
+
+       //!
+       void set_cross_section(CoeffType cs, int il);
+
+       //!
+       void set_lambda_grid(CoeffType l, int il);
+
+       //! set one value of one parameter, characterized by enum and its index
+       void set_parameter(KineticsModel::Parameters parameter, int l, CoeffType new_value);
+
+       //! set one parameter, characterized by enum
+       CoeffType get_parameter(KineticsModel::Parameters parameter, int l) const;
 
        /*! reset the coefficients
         *
@@ -144,6 +161,23 @@ namespace Antioch{
   {
      _lambda_grid = l;
   }
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::set_cross_section(CoeffType cs, int il)
+  {
+     antioch_assert_less(il,_cross_section.size());
+
+    _cross_section[il] = cs;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::set_lambda_grid(CoeffType l, int il)
+  {
+     antioch_assert_less(il,_lambda_grid.size());
+
+     _lambda_grid[il] = l;
+  }
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
@@ -162,6 +196,60 @@ namespace Antioch{
       }
       this->set_lambda_grid(l);
       this->set_cross_section(cs);
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void PhotochemicalRate<CoeffType,VectorCoeffType>::set_parameter(KineticsModel::Parameters parameter, int l, CoeffType new_value)
+  {
+
+    switch(parameter)
+    {
+      case KineticsModel::Parameters::LAMBDA:
+      {
+         this->set_lambda_grid(new_value,l);
+      }
+       break;
+      case KineticsModel::Parameters::SIGMA:
+      {
+         this->set_cross_section(new_value,l);
+      }
+        break;
+      default:
+      {
+        antioch_error();
+      }
+       break;
+    }
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::get_parameter(KineticsModel::Parameters parameter,int l) const
+  {
+
+   antioch_assert_less(l,_cross_section.size());
+
+    switch(parameter)
+    {
+      case KineticsModel::Parameters::LAMBDA:
+      {
+         return this->lambda_grid()[l];
+      }
+       break;
+      case KineticsModel::Parameters::SIGMA:
+      {
+         return this->cross_section()[l];
+      }
+        break;
+      default:
+      {
+        antioch_error();
+      }
+       break;
+    }
+
+     return 0;
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -212,6 +300,20 @@ namespace Antioch{
     Antioch::init_clone(rate,this->rate(pf));
     Antioch::set_zero(drate_dT);
     return;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  VectorCoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::cross_section() const
+  {
+     return _cross_section;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  VectorCoeffType PhotochemicalRate<CoeffType,VectorCoeffType>::lambda_grid() const
+  {
+     return _lambda_grid;
   }
 
 } //end namespace Antioch

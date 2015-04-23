@@ -44,7 +44,16 @@ namespace Antioch
                         LINDEMANN_FALLOFF_THREE_BODY,
                         TROE_FALLOFF_THREE_BODY};
 
+  enum Parameters{ NOT_FOUND = 0,
+                   EFFICIENCIES,
+                   TROE_ALPHA,
+                   TROE_T1,
+                   TROE_T2,
+                   TROE_T3
+                  };
+
   } // end namespace ReactionType
+
 
 } // end namespace Antioch
 

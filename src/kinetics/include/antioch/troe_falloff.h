@@ -120,6 +120,11 @@ namespace Antioch
     void set_T2(const CoeffType &T);
     void set_T3(const CoeffType &T);
 
+    CoeffType get_alpha() const;
+    CoeffType get_T1()    const;
+    CoeffType get_T2()    const;
+    CoeffType get_T3()    const;
+
     template <typename StateType>
     StateType operator()(const StateType &T,
                          const StateType &M,
@@ -194,6 +199,35 @@ namespace Antioch
     _T3 = T;
     return;
   }
+
+  template<typename CoeffType>
+  inline
+  CoeffType TroeFalloff<CoeffType>::get_alpha() const
+  {
+     return _alpha;
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType TroeFalloff<CoeffType>::get_T1()    const
+  {
+     return _T1;
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType TroeFalloff<CoeffType>::get_T2()    const
+  {
+     return _T2;
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType TroeFalloff<CoeffType>::get_T3()    const
+  {
+     return _T3;
+  }
+
 
   template<typename CoeffType>
   template<typename StateType>
