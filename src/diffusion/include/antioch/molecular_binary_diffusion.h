@@ -35,7 +35,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/math_constants.h"
 #include "antioch/cmath_shims.h"
-#include "antioch/Stockmayer_potential.h"
+#include "antioch/stockmayer_potential.h"
 #include "antioch/transport_species.h"
 #include "antioch/gsl_spliner.h"
 
