@@ -104,23 +104,56 @@ namespace Antioch
     CoeffType D()    const;
     CoeffType Tref() const;
 
+// fork methods
+
+    //! \return the rate evaluated at \p T.
+    template <typename InputType>
+    ANTIOCH_AUTO(typename return_type<InputType>::type)
+    operator()(const InputType& T) const
+    ANTIOCH_AUTOFUNC(typename return_type<InputType>::type, this->rate(T))
+
+    //! \return the derivative with respect to the parameter evaluated at \p T.
+    template <typename InputType>
+    ANTIOCH_AUTO(typename return_type<InputType>::type) 
+    sensitivity( const InputType& T, KineticsModel::Parameters par) const;
+
+//
+
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
     rate(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf*(ant_pow(T,_eta)*ant_exp(_D*T)))
 
-    //! \return the rate evaluated at \p T.
-    template <typename StateType>
-    ANTIOCH_AUTO(StateType)
-    operator()(const StateType& T) const
-    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
-
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_eta/T + _D))
+
+    //! \return the derivative with respect to the parameter A evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_A( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, ant_pow(T/_Tref,_eta) * ant_exp(_D * T))
+
+    //! \return the derivative with respect to the parameter D evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_D( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T) * T)
+
+    //! \return the derivative with respect to the parameter beta evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_beta(const StateType & T) const
+    ANTIOCH_AUTOFUNC(StateType,this->rate(T) * ant_log(T/_Tref))
+
+    //! \return the derivative with respect to the parameter Tref evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Tref( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, - _eta /_Tref * this->rate(T) )
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
@@ -134,17 +167,35 @@ namespace Antioch
     rate(const KineticsConditions<StateType,VectorStateType>& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf * ant_exp(_eta * T.temp_cache().lnT + _D*T.T()))
 
-    //! \return the rate evaluated at \p T.
-    template <typename StateType, typename VectorStateType>
-    ANTIOCH_AUTO(StateType)
-    operator()(const KineticsConditions<StateType,VectorStateType>& T) const
-    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
-
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType, typename VectorStateType>
     ANTIOCH_AUTO(StateType)
     derivative( const KineticsConditions<StateType,VectorStateType>& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_eta/T.T() + _D))
+
+    //! \return the derivative with respect to the parameter A evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_A( const KineticsConditions<StateType,VectorStateType>& cond) const
+    ANTIOCH_AUTOFUNC(StateType, ant_pow(cond.T()/_Tref,_eta) * ant_exp(_D * cond.T()))
+
+    //! \return the derivative with respect to the parameter D evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_D( const KineticsConditions<StateType,VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(cond) * cond.T())
+
+    //! \return the derivative with respect to the parameter beta evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_beta(const KineticsConditions<StateType,VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType,this->rate(cond) * (cond.temp_cache().lnT - ant_log(_Tref)) )
+
+    //! \return the derivative with respect to the parameter Tref evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Tref( const KineticsConditions<StateType,VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType, - _eta /_Tref * this->rate(cond) )
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType,typename VectorStateType>
@@ -304,6 +355,44 @@ namespace Antioch
       break;
      }
      return 0;
+  }
+
+  template<typename CoeffType>
+  template <typename InputType>
+  inline
+  ANTIOCH_AUTO(typename return_type<InputType>::type) 
+  BerthelotHercourtEssenRate<CoeffType>::sensitivity( const InputType& T, KineticsModel::Parameters par ) const
+  {
+     switch(par)
+     {
+        case KineticsModel::Parameters::A:
+        {
+           return this->sensitivity_A(T);
+        }
+          break;
+        case KineticsModel::Parameters::B:
+        {
+           return this->sensitivity_beta(T);
+        }
+          break;
+        case KineticsModel::Parameters::D:
+        {
+           return this->sensitivity_D(T);
+        }
+          break;
+        case KineticsModel::Parameters::T_REF:
+        {
+           return this->sensitivity_Tref(T);
+        }
+          break;
+        default:
+        {
+          antioch_error();
+        }
+          break;
+     }
+
+    return 0;
   }
 
   template<typename CoeffType>
