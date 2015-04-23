@@ -320,7 +320,8 @@ namespace Antioch{
          << "  reduced dipole moment = " << _reduced_dipole_moment << "\n"
          << "  xi = "                    << _xi                    << "\n"
          << "  reduced LJ diameter = "   << _reduced_LJ_diameter   << "\n"
-         << "  reduced LJ depth = "      << _reduced_LJ_depth 
+         << "  reduced LJ depth = "      << _reduced_LJ_depth      << "\n"
+         << "  [coefficient = "          << _coefficient           << "]"
          << std::endl;
   }
 

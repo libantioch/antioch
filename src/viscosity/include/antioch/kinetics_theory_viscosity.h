@@ -255,7 +255,9 @@ namespace Antioch
      _delta_star = CoeffType(1e-7L) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
                     ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
                      ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) );
-     _a = CoeffType(0.3125L) * ant_sqrt(Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+           /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2) 
+                ~ 10^-14 float can't take 10^-28 in sqrt*/
+     _a = CoeffType(0.3125e-14L) * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
                 / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2));
           
 
@@ -291,7 +293,8 @@ namespace Antioch
      os << "Pure species viscosity:\n"
         << "5/16 * sqrt(pi * " << _mass << " * kb * T) / ( pi * " << _LJ.depth() << "^2 * <Omega(2,2)*> )\n"
         << "T* = T / " << _LJ.depth() << "\n"
-        << "delta* = 1/2 * " << _dipole_moment << "^2 / ( " << _LJ.depth() << " * kb * " << _LJ.diameter() << "^3 )";
+        << "delta* = 1/2 * " << _dipole_moment << "^2 / ( " << _LJ.depth() << " * kb * " << _LJ.diameter() << "^3 )\n"
+        << "[factor a = " << _a << "]";
   }
 
   template <typename CoeffType, typename Interpolator>
