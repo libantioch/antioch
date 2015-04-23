@@ -69,6 +69,22 @@ namespace Antioch
    *              \f]
    * with \f$\epsilon\f$ the Lennard-Jones potential well depth and \f$\alpha\f$ the
    * dipole moment.
+   *
+   * An important remark about precision:
+   * the viscosity is computed as \f$c * s(T)\f$ with \f$c\f$ a coefficient
+   * and \f$s(T)\f$ the Stockmayer potential spline. The expression of \f$c\f$
+   * is
+   * \f[
+   *     c = \frac{5}{16} \sqrt{\frac{\mathrm{k_B} m}{\pi}} \frac{1}{\sigma^2}
+   * \f]
+   *  which roughly scales as
+   * \f[
+   *    10^{-6}  = 10^{-1} \sqrt{\frac{10^{-23} 10^{-27}}{1}} \frac{1}{10^{-20}}
+   * \f]
+   * The main issue lies in the square root, the float precision evaluate
+   * \f$\sqrt{10^{-50}}\f$ to be zero. Therefore some adaptation has been
+   * made by multiplying the factor in the square root by \f$10^{28}\f$ and
+   * multiplying afterwards by \f$10^{-14}\f$.
    */
   template<typename CoeffType = double, typename Interpolator = GSLSpliner>
   class KineticsTheoryViscosity
