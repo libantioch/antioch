@@ -156,6 +156,12 @@ namespace Antioch
     typedef T & type;
   };
 
+  template <typename T>
+  struct return_type
+  {
+     typedef T type;
+  };
+
 
   // A function for zero-initializing vectorized numeric types
   // while resizing them to match the example input

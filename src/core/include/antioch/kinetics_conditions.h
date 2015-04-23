@@ -143,6 +143,13 @@ namespace Antioch{
      return _temperature;
   }
 
+ // partial specialization for the return_type
+  template <typename StateType, typename VectorStateType>
+  struct return_type<KineticsConditions<StateType,VectorStateType> >
+  {
+     typedef StateType type;
+  };
+
 } //end namespace Antioch
 
 #endif
