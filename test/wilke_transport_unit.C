@@ -275,14 +275,15 @@ int tester()
    and the reduced temperature falls also on a node (less easy).
    Then we will have a theoretical independant value.
 */
-  const Scalar mu_long_double   = 1.42263765441134073137e-06L;
-  const Scalar k_long_double    = 1.49857974915476905594e-01L;
+  const Scalar mu_long_double   = 4.49877527305932602332e-05L;
+  const Scalar k_long_double    = 8.22050332419571328635e-02L;
+
   std::vector<Scalar> D_long_double(5,0);
-  D_long_double[0] = 6.17968346993552034664e-03L;
-  D_long_double[1] = 6.08349222628094511511e-03L;
-  D_long_double[2] = 9.42378174449347986520e-03L;
-  D_long_double[3] = 9.74548942086199659631e-03L;
-  D_long_double[4] = 6.02441229367125800371e-03L;
+  D_long_double[0] = 1.95418749838889089562e-04L;
+  D_long_double[1] = 1.92376915629762328034e-04L;
+  D_long_double[2] = 2.98006144849143296987e-04L;
+  D_long_double[3] = 3.08179434829991685679e-04L;
+  D_long_double[4] = 1.90508644119203653519e-04L;
   Scalar mu_kt, k_kt;
   std::vector<Scalar> D_kt(5,0);
   wilke_ps_evaluator.mu_and_k_and_D( T, rho, mass_fractions, mu_kt, k_kt, D_kt );
@@ -291,7 +292,7 @@ int tester()
   return_flag = test_val( mu_kt, mu_long_double, tol, "kinetics theory viscosity") || return_flag;
   return_flag = test_val( k_kt, k_long_double, tol, "kinetics theory thermal conduction") || return_flag;
   for(unsigned int s = 0; s < D_kt.size(); s++)
-    return_flag = test_val( D_kt[s], D_long_double[s], tol, "kinetics theory diffusion for a species") || return_flag;
+    return_flag = test_val( D_kt[s], D_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
 
 #endif
 
