@@ -30,6 +30,8 @@
 #include "antioch/metaprogramming.h"
 #include "antioch/reaction_set.h"
 #include "antioch/kinetics_conditions.h"
+#include "antioch/reaction_enum.h"
+#include "antioch/kinetics_enum.h"
 
 // C++
 #include <vector>
@@ -105,11 +107,41 @@ namespace Antioch
                                           VectorStateType& dmole_dT,
                                           std::vector<VectorStateType>& dmole_dX_s );
 
+
+    //!
+    template <typename VectorStateType, typename KC>
+    void compute_mole_sources_sensitivity( const KC& conditions,
+                                           const VectorStateType& molar_densities,
+                                           const VectorStateType& h_RT_minus_s_R,
+                                           VectorStateType& mole_sources_sensitivity,
+                                           KineticsModel::Parameters parameter) const;
+
+    //!
+    template<typename VectorStateType, typename KC>
+    void compute_mole_sources_sensitivity( const KC& conditions,
+                                           const VectorStateType& molar_densities,
+                                           const VectorStateType& h_RT_minus_s_R,
+                                           VectorStateType& mole_sources_sensitivity,
+                                           ReactionType::Parameters parameter,
+                                           unsigned int species) const;
+    //!
+    template<typename VectorStateType, typename KC>
+    void compute_mole_sources_sensitivity( const KC& conditions,
+                                           const VectorStateType& molar_densities,
+                                           const VectorStateType& h_RT_minus_s_R,
+                                           const VectorStateType& dh_RT_minus_s_R_dpar,
+                                           VectorStateType& mole_sources_sensitivity) const;
+    
+
     unsigned int n_species() const;
 
     unsigned int n_reactions() const;
 
   protected:
+
+    //! convenient method
+    template<typename VectorStateType>
+    void from_reaction_to_species(const VectorStateType & rates_of_progress, VectorStateType & mole_sources);
 
     const ReactionSet<CoeffType>& _reaction_set;
 
@@ -198,30 +230,7 @@ namespace Antioch
     this->_reaction_set.compute_reaction_rates( kinetics_conditions, molar_densities,
                                                 h_RT_minus_s_R, _net_reaction_rates );
 
-    // compute the actual mole sources in kmol/sec/m^3
-    for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
-      {
-        const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
-        const StateType rate = _net_reaction_rates[rxn];
-        
-        // reactant contributions
-        for (unsigned int r = 0; r < reaction.n_reactants(); r++)
-          {
-            const unsigned int r_id = reaction.reactant_id(r);
-            const unsigned int r_stoich = reaction.reactant_stoichiometric_coefficient(r);
-            
-            mole_sources[r_id] -= (static_cast<CoeffType>(r_stoich)*rate);
-          }
-        
-        // product contributions
-        for (unsigned int p=0; p < reaction.n_products(); p++)
-          {
-            const unsigned int p_id = reaction.product_id(p);
-            const unsigned int p_stoich = reaction.product_stoichiometric_coefficient(p);
-            
-            mole_sources[p_id] += (static_cast<CoeffType>(p_stoich)*rate);
-          }
-      }
+    this->from_reaction_to_species(_net_reaction_rates,mole_sources);
 
     return;
   }
@@ -377,6 +386,133 @@ namespace Antioch
             dmass_drho_s[s][t] *= _chem_mixture.M(s)/_chem_mixture.M(t);
           }
 
+      }
+
+    return;
+  }
+
+  template<typename CoeffType, typename StateType>
+  template<typename VectorStateType, typename KC>
+  inline
+  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources_sensitivity( const KC& conditions,
+                                                                                 const VectorStateType& molar_densities,
+                                                                                 const VectorStateType& h_RT_minus_s_R,
+                                                                                 VectorStateType& mole_sources_sensitivity,
+                                                                                 KineticsModel::Parameters parameter) const
+  {
+    //! \todo Make these assertions vector-compatible
+    // antioch_assert_greater(T, 0.0);
+    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+    antioch_assert_equal_to( mole_sources_sensitivity.size(), this->n_species() );
+
+    /*! \todo Do we need to really initialize this? */
+    VectorStateType rates_of_progress_sensitivity = zero_clone(mole_sources_sensitivity);
+
+    Antioch::set_zero(mole_sources_sensitivity);
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                kinetics_conditions(conditions);
+    // compute the requisite reaction rates sensitivities
+    this->_reaction_set.compute_reaction_rates_sensitivity( molar_densities, kinetics_conditions, 
+                                                            h_RT_minus_s_R, rates_of_progress_sensitivity, parameter);
+
+    this->from_reaction_to_species(rates_of_progress_sensitivity,mole_sources_sensitivity);
+
+    return;
+  }
+
+  template<typename CoeffType, typename StateType>
+  template<typename VectorStateType, typename KC>
+  inline
+  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources_sensitivity( const KC& conditions,
+                                                                                 const VectorStateType& molar_densities,
+                                                                                 const VectorStateType& h_RT_minus_s_R,
+                                                                                 VectorStateType& mole_sources_sensitivity,
+                                                                                 ReactionType::Parameters parameter,
+                                                                                 unsigned int species) const
+  {
+    //! \todo Make these assertions vector-compatible
+    // antioch_assert_greater(T, 0.0);
+    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+    antioch_assert_equal_to( mole_sources_sensitivity.size(), this->n_species() );
+
+    /*! \todo Do we need to really initialize this? */
+    VectorStateType rates_of_progress_sensitivity = zero_clone(mole_sources_sensitivity);
+
+    Antioch::set_zero(mole_sources_sensitivity);
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                kinetics_conditions(conditions);
+    // compute the requisite reaction rates sensitivities
+    this->_reaction_set.compute_reaction_rates_sensitivity( molar_densities,kinetics_conditions, 
+                                                            h_RT_minus_s_R, rates_of_progress_sensitivity, parameter, species);
+
+    this->from_reaction_to_species(rates_of_progress_sensitivity,mole_sources_sensitivity);
+
+    return;
+  }
+
+  template<typename CoeffType, typename StateType>
+  template<typename VectorStateType, typename KC>
+  inline
+  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources_sensitivity( const KC& conditions,
+                                                                                 const VectorStateType& molar_densities,
+                                                                                 const VectorStateType& h_RT_minus_s_R,
+                                                                                 const VectorStateType& dh_RT_minus_s_R_dpar,
+                                                                                 VectorStateType& mole_sources_sensitivity) const
+  {
+    //! \todo Make these assertions vector-compatible
+    // antioch_assert_greater(T, 0.0);
+    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+    antioch_assert_equal_to( mole_sources_sensitivity.size(), this->n_species() );
+
+    /*! \todo Do we need to really initialize this? */
+    VectorStateType rates_of_progress_sensitivity = zero_clone(mole_sources_sensitivity);
+
+    Antioch::set_zero(mole_sources_sensitivity);
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                kinetics_conditions(conditions);
+    // compute the requisite reaction rates sensitivities
+    this->_reaction_set.compute_reaction_rates_sensitivity( molar_densities, kinetics_conditions, h_RT_minus_s_R,
+                                                            dh_RT_minus_s_R_dpar, rates_of_progress_sensitivity);
+
+    this->from_reaction_to_species(rates_of_progress_sensitivity,mole_sources_sensitivity);
+
+    return;
+  }
+
+  template<typename CoeffType, typename StateType>
+  template<typename VectorStateType>
+  inline
+  void KineticsEvaluator<CoeffType,StateType>::from_reaction_to_species(const VectorStateType & rates_of_progress, VectorStateType & mole_sources)
+  {
+    // compute the actual mole sources sensitivities in SI
+    for (unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
+      {
+        const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
+        const StateType rate = rates_of_progress[rxn];
+        
+        // reactant contributions
+        for (unsigned int r = 0; r < reaction.n_reactants(); r++)
+          {
+            const unsigned int r_id = reaction.reactant_id(r);
+            const unsigned int r_stoich = reaction.reactant_stoichiometric_coefficient(r);
+            
+            mole_sources[r_id] -= (static_cast<CoeffType>(r_stoich) * rate);
+          }
+        
+        // product contributions
+        for (unsigned int p=0; p < reaction.n_products(); p++)
+          {
+            const unsigned int p_id = reaction.product_id(p);
+            const unsigned int p_stoich = reaction.product_stoichiometric_coefficient(p);
+            
+            mole_sources[p_id] += (static_cast<CoeffType>(p_stoich) * rate);
+          }
       }
 
     return;

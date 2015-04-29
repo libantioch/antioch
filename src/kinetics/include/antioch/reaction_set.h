@@ -125,6 +125,31 @@ namespace Antioch
                                             VectorReactionsType& dnet_rate_dT,
                                             MatrixReactionsType& dnet_rate_dX_s ) const;
 
+    //! compute the sensitivity of rate of progress for each reaction, kinetics parameter
+    template <typename StateType, typename VectorStateType>
+    void compute_reaction_rates_sensitivity( const VectorStateType &molar_densities,
+                                             const KineticsConditions<StateType,VectorStateType>& conditions,
+                                             const VectorStateType &h_RT_minus_s_R,
+                                             VectorStateType & rates_of_progress_sensitivity,
+                                             KineticsModel::Parameters parameter) const;
+
+    //! compute the sensitivity of rate of progress for each reaction, chemical process parameter
+    template <typename StateType, typename VectorStateType>
+    void compute_reaction_rates_sensitivity( const VectorStateType &molar_densities,
+                                             const KineticsConditions<StateType,VectorStateType>& conditions,
+                                             const VectorStateType &h_RT_minus_s_R,
+                                             VectorStateType & rates_of_progress_sensitivity,
+                                             ReactionType::Parameters parameter,
+                                             unsigned int species) const;
+
+    //! compute the sensitivity of rate of progress for each reaction, thermo parameter
+    template <typename StateType, typename VectorStateType>
+    void compute_reaction_rates_sensitivity( const VectorStateType &molar_densities,
+                                             const KineticsConditions<StateType,VectorStateType>& conditions,
+                                             const VectorStateType &h_RT_minus_s_R,
+                                             const VectorStateType &dh_RT_minus_s_R_dpar,
+                                             VectorStateType & rates_of_progress_sensitivity) const;
+
     //!
     template <typename StateType, typename VectorStateType>
     void print_chemical_scheme( std::ostream& output,
@@ -344,6 +369,79 @@ namespace Antioch
     return;
   }
 
+
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void ReactionSet<CoeffType>::compute_reaction_rates_sensitivity( const VectorStateType &molar_densities,
+                                                                   const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                                   const VectorStateType &h_RT_minus_s_R,
+                                                                   VectorStateType & rates_of_progress_sensitivity,
+                                                                   KineticsModel::Parameters parameter) const
+  {
+    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+    antioch_assert_equal_to(rates_of_progress_sensitivity.size(),this->n_reactions());
+
+    // useful constants
+    const StateType P0_RT = _P0_R/conditions.T(); // used to transform equilibrium constant from pressure units
+
+    // compute reaction forward rates & other reaction-sized arrays
+    for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
+      {
+        rates_of_progress_sensitivity[rxn] = this->reaction(rxn).compute_sensitivity_of_rate_of_progress( molar_densities, conditions, h_RT_minus_s_R, P0_RT, parameter);
+      }
+  }
+
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void ReactionSet<CoeffType>::compute_reaction_rates_sensitivity( const VectorStateType &molar_densities,
+                                                                   const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                                   const VectorStateType &h_RT_minus_s_R,
+                                                                   VectorStateType & rates_of_progress_sensitivity,
+                                                                   ReactionType::Parameters parameter,
+                                                                   unsigned int species) const
+  {
+    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+    antioch_assert_equal_to(rates_of_progress_sensitivity.size(),this->n_reactions());
+
+    // useful constants
+    const StateType P0_RT = _P0_R/conditions.T(); // used to transform equilibrium constant from pressure units
+
+    // compute reaction forward rates & other reaction-sized arrays
+    for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
+      {
+        rates_of_progress_sensitivity[rxn] = this->reaction(rxn).compute_sensitivity_of_rate_of_progress( molar_densities, conditions,
+                                                                                                         h_RT_minus_s_R, P0_RT, parameter, species);
+      }
+  }
+
+  template<typename CoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  void ReactionSet<CoeffType>::compute_reaction_rates_sensitivity( const VectorStateType &molar_densities,
+                                                                   const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                                   const VectorStateType &h_RT_minus_s_R,
+                                                                   const VectorStateType &dh_RT_minus_s_R_dpar,
+                                                                   VectorStateType & rates_of_progress_sensitivity) const
+  {
+    antioch_assert_equal_to( molar_densities.size(), this->n_species() );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+    antioch_assert_equal_to(rates_of_progress_sensitivity.size(),this->n_reactions());
+
+    // useful constants
+    const StateType P0_RT = _P0_R/conditions.T(); // used to transform equilibrium constant from pressure units
+
+    // compute reaction forward rates & other reaction-sized arrays
+    for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
+      {
+        rates_of_progress_sensitivity[rxn] = this->reaction(rxn).compute_sensitivity_of_rate_of_progress( molar_densities, conditions,
+                                                                                                          h_RT_minus_s_R, dh_RT_minus_s_R_dpar,
+                                                                                                          P0_RT);
+      }
+  }
 
   template<typename CoeffType>
   inline
