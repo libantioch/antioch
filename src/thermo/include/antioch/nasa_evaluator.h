@@ -35,6 +35,7 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/nasa_mixture.h"
 #include "antioch/temp_cache.h"
+#include "antioch/thermo_enum.h"
 
 namespace Antioch
 {
@@ -130,6 +131,32 @@ namespace Antioch
      //! s over R, directly from the curve fit
     template<typename StateType>
     StateType s_over_R( const TempCache<StateType>& cache, unsigned int species ) const;
+
+    //! sensitivity of cp for a species
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_cp_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const;
+
+    //! sensitivity of cv for a species
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_cv_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const;
+
+    //! sensitivity of h for a species
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_h_over_RT(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const;
+
+    //! sensitivity of s for a species
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_s_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const;
+
+    //! sensitivity of g for a species
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_h_RT_minus_s_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const;
+    
 
   protected:
 
@@ -381,6 +408,56 @@ namespace Antioch
     {
       return this->cp(cache,mass_fractions) - this->chem_mixture().R(mass_fractions);
     }
+
+  template<typename CoeffType, typename NASAFit>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+  NASAEvaluator<CoeffType,NASAFit>::sensitivity_cp_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  {
+      antioch_assert_less(species,this->n_species());
+      return _nasa_mixture.curve_fit(species).dcp_over_R_dpar(cache,parameter);
+  }
+
+  template<typename CoeffType, typename NASAFit>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+  sensitivity_cv_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  {
+      antioch_assert_less(species,this->n_species());
+      return _nasa_mixture.curve_fit(species).dcp_over_R_dpar(cache,parameter);
+  }
+
+  template<typename CoeffType, typename NASAFit>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+  sensitivity_h_over_RT(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  {
+      antioch_assert_less(species,this->n_species());
+      return _nasa_mixture.curve_fit(species).dh_over_RT_dpar(cache,parameter);
+  }
+
+  template<typename CoeffType, typename NASAFit>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+  sensitivity_s_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  {
+      antioch_assert_less(species,this->n_species());
+      return _nasa_mixture.curve_fit(species).ds_over_R_dpar(cache,parameter);
+  }
+
+  template<typename CoeffType, typename NASAFit>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+  sensitivity_h_RT_minus_s_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  {
+      antioch_assert_less(species,this->n_species());
+      return _nasa_mixture.curve_fit(species).dh_RT_minus_s_R_dpar(cache,parameter);
+  }
 
 } // end namespace Antioch
 
