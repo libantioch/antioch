@@ -423,7 +423,7 @@ namespace Antioch
   template <typename StateType>
   inline
   ANTIOCH_AUTO(StateType)
-  sensitivity_cv_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  NASAEvaluator<CoeffType,NASAFit>::sensitivity_cv_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
   {
       antioch_assert_less(species,this->n_species());
       return _nasa_mixture.curve_fit(species).dcp_over_R_dpar(cache,parameter);
@@ -433,7 +433,7 @@ namespace Antioch
   template <typename StateType>
   inline
   ANTIOCH_AUTO(StateType)
-  sensitivity_h_over_RT(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  NASAEvaluator<CoeffType,NASAFit>::sensitivity_h_over_RT(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
   {
       antioch_assert_less(species,this->n_species());
       return _nasa_mixture.curve_fit(species).dh_over_RT_dpar(cache,parameter);
@@ -443,7 +443,7 @@ namespace Antioch
   template <typename StateType>
   inline
   ANTIOCH_AUTO(StateType)
-  sensitivity_s_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  NASAEvaluator<CoeffType,NASAFit>::sensitivity_s_over_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
   {
       antioch_assert_less(species,this->n_species());
       return _nasa_mixture.curve_fit(species).ds_over_R_dpar(cache,parameter);
@@ -453,7 +453,7 @@ namespace Antioch
   template <typename StateType>
   inline
   ANTIOCH_AUTO(StateType)
-  sensitivity_h_RT_minus_s_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
+  NASAEvaluator<CoeffType,NASAFit>::sensitivity_h_RT_minus_s_R(const TempCache<StateType> & cache, MacroThermo::Parameters parameter, unsigned int species) const
   {
       antioch_assert_less(species,this->n_species());
       return _nasa_mixture.curve_fit(species).dh_RT_minus_s_R_dpar(cache,parameter);

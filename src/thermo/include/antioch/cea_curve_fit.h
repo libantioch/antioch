@@ -562,7 +562,7 @@ namespace Antioch
    template <typename CoeffType>
    template <typename StateType>
    inline
-   const StateType NASA7CurveFit<CoeffType>::dh_RT_minus_S_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const
+   const StateType NASA9CurveFit<CoeffType>::dh_RT_minus_S_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const
    {
       switch(parameter)
       {
