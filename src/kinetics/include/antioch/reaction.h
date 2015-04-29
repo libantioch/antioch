@@ -105,6 +105,8 @@ namespace Antioch
    - Van't Hoff  (VantHoffRate).
 
    By default, we choose a reversible ElementaryReaction with a KooijRate kinetics model.
+
+   \todo, the _efficiencies should live in ThreeBodyReaction
   */
   template<typename CoeffType=double, typename VectorCoeffType = std::vector<CoeffType> >
   class Reaction
@@ -258,7 +260,6 @@ namespace Antioch
     const;
 
     //!
-    //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
                                                            const KineticsConditions<StateType,VectorStateType>& conditions, 
@@ -275,7 +276,7 @@ namespace Antioch
                                                            StateType& dkfwd_dT,
                                                            VectorStateType& dkfwd_dX) const;
 
-    ////
+    //
     template <typename StateType, typename VectorStateType>
     StateType compute_rate_of_progress( const VectorStateType& molar_densities,
                                         const KineticsConditions<StateType,VectorStateType>& conditions,  
@@ -311,6 +312,58 @@ namespace Antioch
                                                    StateType& net_reaction_rate,
                                                    StateType& dnet_rate_dT,
                                                    VectorStateType& dnet_rate_dX_s ) const;
+
+// sensitivity to parameters, kinetics parameters
+
+    //! dk(alpha(T),[M])/dpar
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+             compute_sensitivity_of_forward_rate_coefficient( const VectorStateType &molar_densities,
+                                                              const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                              KineticsModel::Parameters parameter) const;
+
+    //! dk(alpha(T),[M])/dpar
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+             compute_sensitivity_of_forward_rate_coefficient( const VectorStateType &molar_densities,
+                                                              const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                              ReactionType::Parameters parameter, unsigned int species) const;
+
+    //! dK/dpar = - dG/dpar * K + dP0_RT_dpar * exp(-G)
+    //
+    // note that G = Delta G/(R*T)
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+             compute_sensitivity_of_equilibrium_constant( const VectorStateType &molar_densities,
+                                                          const VectorStateType &h_RT_minus_s_R,
+                                                          const VectorStateType &dh_RT_minus_s_R_dpar,
+                                                          const StateType &P0_RT,
+                                                          const StateType &dP0_RT_dpar,
+                                                          const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                          KineticsModel::Parameters parameter) const;
+
+    //! dk-1/dpar = dk/dpar * 1/K - k/K^2 * dK/dpar
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+             compute_sensitivity_of_backward_rate_coefficient( const VectorStateType &molar_densities,
+                                                               const VectorStateType &h_RT_minus_s_R,
+                                                               const VectorStateType &dh_RT_minus_s_R_dpar,
+                                                               const StateType &P0_RT,
+                                                               const StateType &dP0_RT_dpar,
+                                                               const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                               KineticsModel::Parameters parameter) const;
+
+    //! dr/dpar = dk/dpar * Prod_reac molar_densities[reac] - dk-1/dpar * Prod_prod molar_densities[prod]
+    template <typename StateType, typename VectorStateType>
+    StateType compute_sensitivity_of_rate_of_progress( const VectorStateType &molar_densities,
+                                                       const StateType &P0_RT,
+                                                       const StateType &dP0_RT_dpar,
+                                                       const VectorStateType &h_RT_minus_s_R,
+                                                       const VectorStateType &dh_RT_minus_s_R_dpar,
+                                                       const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                       KineticsModel::Parameters parameter) const;
+
+/////
 
     //! Return const reference to the forward rate object
     const KineticsType<CoeffType,VectorCoeffType>& forward_rate(unsigned int ir = 0) const;
@@ -1455,6 +1508,170 @@ namespace Antioch
       }
 
     return value;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  ANTIOCH_AUTO(StateType) 
+        Reaction<CoeffType,VectorCoeffType>::compute_sensitivity_of_forward_rate_coefficient( const VectorStateType &molar_densities,
+                                                             const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                             KineticsModel::Parameters parameter) const
+  {
+      StateType out = zero_clone(conditions.T());
+      switch(this->type())
+      {
+        // elementary & tree body, you only have one rate constant and ...
+         case ReactionType::ELEMENTARY:
+         case ReactionType::THREE_BODY:
+           antioch_assert_equal(_forward_rate.size(),1);
+        // ... as duplicate, it's simply the rate constant's sensitivity ... 
+         case ReactionType::DUPLICATE:
+           for(unsigned int r = 0; r < _forward_rate.size(); r++)
+           {
+              out += _forward_rate[r]->sensitivity(conditions,parameter);
+           }
+           break;
+           // falloffs are a little bit more complicated
+         case ReactionType::LINDEMANN_FALLOFF:
+         {
+              out = static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> > *>(this)->sensitivity(molar_densities,conditions,parameter);
+         }
+           break;
+         case ReactionType::TROE_FALLOFF:
+         {
+              out = static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> > *>(this)->sensitivity(molar_densities,conditions,parameter);
+         }
+           break;
+         case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
+         {
+              out = static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >* >(this)->sensitivity(molar_densities,conditions,parameter);
+         }
+           break;
+         case ReactionType::TROE_FALLOFF_THREE_BODY:
+         {
+              out = static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this)->sensitivity(molar_densities,conditions,parameter);
+         }
+           break;
+      }
+
+      // ... with a coeff for three body
+      if(this->type() == ReactionType::THREE_BODY)
+      {
+          StateType M = zero_clone(conditions.T());
+          for(unsigned int s = 0; s < _efficiencies.size(); s++)
+          {
+              M += _efficiencies[s] * molar_densities[s];
+          }
+          out *= M;
+         
+      }
+ 
+      return out;
+
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  ANTIOCH_AUTO(StateType) 
+        Reaction<CoeffType,VectorCoeffType>::compute_sensitivity_of_forward_rate_coefficient( const VectorStateType &molar_densities,
+                                                             const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                             ReactionType::Parameters parameter, unsigned int species) const
+  {
+      StateType out = zero_clone(conditions.T());
+      switch(this->type())
+      {
+         case ReactionType::THREE_BODY:
+         {
+              if(parameter == ReactionType::EFFICIENCIES)
+              {
+                 antioch_assert_less(species,molar_densities.size());
+                 out = this->compute_forward_rate_coefficient(molar_densities,conditions) * molar_densities[species];
+              }
+         }
+           break;
+         case ReactionType::LINDEMANN_FALLOFF:
+         {
+              out = static_cast<const FalloffReaction<CoeffType,LindemannFalloff<CoeffType> > *>(this)->sensitivity(molar_densities,conditions,parameter);
+         }
+           break;
+         case ReactionType::TROE_FALLOFF:
+         {
+              out = static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> > *>(this)->sensitivity(molar_densities,conditions,parameter);
+         }
+           break;
+         case ReactionType::LINDEMANN_FALLOFF_THREE_BODY:
+         {
+              out = static_cast<const FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >* >(this)->sensitivity(molar_densities,conditions,parameter,species);
+         }
+           break;
+         case ReactionType::TROE_FALLOFF_THREE_BODY:
+         {
+              out = static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this)->sensitivity(molar_densities,conditions,parameter,species);
+         }
+           break;
+      }
+
+     return out;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  ANTIOCH_AUTO(StateType) 
+        Reaction<CoeffType,VectorCoeffType>::compute_sensitivity_of_equilibrium_constant( const VectorStateType &molar_densities,
+                                                                                          const VectorStateType &h_RT_minus_s_R,
+                                                                                          const VectorStateType &dh_RT_minus_s_R_dpar,
+                                                                                          const StateType &P0_RT,
+                                                                                          const StateType &dP0_RT_dpar,
+                                                                                          const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                                                          KineticsModel::Parameters parameter) const
+  {
+    antioch_assert( this->initialized() );
+    //!\todo Make this assertion vector-compatible
+    // antioch_assert_greater( P0_RT, 0.0 );
+    antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
+    antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
+
+// DrG0 = - reactants + product
+// K = (P0/(RT))^gamma exp(-DrG0)
+// exppower = -DrG0 = reactants - products
+// 
+// dK/dpar = d((P0/(RT))^gamma)/dpar * exp(exppower) + d(exppower)/dpar * (P0/(RT))^gamma exp(exppower)
+// dK/dpar = gamma * d((P0/(RT)))/dpar * (P0/(RT))^(gamma - 1) * exp(exppower) + d(exppower)/dpar * (P0/(RT))^gamma exp(exppower)
+// 
+    StateType exppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
+                            h_RT_minus_s_R[_reactant_ids[0]] );
+
+    StateType dexppower_dpar = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
+                                dh_RT_minus_s_R_dpar[_reactant_ids[0]] );
+
+    for (unsigned int s=1; s < this->n_reactants(); s++)
+      {
+        exppower += ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
+                       h_RT_minus_s_R[_reactant_ids[s]] );
+        dexppower_dpar += ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
+                           dh_RT_minus_s_R_dpar[_reactant_ids[s]] );
+      }
+
+    for (unsigned int s=0; s < this->n_products(); s++)
+      {
+        exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
+                       h_RT_minus_s_R[_product_ids[s]] );
+        dexppower_dpar -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
+                           dh_RT_minus_s_R_dpar[_product_ids[s]] );
+      }
+
+    StateType expo = ant_exp(exppower);
+    StateType P0_RT_to_the_gamma = ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) );
+
+    StateType out = P0_RT_to_the_gamma * dexppower_dpar * expo;
+    if(parameter == KineticsModel::Parameters::R_SCALE)
+    {
+        out += this->gamma() * dP0_RT_dpar * P0_RT_to_the_gamma / P0_RT * expo;
+    }
+    return out;
   }
 
 } // namespace Antioch
