@@ -93,6 +93,10 @@ namespace Antioch{
     template <typename StateType>
     StateType operator()(const StateType& temp) const;
 
+    //! derivative with respect to a parameter
+    template <typename StateType, typename VectorStateType>
+    StateType sensitivity(const KineticsConditions<StateType,VectorStateType> & conditions, KineticsModel::Parameters parameter) const;
+
     //!
     template <typename StateType, typename VectorStateType>
     StateType derivative( const KineticsConditions<StateType,VectorStateType> & conditions ) const;
@@ -472,6 +476,60 @@ namespace Antioch{
       } // switch(my_type)
 
       return 0;
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  StateType KineticsType<CoeffType,VectorCoeffType>::sensitivity(const KineticsConditions<StateType,VectorStateType> & cond, KineticsModel::Parameters parameter) const
+  {
+    switch (my_type) 
+      {
+      case(KineticsModel::CONSTANT):
+        {
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->sensitivity(cond,parameter);
+        }
+        break;
+
+      case(KineticsModel::HERCOURT_ESSEN):
+        {
+          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->sensitivity(cond,parameter);
+        }
+        break;
+
+      case(KineticsModel::BERTHELOT):
+        {
+          return (static_cast<const BerthelotRate<CoeffType>*>(this))->sensitivity(cond,parameter);
+        }
+        break;
+
+      case(KineticsModel::ARRHENIUS):
+        {
+          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->sensitivity(cond,parameter);
+        }
+        break;
+
+      case(KineticsModel::BHE):
+        {
+          return (static_cast<const BerthelotHercourtEssenRate<CoeffType>*>(this))->sensitivity(cond,parameter);
+        }
+        break;
+
+      case(KineticsModel::KOOIJ):
+        {
+          return (static_cast<const KooijRate<CoeffType>*>(this))->sensitivity(cond,parameter);
+        }
+        break;
+
+      case(KineticsModel::VANTHOFF):
+        {
+          return (static_cast<const VantHoffRate<CoeffType>*>(this))->sensitivity(cond,parameter);
+        }
+        break;
+
+      } // switch(my_type)
+
+      return zero_clone(cond.T());
   }
 
   template <typename CoeffType, typename VectorCoeffType>
