@@ -76,6 +76,20 @@ namespace Antioch{
                            StateType &dF_dT,
                            VectorStateType &dF_dX) const;
 
+    //! Sensitivity is zero
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+        sensitivity(const StateType & T, 
+                    const StateType & /*Pr*/, 
+                    const StateType & /*dPr_dpar*/) const
+    ANTIOCH_AUTOFUNC(StateType,zero_clone(T))
+
+    //! Sensitivity is zero
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+        sensitivity(const StateType & T, const StateType & /*Pr*/, ReactionType::Parameters /*parameter*/) const
+    ANTIOCH_AUTOFUNC(StateType,zero_clone(T))
+
   private:
     unsigned int n_spec;
 

@@ -120,6 +120,20 @@ namespace Antioch
                                                            StateType& dkfwd_dT, 
                                                            VectorStateType& dkfkwd_dX) const;
 
+    //!
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+        sensitivity(const VectorStateType & molar_densities,
+                    const KineticsConditions<StateType,VectorStateType> & conditions,
+                    KineticsModel::Parameters parameter) const;
+
+    //!
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+        sensitivity(const VectorStateType & molar_densities,
+                    const KineticsConditions<StateType,VectorStateType> & conditions,
+                    ReactionType::Parameters parameter) const;
+
 
     //! Return const reference to the falloff object
     const FalloffType &F() const;
@@ -238,6 +252,55 @@ namespace Antioch
     kfwd *= f; //finalize
 
     return;
+  }
+
+  template<typename CoeffType, typename FalloffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+        FalloffReaction<CoeffType,FalloffType>::sensitivity(const VectorStateType & molar_densities,
+                                                            const KineticsConditions<StateType,VectorStateType> & conditions,
+                                                            KineticsModel::Parameters parameter) const
+  {
+    // temp
+      StateType M = zero_clone(conditions.T());
+      StateType k0   =  this->_forward_rate[0]->compute_forward_rate(conditions);
+      StateType kinf = this->_forward_rate[1]->compute_forward_rate(conditions);
+      StateType dk0_dpar   = this->_forward_rate[0]->sensitivity(conditions,parameter);
+      StateType dkinf_dpar = this->_forward_rate[1]->sensitivity(conditions,parameter);
+
+      for(unsigned int s = 0; s < molar_densities.size(); s++)
+      {
+           M += molar_densities[s];
+      }
+
+      StateType Pr = M * k0 / kinf;
+      StateType dPr_dpar = M * ( dk0_dpar / kinf - k0 / (kinf * kinf) * dkinf_dpar );
+      StateType one_over_one_plus_Pr = constant_clone(conditions.T(),1) / (constant_clone(conditions.T(),1) + Pr);
+
+      return ( M * one_over_one_plus_Pr * dk0_dpar - M * k0 * one_over_one_plus_Pr * one_over_one_plus_Pr * dkinf_dpar ) * _F(conditions.T(),M,k0,kinf) +
+             ( M * k0 * one_over_one_plus_Pr ) * _F.sensitivity(conditions.T(),Pr,dPr_dpar);
+    
+  }
+
+  template<typename CoeffType, typename FalloffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+        FalloffReaction<CoeffType,FalloffType>::sensitivity(const VectorStateType & molar_densities,
+                                                            const KineticsConditions<StateType,VectorStateType> & conditions,
+                                                            ReactionType::Parameters parameter) const
+  {
+      StateType M = zero_clone(conditions.T());
+      StateType alpha0   =  this->_forward_rate[0]->compute_forward_rate(conditions);
+      StateType alphainf = this->_forward_rate[1]->compute_forward_rate(conditions);
+      for(unsigned int s = 0; s < molar_densities.size(); s++)
+      {
+           M += molar_densities[s];
+      }
+      StateType Pr = M * alpha0 / alphainf;
+
+      return alpha0 * M / ( constant_clone(conditions.T(),1)  + Pr) * _F.sensitivity(conditions.T(),Pr,parameter);
   }
   
 } // namespace Antioch
