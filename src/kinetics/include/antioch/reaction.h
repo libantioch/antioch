@@ -46,6 +46,7 @@
 #include "antioch/reaction_enum.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/kinetics_conditions.h"
+#include "antioch/thermo_enum.h"
 
 //C++
 #include <string>
@@ -234,7 +235,14 @@ namespace Antioch
     //!
     int gamma() const;
     
-    //!
+    /*! Equilibrium constant
+     *
+     *
+     * \f[
+     *     K = \left(\frac{\mathrm{P^0}}{\mathrm{R}T}\right)^\gamma \exp\left(-\frac{\Delta_r G}{\mathrm{R}T}\right)
+     * \f]
+     *
+     */
     template <typename StateType, typename VectorStateType>
     StateType equilibrium_constant( const StateType& P0_RT,
                                     const VectorStateType& h_RT_minus_s_R ) const;
@@ -329,29 +337,102 @@ namespace Antioch
                                                               const KineticsConditions<StateType,VectorStateType>& conditions,
                                                               ReactionType::Parameters parameter, unsigned int species) const;
 
-    //! dK/dpar = - dG/dpar * K + dP0_RT_dpar * exp(-G)
-    //
-    // note that G = Delta G/(R*T)
+    /*! Equilibrium constant derivative with respect parameters
+     *
+     *
+     * \f[
+     *     K = \left(\frac{\mathrm{P^0}}{\mathrm{R}T}\right)^\gamma \exp\left(-\frac{\Delta_r G}{\mathrm{R}T}\right)
+     * \f]
+     * Only macro thermo parameters or the kinetics parameter \f$\mathrm{R}\f$
+     * have non-zero derivative.
+     * \f[ 
+     *     \frac{\partial K}{\partial x} = K \left[- \frac{\partial \left( \frac{\Delta_rG}{\mathrm{R}T}\right)}{\partial x} + 
+     *                                               \frac{\partial\left(\left(\frac{\mathrm{P^0}}{\mathrm{R}T}\right)^\gamma\right)}{\partial x} 
+     *                                                  \left(\frac{\mathrm{R}T}{\mathrm{P^0}}\right)^\gamma 
+     *                                       \right]
+     * \f]
+     * which gives
+     * \f[
+     *    \frac{\partial K}{\partial x} = \left\{\begin{array}{lr}
+     *                                            - \frac{K}{\mathrm{R}} \left[ 
+     *                                                          \frac{\Delta_r G}{\mathrm{R}T} 
+     *                                                          + \gamma
+     *                                                                    \right] & \text{if } x = \mathrm{R} \\[10pt]
+     *                                            - \frac{\partial\left(\frac{\Delta_r G}{\mathrm{R}T}\right)}{\partial a} K
+     *                                                                            & \text{if } x = a[i],\quad i \in [0,9]
+     *                                            \end{array}
+     *                                    \right.
+     * \f]
+     * This is the \f$\mathrm{R}\f$ version.
+     */ 
     template <typename StateType, typename VectorStateType>
     ANTIOCH_AUTO(StateType) 
-             compute_sensitivity_of_equilibrium_constant( const VectorStateType &molar_densities,
-                                                          const VectorStateType &h_RT_minus_s_R,
-                                                          const VectorStateType &dh_RT_minus_s_R_dpar,
+             compute_sensitivity_of_equilibrium_constant( const VectorStateType &h_RT_minus_s_R,
                                                           const StateType &P0_RT,
-                                                          const StateType &dP0_RT_dpar,
-                                                          const KineticsConditions<StateType,VectorStateType>& conditions,
                                                           KineticsModel::Parameters parameter) const;
 
-    //! dk-1/dpar = dk/dpar * 1/K - k/K^2 * dK/dpar
+    /*! Equilibrium constant derivative with respect parameters
+     *
+     *
+     * \f[
+     *     K = \left(\frac{\mathrm{P^0}}{\mathrm{R}T}\right)^\gamma \exp\left(-\frac{\Delta_r G}{\mathrm{R}T}\right)
+     * \f]
+     * Only macro thermo parameters or the kinetics parameter \f$\mathrm{R}\f$
+     * have non-zero derivative.
+     * \f[ 
+     *     \frac{\partial K}{\partial x} = K \left[- \frac{\partial \left( \frac{\Delta_rG}{\mathrm{R}T}\right)}{\partial x} + 
+     *                                               \frac{\partial\left(\left(\frac{\mathrm{P^0}}{\mathrm{R}T}\right)^\gamma\right)}{\partial x} 
+     *                                                  \left(\frac{\mathrm{R}T}{\mathrm{P^0}}\right)^\gamma 
+     *                                       \right]
+     * \f]
+     * which gives
+     * \f[
+     *    \frac{\partial K}{\partial x} = \left\{\begin{array}{lr}
+     *                                            - \frac{K}{\mathrm{R}} \left[ 
+     *                                                          \frac{\Delta_r G}{\mathrm{R}T} 
+     *                                                          + \gamma
+     *                                                                    \right] & \text{if } x = \mathrm{R} \\[10pt]
+     *                                            - \frac{\partial\left(\frac{\Delta_r G}{\mathrm{R}T}\right)}{\partial a} K
+     *                                                                            & \text{if } x = a[i],\quad i \in [0,9]
+     *                                            \end{array}
+     *                                    \right.
+     * \f]
+     * This is the thermo version.
+     */ 
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+        compute_sensitivity_of_equilibrium_constant( const VectorStateType &h_RT_minus_s_R,
+                                                     const VectorStateType &dh_RT_minus_s_R_da,
+                                                     const StateType &P0_RT) const;
+
+    /*! Derivative of backward rate with respect to kinetics parameters
+     *
+     *
+     * dk-1/dpar = dk/dpar * 1/K - k/K^2 * dK/dpar
+     *
+     *
+     */
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+             compute_sensitivity_of_backward_rate_coefficient( const VectorStateType &molar_densities,
+                                                               const VectorStateType &h_RT_minus_s_R,
+                                                               const StateType &P0_RT,
+                                                               KineticsModel::Parameters parameter) const;
+
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+             compute_sensitivity_of_backward_rate_coefficient( const VectorStateType &molar_densities,
+                                                               const VectorStateType &h_RT_minus_s_R,
+                                                               const StateType &P0_RT,
+                                                               ReactionType::Parameters parameter) const;
+
     template <typename StateType, typename VectorStateType>
     ANTIOCH_AUTO(StateType) 
              compute_sensitivity_of_backward_rate_coefficient( const VectorStateType &molar_densities,
                                                                const VectorStateType &h_RT_minus_s_R,
                                                                const VectorStateType &dh_RT_minus_s_R_dpar,
-                                                               const StateType &P0_RT,
-                                                               const StateType &dP0_RT_dpar,
-                                                               const KineticsConditions<StateType,VectorStateType>& conditions,
-                                                               KineticsModel::Parameters parameter) const;
+                                                               const StateType &P0_RT) const;
+
 
     //! dr/dpar = dk/dpar * Prod_reac molar_densities[reac] - dk-1/dpar * Prod_prod molar_densities[prod]
     template <typename StateType, typename VectorStateType>
@@ -1620,13 +1701,9 @@ namespace Antioch
   template <typename StateType, typename VectorStateType>
   inline
   ANTIOCH_AUTO(StateType) 
-        Reaction<CoeffType,VectorCoeffType>::compute_sensitivity_of_equilibrium_constant( const VectorStateType &molar_densities,
-                                                                                          const VectorStateType &h_RT_minus_s_R,
-                                                                                          const VectorStateType &dh_RT_minus_s_R_dpar,
+        Reaction<CoeffType,VectorCoeffType>::compute_sensitivity_of_equilibrium_constant( const VectorStateType &h_RT_minus_s_R,
                                                                                           const StateType &P0_RT,
-                                                                                          const StateType &dP0_RT_dpar,
-                                                                                          const KineticsConditions<StateType,VectorStateType>& conditions,
-                                                                                          KineticsModel::Parameters parameter) const
+                                                                                          KineticsModel::Parameters parameter ) const
   {
     antioch_assert( this->initialized() );
     //!\todo Make this assertion vector-compatible
@@ -1637,41 +1714,63 @@ namespace Antioch
 // DrG0 = - reactants + product
 // K = (P0/(RT))^gamma exp(-DrG0)
 // exppower = -DrG0 = reactants - products
-// 
-// dK/dpar = d((P0/(RT))^gamma)/dpar * exp(exppower) + d(exppower)/dpar * (P0/(RT))^gamma exp(exppower)
-// dK/dpar = gamma * d((P0/(RT)))/dpar * (P0/(RT))^(gamma - 1) * exp(exppower) + d(exppower)/dpar * (P0/(RT))^gamma exp(exppower)
-// 
-    StateType exppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
-                            h_RT_minus_s_R[_reactant_ids[0]] );
-
-    StateType dexppower_dpar = ( static_cast<CoeffType>(_reactant_stoichiometry[0])*
-                                dh_RT_minus_s_R_dpar[_reactant_ids[0]] );
-
-    for (unsigned int s=1; s < this->n_reactants(); s++)
-      {
-        exppower += ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
-                       h_RT_minus_s_R[_reactant_ids[s]] );
-        dexppower_dpar += ( static_cast<CoeffType>(_reactant_stoichiometry[s])*
-                           dh_RT_minus_s_R_dpar[_reactant_ids[s]] );
-      }
-
-    for (unsigned int s=0; s < this->n_products(); s++)
-      {
-        exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
-                       h_RT_minus_s_R[_product_ids[s]] );
-        dexppower_dpar -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
-                           dh_RT_minus_s_R_dpar[_product_ids[s]] );
-      }
-
-    StateType expo = ant_exp(exppower);
-    StateType P0_RT_to_the_gamma = ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) );
-
-    StateType out = P0_RT_to_the_gamma * dexppower_dpar * expo;
+    StateType out = zero_clone(P0_RT);
     if(parameter == KineticsModel::Parameters::R_SCALE)
     {
-        out += this->gamma() * dP0_RT_dpar * P0_RT_to_the_gamma / P0_RT * expo;
+      StateType  exppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0]) *
+                            h_RT_minus_s_R[_reactant_ids[0]] );
+
+      for (unsigned int s=1; s < this->n_reactants(); s++)
+      {
+         exppower += ( static_cast<CoeffType>(_reactant_stoichiometry[s]) *
+                            h_RT_minus_s_R[_reactant_ids[s]] );
+      }
+
+      for (unsigned int s=0; s < this->n_products(); s++)
+      {
+          exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s]) *
+                             h_RT_minus_s_R[_product_ids[s]] );
+      }
+
+      out = ant_pow(P0_RT,this->gamma()) * ant_exp(exppower) * ( exppower - this->gamma() ) / Constants::R_universal<CoeffType>();
     }
+
     return out;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  template <typename StateType, typename VectorStateType>
+  inline
+  ANTIOCH_AUTO(StateType) 
+        Reaction<CoeffType,VectorCoeffType>::compute_sensitivity_of_equilibrium_constant( const VectorStateType &h_RT_minus_s_R,
+                                                                                          const VectorStateType &dh_RT_minus_s_R_da,
+                                                                                          const StateType &P0_RT) const
+  {
+    antioch_assert( this->initialized() );
+    //!\todo Make this assertion vector-compatible
+    // antioch_assert_greater( P0_RT, 0.0 );
+    antioch_assert_greater( dh_RT_minus_s_R_da.size(), 0 );
+    antioch_assert_equal_to( dh_RT_minus_s_R_da.size(), this->n_species() );
+
+// DrG0 = - reactants + product
+// K = (P0/(RT))^gamma exp(-DrG0)
+// exppower = -DrG0 = reactants - products
+// dexppower = - d(DrG0)
+    StateType dexppower = ( static_cast<CoeffType>(_reactant_stoichiometry[0]) *
+                            dh_RT_minus_s_R_da[_reactant_ids[0]] );
+    for (unsigned int s=1; s < this->n_reactants(); s++)
+    {
+      dexppower += ( static_cast<CoeffType>(_reactant_stoichiometry[s]) *
+                            dh_RT_minus_s_R_da[_reactant_ids[s]] );
+    }
+
+    for (unsigned int s=0; s < this->n_products(); s++)
+    {
+       dexppower -= ( static_cast<CoeffType>(_product_stoichiometry[s]) *
+                             dh_RT_minus_s_R_da[_product_ids[s]] );
+    }
+
+    return dexppower * this->equilibrium_constant(P0_RT,h_RT_minus_s_R);
   }
 
 } // namespace Antioch
