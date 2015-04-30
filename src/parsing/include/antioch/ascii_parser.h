@@ -637,7 +637,6 @@ namespace Antioch
     NumericType dipole_moment;
     NumericType pol;
     NumericType Zrot;
-    NumericType SI_coeff = Antioch::Units<NumericType>("g/mol").get_SI_factor();
 
     const unsigned int n_data = _n_columns_transport_species + _ignored.size(); // we read all those columns
     unsigned int iLJeps(0);
@@ -667,7 +666,7 @@ namespace Antioch
           if(transport.chemical_mixture().species_name_map().count(name))
           {
               unsigned int place = transport.chemical_mixture().species_name_map().at(name);
-              NumericType mass = transport.chemical_mixture().M(place) * SI_coeff;
+              NumericType mass = transport.chemical_mixture().M(place);
 // adding species in mixture
               transport.add_species(place,LJ_eps_kB,LJ_sigma,dipole_moment,pol,Zrot,mass);
           }
