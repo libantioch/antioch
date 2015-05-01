@@ -79,8 +79,6 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-
   for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
   
