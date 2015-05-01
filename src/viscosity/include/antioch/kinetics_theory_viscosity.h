@@ -69,6 +69,22 @@ namespace Antioch
    *              \f]
    * with \f$\epsilon\f$ the Lennard-Jones potential well depth and \f$\alpha\f$ the
    * dipole moment.
+   *
+   * An important remark about precision:
+   * the viscosity is computed as \f$c * s(T)\f$ with \f$c\f$ a coefficient
+   * and \f$s(T)\f$ the Stockmayer potential spline. The expression of \f$c\f$
+   * is
+   * \f[
+   *     c = \frac{5}{16} \sqrt{\frac{\mathrm{k_B} m}{\pi}} \frac{1}{\sigma^2}
+   * \f]
+   *  which roughly scales as
+   * \f[
+   *    10^{-6}  = 10^{-1} \sqrt{\frac{10^{-23} 10^{-27}}{1}} \frac{1}{10^{-20}}
+   * \f]
+   * The main issue lies in the square root, the float precision evaluate
+   * \f$\sqrt{10^{-50}}\f$ to be zero. Therefore some adaptation has been
+   * made by multiplying the factor in the square root by \f$10^{28}\f$ and
+   * multiplying afterwards by \f$10^{-14}\f$.
    */
   template<typename CoeffType = double, typename Interpolator = GSLSpliner>
   class KineticsTheoryViscosity
@@ -255,7 +271,9 @@ namespace Antioch
      _delta_star = CoeffType(1e-7L) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
                     ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
                      ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) );
-     _a = CoeffType(0.3125L) * ant_sqrt(Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+           /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2) 
+                ~ 10^-14 float can't take 10^-28 in sqrt*/
+     _a = CoeffType(0.3125e-14L) * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
                 / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2));
           
 
@@ -291,7 +309,8 @@ namespace Antioch
      os << "Pure species viscosity:\n"
         << "5/16 * sqrt(pi * " << _mass << " * kb * T) / ( pi * " << _LJ.depth() << "^2 * <Omega(2,2)*> )\n"
         << "T* = T / " << _LJ.depth() << "\n"
-        << "delta* = 1/2 * " << _dipole_moment << "^2 / ( " << _LJ.depth() << " * kb * " << _LJ.diameter() << "^3 )";
+        << "delta* = 1/2 * " << _dipole_moment << "^2 / ( " << _LJ.depth() << " * kb * " << _LJ.diameter() << "^3 )\n"
+        << "[factor a = " << _a << "]";
   }
 
   template <typename CoeffType, typename Interpolator>
