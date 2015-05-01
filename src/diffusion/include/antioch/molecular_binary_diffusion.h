@@ -46,6 +46,26 @@
 
 namespace Antioch{
 
+  /*! \class MolecularBinaryDiffusion
+   *
+   * An important remark about precision:
+   * the diffusion is computed as \f$c * s(T)\f$ with \f$c\f$ a coefficient
+   * and \f$s(T)\f$ the Stockmayer potential spline. The expression of \f$c\f$
+   * is
+   * \f[
+   *     c = \frac{3}{16} \sqrt{\frac{2 \mathrm{k_B}}{m \mathcal{N}_\mathrm{A}\pi}} \frac{1}{\sigma^2}
+   * \f]
+   *  which roughly scales as
+   * \f[
+   *    10^{-4}  = 10^{-1} \sqrt{\frac{10^{-23}}{10^{23}}} \frac{1}{10^{-20}}
+   * \f]
+   * The main issue lies in the square root, the float precision evaluate
+   * \f$\sqrt{10^{-46}}\f$ to be zero. Therefore some adaptation has been
+   * made by multiplying the factor in the square root by \f$10^{50}\f$,
+   * \f$\mathrm{k_B}\f$ by \f$10^{25}\f$ and \f$\mathcal{N}_\mathrm{A}\f$ by
+   * \f$10^{-25}\f$, and
+   * multiplying afterwards by \f$10^{-25}\f$.
+   */
   template <typename CoeffType, typename Interpolator = GSLSpliner>
   class MolecularBinaryDiffusion
   {
@@ -342,7 +362,8 @@ namespace Antioch{
          << "  reduced dipole moment = " << _reduced_dipole_moment << "\n"
          << "  xi = "                    << _xi                    << "\n"
          << "  reduced LJ diameter = "   << _reduced_LJ_diameter   << "\n"
-         << "  reduced LJ depth = "      << _reduced_LJ_depth 
+         << "  reduced LJ depth = "      << _reduced_LJ_depth      << "\n"
+         << "  [coefficient = "          << _coefficient           << "]"
          << std::endl;
   }
 

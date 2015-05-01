@@ -60,8 +60,8 @@ namespace Antioch
                         t(th),Z_298K(Z_298K_),LJ_depth(LJ_depth_){}
 
      const ThermoEvaluator & t;
-     const CoeffType       & Z_298K;
-     const CoeffType       & LJ_depth;
+     const CoeffType        Z_298K;
+     const CoeffType        LJ_depth;
   };
 
    // custom add
