@@ -108,6 +108,7 @@ pkginclude_HEADERS += transport/include/antioch/transport_species.h
 pkginclude_HEADERS += transport/include/antioch/physical_set.h
 
 # viscosity
+pkginclude_HEADERS += viscosity/include/antioch/species_viscosity_base.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils_decl.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils.h
