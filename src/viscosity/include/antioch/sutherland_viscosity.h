@@ -34,6 +34,7 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/cmath_shims.h"
+#include "antioch/species_viscosity_base.h"
 
 // C++
 #include <cmath>
@@ -43,7 +44,7 @@
 namespace Antioch
 {
   template<typename CoeffType=double>
-  class SutherlandViscosity
+  class SutherlandViscosity : public SpeciesViscosityBase<SutherlandViscosity<CoeffType>,CoeffType>
   {
   protected:
 
@@ -56,25 +57,23 @@ namespace Antioch
 
     SutherlandViscosity( const std::vector<CoeffType>& coeffs );
 
-    ~SutherlandViscosity() {}
+    ~SutherlandViscosity(){};
+
+    void reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref );
+
+    //! Friend base class so we can make implementation protected
+    friend class SpeciesViscosityBase<SutherlandViscosity<CoeffType>,CoeffType>;
+
+  protected:
 
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
-    operator()( StateType& T ) const
+    op_impl( StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, _mu_ref*ant_pow(T,CoeffType(1.5))/(T+_T_ref))
-    
-    void reset_coeffs( const CoeffType mu_ref, const CoeffType T_ref );
-    void reset_coeffs( const std::vector<CoeffType> coeffs );
 
-    //! Formatted print, by default to \p std::cout
-    void print(std::ostream& os = std::cout) const;
+    void reset_coeffs_impl( const std::vector<CoeffType>& coeffs );
 
-    //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const SutherlandViscosity& mu)
-    {
-      mu.print(os);
-      return os;
-    }
+    void print_impl(std::ostream& os) const;
 
   private:
     
@@ -84,16 +83,19 @@ namespace Antioch
 
   template<typename CoeffType>
   SutherlandViscosity<CoeffType>::SutherlandViscosity( const CoeffType mu_ref, const CoeffType T_ref )
-    : _mu_ref(mu_ref), _T_ref(T_ref)
+    : SpeciesViscosityBase<SutherlandViscosity<CoeffType>,CoeffType>(),
+    _mu_ref(mu_ref), _T_ref(T_ref)
   {
   }
 
   template<typename CoeffType>
   SutherlandViscosity<CoeffType>::SutherlandViscosity( const std::vector<CoeffType>& coeffs )
 #ifndef NDEBUG
-    : _mu_ref(-1), _T_ref(-1)
+    : SpeciesViscosityBase<SutherlandViscosity<CoeffType>,CoeffType>(),
+    _mu_ref(-1), _T_ref(-1)
 #else
-    : _mu_ref(coeffs[0]), _T_ref(coeffs[1])
+    : SpeciesViscosityBase<SutherlandViscosity<CoeffType>,CoeffType>(),
+    _mu_ref(coeffs[0]), _T_ref(coeffs[1])
 #endif
   {
 #ifndef NDEBUG
@@ -104,7 +106,7 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  void SutherlandViscosity<CoeffType>::print(std::ostream& os) const
+  void SutherlandViscosity<CoeffType>::print_impl(std::ostream& os) const
   {
     os << _mu_ref << "*T^(3/2)/(T + " << _T_ref << ")" << std::endl;
   }
@@ -119,11 +121,10 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void SutherlandViscosity<CoeffType>::reset_coeffs( const std::vector<CoeffType> coeffs )
+  void SutherlandViscosity<CoeffType>::reset_coeffs_impl( const std::vector<CoeffType>& coeffs )
   {
     antioch_assert_equal_to(coeffs.size(), 2);
-    _mu_ref = coeffs[0];
-    _T_ref = coeffs[1];
+    this->reset_coeffs(coeffs[0], coeffs[1]);
   }
 
 } // end namespace Antioch

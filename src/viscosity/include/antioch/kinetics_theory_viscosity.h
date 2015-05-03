@@ -40,6 +40,7 @@
 #include "antioch/gsl_spliner.h"
 #include "antioch/lennard_jones_potential.h"
 #include "antioch/physical_constants.h"
+#include "antioch/species_viscosity_base.h"
 
 // C++
 #include <cmath>
@@ -60,7 +61,7 @@ namespace Antioch
    * with:
    *  - \f$\mathrm{k_B}\f$ the Boltzmann constant
    *  - \f$\sigma_k\f$ the Lennard-Jones collision diameter of molecule \f$k\f$
-   *  - \f$\Omega^{(2,2)*}\f$ the collision integral, determined by a fit using: 
+   *  - \f$\Omega^{(2,2)*}\f$ the collision integral, determined by a fit using:
    *            - \f[
    *                  T^* = \frac{\mathrm{k_B} T}{\epsilon_k}
    *              \f]
@@ -87,7 +88,7 @@ namespace Antioch
    * multiplying afterwards by \f$10^{-14}\f$.
    */
   template<typename CoeffType = double, typename Interpolator = GSLSpliner>
-  class KineticsTheoryViscosity
+  class KineticsTheoryViscosity : public SpeciesViscosityBase<KineticsTheoryViscosity<CoeffType,Interpolator>,CoeffType>
   {
     public:
 
@@ -102,20 +103,21 @@ namespace Antioch
        * Angström,  debye and Boltzmann constant will (almost) cancel out the orders of magnitude
        * in the calculation of _delta_star.
        */
-      KineticsTheoryViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, // depth in K (epsilon/kB), diameter in angström
-                               const CoeffType & dipole_moment, const CoeffType & mass);  // dipole moment in D, molecular mass in kg 
+
+      KineticsTheoryViscosity(const CoeffType & LJ_depth, // depth in K (epsilon/kB),
+                              const CoeffType & LJ_diameter, // diameter in angström
+                              const CoeffType & dipole_moment,
+                              const CoeffType & mass);
+
+      // dipole moment in D, molecular mass in kg
       KineticsTheoryViscosity(const std::vector<CoeffType> & coeffs);
 
-      ~KineticsTheoryViscosity();
+      virtual ~KineticsTheoryViscosity(){};
 
 
       void reset_coeffs( const CoeffType & LJ_depth, const CoeffType & LJ_dia, const CoeffType & dipole_moment, const CoeffType & mass );
-      void reset_coeffs( const std::vector<CoeffType> & coeffs );
 
-      template <typename StateType>
-      ANTIOCH_AUTO(StateType) 
-      operator()(const StateType &T) const
-      ANTIOCH_AUTOFUNC(StateType,  this->viscosity(T)  )
+
 
       /*! \brief Calculates kinetics theory viscosity
        *
@@ -145,23 +147,23 @@ namespace Antioch
       ANTIOCH_AUTO(StateType)
         Stockmayer(const StateType & T) const
       ANTIOCH_AUTOFUNC(StateType,ant_sqrt(T) / _interp.interpolated_value(T) )   // Omega(2,2)
-                                          
-
-      //! Formatted print, by default to \p std::cout
-      void print(std::ostream& os = std::cout) const;
 
       //!\return the value of the reduced dipole moment
       const CoeffType & delta_star() const;
 
-      //! Formatted print.
-      friend std::ostream& operator<<(std::ostream& os, const KineticsTheoryViscosity& mu)
-      {
-        mu.print(os);
-        return os;
-      }
-      
+    //! Friend base class so we can make implementation protected
+    friend class SpeciesViscosityBase<KineticsTheoryViscosity<CoeffType,Interpolator>,CoeffType>;
 
     private:
+
+      template <typename StateType>
+      ANTIOCH_AUTO(StateType)
+      op_impl(const StateType &T) const
+      ANTIOCH_AUTOFUNC(StateType,  this->viscosity(T)  )
+
+      void reset_coeffs_impl( const std::vector<CoeffType>& coeffs );
+
+      void print_impl(std::ostream& os) const;
 
       void build_interpolation();
 
@@ -183,18 +185,19 @@ namespace Antioch
 
   template <typename CoeffType, typename Interpolator>
   inline
-  KineticsTheoryViscosity<CoeffType,Interpolator>::KineticsTheoryViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter, 
-                                                              const CoeffType & dipole_moment, const CoeffType & mass):
-        _LJ(LJ_depth,LJ_diameter),
-        _dipole_moment(dipole_moment),
-        _mass(mass),
-        _delta_star(CoeffType(1e-7L) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
-                    ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
-                     ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
-        _a(CoeffType(0.3125e-14L) * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
-                / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))  
-          ) /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2) 
-                ~ 10^-14 float can't take 10^-28 in sqrt*/
+  KineticsTheoryViscosity<CoeffType,Interpolator>::KineticsTheoryViscosity(const CoeffType & LJ_depth, const CoeffType & LJ_diameter,
+                                                              const CoeffType & dipole_moment, const CoeffType & mass)
+    : SpeciesViscosityBase<KineticsTheoryViscosity<CoeffType,Interpolator>,CoeffType>(),
+    _LJ(LJ_depth,LJ_diameter),
+    _dipole_moment(dipole_moment),
+    _mass(mass),
+    _delta_star(CoeffType(1e-7L) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
+                ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
+                ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
+    _a(CoeffType(0.3125e-14L) * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
+                / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))
+       ) /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2)
+            ~ 10^-14 float can't take 10^-28 in sqrt*/
   {
      this->build_interpolation();
      return;
@@ -204,20 +207,22 @@ namespace Antioch
   inline
   KineticsTheoryViscosity<CoeffType,Interpolator>::KineticsTheoryViscosity(const std::vector<CoeffType> & coeffs):
 #ifndef NDEBUG
+    SpeciesViscosityBase<KineticsTheoryViscosity<CoeffType,Interpolator>,CoeffType>(),
         _LJ(-1,-1),
         _dipole_moment(-1),
         _mass(-1),
         _delta_star(-1),
-       _a(0.L) 
+       _a(0.L)
 #else
+    SpeciesViscosityBase<KineticsTheoryViscosity<CoeffType,Interpolator>,CoeffType>(),
         _LJ(coeffs[0],coeffs[1]),
         _dipole_moment(coeffs[2]),
         _mass(coeffs[3]),
         _delta_star(CoeffType(1e-7L) * ant_pow(Constants::light_celerity<CoeffType>(),2) * // * 1/(4*pi * eps_0) = 10^-7 * c^2
-                    ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /             
+                    ant_pow(_dipole_moment * Units<CoeffType>("D").get_SI_factor(),2) /
                      ( _LJ.depth() * Constants::Boltzmann_constant<CoeffType>() * 2 * ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),3) )),
         _a(CoeffType(0.3125e-14L) * ant_sqrt(CoeffType(1e28) * Constants::Boltzmann_constant<CoeffType>() * _mass / Constants::pi<CoeffType>())
-                / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))  
+                / (ant_pow(_LJ.diameter() * Units<CoeffType>("ang").get_SI_factor(),2))
           ) /* 5 / 16 * sqrt(pi * Boltzmann constant/pi) / (sigma^2)
                 ~ 10^-14 float can't take 10^-28 in sqrt*/
 #endif
@@ -229,14 +234,6 @@ namespace Antioch
 #endif
 
      this->build_interpolation();
-     return;
-  }
-
-
-  template <typename CoeffType, typename Interpolator>
-  inline
-  KineticsTheoryViscosity<CoeffType,Interpolator>::~KineticsTheoryViscosity()
-  {
      return;
   }
 
@@ -283,7 +280,7 @@ namespace Antioch
 
   template <typename CoeffType, typename Interpolator>
   inline
-  void KineticsTheoryViscosity<CoeffType,Interpolator>::reset_coeffs( const std::vector<CoeffType> & coeffs )
+  void KineticsTheoryViscosity<CoeffType,Interpolator>::reset_coeffs_impl( const std::vector<CoeffType>& coeffs )
   {
      antioch_assert_equal_to(coeffs.size(),4);
 
@@ -304,7 +301,7 @@ namespace Antioch
 
   template <typename CoeffType, typename Interpolator>
   inline
-  void KineticsTheoryViscosity<CoeffType,Interpolator>::print(std::ostream& os) const
+  void KineticsTheoryViscosity<CoeffType,Interpolator>::print_impl(std::ostream& os) const
   {
      os << "Pure species viscosity:\n"
         << "5/16 * sqrt(pi * " << _mass << " * kb * T) / ( pi * " << _LJ.depth() << "^2 * <Omega(2,2)*> )\n"
