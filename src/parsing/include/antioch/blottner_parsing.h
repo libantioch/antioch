@@ -43,12 +43,12 @@ namespace Antioch
 {
 
   /* These two methods use a ViscosityMixture object => deprecated */
-  template<class NumericType>
-  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
+  template<typename ThermoEvaluator,class NumericType>
+  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
 				 const std::string &filename );
 
-  template<class NumericType>
-  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu );
+  template<typename ThermoEvaluator,class NumericType>
+  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu );
 
   /*
       PhysicalSet version
@@ -125,9 +125,9 @@ namespace Antioch
    ViscosityMixture version
 */
 
-  template<class NumericType>
+  template<typename ThermoEvaluator,class NumericType>
   inline
-  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
+  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
 				 const std::string &filename )
   {
     antioch_deprecated();
@@ -176,8 +176,8 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType>
-  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu )
+  template<typename ThermoEvaluator,class NumericType>
+  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu )
   {
     antioch_deprecated();
     read_blottner_data_ascii(mu, DefaultFilename::blottner_data());

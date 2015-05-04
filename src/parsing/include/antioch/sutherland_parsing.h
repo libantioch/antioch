@@ -46,27 +46,27 @@ namespace Antioch
       MixtureViscosity versions, all deprecated
    */
 
-  template<class NumericType>
-  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
+  template<typename ThermoEvaluator,class NumericType>
+  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
 				   const std::string &filename);
- 
-  template<class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu );
+
+  template<typename ThermoEvaluator,class NumericType>
+  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu );
 
   /*PhysicalSet versions*/
 
   template<class NumericType>
   void read_sutherland_data_ascii( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu,
 				   const std::string &filename);
- 
+
   /*Do we need it?*/
   template<class NumericType>
   void read_sutherland_data_ascii_default( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu );
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
+  template<typename ThermoEvaluator, class NumericType>
   inline
-  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
+  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
 				   const std::string &filename)
   {
     antioch_deprecated();
@@ -112,8 +112,8 @@ namespace Antioch
     return;
   }
 
-  template<class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu )
+  template<typename ThermoEvaluator,class NumericType>
+  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu )
   {
     antioch_deprecated();
     read_sutherland_data_ascii(mu, DefaultFilename::sutherland_data());
