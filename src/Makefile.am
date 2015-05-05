@@ -96,6 +96,7 @@ pkginclude_HEADERS += thermo/include/antioch/ideal_gas_micro_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/thermo_handler.h
 
 # transport
+pkginclude_HEADERS += transport/include/antioch/mixture_transport_base.h
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
 pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
 pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
