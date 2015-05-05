@@ -71,7 +71,7 @@ namespace Antioch
           coeffs[1] = mu.mixture().transport_species()[s]->LJ_diameter();
           coeffs[2] = mu.mixture().transport_species()[s]->dipole_moment();
           coeffs[3] = mu.mixture().transport_species()[s]->M() / Constants::Avogadro<NumericType>();
-          mu.add_model(mu.mixture().species_inverse_name_map().at(s),coeffs);
+          mu.add(mu.mixture().species_inverse_name_map().at(s),coeffs);
       }
   }
 
