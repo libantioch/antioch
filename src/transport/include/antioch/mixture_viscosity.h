@@ -55,9 +55,6 @@ namespace Antioch
     MixtureViscosity( const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture );
     ~MixtureViscosity();
 
-   // forward compatibility
-    typedef Viscosity Model;
-
     //! Evaluate viscosity for species s
     /*! Total viscosity computed by mixing model, e.g. WilkeTransportEvaluator */
     template <typename StateType>
