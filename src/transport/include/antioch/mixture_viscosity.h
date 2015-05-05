@@ -41,6 +41,12 @@
 
 namespace Antioch
 {
+  //! Container class for species viscosities
+  /*! For the given set of chemical species in the input TransportMixture, this contains
+      all the viscosities for each of those species and provides and interface for
+      computing the species viscosity. Total viscosity is computed by a mixing model,
+      e.g. WilkeTransportMixture. This class is templated on the viscosity model,
+      so an inherent assumption is that all species viscosities have the same model. */
   template<typename Viscosity, typename ThermoEvaluator, class CoeffType=double>
   class MixtureViscosity
   {
@@ -52,23 +58,25 @@ namespace Antioch
    // forward compatibility
     typedef Viscosity Model;
 
+    //! Evaluate viscosity for species s
+    /*! Total viscosity computed by mixing model, e.g. WilkeTransportEvaluator */
     template <typename StateType>
     StateType operator()( const unsigned int s, const StateType& T ) const;
 
+    //! Add species viscosity
     void add( const std::string& species_name,
 	      const std::vector<CoeffType>& coeffs );
 
-    void reset_coeffs( const unsigned int s, 
+    //! Reset model coefficients for viscosity model of species s
+    void reset_coeffs( const unsigned int s,
                        const std::vector<CoeffType> coeffs );
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
     const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture() const;
 
-    // forward compatibility
     const TransportMixture<ThermoEvaluator,CoeffType>& mixture() const;
 
-    // backward compatibility
     const std::vector<Viscosity*> & species_viscosities() const;
 
     //! Formatted print, by default to \p std::cout
