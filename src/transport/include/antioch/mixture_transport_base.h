@@ -26,6 +26,8 @@
 #ifndef ANTIOCH_MIXTURE_TRANSPORT_BASE_H
 #define ANTIOCH_MIXTURE_TRANSPORT_BASE_H
 
+#include "antioch/transport_mixture.h"
+
 namespace Antioch
 {
   template<typename ThermoEvaluator, class CoeffType=double>

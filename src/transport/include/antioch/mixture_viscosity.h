@@ -33,7 +33,7 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/transport_mixture.h"
+#include "antioch/mixture_transport_base.h"
 
 // C++
 #include <string>
@@ -48,7 +48,7 @@ namespace Antioch
       e.g. WilkeTransportMixture. This class is templated on the viscosity model,
       so an inherent assumption is that all species viscosities have the same model. */
   template<typename Viscosity, typename ThermoEvaluator, class CoeffType=double>
-  class MixtureViscosity
+  class MixtureViscosity : public MixtureTransportBase<ThermoEvaluator,CoeffType>
   {
   public:
 
@@ -68,12 +68,6 @@ namespace Antioch
     void reset_coeffs( const unsigned int s,
                        const std::vector<CoeffType> coeffs );
 
-    const ChemicalMixture<CoeffType>& chemical_mixture() const;
-
-    const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture() const;
-
-    const TransportMixture<ThermoEvaluator,CoeffType>& mixture() const;
-
     const std::vector<Viscosity*> & species_viscosities() const;
 
     //! Formatted print, by default to \p std::cout
@@ -88,15 +82,17 @@ namespace Antioch
 
   protected:
 
-    const TransportMixture<ThermoEvaluator,CoeffType>& _transport_mixture;
-
     std::vector<Viscosity*> _species_viscosities;
+
+  private:
+
+    MixtureViscosity();
 
   };
 
   template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
   MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::MixtureViscosity(  const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture )
-    :  _transport_mixture(transport_mixture),
+    :  MixtureTransportBase<ThermoEvaluator,CoeffType>(transport_mixture),
        _species_viscosities( transport_mixture.n_species(), NULL )
   {}
 
@@ -116,10 +112,10 @@ namespace Antioch
   void MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::add( const std::string& species_name,
 						   const std::vector<CoeffType>& coeffs )
   {
-    antioch_assert( _transport_mixture.species_name_map().find(species_name) !=
-		    _transport_mixture.species_name_map().end() );
+    antioch_assert( this->_transport_mixture.species_name_map().find(species_name) !=
+		    this->_transport_mixture.species_name_map().end() );
 
-    unsigned int s = _transport_mixture.species_name_map().find(species_name)->second;
+    unsigned int s = this->_transport_mixture.species_name_map().find(species_name)->second;
 
     antioch_assert_less_equal( s, _species_viscosities.size() );
     antioch_assert( !_species_viscosities[s] );
@@ -149,27 +145,6 @@ namespace Antioch
 
   template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
   inline
-  const ChemicalMixture<CoeffType>& MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::chemical_mixture() const
-  {
-    return _transport_mixture.chemical_mixture();
-  }
-
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  inline
-  const TransportMixture<ThermoEvaluator,CoeffType>& MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::transport_mixture() const
-  {
-    return _transport_mixture;
-  }
-
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  inline
-  const TransportMixture<ThermoEvaluator,CoeffType>& MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::mixture() const
-  {
-    return _transport_mixture;
-  }
-
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  inline
   const std::vector<Viscosity*>& MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::species_viscosities() const
   {
     return _species_viscosities;
@@ -178,12 +153,12 @@ namespace Antioch
   template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
   void MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::print(std::ostream& os) const
   {
-    antioch_assert_equal_to( _species_viscosities.size(), _transport_mixture.n_species() );
+    antioch_assert_equal_to( _species_viscosities.size(), this->_transport_mixture.n_species() );
 
-    for( unsigned int s = 0; s < _transport_mixture.n_species(); s++ )
+    for( unsigned int s = 0; s < this->_transport_mixture.n_species(); s++ )
       {
-	const Species& species = _transport_mixture.species_list()[s];
-	const std::string& name = _transport_mixture.species_inverse_name_map().find( species  )->second;
+	const Species& species = this->_transport_mixture.species_list()[s];
+	const std::string& name = this->_transport_mixture.species_inverse_name_map().find( species  )->second;
 
 	os << "mu(" << name << ") = " << (*_species_viscosities[s]) << std::endl;
       }
