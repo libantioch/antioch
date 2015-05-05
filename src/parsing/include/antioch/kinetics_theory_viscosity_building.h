@@ -29,7 +29,6 @@
 // Antioch
 #include "antioch/kinetics_theory_viscosity.h"
 #include "antioch/mixture_viscosity.h"
-#include "antioch/physical_set.h"
 
 // C++
 #include <iostream>
@@ -43,23 +42,9 @@ namespace Antioch
   class TransportMixture;
 
   template<class NumericType, class ThermoEvaluator>
-  void build_kinetics_theory_viscosity( PhysicalSet<KineticsTheoryViscosity<NumericType>, TransportMixture<ThermoEvaluator,NumericType> >& mu);
+  void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType>,ThermoEvaluator,NumericType >& mu);
 
-// ----------------------------------------- //
-
-  template<class NumericType, class ThermoEvaluator>
-  void build_kinetics_theory_viscosity( PhysicalSet<KineticsTheoryViscosity<NumericType>, TransportMixture<ThermoEvaluator,NumericType> >& mu)
-  {
-      for(unsigned int s = 0; s < mu.mixture().n_species(); s++)
-      {
-          std::vector<NumericType> coeffs(4,0);
-          coeffs[0] = mu.mixture().transport_species()[s]->LJ_depth();
-          coeffs[1] = mu.mixture().transport_species()[s]->LJ_diameter();
-          coeffs[2] = mu.mixture().transport_species()[s]->dipole_moment();
-          coeffs[3] = mu.mixture().transport_species()[s]->M() / Constants::Avogadro<NumericType>();
-          mu.add_model(mu.mixture().species_inverse_name_map().at(s),coeffs);
-      }
-  }
+  // ----------------------------------------- //
 
   template<class NumericType, class ThermoEvaluator>
   void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType>,ThermoEvaluator,NumericType >& mu)

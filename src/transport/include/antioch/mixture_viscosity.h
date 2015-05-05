@@ -189,20 +189,6 @@ namespace Antioch
     return;
   }
 
-/// now the forward compatibility to make it alright with PhysicalSet
-
- // tag is the tag of the physical model
- template <typename Viscosity,typename ThermoEvaluator,typename CoeffType>
- struct physical_tag<MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType> >:
-        public physical_tag<Viscosity>
- {};
-
- // physical set boolean
- template<typename Viscosity,typename ThermoEvaluator, typename CoeffType>
- struct is_physical_set<MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType> >:
-      public is_physical_set<Viscosity>
- {};
-
 } // end namespace Antioch
 
 #endif // ANTIOCH_MIXTURE_VISCOSITY_H

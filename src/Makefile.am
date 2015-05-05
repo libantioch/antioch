@@ -110,14 +110,8 @@ pkginclude_HEADERS += transport/include/antioch/physical_set.h
 # viscosity
 pkginclude_HEADERS += viscosity/include/antioch/species_viscosity_base.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity.h
-pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils_decl.h
-pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity.h
-pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils_decl.h
-pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity.h
-pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity_utils_decl.h
-pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity_utils.h
 
 # diffusion
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h

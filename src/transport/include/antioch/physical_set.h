@@ -111,14 +111,6 @@ namespace Antioch
         template <typename InitType>
         void reset_model(const InitType & initMe);
 
-        // viscosity one species
-        template<typename StateType, typename VectorStateType>
-        void compute_viscosity(unsigned int s, const KineticsConditions<StateType,VectorStateType> & conditions, StateType & mu) const;
-
-        // viscosity full set
-        template<typename StateType, typename VectorStateType>
-        void compute_viscosities(const KineticsConditions<StateType,VectorStateType> & conditions, VectorStateType & mu) const;
-
         // diffusion full set (set level, matrix)
         template<typename StateType, typename VectorStateType, typename MatrixStateType>
         void compute_binary_diffusion_matrix(const KineticsConditions<StateType, VectorStateType> & conditions, 
@@ -250,25 +242,7 @@ namespace Antioch
   inline
   void PhysicalSet<Physics,Mixture>::print(std::ostream & out) const
   {
-    physical_set_print(_set, _mixture.species_inverse_name_map(), out, typename physical_tag<Physics>::set_type());  
-  }
-
-  // viscosity one
-  template<typename Physics, typename Mixture>
-  template<typename StateType, typename VectorStateType>
-  inline
-  void PhysicalSet<Physics,Mixture>::compute_viscosity(unsigned int s, const KineticsConditions<StateType, VectorStateType> & conditions, StateType & mu) const
-  {
-     physical_set_operator_viscosity(_set,s,conditions.T(), mu, typename physical_tag<Physics>::viscosity_type());
-  }
-
-  // viscosity full
-  template<typename Physics, typename Mixture>
-  template<typename StateType, typename VectorStateType >
-  inline
-  void PhysicalSet<Physics,Mixture>::compute_viscosities(const KineticsConditions<StateType,VectorStateType> & conditions, VectorStateType &mu) const
-  {
-      physical_set_operator_viscosity(_set,conditions.T(),mu, typename physical_tag<Physics>::viscosity_type());
+    physical_set_print(_set, _mixture.species_inverse_name_map(), out, typename physical_tag<Physics>::set_type());
   }
 
   // diffusion full

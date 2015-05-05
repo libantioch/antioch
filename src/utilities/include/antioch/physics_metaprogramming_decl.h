@@ -72,7 +72,6 @@ namespace Antioch
                                      default_physical_tag
                                    >::type del_type;
         // for operators, diffusion is special, see comment below
-     typedef default_physical_tag viscosity_type;
      typedef default_physical_tag diffusion_species_type;
      typedef default_physical_tag diffusion_mixture_type;
      typedef default_physical_tag thermal_conductivity_type;
@@ -164,20 +163,6 @@ namespace Antioch
         Lewis. Thus they act differently, thus two tags
         as a strategy to disable.
      */
-
-    ///// viscosity
-
-        /// may or may not be used, though always
-        /// defined
-        /// should not be used when not concerned
-   template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType & k, default_physical_tag);
-
-        /// this one may or may not be used,
-        /// void by default to skip it in concerned cases
-   template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, default_physical_tag);
-
 
     ///// thermal conduction
 

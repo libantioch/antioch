@@ -50,15 +50,12 @@
 #include "antioch/constant_lewis_diffusivity.h"
 #include "antioch/kinetics_theory_thermal_conductivity.h"
 #include "antioch/constant_lewis_diffusivity_utils.h"
-#include "antioch/blottner_viscosity_utils.h"
-#include "antioch/eucken_thermal_conductivity_utils.h"
-#include "antioch/kinetics_theory_thermal_conductivity_utils.h"
 
 #ifdef ANTIOCH_HAVE_GSL
 
 #include "antioch/kinetics_theory_viscosity.h"
+#include "antioch/kinetics_theory_viscosity_building.h"
 #include "antioch/molecular_binary_diffusion.h"
-#include "antioch/kinetics_theory_viscosity_utils.h"
 #include "antioch/molecular_binary_diffusion_utils.h"
 #include "antioch/gsl_spliner.h"
 

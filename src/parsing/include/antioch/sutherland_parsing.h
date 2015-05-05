@@ -34,7 +34,6 @@
 // Antioch
 #include "antioch/sutherland_viscosity.h"
 #include "antioch/mixture_viscosity.h"
-#include "antioch/physical_set.h"
 
 // C++
 #include <iostream>
@@ -43,7 +42,7 @@ namespace Antioch
 {
 
   /*
-      MixtureViscosity versions, all deprecated
+      MixtureViscosity versions
    */
 
   template<typename ThermoEvaluator,class NumericType>
@@ -52,16 +51,6 @@ namespace Antioch
 
   template<typename ThermoEvaluator,class NumericType>
   void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu );
-
-  /*PhysicalSet versions*/
-
-  template<class NumericType>
-  void read_sutherland_data_ascii( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu,
-				   const std::string &filename);
-
-  /*Do we need it?*/
-  template<class NumericType>
-  void read_sutherland_data_ascii_default( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu );
 
   /* ------------------------- Inline Functions -------------------------*/
   template<typename ThermoEvaluator, class NumericType>
@@ -114,62 +103,6 @@ namespace Antioch
 
   template<typename ThermoEvaluator,class NumericType>
   void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu )
-  {
-    antioch_deprecated();
-    read_sutherland_data_ascii(mu, DefaultFilename::sutherland_data());
-  }
-
-  /*PhysicalSet versions*/
-
-  template<class NumericType>
-  inline
-  void read_sutherland_data_ascii( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu,
-				   const std::string &filename)
-  {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-       std::cerr << "ERROR: unable to load file " << filename << std::endl;
-       antioch_error();
-    }
-    
-    // skip the header
-    skip_comment_lines(in, '#');
-
-    std::string name;
-    NumericType a, b;
-
-     while (in.good())
-      {
-        in >> name; // Species Name
-        in >> a;    // 
-        in >> b;    //
-        
-        // If we are still good, we have a valid set of transport
-        // data for this species. Otherwise, we read past end-of-file 
-        // in the section above
-        if (in.good())
-          {
-	    const ChemicalMixture<NumericType>& chem_mixture = mu.mixture();
-	    
-	    // Check if this is a species we want.
-	    if( chem_mixture.species_name_map().find(name) !=
-		chem_mixture.species_name_map().end() )
-	      {
-		// Pack up coefficients
-		std::vector<NumericType> coeffs(2);
-		coeffs[0] = a;
-		coeffs[1] = b;
-		mu.add_model(name, coeffs);
-	      }
-	  }
-      }
-      in.close();
-    return;
-  }
-
-  template<class NumericType>
-  void read_sutherland_data_ascii_default( PhysicalSet<SutherlandViscosity<NumericType>, ChemicalMixture<NumericType> >& mu )
   {
     antioch_deprecated();
     read_sutherland_data_ascii(mu, DefaultFilename::sutherland_data());

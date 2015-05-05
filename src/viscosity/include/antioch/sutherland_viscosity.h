@@ -129,7 +129,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#include "antioch/sutherland_viscosity_utils_decl.h"
-#include "antioch/sutherland_viscosity_utils.h"
-
 #endif //ANTIOCH_SUTHERLAND_VISCOSITY_H
