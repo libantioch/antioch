@@ -44,6 +44,9 @@ namespace Antioch
 
     EuckenThermalConductivity( const ThermoEvaluator& t) : _thermo(t) {}
 
+    template <typename CoeffType>
+    EuckenThermalConductivity( const ThermoEvaluator& t, const std::vector<CoeffType>& /*coeffs*/) : _thermo(t) {}
+
     ~EuckenThermalConductivity() {}
 
      // Suppose thermal equilibrium Tv = Te = T:w
