@@ -35,11 +35,17 @@
 // Antioch
 #include "antioch_config.h"
 #include "antioch/default_filename.h"
+#include "antioch/vector_utils_decl.h"
 #include "antioch/sutherland_viscosity.h"
 #include "antioch/blottner_viscosity.h"
+#include "antioch/kinetics_theory_viscosity.h"
+#include "antioch/gsl_spliner.h"
+#include "antioch/vector_utils.h"
+
 #include "antioch/mixture_viscosity.h"
 #include "antioch/blottner_parsing.h"
 #include "antioch/sutherland_parsing.h"
+#include "antioch/kinetics_theory_viscosity_building.h"
 
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_evaluator.h"
@@ -47,14 +53,15 @@
 #include "antioch/thermo_handler.h"
 #include "antioch/stat_mech_thermo.h"
 
+
+
 template <typename Scalar>
 int tester()
 {
   std::vector<std::string> species_str_list;
-  const unsigned int n_species = 2;
+  const unsigned int n_species = 1;
   species_str_list.reserve(n_species);
   species_str_list.push_back( "N2" );
-  species_str_list.push_back( "Air" ); // Yes, I know this doesn't make sense, it's just a test.
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
@@ -78,13 +85,24 @@ int tester()
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar>
     b_mu_mixture(tran_mixture);
 
+  Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner>,Thermo,Scalar>
+    k_mu_mixture(tran_mixture);
+
   Antioch::read_sutherland_data_ascii<Thermo,Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
   Antioch::read_blottner_data_ascii<Thermo,Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
+  Antioch::build_kinetics_theory_viscosity<Scalar,Thermo>(k_mu_mixture);
 
   std::cout << s_mu_mixture << std::endl;
   std::cout << b_mu_mixture << std::endl;
+  std::cout << k_mu_mixture << std::endl;
 
   const Scalar T = 1500.1;
+
+  std::cout << "Sutherland:" << std::endl;
+  for( unsigned int s = 0; s < n_species; s++ )
+    {
+      std::cout << "mu(" << species_str_list[s] << ") = " << s_mu_mixture(s, T) << std::endl;
+    }
 
   std::cout << "Blottner:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
@@ -92,10 +110,10 @@ int tester()
       std::cout << "mu(" << species_str_list[s] << ") = " << b_mu_mixture(s, T) << std::endl;
     }
 
-  std::cout << "Sutherland:" << std::endl;
+  std::cout << "Kinetic Theory:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
     {
-      std::cout << "mu(" << species_str_list[s] << ") = " << s_mu_mixture(s, T) << std::endl;
+      std::cout << "mu(" << species_str_list[s] << ") = " << k_mu_mixture(s, T) << std::endl;
     }
 
   int return_flag = 0;
