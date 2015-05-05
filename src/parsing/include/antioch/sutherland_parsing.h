@@ -58,7 +58,6 @@ namespace Antioch
   void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
 				   const std::string &filename)
   {
-    antioch_deprecated();
     std::ifstream in(filename.c_str());
     if(!in.is_open())
     {
@@ -104,7 +103,6 @@ namespace Antioch
   template<typename ThermoEvaluator,class NumericType>
   void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu )
   {
-    antioch_deprecated();
     read_sutherland_data_ascii(mu, DefaultFilename::sutherland_data());
   }
 

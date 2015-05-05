@@ -93,10 +93,7 @@ namespace Antioch
   MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::MixtureViscosity(  const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture )
     :  _transport_mixture(transport_mixture),
        _species_viscosities( transport_mixture.n_species(), NULL )
-  {
-    antioch_deprecated();
-    return;
-  }
+  {}
 
   template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
   MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::~MixtureViscosity()
