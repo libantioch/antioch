@@ -140,14 +140,16 @@ int tester()
 // 
   Antioch::PhysicalSet<Antioch::EuckenThermalConductivity<MicroThermo >, TranMix > k( tran_mixture );
 
-  Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>,               Antioch::ChemicalMixture<Scalar> > mu( chem_mixture );
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar> mu( tran_mixture );
+  Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
   Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>,        Antioch::ChemicalMixture<Scalar> > D( chem_mixture );
 
 // pure species set, all internally set
 #ifdef ANTIOCH_HAVE_GSL
-  Antioch::PhysicalSet<Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner>,
-                       TranMix > ps_mu(tran_mixture);
+  Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,Thermo,Scalar >
+    ps_mu(tran_mixture);
+  Antioch::build_kinetics_theory_viscosity<Scalar,Thermo>(ps_mu);
 
   Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >,
                        TranMix > bimol_D( tran_mixture );
@@ -157,7 +159,7 @@ int tester()
 
 //Eucken is internally set
 
-  Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
+
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
@@ -165,10 +167,10 @@ int tester()
   Antioch::WilkeTransportMixture< Thermo,  // ThermoEval
                                    Scalar                          // Type
                                 > wilke_mixture( tran_mixture );
-  
+
   Antioch::WilkeTransportEvaluator< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >, // Diffusion
-                           Antioch::PhysicalSet< Antioch::BlottnerViscosity<Scalar>,        Antioch::ChemicalMixture<Scalar> >, // Viscosity
-                           Antioch::PhysicalSet< Antioch::EuckenThermalConductivity< MicroThermo >, TranMix >,                   /* Thermal conduction */   
+                           Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar>, // Viscosity
+                           Antioch::PhysicalSet< Antioch::EuckenThermalConductivity< MicroThermo >, TranMix >,                   /* Thermal conduction */
                            Antioch::WilkeTransportMixture< Thermo, Scalar >,              /*  mixture*/
                            Scalar                                                         // type
                          > wilke( wilke_mixture, D, mu, k );
@@ -178,8 +180,8 @@ int tester()
   Antioch::WilkeTransportEvaluator<
                         Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >,
                                              TranMix >,
-                        Antioch::PhysicalSet<Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner>,
-                                             TranMix >,
+                        Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
+                                                  Thermo,Scalar >,
                         Antioch::PhysicalSet<Antioch::KineticsTheoryThermalConductivity<MicroThermo, Scalar >,
                                              TranMix >,
                         Antioch::WilkeTransportMixture< Thermo,   /*  */
@@ -191,7 +193,7 @@ int tester()
 #else //only thermal conduction then
 
   Antioch::WilkeTransportEvaluator< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
-                           Antioch::PhysicalSet< Antioch::BlottnerViscosity<Scalar>,        Antioch::ChemicalMixture<Scalar> >,
+                           Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar>,
                            Antioch::PhysicalSet< Antioch::KineticsTheoryThermalConductivity<MicroThermo, Scalar >,
                                                  TranMix >,
                            Antioch::WilkeTransportMixture< Thermo, /*  */

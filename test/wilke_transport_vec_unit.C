@@ -63,6 +63,7 @@
 
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
+#include "antioch/mixture_viscosity.h"
 #include "antioch/constant_lewis_diffusivity.h"
 #include "antioch/eucken_thermal_conductivity_utils.h"
 #include "antioch/blottner_viscosity_utils.h"
@@ -161,17 +162,15 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::PhysicalSet< Antioch::EuckenThermalConductivity<ThermoType>, TransportType > k( tran_mixture );
 
-  Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, ChemicalType> mu( chem_mixture );
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar> mu( tran_mixture );
+  Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
   Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType > D( chem_mixture );
-
-
-  Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
   typedef Antioch::PhysicalSet< Antioch::EuckenThermalConductivity<ThermoType>, TransportType > TCType;
-  typedef Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, ChemicalType>                VType;
+  typedef Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar>           VType;
   typedef Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType >        DType;
 
 

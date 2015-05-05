@@ -378,7 +378,7 @@ namespace Antioch
     // chi_s = w_s*M/M_s
     for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
       {
-        _viscosity.compute_viscosity(s,transport_conditions,mu[s]);
+        mu[s] = _viscosity(s,transport_conditions.T());
         chi[s] = mass_fractions[s]*M/_mixture.chem_mixture().M(s);
       }
 
