@@ -43,6 +43,8 @@ namespace Antioch{
 
         KineticsTheoryThermalConductivity(const ThermoEvaluator & t, CoeffType Z_298K, CoeffType LJ_depth);
 
+        KineticsTheoryThermalConductivity( const ThermoEvaluator& t, const std::vector<CoeffType>& coeffs);
+
         ~KineticsTheoryThermalConductivity();
 
         void reset_coeffs(const std::vector<CoeffType> & coeffs);
@@ -115,6 +117,16 @@ namespace Antioch{
         one(1)
   {}
 
+  template <typename ThermoEvaluator, typename CoeffType>
+  inline
+  KineticsTheoryThermalConductivity<ThermoEvaluator,CoeffType>::KineticsTheoryThermalConductivity( const ThermoEvaluator& t, const std::vector<CoeffType>& coeffs)
+    :_thermo(t),
+     _rot(coeffs[0],coeffs[1]),
+     five_over_two(CoeffType(5)/CoeffType(2)),
+     five_over_three(CoeffType(5)/CoeffType(3)),
+     two_over_pi(2/Constants::pi<CoeffType>()),
+     one(1)
+  {}
 
   template <typename ThermoEvaluator, typename CoeffType>
   inline
