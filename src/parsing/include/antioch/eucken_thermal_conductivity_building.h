@@ -70,4 +70,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif
+#endif // ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_BUILDING_H

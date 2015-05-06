@@ -29,6 +29,7 @@
 // Antioch
 #include "antioch/kinetics_theory_thermal_conductivity.h"
 #include "antioch/physical_set.h"
+#include "antioch/mixture_conductivity.h"
 
 // C++
 #include <iostream>
@@ -60,6 +61,18 @@ namespace Antioch
        }
   }
 
-}
+  template<class ThermoTC, class ThermoTran,class NumericType>
+  void build_kinetics_theory_thermal_conductivity(MixtureConductivity<KineticsTheoryThermalConductivity<ThermoTC,NumericType>,ThermoTran,ThermoTC,NumericType>& k )
+  {
+    for(unsigned int s = 0; s < k.mixture().n_species(); s++)
+       {
+         std::vector<NumericType> coeffs(2);
+         coeffs[0] = k.mixture().transport_species()[s]->rotational_relaxation();
+         coeffs[1] = k.mixture().transport_species()[s]->LJ_depth();
+         k.add(s,coeffs,k.mixture().thermo().micro_thermo());
+       }
+  }
 
-#endif
+} // end namespace Antioch
+
+#endif // ANTIOCH_KINETICS_THEORY_THERMAL_CONDUCTIVITY_BUILDING_H
