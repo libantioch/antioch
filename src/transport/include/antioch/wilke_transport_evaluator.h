@@ -176,7 +176,12 @@ namespace Antioch
      StateType k = zero_clone(transport_conditions.T());
      for(unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++)
      {
-        _conductivity.compute_thermal_conductivity(s,mu[s],Ds[s][s],transport_conditions,cTot * _mixture().chem_mixture().M(s),k);
+       k = _conductivity.conductivity_with_diffusion( s,
+                                                      transport_conditions.T(),
+                                                      cTot * _mixture().chem_mixture().M(s),
+                                                      mu[s],
+                                                      Ds[s][s] );
+
         _diffusion.compute_diffusivity(_mixture.thermo_evaluator().cp(transport_conditions.temp_cache(),s), k, ds[s]); // \todo, solve this by KineticsConditions
      }
   }
@@ -242,7 +247,10 @@ namespace Antioch
         typename value_type<VectorStateType>::type  phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
         
         typename value_type<VectorStateType>::type  k_s = zero_clone(transport_conditions.T());
-        _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(transport_conditions.T()),transport_conditions, zero_clone(transport_conditions.T()), k_s); //\todo, better management
+
+        k_s =  _conductivity.conductivity_without_diffusion( s,
+                                                             transport_conditions.T(),
+                                                             mu[s] );
 
         k_mix += k_s*chi[s]/phi_s;
       }
@@ -278,7 +286,10 @@ namespace Antioch
         StateType phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
         
         StateType k_s = zero_clone(transport_conditions.T());
-        _conductivity.compute_thermal_conductivity( s, mu[s], zero_clone(transport_conditions.T()),transport_conditions, zero_clone(transport_conditions.T()), k_s); //\todo, better management
+
+        k_s =  _conductivity.conductivity_without_diffusion( s,
+                                                             transport_conditions.T(),
+                                                             mu[s] );
 
         mu_mix += mu[s]*chi[s]/phi_s;
         k_mix += k_s*chi[s]/phi_s;
@@ -313,7 +324,12 @@ namespace Antioch
     for(unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++)
     {
       _diffusion.compute_self_diffusion(s,transport_conditions,n_molar_mixture,Ds[s][s]);
-      _conductivity.compute_thermal_conductivity(s,mu[s],Ds[s][s],transport_conditions,n_molar_mixture * _mixture.chem_mixture().M(s),k[s]);
+
+      k[s] = _conductivity.conductivity_with_diffusion( s,
+                                                        transport_conditions.T(),
+                                                        n_molar_mixture * _mixture.chem_mixture().M(s),
+                                                        mu[s],
+                                                        Ds[s][s] );
     }
 
 // diffusion comes last
