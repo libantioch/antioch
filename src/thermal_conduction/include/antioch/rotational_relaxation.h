@@ -39,10 +39,10 @@ namespace Antioch
   class RotationalRelaxation
   {
       public:
-        RotationalRelaxation(const CoeffType & z_298, const CoeffType & eps_kb);
+        RotationalRelaxation( CoeffType z_298, CoeffType eps_kb);
         ~RotationalRelaxation(){};
 
-        void reset_coeffs(const CoeffType & rot, const CoeffType & depth);
+        void reset_coeffs( CoeffType rot, CoeffType depth);
 
         // \todo
         // cache _eps_kb / 298
@@ -77,7 +77,7 @@ namespace Antioch
   };
 
   template <typename CoeffType>
-  RotationalRelaxation<CoeffType>::RotationalRelaxation(const CoeffType & z_298, const CoeffType & eps_kb):
+  RotationalRelaxation<CoeffType>::RotationalRelaxation( CoeffType z_298, CoeffType eps_kb):
                 _z_298(z_298),
                 _eps_kb(eps_kb),
                 _one(1),
@@ -90,7 +90,7 @@ namespace Antioch
 
   template <typename CoeffType>
   inline
-  void RotationalRelaxation<CoeffType>::reset_coeffs(const CoeffType & rot, const CoeffType & depth)
+  void RotationalRelaxation<CoeffType>::reset_coeffs( CoeffType rot, CoeffType depth)
   {
      _z_298 = rot;
      _eps_kb = depth;
