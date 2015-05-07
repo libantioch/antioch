@@ -30,24 +30,24 @@
 
 namespace Antioch
 {
-  template<typename ThermoEvaluator, class CoeffType=double>
+  template<class CoeffType=double>
   class MixtureTransportBase
   {
   public:
 
-    MixtureTransportBase( const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture );
+    MixtureTransportBase( const TransportMixture<CoeffType>& transport_mixture );
 
     virtual ~MixtureTransportBase(){};
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
 
-    const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture() const;
+    const TransportMixture<CoeffType>& transport_mixture() const;
 
-    const TransportMixture<ThermoEvaluator,CoeffType>& mixture() const;
+    const TransportMixture<CoeffType>& mixture() const;
 
   protected:
 
-    const TransportMixture<ThermoEvaluator,CoeffType>& _transport_mixture;
+    const TransportMixture<CoeffType>& _transport_mixture;
 
   private:
 
@@ -55,28 +55,28 @@ namespace Antioch
 
   };
 
-  template<typename ThermoEvaluator, class CoeffType>
-  MixtureTransportBase<ThermoEvaluator,CoeffType>::MixtureTransportBase( const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture )
+  template<class CoeffType>
+  MixtureTransportBase<CoeffType>::MixtureTransportBase( const TransportMixture<CoeffType>& transport_mixture )
     : _transport_mixture(transport_mixture)
   {}
 
-  template<typename ThermoEvaluator, class CoeffType>
+  template<class CoeffType>
   inline
-  const ChemicalMixture<CoeffType>& MixtureTransportBase<ThermoEvaluator,CoeffType>::chemical_mixture() const
+  const ChemicalMixture<CoeffType>& MixtureTransportBase<CoeffType>::chemical_mixture() const
   {
     return _transport_mixture.chemical_mixture();
   }
 
-  template<typename ThermoEvaluator, class CoeffType>
+  template<class CoeffType>
   inline
-  const TransportMixture<ThermoEvaluator,CoeffType>& MixtureTransportBase<ThermoEvaluator,CoeffType>::transport_mixture() const
+  const TransportMixture<CoeffType>& MixtureTransportBase<CoeffType>::transport_mixture() const
   {
     return _transport_mixture;
   }
 
-  template<typename ThermoEvaluator, class CoeffType>
+  template<class CoeffType>
   inline
-  const TransportMixture<ThermoEvaluator,CoeffType>& MixtureTransportBase<ThermoEvaluator,CoeffType>::mixture() const
+  const TransportMixture<CoeffType>& MixtureTransportBase<CoeffType>::mixture() const
   {
     return _transport_mixture;
   }

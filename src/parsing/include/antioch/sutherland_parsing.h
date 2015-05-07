@@ -45,17 +45,17 @@ namespace Antioch
       MixtureViscosity versions
    */
 
-  template<typename ThermoEvaluator,class NumericType>
-  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
+  template<class NumericType>
+  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
 				   const std::string &filename);
 
-  template<typename ThermoEvaluator,class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu );
+  template<class NumericType>
+  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu );
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename ThermoEvaluator, class NumericType>
+  template<class NumericType>
   inline
-  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
+  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
 				   const std::string &filename)
   {
     std::ifstream in(filename.c_str());
@@ -100,8 +100,8 @@ namespace Antioch
     return;
   }
 
-  template<typename ThermoEvaluator,class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,ThermoEvaluator,NumericType >& mu )
+  template<class NumericType>
+  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu )
   {
     read_sutherland_data_ascii(mu, DefaultFilename::sutherland_data());
   }

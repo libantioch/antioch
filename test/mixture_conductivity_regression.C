@@ -44,10 +44,6 @@
 #include "antioch/sutherland_parsing.h"
 #include "antioch/kinetics_theory_viscosity_building.h"
 
-#include "antioch/nasa_mixture.h"
-#include "antioch/nasa_evaluator.h"
-#include "antioch/nasa_mixture_parsing.h"
-#include "antioch/thermo_handler.h"
 #include "antioch/stat_mech_thermo.h"
 
 template<typename Scalar>
@@ -87,36 +83,27 @@ int tester()
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
   typedef Antioch::StatMechThermodynamics<Scalar> MicroThermo;
-
   MicroThermo thermo_stat( chem_mixture );
 
-  Antioch::NASAThermoMixture<Scalar,Antioch::NASA9CurveFit<Scalar> > cea_mixture( chem_mixture );
-  Antioch::read_nasa_mixture_data( cea_mixture, Antioch::DefaultFilename::thermo_data(),Antioch::ASCII, true );
-  Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> > thermo_mix( cea_mixture );
+  Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  typedef Antioch::ThermoHandler<Scalar,Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> >, MicroThermo > Thermo;
-
-  Thermo thermo_handler(thermo_mix,thermo_stat);
-
-  Antioch::TransportMixture<Thermo,Scalar> tran_mixture( chem_mixture, thermo_handler );
-
-  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,Thermo,MicroThermo,Scalar>
+  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,MicroThermo,Scalar>
     e_k_mixture(tran_mixture);
 
-  Antioch::build_eucken_thermal_conductivity<MicroThermo,Thermo,Scalar>(e_k_mixture);
+  Antioch::build_eucken_thermal_conductivity<MicroThermo,Scalar>(e_k_mixture, thermo_stat);
 
-  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Thermo,Scalar>
+  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar>
     s_mu_mixture(tran_mixture);
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar>
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>
     b_mu_mixture(tran_mixture);
 
-  Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner>,Thermo,Scalar>
+  Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner>,Scalar>
     k_mu_mixture(tran_mixture);
 
-  Antioch::read_sutherland_data_ascii<Thermo,Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
-  Antioch::read_blottner_data_ascii<Thermo,Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
-  Antioch::build_kinetics_theory_viscosity<Scalar,Thermo>(k_mu_mixture);
+  Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
+  Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
+  Antioch::build_kinetics_theory_viscosity<Scalar>(k_mu_mixture);
 
   const Scalar T = 1500.1;
 

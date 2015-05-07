@@ -38,20 +38,21 @@
 namespace Antioch
 {
 
-  template <typename ThermoEvaluator, typename NumericType>
+  template <typename NumericType>
   class TransportMixture;
 
 // ----------------------------------------- //
 
-  template<class ThermoTC, class ThermoTran,class NumericType>
-  void build_kinetics_theory_thermal_conductivity(MixtureConductivity<KineticsTheoryThermalConductivity<ThermoTC,NumericType>,ThermoTran,ThermoTC,NumericType>& k )
+  template<class ThermoTC, class NumericType>
+  void build_kinetics_theory_thermal_conductivity(MixtureConductivity<KineticsTheoryThermalConductivity<ThermoTC,NumericType>,ThermoTC,NumericType>& k,
+                                                  const ThermoTC& thermo )
   {
     for(unsigned int s = 0; s < k.mixture().n_species(); s++)
        {
          std::vector<NumericType> coeffs(2);
          coeffs[0] = k.mixture().transport_species()[s]->rotational_relaxation();
          coeffs[1] = k.mixture().transport_species()[s]->LJ_depth();
-         k.add(s,coeffs,k.mixture().thermo().micro_thermo());
+         k.add(s,coeffs,thermo);
        }
   }
 

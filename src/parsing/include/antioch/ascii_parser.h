@@ -57,7 +57,7 @@ namespace Antioch
   template <class NumericType>
   class ChemicalMixture;
 
-  template <class ThermoEval,class NumericType>
+  template <class NumericType>
   class TransportMixture;
 
   template <typename NumericType, typename Macro,typename Micro>
@@ -125,52 +125,7 @@ namespace Antioch
 // transport, the thermo is explicit...
 
         //! reads the transport data, not valid in xml && chemkin
-        //  NASA7 + StatMech
-        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
-                                                                   NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
-                                                                   StatMechThermodynamics<NumericType> 
-                                                                 > ,
-                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
-
-        //! reads the transport data, not valid in xml && chemkin
-        //  NASA9 + StatMech
-        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
-                                                                   NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
-                                                                   StatMechThermodynamics<NumericType>
-                                                                 >,
-                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
-
-        //! reads the transport data, not valid in xml && chemkin
-        //  CEA + StatMech for backward compat
-        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
-                                                                   CEAEvaluator<NumericType>,
-                                                                   StatMechThermodynamics<NumericType> 
-                                                                 >,
-                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
-
-        //! reads the transport data, not valid in xml && chemkin
-        //  NASA7 + Ideal Gas
-        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
-                                                                   NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >,
-                                                                   IdealGasMicroThermo<NASAEvaluator<NumericType,NASA7CurveFit<NumericType> >, NumericType> 
-                                                                 >,
-                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
-
-        //! reads the transport data, not valid in xml && chemkin
-        //  NASA9 + Ideal Gas
-        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
-                                                                   NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >,
-                                                                   IdealGasMicroThermo<NASAEvaluator<NumericType,NASA9CurveFit<NumericType> >, NumericType> 
-                                                                 >,
-                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
-
-        //! reads the transport data, not valid in xml && chemkin
-        //  CEA + Ideal Gas for backward compat
-        void read_transport_data(TransportMixture< ThermoHandler < NumericType,
-                                                                   CEAEvaluator<NumericType>,
-                                                                   IdealGasMicroThermo<CEAEvaluator<NumericType>,NumericType>
-                                                                 >,
-                                                   NumericType > & transport_mixture) {this->read_transport_data_root(transport_mixture);}
+        void read_transport_data(TransportMixture<NumericType> & transport_mixture) {this->read_transport_data_root(transport_mixture);}
 
 
 ///////////////

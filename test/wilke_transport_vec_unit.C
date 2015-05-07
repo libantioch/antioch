@@ -154,14 +154,13 @@ int tester(const PairScalars& example, const std::string& testname)
 
   typedef Antioch::ThermoHandler<Scalar,ThermoMixType,ThermoType > Thermo;
 
-  Antioch::TransportMixture<Thermo,Scalar> tran_mixture( chem_mixture, thermo_handler );
+  Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
   Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,
-                               Thermo,
                                ThermoType,
                                Scalar> k( tran_mixture );
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar> mu( tran_mixture );
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> mu( tran_mixture );
   Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
   Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType > D( chem_mixture );
@@ -169,16 +168,15 @@ int tester(const PairScalars& example, const std::string& testname)
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
   typedef Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,
-                                       Thermo,
                                        ThermoType,
                                        Scalar> TCType;
-  typedef Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Thermo,Scalar>           VType;
+  typedef Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>           VType;
   typedef Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType >        DType;
 
 
-  Antioch::WilkeTransportMixture<Thermo,Scalar> wilke_mixture( tran_mixture );
+  Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  typedef Antioch::WilkeTransportMixture<Thermo,Scalar>  WilkeMixType;
+  typedef Antioch::WilkeTransportMixture<Scalar>  WilkeMixType;
 
   Antioch::WilkeTransportEvaluator< DType, VType, TCType, Thermo, WilkeMixType, Scalar > wilke( wilke_mixture, thermo_handler, D, mu, k );
 

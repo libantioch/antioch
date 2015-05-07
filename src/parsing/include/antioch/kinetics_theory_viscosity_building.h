@@ -38,16 +38,16 @@
 namespace Antioch
 {
 
-  template <typename Thermo, typename Scalar>
+  template <typename Scalar>
   class TransportMixture;
 
-  template<class NumericType, class ThermoEvaluator>
-  void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType>,ThermoEvaluator,NumericType >& mu);
+  template<class NumericType, class SplineType>
+  void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType,SplineType>,NumericType >& mu);
 
   // ----------------------------------------- //
 
-  template<class NumericType, class ThermoEvaluator>
-  void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType>,ThermoEvaluator,NumericType >& mu)
+  template<class NumericType, class SplineType>
+  void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType,SplineType>,NumericType >& mu)
   {
       for(unsigned int s = 0; s < mu.mixture().n_species(); s++)
       {

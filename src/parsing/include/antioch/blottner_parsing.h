@@ -42,17 +42,17 @@ namespace Antioch
 {
 
   /* These two methods use a ViscosityMixture object => deprecated */
-  template<typename ThermoEvaluator,class NumericType>
-  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
+  template<class NumericType>
+  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
 				 const std::string &filename );
 
-  template<typename ThermoEvaluator,class NumericType>
-  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu );
+  template<class NumericType>
+  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu );
 
   /* ------------------------- Inline Functions -------------------------*/
-  template<typename ThermoEvaluator,class NumericType>
+  template<class NumericType>
   inline
-  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu,
+  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
 				 const std::string &filename )
   {
     std::ifstream in(filename.c_str());
@@ -100,8 +100,8 @@ namespace Antioch
     return;
   }
 
-  template<typename ThermoEvaluator,class NumericType>
-  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,ThermoEvaluator,NumericType >& mu )
+  template<class NumericType>
+  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu )
   {
     read_blottner_data_ascii(mu, DefaultFilename::blottner_data());
   }

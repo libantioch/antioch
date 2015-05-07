@@ -41,16 +41,16 @@ namespace Antioch
   template <typename CoeffType>
   class TransportSpecies;
 
-  template <typename ThermoEvaluator,typename CoeffType>
+  template <typename CoeffType>
   class TransportMixture;
 
-  template<class NumericType, typename Interpolator, typename ThermoEvaluator>
-  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolator> , TransportMixture<ThermoEvaluator,NumericType> >& D);
+  template<class NumericType, typename Interpolator>
+  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolator> , TransportMixture<NumericType> >& D);
 
 // ----------------------------------------- //
 
-  template<typename NumericType, typename Interpolator, typename ThermoEvaluator>
-  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolator>, TransportMixture<ThermoEvaluator,NumericType> >& D)
+  template<typename NumericType, typename Interpolator>
+  void build_molecular_binary_diffusion( PhysicalSet<MolecularBinaryDiffusion<NumericType, Interpolator>, TransportMixture<NumericType> >& D)
   {
      for(unsigned int s = 0; s < D.mixture().n_species(); s++)
      {

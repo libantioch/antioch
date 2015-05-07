@@ -47,12 +47,12 @@ namespace Antioch
       computing the species viscosity. Total viscosity is computed by a mixing model,
       e.g. WilkeTransportMixture. This class is templated on the viscosity model,
       so an inherent assumption is that all species viscosities have the same model. */
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType=double>
-  class MixtureViscosity : public MixtureTransportBase<ThermoEvaluator,CoeffType>
+  template<typename Viscosity, class CoeffType=double>
+  class MixtureViscosity : public MixtureTransportBase<CoeffType>
   {
   public:
 
-    MixtureViscosity( const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture );
+    MixtureViscosity( const TransportMixture<CoeffType>& transport_mixture );
     ~MixtureViscosity();
 
     //! Evaluate viscosity for species s
@@ -90,14 +90,14 @@ namespace Antioch
 
   };
 
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::MixtureViscosity(  const TransportMixture<ThermoEvaluator,CoeffType>& transport_mixture )
-    :  MixtureTransportBase<ThermoEvaluator,CoeffType>(transport_mixture),
+  template<typename Viscosity, class CoeffType>
+  MixtureViscosity<Viscosity,CoeffType>::MixtureViscosity(  const TransportMixture<CoeffType>& transport_mixture )
+    :  MixtureTransportBase<CoeffType>(transport_mixture),
        _species_viscosities( transport_mixture.n_species(), NULL )
   {}
 
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::~MixtureViscosity()
+  template<typename Viscosity, class CoeffType>
+  MixtureViscosity<Viscosity,CoeffType>::~MixtureViscosity()
   {
     // Need to delete all the species viscosities we allocated
     for( typename std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*>::iterator it = _species_viscosities.begin();
@@ -105,11 +105,10 @@ namespace Antioch
       {
 	delete (*it);
       }
-    return;
   }
 
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  void MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::add( const std::string& species_name,
+  template<typename Viscosity, class CoeffType>
+  void MixtureViscosity<Viscosity,CoeffType>::add( const std::string& species_name,
 						   const std::vector<CoeffType>& coeffs )
   {
     antioch_assert( this->_transport_mixture.species_name_map().find(species_name) !=
@@ -124,17 +123,17 @@ namespace Antioch
     return;
   }
 
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  void MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::reset_coeffs( const unsigned int s,
+  template<typename Viscosity, class CoeffType>
+  void MixtureViscosity<Viscosity,CoeffType>::reset_coeffs( const unsigned int s,
                                                             const std::vector<CoeffType> coeffs )
   {
     _species_viscosities[s]->reset_coeffs(coeffs);
   }
 
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
+  template<typename Viscosity, class CoeffType>
   template<typename StateType>
   inline
-  StateType MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::operator()( const unsigned int s,
+  StateType MixtureViscosity<Viscosity,CoeffType>::operator()( const unsigned int s,
 							       const StateType& T ) const
   {
     antioch_assert_less_equal( s, _species_viscosities.size() );
@@ -143,15 +142,15 @@ namespace Antioch
     return (*_species_viscosities[s])(T);
   }
 
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
+  template<typename Viscosity, class CoeffType>
   inline
-  const std::vector<Viscosity*>& MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::species_viscosities() const
+  const std::vector<Viscosity*>& MixtureViscosity<Viscosity,CoeffType>::species_viscosities() const
   {
     return _species_viscosities;
   }
 
-  template<typename Viscosity, typename ThermoEvaluator, class CoeffType>
-  void MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::print(std::ostream& os) const
+  template<typename Viscosity, class CoeffType>
+  void MixtureViscosity<Viscosity,CoeffType>::print(std::ostream& os) const
   {
     antioch_assert_equal_to( _species_viscosities.size(), this->_transport_mixture.n_species() );
 

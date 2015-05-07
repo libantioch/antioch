@@ -38,19 +38,20 @@
 namespace Antioch
 {
   //forward declaration
-  template <typename ThermoEval, typename NumericType>
+  template <typename NumericType>
   class TransportMixture;
 
 // ----------------------------------------- //
 
-  template<class ThermoEucken, class ThermoTran, class NumericType>
-  void build_eucken_thermal_conductivity( MixtureConductivity<EuckenThermalConductivity<ThermoEucken>,ThermoTran,ThermoEucken,NumericType>& k)
+  template<class ThermoEucken, class NumericType>
+  void build_eucken_thermal_conductivity( MixtureConductivity<EuckenThermalConductivity<ThermoEucken>,ThermoEucken,NumericType>& k,
+                                          const ThermoEucken& thermo )
   {
     for(unsigned int s = 0; s < k.mixture().n_species(); s++)
        {
          // Eucken doesn't have any coefficients to cache so we provide a dummy vector
          std::vector<NumericType> dummy;
-         k.add(s,dummy,k.mixture().thermo().micro_thermo());
+         k.add(s,dummy,thermo);
        }
   }
 
