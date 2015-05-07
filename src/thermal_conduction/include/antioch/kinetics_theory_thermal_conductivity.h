@@ -160,7 +160,4 @@ namespace Antioch{
 
 } //end namespace Antioch
 
-#include "antioch/kinetics_theory_thermal_cond_utils_decl.h"
-#include "antioch/kinetics_theory_thermal_conductivity_utils.h"
-
 #endif

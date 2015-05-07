@@ -129,16 +129,6 @@ namespace Antioch
         template<typename StateType, typename VectorStateType>
         void compute_diffusivities(const StateType & rho, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds) const;
 
-        // thermal conduction one species
-        template<typename StateType, typename VectorStateType>
-        void compute_thermal_conductivity(unsigned int s, const StateType & mu, const StateType & dss, 
-                                          const KineticsConditions<StateType, VectorStateType> & conditions, const StateType & rho, StateType & k) const;
-
-        // thermal conduction full set
-        template<typename StateType, typename VectorStateType>
-        void compute_thermal_conductivities(const VectorStateType & mu, const VectorStateType & dss, 
-                                            const KineticsConditions<StateType, VectorStateType> & conditions, const StateType & rho, VectorStateType & k) const;
-
         void print(std::ostream & out = std::cout) const;
 
         friend std::ostream & operator<< (std::ostream & out, const PhysicalSet<Physics,Mixture> & physical_set )
@@ -279,26 +269,6 @@ namespace Antioch
   void PhysicalSet<Physics,Mixture>::compute_diffusivities(const StateType & rho, const VectorStateType & cp, const VectorStateType & k, VectorStateType & ds) const
   {
     physical_set_operator_diffusion(_set, rho, cp, k, ds, typename physical_tag<Physics>::diffusion_mixture_type());
-  }
-
-  // thermal conductivity one
-  template<typename Physics, typename Mixture>
-  template<typename StateType, typename VectorStateType>
-  inline
-  void PhysicalSet<Physics,Mixture>::compute_thermal_conductivity(unsigned int s, const StateType & mu, const StateType & dss, 
-                                                                  const KineticsConditions<StateType,VectorStateType> & conditions, const StateType & rho, StateType & k) const
-  {
-    physical_set_operator_thermal_conductivity(_set, s, mu, dss, conditions.T(), rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
-  }
-
-  // thermal conductivity full
-  template<typename Physics, typename Mixture>
-  template<typename StateType, typename VectorStateType>
-  inline
-  void PhysicalSet<Physics,Mixture>::compute_thermal_conductivities(const VectorStateType & mu, const VectorStateType & dss, 
-                                                                    const KineticsConditions<StateType,VectorStateType> & conditions, const StateType & rho, VectorStateType & k) const
-  {
-    physical_set_operator_thermal_conductivity(_set, mu, dss, conditions.T(), rho, k, typename physical_tag<Physics>::thermal_conductivity_type());
   }
 }
 

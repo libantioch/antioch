@@ -46,9 +46,11 @@
 #include "antioch/thermo_handler.h"
 //
 #include "antioch/eucken_thermal_conductivity.h"
+#include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/blottner_viscosity.h"
 #include "antioch/constant_lewis_diffusivity.h"
 #include "antioch/kinetics_theory_thermal_conductivity.h"
+#include "antioch/kinetics_theory_thermal_conductivity_building.h"
 #include "antioch/constant_lewis_diffusivity_utils.h"
 
 #ifdef ANTIOCH_HAVE_GSL

@@ -74,7 +74,6 @@ namespace Antioch
         // for operators, diffusion is special, see comment below
      typedef default_physical_tag diffusion_species_type;
      typedef default_physical_tag diffusion_mixture_type;
-     typedef default_physical_tag thermal_conductivity_type;
    };
 
    template <typename Model, typename Enable = void>
@@ -163,24 +162,6 @@ namespace Antioch
         Lewis. Thus they act differently, thus two tags
         as a strategy to disable.
      */
-
-    ///// thermal conduction
-
-        /// may or may not be used, though always
-        /// defined
-        /// should not be used in not concerned
-   template<typename Model, typename StateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, 
-                                                   const StateType & dss, const StateType & T, const StateType & rho,
-                                                   StateType & k,
-                                                    default_physical_tag);
-
-        /// this one may or may not be used
-        /// nothing is not needed
-   template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, 
-                                                   const VectorStateType & dss, const StateType & T, const StateType & rho, 
-                                                    default_physical_tag);
 
 
     ///// diffusion

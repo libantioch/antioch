@@ -127,20 +127,6 @@ namespace Antioch
 
 /// operators
 
-   /// thermal conduction
-   // keep it this way of void it?
-   template<typename Model, typename StateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, unsigned int s, const StateType & mu, const StateType & dss, const StateType & T, const StateType & rho, 
-                                                    StateType & k, default_physical_tag)
-   {}
-
-   // supposed to disappear and be optimized out if not needed
-   template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_thermal_conductivity(const Model & set, const VectorStateType & mu, 
-                                                   const VectorStateType & dss, const StateType & T, const StateType & rho, 
-                                                    default_physical_tag)
-   {}
-
 
    /// diffusion
 

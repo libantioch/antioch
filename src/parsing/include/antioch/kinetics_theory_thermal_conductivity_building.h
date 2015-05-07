@@ -28,7 +28,6 @@
 
 // Antioch
 #include "antioch/kinetics_theory_thermal_conductivity.h"
-#include "antioch/physical_set.h"
 #include "antioch/mixture_conductivity.h"
 
 // C++
@@ -42,24 +41,7 @@ namespace Antioch
   template <typename ThermoEvaluator, typename NumericType>
   class TransportMixture;
 
-
-  template<class ThermoTC, class ThermoTran, class NumericType>
-  void build_kinetics_theory_thermal_conductivity( PhysicalSet<KineticsTheoryThermalConductivity<ThermoTC,NumericType> , TransportMixture<ThermoTran,NumericType> >& k);
-
 // ----------------------------------------- //
-
-  template<class ThermoTC, class ThermoTran,class NumericType>
-  void build_kinetics_theory_thermal_conductivity( PhysicalSet<KineticsTheoryThermalConductivity<ThermoTC,NumericType>, TransportMixture<ThermoTran,NumericType> >& k)
-  {
-       for(unsigned int s = 0; s < k.mixture().n_species(); s++)
-       {
-           Initializer<KineticsTheoryThermalConductivity<ThermoTC,NumericType>, kinetics_theory_thermal_conductivity_tag >
-             init(k.mixture().thermo().micro_thermo(),
-                  k.mixture().transport_species()[s]->rotational_relaxation(),
-                  k.mixture().transport_species()[s]->LJ_depth());
-           k.add_model(k.mixture().species_inverse_name_map().at(s),init);
-       }
-  }
 
   template<class ThermoTC, class ThermoTran,class NumericType>
   void build_kinetics_theory_thermal_conductivity(MixtureConductivity<KineticsTheoryThermalConductivity<ThermoTC,NumericType>,ThermoTran,ThermoTC,NumericType>& k )

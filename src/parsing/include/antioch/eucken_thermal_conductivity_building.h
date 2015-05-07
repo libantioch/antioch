@@ -28,7 +28,6 @@
 
 // Antioch
 #include "antioch/eucken_thermal_conductivity.h"
-#include "antioch/physical_set.h"
 #include "antioch/mixture_conductivity.h"
 
 // C++
@@ -42,20 +41,7 @@ namespace Antioch
   template <typename ThermoEval, typename NumericType>
   class TransportMixture;
 
-  // backward compatibility
-  template<class ThermoEvaluator, class Mixture>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator> , Mixture>& /*k*/){}
-
-  template<class ThermoEucken,class ThermoTran, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEucken> , TransportMixture<ThermoTran,NumericType> >& k);
-
 // ----------------------------------------- //
-
-  template<class ThermoEucken,class ThermoTran, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEucken>, TransportMixture<ThermoTran,NumericType> >& k)
-  {
-    k.add_model(k.mixture().thermo().micro_thermo());
-  }
 
   template<class ThermoEucken, class ThermoTran, class NumericType>
   void build_eucken_thermal_conductivity( MixtureConductivity<EuckenThermalConductivity<ThermoEucken>,ThermoTran,ThermoEucken,NumericType>& k)
