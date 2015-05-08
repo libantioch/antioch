@@ -50,8 +50,8 @@ namespace Antioch{
         void reset_coeffs(const std::vector<CoeffType> & coeffs);
 
         template <typename StateType>
-        const ANTIOCH_AUTO(StateType) 
-                operator()(unsigned int s, const StateType& mu, const StateType & T, const StateType & rho, const StateType & Dss) const;
+        const ANTIOCH_AUTO(StateType)
+                operator()(unsigned int s, const StateType& mu_s, const StateType & T, const StateType & rho_s, const StateType & Dss) const;
 
         template <typename StateType>
         ANTIOCH_AUTO(StateType)
@@ -147,14 +147,14 @@ namespace Antioch{
   template <typename ThermoEvaluator, typename CoeffType>
   template <typename StateType>
   inline
-  const ANTIOCH_AUTO(StateType) 
-        KineticsTheoryThermalConductivity<ThermoEvaluator,CoeffType>::operator()(const unsigned int s, const StateType& mu, const StateType & T, const StateType & rho, const StateType & Dss) const
+  const ANTIOCH_AUTO(StateType)
+        KineticsTheoryThermalConductivity<ThermoEvaluator,CoeffType>::operator()(const unsigned int s, const StateType& mu_s, const StateType & T, const StateType & rho_s, const StateType & Dss) const
   {
-      StateType rho_d_m = rho * Dss / mu; // only once instead of twice
+      StateType rho_d_m = rho_s * Dss / mu_s; // only once instead of twice
       StateType A_B = two_over_pi * this->A(rho_d_m) / this->B(s, T, rho_d_m);
 
-      return ( mu  * _thermo.cv_trans(s) * five_over_two * (one - _thermo.cv_rot_over_R(s) / _thermo.cv_trans_over_R(s) * A_B) +
-               rho * Dss  * ( _thermo.cv_rot(s) * (one + A_B) +
+      return ( mu_s  * _thermo.cv_trans(s) * five_over_two * (one - _thermo.cv_rot_over_R(s) / _thermo.cv_trans_over_R(s) * A_B) +
+               rho_s * Dss  * ( _thermo.cv_rot(s) * (one + A_B) +
                               _thermo.cv_vib(s,T) ) );
   }
 
