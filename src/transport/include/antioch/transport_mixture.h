@@ -100,6 +100,8 @@ namespace Antioch
 
     const std::vector<TransportSpecies<CoeffType>*>& transport_species() const;
 
+    const TransportSpecies<CoeffType>& transport_species( unsigned int s ) const;
+
   protected:
 
     const ChemicalMixture<CoeffType>        & _chemical_mixture;
@@ -154,6 +156,16 @@ namespace Antioch
   const std::vector<TransportSpecies<CoeffType>*>& TransportMixture<CoeffType>::transport_species() const
   {
     return _transport_species;
+  }
+
+  template<typename CoeffType>
+  inline
+  const TransportSpecies<CoeffType>& TransportMixture<CoeffType>::transport_species(unsigned int s) const
+  {
+    antioch_assert_less(s,_transport_species.size());
+    antioch_assert(_transport_species[s]);
+
+    return (*_transport_species[s]);
   }
 
   template<typename CoeffType>
