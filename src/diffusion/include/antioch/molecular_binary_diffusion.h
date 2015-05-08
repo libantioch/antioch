@@ -111,8 +111,8 @@ namespace Antioch{
           template <typename StateType>
           const 
           ANTIOCH_AUTO(StateType)
-          operator()(const StateType & T, const StateType & cTot) const
-          ANTIOCH_AUTOFUNC(StateType, this->binary_diffusion(T, cTot))
+          operator()(const StateType & T, const StateType & molar_density) const
+          ANTIOCH_AUTOFUNC(StateType, this->binary_diffusion(T, molar_density))
 
           template <typename StateType>
           const
@@ -122,10 +122,10 @@ namespace Antioch{
 
           //! \return molecular binary diffusion coefficient
           template <typename StateType>
-          const 
-          ANTIOCH_AUTO(StateType) 
-                binary_diffusion(const StateType & T, const StateType & cTot) const
-          ANTIOCH_AUTOFUNC(StateType,_coefficient * _interp.interpolated_value(T) / cTot )
+          const
+          ANTIOCH_AUTO(StateType)
+                binary_diffusion(const StateType & T, const StateType & molar_density) const
+          ANTIOCH_AUTOFUNC(StateType,_coefficient * _interp.interpolated_value(T) / molar_density )
 
            //!
           const CoeffType & reduced_dipole_moment() const;
