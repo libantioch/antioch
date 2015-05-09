@@ -119,6 +119,15 @@ namespace Antioch
 
   protected:
 
+    //! Compute species diffusion coefficients
+    /*! Uses Wilke mixing rule to compute species diffusion coefficients, D_vec,
+        based on the given binary diffusion matrix, D_mat. */
+    template <typename VectorStateType, typename MatrixStateType>
+    void diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
+                                const VectorStateType & mass_fractions,
+                                const MatrixStateType & D_mat,
+                                VectorStateType & D_vec ) const;
+
     const Mixture& _mixture;
 
     const ThermoEvaluator& _thermo;
@@ -473,6 +482,46 @@ namespace Antioch
     }
   }
  }
+
+  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template <typename VectorStateType, typename MatrixStateType>
+  void WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
+                                                                                                 const VectorStateType & mass_fractions,
+                                                                                                 const MatrixStateType & D_mat,
+                                                                                                 VectorStateType & D_vec ) const
+  {
+    antioch_assert_equal_to(D_vec.size(),mixture.n_species());
+    antioch_assert_equal_to(D_vec.size(),mass_fractions.size());
+    antioch_assert_equal_to(D_vec.size(),D_mat.size());
+
+#ifndef NDEBUG
+    // D_Mat should be square
+    for(unsigned int s = 0; s < D_vec.size(); s++)
+      antioch_assert_equal_to(D_vec.size(),D_mat[s].size());
+#endif
+
+    VectorStateType molar_fractions = zero_clone(mass_fractions);
+
+    mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
+
+    // D_s = (1 - Y_s) / (sum_{j \neq s} x_j/D_{s,j})
+    for(unsigned int s = 0; s < D_vec.size(); s++)
+      {
+        D_vec[s] = constant_clone(mass_fractions[s],1) - mass_fractions[s];
+
+        typename value_type<VectorStateType>::type denom = zero_clone(mass_fractions[0]);
+
+        for(unsigned int j = 0; j < D_vec.size(); j++)
+          {
+            if(j == s)
+              continue;
+
+            denom += molar_fractions[j] / D_mat[s][j];
+          }
+
+        D_vec[s] /= denom;
+      }
+  }
 
 } // end namespace Antioch
 
