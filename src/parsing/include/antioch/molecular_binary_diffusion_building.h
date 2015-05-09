@@ -29,6 +29,7 @@
 // Antioch
 #include "antioch/molecular_binary_diffusion.h"
 #include "antioch/physical_set.h"
+#include "antioch/mixture_binary_diffusion.h"
 
 // C++
 #include <iostream>
@@ -60,6 +61,20 @@ namespace Antioch
                 init(j,*(D.mixture().transport_species()[s]), *(D.mixture().transport_species()[j]));
 
            D.add_model(D.mixture().species_inverse_name_map().at(s),init);
+        }
+     }
+  }
+
+  template<typename NumericType, typename Interpolator>
+  void build_molecular_binary_diffusion( MixtureBinaryDiffusion<MolecularBinaryDiffusion<NumericType,Interpolator>,NumericType>& D )
+  {
+    for(unsigned int i = 0; i < D.mixture().n_species(); i++)
+     {
+        for (unsigned int j = 0; j < D.mixture().n_species(); j++)
+        {
+           D.add( i, j,
+                  D.mixture().transport_species(i),
+                  D.mixture().transport_species(j) );
         }
      }
   }
