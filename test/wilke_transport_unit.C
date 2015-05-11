@@ -65,13 +65,14 @@
 //
 #include "antioch/physical_set.h"
 #include "antioch/wilke_mixture.h"  // backward compatiblity
-#include "antioch/wilke_evaluator.h"  // backward compatiblity
+//#include "antioch/wilke_evaluator.h"  // backward compatiblity
 #include "antioch/wilke_transport_mixture.h"
 #include "antioch/wilke_transport_evaluator.h"
 
 #include "antioch/blottner_parsing.h"
 #include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/constant_lewis_diffusivity_building.h"
+#include "antioch/molecular_binary_diffusion_building.h"
 
 #include "antioch/physics_metaprogramming.h"
 
@@ -134,8 +135,6 @@ int tester()
 
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  typedef Antioch::TransportMixture<Scalar>  TranMix;
-
 //
   Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
                                MicroThermo,
@@ -154,8 +153,10 @@ int tester()
     ps_mu(tran_mixture);
   Antioch::build_kinetics_theory_viscosity<Scalar,Antioch::GSLSpliner>(ps_mu);
 
-  Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >,
-                       TranMix > bimol_D( tran_mixture );
+  Antioch::MixtureBinaryDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,Scalar>
+    bimol_D( tran_mixture );
+  Antioch::build_molecular_binary_diffusion<Scalar,Antioch::GSLSpliner>(bimol_D);
+
 #endif
 
   Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
@@ -174,21 +175,24 @@ int tester()
 // non kinetics theory
   Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  Antioch::WilkeTransportEvaluator< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >, // Diffusion
-                           Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>, // Viscosity
+  /*
+  Antioch::WilkeTransportEvaluator< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
+                           Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>,
                            Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
                                                         MicroThermo,
-                                                        Scalar>,                   /* Thermal conduction */
-                           Thermo, /* ThermoEvaluator */
-                           Antioch::WilkeTransportMixture<Scalar>,              /*  mixture*/
-                           Scalar                                                         // type
+                                                        Scalar>,
+                           Thermo,
+                           Antioch::WilkeTransportMixture<Scalar>,
+                           Scalar
                            > wilke( wilke_mixture, thermo_handler, D, mu, k );
+
+*/
 
 // kinetics theory full
 #ifdef ANTIOCH_HAVE_GSL
 
-  Antioch::WilkeTransportEvaluator< Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar, Antioch::GSLSpliner >,
-                                                         TranMix >,
+  Antioch::WilkeTransportEvaluator< Antioch::MixtureBinaryDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
+                                                                    Scalar>,
                                     Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
                                                               Scalar >,
                                     Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
@@ -198,18 +202,6 @@ int tester()
                                     Antioch::WilkeTransportMixture<Scalar>,
                                     Scalar>
                        wilke_ps_evaluator(wilke_mixture,thermo_handler,bimol_D,ps_mu,ps_k);
-
-#else //only thermal conduction then
-
-  Antioch::WilkeTransportEvaluator< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
-                                    Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>,
-                                    Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                                                                 MicroThermo,
-                                                                 Scalar>,
-                                    Thermo,
-                                    Antioch::WilkeTransportMixture<Scalar>,
-                                    Scalar>
-        wilke_ps_evaluator(wilke_mixture,D,mu,ps_k);
 
 #endif
 
@@ -250,14 +242,14 @@ int tester()
     Antioch::init_constant(mu_mu_sqrt,mu);
     Antioch::set_zero(mu_mu_sqrt);
 
-    wilke.compute_mu_mu_sqrt( mu, mu_mu_sqrt);
-    phi_N = wilke.compute_phi( mu_mu_sqrt, chi, N_index );
+    //wilke.compute_mu_mu_sqrt( mu, mu_mu_sqrt);
+    //phi_N = wilke.compute_phi( mu_mu_sqrt, chi, N_index );
 
-    return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
+    //return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
-  
 
-  std::vector<Scalar> mass_fractions( 5, 0.2L); 
+
+  std::vector<Scalar> mass_fractions( 5, 0.2L);
 
   // Currently dummy
   //const Scalar mu_exact = ;
@@ -267,10 +259,10 @@ int tester()
   const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
   const Scalar rho = P/(R_mix*T); // kg.m-3
 
-  Scalar wilke_mu = wilke.mu(T, mass_fractions );
-  Scalar wilke_k = wilke.k(T, mass_fractions );
-  
-  wilke.mu_and_k(T,mass_fractions,wilke_mu,wilke_k);
+  //Scalar wilke_mu = wilke.mu(T, mass_fractions );
+  //Scalar wilke_k = wilke.k(T, mass_fractions );
+
+  //wilke.mu_and_k(T,mass_fractions,wilke_mu,wilke_k);
 
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );
@@ -300,7 +292,7 @@ int tester()
   std::vector<Scalar> D_kt(5,0);
   wilke_ps_evaluator.mu_and_k_and_D( T, rho, mass_fractions, mu_kt, k_kt, D_kt );
 
-  
+
   return_flag = test_val( mu_kt, mu_long_double, tol, "kinetics theory viscosity") || return_flag;
   return_flag = test_val( k_kt, k_long_double, tol, "kinetics theory thermal conduction") || return_flag;
   for(unsigned int s = 0; s < D_kt.size(); s++)
