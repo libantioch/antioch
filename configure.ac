@@ -158,9 +158,11 @@ AC_ARG_ENABLE(cxx11,
 if (test x$enablecxx11 = xyes); then
   AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
   AX_CXX_AUTO_THIS(optional)
+  AX_CXX_STATIC_ASSERT(optional)
 elif (test x$enablecxx11 = xoptional); then
   AX_CXX_COMPILE_STDCXX_11(noext, optional)
   AX_CXX_AUTO_THIS(optional)
+  AX_CXX_STATIC_ASSERT(optional)
 fi
 
 
