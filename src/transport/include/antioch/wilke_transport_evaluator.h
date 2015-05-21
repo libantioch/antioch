@@ -37,6 +37,7 @@
 #include "antioch/kinetics_conditions.h"
 #include "antioch/wilke_mixture.h"
 #include "antioch/cmath_shims.h"
+#include "antioch/diffusion_traits.h"
 
 namespace Antioch
 {
@@ -161,6 +162,11 @@ namespace Antioch
                                                                                 const VectorStateType& mass_fractions,
                                                                                 VectorStateType & D_vec) const
   {
+#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
+    static_assert( !DiffusionTraits<typename Diff::Type,CoeffType>::requires_conductivity,
+                   "This function requires thermal conductivity to compute D!" );
+#endif
+
     typename rebind<VectorStateType,VectorStateType>::type D_mat(D_vec.size());
     init_constant(D_mat,D_vec);
 
@@ -287,14 +293,14 @@ namespace Antioch
     return;
   }
 
-  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class Diff, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
   template <typename Conditions, typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::mu_and_k_and_D( const Conditions& conditions,
-                                                                                          const StateType & rho,
-                                                                                          const VectorStateType& mass_fractions,
-                                                                                          StateType& mu_mix,
-                                                                                          StateType& k_mix,
-                                                                                          VectorStateType & D_vec ) const
+  void WilkeTransportEvaluator<Diff,V,TC,ThermoEvaluator,Mixture,CoeffType>::mu_and_k_and_D( const Conditions& conditions,
+                                                                                             const StateType & rho,
+                                                                                             const VectorStateType& mass_fractions,
+                                                                                             StateType& mu_mix,
+                                                                                             StateType& k_mix,
+                                                                                             VectorStateType & D_vec ) const
   {
 
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
@@ -316,18 +322,22 @@ namespace Antioch
     MatrixStateType D_mat(mass_fractions.size());
     init_constant(D_mat,D_vec);
 
-    const StateType molar_density = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
-
-    _diffusion.compute_binary_diffusion_matrix(transport_conditions.T(), molar_density, D_mat);
 
     this->compute_mu_chi( transport_conditions, mass_fractions, mu, chi );
 
     this->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
 
-    this->diffusion_mixing_rule<VectorStateType,MatrixStateType>( _mixture.chem_mixture(),
-                                                                  mass_fractions,
-                                                                  D_mat,
-                                                                  D_vec );
+    const StateType molar_density = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
+
+    if( !DiffusionTraits<typename Diff::Type,CoeffType>::requires_conductivity )
+      {
+        _diffusion.compute_binary_diffusion_matrix(transport_conditions.T(), molar_density, D_mat);
+
+        this->diffusion_mixing_rule<VectorStateType,MatrixStateType>( _mixture.chem_mixture(),
+                                                                      mass_fractions,
+                                                                      D_mat,
+                                                                      D_vec );
+      }
 
     /*
     for(unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++)
