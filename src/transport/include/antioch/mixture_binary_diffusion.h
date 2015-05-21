@@ -60,6 +60,9 @@ namespace Antioch
     template<typename StateType, typename MatrixStateType>
     void compute_binary_diffusion_matrix( const StateType& T, const StateType& molar_density, MatrixStateType& D ) const;
 
+    //! Define the diffusion model
+    typedef Diffusion Type;
+
   protected:
 
     //! Stores binary diffusion model for all species pairs
