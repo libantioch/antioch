@@ -37,13 +37,15 @@ namespace Antioch
   template<typename CoeffType>
   struct DiffusionTraits<ConstantLewisDiffusivity<CoeffType>,CoeffType>
   {
-    static bool const requires_conductivity = true;
+    static bool const is_species_diffusion = true;
+    static bool const is_binary_diffusion = false;
   };
 
   template<typename CoeffType>
   struct DiffusionTraits<MolecularBinaryDiffusion<CoeffType>,CoeffType>
   {
-    static bool const requires_conductivity = false;
+    static bool const is_species_diffusion = false;
+    static bool const is_binary_diffusion = true;
   };
 
 } // end namespace Antioch

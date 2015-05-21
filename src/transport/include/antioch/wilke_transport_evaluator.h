@@ -163,8 +163,8 @@ namespace Antioch
                                                                                 VectorStateType & D_vec) const
   {
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-    static_assert( !DiffusionTraits<typename Diff::Type,CoeffType>::requires_conductivity,
-                   "This function requires thermal conductivity to compute D!" );
+    static_assert( !DiffusionTraits<typename Diff::Type,CoeffType>::is_binary_diffusion,
+                   "This function requires a binary diffusion model to compute D!" );
 #endif
 
     typename rebind<VectorStateType,VectorStateType>::type D_mat(D_vec.size());
@@ -329,7 +329,8 @@ namespace Antioch
 
     const StateType molar_density = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
 
-    if( !DiffusionTraits<typename Diff::Type,CoeffType>::requires_conductivity )
+    // If we're using a binary diffusion model, compute D_mat, D_vec now
+    if( DiffusionTraits<typename Diff::Type,CoeffType>::is_binary_diffusion )
       {
         _diffusion.compute_binary_diffusion_matrix(transport_conditions.T(), molar_density, D_mat);
 
