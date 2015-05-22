@@ -98,6 +98,11 @@ namespace Antioch
     :  MixtureDiffusionBase<MixtureBinaryDiffusion<Diffusion,CoeffType>,CoeffType>(transport_mixture),
     _binary_diffusivities( transport_mixture.n_species() )
   {
+#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
+    static_assert( DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion,
+                   "Can only instantiate MixtureBinaryDiffusion with a binary diffusion model!" );
+#endif
+
     // Finish allocating space for binary diffusion coeffient objects
     for( unsigned int s = 0; s < transport_mixture.n_species(); s++ )
       _binary_diffusivities[s].resize( transport_mixture.n_species(), NULL );
