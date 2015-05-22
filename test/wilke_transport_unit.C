@@ -171,7 +171,6 @@ int tester()
                                     Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
                                                                  MicroThermo,
                                                                  Scalar>,
-                                    Antioch::WilkeTransportMixture<Scalar>,
                                     Scalar>
     wilke( wilke_mixture, D, mu, k );
 
@@ -186,7 +185,6 @@ int tester()
                                     Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
                                                                  MicroThermo,
                                                                  Scalar>,
-                                    Antioch::WilkeTransportMixture<Scalar>,
                                     Scalar>
                        wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);
 

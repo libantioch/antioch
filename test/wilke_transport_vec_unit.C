@@ -165,9 +165,7 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  typedef Antioch::WilkeTransportMixture<Scalar>  WilkeMixType;
-
-  Antioch::WilkeTransportEvaluator< DType, VType, TCType, WilkeMixType, Scalar >
+  Antioch::WilkeTransportEvaluator< DType, VType, TCType, Scalar >
     wilke( wilke_mixture, D, mu, k );
 
   int return_flag = 0;
