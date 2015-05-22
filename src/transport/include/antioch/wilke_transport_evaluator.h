@@ -85,9 +85,9 @@ namespace Antioch
 
     //! mixture level thermal conduction, viscosity (one value) and diffusion (array of values)
     template <typename Conditions, typename StateType, typename VectorStateType>
-    void mu_and_k_and_D( const Conditions& conditions, const StateType & rho,
+    void mu_and_k_and_D( const Conditions& conditions, const StateType& rho, const StateType& cp,
                          const VectorStateType& mass_fractions,
-                         StateType& mu, StateType& k, VectorStateType & D_vec ) const;
+                         StateType& mu, StateType& k, VectorStateType& D_vec ) const;
 
     //! Helper function to reduce code duplication.
     /*! Populates species viscosities and the intermediate \chi variable
@@ -296,6 +296,7 @@ namespace Antioch
   template <typename Conditions, typename StateType, typename VectorStateType>
   void WilkeTransportEvaluator<Diff,V,TC,ThermoEvaluator,Mixture,CoeffType>::mu_and_k_and_D( const Conditions& conditions,
                                                                                              const StateType & rho,
+                                                                                             const StateType& cp,
                                                                                              const VectorStateType& mass_fractions,
                                                                                              StateType& mu_mix,
                                                                                              StateType& k_mix,
@@ -360,8 +361,8 @@ namespace Antioch
           {
             _diffusion.compute_species_diffusivity(s,
                                                    rho,
-                                                   _thermo.cp(transport_conditions.temp_cache(),s),
-                                                   k[s],
+                                                   cp,
+                                                   k_mix,
                                                    D_vec[s]);
           }
       }

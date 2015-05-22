@@ -250,10 +250,11 @@ int tester()
   //const Scalar mu_exact = ;
 
   const Scalar T = 1000.0L;
+  const Antioch::TempCache<Scalar> T_cache(T);
   const Scalar P = 1e5;
   const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
   const Scalar rho = P/(R_mix*T); // kg.m-3
-
+  const Scalar cp = thermo_mix.cp( T_cache, mass_fractions );
   Scalar wilke_mu = wilke.mu(T, mass_fractions );
   Scalar wilke_k = wilke.k(T, mass_fractions );
 
@@ -285,7 +286,7 @@ int tester()
   D_long_double[4] = 1.90508644119203653519e-04L;
   Scalar mu_kt, k_kt;
   std::vector<Scalar> D_kt(5,0);
-  wilke_ps_evaluator.mu_and_k_and_D( T, rho, mass_fractions, mu_kt, k_kt, D_kt );
+  wilke_ps_evaluator.mu_and_k_and_D( T, rho, cp, mass_fractions, mu_kt, k_kt, D_kt );
 
 
   return_flag = test_val( mu_kt, mu_long_double, tol, "kinetics theory viscosity") || return_flag;
