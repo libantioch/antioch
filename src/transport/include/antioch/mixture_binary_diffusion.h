@@ -95,17 +95,28 @@ namespace Antioch
 
   template<typename Diffusion, class CoeffType>
   MixtureBinaryDiffusion<Diffusion,CoeffType>::MixtureBinaryDiffusion( const TransportMixture<CoeffType>& transport_mixture )
-    :  MixtureDiffusionBase<MixtureBinaryDiffusion<Diffusion,CoeffType>,CoeffType>(transport_mixture),
-    _binary_diffusivities( transport_mixture.n_species() )
+    :  MixtureDiffusionBase<MixtureBinaryDiffusion<Diffusion,CoeffType>,CoeffType>(transport_mixture)
   {
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
     static_assert( DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion,
                    "Can only instantiate MixtureBinaryDiffusion with a binary diffusion model!" );
 #endif
 
-    // Finish allocating space for binary diffusion coeffient objects
-    for( unsigned int s = 0; s < transport_mixture.n_species(); s++ )
-      _binary_diffusivities[s].resize( transport_mixture.n_species(), NULL );
+    // Build up binary diffusion species models
+    _binary_diffusivities.resize( transport_mixture.n_species() );
+    for( unsigned int i = 0; i < transport_mixture.n_species(); i++ )
+      {
+        _binary_diffusivities[i].resize( transport_mixture.n_species(), NULL );
+
+        for (unsigned int j = 0; j < transport_mixture.n_species(); j++)
+          {
+            const TransportSpecies<CoeffType>& s_i = transport_mixture.transport_species(i);
+            const TransportSpecies<CoeffType>& s_j = transport_mixture.transport_species(j);
+
+            _binary_diffusivities[i][j] = new Diffusion( s_i, s_j );
+          }
+      }
+
   }
 
   template<typename Diffusion, class CoeffType>

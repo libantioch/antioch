@@ -143,7 +143,6 @@ int tester()
 
   Antioch::MixtureBinaryDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,Scalar>
     bimol_D( tran_mixture );
-  Antioch::build_molecular_binary_diffusion<Scalar,Antioch::GSLSpliner>(bimol_D);
 
 #endif
 
