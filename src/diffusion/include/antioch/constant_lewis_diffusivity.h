@@ -31,6 +31,10 @@
 #ifndef ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
 #define ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
 
+//C++
+#include <vector>
+
+// Antioch
 #include "antioch/metaprogramming_decl.h" // ANTIOCH_AUTO*
 
 namespace Antioch
@@ -42,13 +46,16 @@ namespace Antioch
   protected:
 
     CoeffType _Le;
-    
+
   public:
-    
+
     ConstantLewisDiffusivity( const CoeffType Le ) : _Le(Le) {}
 
-    ~ConstantLewisDiffusivity() {}
-    
+    ConstantLewisDiffusivity( const std::vector<CoeffType>& coeffs ) : _Le(coeffs[0])
+    { antioch_assert_equal_to( coeffs.size(), 1 ); }
+
+    ~ConstantLewisDiffusivity(){}
+
     template<typename StateType>
     ANTIOCH_AUTO(StateType)
     D( const StateType& rho, const StateType& cp, const StateType& k ) const
