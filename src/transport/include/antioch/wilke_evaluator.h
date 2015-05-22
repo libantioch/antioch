@@ -36,8 +36,6 @@
 #include "antioch/wilke_mixture.h"
 #include "antioch/mixture_viscosity.h"
 #include "antioch/wilke_transport_evaluator.h"
-#include "antioch/physics_placeholder.h"
-#include "antioch/physical_set.h"
 #include "antioch/antioch_asserts.h"
 
 namespace Antioch

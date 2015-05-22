@@ -33,7 +33,6 @@
 
 // Antioch
 #include "antioch/metaprogramming.h"
-#include "antioch/physics_metaprogramming_decl.h"
 #include "antioch/kinetics_conditions.h"
 #include "antioch/wilke_mixture.h"
 #include "antioch/cmath_shims.h"

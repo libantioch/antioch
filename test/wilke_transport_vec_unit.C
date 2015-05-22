@@ -65,15 +65,10 @@
 #include "antioch/blottner_viscosity.h"
 #include "antioch/mixture_viscosity.h"
 #include "antioch/constant_lewis_diffusivity.h"
-#include "antioch/constant_lewis_diffusivity_utils.h"
 #include "antioch/mixture_binary_diffusion.h"
 #include "antioch/mixture_species_diffusion.h"
 
-#include "antioch/physical_set.h"
-#include "antioch/physics_metaprogramming.h"
-
 #include "antioch/wilke_mixture.h"
-#include "antioch/wilke_evaluator.h"
 #include "antioch/wilke_transport_mixture.h"
 #include "antioch/wilke_transport_evaluator.h"
 #include "antioch/blottner_parsing.h"

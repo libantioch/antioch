@@ -51,7 +51,6 @@
 #include "antioch/constant_lewis_diffusivity.h"
 #include "antioch/kinetics_theory_thermal_conductivity.h"
 #include "antioch/kinetics_theory_thermal_conductivity_building.h"
-#include "antioch/constant_lewis_diffusivity_utils.h"
 
 #ifdef ANTIOCH_HAVE_GSL
 
@@ -63,7 +62,6 @@
 
 #endif
 //
-#include "antioch/physical_set.h"
 #include "antioch/wilke_mixture.h"  // backward compatiblity
 //#include "antioch/wilke_evaluator.h"  // backward compatiblity
 #include "antioch/wilke_transport_mixture.h"
@@ -73,8 +71,6 @@
 #include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/constant_lewis_diffusivity_building.h"
 #include "antioch/molecular_binary_diffusion_building.h"
-
-#include "antioch/physics_metaprogramming.h"
 
 #include "antioch/vector_utils.h"
 

@@ -41,18 +41,6 @@ namespace Antioch
   template <typename NumericType>
   class ChemicalMixture;
 
-
-  template<class NumericType>
-  void build_constant_lewis_diffusivity( PhysicalSet<ConstantLewisDiffusivity<NumericType> , ChemicalMixture<NumericType> >& D, const  NumericType & Le);
-
-// ----------------------------------------- //
-
-  template<class NumericType>
-  void build_constant_lewis_diffusivity( PhysicalSet<ConstantLewisDiffusivity<NumericType>, ChemicalMixture<NumericType> >& D, const NumericType & Le)
-  {
-          D.set() = new ConstantLewisDiffusivity<NumericType>(Le);
-  }
-
   template<class NumericType>
   void build_constant_lewis_diffusivity( MixtureSpeciesDiffusion<ConstantLewisDiffusivity<NumericType>,NumericType>& D, const NumericType Le )
   {

@@ -65,7 +65,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#include "antioch/constant_lewis_diffusivity_utils_decl.h"
-#include "antioch/constant_lewis_diffusivity_utils.h"
-
 #endif // ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
