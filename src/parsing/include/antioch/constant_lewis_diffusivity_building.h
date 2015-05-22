@@ -28,11 +28,11 @@
 
 // Antioch
 #include "antioch/constant_lewis_diffusivity.h"
+#include "antioch/mixture_species_diffusion.h"
 
 // C++
 #include <iostream>
 #include <vector>
-
 
 namespace Antioch
 {
@@ -51,6 +51,26 @@ namespace Antioch
   void build_constant_lewis_diffusivity( PhysicalSet<ConstantLewisDiffusivity<NumericType>, ChemicalMixture<NumericType> >& D, const NumericType & Le)
   {
           D.set() = new ConstantLewisDiffusivity<NumericType>(Le);
+  }
+
+  template<class NumericType>
+  void build_constant_lewis_diffusivity( MixtureSpeciesDiffusion<ConstantLewisDiffusivity<NumericType>,NumericType>& D, const NumericType Le )
+  {
+    std::vector<NumericType> coeffs(1, Le);
+    for(unsigned int s = 0; s < D.mixture().n_species(); s++)
+      {
+        D.add(s,coeffs);
+      }
+  }
+
+  template<class NumericType>
+  void build_constant_lewis_diffusivity( MixtureSpeciesDiffusion<ConstantLewisDiffusivity<NumericType>,NumericType>& D, const std::vector<NumericType>& Le )
+  {
+    for(unsigned int s = 0; s < D.mixture().n_species(); s++)
+      {
+        std::vector<NumericType> coeffs(1, Le[s]);
+        D.add(s,coeffs);
+      }
   }
 
 }
