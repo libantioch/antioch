@@ -43,9 +43,9 @@ namespace Antioch
 
 // ----------------------------------------- //
 
-  template<class ThermoTC, class NumericType>
-  void build_kinetics_theory_thermal_conductivity(MixtureConductivity<KineticsTheoryThermalConductivity<ThermoTC,NumericType>,ThermoTC,NumericType>& k,
-                                                  const ThermoTC& thermo )
+  template<class MicroThermo, class NumericType>
+  void build_kinetics_theory_thermal_conductivity(MixtureConductivity<KineticsTheoryThermalConductivity<MicroThermo,NumericType>,NumericType>& k,
+                                                  const MicroThermo& thermo )
   {
     for(unsigned int s = 0; s < k.mixture().n_species(); s++)
        {

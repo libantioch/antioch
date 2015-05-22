@@ -37,15 +37,9 @@
 
 namespace Antioch
 {
-  //forward declaration
-  template <typename NumericType>
-  class TransportMixture;
-
-// ----------------------------------------- //
-
-  template<class ThermoEucken, class NumericType>
-  void build_eucken_thermal_conductivity( MixtureConductivity<EuckenThermalConductivity<ThermoEucken>,ThermoEucken,NumericType>& k,
-                                          const ThermoEucken& thermo )
+  template<class MicroThermo, class NumericType>
+  void build_eucken_thermal_conductivity( MixtureConductivity<EuckenThermalConductivity<MicroThermo>,NumericType>& k,
+                                          const MicroThermo& thermo )
   {
     for(unsigned int s = 0; s < k.mixture().n_species(); s++)
        {

@@ -127,7 +127,6 @@ int tester()
 
 //
   Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
-                               MicroThermo,
                                Scalar> k( tran_mixture );
   Antioch::build_eucken_thermal_conductivity<MicroThermo,Scalar>(k,thermo_stat);
 
@@ -149,7 +148,6 @@ int tester()
 #endif
 
   Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                               MicroThermo,
                                Scalar>
     ps_k( tran_mixture );
 
@@ -169,7 +167,6 @@ int tester()
                                                                      Scalar>,
                                     Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>,
                                     Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
-                                                                 MicroThermo,
                                                                  Scalar>,
                                     Scalar>
     wilke( wilke_mixture, D, mu, k );
@@ -183,7 +180,6 @@ int tester()
                                     Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
                                                               Scalar >,
                                     Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                                                                 MicroThermo,
                                                                  Scalar>,
                                     Scalar>
                        wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);

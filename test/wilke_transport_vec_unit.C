@@ -144,9 +144,8 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,
-                               ThermoType,
-                               Scalar> k( tran_mixture );
+  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,Scalar>
+    k( tran_mixture );
 
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> mu( tran_mixture );
   Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
@@ -156,9 +155,7 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
-  typedef Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,
-                                       ThermoType,
-                                       Scalar> TCType;
+  typedef Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,Scalar> TCType;
   typedef Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>           VType;
   typedef Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>        DType;
 
@@ -190,7 +187,7 @@ int tester(const PairScalars& example, const std::string& testname)
         mu[2][2*tuple+1] = 0.3L;
         mu[3][2*tuple+1] = 0.2L;
         mu[4][2*tuple+1] = 0.1L;
-    
+
         chi[0][2*tuple  ] = 0.1L;
         chi[1][2*tuple  ] = 0.2L;
         chi[2][2*tuple  ] = 0.3L;
@@ -235,14 +232,14 @@ int tester(const PairScalars& example, const std::string& testname)
 
     return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
-  
+
 
   // PairScalars each_mass = example;
 
   // each_mass[2*tuple  ] = 0.2L;
   // each_mass[2*tuple+1] = 0.2L;
 
-  // std::vector<PairScalars> mass_fractions( 5, each_mass); 
+  // std::vector<PairScalars> mass_fractions( 5, each_mass);
 
   // Currently dummy
   //const Scalar mu_exact = ;

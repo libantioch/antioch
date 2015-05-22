@@ -87,7 +87,7 @@ int tester()
 
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,MicroThermo,Scalar>
+  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,Scalar>
     e_k_mixture(tran_mixture);
 
   Antioch::build_eucken_thermal_conductivity<MicroThermo,Scalar>(e_k_mixture, thermo_stat);

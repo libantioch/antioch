@@ -36,7 +36,7 @@ namespace Antioch
     computing the species thermal conductivity. Total conductivity is computed by a mixing model,
     e.g. WilkeTransportMixture. This class is templated on the conductivity model,
     so an inherent assumption is that all species conductivities have the same model. */
-  template<typename Conductivity, typename MicroThermo, class CoeffType=double>
+  template<typename Conductivity, class CoeffType=double>
   class MixtureConductivity : public MixtureTransportBase<CoeffType>
   {
   public:
@@ -46,6 +46,7 @@ namespace Antioch
     virtual ~MixtureConductivity();
 
     //! Add species viscosity
+    template<class MicroThermo>
     void add( unsigned int s,
               const std::vector<CoeffType>& coeffs,
               const MicroThermo& thermo );
@@ -76,14 +77,14 @@ namespace Antioch
 
   };
 
-  template<typename Conductivity, typename MicroThermo, class CoeffType>
-  MixtureConductivity<Conductivity,MicroThermo,CoeffType>::MixtureConductivity(  const TransportMixture<CoeffType>& transport_mixture )
+  template<typename Conductivity, class CoeffType>
+  MixtureConductivity<Conductivity,CoeffType>::MixtureConductivity(  const TransportMixture<CoeffType>& transport_mixture )
     :  MixtureTransportBase<CoeffType>(transport_mixture),
     _species_conductivities( transport_mixture.n_species(), NULL )
   {}
 
-  template<typename Conductivity, typename MicroThermo, class CoeffType>
-  MixtureConductivity<Conductivity,MicroThermo,CoeffType>::~MixtureConductivity()
+  template<typename Conductivity, class CoeffType>
+  MixtureConductivity<Conductivity,CoeffType>::~MixtureConductivity()
   {
     // Need to delete all the species viscosities we allocated
     for( typename std::vector<Conductivity*>::iterator it = _species_conductivities.begin();
@@ -93,10 +94,11 @@ namespace Antioch
       }
   }
 
-  template<typename Conductivity, typename MicroThermo, class CoeffType>
-  void MixtureConductivity<Conductivity,MicroThermo,CoeffType>::add( unsigned int s,
-                                                                     const std::vector<CoeffType>& coeffs,
-                                                                     const MicroThermo& thermo )
+  template<typename Conductivity, class CoeffType>
+  template<class MicroThermo>
+  void MixtureConductivity<Conductivity,CoeffType>::add( unsigned int s,
+                                                         const std::vector<CoeffType>& coeffs,
+                                                         const MicroThermo& thermo )
   {
     antioch_assert_less_equal( s, _species_conductivities.size() );
     antioch_assert( !_species_conductivities[s] );
@@ -104,29 +106,29 @@ namespace Antioch
     _species_conductivities[s] = new Conductivity(thermo, coeffs);
   }
 
-  template<typename Conductivity, typename MicroThermo, class CoeffType>
-  void MixtureConductivity<Conductivity,MicroThermo,CoeffType>::reset_coeffs( const unsigned int s,
-                                                                              const std::vector<CoeffType> coeffs )
+  template<typename Conductivity, class CoeffType>
+  void MixtureConductivity<Conductivity,CoeffType>::reset_coeffs( const unsigned int s,
+                                                                  const std::vector<CoeffType> coeffs )
   {
     _species_conductivities[s]->reset_coeffs(coeffs);
   }
 
-  template<typename Conductivity, typename MicroThermo, class CoeffType>
+  template<typename Conductivity, class CoeffType>
   template<typename StateType>
-  StateType MixtureConductivity<Conductivity,MicroThermo,CoeffType>::conductivity_with_diffusion( unsigned int s,
-                                                                                                  const StateType& T,
-                                                                                                  const StateType& rho,
-                                                                                                  const StateType& mu_s,
-                                                                                                  const StateType& D_ss ) const
+  StateType MixtureConductivity<Conductivity,CoeffType>::conductivity_with_diffusion( unsigned int s,
+                                                                                      const StateType& T,
+                                                                                      const StateType& rho,
+                                                                                      const StateType& mu_s,
+                                                                                      const StateType& D_ss ) const
   {
     return (*this->_species_conductivities[s])(s,mu_s,T,rho,D_ss);
   }
 
-  template<typename Conductivity, typename MicroThermo, class CoeffType>
+  template<typename Conductivity, class CoeffType>
   template<typename StateType>
-  StateType MixtureConductivity<Conductivity,MicroThermo,CoeffType>::conductivity_without_diffusion( unsigned int s,
-                                                                                                     const StateType& T,
-                                                                                                     const StateType& mu_s ) const
+  StateType MixtureConductivity<Conductivity,CoeffType>::conductivity_without_diffusion( unsigned int s,
+                                                                                         const StateType& T,
+                                                                                         const StateType& mu_s ) const
   {
     return (*this->_species_conductivities[s])(s,mu_s,T);
   }
