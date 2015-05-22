@@ -43,8 +43,7 @@
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_evaluator.h"
 #include "antioch/nasa_mixture_parsing.h"
-#include "antioch/thermo_handler.h"
-//
+
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/blottner_viscosity.h"
@@ -124,11 +123,6 @@ int tester()
   Antioch::read_nasa_mixture_data( cea_mixture, Antioch::DefaultFilename::thermo_data(),Antioch::ASCII, true );
   Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> > thermo_mix( cea_mixture );
 
-// thermo handler
-  Antioch::ThermoHandler<Scalar,Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> >, MicroThermo > thermo_handler(thermo_mix,thermo_stat);
-
-  typedef Antioch::ThermoHandler<Scalar,Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> >, MicroThermo > Thermo;
-
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
 //
@@ -177,10 +171,9 @@ int tester()
                                     Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
                                                                  MicroThermo,
                                                                  Scalar>,
-                                    Thermo,
                                     Antioch::WilkeTransportMixture<Scalar>,
                                     Scalar>
-    wilke( wilke_mixture, thermo_handler, D, mu, k );
+    wilke( wilke_mixture, D, mu, k );
 
 
 // kinetics theory full
@@ -193,10 +186,9 @@ int tester()
                                     Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
                                                                  MicroThermo,
                                                                  Scalar>,
-                                    Thermo,
                                     Antioch::WilkeTransportMixture<Scalar>,
                                     Scalar>
-                       wilke_ps_evaluator(wilke_mixture,thermo_handler,bimol_D,ps_mu,ps_k);
+                       wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);
 
 #endif
 

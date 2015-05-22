@@ -59,7 +59,6 @@
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_evaluator.h"
 #include "antioch/nasa_mixture_parsing.h"
-#include "antioch/thermo_handler.h"
 
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
@@ -143,12 +142,6 @@ int tester(const PairScalars& example, const std::string& testname)
   Antioch::read_nasa_mixture_data( cea_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true );
   Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> > thermo_mix( cea_mixture );
 
-  typedef Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> >  ThermoMixType;
-
-  Antioch::ThermoHandler<Scalar,ThermoMixType,Antioch::StatMechThermodynamics<Scalar> > thermo_handler(thermo_mix,thermo);
-
-  typedef Antioch::ThermoHandler<Scalar,ThermoMixType,ThermoType > Thermo;
-
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
   Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,
@@ -174,7 +167,8 @@ int tester(const PairScalars& example, const std::string& testname)
 
   typedef Antioch::WilkeTransportMixture<Scalar>  WilkeMixType;
 
-  Antioch::WilkeTransportEvaluator< DType, VType, TCType, Thermo, WilkeMixType, Scalar > wilke( wilke_mixture, thermo_handler, D, mu, k );
+  Antioch::WilkeTransportEvaluator< DType, VType, TCType, WilkeMixType, Scalar >
+    wilke( wilke_mixture, D, mu, k );
 
   int return_flag = 0;
 

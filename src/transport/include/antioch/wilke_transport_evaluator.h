@@ -43,7 +43,6 @@ namespace Antioch
 
 
   template<class Diffusion, class Viscosity, class ThermalConductivity,
-           class ThermoEvaluator,
            class Mixture,  // this is a WilkeMixture, but let's stop the templates here...
            class CoeffType=double>
   class WilkeTransportEvaluator
@@ -51,10 +50,9 @@ namespace Antioch
   public:
 
     WilkeTransportEvaluator( const Mixture& mixture,
-                             const ThermoEvaluator & thermo_evaluator,
-                    const Diffusion& diffusion,
-                    const Viscosity& viscosity,
-                    const ThermalConductivity& conductivity );
+                             const Diffusion& diffusion,
+                             const Viscosity& viscosity,
+                             const ThermalConductivity& conductivity );
 
     ~WilkeTransportEvaluator(){};
 
@@ -68,14 +66,14 @@ namespace Antioch
     //! mixture level viscosity, one value
     template <typename Conditions, typename VectorStateType>
     typename value_type<VectorStateType>::type
-         mu( const Conditions& conditions,
-             const VectorStateType& mass_fractions ) const;
+    mu( const Conditions& conditions,
+        const VectorStateType& mass_fractions ) const;
 
     //! mixture level thermal conduction, one value
     template <typename Conditions, typename VectorStateType>
     typename value_type<VectorStateType>::type
-        k( const Conditions & conditions,
-           const VectorStateType& mass_fractions ) const;
+    k( const Conditions & conditions,
+       const VectorStateType& mass_fractions ) const;
 
     //! mixture level thermal conduction and viscosity, one value
     template <typename Conditions, typename StateType, typename VectorStateType>
@@ -91,7 +89,7 @@ namespace Antioch
 
     //! Helper function to reduce code duplication.
     /*! Populates species viscosities and the intermediate \chi variable
-        needed for Wilke's mixing rule. */
+      needed for Wilke's mixing rule. */
     template <typename Conditions, typename VectorStateType>
     void compute_mu_chi( const Conditions& conditions,
                          const VectorStateType& mass_fractions,
@@ -116,7 +114,7 @@ namespace Antioch
 
     //! Compute species diffusion coefficients
     /*! Uses Wilke mixing rule to compute species diffusion coefficients, D_vec,
-        based on the given binary diffusion matrix, D_mat. */
+      based on the given binary diffusion matrix, D_mat. */
     template <typename VectorStateType, typename MatrixStateType>
     void diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
                                 const VectorStateType & mass_fractions,
@@ -124,8 +122,6 @@ namespace Antioch
                                 VectorStateType & D_vec ) const;
 
     const Mixture& _mixture;
-
-    const ThermoEvaluator& _thermo;
 
     const Diffusion& _diffusion;
 
@@ -139,14 +135,12 @@ namespace Antioch
 
   };
 
-  template<class Diff, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
-  WilkeTransportEvaluator<Diff,V,TC,ThermoEvaluator,Mixture,CoeffType>::WilkeTransportEvaluator( const Mixture& mixture,
-                                                                                                 const ThermoEvaluator& thermo_evaluator,
-                                                                                                 const Diff& diffusion,
-                                                                                                 const V& viscosity,
-                                                                                                 const TC& conductivity )
+  template<class Diff, class V, class TC, class Mixture, class CoeffType>
+  WilkeTransportEvaluator<Diff,V,TC,Mixture,CoeffType>::WilkeTransportEvaluator( const Mixture& mixture,
+                                                                                 const Diff& diffusion,
+                                                                                 const V& viscosity,
+                                                                                 const TC& conductivity )
     : _mixture(mixture),
-      _thermo(thermo_evaluator),
       _diffusion(diffusion),
       _viscosity(viscosity),
       _conductivity(conductivity)
@@ -154,12 +148,12 @@ namespace Antioch
     return;
   }
 
-  template<class Diff, class V, class TC, class ThermoEvaluator,class Mixture, class CoeffType>
+  template<class Diff, class V, class TC, class Mixture, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diff,V,TC,ThermoEvaluator,Mixture,CoeffType>::D( const StateType & rho,
-                                                                                const StateType& T,
-                                                                                const VectorStateType& mass_fractions,
-                                                                                VectorStateType & D_vec) const
+  void WilkeTransportEvaluator<Diff,V,TC,Mixture,CoeffType>::D( const StateType & rho,
+                                                                const StateType& T,
+                                                                const VectorStateType& mass_fractions,
+                                                                VectorStateType & D_vec) const
   {
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
     static_assert( !DiffusionTraits<typename Diff::Type,CoeffType>::is_binary_diffusion,
@@ -169,7 +163,7 @@ namespace Antioch
     typename rebind<VectorStateType,VectorStateType>::type D_mat(D_vec.size());
     init_constant(D_mat,D_vec);
 
-     const StateType molar_density = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
+    const StateType molar_density = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
 
     _diffusion.compute_binary_diffusion_matrix( T, molar_density, D_mat );
 
@@ -179,16 +173,16 @@ namespace Antioch
                                  D_vec );
   }
 
-  template<class Diff, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class Diff, class V, class TC, class Mixture, class CoeffType>
   template <typename Conditions, typename VectorStateType>
   inline
   typename value_type<VectorStateType>::type
-         WilkeTransportEvaluator<Diff,V,TC,ThermoEvaluator,Mixture,CoeffType>::mu( const Conditions& conditions,
-                                                                                   const VectorStateType& mass_fractions ) const
+  WilkeTransportEvaluator<Diff,V,TC,Mixture,CoeffType>::mu( const Conditions& conditions,
+                                                            const VectorStateType& mass_fractions ) const
   {
 
     typename constructor_or_reference<const KineticsConditions<typename value_type<VectorStateType>::type,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
-                transport_conditions(conditions);
+      transport_conditions(conditions);
 
     typename value_type<VectorStateType>::type mu_mix = zero_clone(transport_conditions.T());
 
@@ -213,16 +207,16 @@ namespace Antioch
     return mu_mix;
   }
 
-  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class D, class V, class TC, class Mixture, class CoeffType>
   template <typename Conditions, typename VectorStateType>
   typename value_type<VectorStateType>::type
-        WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::k( const Conditions& conditions,
-                                                                              const VectorStateType& mass_fractions ) const
+  WilkeTransportEvaluator<D,V,TC,Mixture,CoeffType>::k( const Conditions& conditions,
+                                                        const VectorStateType& mass_fractions ) const
   {
     antioch_assert_equal_to(mass_fractions.size(), _mixture.chem_mixture().n_species());
 
     typename constructor_or_reference<const KineticsConditions<typename value_type<VectorStateType>::type,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
-                transport_conditions(conditions);
+      transport_conditions(conditions);
 
     typename value_type<VectorStateType>::type k_mix = zero_clone(transport_conditions.T());
 
@@ -252,15 +246,15 @@ namespace Antioch
     return k_mix;
   }
 
-  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class D, class V, class TC, class Mixture, class CoeffType>
   template <typename Conditions, typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::mu_and_k( const Conditions& conditions,
-                                                                                    const VectorStateType& mass_fractions,
-                                                                                    StateType& mu_mix,
-                                                                                    StateType& k_mix ) const
+  void WilkeTransportEvaluator<D,V,TC,Mixture,CoeffType>::mu_and_k( const Conditions& conditions,
+                                                                    const VectorStateType& mass_fractions,
+                                                                    StateType& mu_mix,
+                                                                    StateType& k_mix ) const
   {
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
-                transport_conditions(conditions);
+      transport_conditions(conditions);
 
     mu_mix = zero_clone(transport_conditions.T());
     k_mix  = zero_clone(transport_conditions.T());
@@ -292,19 +286,19 @@ namespace Antioch
     return;
   }
 
-  template<class Diff, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class Diff, class V, class TC, class Mixture, class CoeffType>
   template <typename Conditions, typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diff,V,TC,ThermoEvaluator,Mixture,CoeffType>::mu_and_k_and_D( const Conditions& conditions,
-                                                                                             const StateType & rho,
-                                                                                             const StateType& cp,
-                                                                                             const VectorStateType& mass_fractions,
-                                                                                             StateType& mu_mix,
-                                                                                             StateType& k_mix,
-                                                                                             VectorStateType & D_vec ) const
+  void WilkeTransportEvaluator<Diff,V,TC,Mixture,CoeffType>::mu_and_k_and_D( const Conditions& conditions,
+                                                                             const StateType & rho,
+                                                                             const StateType& cp,
+                                                                             const VectorStateType& mass_fractions,
+                                                                             StateType& mu_mix,
+                                                                             StateType& k_mix,
+                                                                             VectorStateType & D_vec ) const
   {
 
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
-                transport_conditions(conditions);
+      transport_conditions(conditions);
 
     mu_mix = zero_clone(transport_conditions.T());
     k_mix  = zero_clone(transport_conditions.T());
@@ -370,16 +364,16 @@ namespace Antioch
     return;
   }
 
-  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class D, class V, class TC, class Mixture, class CoeffType>
   template <typename Conditions, typename VectorStateType>
-  void WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::compute_mu_chi( const Conditions& conditions,
-                                                                                          const VectorStateType& mass_fractions,
-                                                                                          VectorStateType& mu,
-                                                                                          VectorStateType& chi ) const
+  void WilkeTransportEvaluator<D,V,TC,Mixture,CoeffType>::compute_mu_chi( const Conditions& conditions,
+                                                                          const VectorStateType& mass_fractions,
+                                                                          VectorStateType& mu,
+                                                                          VectorStateType& chi ) const
   {
 
     typename constructor_or_reference<const KineticsConditions<typename value_type<VectorStateType>::type,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
-                transport_conditions(conditions);
+      transport_conditions(conditions);
 
     const typename value_type<VectorStateType>::type M = _mixture.chem_mixture().M(mass_fractions);
 
@@ -394,13 +388,13 @@ namespace Antioch
     return;
   }
 
-  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class D, class V, class TC, class Mixture, class CoeffType>
   template <typename VectorStateType>
   typename
   value_type<VectorStateType>::type
-  WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::compute_phi(typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
-                                                                                 const VectorStateType& chi,
-                                                                                 const unsigned int s ) const
+  WilkeTransportEvaluator<D,V,TC,Mixture,CoeffType>::compute_phi(typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
+                                                                 const VectorStateType& chi,
+                                                                 const unsigned int s ) const
   {
     using std::sqrt;
 
@@ -422,50 +416,50 @@ namespace Antioch
     return phi_s;
   }
 
-  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class D, class V, class TC, class Mixture, class CoeffType>
   template <typename VectorStateType>
   inline
-  void WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::compute_mu_mu_sqrt( const VectorStateType & mu,
-                                                                                              typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const
+  void WilkeTransportEvaluator<D,V,TC,Mixture,CoeffType>::compute_mu_mu_sqrt( const VectorStateType & mu,
+                                                                              typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const
 
   {
     antioch_assert_equal_to(mu.size(),mu_mu_sqrt.size()); // indeed square matrix
     antioch_assert_greater(mu.size(),0); // not empty
 #ifndef NDEBUG
     for(unsigned int i = 0; i < mu.size(); i++)
-    {
+      {
         antioch_assert_equal_to(mu.size(),mu_mu_sqrt[i].size());
-    }
+      }
 #endif
 
-/// first the diagonal
+    /// first the diagonal
     for(unsigned int s = 0; s < mu.size(); s++)
-    {
-       mu_mu_sqrt[s][s] = Antioch::constant_clone(mu[s],1);
-    }
-///then the square roots and the inversion (first row, first column)
-   for(unsigned int s = 1; s < mu.size(); s++)
-   {
-      mu_mu_sqrt[0][s] = ant_sqrt(mu[0]/mu[s]);
-      mu_mu_sqrt[s][0] = Antioch::constant_clone(mu[0],1)/mu_mu_sqrt[0][s];
-   }
-/// now the remaining n-2 matrix, using the fact that mu[i]/mu[j] = mu[i]/mu[0] * mu[0]/mu[j]
-  for(unsigned int s = 1; s < mu.size(); s++)
-  {
-    for(unsigned int l = 1; l < mu.size(); l++)
-    {
-        if(l == s)continue;
-        mu_mu_sqrt[s][l] = mu_mu_sqrt[s][0] * mu_mu_sqrt[0][l];
-    }
+      {
+        mu_mu_sqrt[s][s] = Antioch::constant_clone(mu[s],1);
+      }
+    ///then the square roots and the inversion (first row, first column)
+    for(unsigned int s = 1; s < mu.size(); s++)
+      {
+        mu_mu_sqrt[0][s] = ant_sqrt(mu[0]/mu[s]);
+        mu_mu_sqrt[s][0] = Antioch::constant_clone(mu[0],1)/mu_mu_sqrt[0][s];
+      }
+    /// now the remaining n-2 matrix, using the fact that mu[i]/mu[j] = mu[i]/mu[0] * mu[0]/mu[j]
+    for(unsigned int s = 1; s < mu.size(); s++)
+      {
+        for(unsigned int l = 1; l < mu.size(); l++)
+          {
+            if(l == s)continue;
+            mu_mu_sqrt[s][l] = mu_mu_sqrt[s][0] * mu_mu_sqrt[0][l];
+          }
+      }
   }
- }
 
-  template<class D, class V, class TC, class ThermoEvaluator, class Mixture, class CoeffType>
+  template<class D, class V, class TC, class Mixture, class CoeffType>
   template <typename VectorStateType, typename MatrixStateType>
-  void WilkeTransportEvaluator<D,V,TC,ThermoEvaluator,Mixture,CoeffType>::diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
-                                                                                                 const VectorStateType & mass_fractions,
-                                                                                                 const MatrixStateType & D_mat,
-                                                                                                 VectorStateType & D_vec ) const
+  void WilkeTransportEvaluator<D,V,TC,Mixture,CoeffType>::diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
+                                                                                 const VectorStateType & mass_fractions,
+                                                                                 const MatrixStateType & D_mat,
+                                                                                 VectorStateType & D_vec ) const
   {
     antioch_assert_equal_to(D_vec.size(),mixture.n_species());
     antioch_assert_equal_to(D_vec.size(),mass_fractions.size());
