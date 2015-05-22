@@ -171,12 +171,8 @@ namespace Antioch
                                                                                       const StateType& k,
                                                                                       StateType& D ) const
   {
-    static_assert( !DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion,
-                   "Cannot call species diffusion implementation with binary diffusion model!" );
-
     std::string error = "ERROR: You're trying to use a species diffusion implementation\n";
     error += "       with a binary diffusion model!\n";
-    error += "       Does your compiler not have static_assert enabled?";
     antioch_msg_error(error);
   }
 

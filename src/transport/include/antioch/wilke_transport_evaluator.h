@@ -340,14 +340,6 @@ namespace Antioch
                                                                       D_vec );
       }
 
-    /*
-    for(unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++)
-        _diffusion.compute_diffusivity( rho,
-                                        _thermo.cp(transport_conditions.temp_cache(),s),
-                                        k[s],
-                                        D_vec[s] );
-    */
-
     for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
       {
         StateType phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
@@ -361,6 +353,18 @@ namespace Antioch
 
         mu_mix += mu[s]*chi[s]/phi_s;
         k_mix += k[s]*chi[s]/phi_s;
+      }
+
+    if( DiffusionTraits<typename Diff::Type,CoeffType>::is_species_diffusion )
+      {
+        for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
+          {
+            _diffusion.compute_species_diffusivity(s,
+                                                   rho,
+                                                   _thermo.cp(transport_conditions.temp_cache(),s),
+                                                   k[s],
+                                                   D_vec[s]);
+          }
       }
 
     return;
