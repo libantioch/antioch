@@ -48,6 +48,10 @@ namespace Antioch
     void compute_species_diffusivity( unsigned int s, const StateType& rho,
                                       const StateType& cp, const StateType& k,
                                       StateType& D ) const;
+
+  private:
+
+    MixtureDiffusionBase();
   };
 
   template<typename Subclass, class CoeffType>
