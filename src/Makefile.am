@@ -120,8 +120,6 @@ pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils_decl.h
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils.h
 pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion.h
-pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils_decl.h
-pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils.h
 
 # thermal conduction
 pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity.h

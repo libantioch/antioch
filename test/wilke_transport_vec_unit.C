@@ -64,6 +64,7 @@
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
 #include "antioch/mixture_viscosity.h"
+#include "antioch/mixture_binary_diffusion.h"
 #include "antioch/constant_lewis_diffusivity.h"
 #include "antioch/constant_lewis_diffusivity_utils.h"
 
