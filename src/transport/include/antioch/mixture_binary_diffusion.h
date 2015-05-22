@@ -26,7 +26,9 @@
 #ifndef ANTIOCH_MIXTURE_BINARY_DIFFUSION_H
 #define ANTIOCH_MIXTURE_BINARY_DIFFUSION_H
 
-#include "antioch/mixture_transport_base.h"
+#include "antioch/diffusion_traits.h"
+#include "antioch/mixture_diffusion_base.h"
+
 
 namespace Antioch
 {
@@ -37,7 +39,7 @@ namespace Antioch
     by a mixing model, e.g. WilkeTransportMixture. This class is templated on the diffusion model,
     so an inherent assumption is that all species conductivities have the same model. */
   template<typename Diffusion, class CoeffType=double>
-  class MixtureBinaryDiffusion : public MixtureTransportBase<CoeffType>
+  class MixtureBinaryDiffusion : public MixtureDiffusionBase<MixtureBinaryDiffusion<Diffusion,CoeffType>,CoeffType>
   {
   public:
 
@@ -55,15 +57,30 @@ namespace Antioch
                        const TransportSpecies<CoeffType>& s_i,
                        const TransportSpecies<CoeffType>& s_j );
 
+    //! Define the diffusion model. Mainly for use in DiffusionTraits
+    typedef Diffusion Type;
+
+    //! Friend the base class so we can make the implementation protected
+    friend class MixtureDiffusionBase<MixtureBinaryDiffusion<Diffusion,CoeffType>,CoeffType>;
+
+  protected:
+
     //! Compute the full binary diffusion matrix in D
     /*! \todo We need a matrix type and separate method for exploiting the symmetry*/
     template<typename StateType, typename MatrixStateType>
-    void compute_binary_diffusion_matrix( const StateType& T, const StateType& molar_density, MatrixStateType& D ) const;
+    void compute_binary_diffusion_matrix_impl( const StateType& T, const StateType& molar_density, MatrixStateType& D ) const;
 
-    //! Define the diffusion model
-    typedef Diffusion Type;
-
-  protected:
+    //! Should never be called by this class, facilitating interaction in WilkeTransportEvaluator
+    /*!
+     * There are wildly differing requirements between species and binary diffusion
+     * models, but we want to have a uniform interface through WilkeTransportEvaluator.
+     * So we need to implement this function, but it will throw an error. If static_assert
+     * is available, the user should never get this far.
+     */
+    template<typename StateType>
+    void compute_species_diffusivity_impl( unsigned int s, const StateType& rho,
+                                           const StateType& cp, const StateType& k,
+                                           StateType& D ) const;
 
     //! Stores binary diffusion model for all species pairs
     /*! \todo This will always be symmetric so we should make a smarter
@@ -78,7 +95,7 @@ namespace Antioch
 
   template<typename Diffusion, class CoeffType>
   MixtureBinaryDiffusion<Diffusion,CoeffType>::MixtureBinaryDiffusion( const TransportMixture<CoeffType>& transport_mixture )
-    :  MixtureTransportBase<CoeffType>(transport_mixture),
+    :  MixtureDiffusionBase<MixtureBinaryDiffusion<Diffusion,CoeffType>,CoeffType>(transport_mixture),
     _binary_diffusivities( transport_mixture.n_species() )
   {
     // Finish allocating space for binary diffusion coeffient objects
@@ -122,9 +139,9 @@ namespace Antioch
   template<typename Diffusion, class CoeffType>
   template<typename StateType, typename MatrixStateType>
   inline
-  void MixtureBinaryDiffusion<Diffusion,CoeffType>::compute_binary_diffusion_matrix( const StateType& T,
-                                                                                     const StateType& molar_density,
-                                                                                     MatrixStateType& D ) const
+  void MixtureBinaryDiffusion<Diffusion,CoeffType>::compute_binary_diffusion_matrix_impl( const StateType& T,
+                                                                                          const StateType& molar_density,
+                                                                                          MatrixStateType& D ) const
   {
     const unsigned int n_cols = D.size();
     antioch_assert_greater(n_cols,0);
@@ -146,7 +163,22 @@ namespace Antioch
       }
   }
 
+  template<typename Diffusion, class CoeffType>
+  template<typename StateType>
+  void MixtureBinaryDiffusion<Diffusion,CoeffType>::compute_species_diffusivity_impl( unsigned int s,
+                                                                                      const StateType& rho,
+                                                                                      const StateType& cp,
+                                                                                      const StateType& k,
+                                                                                      StateType& D ) const
+  {
+    static_assert( !DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion,
+                   "Cannot call species diffusion implementation with binary diffusion model!" );
 
+    std::string error = "ERROR: You're trying to use a species diffusion implementation\n";
+    error += "       with a binary diffusion model!\n";
+    error += "       Does your compiler not have static_assert enabled?";
+    antioch_msg_error(error);
+  }
 
 } // end namespace Antioch
 
