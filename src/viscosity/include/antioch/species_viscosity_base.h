@@ -61,7 +61,7 @@ namespace Antioch
     void print(std::ostream& os = std::cout) const;
 
     //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const Subclass& mu)
+    friend std::ostream& operator<<(std::ostream& os, const SpeciesViscosityBase<Subclass,CoeffType>& mu)
     {
       mu.print(os);
       return os;
