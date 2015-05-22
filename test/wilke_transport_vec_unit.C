@@ -155,14 +155,13 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
-  typedef Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,Scalar> TCType;
-  typedef Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>           VType;
-  typedef Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>        DType;
-
 
   Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  Antioch::WilkeTransportEvaluator< DType, VType, TCType, Scalar >
+  Antioch::WilkeTransportEvaluator<Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>,
+                                   Antioch::BlottnerViscosity<Scalar>,
+                                   Antioch::EuckenThermalConductivity<ThermoType>,
+                                   Scalar>
     wilke( wilke_mixture, D, mu, k );
 
   int return_flag = 0;

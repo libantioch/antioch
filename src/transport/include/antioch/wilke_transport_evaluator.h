@@ -36,21 +36,24 @@
 #include "antioch/kinetics_conditions.h"
 #include "antioch/wilke_transport_mixture.h"
 #include "antioch/cmath_shims.h"
+#include "antioch/mixture_diffusion_base.h"
+#include "antioch/mixture_viscosity.h"
+#include "antioch/mixture_conductivity.h"
 #include "antioch/diffusion_traits.h"
 
 namespace Antioch
 {
 
 
-  template<class Diffusion, class Viscosity, class ThermalConductivity,class CoeffType=double>
+  template<class MixtureDiffusion, class Viscosity, class ThermalConductivity,class CoeffType=double>
   class WilkeTransportEvaluator
   {
   public:
 
     WilkeTransportEvaluator( const WilkeTransportMixture<CoeffType>& mixture,
-                             const Diffusion& diffusion,
-                             const Viscosity& viscosity,
-                             const ThermalConductivity& conductivity );
+                             const MixtureDiffusion& diffusion,
+                             const MixtureViscosity<Viscosity,CoeffType>& viscosity,
+                             const MixtureConductivity<ThermalConductivity,CoeffType>& conductivity );
 
     ~WilkeTransportEvaluator(){};
 
@@ -121,11 +124,11 @@ namespace Antioch
 
     const WilkeTransportMixture<CoeffType>& _mixture;
 
-    const Diffusion& _diffusion;
+    const MixtureDiffusion& _diffusion;
 
-    const Viscosity& _viscosity;
+    const MixtureViscosity<Viscosity,CoeffType>& _viscosity;
 
-    const ThermalConductivity& _conductivity;
+    const MixtureConductivity<ThermalConductivity,CoeffType>& _conductivity;
 
   private:
 
@@ -133,11 +136,11 @@ namespace Antioch
 
   };
 
-  template<class Diff, class Visc, class TherCond, class CoeffType>
-  WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::WilkeTransportEvaluator( const WilkeTransportMixture<CoeffType>& mixture,
-                                                                                  const Diff& diffusion,
-                                                                                  const Visc& viscosity,
-                                                                                  const TherCond& conductivity )
+  template<class MixtureDiffusion, class Visc, class TherCond, class CoeffType>
+  WilkeTransportEvaluator<MixtureDiffusion,Visc,TherCond,CoeffType>::WilkeTransportEvaluator( const WilkeTransportMixture<CoeffType>& mixture,
+                                                                                              const MixtureDiffusion& diffusion,
+                                                                                              const MixtureViscosity<Visc,CoeffType>& viscosity,
+                                                                                              const MixtureConductivity<TherCond,CoeffType>& conductivity )
     : _mixture(mixture),
       _diffusion(diffusion),
       _viscosity(viscosity),

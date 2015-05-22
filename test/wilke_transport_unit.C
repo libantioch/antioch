@@ -126,12 +126,12 @@ int tester()
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
 //
-  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
-                               Scalar> k( tran_mixture );
+  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,Scalar>
+    k( tran_mixture );
   Antioch::build_eucken_thermal_conductivity<MicroThermo,Scalar>(k,thermo_stat);
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> mu( tran_mixture );
 
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> mu( tran_mixture );
   Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
 
@@ -147,8 +147,7 @@ int tester()
 
 #endif
 
-  Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                               Scalar>
+  Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,Scalar>
     ps_k( tran_mixture );
 
   Antioch::build_kinetics_theory_thermal_conductivity<MicroThermo,Scalar>(ps_k,thermo_stat);
@@ -165,9 +164,8 @@ int tester()
 
   Antioch::WilkeTransportEvaluator< Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,
                                                                      Scalar>,
-                                    Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>,
-                                    Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
-                                                                 Scalar>,
+                                    Antioch::BlottnerViscosity<Scalar>,
+                                    Antioch::EuckenThermalConductivity<MicroThermo>,
                                     Scalar>
     wilke( wilke_mixture, D, mu, k );
 
@@ -175,14 +173,12 @@ int tester()
 // kinetics theory full
 #ifdef ANTIOCH_HAVE_GSL
 
-  Antioch::WilkeTransportEvaluator< Antioch::MixtureBinaryDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
-                                                                    Scalar>,
-                                    Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
-                                                              Scalar >,
-                                    Antioch::MixtureConductivity<Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                                                                 Scalar>,
-                                    Scalar>
-                       wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);
+  Antioch::WilkeTransportEvaluator<Antioch::MixtureBinaryDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
+                                                                   Scalar>,
+                                   Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
+                                   Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
+                                   Scalar>
+    wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);
 
 #endif
 
