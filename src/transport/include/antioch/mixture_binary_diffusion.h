@@ -34,10 +34,11 @@ namespace Antioch
 {
   //! Container class for species binary diffusion models
   /*! For the given set of chemical species in the input TransportMixture, this contains
-    the diffusion models for each of those species and provides and interface for
-    computing the species diffusion coefficients. Total diffusion coefficients is computed
-    by a mixing model, e.g. WilkeTransportMixture. This class is templated on the diffusion model,
-    so an inherent assumption is that all species conductivities have the same model. */
+   * the diffusion models for each of those species and provides and interface for
+   * computing the species diffusion coefficients. Total diffusion coefficients is computed
+   * by a mixing model, e.g. WilkeTransportMixture. This class is templated on the diffusion model,
+   * so an inherent assumption is that all species diffusions have the same model.
+   */
   template<typename Diffusion, class CoeffType=double>
   class MixtureBinaryDiffusion : public MixtureDiffusionBase<MixtureBinaryDiffusion<Diffusion,CoeffType>,CoeffType>
   {
@@ -74,8 +75,7 @@ namespace Antioch
     /*!
      * There are wildly differing requirements between species and binary diffusion
      * models, but we want to have a uniform interface through WilkeTransportEvaluator.
-     * So we need to implement this function, but it will throw an error. If static_assert
-     * is available, the user should never get this far.
+     * So we need to implement this function, but it will throw an error.
      */
     template<typename StateType>
     void compute_species_diffusivity_impl( unsigned int s, const StateType& rho,
