@@ -45,10 +45,6 @@ namespace Antioch
   template <class NumericType>
   class TransportMixture;
 
-  template <typename NumericType, typename Macro,typename Micro>
-  class ThermoHandler;
-
-// macro
   template <typename NumericType, typename CurveFit>
   class NASAEvaluator;
 
