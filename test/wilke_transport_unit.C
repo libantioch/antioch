@@ -69,7 +69,6 @@
 #include "antioch/blottner_parsing.h"
 #include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/constant_lewis_diffusivity_building.h"
-#include "antioch/molecular_binary_diffusion_building.h"
 
 #include "antioch/vector_utils.h"
 
