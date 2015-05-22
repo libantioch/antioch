@@ -31,37 +31,56 @@
 #ifndef ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
 #define ANTIOCH_CONSTANT_LEWIS_DIFFUSIVITY_H
 
-//C++
-#include <vector>
-
 // Antioch
 #include "antioch/metaprogramming_decl.h" // ANTIOCH_AUTO*
+#include "antioch/species_diffusion_base.h"
 
 namespace Antioch
 {
 
   template<typename CoeffType=double>
-  class ConstantLewisDiffusivity
+  class ConstantLewisDiffusivity : public SpeciesDiffusionBase<ConstantLewisDiffusivity<CoeffType>,CoeffType>
   {
-  protected:
-
-    CoeffType _Le;
-
   public:
 
-    ConstantLewisDiffusivity( const CoeffType Le ) : _Le(Le) {}
+    ConstantLewisDiffusivity( const CoeffType Le );
 
-    ConstantLewisDiffusivity( const std::vector<CoeffType>& coeffs ) : _Le(coeffs[0])
-    { antioch_assert_equal_to( coeffs.size(), 1 ); }
+    ConstantLewisDiffusivity( const std::vector<CoeffType>& coeffs );
 
-    ~ConstantLewisDiffusivity(){}
+    virtual ~ConstantLewisDiffusivity(){}
+
+    //! Friend the base class so we can make the implementation protected
+    friend class SpeciesDiffusionBase<ConstantLewisDiffusivity<CoeffType>,CoeffType>;
+
+  protected:
+    CoeffType _Le;
+
+    void reset_coeffs_impl( const std::vector<CoeffType>& coeffs );
 
     template<typename StateType>
     ANTIOCH_AUTO(StateType)
-    D( const StateType& rho, const StateType& cp, const StateType& k ) const
+    D_impl( const StateType& rho, const StateType& cp, const StateType& k ) const
     ANTIOCH_AUTOFUNC(StateType, _Le*k/(rho*cp))
-
   };
+
+  template<typename CoeffType>
+  ConstantLewisDiffusivity<CoeffType>::ConstantLewisDiffusivity( const CoeffType Le )
+    : SpeciesDiffusionBase<ConstantLewisDiffusivity<CoeffType>,CoeffType>(),
+    _Le(Le)
+  {}
+
+  template<typename CoeffType>
+  ConstantLewisDiffusivity<CoeffType>::ConstantLewisDiffusivity( const std::vector<CoeffType>& coeffs )
+    : SpeciesDiffusionBase<ConstantLewisDiffusivity<CoeffType>,CoeffType>(),
+    _Le(coeffs[0])
+  { antioch_assert_equal_to( coeffs.size(), 1 ); }
+
+  template<typename CoeffType>
+  void ConstantLewisDiffusivity<CoeffType>::reset_coeffs_impl( const std::vector<CoeffType>& coeffs )
+  {
+    antioch_assert_equal_to( coeffs.size(), 1 );
+    _Le = coeffs[0];
+  }
 
 } // end namespace Antioch
 
