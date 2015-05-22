@@ -34,7 +34,7 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/mixture_transport_base.h"
-
+#include "antioch/species_viscosity_base.h"
 // C++
 #include <string>
 #include <vector>
@@ -82,7 +82,7 @@ namespace Antioch
 
   protected:
 
-    std::vector<Viscosity*> _species_viscosities;
+    std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*> _species_viscosities;
 
   private:
 
@@ -100,7 +100,7 @@ namespace Antioch
   MixtureViscosity<Viscosity,ThermoEvaluator,CoeffType>::~MixtureViscosity()
   {
     // Need to delete all the species viscosities we allocated
-    for( typename std::vector<Viscosity*>::iterator it = _species_viscosities.begin();
+    for( typename std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*>::iterator it = _species_viscosities.begin();
 	 it != _species_viscosities.end(); ++it )
       {
 	delete (*it);
