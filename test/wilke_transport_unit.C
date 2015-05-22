@@ -145,7 +145,6 @@ int tester()
 
   Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
-  Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>,        Antioch::ChemicalMixture<Scalar> > D( chem_mixture );
 
 // pure species set, all internally set
 #ifdef ANTIOCH_HAVE_GSL
@@ -168,25 +167,25 @@ int tester()
 
 //Eucken is internally set
 
-
+  Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
+    D( tran_mixture );
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
 // non kinetics theory
   Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  /*
-  Antioch::WilkeTransportEvaluator< Antioch::PhysicalSet< Antioch::ConstantLewisDiffusivity<Scalar>, Antioch::ChemicalMixture<Scalar> >,
-                           Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>,
-                           Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
-                                                        MicroThermo,
-                                                        Scalar>,
-                           Thermo,
-                           Antioch::WilkeTransportMixture<Scalar>,
-                           Scalar
-                           > wilke( wilke_mixture, thermo_handler, D, mu, k );
+  Antioch::WilkeTransportEvaluator< Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,
+                                                                     Scalar>,
+                                    Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>,
+                                    Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,
+                                                                 MicroThermo,
+                                                                 Scalar>,
+                                    Thermo,
+                                    Antioch::WilkeTransportMixture<Scalar>,
+                                    Scalar>
+    wilke( wilke_mixture, thermo_handler, D, mu, k );
 
-*/
 
 // kinetics theory full
 #ifdef ANTIOCH_HAVE_GSL
@@ -242,10 +241,10 @@ int tester()
     Antioch::init_constant(mu_mu_sqrt,mu);
     Antioch::set_zero(mu_mu_sqrt);
 
-    //wilke.compute_mu_mu_sqrt( mu, mu_mu_sqrt);
-    //phi_N = wilke.compute_phi( mu_mu_sqrt, chi, N_index );
+    wilke.compute_mu_mu_sqrt( mu, mu_mu_sqrt);
+    phi_N = wilke.compute_phi( mu_mu_sqrt, chi, N_index );
 
-    //return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
+    return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
 
 
@@ -259,10 +258,10 @@ int tester()
   const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
   const Scalar rho = P/(R_mix*T); // kg.m-3
 
-  //Scalar wilke_mu = wilke.mu(T, mass_fractions );
-  //Scalar wilke_k = wilke.k(T, mass_fractions );
+  Scalar wilke_mu = wilke.mu(T, mass_fractions );
+  Scalar wilke_k = wilke.k(T, mass_fractions );
 
-  //wilke.mu_and_k(T,mass_fractions,wilke_mu,wilke_k);
+  wilke.mu_and_k(T,mass_fractions,wilke_mu,wilke_k);
 
   int return_flag_temp = 0;
   //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );
