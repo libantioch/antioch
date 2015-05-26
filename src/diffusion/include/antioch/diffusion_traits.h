@@ -41,8 +41,8 @@ namespace Antioch
     static bool const is_binary_diffusion = false;
   };
 
-  template<typename CoeffType>
-  struct DiffusionTraits<MolecularBinaryDiffusion<CoeffType>,CoeffType>
+  template<typename CoeffType, typename Interpolator>
+  struct DiffusionTraits<MolecularBinaryDiffusion<CoeffType,Interpolator>,CoeffType>
   {
     static bool const is_species_diffusion = false;
     static bool const is_binary_diffusion = true;
