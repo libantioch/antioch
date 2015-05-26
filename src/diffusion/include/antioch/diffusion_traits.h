@@ -48,6 +48,27 @@ namespace Antioch
     static bool const is_binary_diffusion = true;
   };
 
+  namespace AntiochPrivate
+  {
+    template<typename Diffusion>
+    struct diffusion_tag;
+
+    template<typename Diffusion, typename CoeffType>
+    struct diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >{};
+
+    template<typename CoeffType>
+    struct diffusion_tag<ConstantLewisDiffusivity<CoeffType> >
+      : public diffusion_tag<SpeciesDiffusionBase<ConstantLewisDiffusivity<CoeffType>,CoeffType> >{};
+
+
+    template<typename Diffusion, typename CoeffType>
+    struct diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >{};
+
+    template<typename CoeffType, typename Interpolator>
+    struct diffusion_tag<MolecularBinaryDiffusion<CoeffType,Interpolator> >
+      : public diffusion_tag<BinaryDiffusionBase<MolecularBinaryDiffusion<CoeffType,Interpolator>,CoeffType> >{};
+  }
+
 } // end namespace Antioch
 
 #endif // ANTIOCH_DIFFUSION_TRAITS_H
