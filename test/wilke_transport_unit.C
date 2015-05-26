@@ -140,7 +140,7 @@ int tester()
     ps_mu(tran_mixture);
   Antioch::build_kinetics_theory_viscosity<Scalar,Antioch::GSLSpliner>(ps_mu);
 
-  Antioch::MixtureBinaryDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,Scalar>
+  Antioch::MixtureDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,Scalar>
     bimol_D( tran_mixture );
 
 #endif
@@ -152,7 +152,7 @@ int tester()
 
 //Eucken is internally set
 
-  Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
+  Antioch::MixtureDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
     D( tran_mixture );
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
@@ -160,19 +160,17 @@ int tester()
 // non kinetics theory
   Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  Antioch::WilkeTransportEvaluator< Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,
-                                                                     Scalar>,
-                                    Antioch::BlottnerViscosity<Scalar>,
-                                    Antioch::EuckenThermalConductivity<MicroThermo>,
-                                    Scalar>
+  Antioch::WilkeTransportEvaluator<Antioch::ConstantLewisDiffusivity<Scalar>,
+                                   Antioch::BlottnerViscosity<Scalar>,
+                                   Antioch::EuckenThermalConductivity<MicroThermo>,
+                                   Scalar>
     wilke( wilke_mixture, D, mu, k );
 
 
 // kinetics theory full
 #ifdef ANTIOCH_HAVE_GSL
 
-  Antioch::WilkeTransportEvaluator<Antioch::MixtureBinaryDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
-                                                                   Scalar>,
+  Antioch::WilkeTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
                                    Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
                                    Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
                                    Scalar>

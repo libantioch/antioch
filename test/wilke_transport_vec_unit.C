@@ -64,8 +64,7 @@
 #include "antioch/blottner_viscosity.h"
 #include "antioch/mixture_viscosity.h"
 #include "antioch/constant_lewis_diffusivity.h"
-#include "antioch/mixture_binary_diffusion.h"
-#include "antioch/mixture_species_diffusion.h"
+#include "antioch/mixture_diffusion.h"
 
 #include "antioch/wilke_mixture.h"
 #include "antioch/wilke_transport_mixture.h"
@@ -135,7 +134,7 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
 
-  typedef Antioch::StatMechThermodynamics< Scalar >   ThermoType;
+  typedef Antioch::StatMechThermodynamics< Scalar >   MicroThermo;
 
 // thermo for cp (diffusion)
   Antioch::NASAThermoMixture<Scalar,Antioch::NASA9CurveFit<Scalar> > cea_mixture( chem_mixture );
@@ -144,13 +143,13 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<ThermoType>,Scalar>
+  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,Scalar>
     k( tran_mixture );
 
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> mu( tran_mixture );
   Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
 
-  Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
+  Antioch::MixtureDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
     D( tran_mixture );
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
@@ -158,9 +157,9 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  Antioch::WilkeTransportEvaluator<Antioch::MixtureSpeciesDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>,
+  Antioch::WilkeTransportEvaluator<Antioch::ConstantLewisDiffusivity<Scalar>,
                                    Antioch::BlottnerViscosity<Scalar>,
-                                   Antioch::EuckenThermalConductivity<ThermoType>,
+                                   Antioch::EuckenThermalConductivity<MicroThermo>,
                                    Scalar>
     wilke( wilke_mixture, D, mu, k );
 
