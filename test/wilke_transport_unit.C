@@ -57,7 +57,7 @@
 #include "antioch/kinetics_theory_viscosity_building.h"
 #include "antioch/molecular_binary_diffusion.h"
 #include "antioch/gsl_spliner.h"
-#include "antioch/mixture_binary_diffusion.h"
+#include "antioch/mixture_diffusion.h"
 
 #endif
 //
