@@ -27,6 +27,7 @@
 #define ANTIOCH_MIXTURE_CONDUCTIVITY_H
 
 #include "antioch/mixture_transport_base.h"
+#include "antioch/species_conductivity_base.h"
 
 namespace Antioch
 {
@@ -69,7 +70,7 @@ namespace Antioch
 
   protected:
 
-    std::vector<Conductivity*> _species_conductivities;
+    std::vector<SpeciesConductivityBase<Conductivity>*> _species_conductivities;
 
   private:
 
@@ -87,7 +88,7 @@ namespace Antioch
   MixtureConductivity<Conductivity,CoeffType>::~MixtureConductivity()
   {
     // Need to delete all the species viscosities we allocated
-    for( typename std::vector<Conductivity*>::iterator it = _species_conductivities.begin();
+    for( typename std::vector<SpeciesConductivityBase<Conductivity>*>::iterator it = _species_conductivities.begin();
          it != _species_conductivities.end(); ++it )
       {
         delete (*it);
