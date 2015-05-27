@@ -320,6 +320,16 @@ namespace Antioch
                                                                               StateType& k_mix,
                                                                               VectorStateType & D_vec ) const
   {
+#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
+    static_assert( (ConductivityTraits<TherCond>::requires_diffusion &&
+                    DiffusionTraits<Diff>::is_binary_diffusion) ,
+                   "Incompatible thermal conductivity and diffusion models!" );
+#else
+    // Fall back to run time error if static_assert not available
+    if( ConductivityTraits<TherCond>::requires_diffusion &&
+        DiffusionTraits<Diff>::is_species_diffusion )
+      antioch_msg_error("ERROR: Incompatible thermal conductivity and diffusion models!");
+#endif
 
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
       transport_conditions(conditions);
