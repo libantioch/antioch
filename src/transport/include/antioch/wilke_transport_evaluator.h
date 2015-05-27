@@ -362,16 +362,29 @@ namespace Antioch
       {
         StateType phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
 
-        k[s] = _conductivity.conductivity_with_diffusion( s,
-                                                          transport_conditions.T(),
-                                                          molar_density*_mixture.chem_mixture().M(s),
-                                                          //rho*mass_fractions[s], // species density, rho_s
-                                                          mu[s],
-                                                          D_mat[s][s] );
+        if( ConductivityTraits<TherCond>::requires_diffusion )
+          {
+            k[s] = _conductivity.conductivity_with_diffusion( s,
+                                                              transport_conditions.T(),
+                                                              molar_density*_mixture.chem_mixture().M(s),
+                                                              //rho*mass_fractions[s], // species density, rho_s
+                                                              mu[s],
+                                                              D_mat[s][s] );
 
-        mu_mix += mu[s]*chi[s]/phi_s;
+          }
+        else
+          {
+            k[s] =  _conductivity.conductivity_without_diffusion( s,
+                                                                  transport_conditions.T(),
+                                                                  mu[s] );
+          }
+
         k_mix += k[s]*chi[s]/phi_s;
+        mu_mix += mu[s]*chi[s]/phi_s;
+
       }
+
+
 
     if( DiffusionTraits<Diff>::is_species_diffusion )
       {
