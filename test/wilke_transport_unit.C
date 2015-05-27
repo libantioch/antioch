@@ -272,6 +272,13 @@ int tester()
   for(unsigned int s = 0; s < D_kt.size(); s++)
     return_flag = test_val( D_kt[s], D_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
 
+  std::vector<Scalar> D_kt_2(5,0);
+  wilke_ps_evaluator.D(rho, T, mass_fractions, D_kt_2 );
+
+  for(unsigned int s = 0; s < D_kt.size(); s++)
+    return_flag = test_val( D_kt_2[s], D_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
+
+
 #endif
 
   return return_flag;
