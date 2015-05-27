@@ -159,6 +159,9 @@ namespace Antioch
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
     static_assert( !DiffusionTraits<Diff>::is_binary_diffusion,
                    "This function requires a binary diffusion model to compute D!" );
+#else
+    // Fall back to run time error if static_assert not available
+    antioch_msg_error("ERROR: This function requires a binary diffusion model to compute D!");
 #endif
 
     typename rebind<VectorStateType,VectorStateType>::type D_mat(D_vec.size());
