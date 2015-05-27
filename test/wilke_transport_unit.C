@@ -62,7 +62,7 @@
 #endif
 //
 #include "antioch/wilke_mixture.h"  // backward compatiblity
-//#include "antioch/wilke_evaluator.h"  // backward compatiblity
+#include "antioch/wilke_evaluator.h"  // backward compatiblity
 #include "antioch/wilke_transport_mixture.h"
 #include "antioch/wilke_transport_evaluator.h"
 
@@ -177,6 +177,14 @@ int tester()
     wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);
 
 #endif
+
+  Antioch::WilkeMixture<Scalar> wilke_mix_dep( chem_mixture );
+
+  Antioch::EuckenThermalConductivity<MicroThermo> k_eucken(thermo_stat);
+
+  Antioch::WilkeEvaluator<Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>,
+                          Antioch::EuckenThermalConductivity<MicroThermo>,
+                          Scalar> wilke_eval_dep( wilke_mix_dep, mu, k_eucken );
 
   int return_flag = 0;
 
