@@ -172,7 +172,7 @@ namespace Antioch
 
     _diffusion.compute_binary_diffusion_matrix( T, molar_density, D_mat );
 
-    this->diffusion_mixing_rule( _mixture().chem_mixture(),
+    this->diffusion_mixing_rule( _mixture.chem_mixture(),
                                  mass_fractions,
                                  D_mat,
                                  D_vec );
