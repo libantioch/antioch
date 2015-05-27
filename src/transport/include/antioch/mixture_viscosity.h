@@ -80,6 +80,8 @@ namespace Antioch
       return os;
     }
 
+    typedef Viscosity species_viscosity_type;
+
   protected:
 
     std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*> _species_viscosities;
