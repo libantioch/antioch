@@ -40,6 +40,7 @@
 #include "antioch/mixture_viscosity.h"
 #include "antioch/mixture_conductivity.h"
 #include "antioch/diffusion_traits.h"
+#include "antioch/conductivity_traits.h"
 
 namespace Antioch
 {
@@ -218,6 +219,15 @@ namespace Antioch
   WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::k( const Conditions& conditions,
                                                             const VectorStateType& mass_fractions ) const
   {
+#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
+    static_assert( !ConductivityTraits<TherCond>::requires_diffusion,
+                   "This function requires a conductivity model independent of diffusion!" );
+#else
+    // Fall back to run time error if static_assert not available
+    if( ConductivityTraits<TherCond>::requires_diffusion )
+      antioch_msg_error("ERROR: This function requires a conductivity model independent of diffusion!");
+#endif
+
     antioch_assert_equal_to(mass_fractions.size(), _mixture.chem_mixture().n_species());
 
     typename constructor_or_reference<const KineticsConditions<typename value_type<VectorStateType>::type,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
@@ -258,6 +268,15 @@ namespace Antioch
                                                                         StateType& mu_mix,
                                                                         StateType& k_mix ) const
   {
+#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
+    static_assert( !ConductivityTraits<TherCond>::requires_diffusion,
+                   "This function requires a conductivity model independent of diffusion!" );
+#else
+    // Fall back to run time error if static_assert not available
+    if( ConductivityTraits<TherCond>::requires_diffusion )
+      antioch_msg_error("ERROR: This function requires a conductivity model independent of diffusion!");
+#endif
+
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
       transport_conditions(conditions);
 
