@@ -157,7 +157,7 @@ namespace Antioch
                                                                  VectorStateType & D_vec) const
   {
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-    static_assert( !DiffusionTraits<Diff,CoeffType>::is_binary_diffusion,
+    static_assert( !DiffusionTraits<Diff>::is_binary_diffusion,
                    "This function requires a binary diffusion model to compute D!" );
 #endif
 
@@ -325,7 +325,7 @@ namespace Antioch
     const StateType molar_density = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
 
     // If we're using a binary diffusion model, compute D_mat, D_vec now
-    if( DiffusionTraits<Diff,CoeffType>::is_binary_diffusion )
+    if( DiffusionTraits<Diff>::is_binary_diffusion )
       {
         _diffusion.compute_binary_diffusion_matrix(transport_conditions.T(), molar_density, D_mat);
 
@@ -350,7 +350,7 @@ namespace Antioch
         k_mix += k[s]*chi[s]/phi_s;
       }
 
-    if( DiffusionTraits<Diff,CoeffType>::is_species_diffusion )
+    if( DiffusionTraits<Diff>::is_species_diffusion )
       {
         for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
           {

@@ -31,18 +31,18 @@
 
 namespace Antioch
 {
-  template<typename DiffModel, typename CoeffType>
+  template<typename DiffModel>
   struct DiffusionTraits;
 
   template<typename CoeffType>
-  struct DiffusionTraits<ConstantLewisDiffusivity<CoeffType>,CoeffType>
+  struct DiffusionTraits<ConstantLewisDiffusivity<CoeffType> >
   {
     static bool const is_species_diffusion = true;
     static bool const is_binary_diffusion = false;
   };
 
   template<typename CoeffType, typename Interpolator>
-  struct DiffusionTraits<MolecularBinaryDiffusion<CoeffType,Interpolator>,CoeffType>
+  struct DiffusionTraits<MolecularBinaryDiffusion<CoeffType,Interpolator> >
   {
     static bool const is_species_diffusion = false;
     static bool const is_binary_diffusion = true;

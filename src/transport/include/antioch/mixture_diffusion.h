@@ -97,7 +97,7 @@ namespace Antioch
     void private_init_impl( AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& tag )
     {
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-      static_assert( DiffusionTraits<Diffusion,CoeffType>::is_species_diffusion,
+      static_assert( DiffusionTraits<Diffusion>::is_species_diffusion,
                      "This shouldn't happen!" );
 #endif
 
@@ -107,7 +107,7 @@ namespace Antioch
     void private_init_impl( AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& tag )
     {
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-      static_assert( DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion,
+      static_assert( DiffusionTraits<Diffusion>::is_binary_diffusion,
                      "This shouldn't happen!" );
 #endif
 
@@ -185,12 +185,12 @@ namespace Antioch
 
   {
     // This class currenltly only supports species or binary diffusion models
-    if( !DiffusionTraits<Diffusion,CoeffType>::is_species_diffusion ||
-        !DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion )
+    if( !DiffusionTraits<Diffusion>::is_species_diffusion ||
+        !DiffusionTraits<Diffusion>::is_binary_diffusion )
       {
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-        static_assert( DiffusionTraits<Diffusion,CoeffType>::is_species_diffusion ||
-                       DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion,
+        static_assert( DiffusionTraits<Diffusion>::is_species_diffusion ||
+                       DiffusionTraits<Diffusion>::is_binary_diffusion,
                        "Can only instantiate MixtureDiffusion with a species or binary diffusion model!" );
 #endif
 
@@ -209,7 +209,7 @@ namespace Antioch
   MixtureDiffusion<Diffusion,CoeffType>::~MixtureDiffusion()
   {
     // Clean up species diffusion models
-    if( DiffusionTraits<Diffusion,CoeffType>::is_species_diffusion )
+    if( DiffusionTraits<Diffusion>::is_species_diffusion )
       {
         for( typename std::vector<SpeciesDiffusionBase<Diffusion,CoeffType>*>::iterator it = _species_diffusivities.begin();
          it != _species_diffusivities.end(); ++it )
@@ -217,7 +217,7 @@ namespace Antioch
       }
 
     // Clean up binary diffusion models
-    if( DiffusionTraits<Diffusion,CoeffType>::is_binary_diffusion )
+    if( DiffusionTraits<Diffusion>::is_binary_diffusion )
       {
         for( typename std::vector<std::vector<BinaryDiffusionBase<Diffusion,CoeffType>*> >::iterator it_outer = _binary_diffusivities.begin();
              it_outer != _binary_diffusivities.end(); ++it_outer )
