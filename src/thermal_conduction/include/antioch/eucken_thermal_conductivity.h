@@ -31,41 +31,40 @@
 #ifndef ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H
 #define ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_H
 
+#include "antioch/antioch_asserts.h"
+#include "antioch/species_conductivity_base.h"
+
 namespace Antioch
 {
   template<class ThermoEvaluator>
-  class EuckenThermalConductivity
+  class EuckenThermalConductivity : public SpeciesConductivityBase<EuckenThermalConductivity<ThermoEvaluator> >
   {
-  protected:
-
-    const ThermoEvaluator& _thermo;
-
   public:
 
-    EuckenThermalConductivity( const ThermoEvaluator& t) : _thermo(t) {}
+    EuckenThermalConductivity( const ThermoEvaluator& t)
+      : SpeciesConductivityBase<EuckenThermalConductivity<ThermoEvaluator> >(),
+      _thermo(t)
+    {}
 
     template <typename CoeffType>
-    EuckenThermalConductivity( const ThermoEvaluator& t, const std::vector<CoeffType>& /*coeffs*/) : _thermo(t) {}
+    EuckenThermalConductivity( const ThermoEvaluator& t, const std::vector<CoeffType>& /*coeffs*/)
+      : SpeciesConductivityBase<EuckenThermalConductivity<ThermoEvaluator> >(),
+      _thermo(t)
+    {}
 
-    ~EuckenThermalConductivity() {}
-
-     // Suppose thermal equilibrium Tv = Te = T:w
-    template <typename StateType>
-    ANTIOCH_AUTO(StateType)
-      operator()( const unsigned int s, const StateType& mu, const StateType & T ) const
-    ANTIOCH_AUTOFUNC(StateType, trans(s,mu) + rot(s,mu) + vib(s,mu,T) + elec(s,mu,T))
+    virtual ~EuckenThermalConductivity() {}
 
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
     trans( const unsigned int s, const StateType& mu ) const
     ANTIOCH_AUTOFUNC(StateType,
 		     typename Antioch::raw_value_type<StateType>::type(2.5) *
-		     mu * _thermo.cv_trans(s))
+		     mu * this->_thermo.cv_trans(s))
 
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
     rot( const unsigned int s, const StateType& mu ) const
-    ANTIOCH_AUTOFUNC(StateType, mu*_thermo.cv_rot(s))
+    ANTIOCH_AUTOFUNC(StateType, mu* this->_thermo.cv_rot(s))
 
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
@@ -73,14 +72,44 @@ namespace Antioch
     /* Note: Cander, "High-temperature effects in hypersonic flight",
              Encyclopedia of Aerospace Engineering, 2010 suggests that
              there should be a factor of 1.2 here. */
-    ANTIOCH_AUTOFUNC(StateType, mu*_thermo.cv_vib(s, Tv))
+    ANTIOCH_AUTOFUNC(StateType, mu* this->_thermo.cv_vib(s, Tv))
 
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
     elec( const unsigned int s, const StateType& mu, const StateType& Te ) const
-    ANTIOCH_AUTOFUNC(StateType, mu*_thermo.cv_el(s, Te))
+    ANTIOCH_AUTOFUNC(StateType, mu* this->_thermo.cv_el(s, Te))
+
+
+    //! Friend the base class so we can make the implementation protected
+    friend class SpeciesConductivityBase<EuckenThermalConductivity<ThermoEvaluator> >;
+
+  protected:
+
+    const ThermoEvaluator& _thermo;
+
+     // Suppose thermal equilibrium Tv = Te = T:w
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+      op_no_diff_impl( const unsigned int s, const StateType& mu, const StateType & T ) const
+    ANTIOCH_AUTOFUNC(StateType, trans(s,mu) + rot(s,mu) + vib(s,mu,T) + elec(s,mu,T))
+
+
+    template <typename StateType>
+    const ANTIOCH_AUTO(StateType)
+      op_with_diff_impl(unsigned int s, const StateType& mu_s, const StateType & T, const StateType & rho_s, const StateType & Dss) const;
 
   };
+
+  template<class ThermoEvaluator>
+  template <typename StateType>
+  const ANTIOCH_AUTO(StateType)
+    EuckenThermalConductivity<ThermoEvaluator>::op_with_diff_impl(unsigned int s, const StateType& mu_s, const StateType & /*T*/, const StateType & /*rho_s*/, const StateType & /*Dss*/) const
+  {
+    antioch_error();
+
+    /*The following is dummy*/
+    return trans(s,mu_s);
+  }
 
 } // end namespace Antioch
 
