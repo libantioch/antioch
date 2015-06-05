@@ -97,6 +97,7 @@ pkginclude_HEADERS += thermo/include/antioch/ideal_gas_micro_thermo.h
 pkginclude_HEADERS += transport/include/antioch/mixture_transport_base.h
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
 pkginclude_HEADERS += transport/include/antioch/mixture_conductivity.h
+pkginclude_HEADERS += transport/include/antioch/mixture_diffusion.h
 pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
 pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
 pkginclude_HEADERS += transport/include/antioch/wilke_transport_mixture.h
@@ -115,11 +116,16 @@ pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity.h
 # diffusion
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
 pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion.h
+pkginclude_HEADERS += diffusion/include/antioch/binary_diffusion_base.h
+pkginclude_HEADERS += diffusion/include/antioch/species_diffusion_base.h
+pkginclude_HEADERS += diffusion/include/antioch/diffusion_traits.h
 
 # thermal conduction
 pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity.h
 pkginclude_HEADERS += thermal_conduction/include/antioch/kinetics_theory_thermal_conductivity.h
 pkginclude_HEADERS += thermal_conduction/include/antioch/rotational_relaxation.h
+pkginclude_HEADERS += thermal_conduction/include/antioch/species_conductivity_base.h
+pkginclude_HEADERS += thermal_conduction/include/antioch/conductivity_traits.h
 
 # utilities
 pkginclude_HEADERS += utilities/include/antioch/antioch_exceptions.h
