@@ -12,6 +12,7 @@
 # Air   -- 
 # N2    -- 
 # CPAir & CPN2 -- compatibility with benkirk's dissertation cases
+# O2    -- Wikipedia. Should be taken with a grain of salt.
 # 
 # Sutherland coefficients are in general not as accurate as Blottner fits,
 # and are provided mainly for completeness.
@@ -20,3 +21,4 @@ Air     1.458000e-06  1.103000e+02
 CPAir   1.458000e-06  1.104000e+02
 N2      1.399306e-06  1.066667e+02
 CPN2    1.399306e-06  1.066667e+02
+O2      1.693411e-06  1.270000e+02
