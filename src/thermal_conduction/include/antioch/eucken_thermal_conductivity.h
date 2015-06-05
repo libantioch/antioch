@@ -79,6 +79,7 @@ namespace Antioch
     elec( const unsigned int s, const StateType& mu, const StateType& Te ) const
     ANTIOCH_AUTOFUNC(StateType, mu* this->_thermo.cv_el(s, Te))
 
+    typedef ThermoEvaluator micro_thermo_type;
 
     //! Friend the base class so we can make the implementation protected
     friend class SpeciesConductivityBase<EuckenThermalConductivity<ThermoEvaluator> >;
