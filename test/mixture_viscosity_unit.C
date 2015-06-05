@@ -88,8 +88,10 @@ int tester()
   Antioch::BlottnerViscosity<Scalar> b_N2(2.68142000000e-02,  3.17783800000e-01, -1.13155513000e+01);
   Antioch::BlottnerViscosity<Scalar> b_O2(4.49290000000e-02, -8.26158000000e-02, -9.20194750000e+00);
 
+#ifdef  ANTIOCH_HAVE_GSL
   Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner> k_N2(97.530, 3.621, 0.0, chem_mixture.M(0)/Antioch::Constants::Avogadro<Scalar>());
   Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner> k_O2(107.400, 3.458, 0.0, chem_mixture.M(1)/Antioch::Constants::Avogadro<Scalar>() );
+#endif // ANTIOCH_HAVE_GSL
 
   Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar>
     s_mu_mixture(tran_mixture);
@@ -97,16 +99,24 @@ int tester()
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>
     b_mu_mixture(tran_mixture);
 
+#ifdef  ANTIOCH_HAVE_GSL
   Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner>,Scalar>
     k_mu_mixture(tran_mixture);
+#endif // ANTIOCH_HAVE_GSL
 
   Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
   Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
+
+#ifdef  ANTIOCH_HAVE_GSL
   Antioch::build_kinetics_theory_viscosity<Scalar>(k_mu_mixture);
+#endif // ANTIOCH_HAVE_GSL
 
   std::cout << s_mu_mixture << std::endl;
   std::cout << b_mu_mixture << std::endl;
+
+#ifdef  ANTIOCH_HAVE_GSL
   std::cout << k_mu_mixture << std::endl;
+#endif // ANTIOCH_HAVE_GSL
 
   const Scalar T = 1500.1;
 
@@ -122,11 +132,13 @@ int tester()
       std::cout << "mu(" << species_str_list[s] << ") = " << b_mu_mixture(s, T) << std::endl;
     }
 
+#ifdef  ANTIOCH_HAVE_GSL
   std::cout << "Kinetic Theory:" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
     {
       std::cout << "mu(" << species_str_list[s] << ") = " << k_mu_mixture(s, T) << std::endl;
     }
+#endif // ANTIOCH_HAVE_GSL
 
   int return_flag = 0;
 
@@ -134,9 +146,12 @@ int tester()
   return_flag = test_values( s_mu_mixture(0, T), s_N2(T), tol ) ||
     test_values( s_mu_mixture(1, T), s_O2(T), tol ) ||
     test_values( b_mu_mixture(0, T), b_N2(T), tol ) ||
-    test_values( b_mu_mixture(1, T), b_O2(T), tol ) ||
-    test_values( k_mu_mixture(0, T), k_N2(T), tol ) ||
+    test_values( b_mu_mixture(1, T), b_O2(T), tol );
+
+#ifdef  ANTIOCH_HAVE_GSL
+    return_flag = test_values( k_mu_mixture(0, T), k_N2(T), tol ) ||
     test_values( k_mu_mixture(1, T), k_O2(T), tol );
+#endif // ANTIOCH_HAVE_GSL
 
   return return_flag;
 }

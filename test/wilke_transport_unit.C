@@ -237,10 +237,7 @@ int tester()
 
   const Scalar T = 1000.0L;
   const Antioch::TempCache<Scalar> T_cache(T);
-  const Scalar P = 1e5;
-  const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
-  const Scalar rho = P/(R_mix*T); // kg.m-3
-  const Scalar cp = thermo_mix.cp( T_cache, mass_fractions );
+
   Scalar wilke_mu = wilke.mu(T, mass_fractions );
   Scalar wilke_k = wilke.k(T, mass_fractions );
 
@@ -261,6 +258,11 @@ int tester()
    and the reduced temperature falls also on a node (less easy).
    Then we will have a theoretical independant value.
 */
+  const Scalar P = 1e5;
+  const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
+  const Scalar rho = P/(R_mix*T); // kg.m-3
+  const Scalar cp = thermo_mix.cp( T_cache, mass_fractions );
+
   const Scalar mu_long_double   = 4.49877527305932602332e-05L;
   const Scalar k_long_double    = 8.22050332419571328635e-02L;
 

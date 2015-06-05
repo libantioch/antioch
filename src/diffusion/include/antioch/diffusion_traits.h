@@ -43,12 +43,14 @@ namespace Antioch
     static bool const is_binary_diffusion = false;
   };
 
+#ifdef  ANTIOCH_HAVE_GSL
   template<typename CoeffType, typename Interpolator>
   struct DiffusionTraits<MolecularBinaryDiffusion<CoeffType,Interpolator> >
   {
     static bool const is_species_diffusion = false;
     static bool const is_binary_diffusion = true;
   };
+#endif // ANTIOCH_HAVE_GSL
 
   namespace AntiochPrivate
   {
@@ -66,9 +68,12 @@ namespace Antioch
     template<typename Diffusion, typename CoeffType>
     struct diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >{};
 
+#ifdef  ANTIOCH_HAVE_GSL
     template<typename CoeffType, typename Interpolator>
     struct diffusion_tag<MolecularBinaryDiffusion<CoeffType,Interpolator> >
       : public diffusion_tag<BinaryDiffusionBase<MolecularBinaryDiffusion<CoeffType,Interpolator>,CoeffType> >{};
+#endif // ANTIOCH_HAVE_GSL
+
   }
 
 } // end namespace Antioch

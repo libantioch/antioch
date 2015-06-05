@@ -98,12 +98,17 @@ int tester()
   Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>
     b_mu_mixture(tran_mixture);
 
+#ifdef  ANTIOCH_HAVE_GSL
   Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar, Antioch::GSLSpliner>,Scalar>
     k_mu_mixture(tran_mixture);
+#endif // ANTIOCH_HAVE_GSL
 
   Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
   Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
+
+#ifdef  ANTIOCH_HAVE_GSL
   Antioch::build_kinetics_theory_viscosity<Scalar>(k_mu_mixture);
+#endif // ANTIOCH_HAVE_GSL
 
   const Scalar T = 1500.1;
 
@@ -117,8 +122,10 @@ int tester()
   Scalar k_e_b_N2_value = 0.0; // init
 
   // Eucken KineticsTheory gold
+#ifdef  ANTIOCH_HAVE_GSL
   Scalar k_e_kt_N2_gold = 8.6774379182691310526782e-02L;
   Scalar k_e_kt_N2_value = 0.0; // init
+#endif // ANTIOCH_HAVE_GSL
 
   std::cout << "Eucken (with SutherlandViscosity):" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
@@ -142,6 +149,7 @@ int tester()
       std::cout << "k(" << species_str_list[s] << ") = " <<  value << std::endl;
     }
 
+#ifdef  ANTIOCH_HAVE_GSL
   std::cout << "Eucken (with KineticsTheoryViscosity):" << std::endl;
   for( unsigned int s = 0; s < n_species; s++ )
     {
@@ -152,6 +160,7 @@ int tester()
 
       std::cout << "k(" << species_str_list[s] << ") = " << value << std::endl;
     }
+#endif // ANTIOCH_HAVE_GSL
 
   int return_flag = 0;
 
@@ -164,8 +173,10 @@ int tester()
   if( !test_val<Scalar>(k_e_b_N2_value, k_e_b_N2_gold, tol, "Eucken-Blottner") )
     return_flag = 1;
 
+#ifdef  ANTIOCH_HAVE_GSL
   if( !test_val<Scalar>(k_e_kt_N2_value, k_e_kt_N2_gold, tol, "Eucken-KineticsTheory") )
     return_flag = 1;
+#endif // ANTIOCH_HAVE_GSL
 
   return return_flag;
 }

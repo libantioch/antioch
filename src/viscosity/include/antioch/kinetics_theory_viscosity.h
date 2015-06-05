@@ -321,4 +321,4 @@ namespace Antioch
 
 #endif //ANTIOCH_KINETICS_THEORY_VISCOSITY_H
 
-#endif // if ANTIOCH_HAVE_GSL
+#endif // ANTIOCH_HAVE_GSL

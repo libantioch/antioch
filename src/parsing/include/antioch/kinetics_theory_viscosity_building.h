@@ -23,6 +23,9 @@
 //
 //-----------------------------------------------------------------------el-
 
+#include "antioch_config.h"
+#ifdef ANTIOCH_HAVE_GSL // if we do not have it, we don't even define the stuff
+
 #ifndef ANTIOCH_KINETICS_THEORY_BUILDING_H
 #define ANTIOCH_KINETICS_THEORY_BUILDING_H
 
@@ -62,4 +65,6 @@ namespace Antioch
 
 }
 
-#endif
+#endif // ANTIOCH_KINETICS_THEORY_BUILDING_H
+
+#endif // ANTIOCH_HAVE_GSL
