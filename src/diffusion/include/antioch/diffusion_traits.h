@@ -26,6 +26,8 @@
 #ifndef ANTIOCH_DIFFUSION_TRAITS_H
 #define ANTIOCH_DIFFUSION_TRAITS_H
 
+#include "antioch/species_diffusion_base.h"
+#include "antioch/binary_diffusion_base.h"
 #include "antioch/constant_lewis_diffusivity.h"
 #include "antioch/molecular_binary_diffusion.h"
 
