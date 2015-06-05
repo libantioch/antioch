@@ -94,7 +94,7 @@ namespace Antioch
 
   private:
 
-    void private_init_impl( AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& tag )
+    void private_init_impl( AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& /*tag*/ )
     {
       antioch_static_assert( DiffusionTraits<Diffusion>::is_species_diffusion,
                              "This shouldn't happen!" );
@@ -102,7 +102,7 @@ namespace Antioch
       _species_diffusivities.resize( this->_transport_mixture.n_species(), NULL );
     }
 
-    void private_init_impl( AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& tag )
+    void private_init_impl( AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& /*tag*/ )
     {
       antioch_static_assert( DiffusionTraits<Diffusion>::is_binary_diffusion,
                              "This shouldn't happen!" );
@@ -127,7 +127,7 @@ namespace Antioch
     void private_diff_matrix_impl( const StateType& T,
                                    const StateType& molar_density,
                                    MatrixStateType& D,
-                                   AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& tag ) const
+                                   AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& /*tag*/ ) const
     {
       for(unsigned int i = 0; i < D.size(); i++)
       {
@@ -144,7 +144,7 @@ namespace Antioch
     void private_diff_matrix_impl( const StateType& /*T*/,
                                    const StateType& /*molar_density*/,
                                    MatrixStateType& /*D*/,
-                                   AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& tag ) const
+                                   AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& /*tag*/ ) const
     {
       antioch_error();
     }
@@ -155,7 +155,7 @@ namespace Antioch
                                     const StateType& cp,
                                     const StateType& k,
                                     StateType& D,
-                                    AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& tag ) const
+                                    AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& /*tag*/ ) const
     {
       (*_species_diffusivities[s])(rho,cp,k,D);
     }
@@ -166,7 +166,7 @@ namespace Antioch
                                     const StateType& cp,
                                     const StateType& k,
                                     StateType& D,
-                                    AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& tag ) const
+                                    AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& /*tag*/ ) const
     {
       antioch_error();
     }

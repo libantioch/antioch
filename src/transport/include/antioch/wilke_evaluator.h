@@ -116,7 +116,7 @@ namespace Antioch
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
                                                                            const Viscosity& viscosity,
-                                                                           const ThermalConductivity& conductivity )
+                                                                           const ThermalConductivity& /*conductivity*/ )
     : _transport_mixture( new TransportMixture<CoeffType>(mixture.chem_mixture()) ),
       _wilke_mixture( new WilkeTransportMixture<CoeffType>(*_transport_mixture) ),
       _diffusion( new MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>(*_transport_mixture) ),
