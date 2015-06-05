@@ -96,20 +96,16 @@ namespace Antioch
 
     void private_init_impl( AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& tag )
     {
-#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-      static_assert( DiffusionTraits<Diffusion>::is_species_diffusion,
-                     "This shouldn't happen!" );
-#endif
+      antioch_static_assert( DiffusionTraits<Diffusion>::is_species_diffusion,
+                             "This shouldn't happen!" );
 
       _species_diffusivities.resize( this->_transport_mixture.n_species(), NULL );
     }
 
     void private_init_impl( AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& tag )
     {
-#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-      static_assert( DiffusionTraits<Diffusion>::is_binary_diffusion,
-                     "This shouldn't happen!" );
-#endif
+      antioch_static_assert( DiffusionTraits<Diffusion>::is_binary_diffusion,
+                             "This shouldn't happen!" );
 
       // Build up binary diffusion species models
       _binary_diffusivities.resize( this->_transport_mixture.n_species() );
@@ -188,11 +184,9 @@ namespace Antioch
     if( !DiffusionTraits<Diffusion>::is_species_diffusion ||
         !DiffusionTraits<Diffusion>::is_binary_diffusion )
       {
-#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-        static_assert( DiffusionTraits<Diffusion>::is_species_diffusion ||
-                       DiffusionTraits<Diffusion>::is_binary_diffusion,
-                       "Can only instantiate MixtureDiffusion with a species or binary diffusion model!" );
-#endif
+        antioch_static_assert( DiffusionTraits<Diffusion>::is_species_diffusion ||
+                               DiffusionTraits<Diffusion>::is_binary_diffusion,
+                               "Can only instantiate MixtureDiffusion with a species or binary diffusion model!" );
 
         std::string error = "ERROR: You're trying to construct an object\n";
         error += "       with an unknown diffusion model!\n";

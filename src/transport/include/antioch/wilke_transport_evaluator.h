@@ -157,14 +157,8 @@ namespace Antioch
                                                                  const VectorStateType& mass_fractions,
                                                                  VectorStateType & D_vec) const
   {
-#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-    static_assert( DiffusionTraits<Diff>::is_binary_diffusion,
-                   "This function requires a binary diffusion model to compute D!" );
-#else
-    // Fall back to run time error if static_assert not available
-    if( !DiffusionTraits<Diff>::is_binary_diffusion )
-      antioch_msg_error("ERROR: This function requires a binary diffusion model to compute D!");
-#endif
+    antioch_static_assert_runtime_fallback( DiffusionTraits<Diff>::is_binary_diffusion,
+                                            "ERROR: This function requires a binary diffusion model to compute D!");
 
     typename rebind<VectorStateType,VectorStateType>::type D_mat(D_vec.size());
     init_constant(D_mat,D_vec);
@@ -219,14 +213,8 @@ namespace Antioch
   WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::k( const Conditions& conditions,
                                                             const VectorStateType& mass_fractions ) const
   {
-#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-    static_assert( !ConductivityTraits<TherCond>::requires_diffusion,
-                   "This function requires a conductivity model independent of diffusion!" );
-#else
-    // Fall back to run time error if static_assert not available
-    if( ConductivityTraits<TherCond>::requires_diffusion )
-      antioch_msg_error("ERROR: This function requires a conductivity model independent of diffusion!");
-#endif
+    antioch_static_assert_runtime_fallback( !ConductivityTraits<TherCond>::requires_diffusion,
+                                            "This function requires a conductivity model independent of diffusion!");
 
     antioch_assert_equal_to(mass_fractions.size(), _mixture.chem_mixture().n_species());
 
@@ -268,14 +256,8 @@ namespace Antioch
                                                                         StateType& mu_mix,
                                                                         StateType& k_mix ) const
   {
-#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-    static_assert( !ConductivityTraits<TherCond>::requires_diffusion,
-                   "This function requires a conductivity model independent of diffusion!" );
-#else
-    // Fall back to run time error if static_assert not available
-    if( ConductivityTraits<TherCond>::requires_diffusion )
-      antioch_msg_error("ERROR: This function requires a conductivity model independent of diffusion!");
-#endif
+    antioch_static_assert_runtime_fallback( !ConductivityTraits<TherCond>::requires_diffusion,
+                                            "This function requires a conductivity model independent of diffusion!");
 
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
       transport_conditions(conditions);
@@ -320,16 +302,9 @@ namespace Antioch
                                                                               StateType& k_mix,
                                                                               VectorStateType & D_vec ) const
   {
-#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
-    static_assert( (ConductivityTraits<TherCond>::requires_diffusion &&
-                    DiffusionTraits<Diff>::is_binary_diffusion) ,
-                   "Incompatible thermal conductivity and diffusion models!" );
-#else
-    // Fall back to run time error if static_assert not available
-    if( ConductivityTraits<TherCond>::requires_diffusion &&
-        DiffusionTraits<Diff>::is_species_diffusion )
-      antioch_msg_error("ERROR: Incompatible thermal conductivity and diffusion models!");
-#endif
+    antioch_static_assert_runtime_fallback( (ConductivityTraits<TherCond>::requires_diffusion &&
+                                             DiffusionTraits<Diff>::is_binary_diffusion) ,
+                                            "Incompatible thermal conductivity and diffusion models!" );
 
     typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const Conditions>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
       transport_conditions(conditions);
