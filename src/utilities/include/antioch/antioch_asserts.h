@@ -124,6 +124,25 @@
 
 // Just outputing to std::cerr
 #define antioch_msg_error(errmsg)           do { std::cerr << errmsg << std::endl; }                   while(0)
-#define antioch_not_implemented_msg(errmsg) do {antioch_msg_error(errmsg); antioch_not_implemented();} while(0) 
+#define antioch_not_implemented_msg(errmsg) do {antioch_msg_error(errmsg); antioch_not_implemented();} while(0)
+
+// Encapsulate guarding static_assert until we require C++11
+#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
+#define antioch_static_assert(cond,errmsg) static_assert(cond,errmsg)
+#else
+#define antioch_static_assert(cond,errmsg) ((void) 0)
+#endif
+
+
+// Encapsulate guarding static_assert until we require C++11
+// This one include a fallback to a runtime error.
+#ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT
+#define antioch_static_assert_runtime_fallback(cond,errmsg) static_assert( cond, errmsg )
+#else
+#define antioch_static_assert_runtime_fallback(cond,errmsg)     \
+  if( !cond )                                                   \
+    antioch_msg_error(errmsg)
+#endif
+
 
 #endif // ANTIOCH_ASSERTS_H
