@@ -37,6 +37,7 @@
 #include "antioch/mixture_viscosity.h"
 #include "antioch/wilke_transport_evaluator.h"
 #include "antioch/antioch_asserts.h"
+#include "antioch/eucken_thermal_conductivity_building.h"
 
 namespace Antioch
 {
@@ -101,6 +102,8 @@ namespace Antioch
 
     MixtureConductivity<ThermalConductivity,CoeffType>* _conductivity;
 
+    typename ThermalConductivity::micro_thermo_type* _micro_thermo;
+
     typedef  WilkeTransportEvaluator<ConstantLewisDiffusivity<CoeffType>,
                                      typename MixtureViscosity::species_viscosity_type,
                                      ThermalConductivity,
@@ -118,15 +121,18 @@ namespace Antioch
       _wilke_mixture( new WilkeTransportMixture<CoeffType>(*_transport_mixture) ),
       _diffusion( new MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>(*_transport_mixture) ),
       _conductivity( new MixtureConductivity<ThermalConductivity,CoeffType>(*_transport_mixture) ),
+      _micro_thermo( new typename ThermalConductivity::micro_thermo_type(mixture.chem_mixture()) ),
       _wilke_eval(new Evaluator(*_wilke_mixture,*_diffusion,viscosity,*_conductivity))
   {
     antioch_deprecated();
+    Antioch::build_eucken_thermal_conductivity<typename ThermalConductivity::micro_thermo_type,CoeffType>(*_conductivity, *_micro_thermo );
   }
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::~WilkeEvaluator()
   {
     delete _wilke_eval;
+    delete _micro_thermo;
     delete _conductivity;
     delete _diffusion;
     delete _wilke_mixture;
