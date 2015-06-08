@@ -3,7 +3,17 @@
 # Programs and libraries we want to build
 #----------------------------------------
 
-bin_PROGRAMS    = antioch_version 
+bin_PROGRAMS    = antioch_version
+
+lib_LTLIBRARIES = libantioch.la
+
+#----------------------------------------------
+# List of source files to build dynamic library
+#----------------------------------------------
+libantioch_la_SOURCES =
+
+# utilities
+libantioch_la_SOURCES += utilities/src/antioch_version.C
 
 #----------------------------
 # INCLUDES we want distributed
@@ -155,6 +165,7 @@ pkginclude_HEADERS += $(top_builddir)/src/utilities/include/antioch/antioch_vers
 
 # Version app
 antioch_version_SOURCES = apps/version.C
+antioch_version_LDADD = libantioch.la
 
 #--------------------------------------
 #Local Directories to include for build
@@ -181,4 +192,3 @@ if CODE_COVERAGE_ENABLED
 endif
 
 EXTRA_DIST = common
-
