@@ -12,6 +12,25 @@ lib_LTLIBRARIES = libantioch.la
 #----------------------------------------------
 libantioch_la_SOURCES =
 
+# core
+libantioch_la_SOURCES += core/src/chemical_mixture.C
+
+# parsing
+libantioch_la_SOURCES += parsing/src/ascii_parser.C
+libantioch_la_SOURCES += parsing/src/blottner_parsing.C
+libantioch_la_SOURCES += parsing/src/cea_mixture_parsing.C
+libantioch_la_SOURCES += parsing/src/cea_mixture_ascii_parsing.C
+libantioch_la_SOURCES += parsing/src/chemkin_parser.C
+libantioch_la_SOURCES += parsing/src/nasa_mixture_parsing.C
+libantioch_la_SOURCES += parsing/src/nasa_mixture_ascii_parsing.C
+libantioch_la_SOURCES += parsing/src/read_reaction_set_data.C
+libantioch_la_SOURCES += parsing/src/sutherland_parsing.C
+libantioch_la_SOURCES += parsing/src/transport_species_parsing.C
+libantioch_la_SOURCES += parsing/src/xml_parser.C
+
+# transport
+libantioch_la_SOURCES += transport/src/transport_mixture.C
+
 # utilities
 libantioch_la_SOURCES += utilities/src/antioch_version.C
 

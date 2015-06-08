@@ -31,19 +31,16 @@
 #ifndef ANTIOCH_SUTHERLAND_PARSING_H
 #define ANTIOCH_SUTHERLAND_PARSING_H
 
-// Antioch
-#include "antioch/sutherland_viscosity.h"
-#include "antioch/mixture_viscosity.h"
-
 // C++
-#include <iostream>
+#include <string>
 
 namespace Antioch
 {
+  template<typename Viscosity, typename NumericType>
+  class MixtureViscosity;
 
-  /*
-      MixtureViscosity versions
-   */
+  template<typename NumericType>
+  class SutherlandViscosity;
 
   template<class NumericType>
   void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
@@ -51,60 +48,6 @@ namespace Antioch
 
   template<class NumericType>
   void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu );
-
-  /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
-  inline
-  void read_sutherland_data_ascii( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu,
-				   const std::string &filename)
-  {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-       std::cerr << "ERROR: unable to load file " << filename << std::endl;
-       antioch_error();
-    }
-    
-    // skip the header
-    skip_comment_lines(in, '#');
-
-    std::string name;
-    NumericType a, b;
-
-     while (in.good())
-      {
-        in >> name; // Species Name
-        in >> a;    // 
-        in >> b;    //
-        
-        // If we are still good, we have a valid set of transport
-        // data for this species. Otherwise, we read past end-of-file 
-        // in the section above
-        if (in.good())
-          {
-	    const ChemicalMixture<NumericType>& chem_mixture = mu.chemical_mixture();
-	    
-	    // Check if this is a species we want.
-	    if( chem_mixture.species_name_map().find(name) !=
-		chem_mixture.species_name_map().end() )
-	      {
-		// Pack up coefficients
-		std::vector<NumericType> coeffs(2);
-		coeffs[0] = a;
-		coeffs[1] = b;
-		mu.add(name, coeffs);
-	      }
-	  }
-      }
-      in.close();
-    return;
-  }
-
-  template<class NumericType>
-  void read_sutherland_data_ascii_default( MixtureViscosity<SutherlandViscosity<NumericType>,NumericType >& mu )
-  {
-    read_sutherland_data_ascii(mu, DefaultFilename::sutherland_data());
-  }
 
 } // end namespace Antioch
 

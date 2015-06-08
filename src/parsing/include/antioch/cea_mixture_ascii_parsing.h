@@ -36,6 +36,7 @@
 #include <vector>
 
 // Antioch
+#include "antioch/ascii_parser.h"
 #include "antioch/cea_mixture_parsing.h"
 
 
@@ -68,29 +69,6 @@ namespace Antioch
   template<class NumericType>
   void read_cea_mixture_data_ascii( CEAThermodynamics<NumericType >& thermo, const std::string &filename );
 
-
-/* ------------------------ backward compatibility ---------------------*/
-  template<class NumericType>
-  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType >& thermo )
-  {
-    antioch_deprecated();
-    read_cea_mixture_data(thermo, DefaultFilename::thermo_data(), ASCII, true);
-  }
-
-  template<class NumericType>
-  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType > & thermo, const std::string &filename )
-  {
-    antioch_deprecated();
-    read_cea_mixture_data( thermo, filename, ASCII, true );
-  }
-
-  template<class NumericType>
-  void read_cea_mixture_data_ascii( CEAThermodynamics<NumericType > & thermo, const std::string &filename )
-  {
-    antioch_deprecated();
-    ASCIIParser<NumericType> parser(filename);
-    parser.read_thermodynamic_data(thermo);
-  }
 
 } // end namespace Antioch
 

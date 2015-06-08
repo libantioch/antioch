@@ -51,17 +51,8 @@ namespace Antioch
   // New declarations
 
   template<class NumericType>
-  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType,NASA7CurveFit<NumericType> >& thermo, const std::string &filename );
-
- 
-  /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
-  inline
-  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo, const std::string &filename )
-  {
-     antioch_deprecated(); 
-     read_nasa_mixture_data( thermo, filename, CHEMKIN, true);
-  }
+  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType,NASA7CurveFit<NumericType> >& thermo,
+                                     const std::string &filename );
 
 } // end namespace Antioch
 

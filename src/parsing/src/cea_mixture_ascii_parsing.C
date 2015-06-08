@@ -23,23 +23,38 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#include "antioch/cea_mixture_ascii_parsing.h"
 
-namespace Antioch{
+// Antioch
+#include "antioch/cea_mixture.h"
+#include "antioch/ascii_parser.h"
+#include "antioch/cea_mixture_ascii_parsing_instantiate_macro.h"
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
+namespace Antioch
+{
 
-  template <typename NumericType>
-  class TransportMixture;
+  template<class NumericType>
+  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType >& thermo )
+  {
+    antioch_deprecated();
+    read_cea_mixture_data(thermo, DefaultFilename::thermo_data(), ASCII, true);
+  }
 
+  template<class NumericType>
+  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType > & thermo, const std::string &filename )
+  {
+    antioch_deprecated();
+    read_cea_mixture_data( thermo, filename, ASCII, true );
+  }
 
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
+  template<class NumericType>
+  void read_cea_mixture_data_ascii( CEAThermodynamics<NumericType > & thermo, const std::string &filename )
+  {
+    antioch_deprecated();
+    ASCIIParser<NumericType> parser(filename);
+    parser.read_thermodynamic_data(thermo);
+  }
 
-} //end namespace Antioch
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_INSTANTIATE();
 
-#endif
+} // end namespace Antioch

@@ -23,23 +23,26 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#include "antioch/nasa_mixture_ascii_parsing.h"
 
-namespace Antioch{
+// Antioch
+#include "antioch/parsing_enum.h"
+#include "antioch/nasa_mixture_parsing.h"
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
+namespace Antioch
+{
 
-  template <typename NumericType>
-  class TransportMixture;
+  template<class NumericType>
+  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType,NASA7CurveFit<NumericType> >& thermo,
+                                     const std::string &filename )
+  {
+     antioch_deprecated();
+     read_nasa_mixture_data( thermo, filename, CHEMKIN, true);
+  }
 
+  // Instantiate
+  template void read_nasa_mixture_data_ascii<float>( NASAThermoMixture<float,NASA7CurveFit<float> >&, const std::string& );
+  template void read_nasa_mixture_data_ascii<double>( NASAThermoMixture<double,NASA7CurveFit<double> >&, const std::string& );
+  template void read_nasa_mixture_data_ascii<long double>( NASAThermoMixture<long double,NASA7CurveFit<long double> >&, const std::string& );
 
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+} // end namespace Antioch
