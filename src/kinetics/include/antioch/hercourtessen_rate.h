@@ -101,17 +101,27 @@ namespace Antioch
     CoeffType eta()  const;
     CoeffType Tref() const;
 
+// fork method
+
+    //! \return the rate evaluated at \p T.
+    template <typename InputType>
+    ANTIOCH_AUTO(typename return_type<InputType>::type) 
+    operator()(const InputType& T) const
+    ANTIOCH_AUTOFUNC(typename return_type<InputType>::type, this->rate(T))
+
+    //! \return the derivative with respect to the parameter evaluated at \p T.
+    template <typename InputType>
+    ANTIOCH_AUTO(typename return_type<InputType>::type) 
+    sensitivity( const InputType& T, KineticsModel::Parameters par ) const;
+
+
+// overloads
+
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     rate(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_pow(T,_eta)))
-
-    //! \return the rate evaluated at \p T.
-    template <typename StateType>
-    ANTIOCH_AUTO(StateType) 
-    operator()(const StateType& T) const
-    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
@@ -119,9 +129,48 @@ namespace Antioch
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)/T*(_eta))
 
+    //! \return the derivative with respect to the parameter A evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_A( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, ant_pow(T/_Tref,_eta))
+
+    //! \return the derivative with respect to the parameter beta evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_beta( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T) * ant_log(T/_Tref))
+
+    //! \return the derivative with respect to the parameter Tref evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Tref( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, - _eta /_Tref * this->rate(T) )
+
+
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
+
+
+    //! \return the derivative with respect to the parameter A evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_A( const KineticsConditions<StateType,VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType, ant_pow(cond.T()/_Tref,_eta))
+
+    //! \return the derivative with respect to the parameter beta evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_beta( const KineticsConditions<StateType, VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(cond) * (cond.temp_cache().lnT - ant_log(_Tref)) )
+
+    //! \return the derivative with respect to the parameter Tref evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Tref( const KineticsConditions<StateType, VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType, - _eta /_Tref * this->rate(cond) )
+
 
     //! print equation
     const std::string numeric() const;
@@ -296,6 +345,34 @@ namespace Antioch
     _Cf = _raw_Cf * ant_pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
 
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename InputType>
+  inline
+  ANTIOCH_AUTO(typename return_type<InputType>::type) 
+  HercourtEssenRate<CoeffType>::sensitivity( const InputType& T, KineticsModel::Parameters par ) const
+  {
+     switch(par)
+     {
+        case KineticsModel::Parameters::A:
+        {
+           return this->sensitivity_A(T);
+        }
+          break;
+        case KineticsModel::Parameters::B:
+        {
+           return this->sensitivity_beta(T);
+        }
+          break;
+        case KineticsModel::Parameters::T_REF:
+        {
+           return this->sensitivity_Tref(T);
+        }
+          break;
+     }
+
+    return typename return_type<InputType>::type(0);
   }
 
 } // end namespace Antioch

@@ -142,6 +142,41 @@ namespace Antioch
                            StateType &dF_dT,
                            VectorStateType &dF_dX) const;
 
+    //! Sensitivity to kinetics parameters and epsilon parameters
+    //
+    // This is but a combination of previously computed values
+    // namely dPr / dpar
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+        sensitivity(const StateType & T, 
+                    const StateType & Pr, 
+                    const StateType & dPr_dpar) const;
+
+    //! Sensitivity with respect to a Troe parameter
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+        sensitivity(const StateType & T, const StateType & Pr, ReactionType::Parameters parameter) const;
+
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_alpha(const StateType & T, const StateType & Pr) const
+    ANTIOCH_AUTOFUNC(StateType,this->sensitivity_par(T,Pr,this->sensitivity_Fcent_alpha(T)) )
+
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_T1(const StateType & T, const StateType & Pr) const
+    ANTIOCH_AUTOFUNC(StateType, this->sensitivity_par(T,Pr,this->sensitivity_Fcent_T1(T)) )
+
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_T2(const StateType & T, const StateType & Pr) const
+    ANTIOCH_AUTOFUNC(StateType,this->sensitivity_par(T,Pr,this->sensitivity_Fcent_T2(T)) )
+
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+    sensitivity_T3(const StateType & T, const StateType & Pr) const
+    ANTIOCH_AUTOFUNC(StateType,this->sensitivity_par(T,Pr,this->sensitivity_Fcent_T3(T)) )
+
   private:
 
     unsigned int n_spec;
@@ -165,6 +200,36 @@ namespace Antioch
     void Fcent_and_derivatives( const StateType &T,
                                 StateType &Fc,
                                 StateType &dFc_dT ) const;
+
+   //! convenient method
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+        sensitivity_Fcent_alpha(const StateType &T) const
+    ANTIOCH_AUTOFUNC(StateType, - ant_exp(-T/_T3) + ant_exp(-T/_T1))
+
+   //! convenient method
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+        sensitivity_Fcent_T1(const StateType &T) const
+    ANTIOCH_AUTOFUNC(StateType, - T / (_T1 * _T1) * _alpha * ant_exp(-T/_T1))
+
+   //! convenient method
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+        sensitivity_Fcent_T2(const StateType &T) const
+    ANTIOCH_AUTOFUNC(StateType, - constant_clone(T,1) / T * ant_exp(-_T2/T))
+
+   //! convenient method
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+        sensitivity_Fcent_T3(const StateType &T) const
+    ANTIOCH_AUTOFUNC(StateType, (_alpha - constant_clone(T,1)) * T / (_T3 * _T3) * ant_exp(-T/_T3))
+
+   //! convenient method
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType)
+        sensitivity_par(const StateType & T, const StateType & Pr, const StateType & dFcent_dpar) const;
+
 
   };
 
@@ -383,6 +448,114 @@ namespace Antioch
   TroeFalloff<CoeffType>::~TroeFalloff()
   {
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+        TroeFalloff<CoeffType>::sensitivity(const StateType & T, const StateType & Pr, ReactionType::Parameters parameter) const
+  {
+      switch(parameter)
+      {
+         case ReactionType::TROE_ALPHA:
+         {
+            return this->sensitivity_alpha(T,Pr);
+         }
+            break;
+         case ReactionType::TROE_T1:
+         {
+            return this->sensitivity_T1(T,Pr);
+         }
+            break;
+         case ReactionType::TROE_T2:
+         {
+            return this->sensitivity_T1(T,Pr);
+         }
+            break;
+         case ReactionType::TROE_T3:
+         {
+            return this->sensitivity_T3(T,Pr);
+         }
+            break;
+      }
+
+     return zero_clone(T);
+  }
+
+
+  template<typename CoeffType>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+        TroeFalloff<CoeffType>::sensitivity_par(const StateType & T, const StateType & Pr, const StateType & dFcent_dpar) const
+  {
+      CoeffType to_log10 = Constants::log10_to_log<CoeffType>();
+
+      StateType Fcent = this->Fcent(T);
+      StateType lnFcent = ant_log(Fcent);
+
+      // all the temporaries
+      StateType  d =   constant_clone(T, CoeffType(0.14L));
+
+      StateType  c = - CoeffType(0.4L)  - _c_coeff * lnFcent;
+      StateType  dc_dpar = - _c_coeff / Fcent * dFcent_dpar;
+
+      StateType  n =   CoeffType(0.75L) - _n_coeff * lnFcent;
+      StateType  dn_dpar =   - _n_coeff / Fcent * dFcent_dpar;
+
+      StateType g = to_log10 * ant_log(Pr) + c;
+
+      StateType h = n - d * to_log10 * ant_log(g);
+      StateType dh_dpar = dn_dpar - d * to_log10 / g * dc_dpar;
+
+      StateType l = to_log10 * ant_log(g / h);
+      StateType dl_dpar = to_log10 / g * ( dc_dpar - g / h * dh_dpar );
+
+      StateType m = constant_clone(T,1) + l * l;
+      StateType dm_dpar = 2 * l * dl_dpar;
+
+      return ant_exp(  
+                      dFcent_dpar / (m * Fcent)  - lnFcent / (m * m) * dm_dpar
+                    );
+  }
+
+  template<typename CoeffType>
+  template <typename StateType>
+  inline
+  ANTIOCH_AUTO(StateType)
+        TroeFalloff<CoeffType>::sensitivity(const StateType & T, 
+                                            const StateType & Pr,
+                                            const StateType & dPr_dpar) const
+  {
+      CoeffType to_log10 = Constants::log10_to_log<CoeffType>();
+
+      StateType Fcent = this->Fcent(T);
+      StateType lnFcent = ant_log(Fcent);
+
+      // all the temporaries
+      StateType  d =   constant_clone(T, CoeffType(0.14L));
+
+      StateType  c = - CoeffType(0.4L)  - _c_coeff * lnFcent;
+
+      StateType  n =   CoeffType(0.75L) - _n_coeff * lnFcent;
+
+      StateType g = to_log10 * ant_log(Pr) + c;
+      StateType dg_dpar = to_log10 / Pr * dPr_dpar;
+
+      StateType h = n - d * to_log10 * ant_log(g);
+      StateType dh_dpar = - d * to_log10 / g * dg_dpar;
+
+      StateType l = to_log10 * ant_log(g / h);
+      StateType dl_dpar = to_log10 / g * ( dg_dpar - g / h * dh_dpar );
+
+      StateType m = constant_clone(T,1) + l * l;
+      StateType dm_dpar = 2 * l * dl_dpar;
+
+      return ant_exp(  
+                      - lnFcent / (m * m) * dm_dpar
+                    );
+
   }
 
 } // end namespace Antioch

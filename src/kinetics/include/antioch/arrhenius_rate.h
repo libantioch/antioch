@@ -115,22 +115,65 @@ namespace Antioch
     CoeffType rscale() const;
 
     //! \return the rate evaluated at \p T.
-    template <typename StateType>
-    ANTIOCH_AUTO(StateType) 
-    rate(const StateType& T) const
-    ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(-_Ea/T)))
+    template <typename InputType>
+    ANTIOCH_AUTO(typename return_type<InputType>::type) 
+    operator()(const InputType& T) const
+    ANTIOCH_AUTOFUNC(typename return_type<InputType>::type, this->rate(T))
+
+    //! \return the derivative with respect to the parameter evaluated at \p T.
+    template <typename InputType>
+    ANTIOCH_AUTO(typename return_type<InputType>::type) 
+    sensitivity( const InputType& T, KineticsModel::Parameters par ) const;
+
+//
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
-    operator()(const StateType& T) const
-    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
+    rate(const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(-_Ea/T)))
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
     ANTIOCH_AUTO(StateType) 
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_Ea/(T*T)))
+
+    //! \return the derivative with respect to the parameter A evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_A( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, ant_exp(-_Ea / T))
+
+    //! \return the derivative with respect to the parameter beta evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Ea( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, - this->rate(T) /(_rscale * T) )
+
+    //! \return the derivative with respect to the parameter rscale evaluated at \p T.
+    template <typename StateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Rscale( const StateType& T) const
+    ANTIOCH_AUTOFUNC(StateType, - this->rate(T) * _Ea /(_rscale * T) ) // Ea = _raw_Ea / rscale
+
+    //! \return the derivative with respect to the parameter A evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_A( const KineticsConditions<StateType, VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType, ant_exp(-_Ea / cond.T()))
+
+    //! \return the derivative with respect to the parameter beta evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Ea( const KineticsConditions<StateType, VectorStateType>& cond) const
+    ANTIOCH_AUTOFUNC(StateType, - this->rate(cond.T()) /(_rscale * cond.T()) )
+
+    //! \return the derivative with respect to the parameter rscale evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType) 
+    sensitivity_Rscale( const KineticsConditions<StateType, VectorStateType> & cond) const
+    ANTIOCH_AUTOFUNC(StateType, - this->rate(cond.T()) * _Ea /(_rscale * cond.T()) ) // Ea = _raw_Ea / rscale
 
     //! Simultaneously evaluate the rate and its derivative at \p T.
     template <typename StateType>
@@ -305,6 +348,34 @@ namespace Antioch
     rate     = (*this)(T);
     drate_dT = rate*_Ea/(T*T);
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename InputType>
+  inline
+  ANTIOCH_AUTO(typename return_type<InputType>::type) 
+  ArrheniusRate<CoeffType>::sensitivity( const InputType& T, KineticsModel::Parameters par ) const
+  {
+     switch(par)
+     {
+        case KineticsModel::Parameters::A:
+        {
+           return this->sensitivity_A(T);
+        }
+          break;
+        case KineticsModel::Parameters::E:
+        {
+           return this->sensitivity_Ea(T);
+        }
+          break;
+        case KineticsModel::Parameters::R_SCALE:
+        {
+           return this->sensitivity_Rscale(T);
+        }
+          break;
+     }
+
+    return typename return_type<InputType>::type(0);
   }
 
 } // end namespace Antioch

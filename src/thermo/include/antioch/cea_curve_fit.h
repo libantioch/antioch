@@ -35,6 +35,7 @@
 #include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h" // Antioch::rebind
 #include "antioch/temp_cache.h" 
+#include "antioch/thermo_enum.h" 
 
 // C++
 #include <vector>
@@ -165,6 +166,18 @@ namespace Antioch
       _n_coeffs coefficients for each range fit.
     */
     const CoeffType* coefficients(const unsigned int interval) const;
+
+    template <typename StateType>
+    const StateType dcp_over_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const;
+
+    template <typename StateType>
+    const StateType dh_over_RT_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const;
+
+    template <typename StateType>
+    const StateType ds_over_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const;
+
+    template <typename StateType>
+    const StateType dh_RT_minus_S_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const;
 
   protected:
 
@@ -396,6 +409,210 @@ namespace Antioch
 
     return returnval;
         
+   }
+
+   template <typename CoeffType>
+   template <typename StateType>
+   inline
+   const StateType NASA9CurveFit<CoeffType>::dcp_over_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const
+   {
+      switch(parameter)
+      {
+        case MacroThermo::Parameters::A_ZERO:
+        {
+          return constant_clone(cache.T,1) / cache.T2;
+        }
+          break;
+        case MacroThermo::Parameters::A_ONE:
+        {
+          return constant_clone(cache.T,1) / cache.T;
+        }
+          break;
+        case MacroThermo::Parameters::A_TWO:
+        {
+          return constant_clone(cache.T,1);
+        }
+          break;
+        case MacroThermo::Parameters::A_THREE:
+        {
+          return cache.T;
+        }
+          break;
+        case MacroThermo::Parameters::A_FOUR:
+        {
+          return cache.T2;
+        }
+          break;
+        case MacroThermo::Parameters::A_FIVE:
+        {
+          return cache.T3;
+        }
+          break;
+        case MacroThermo::Parameters::A_SIX:
+        {
+          return cache.T4;
+        }
+          break;
+      }
+      return zero_clone(cache.T);
+   }
+
+   template <typename CoeffType>
+   template <typename StateType>
+   inline
+   const StateType NASA9CurveFit<CoeffType>::dh_over_RT_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const
+   {
+      switch(parameter)
+      {
+        case MacroThermo::Parameters::A_ZERO:
+        {
+          return - constant_clone(cache.T,1) / cache.T2;
+        }
+          break;
+        case MacroThermo::Parameters::A_ONE:
+        {
+          return  cache.lnT / cache.T;
+        }
+          break;
+        case MacroThermo::Parameters::A_TWO:
+        {
+          return constant_clone(cache.T,1);
+        }
+          break;
+        case MacroThermo::Parameters::A_THREE:
+        {
+          return cache.T / 2;
+        }
+          break;
+        case MacroThermo::Parameters::A_FOUR:
+        {
+          return cache.T2 / 3;
+        }
+          break;
+        case MacroThermo::Parameters::A_FIVE:
+        {
+          return cache.T3 / 4;
+        }
+          break;
+        case MacroThermo::Parameters::A_SIX:
+        {
+          return cache.T4 / 5;
+        }
+          break;
+        case MacroThermo::Parameters::A_EIGHT:
+        {
+          return constant_clone(cache.T,1) / cache.T;
+        }
+          break;
+      }
+      return zero_clone(cache.T);
+   }
+
+   template <typename CoeffType>
+   template <typename StateType>
+   inline
+   const StateType NASA9CurveFit<CoeffType>::ds_over_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const
+   {
+      switch(parameter)
+      {
+        case MacroThermo::Parameters::A_ZERO:
+        {
+          return  - constant_clone(cache.T,1) / (2 * cache.T2) ;
+        }
+          break;
+        case MacroThermo::Parameters::A_ONE:
+        {
+          return - constant_clone(cache.T,1) / cache.T;
+        }
+          break;
+        case MacroThermo::Parameters::A_TWO:
+        {
+          return cache.lnT;
+        }
+          break;
+        case MacroThermo::Parameters::A_THREE:
+        {
+          return cache.T;
+        }
+          break;
+        case MacroThermo::Parameters::A_FOUR:
+        {
+          return cache.T2 / 2;
+        }
+          break;
+        case MacroThermo::Parameters::A_FIVE:
+        {
+          return cache.T3 / 3;
+        }
+          break;
+        case MacroThermo::Parameters::A_SIX:
+        {
+          return cache.T4 / 4;
+        }
+          break;
+        case MacroThermo::Parameters::A_NINE:
+        {
+          return constant_clone(cache.T,1);
+        }
+          break;
+      }
+      return zero_clone(cache.T);
+   }
+
+   template <typename CoeffType>
+   template <typename StateType>
+   inline
+   const StateType NASA9CurveFit<CoeffType>::dh_RT_minus_S_R_dpar (const TempCache<StateType> & cache, MacroThermo::Parameters parameter) const
+   {
+      switch(parameter)
+      {
+        case MacroThermo::Parameters::A_ZERO:
+        {
+          return - constant_clone(cache.T,1) / (2 * cache.T2);
+        }
+          break;
+        case MacroThermo::Parameters::A_ONE:
+        {
+          return  cache.T + cache.lnT/cache.T;
+        }
+          break;
+        case MacroThermo::Parameters::A_TWO:
+        {
+          return constant_clone(cache.T,1) - cache.lnT;
+        }
+          break;
+        case MacroThermo::Parameters::A_THREE:
+        {
+          return - cache.T / 2;
+        }
+          break;
+        case MacroThermo::Parameters::A_FOUR:
+        {
+          return - cache.T2 / 6;
+        }
+          break;
+        case MacroThermo::Parameters::A_FIVE:
+        {
+          return - cache.T3 / 12;
+        }
+          break;
+        case MacroThermo::Parameters::A_SIX:
+        {
+          return - cache.T4 / 20;
+        }
+          break;
+        case MacroThermo::Parameters::A_EIGHT:
+        {
+          return cache.T;
+        }
+          break;
+        case MacroThermo::Parameters::A_NINE:
+        {
+          return - constant_clone(cache.T,1);
+        }
+          break;
+      }
+      return zero_clone(cache.T);
    }
 
 
