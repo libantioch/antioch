@@ -40,8 +40,10 @@
 
 namespace Antioch
 {
+  //! Objects in this namespace are not a public API and are subject to change without notice
   namespace AntiochPrivate
   {
+    //! PIMPL wrapper for raw GSL objects
     class GSLSplinerImplementation
     {
     public:
