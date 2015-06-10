@@ -31,107 +31,50 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h"
-
-// GSL
-#include <gsl/gsl_spline.h>
-#include <gsl/gsl_errno.h>
-#include <vector>
+#include "antioch/gsl_spliner_shim.h"
+#include "antioch/gsl_spliner_policy.h"
 
 namespace Antioch
 {
-
-  template<bool B>
-  struct GSLInterp
-  {
-      template <typename Scalar>
-      Scalar interpolation(const Scalar & x, gsl_spline * spline, gsl_interp_accel * acc)
-                {return gsl_spline_eval(spline,x,acc);}
-
-      template <typename Scalar>
-      Scalar dinterpolation(const Scalar & x, gsl_spline * spline, gsl_interp_accel * acc)
-                {return gsl_spline_eval_deriv(spline,x,acc);}
-  };
-
-  template <>
-  struct GSLInterp<true>
-  {
-      template <typename VectorScalar>
-      VectorScalar interpolation(const VectorScalar & x, gsl_spline * spline, gsl_interp_accel * acc)
-                {
-                  VectorScalar out = zero_clone(x);
-                  for(unsigned int i =0; i < x.size(); ++i)
-                  {
-                    out[i] = gsl_spline_eval(spline,x[i],acc);
-                  }
-                  return out;
-                }
-
-      template <typename VectorScalar>
-      VectorScalar dinterpolation(const VectorScalar & x, gsl_spline * spline, gsl_interp_accel * acc)
-                {
-                  VectorScalar out = zero_clone(x);
-                  for(unsigned int i =0; i < x.size(); ++i)
-                  {
-                    out[i] = gsl_spline_eval_deriv(spline,x[i],acc);
-                  }
-                  return out;
-                }
-  };
-
   class GSLSpliner
   {
-     public:
-       GSLSpliner();
-       template <typename VectorCoeffType>
-       GSLSpliner(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
-       ~GSLSpliner();
+  public:
 
-     template <typename VectorCoeffType>
-     void spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
+    GSLSpliner(){};
 
-     void spline_delete();
+    template <typename VectorCoeffType>
+    GSLSpliner(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
 
-     template <typename StateType>
-     StateType interpolated_value(const StateType & x) const;
+    ~GSLSpliner(){};
 
-     template <typename StateType>
-     StateType dinterp_dx(const StateType & x) const;
+    template <typename VectorCoeffType>
+    void spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
 
-     private:
+    void spline_delete();
 
-       gsl_interp_accel * _acc;
-       gsl_spline       * _spline;
+    template <typename StateType>
+    StateType interpolated_value(const StateType & x) const;
+
+    template <typename StateType>
+    StateType dinterp_dx(const StateType & x) const;
+
+  private:
+
+    AntiochPrivate::GSLSplinerShim _gsl_shim;
+
   };
-
-  inline
-  GSLSpliner::GSLSpliner()
-      :_acc(NULL),_spline(NULL)
-  {
-    _acc =  gsl_interp_accel_alloc();
-    return;
-  }
 
   template <typename VectorCoeffType>
   inline
   GSLSpliner::GSLSpliner(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point)
-        :_acc(NULL),_spline(NULL)
   {
-    _acc =  gsl_interp_accel_alloc();
-    spline_init(data_x_point, data_y_point);
-  }
-
-  GSLSpliner::~GSLSpliner()
-  {
-    this->spline_delete();
-    gsl_interp_accel_free(_acc);
-    return;
+    this->spline_init(data_x_point, data_y_point);
   }
 
   inline
   void GSLSpliner::spline_delete()
   {
-    gsl_spline_free(_spline);
-    return;
+    _gsl_shim.spline_clear();
   }
 
   template <typename VectorCoeffType>
@@ -139,8 +82,6 @@ namespace Antioch
   void GSLSpliner::spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point)
   {
      antioch_assert_equal_to(data_x_point.size(), data_y_point.size());
-
-     _spline = gsl_spline_alloc(gsl_interp_cspline, data_x_point.size());
 
    // GLS takes only double, raaaaahhhh
      typedef typename rebind<VectorCoeffType,double>::type VectorGSLType;
@@ -155,21 +96,21 @@ namespace Antioch
      const double * x = &gsl_x_point[0];
      const double * y = &gsl_y_point[0];
 
-     gsl_spline_init(_spline, x, y, data_x_point.size());
+     _gsl_shim.spline_init(x, y, data_x_point.size());
   }
 
   template <typename StateType>
   inline
   StateType GSLSpliner::interpolated_value(const StateType & x) const
   {
-     return GSLInterp<has_size<StateType>::value>().interpolation(x, _spline, _acc);
+    return AntiochPrivate::GSLSplinerPolicy<has_size<StateType>::value>().interpolation(x, _gsl_shim);
   }
 
   template <typename StateType>
   inline
   StateType GSLSpliner::dinterp_dx(const StateType & x) const
   {
-     return GSLInterp<has_size<StateType>::value>().dinterpolation(x, _spline, _acc);
+    return AntiochPrivate::GSLSplinerPolicy<has_size<StateType>::value>().dinterpolation(x, _gsl_shim);
   }
 
 }
