@@ -36,30 +36,64 @@
 
 namespace Antioch
 {
+  //! Interface to GSL for computing splines
+  /*!
+   * We've used a PIMPL idiom here to hide the details of GSL from the user.
+   * Note that GSL is restricted to double precision arithmetic, so all data
+   * is converted to double internally.
+   */
   class GSLSpliner
   {
   public:
 
+    //! Default constructor will allocate space, but user needs to subsequently call spline_init
     GSLSpliner(){};
 
+    //! This constructor will allocate space and initialize the GSL spline data
     template <typename VectorCoeffType>
     GSLSpliner(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
 
+    //! Destructor
+    /*!
+     * Constructor will clear spline data so user need only call spline_delete if they alter the
+     * spline data, i.e. they wish to call spline_init more than once with different data
+     */
     ~GSLSpliner(){};
 
+    //! Initialize GSL spline data structures to spline the x,y data passed to this function.
+    /*!
+     *  Note that GSL is restricted to double precision arithmetic, so all data is converted
+     *  to double internally.
+     */
     template <typename VectorCoeffType>
     void spline_init(const VectorCoeffType & data_x_point, const VectorCoeffType & data_y_point);
 
+    //! Clear the spline data initialized with spline_init
     void spline_delete();
 
+    //! Compute interpolant at point x
+    /*!
+     * This function can accept scalar or vector types for x. Note that GSL is restricted
+     * to double precision arithmetic, so all data is converted to double internally.
+     */
     template <typename StateType>
     StateType interpolated_value(const StateType & x) const;
 
+    //! Compute interpolant derivative at point x
+    /*!
+     * This function can accept scalar or vector types for x. Note that GSL is restricted
+     * to double precision arithmetic, so all data is converted to double internally.
+     */
     template <typename StateType>
     StateType dinterp_dx(const StateType & x) const;
 
   private:
 
+    //! Shim class to hide GSL implementation
+    /*!
+     * Because of the templated member functions, the "raw" implementation
+     * actually resides in GSLSplinerImplementation
+     */
     AntiochPrivate::GSLSplinerShim _gsl_shim;
 
   };
@@ -83,7 +117,7 @@ namespace Antioch
   {
      antioch_assert_equal_to(data_x_point.size(), data_y_point.size());
 
-   // GLS takes only double, raaaaahhhh
+     // GSL only accepts doubles, so need to cast
      typedef typename rebind<VectorCoeffType,double>::type VectorGSLType;
      VectorGSLType gsl_x_point(data_x_point.size(),0);
      VectorGSLType gsl_y_point(data_y_point.size(),0);

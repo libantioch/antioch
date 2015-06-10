@@ -34,7 +34,9 @@ namespace Antioch
   namespace AntiochPrivate
   {
 
-    template<bool B>
+    //! Default GSLSpliner policy
+    /*! The default is for scalar inputs */
+    template<bool B /*has_size*/>
     struct GSLSplinerPolicy
     {
       template <typename Scalar>
@@ -46,8 +48,11 @@ namespace Antioch
       {return gsl_shim.eval_deriv(x);}
     };
 
+    //! GSLSpliner policy for vector inputs
+    /*! If x is a vector, then need to extract scalars since GSL can only evaluate
+     *  one point at a time. */
     template <>
-    struct GSLSplinerPolicy<true>
+    struct GSLSplinerPolicy<true /*has_size*/>
     {
       template <typename VectorScalar>
       VectorScalar interpolation(const VectorScalar & x, const GSLSplinerShim& gsl_shim)
