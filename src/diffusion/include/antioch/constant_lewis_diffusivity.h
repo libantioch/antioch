@@ -64,7 +64,7 @@ namespace Antioch
     template<typename StateType>
     ANTIOCH_AUTO(StateType)
     D_impl( const StateType& rho, const StateType& cp, const StateType& k ) const
-    ANTIOCH_AUTOFUNC(StateType, _Le*k/(rho*cp))
+    ANTIOCH_AUTOFUNC(StateType, k/(_Le*rho*cp))
   };
 
   template<typename CoeffType>
