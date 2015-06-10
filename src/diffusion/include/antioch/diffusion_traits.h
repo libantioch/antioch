@@ -33,6 +33,11 @@
 
 namespace Antioch
 {
+  //! Characteristics of various diffusion models
+  /*! We use a traits programming style to deduce
+      properties of diffusion models and make compile
+      time decisions about behavior based on the species
+      diffusion model. */
   template<typename DiffModel>
   struct DiffusionTraits;
 
@@ -52,11 +57,21 @@ namespace Antioch
   };
 #endif // ANTIOCH_HAVE_GSL
 
+  // Anything defined in AntiochPrivate is not meant for the user and is subject
+  // to change without notice.
   namespace AntiochPrivate
   {
+    //! We use these tags to force operator overloading based on Diffusion type
     template<typename Diffusion>
     struct diffusion_tag;
 
+    //! SpeciesDiffusionBase models should subclass this tag
+    /*!
+     * There are instances where we can make compile decisions based
+     * on the base class type of diffusion. Thus, the user only need
+     * to subclass this tag and instances in, for example, MixtureDiffusion
+     * will automatically behave correctly.
+     */
     template<typename Diffusion, typename CoeffType>
     struct diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >{};
 
@@ -65,6 +80,13 @@ namespace Antioch
       : public diffusion_tag<SpeciesDiffusionBase<ConstantLewisDiffusivity<CoeffType>,CoeffType> >{};
 
 
+    //! BinaryDiffusionBase models should subclass this tag
+    /*!
+     * There are instances where we can make compile decisions based
+     * on the base class type of diffusion. Thus, the user only need
+     * to subclass this tag and instances in, for example, MixtureDiffusion
+     * will automatically behave correctly.
+     */
     template<typename Diffusion, typename CoeffType>
     struct diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >{};
 

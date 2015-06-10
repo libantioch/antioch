@@ -37,6 +37,8 @@
 
 namespace Antioch{
 
+  //! Conductivity based on kinetic theory of mixtures approximations
+  /*! "with diffusion" model */
   template <typename ThermoEvaluator, typename CoeffType>
   class KineticsTheoryThermalConductivity : public SpeciesConductivityBase<KineticsTheoryThermalConductivity<ThermoEvaluator,CoeffType> >
   {
@@ -175,6 +177,8 @@ namespace Antioch{
   ANTIOCH_AUTO(StateType)
     KineticsTheoryThermalConductivity<ThermoEvaluator,CoeffType>::op_no_diff_impl( const unsigned int s, const StateType& mu, const StateType & T ) const
   {
+    // This is a "with diffusion" model so any attempts
+    // at calling the "no diffusion" method should error.
     antioch_error();
 
     /*The following is dummy*/

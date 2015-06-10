@@ -36,6 +36,8 @@
 
 namespace Antioch
 {
+  //! Species conductivity based on Eucken relation
+  /*! "no diffusion" model */
   template<class ThermoEvaluator>
   class EuckenThermalConductivity : public SpeciesConductivityBase<EuckenThermalConductivity<ThermoEvaluator> >
   {
@@ -106,6 +108,8 @@ namespace Antioch
   const ANTIOCH_AUTO(StateType)
     EuckenThermalConductivity<ThermoEvaluator>::op_with_diff_impl(unsigned int s, const StateType& mu_s, const StateType & /*T*/, const StateType & /*rho_s*/, const StateType & /*Dss*/) const
   {
+    // This is a "no diffusion" model, so attempts at call the "with diffusion"
+    // method should error.
     antioch_error();
 
     /*The following is dummy*/

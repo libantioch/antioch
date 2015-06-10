@@ -40,8 +40,15 @@ namespace Antioch
    *  an interface for computing the species diffusion coefficients/binary diffusion
    *  matrix, depending on the Diffusion model template parameter.
    *  Total/mixture diffusion coefficients are computed by a mixing model,
-   *  e.g. WilkeTransportMixture. This class is templated on the diffusion model,
+   *  e.g. WilkeTransportEvaluator. This class is templated on the diffusion model,
    *  so an inherent assumption is that all species diffusions have the same model.
+   *
+   *  This is intended to only be used through a mixing model, e.g.
+   *  WilkeTransportEvaluator.
+   *
+   *  This class supports interfaces to multiple types of species diffusion models.
+   *  As such, we use "tagging" mechanisms to defer to the correct, private, implemenation
+   *  for various functions.
    */
   template<typename Diffusion, class CoeffType>
   class MixtureDiffusion : public MixtureTransportBase<CoeffType>
@@ -94,6 +101,8 @@ namespace Antioch
 
   private:
 
+    //! Initialize species diffusion models
+    /*! SpeciesDiffusionBase models should've subclassed diffusion_tag so that they call this method. */
     void private_init_impl( AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& /*tag*/ )
     {
       antioch_static_assert( DiffusionTraits<Diffusion>::is_species_diffusion,
@@ -102,6 +111,8 @@ namespace Antioch
       _species_diffusivities.resize( this->_transport_mixture.n_species(), NULL );
     }
 
+    //! Initialize binary diffusion models
+    /*! BinaryDiffusionBase models should've subclassed diffusion_tag so that they call this method. */
     void private_init_impl( AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& /*tag*/ )
     {
       antioch_static_assert( DiffusionTraits<Diffusion>::is_binary_diffusion,
@@ -123,6 +134,8 @@ namespace Antioch
         }
     }
 
+    //! Compute binary diffusion matrix
+    /*! BinaryDiffusionBase models should've subclassed diffusion_tag so that they call this method. */
     template<typename StateType, typename MatrixStateType>
     void private_diff_matrix_impl( const StateType& T,
                                    const StateType& molar_density,
@@ -140,6 +153,7 @@ namespace Antioch
       }
     }
 
+    //! Invalid to call binary diffusion matrix with SpeciesDiffusionBase model
     template<typename StateType, typename MatrixStateType>
     void private_diff_matrix_impl( const StateType& /*T*/,
                                    const StateType& /*molar_density*/,
@@ -149,6 +163,8 @@ namespace Antioch
       antioch_error();
     }
 
+    //! Compute species diffusivities
+    /*! SpeciesDiffusionBase models should've subclassed diffusion_tag so that they call this method. */
     template<typename StateType>
     void private_species_diff_impl( unsigned int s,
                                     const StateType& rho,
@@ -160,6 +176,7 @@ namespace Antioch
       (*_species_diffusivities[s])(rho,cp,k,D);
     }
 
+    //! Invalid to call species diffusivity calculation with BinaryDiffusionBase model
     template<typename StateType>
     void private_species_diff_impl( unsigned int s,
                                     const StateType& rho,
@@ -194,6 +211,7 @@ namespace Antioch
         antioch_msg_error(error);
       }
 
+    // Build tag so we defer to the right initialization function
     AntiochPrivate::diffusion_tag<Diffusion> tag;
     this->private_init_impl( tag );
 
@@ -237,6 +255,7 @@ namespace Antioch
       antioch_assert_equal_to(D[r].size(),n_cols);
 #endif
 
+    // Build tag so we defer to the right binary diffusion matrix function
     AntiochPrivate::diffusion_tag<Diffusion> tag;
     this->private_diff_matrix_impl(T,molar_density,D,tag);
   }
@@ -253,6 +272,7 @@ namespace Antioch
     antioch_assert_less( s, _species_diffusivities.size());
     antioch_assert(_species_diffusivities[s]);
 
+    // Build tag so we defer to the right species diffusivity function
     AntiochPrivate::diffusion_tag<Diffusion> tag;
     this->private_species_diff_impl(s,rho,cp,k,D,tag);
   }

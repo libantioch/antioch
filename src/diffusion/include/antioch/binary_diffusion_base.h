@@ -34,6 +34,15 @@
 
 namespace Antioch
 {
+  //! Base class for binary diffusion models
+  /*!
+   * Binary diffusion models are those that are used to compute
+   * a binary diffusion matrix (in constrast to species diffusion models
+   * that are used to directly compute species diffusivities). We use the
+   * curiously recurring template pattern; subclasses need to implement
+   * op_impl - computes binary diffusion coefficient for the species s_i, s_j
+   * reset_coeffs_impl - reset TransportSpecies s_i, s_j
+   */
   template<typename Subclass, typename CoeffType>
   class BinaryDiffusionBase
   {

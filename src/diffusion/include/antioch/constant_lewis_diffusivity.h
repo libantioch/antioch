@@ -38,6 +38,10 @@
 namespace Antioch
 {
 
+  //! Compute species diffusivity based on constant Lewis number
+  /*!
+   * \f$Le = \frac{k}{\rho c_p D}\f$
+   */
   template<typename CoeffType=double>
   class ConstantLewisDiffusivity : public SpeciesDiffusionBase<ConstantLewisDiffusivity<CoeffType>,CoeffType>
   {

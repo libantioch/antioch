@@ -44,8 +44,18 @@
 
 namespace Antioch
 {
-
-
+  //! Compute transport properties using Wilke's mixing rule
+  /*!
+   * Use the species transport models (template parameters) to evaluate species
+   * values, then use Wilke's mixing rule to compute the mixture quantities. This is
+   * the expected interface for the user. Underlying compile time decisions
+   * are made based on the species transport models that should be invisible
+   * to the user. The preferred, most efficient, and most general
+   * method is m_and_k_and_D for evaluating the transport quantities.
+   * The other methods are less efficient and may only be available
+   * for a subset of species model; they are present for backwards
+   * compatibility and pedagogical reasons.
+   */
   template<class Diffusion, class Viscosity, class ThermalConductivity,class CoeffType=double>
   class WilkeTransportEvaluator
   {
@@ -59,6 +69,8 @@ namespace Antioch
     ~WilkeTransportEvaluator(){};
 
     //! mixture level diffusion, array of values
+    /*! Only valid for BinaryDiffusionBase species diffusion models.
+     *  Compile time error if otherwise. */
     template <typename StateType, typename VectorStateType>
     void D( const StateType & rho,
             const StateType& T,
@@ -71,16 +83,21 @@ namespace Antioch
     mu( const StateType& T, const VectorStateType& mass_fractions ) const;
 
     //! mixture level thermal conduction, one value
+    /*! Only valid for "no diffusion" conductivity models.
+     *  Compile time error if otherwise. */
     template <typename StateType, typename VectorStateType>
     typename value_type<VectorStateType>::type
     k( const StateType & T, const VectorStateType& mass_fractions ) const;
 
     //! mixture level thermal conduction and viscosity, one value
+    /*! Only valid for "no diffusion" conductivity models.
+     *  Compile time error if otherwise. */
     template <typename StateType, typename VectorStateType>
     void mu_and_k( const StateType& T, const VectorStateType& mass_fractions,
                    StateType& mu, StateType& k ) const;
 
     //! mixture level thermal conduction, viscosity (one value) and diffusion (array of values)
+    /*! This is the preferred, most efficient, and most general method. */
     template <typename StateType, typename VectorStateType>
     void mu_and_k_and_D( const StateType& T, const StateType& rho, const StateType& cp,
                          const VectorStateType& mass_fractions,
@@ -88,7 +105,9 @@ namespace Antioch
 
     //! Helper function to reduce code duplication.
     /*! Populates species viscosities and the intermediate \chi variable
-      needed for Wilke's mixing rule. */
+     *  needed for Wilke's mixing rule. This is not intended for the
+     *  user; only public to facilitate testing.
+     */
     template <typename StateType, typename VectorStateType>
     void compute_mu_chi( const StateType& T,
                          const VectorStateType& mass_fractions,
@@ -96,7 +115,9 @@ namespace Antioch
                          VectorStateType& chi ) const;
 
     //! Helper function to reduce code duplication.
-    /*! Computes the intermediate \phi variable needed for Wilke's mixing rule.  */
+    /*! Computes the intermediate \phi variable needed for Wilke's mixing rule.
+     *  Not intended for the user; only public to facilitate testing.
+     */
     template <typename VectorStateType>
     typename value_type<VectorStateType>::type
     compute_phi( typename rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
@@ -104,7 +125,9 @@ namespace Antioch
                  const unsigned int s ) const;
 
     //! Helper function to reduce code duplication.
-    /*! Computes the intermediate \mu,\mu matrix needed for Wilke's mixing rule.  */
+    /*! Computes the intermediate \mu,\mu matrix needed for Wilke's mixing rule.
+     *  Not intended for the user; only public to facilitate testing.
+     */
     template <typename VectorStateType>
     void compute_mu_mu_sqrt( const VectorStateType & mu,
                              typename rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const;
@@ -334,7 +357,7 @@ namespace Antioch
             k[s] = _conductivity.conductivity_with_diffusion( s,
                                                               T,
                                                               molar_density*_mixture.chem_mixture().M(s),
-                                                              //rho*mass_fractions[s], // species density, rho_s
+                                                              //rho*mass_fractions[s], see #146
                                                               mu[s],
                                                               D_mat[s][s] );
 

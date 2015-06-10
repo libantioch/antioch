@@ -30,6 +30,8 @@
 
 namespace Antioch
 {
+  //! Base class for MixtureViscosity, MixtureConductivity, etc.
+  /*! Mainly for containing TransportMixture reference. */
   template<class CoeffType=double>
   class MixtureTransportBase
   {

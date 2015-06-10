@@ -34,6 +34,15 @@
 
 namespace Antioch
 {
+  //! Base class for species diffusion models
+  /*!
+   * Species diffusion models are those that directly compute species
+   * diffusion coefficients (in constrast to binary diffusion models
+   * that are used to compute binary diffusion matrix). We use the
+   * curiously recurring template pattern; subclasses need to implement
+   * D_impl - computes species diffusion coefficient
+   * reset_coeffs_impl - reset model coefficients
+   */
   template<typename Subclass, typename CoeffType>
   class SpeciesDiffusionBase
   {
@@ -43,8 +52,10 @@ namespace Antioch
 
     virtual ~SpeciesDiffusionBase(){};
 
+    //! Reset model coefficients
     void reset_coeffs( std::vector<CoeffType>& coeffs );
 
+    //! Compute species diffusivity
     template<typename StateType>
     ANTIOCH_AUTO(StateType)
     D( const StateType& rho, const StateType& cp, const StateType& k ) const

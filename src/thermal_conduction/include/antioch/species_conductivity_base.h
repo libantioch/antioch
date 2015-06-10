@@ -31,6 +31,16 @@
 
 namespace Antioch
 {
+  //! Base class for species conducitivity models
+  /*!
+   * Defines interface to be used by MixtureConductivity to evaluate
+   * species conductivity models. Some models require species diffusion
+   * to evaluate the conductivity; these are "with diffusion" models.
+   * Other models do not require diffusion; these are "no diffusion" models.
+   * We use the curiously recurring template pattern; subclasses should implement
+   * op_no_diff_impl - "no diffusion" version (should call antioch_error if invalid)
+   * op_with_diff_impl - "requires diffusion" version (should call antioch_error if invalid)
+   */
   template<class Subclass>
   class SpeciesConductivityBase
   {
@@ -40,12 +50,14 @@ namespace Antioch
 
     virtual ~SpeciesConductivityBase(){}
 
+    //! Compute species conductivity, without species diffusion
     template <typename StateType>
     ANTIOCH_AUTO(StateType)
       operator()( const unsigned int s, const StateType& mu, const StateType & T ) const
     ANTIOCH_AUTOFUNC(StateType, static_cast<const Subclass*>(this)->op_no_diff_impl(s,mu,T))
 
 
+    //! Compute species conductivity, with species diffusion
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
       operator()(unsigned int s, const StateType& mu_s, const StateType & T, const StateType & rho_s, const StateType & Dss) const
