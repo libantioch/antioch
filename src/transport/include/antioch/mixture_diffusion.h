@@ -261,6 +261,8 @@ namespace Antioch
   void MixtureDiffusion<Diffusion,CoeffType>::add_species_diffusion( unsigned int s,
                                                                      const std::vector<CoeffType>& coeffs )
   {
+    antioch_static_assert_runtime_fallback( DiffusionTraits<Diffusion>::is_species_diffusion,
+                                            "Invalid to add species diffusion model with Diffusion model is not a species diffusion model!" );
     antioch_assert_less( s, _species_diffusivities.size() );
 
     _species_diffusivities[s] = new Diffusion( coeffs );
