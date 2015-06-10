@@ -23,16 +23,11 @@
 //
 //-----------------------------------------------------------------------el-
 
-#include "antioch_config.h" //only of we have GSL
-
-#ifdef ANTIOCH_HAVE_GSL
-
 #ifndef ANTIOCH_GSL_SPLINER_POLICY_H
 #define ANTIOCH_GSL_SPLINER_POLICY_H
 
-// GSL
-#include <gsl/gsl_spline.h>
-#include <gsl/gsl_errno.h>
+// Antioch
+#include "antioch/gsl_spliner_shim.h"
 
 namespace Antioch
 {
@@ -43,35 +38,35 @@ namespace Antioch
     struct GSLSplinerPolicy
     {
       template <typename Scalar>
-      Scalar interpolation(const Scalar & x, gsl_spline * spline, gsl_interp_accel * acc)
-      {return gsl_spline_eval(spline,x,acc);}
+      Scalar interpolation(const Scalar & x, const GSLSplinerShim& gsl_shim)
+      {return gsl_shim.eval(x);}
 
       template <typename Scalar>
-      Scalar dinterpolation(const Scalar & x, gsl_spline * spline, gsl_interp_accel * acc)
-      {return gsl_spline_eval_deriv(spline,x,acc);}
+      Scalar dinterpolation(const Scalar & x, const GSLSplinerShim& gsl_shim)
+      {return gsl_shim.eval_deriv(x);}
     };
 
     template <>
     struct GSLSplinerPolicy<true>
     {
       template <typename VectorScalar>
-      VectorScalar interpolation(const VectorScalar & x, gsl_spline * spline, gsl_interp_accel * acc)
+      VectorScalar interpolation(const VectorScalar & x, const GSLSplinerShim& gsl_shim)
       {
         VectorScalar out = zero_clone(x);
         for(unsigned int i =0; i < x.size(); ++i)
           {
-            out[i] = gsl_spline_eval(spline,x[i],acc);
+            out[i] = gsl_shim.eval(x[i]);
           }
         return out;
       }
 
       template <typename VectorScalar>
-      VectorScalar dinterpolation(const VectorScalar & x, gsl_spline * spline, gsl_interp_accel * acc)
+      VectorScalar dinterpolation(const VectorScalar & x, const GSLSplinerShim& gsl_shim)
       {
         VectorScalar out = zero_clone(x);
         for(unsigned int i =0; i < x.size(); ++i)
           {
-            out[i] = gsl_spline_eval_deriv(spline,x[i],acc);
+            out[i] = gsl_shim.eval_deriv(x[i]);
           }
         return out;
       }
@@ -82,6 +77,3 @@ namespace Antioch
 } // end namespace Antioch
 
 #endif // ANTIOCH_GSL_SPLINER_POLICY_H
-
-
-#endif// if ANTIOCH_HAVE_GSL
