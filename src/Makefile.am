@@ -200,7 +200,10 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/viscosity/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
-AM_CPPFLAGS +=  $(antioch_optional_INCLUDES)
+AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
+
+AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
+LIBS = $(antioch_optional_test_LIBS)
 
 CLEANFILES =
 
