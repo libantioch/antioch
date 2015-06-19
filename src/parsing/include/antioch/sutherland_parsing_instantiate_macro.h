@@ -23,23 +23,17 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_SUTHERLAND_PARSING_INSTANTIATE_MACRO_H
+#define ANTIOCH_SUTHERLAND_PARSING_INSTANTIATE_MACRO_H
 
-namespace Antioch{
+#define ANTIOCH_SUTHERLAND_PARSING_TYPE_INSTANTIATE(type)                 \
+  template void read_sutherland_data_ascii<type>( MixtureViscosity<SutherlandViscosity<type>,type>&, \
+                                                const std::string& );   \
+  template void read_sutherland_data_ascii_default<type>( MixtureViscosity<SutherlandViscosity<type>,type>& )
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
+#define ANTIOCH_SUTHERLAND_PARSING_INSTANTIATE() \
+  ANTIOCH_SUTHERLAND_PARSING_TYPE_INSTANTIATE(float); \
+  ANTIOCH_SUTHERLAND_PARSING_TYPE_INSTANTIATE(double); \
+  ANTIOCH_SUTHERLAND_PARSING_TYPE_INSTANTIATE(long double)
 
-  template <typename NumericType>
-  class TransportMixture;
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+#endif // ANTIOCH_SUTHERLAND_PARSING_INSTANTIATE_MACRO_H

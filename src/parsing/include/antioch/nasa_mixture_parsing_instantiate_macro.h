@@ -23,23 +23,12 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE_MACRO_H
+#define ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE_MACRO_H
 
-namespace Antioch{
+#define ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE(curvefit)              \
+  template void read_nasa_mixture_data<float,curvefit<float> >( NASAThermoMixture<float,curvefit<float> >&, const std::string&, ParsingType, bool ); \
+  template void read_nasa_mixture_data<double,curvefit<double> >( NASAThermoMixture<double,curvefit<double> >&, const std::string&, ParsingType, bool ); \
+   template void read_nasa_mixture_data<long double,curvefit<long double> >( NASAThermoMixture<long double,curvefit<long double> >&, const std::string&, ParsingType, bool )
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
-
-  template <typename NumericType>
-  class TransportMixture;
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+#endif // ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE_MACRO_H

@@ -27,6 +27,7 @@
 #define ANTIOCH_PARSER_BASE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/input_utils.h"
 

@@ -23,23 +23,18 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_XML_PARSER_INSTANTIATION_MACRO_H
+#define ANTIOCH_XML_PARSER_INSTANTIATION_MACRO_H
 
-namespace Antioch{
+#define ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(type)                     \
+  template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,NASA7CurveFit<type> > >(NASAThermoMixture<type,NASA7CurveFit<type> >& ); \
+  template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,NASA9CurveFit<type> > >(NASAThermoMixture<type,NASA9CurveFit<type> >& ); \
+  template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,CEACurveFit<type> > >(NASAThermoMixture<type,CEACurveFit<type> >& ); \
+  template void XMLParser<type>::read_thermodynamic_data_root<CEAThermodynamics<type> >(CEAThermodynamics<type>& )
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
+#define ANTIOCH_XML_PARSER_INSTANTIATE() \
+  ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(float); \
+  ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(double); \
+  ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(long double)
 
-  template <typename NumericType>
-  class TransportMixture;
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+#endif // ANTIOCH_XML_PARSER_INSTANTIATION_MACRO_H

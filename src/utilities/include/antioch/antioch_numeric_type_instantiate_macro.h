@@ -23,23 +23,12 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_NUMERIC_TYPE_INSTANTIATE_MACRO_H
+#define ANTIOCH_NUMERIC_TYPE_INSTANTIATE_MACRO_H
 
-namespace Antioch{
+#define ANTIOCH_NUMERIC_TYPE_CLASS_INSTANTIATE(classname) \
+  template class classname<float>;                        \
+  template class classname<double>;                       \
+  template class classname<long double>
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
-
-  template <typename NumericType>
-  class TransportMixture;
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+#endif // ANTIOCH_NUMERIC_TYPE_INSTANTIATE_MACRO_H

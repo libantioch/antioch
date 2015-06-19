@@ -23,23 +23,23 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE_MACRO_H
+#define ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE_MACRO_H
 
-namespace Antioch{
+#define ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(type)   \
+  template void verify_unit_of_parameter<type>( Units<type>&,           \
+                                               const std::string&, \
+                                               const std::vector<std::string>&, \
+                                               const std::string&, \
+                                                const std::string& ); \
+  template void read_reaction_set_data<type>( const std::string&, \
+                                              const bool, \
+                                              ReactionSet<type>&, \
+                                              ParsingType  )
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
+#define ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE() \
+  ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(float); \
+  ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(double); \
+  ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(long double)
 
-  template <typename NumericType>
-  class TransportMixture;
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+#endif // ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE_MACRO_H

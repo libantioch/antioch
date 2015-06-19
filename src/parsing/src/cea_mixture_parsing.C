@@ -22,46 +22,52 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_MIXTURE_PARSING_H
-#define ANTIOCH_CEA_MIXTURE_PARSING_H
-
-// C++
-#include <iostream>
-#include <vector>
+#include "antioch/cea_mixture_parsing.h"
 
 // Antioch
-#include "antioch/parsing_enum.h"
-
-
-/*! Everything here is deprecated, it is for backward compatibility,
-    using the deprecated name/object CEAThermo...<NumericType>.
-
-    We required to provide:
-      - read_cea_mixture_data_ascii()
-      - read_cea_mixture_data_ascii_default()
-
-    for both descriptions (Mixture, dynamics).
-*/
+#include "antioch/cea_mixture.h"
+#include "antioch/ascii_parser.h"
+#include "antioch/chemkin_parser.h"
+#include "antioch/xml_parser.h"
 
 namespace Antioch
 {
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermoMixture;
-
-  // parser explicit
   template<class NumericType>
   void read_cea_mixture_data( CEAThermoMixture<NumericType>& thermo,
                               const std::string & filename,
                               ParsingType type,
-                              bool verbose = true );
+                              bool verbose )
+  {
+
+    ParserBase<NumericType> * parser(NULL);
+    switch(type)
+    {
+      case ASCII:
+         parser = new ASCIIParser<NumericType>(filename,verbose);
+         break;
+      case CHEMKIN:
+         parser = new ChemKinParser<NumericType>(filename,verbose);
+         break;
+      case XML:
+         parser = new XMLParser<NumericType>(filename,verbose);
+         break;
+      default:
+         antioch_parsing_error("unknown type");
+    }
+
+    parser->read_thermodynamic_data(thermo);
+   // Make sure we actually populated everything
+    if( !thermo.check() )
+    {
+       std::cerr << "Error: CEA table not fully populated" << std::endl;
+       antioch_error();
+    }
+  }
+
+  // Instantiate
+  template void read_cea_mixture_data<float>( CEAThermoMixture<float>&,const std::string&, ParsingType, bool );
+  template void read_cea_mixture_data<double>( CEAThermoMixture<double>&,const std::string&, ParsingType, bool );
+  template void read_cea_mixture_data<long double>( CEAThermoMixture<long double>&,const std::string&, ParsingType, bool );
 
 } // end namespace Antioch
-
-#endif // ANTIOCH_CEA_MIXTURE_PARSING_H

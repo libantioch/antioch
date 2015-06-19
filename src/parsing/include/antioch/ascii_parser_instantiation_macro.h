@@ -23,23 +23,17 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_ASCII_PARSER_INSTANTIATION_MACRO_H
+#define ANTIOCH_ASCII_PARSER_INSTANTIATION_MACRO_H
 
-namespace Antioch{
+#define ANTIOCH_ASCII_PARSER_TYPE_INSTANTIATE(type)                     \
+  template void ASCIIParser<type>::read_thermodynamic_data_root<NASA7CurveFit<type> >(NASAThermoMixture<type,NASA7CurveFit<type> >& ); \
+  template void ASCIIParser<type>::read_thermodynamic_data_root<NASA9CurveFit<type> >(NASAThermoMixture<type,NASA9CurveFit<type> >& ); \
+  template void ASCIIParser<type>::read_thermodynamic_data_root<CEACurveFit<type> >(NASAThermoMixture<type,CEACurveFit<type> >& )
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
+#define ANTIOCH_ASCII_PARSER_INSTANTIATE() \
+  ANTIOCH_ASCII_PARSER_TYPE_INSTANTIATE(float); \
+  ANTIOCH_ASCII_PARSER_TYPE_INSTANTIATE(double); \
+  ANTIOCH_ASCII_PARSER_TYPE_INSTANTIATE(long double)
 
-  template <typename NumericType>
-  class TransportMixture;
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+#endif // ANTIOCH_ASCII_PARSER_INSTANTIATION_MACRO_H

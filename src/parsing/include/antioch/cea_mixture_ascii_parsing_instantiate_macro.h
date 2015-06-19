@@ -23,23 +23,17 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_CEA_MIXTURE_ASCII_PARSING_INSTANTIATE_MACRO_H
+#define ANTIOCH_CEA_MIXTURE_ASCII_PARSING_INSTANTIATE_MACRO_H
 
-namespace Antioch{
+#define ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(type) \
+  template void read_cea_mixture_data_ascii_default<type>( CEAThermoMixture<type>& ); \
+  template void read_cea_mixture_data_ascii<type>( CEAThermoMixture<type>&, const std::string& ); \
+  template void read_cea_mixture_data_ascii<type>( CEAThermodynamics<type>&, const std::string& )
 
-  //Forward declaration
-  template <typename NumericType>
-  class ParserBase;
+#define ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_INSTANTIATE() \
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(float); \
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(double); \
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(long double)
 
-  template <typename NumericType>
-  class TransportMixture;
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<NumericType> & transport);
-
-} //end namespace Antioch
-
-#endif
+#endif // ANTIOCH_CEA_MIXTURE_ASCII_PARSING_INSTANTIATE_MACRO_H
