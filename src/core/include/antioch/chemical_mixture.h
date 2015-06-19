@@ -104,14 +104,6 @@ namespace Antioch
      */
     const ChemicalMixture<CoeffType> & chemical_mixture() const;
 
-    /*! method to send thermo back
-
-        added for backward compatibility for WilkeMixture v/s
-        WilkeTransportMixture, it sends an error
-     */
-    template<typename ThermoEvaluator>
-    const ThermoEvaluator & thermo_evaluator() const;
-
     //! method to initialize, backward compatibility
     void initialize_species(const std::vector<std::string> & species_list);
 
@@ -592,26 +584,6 @@ namespace Antioch
      antioch_deprecated();
      return *this;
   }
-
-  template<typename CoeffType>
-  template<typename ThermoEvaluator>
-  inline
-  const ThermoEvaluator & ChemicalMixture<CoeffType>::thermo_evaluator() const
-  {
-     /* Alright let's still have a description.
-
-        The deprecated WilkeEvaluator has a ChemicalMixture,
-        the newer WilkeTransportEvaluator has a TransportMixture.
-        To keep the compiler happy, ChemicalMixture thus needs
-        this method that exists (and should only exists) in
-        TransportMixture
-      */
-     antioch_deprecated();
-     antioch_error();
-     return ThermoEvaluator(); // default constructor is private
-  }
-
-
 
 } // end namespace Antioch
 

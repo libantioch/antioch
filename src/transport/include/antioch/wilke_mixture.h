@@ -33,7 +33,6 @@
 
 // Antioch
 #include "antioch/wilke_transport_mixture.h"
-#include "antioch/physics_placeholder.h"
 #include "antioch/antioch_asserts.h"
 
 // C++

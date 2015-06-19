@@ -36,35 +36,24 @@
 #include "antioch/wilke_mixture.h"
 #include "antioch/mixture_viscosity.h"
 #include "antioch/wilke_transport_evaluator.h"
-#include "antioch/physics_placeholder.h"
-#include "antioch/physical_set.h"
 #include "antioch/antioch_asserts.h"
+#include "antioch/eucken_thermal_conductivity_building.h"
 
 namespace Antioch
 {
-
-  
-  template<class Viscosity, class ThermalConductivity, class CoeffType=double>
+  //! Deprecated. Use WilkeTransportEvaluator instead.
+  template<class MixtureViscosity, class ThermalConductivity, class CoeffType=double>
   class WilkeEvaluator
-   /*     public WilkeTransportEvaluator<PhysicalSet<PhysicsPlaceholder,        ChemicalMixture<CoeffType> >,
-                                       PhysicalSet<typename Viscosity::Model, ChemicalMixture<CoeffType> >,
-                                       PhysicalSet<ThermalConductivity,       ChemicalMixture<CoeffType> >,
-                                       WilkeMixture<CoeffType>,CoeffType>*/
   {
   public:
 
-    typedef WilkeTransportEvaluator<PhysicalSet<PhysicsPlaceholder,        ChemicalMixture<CoeffType> >,
-                                    PhysicalSet<typename Viscosity::Model, ChemicalMixture<CoeffType> >,
-                                    PhysicalSet<ThermalConductivity,       ChemicalMixture<CoeffType> >,
-                                    WilkeMixture<CoeffType>,CoeffType> BaseWilke;
-
     WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
-                    const Viscosity& viscosity,
+                    const MixtureViscosity& viscosity,
                     const ThermalConductivity& conductivity );
 
     ~WilkeEvaluator();
 
-    
+
     template <typename StateType, typename VectorStateType>
     StateType mu( const StateType& T,
                   const VectorStateType& mass_fractions ) const {return _wilke_eval->mu(T,mass_fractions);}
@@ -100,36 +89,55 @@ namespace Antioch
   private:
 
     WilkeEvaluator();
-    // we need them stored somewhere else than the evaluator
-    PhysicalSet<PhysicsPlaceholder,        ChemicalMixture<CoeffType> > * _shadow_dif;
-    PhysicalSet<typename Viscosity::Model, ChemicalMixture<CoeffType> > * _visc;
-    PhysicalSet<ThermalConductivity,       ChemicalMixture<CoeffType> > * _therm;
 
-    // 
-    BaseWilke * _wilke_eval;
+    TransportMixture<CoeffType>* _transport_mixture;
+
+    WilkeTransportMixture<CoeffType>* _wilke_mixture;
+
+    //! This is dummy.
+    /*! WilkeEvaluator doesn't support diffusion, but the new WilkeTransportEvaluator does
+        so we create a dummy diffusion class, don't bother building it and pass it along
+        to WilkeTransportEvaluator. */
+    MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>* _diffusion;
+
+    MixtureConductivity<ThermalConductivity,CoeffType>* _conductivity;
+
+    typename ThermalConductivity::micro_thermo_type* _micro_thermo;
+
+    typedef  WilkeTransportEvaluator<ConstantLewisDiffusivity<CoeffType>,
+                                     typename MixtureViscosity::species_viscosity_type,
+                                     ThermalConductivity,
+                                     CoeffType> Evaluator;
+
+    Evaluator* _wilke_eval;
 
   };
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
                                                                            const Viscosity& viscosity,
-                                                                           const ThermalConductivity& conductivity )
-    : _shadow_dif(new PhysicalSet<PhysicsPlaceholder,        ChemicalMixture<CoeffType> > (mixture.transport_mixture())),
-      _visc(      new PhysicalSet<typename Viscosity::Model, ChemicalMixture<CoeffType> > (mixture.transport_mixture(), viscosity)),
-      _therm(     new PhysicalSet<ThermalConductivity,       ChemicalMixture<CoeffType> > (mixture.transport_mixture(), conductivity)), 
-      _wilke_eval(new BaseWilke(mixture,*_shadow_dif,*_visc,*_therm))
+                                                                           const ThermalConductivity& /*conductivity*/ )
+    : _transport_mixture( new TransportMixture<CoeffType>(mixture.chem_mixture()) ),
+      _wilke_mixture( new WilkeTransportMixture<CoeffType>(*_transport_mixture) ),
+      _diffusion( new MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>(*_transport_mixture) ),
+      _conductivity( new MixtureConductivity<ThermalConductivity,CoeffType>(*_transport_mixture) ),
+      _micro_thermo( new typename ThermalConductivity::micro_thermo_type(mixture.chem_mixture()) ),
+      _wilke_eval(new Evaluator(*_wilke_mixture,*_diffusion,viscosity,*_conductivity))
   {
     antioch_deprecated();
-    return;
+    Antioch::build_eucken_thermal_conductivity<typename ThermalConductivity::micro_thermo_type,CoeffType>(*_conductivity, *_micro_thermo );
   }
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::~WilkeEvaluator()
   {
-    delete _shadow_dif;
-    delete _visc;
-    delete _therm;
     delete _wilke_eval;
+    delete _micro_thermo;
+    delete _conductivity;
+    delete _diffusion;
+    delete _wilke_mixture;
+    delete _transport_mixture;
+
     return;
   }
 
@@ -141,7 +149,7 @@ namespace Antioch
                      const VectorStateType& chi,
                      const unsigned int s ) const
   {
-    
+
     typename Antioch::rebind<VectorStateType,VectorStateType>::type mu_mu_sqrt(mu.size());
     Antioch::init_constant(mu_mu_sqrt,mu);
 

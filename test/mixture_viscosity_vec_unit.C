@@ -64,6 +64,8 @@
 #include "antioch/valarray_utils.h"
 #include "antioch/vexcl_utils.h"
 
+#include "antioch/stat_mech_thermo.h"
+
 #ifdef ANTIOCH_HAVE_GRVY
 #include "grvy.h"
 
@@ -87,9 +89,16 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar> s_mu_mixture(chem_mixture);
+  typedef Antioch::StatMechThermodynamics<Scalar> MicroThermo;
+  MicroThermo thermo_stat( chem_mixture );
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> b_mu_mixture(chem_mixture);
+  Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
+
+  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar>
+    s_mu_mixture(tran_mixture);
+
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>
+    b_mu_mixture(tran_mixture);
 
   Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
   Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );

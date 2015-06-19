@@ -33,40 +33,41 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/chemical_mixture.h"
-
+#include "antioch/mixture_transport_base.h"
+#include "antioch/species_viscosity_base.h"
 // C++
 #include <string>
 #include <vector>
 
 namespace Antioch
 {
+  //! Container class for species viscosities
+  /*! For the given set of chemical species in the input TransportMixture, this contains
+      all the viscosities for each of those species and provides and interface for
+      computing the species viscosity. Total viscosity is computed by a mixing model,
+      e.g. WilkeTransportMixture. This class is templated on the viscosity model,
+      so an inherent assumption is that all species viscosities have the same model. */
   template<typename Viscosity, class CoeffType=double>
-  class MixtureViscosity
+  class MixtureViscosity : public MixtureTransportBase<CoeffType>
   {
   public:
 
-    MixtureViscosity( const ChemicalMixture<CoeffType>& chem_mixture );
+    MixtureViscosity( const TransportMixture<CoeffType>& transport_mixture );
     ~MixtureViscosity();
 
-   // forward compatibility
-    typedef Viscosity Model;
-
+    //! Evaluate viscosity for species s
+    /*! Total viscosity computed by mixing model, e.g. WilkeTransportEvaluator */
     template <typename StateType>
     StateType operator()( const unsigned int s, const StateType& T ) const;
 
+    //! Add species viscosity
     void add( const std::string& species_name,
 	      const std::vector<CoeffType>& coeffs );
 
-    void reset_coeffs( const unsigned int s, 
+    //! Reset model coefficients for viscosity model of species s
+    void reset_coeffs( const unsigned int s,
                        const std::vector<CoeffType> coeffs );
 
-    const ChemicalMixture<CoeffType>& chemical_mixture() const;
-
-    // forward compatibility
-    const ChemicalMixture<CoeffType>& mixture() const;
-
-    // backward compatibility
     const std::vector<Viscosity*> & species_viscosities() const;
 
     //! Formatted print, by default to \p std::cout
@@ -79,43 +80,43 @@ namespace Antioch
       return os;
     }
 
+    typedef Viscosity species_viscosity_type;
+
   protected:
 
-    const ChemicalMixture<CoeffType>& _chem_mixture;
+    std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*> _species_viscosities;
 
-    std::vector<Viscosity*> _species_viscosities;
+  private:
+
+    MixtureViscosity();
 
   };
 
   template<typename Viscosity, class CoeffType>
-  MixtureViscosity<Viscosity,CoeffType>::MixtureViscosity( const ChemicalMixture<CoeffType>& chem_mixture )
-    :  _chem_mixture(chem_mixture),
-       _species_viscosities( chem_mixture.n_species(), NULL )
-  {
-    antioch_deprecated();
-    return;
-  }
+  MixtureViscosity<Viscosity,CoeffType>::MixtureViscosity(  const TransportMixture<CoeffType>& transport_mixture )
+    :  MixtureTransportBase<CoeffType>(transport_mixture),
+       _species_viscosities( transport_mixture.n_species(), NULL )
+  {}
 
   template<typename Viscosity, class CoeffType>
   MixtureViscosity<Viscosity,CoeffType>::~MixtureViscosity()
   {
     // Need to delete all the species viscosities we allocated
-    for( typename std::vector<Viscosity*>::iterator it = _species_viscosities.begin();
+    for( typename std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*>::iterator it = _species_viscosities.begin();
 	 it != _species_viscosities.end(); ++it )
       {
 	delete (*it);
       }
-    return;
   }
 
   template<typename Viscosity, class CoeffType>
   void MixtureViscosity<Viscosity,CoeffType>::add( const std::string& species_name,
 						   const std::vector<CoeffType>& coeffs )
   {
-    antioch_assert( _chem_mixture.species_name_map().find(species_name) !=
-		    _chem_mixture.species_name_map().end() );
+    antioch_assert( this->_transport_mixture.species_name_map().find(species_name) !=
+		    this->_transport_mixture.species_name_map().end() );
 
-    unsigned int s = _chem_mixture.species_name_map().find(species_name)->second;
+    unsigned int s = this->_transport_mixture.species_name_map().find(species_name)->second;
 
     antioch_assert_less_equal( s, _species_viscosities.size() );
     antioch_assert( !_species_viscosities[s] );
@@ -125,7 +126,7 @@ namespace Antioch
   }
 
   template<typename Viscosity, class CoeffType>
-  void MixtureViscosity<Viscosity,CoeffType>::reset_coeffs( const unsigned int s, 
+  void MixtureViscosity<Viscosity,CoeffType>::reset_coeffs( const unsigned int s,
                                                             const std::vector<CoeffType> coeffs )
   {
     _species_viscosities[s]->reset_coeffs(coeffs);
@@ -145,20 +146,6 @@ namespace Antioch
 
   template<typename Viscosity, class CoeffType>
   inline
-  const ChemicalMixture<CoeffType>& MixtureViscosity<Viscosity,CoeffType>::chemical_mixture() const
-  {
-    return _chem_mixture;
-  }
-
-  template<typename Viscosity, class CoeffType>
-  inline
-  const ChemicalMixture<CoeffType>& MixtureViscosity<Viscosity,CoeffType>::mixture() const
-  {
-    return _chem_mixture;
-  }
-
-  template<typename Viscosity, class CoeffType>
-  inline
   const std::vector<Viscosity*>& MixtureViscosity<Viscosity,CoeffType>::species_viscosities() const
   {
     return _species_viscosities;
@@ -167,32 +154,18 @@ namespace Antioch
   template<typename Viscosity, class CoeffType>
   void MixtureViscosity<Viscosity,CoeffType>::print(std::ostream& os) const
   {
-    antioch_assert_equal_to( _species_viscosities.size(), _chem_mixture.n_species() );
+    antioch_assert_equal_to( _species_viscosities.size(), this->_transport_mixture.n_species() );
 
-    for( unsigned int s = 0; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 0; s < this->_transport_mixture.n_species(); s++ )
       {
-	const Species& species = _chem_mixture.species_list()[s];
-	const std::string& name = _chem_mixture.species_inverse_name_map().find( species  )->second;
+	const Species& species = this->_transport_mixture.species_list()[s];
+	const std::string& name = this->_transport_mixture.species_inverse_name_map().find( species  )->second;
 
 	os << "mu(" << name << ") = " << (*_species_viscosities[s]) << std::endl;
       }
 
     return;
   }
-
-/// now the forward compatibility to make it alright with PhysicalSet
-
- // tag is the tag of the physical model
- template <typename Viscosity,typename CoeffType>
- struct physical_tag<MixtureViscosity<Viscosity,CoeffType> >:
-        public physical_tag<Viscosity>
- {};
-
- // physical set boolean
- template<typename Viscosity, typename CoeffType>
- struct is_physical_set<MixtureViscosity<Viscosity,CoeffType> >:
-      public is_physical_set<Viscosity>
- {};
 
 } // end namespace Antioch
 

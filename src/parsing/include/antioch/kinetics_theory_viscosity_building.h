@@ -23,12 +23,15 @@
 //
 //-----------------------------------------------------------------------el-
 
+#include "antioch_config.h"
+#ifdef ANTIOCH_HAVE_GSL // if we do not have it, we don't even define the stuff
+
 #ifndef ANTIOCH_KINETICS_THEORY_BUILDING_H
 #define ANTIOCH_KINETICS_THEORY_BUILDING_H
 
 // Antioch
 #include "antioch/kinetics_theory_viscosity.h"
-#include "antioch/physical_set.h"
+#include "antioch/mixture_viscosity.h"
 
 // C++
 #include <iostream>
@@ -38,16 +41,16 @@
 namespace Antioch
 {
 
-  template <typename Thermo, typename Scalar>
+  template <typename Scalar>
   class TransportMixture;
 
-  template<class NumericType, class ThermoEvaluator>
-  void build_kinetics_theory_viscosity( PhysicalSet<KineticsTheoryViscosity<NumericType>, TransportMixture<ThermoEvaluator,NumericType> >& mu);
+  template<class NumericType, class SplineType>
+  void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType,SplineType>,NumericType >& mu);
 
-// ----------------------------------------- //
+  // ----------------------------------------- //
 
-  template<class NumericType, class ThermoEvaluator>
-  void build_kinetics_theory_viscosity( PhysicalSet<KineticsTheoryViscosity<NumericType>, TransportMixture<ThermoEvaluator,NumericType> >& mu)
+  template<class NumericType, class SplineType>
+  void build_kinetics_theory_viscosity( MixtureViscosity<KineticsTheoryViscosity<NumericType,SplineType>,NumericType >& mu)
   {
       for(unsigned int s = 0; s < mu.mixture().n_species(); s++)
       {
@@ -56,10 +59,12 @@ namespace Antioch
           coeffs[1] = mu.mixture().transport_species()[s]->LJ_diameter();
           coeffs[2] = mu.mixture().transport_species()[s]->dipole_moment();
           coeffs[3] = mu.mixture().transport_species()[s]->M() / Constants::Avogadro<NumericType>();
-          mu.add_model(mu.mixture().species_inverse_name_map().at(s),coeffs);
+          mu.add(mu.mixture().species_inverse_name_map().at(s),coeffs);
       }
   }
 
 }
 
-#endif
+#endif // ANTIOCH_KINETICS_THEORY_BUILDING_H
+
+#endif // ANTIOCH_HAVE_GSL
