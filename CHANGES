@@ -1,3 +1,6 @@
+Version 0.2.1
+* Critical bugfix for ConstantLewisDiffusivity
+
 Version 0.2.0
 * Added general units capabilities
 * Update in conversion factor for gas constant
