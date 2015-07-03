@@ -173,7 +173,7 @@ namespace Antioch
                                     StateType& D,
                                     AntiochPrivate::diffusion_tag<SpeciesDiffusionBase<Diffusion,CoeffType> >& /*tag*/ ) const
     {
-      (*_species_diffusivities[s])(rho,cp,k,D);
+      D = (*_species_diffusivities[s]).D(rho,cp,k);
     }
 
     //! Invalid to call species diffusivity calculation with BinaryDiffusionBase model
