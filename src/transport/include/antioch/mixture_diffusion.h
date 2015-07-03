@@ -198,7 +198,7 @@ namespace Antioch
 
   {
     // This class currenltly only supports species or binary diffusion models
-    if( !DiffusionTraits<Diffusion>::is_species_diffusion ||
+    if( !DiffusionTraits<Diffusion>::is_species_diffusion &&
         !DiffusionTraits<Diffusion>::is_binary_diffusion )
       {
         antioch_static_assert( DiffusionTraits<Diffusion>::is_species_diffusion ||
