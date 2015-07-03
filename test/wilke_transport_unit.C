@@ -155,7 +155,8 @@ int tester()
   Antioch::MixtureDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
     D( tran_mixture );
 
-  Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
+  const Scalar Le = 1.4;
+  Antioch::build_constant_lewis_diffusivity<Scalar>( D, Le);
 
 // non kinetics theory
   Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
@@ -229,23 +230,37 @@ int tester()
     return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
 
-
+  const Scalar P = 1e5;
   std::vector<Scalar> mass_fractions( 5, 0.2L);
-
-  // Currently dummy
-  //const Scalar mu_exact = ;
-
   const Scalar T = 1000.0L;
   const Antioch::TempCache<Scalar> T_cache(T);
+
+  const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
+  const Scalar rho = P/(R_mix*T); // kg.m-3
+  const Scalar cp = thermo_mix.cp( T_cache, mass_fractions );
+
+  const Scalar wilke_mu_long_double = 4.51233094078102111066e-05L;
+  const Scalar wilke_k_long_double  = 8.01027375195322618301e-02L;
 
   Scalar wilke_mu = wilke.mu(T, mass_fractions );
   Scalar wilke_k = wilke.k(T, mass_fractions );
 
+  return_flag = test_val( wilke_mu, wilke_mu_long_double, tol, "wilke mixture viscosity") || return_flag;
+  return_flag = test_val( wilke_k, wilke_k_long_double, tol, "wilke mixture thermal conduction") || return_flag;
+
+  std::vector<Scalar> lewis_D(5,0);
+
   wilke.mu_and_k(T,mass_fractions,wilke_mu,wilke_k);
 
-  int return_flag_temp = 0;
-  //return_flag_temp = test_mu( wilke.mu(T, mass_fractions ), mu_exact, tol );
-  if( return_flag_temp != 0 ) return_flag = 1;
+  return_flag = test_val( wilke_mu, wilke_mu_long_double, tol, "wilke mixture viscosity") || return_flag;
+  return_flag = test_val( wilke_k, wilke_k_long_double, tol, "wilke mixture thermal conduction") || return_flag;
+
+  wilke.mu_and_k_and_D( T, rho, cp, mass_fractions, wilke_mu, wilke_k, lewis_D );
+
+  Scalar D_lewis_exact = wilke_k/(rho*cp*Le);
+
+  for(unsigned int s = 0; s < lewis_D.size(); s++)
+    return_flag = test_val( lewis_D[s], D_lewis_exact, tol, "constant Lewis diffusion for species " + species_str_list[s]) || return_flag;
 
 #if ANTIOCH_HAVE_GSL
 /* \todo better the test
@@ -258,35 +273,31 @@ int tester()
    and the reduced temperature falls also on a node (less easy).
    Then we will have a theoretical independant value.
 */
-  const Scalar P = 1e5;
-  const Scalar R_mix = chem_mixture.R(mass_fractions); // get R_tot in J.kg-1.K-1
-  const Scalar rho = P/(R_mix*T); // kg.m-3
-  const Scalar cp = thermo_mix.cp( T_cache, mass_fractions );
 
-  const Scalar mu_long_double   = 4.49877527305932602332e-05L;
-  const Scalar k_long_double    = 8.22050332419571328635e-02L;
+  const Scalar mu_kt_long_double   = 4.49877527305932602332e-05L;
+  const Scalar k_kt_long_double    = 8.22050332419571328635e-02L;
 
-  std::vector<Scalar> D_long_double(5,0);
-  D_long_double[0] = 1.95418749838889089562e-04L;
-  D_long_double[1] = 1.92376915629762328034e-04L;
-  D_long_double[2] = 2.98006144849143296987e-04L;
-  D_long_double[3] = 3.08179434829991685679e-04L;
-  D_long_double[4] = 1.90508644119203653519e-04L;
+  std::vector<Scalar> D_kt_long_double(5,0);
+  D_kt_long_double[0] = 1.95418749838889089562e-04L;
+  D_kt_long_double[1] = 1.92376915629762328034e-04L;
+  D_kt_long_double[2] = 2.98006144849143296987e-04L;
+  D_kt_long_double[3] = 3.08179434829991685679e-04L;
+  D_kt_long_double[4] = 1.90508644119203653519e-04L;
   Scalar mu_kt, k_kt;
   std::vector<Scalar> D_kt(5,0);
   wilke_ps_evaluator.mu_and_k_and_D( T, rho, cp, mass_fractions, mu_kt, k_kt, D_kt );
 
 
-  return_flag = test_val( mu_kt, mu_long_double, tol, "kinetics theory viscosity") || return_flag;
-  return_flag = test_val( k_kt, k_long_double, tol, "kinetics theory thermal conduction") || return_flag;
+  return_flag = test_val( mu_kt, mu_kt_long_double, tol, "kinetics theory viscosity") || return_flag;
+  return_flag = test_val( k_kt, k_kt_long_double, tol, "kinetics theory thermal conduction") || return_flag;
   for(unsigned int s = 0; s < D_kt.size(); s++)
-    return_flag = test_val( D_kt[s], D_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
+    return_flag = test_val( D_kt[s], D_kt_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
 
   std::vector<Scalar> D_kt_2(5,0);
   wilke_ps_evaluator.D(rho, T, mass_fractions, D_kt_2 );
 
   for(unsigned int s = 0; s < D_kt.size(); s++)
-    return_flag = test_val( D_kt_2[s], D_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
+    return_flag = test_val( D_kt_2[s], D_kt_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
 
 
 #endif
