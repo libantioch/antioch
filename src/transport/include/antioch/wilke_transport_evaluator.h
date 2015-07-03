@@ -311,7 +311,9 @@ namespace Antioch
                                                                               VectorStateType & D_vec ) const
   {
     antioch_static_assert_runtime_fallback( (ConductivityTraits<TherCond>::requires_diffusion &&
-                                             DiffusionTraits<Diff>::is_binary_diffusion) ,
+                                             DiffusionTraits<Diff>::is_binary_diffusion) ||
+                                            (!ConductivityTraits<TherCond>::requires_diffusion &&
+                                             DiffusionTraits<Diff>::is_species_diffusion),
                                             "Incompatible thermal conductivity and diffusion models!" );
 
     mu_mix = zero_clone(T);
