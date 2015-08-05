@@ -35,7 +35,7 @@ namespace Antioch
   /*! For the given set of chemical species in the input TransportMixture, this contains
     all the thermal conductivities for each of those species and provides and interface for
     computing the species thermal conductivity. Total conductivity is computed by a mixing model,
-    e.g. WilkeTransportMixture. This class is templated on the conductivity model,
+    e.g. MixtureAveragedTransportMixture. This class is templated on the conductivity model,
     so an inherent assumption is that all species conductivities have the same model. */
   template<typename Conductivity, class CoeffType=double>
   class MixtureConductivity : public MixtureTransportBase<CoeffType>

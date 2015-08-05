@@ -159,22 +159,22 @@ int tester()
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, Le);
 
 // non kinetics theory
-  Antioch::WilkeTransportMixture<Scalar> wilke_mixture( tran_mixture );
+  Antioch::MixtureAveragedTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  Antioch::WilkeTransportEvaluator<Antioch::ConstantLewisDiffusivity<Scalar>,
-                                   Antioch::BlottnerViscosity<Scalar>,
-                                   Antioch::EuckenThermalConductivity<MicroThermo>,
-                                   Scalar>
+  Antioch::MixtureAveragedTransportEvaluator<Antioch::ConstantLewisDiffusivity<Scalar>,
+                                             Antioch::BlottnerViscosity<Scalar>,
+                                             Antioch::EuckenThermalConductivity<MicroThermo>,
+                                             Scalar>
     wilke( wilke_mixture, D, mu, k );
 
 
 // kinetics theory full
 #ifdef ANTIOCH_HAVE_GSL
 
-  Antioch::WilkeTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
-                                   Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
-                                   Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                                   Scalar>
+  Antioch::MixtureAveragedTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
+                                             Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
+                                             Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
+                                             Scalar>
     wilke_ps_evaluator(wilke_mixture,bimol_D,ps_mu,ps_k);
 
 #endif

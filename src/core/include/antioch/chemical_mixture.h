@@ -99,7 +99,7 @@ namespace Antioch
     /*! method to send this back
 
         added for backward compatibility for WilkeMixture v/s
-        WilkeTransportMixture, the idea is to send a chemical mixture
+        MixtureAveragedTransportMixture, the idea is to send a chemical mixture
         whatever mixture is provided
      */
     const ChemicalMixture<CoeffType> & chemical_mixture() const;
@@ -156,10 +156,10 @@ namespace Antioch
     template<typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value,
-      typename Antioch::value_type<VectorStateType>::type 
+      typename Antioch::value_type<VectorStateType>::type
     >::type
     R( const VectorStateType& mass_fractions ) const;
-    
+
     //! Molecular weight (molar mass) for species s in kg/mol
     CoeffType M( const unsigned int s ) const;
 
@@ -172,18 +172,18 @@ namespace Antioch
     template<typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value,
-      typename Antioch::value_type<VectorStateType>::type 
+      typename Antioch::value_type<VectorStateType>::type
     >::type
     M( const VectorStateType& mass_fractions ) const;
 
     //! Species mole fraction
-    /*! 
+    /*!
       Given mixture molar mass M and mass fraction for species,
       compute species mole fraction using the relationship
-      \f$ w_i = x_i \frac{M_i}{M} \f$ 
+      \f$ w_i = x_i \frac{M_i}{M} \f$
     */
     template<typename StateType>
-    ANTIOCH_AUTO(StateType) 
+    ANTIOCH_AUTO(StateType)
     X( const unsigned int species, const StateType& M,
        const StateType& mass_fraction ) const
     ANTIOCH_AUTOFUNC(StateType, mass_fraction*M/this->M(species))
@@ -195,11 +195,11 @@ namespace Antioch
     */
     template<typename VectorStateType>
     void X( typename Antioch::value_type<VectorStateType>::type M,
-	    const VectorStateType& mass_fractions, 
+	    const VectorStateType& mass_fractions,
 	    VectorStateType& mole_fractions ) const;
 
     //! Species molar density
-    /*! 
+    /*!
       Given total density rho and mass fraction for species,
       compute species moles per unit volume
     */
@@ -211,7 +211,7 @@ namespace Antioch
     ANTIOCH_AUTOFUNC(StateType, rho*mass_fraction/this->M(species))
 
     //! Species molar densities
-    /*! 
+    /*!
       Given total density rho and mass fractions for all species,
       compute moles per unit volume for all species
     */
@@ -245,7 +245,7 @@ namespace Antioch
   template<typename CoeffType>
   inline
   const std::vector<Species>& ChemicalMixture<CoeffType>::species_list() const
-  { 
+  {
     return _species_list;
   }
 
@@ -322,7 +322,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  ChemicalMixture<CoeffType>::ChemicalMixture(const std::string & filename, const bool verbose, 
+  ChemicalMixture<CoeffType>::ChemicalMixture(const std::string & filename, const bool verbose,
                                               const std::string & species_data,
                                               const std::string & vibration_data,
                                               const std::string & electronic_data)
@@ -418,7 +418,7 @@ namespace Antioch
     _chemical_species.resize( species_list.size(), NULL );
     // Build up name map for all possible species
     this->init_species_name_map(species_list);
-    
+
     // Build up inverse name map
     this->build_inverse_name_map();
 
@@ -458,14 +458,14 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value,
-    typename Antioch::value_type<VectorStateType>::type 
+    typename Antioch::value_type<VectorStateType>::type
   >::type
   ChemicalMixture<CoeffType>::R( const VectorStateType& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
     antioch_assert_greater( mass_fractions.size(), 0);
-    
-    typename Antioch::value_type<VectorStateType>::type 
+
+    typename Antioch::value_type<VectorStateType>::type
       R = mass_fractions[0]*this->R(0);
     for( unsigned int s = 1; s < mass_fractions.size(); s++ )
       {
@@ -481,13 +481,13 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value,
-    typename Antioch::value_type<VectorStateType>::type 
+    typename Antioch::value_type<VectorStateType>::type
   >::type
   ChemicalMixture<CoeffType>::M( const VectorStateType& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
 
-    typename Antioch::value_type<VectorStateType>::type 
+    typename Antioch::value_type<VectorStateType>::type
       M = mass_fractions[0]/this->M(0);
     for( unsigned int s = 1; s < mass_fractions.size(); s++ )
       {
@@ -502,7 +502,7 @@ namespace Antioch
   template<typename VectorStateType>
   inline
   void ChemicalMixture<CoeffType>::X( typename Antioch::value_type<VectorStateType>::type M,
-				      const VectorStateType& mass_fractions, 
+				      const VectorStateType& mass_fractions,
 				      VectorStateType& mole_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), _chemical_species.size() );
@@ -552,7 +552,7 @@ namespace Antioch
   {
     (_chemical_species[index])->add_electronic_data(theta_e, ndg_e);
   }
-  
+
   template<typename CoeffType>
   inline
   void ChemicalMixture<CoeffType>::init_species_name_map(const std::vector<std::string> & species_list)

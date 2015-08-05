@@ -45,7 +45,7 @@ namespace Antioch
   /*! For the given set of chemical species in the input TransportMixture, this contains
       all the viscosities for each of those species and provides and interface for
       computing the species viscosity. Total viscosity is computed by a mixing model,
-      e.g. WilkeTransportMixture. This class is templated on the viscosity model,
+      e.g. MixtureAveragedTransportMixture. This class is templated on the viscosity model,
       so an inherent assumption is that all species viscosities have the same model. */
   template<typename Viscosity, class CoeffType=double>
   class MixtureViscosity : public MixtureTransportBase<CoeffType>
@@ -56,7 +56,7 @@ namespace Antioch
     ~MixtureViscosity();
 
     //! Evaluate viscosity for species s
-    /*! Total viscosity computed by mixing model, e.g. WilkeTransportEvaluator */
+    /*! Total viscosity computed by mixing model, e.g. MixtureAveragedTransportEvaluator */
     template <typename StateType>
     StateType operator()( const unsigned int s, const StateType& T ) const;
 

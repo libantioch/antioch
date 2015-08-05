@@ -40,11 +40,11 @@ namespace Antioch
    *  an interface for computing the species diffusion coefficients/binary diffusion
    *  matrix, depending on the Diffusion model template parameter.
    *  Total/mixture diffusion coefficients are computed by a mixing model,
-   *  e.g. WilkeTransportEvaluator. This class is templated on the diffusion model,
+   *  e.g. MixtureAveragedTransportEvaluator. This class is templated on the diffusion model,
    *  so an inherent assumption is that all species diffusions have the same model.
    *
    *  This is intended to only be used through a mixing model, e.g.
-   *  WilkeTransportEvaluator.
+   *  MixtureAveragedTransportEvaluator.
    *
    *  This class supports interfaces to multiple types of species diffusion models.
    *  As such, we use "tagging" mechanisms to defer to the correct, private, implemenation

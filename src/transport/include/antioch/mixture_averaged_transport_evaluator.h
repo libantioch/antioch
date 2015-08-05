@@ -44,29 +44,30 @@
 
 namespace Antioch
 {
-  //! Compute transport properties using Wilke's mixing rule
+  //! Compute transport properties using ``mixture averaged" model
   /*!
    * Use the species transport models (template parameters) to evaluate species
-   * values, then use Wilke's mixing rule to compute the mixture quantities. This is
+   * values, then use Wilke's mixing rule to compute the mixture viscosity and thermal conductivity
+   * and the appropriate DiffusivityType for the mixture diffusivity. This is
    * the expected interface for the user. Underlying compile time decisions
    * are made based on the species transport models that should be invisible
    * to the user. The preferred, most efficient, and most general
-   * method is m_and_k_and_D for evaluating the transport quantities.
+   * method is mu_and_k_and_D for evaluating the transport quantities.
    * The other methods are less efficient and may only be available
    * for a subset of species model; they are present for backwards
    * compatibility and pedagogical reasons.
    */
   template<class Diffusion, class Viscosity, class ThermalConductivity,class CoeffType=double>
-  class WilkeTransportEvaluator
+  class MixtureAveragedTransportEvaluator
   {
   public:
 
-    WilkeTransportEvaluator( const WilkeTransportMixture<CoeffType>& mixture,
-                             const MixtureDiffusion<Diffusion,CoeffType>& diffusion,
-                             const MixtureViscosity<Viscosity,CoeffType>& viscosity,
-                             const MixtureConductivity<ThermalConductivity,CoeffType>& conductivity );
+    MixtureAveragedTransportEvaluator( const MixtureAveragedTransportMixture<CoeffType>& mixture,
+                                       const MixtureDiffusion<Diffusion,CoeffType>& diffusion,
+                                       const MixtureViscosity<Viscosity,CoeffType>& viscosity,
+                                       const MixtureConductivity<ThermalConductivity,CoeffType>& conductivity );
 
-    ~WilkeTransportEvaluator(){};
+    ~MixtureAveragedTransportEvaluator(){};
 
     /*!
      *  For the mixture averaged diffusion models, there are three typical ways
@@ -159,7 +160,7 @@ namespace Antioch
                                 DiffusivityType diff_type,
                                 VectorStateType & D_vec ) const;
 
-    const WilkeTransportMixture<CoeffType>& _mixture;
+    const MixtureAveragedTransportMixture<CoeffType>& _mixture;
 
     const MixtureDiffusion<Diffusion,CoeffType>& _diffusion;
 
@@ -169,30 +170,30 @@ namespace Antioch
 
   private:
 
-    WilkeTransportEvaluator();
+    MixtureAveragedTransportEvaluator();
 
   };
 
   template<class Diff, class Visc, class TherCond, class CoeffType>
-  WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::WilkeTransportEvaluator( const WilkeTransportMixture<CoeffType>& mixture,
-                                                                                  const MixtureDiffusion<Diff,CoeffType>& diffusion,
-                                                                                  const MixtureViscosity<Visc,CoeffType>& viscosity,
-                                                                                  const MixtureConductivity<TherCond,CoeffType>& conductivity )
-    : _mixture(mixture),
-      _diffusion(diffusion),
-      _viscosity(viscosity),
-      _conductivity(conductivity)
+  MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::MixtureAveragedTransportEvaluator( const MixtureAveragedTransportMixture<CoeffType>& mixture,
+                                                                                                      const MixtureDiffusion<Diff,CoeffType>& diffusion,
+                                                                                                      const MixtureViscosity<Visc,CoeffType>& viscosity,
+                                                                                                      const MixtureConductivity<TherCond,CoeffType>& conductivity )
+  : _mixture(mixture),
+    _diffusion(diffusion),
+    _viscosity(viscosity),
+    _conductivity(conductivity)
   {
     return;
   }
 
   template<class Diff, class Visc, class TherCond, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::D( const StateType & rho,
-                                                                 const StateType& T,
-                                                                 const VectorStateType& mass_fractions,
-                                                                 VectorStateType & D_vec,
-                                                                 DiffusivityType diff_type ) const
+  void MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::D( const StateType & rho,
+                                                                           const StateType& T,
+                                                                           const VectorStateType& mass_fractions,
+                                                                           VectorStateType & D_vec,
+                                                                           DiffusivityType diff_type ) const
   {
     antioch_static_assert_runtime_fallback( DiffusionTraits<Diff>::is_binary_diffusion,
                                             "ERROR: This function requires a binary diffusion model to compute D!");
@@ -215,8 +216,8 @@ namespace Antioch
   template <typename StateType, typename VectorStateType>
   inline
   typename value_type<VectorStateType>::type
-  WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::mu( const StateType& T,
-                                                             const VectorStateType& mass_fractions ) const
+  MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::mu( const StateType& T,
+                                                                       const VectorStateType& mass_fractions ) const
   {
     typename value_type<VectorStateType>::type mu_mix = zero_clone(T);
 
@@ -244,8 +245,8 @@ namespace Antioch
   template<class Diff, class Visc, class TherCond, class CoeffType>
   template <typename StateType, typename VectorStateType>
   typename value_type<VectorStateType>::type
-  WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::k( const StateType& T,
-                                                            const VectorStateType& mass_fractions ) const
+  MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::k( const StateType& T,
+                                                                      const VectorStateType& mass_fractions ) const
   {
     antioch_static_assert_runtime_fallback( !ConductivityTraits<TherCond>::requires_diffusion,
                                             "This function requires a conductivity model independent of diffusion!");
@@ -282,10 +283,10 @@ namespace Antioch
 
   template<class Diff, class Visc, class TherCond, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::mu_and_k( const StateType& T,
-                                                                        const VectorStateType& mass_fractions,
-                                                                        StateType& mu_mix,
-                                                                        StateType& k_mix ) const
+  void MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::mu_and_k( const StateType& T,
+                                                                                  const VectorStateType& mass_fractions,
+                                                                                  StateType& mu_mix,
+                                                                                  StateType& k_mix ) const
   {
     antioch_static_assert_runtime_fallback( !ConductivityTraits<TherCond>::requires_diffusion,
                                             "This function requires a conductivity model independent of diffusion!");
@@ -320,14 +321,14 @@ namespace Antioch
 
   template<class Diff, class Visc, class TherCond, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::mu_and_k_and_D( const StateType& T,
-                                                                              const StateType & rho,
-                                                                              const StateType& cp,
-                                                                              const VectorStateType& mass_fractions,
-                                                                              StateType& mu_mix,
-                                                                              StateType& k_mix,
-                                                                              VectorStateType & D_vec,
-                                                                              DiffusivityType diff_type ) const
+  void MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::mu_and_k_and_D( const StateType& T,
+                                                                                        const StateType & rho,
+                                                                                        const StateType& cp,
+                                                                                        const VectorStateType& mass_fractions,
+                                                                                        StateType& mu_mix,
+                                                                                        StateType& k_mix,
+                                                                                        VectorStateType & D_vec,
+                                                                                        DiffusivityType diff_type ) const
   {
     antioch_static_assert_runtime_fallback( (ConductivityTraits<TherCond>::requires_diffusion &&
                                              DiffusionTraits<Diff>::is_binary_diffusion) ||
@@ -415,10 +416,10 @@ namespace Antioch
 
   template<class Diff, class Visc, class TherCond, class CoeffType>
   template <typename StateType, typename VectorStateType>
-  void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::compute_mu_chi( const StateType& T,
-                                                                              const VectorStateType& mass_fractions,
-                                                                              VectorStateType& mu,
-                                                                              VectorStateType& chi ) const
+  void MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::compute_mu_chi( const StateType& T,
+                                                                                        const VectorStateType& mass_fractions,
+                                                                                        VectorStateType& mu,
+                                                                                        VectorStateType& chi ) const
   {
     const typename value_type<VectorStateType>::type M = _mixture.chem_mixture().M(mass_fractions);
 
@@ -437,9 +438,9 @@ namespace Antioch
   template <typename VectorStateType>
   typename
   value_type<VectorStateType>::type
-  WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::compute_phi(typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
-                                                                     const VectorStateType& chi,
-                                                                     const unsigned int s ) const
+  MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::compute_phi(typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt,
+                                                                               const VectorStateType& chi,
+                                                                               const unsigned int s ) const
   {
     using std::sqrt;
 
@@ -464,8 +465,8 @@ namespace Antioch
   template<class Diff, class Visc, class TherCond, class CoeffType>
   template <typename VectorStateType>
   inline
-  void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::compute_mu_mu_sqrt( const VectorStateType & mu,
-                                                                                  typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const
+  void MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::compute_mu_mu_sqrt( const VectorStateType & mu,
+                                                                                            typename Antioch::rebind<VectorStateType,VectorStateType>::type & mu_mu_sqrt) const
 
   {
     antioch_assert_equal_to(mu.size(),mu_mu_sqrt.size()); // indeed square matrix
@@ -501,11 +502,11 @@ namespace Antioch
 
   template<class Diff, class Visc, class TherCond, class CoeffType>
   template <typename VectorStateType, typename MatrixStateType>
-  void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
-                                                                                     const VectorStateType & mass_fractions,
-                                                                                     const MatrixStateType & D_mat,
-                                                                                     DiffusivityType diff_type,
-                                                                                     VectorStateType & D_vec ) const
+  void MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
+                                                                                               const VectorStateType & mass_fractions,
+                                                                                               const MatrixStateType & D_mat,
+                                                                                               DiffusivityType diff_type,
+                                                                                               VectorStateType & D_vec ) const
   {
     antioch_assert_equal_to(D_vec.size(),mixture.n_species());
     antioch_assert_equal_to(D_vec.size(),mass_fractions.size());
@@ -551,7 +552,7 @@ namespace Antioch
         }
       default:
         {
-          antioch_msg_error("ERROR: Invalid DiffusivityType in WilkeTransportEvaluator::diffusion_mixing_rule");
+          antioch_msg_error("ERROR: Invalid DiffusivityType in MixtureAveragedTransportEvaluator::diffusion_mixing_rule");
           antioch_error();
         }
       } // switch(diff_type)

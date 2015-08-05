@@ -41,7 +41,7 @@
 
 namespace Antioch
 {
-  //! Deprecated. Use WilkeTransportEvaluator instead.
+  //! Deprecated. Use MixtureAveragedTransportEvaluator instead.
   template<class MixtureViscosity, class ThermalConductivity, class CoeffType=double>
   class WilkeEvaluator
   {
@@ -92,22 +92,22 @@ namespace Antioch
 
     TransportMixture<CoeffType>* _transport_mixture;
 
-    WilkeTransportMixture<CoeffType>* _wilke_mixture;
+    MixtureAveragedTransportMixture<CoeffType>* _wilke_mixture;
 
     //! This is dummy.
-    /*! WilkeEvaluator doesn't support diffusion, but the new WilkeTransportEvaluator does
+    /*! WilkeEvaluator doesn't support diffusion, but the new MixtureAveragedTransportEvaluator does
         so we create a dummy diffusion class, don't bother building it and pass it along
-        to WilkeTransportEvaluator. */
+        to MixtureAveragedTransportEvaluator. */
     MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>* _diffusion;
 
     MixtureConductivity<ThermalConductivity,CoeffType>* _conductivity;
 
     typename ThermalConductivity::micro_thermo_type* _micro_thermo;
 
-    typedef  WilkeTransportEvaluator<ConstantLewisDiffusivity<CoeffType>,
-                                     typename MixtureViscosity::species_viscosity_type,
-                                     ThermalConductivity,
-                                     CoeffType> Evaluator;
+    typedef  MixtureAveragedTransportEvaluator<ConstantLewisDiffusivity<CoeffType>,
+                                               typename MixtureViscosity::species_viscosity_type,
+                                               ThermalConductivity,
+                                               CoeffType> Evaluator;
 
     Evaluator* _wilke_eval;
 
@@ -118,7 +118,7 @@ namespace Antioch
                                                                            const Viscosity& viscosity,
                                                                            const ThermalConductivity& /*conductivity*/ )
     : _transport_mixture( new TransportMixture<CoeffType>(mixture.chem_mixture()) ),
-      _wilke_mixture( new WilkeTransportMixture<CoeffType>(*_transport_mixture) ),
+      _wilke_mixture( new MixtureAveragedTransportMixture<CoeffType>(*_transport_mixture) ),
       _diffusion( new MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>(*_transport_mixture) ),
       _conductivity( new MixtureConductivity<ThermalConductivity,CoeffType>(*_transport_mixture) ),
       _micro_thermo( new typename ThermalConductivity::micro_thermo_type(mixture.chem_mixture()) ),

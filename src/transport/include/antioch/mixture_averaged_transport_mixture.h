@@ -37,7 +37,7 @@
 namespace Antioch
 {
 
-  // forward declaration to keep the call to 
+  // forward declaration to keep the call to
   // the ChemicalMixture object
   template <typename CoeffType>
   class ChemicalMixture;
@@ -46,17 +46,17 @@ namespace Antioch
   class TransportMixture;
 
   template<class CoeffType = double>      // type
-  class WilkeTransportMixture
+  class MixtureAveragedTransportMixture
   {
   public:
 
-    WilkeTransportMixture( const TransportMixture<CoeffType> & mixture);
+    MixtureAveragedTransportMixture( const TransportMixture<CoeffType> & mixture);
 
-    ~WilkeTransportMixture(){};
+    ~MixtureAveragedTransportMixture(){};
 
     CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
                                        const unsigned int s ) const;
-    
+
     CoeffType denominator( const unsigned int r,
                            const unsigned int s ) const;
 
@@ -81,7 +81,7 @@ namespace Antioch
   };
 
   template<class CoeffType>
-  WilkeTransportMixture<CoeffType>::WilkeTransportMixture( const TransportMixture<CoeffType>& mixture)
+  MixtureAveragedTransportMixture<CoeffType>::MixtureAveragedTransportMixture( const TransportMixture<CoeffType>& mixture)
     : _mixture(mixture),
       _Mr_Ms_to_the_one_fourth(mixture.n_species()),
       _denom(mixture.n_species())
@@ -106,8 +106,8 @@ namespace Antioch
 
   template<class CoeffType>
   inline
-  CoeffType WilkeTransportMixture<CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
-                                                                       const unsigned int s ) const
+  CoeffType MixtureAveragedTransportMixture<CoeffType>::Mr_Ms_to_the_one_fourth( const unsigned int r,
+                                                                                 const unsigned int s ) const
   {
     return _Mr_Ms_to_the_one_fourth[r][s];
   }
@@ -115,22 +115,22 @@ namespace Antioch
 
   template<class CoeffType>
   inline
-  CoeffType WilkeTransportMixture<CoeffType>::denominator( const unsigned int r,
-                                                           const unsigned int s ) const
+  CoeffType MixtureAveragedTransportMixture<CoeffType>::denominator( const unsigned int r,
+                                                                     const unsigned int s ) const
   {
     return _denom[r][s];
   }
 
   template<class CoeffType>
   inline
-  const ChemicalMixture<CoeffType>& WilkeTransportMixture<CoeffType>::chem_mixture() const
+  const ChemicalMixture<CoeffType>& MixtureAveragedTransportMixture<CoeffType>::chem_mixture() const
   {
     return _mixture.chemical_mixture();
   }
 
   template<class CoeffType>
   inline
-  const TransportMixture<CoeffType> & WilkeTransportMixture<CoeffType>::transport_mixture() const
+  const TransportMixture<CoeffType> & MixtureAveragedTransportMixture<CoeffType>::transport_mixture() const
   {
     return _mixture;
   }
