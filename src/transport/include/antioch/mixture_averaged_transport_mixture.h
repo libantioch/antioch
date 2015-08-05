@@ -36,16 +36,25 @@
 
 namespace Antioch
 {
-
-  // forward declaration to keep the call to
-  // the ChemicalMixture object
+  // Forward declarations
   template <typename CoeffType>
   class ChemicalMixture;
 
   template <typename CoeffType>
   class TransportMixture;
 
-  template<class CoeffType = double>      // type
+  //! Mixture object for MixtureAveragedTransport model
+  /*! This object is meant to live for the life of the program and contains data that is reused
+   *  by the MixtureAveragedTransportEvaluator object. In particular, there are two terms for
+   *  species indices r and s:
+   *
+   * \f[  \left(\frac{M_r}{M_s}\right)^{1/4} \f]
+   *
+   * \f[ \sqrt{8\left( 1 + \frac{M_r}{M_s} \right)} \f]
+   *
+   * These terms appear in the mixing formulae used in MixtureAveragedTransportEvaluator.
+   */
+  template<class CoeffType = double>
   class MixtureAveragedTransportMixture
   {
   public:
@@ -54,9 +63,11 @@ namespace Antioch
 
     ~MixtureAveragedTransportMixture(){};
 
+    //! \f[ \left(\frac{M_r}{M_s}\right)^{1/4} \f]
     CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
                                        const unsigned int s ) const;
 
+    //! \f[ \sqrt{8\left( 1 + \frac{M_r}{M_s} \right)} \f]
     CoeffType denominator( const unsigned int r,
                            const unsigned int s ) const;
 

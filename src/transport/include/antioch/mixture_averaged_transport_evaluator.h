@@ -56,6 +56,10 @@ namespace Antioch
    * The other methods are less efficient and may only be available
    * for a subset of species model; they are present for backwards
    * compatibility and pedagogical reasons.
+   *
+   * In a multi-threaded computing environment, this object should be created *after* threads
+   * have been forked. In other words, this object is meant to live only temporarily for computing
+   * quantities.
    */
   template<class Diffusion, class Viscosity, class ThermalConductivity,class CoeffType=double>
   class MixtureAveragedTransportEvaluator
@@ -82,9 +86,10 @@ namespace Antioch
                            MASS_FLUX_MASS_FRACTION,
                            MASS_FLUX_MOLE_FRACTION };
 
-    //! mixture level diffusion, array of values
+    //! Mixture diffusivities for each species, in [m^2/s]
     /*! Only valid for BinaryDiffusionBase species diffusion models.
-     *  Compile time error if otherwise. */
+     *  Compile time error if otherwise.
+     */
     template <typename StateType, typename VectorStateType>
     void D( const StateType & rho,
             const StateType& T,
@@ -92,26 +97,26 @@ namespace Antioch
             VectorStateType & D_vec,
             DiffusivityType diff_type = DiffusivityType::MASS_FLUX_MOLE_FRACTION ) const;
 
-    //! mixture level viscosity, one value
+    //! Mixture viscosity, in [Pa-s]
     template <typename StateType, typename VectorStateType>
     typename value_type<VectorStateType>::type
     mu( const StateType& T, const VectorStateType& mass_fractions ) const;
 
-    //! mixture level thermal conduction, one value
+    //! Mixture conducivity, in [W/m-K]
     /*! Only valid for "no diffusion" conductivity models.
      *  Compile time error if otherwise. */
     template <typename StateType, typename VectorStateType>
     typename value_type<VectorStateType>::type
     k( const StateType & T, const VectorStateType& mass_fractions ) const;
 
-    //! mixture level thermal conduction and viscosity, one value
+    //! Mixture viscosity and thermal conductivity, in [Pa-s], [W/m-K] respectively
     /*! Only valid for "no diffusion" conductivity models.
      *  Compile time error if otherwise. */
     template <typename StateType, typename VectorStateType>
     void mu_and_k( const StateType& T, const VectorStateType& mass_fractions,
                    StateType& mu, StateType& k ) const;
 
-    //! mixture level thermal conduction, viscosity (one value) and diffusion (array of values)
+    //! Mixture viscosity, thermal conductivity, and diffusivities in [Pa-s], [W/m-K], [m^2/s] respectively
     /*! This is the preferred, most efficient, and most general method. */
     template <typename StateType, typename VectorStateType>
     void mu_and_k_and_D( const StateType& T, const StateType& rho, const StateType& cp,
