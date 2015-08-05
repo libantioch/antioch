@@ -68,6 +68,19 @@ namespace Antioch
 
     ~WilkeTransportEvaluator(){};
 
+    /*!
+     *  For the mixture averaged diffusion models, there are three typical ways
+     *  of computing an average diffusivity, depending on the "units" of the flux
+     *  and which variable with which the gradient is taken:
+     *  -# molar flux with gradients of mole fraction (MOLE_FLUX_MOLE_FRACTION)
+     *  -# mass flux with gradients of mass fraction (MASS_FLUX_MASS_FRACTION)
+     *  -# mass flux with gradients of mole fraction (MASS_FLUX_MOLE_FRACTION)
+     *  See, for example: Kee, Coltrin, Glarborg, ``Chemically Reacting Flow", Wiley, 2003, Chapter 12.7
+     */
+    enum DiffusivityType { MOLE_FLUX_MOLE_FRACTION,
+                           MASS_FLUX_MASS_FRACTION,
+                           MASS_FLUX_MOLE_FRACTION };
+
     //! mixture level diffusion, array of values
     /*! Only valid for BinaryDiffusionBase species diffusion models.
      *  Compile time error if otherwise. */
@@ -75,7 +88,8 @@ namespace Antioch
     void D( const StateType & rho,
             const StateType& T,
             const VectorStateType& mass_fractions,
-            VectorStateType & D_vec) const;
+            VectorStateType & D_vec,
+            DiffusivityType diff_type = DiffusivityType::MASS_FLUX_MOLE_FRACTION ) const;
 
     //! mixture level viscosity, one value
     template <typename StateType, typename VectorStateType>
@@ -101,7 +115,8 @@ namespace Antioch
     template <typename StateType, typename VectorStateType>
     void mu_and_k_and_D( const StateType& T, const StateType& rho, const StateType& cp,
                          const VectorStateType& mass_fractions,
-                         StateType& mu, StateType& k, VectorStateType& D_vec ) const;
+                         StateType& mu, StateType& k, VectorStateType& D_vec,
+                         DiffusivityType diff_type = DiffusivityType::MASS_FLUX_MOLE_FRACTION ) const;
 
     //! Helper function to reduce code duplication.
     /*! Populates species viscosities and the intermediate \chi variable
@@ -141,6 +156,7 @@ namespace Antioch
     void diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
                                 const VectorStateType & mass_fractions,
                                 const MatrixStateType & D_mat,
+                                DiffusivityType diff_type,
                                 VectorStateType & D_vec ) const;
 
     const WilkeTransportMixture<CoeffType>& _mixture;
@@ -175,7 +191,8 @@ namespace Antioch
   void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::D( const StateType & rho,
                                                                  const StateType& T,
                                                                  const VectorStateType& mass_fractions,
-                                                                 VectorStateType & D_vec) const
+                                                                 VectorStateType & D_vec,
+                                                                 DiffusivityType diff_type ) const
   {
     antioch_static_assert_runtime_fallback( DiffusionTraits<Diff>::is_binary_diffusion,
                                             "ERROR: This function requires a binary diffusion model to compute D!");
@@ -190,6 +207,7 @@ namespace Antioch
     this->diffusion_mixing_rule( _mixture.chem_mixture(),
                                  mass_fractions,
                                  D_mat,
+                                 diff_type,
                                  D_vec );
   }
 
@@ -308,7 +326,8 @@ namespace Antioch
                                                                               const VectorStateType& mass_fractions,
                                                                               StateType& mu_mix,
                                                                               StateType& k_mix,
-                                                                              VectorStateType & D_vec ) const
+                                                                              VectorStateType & D_vec,
+                                                                              DiffusivityType diff_type ) const
   {
     antioch_static_assert_runtime_fallback( (ConductivityTraits<TherCond>::requires_diffusion &&
                                              DiffusionTraits<Diff>::is_binary_diffusion) ||
@@ -347,6 +366,7 @@ namespace Antioch
         this->diffusion_mixing_rule<VectorStateType,MatrixStateType>( _mixture.chem_mixture(),
                                                                       mass_fractions,
                                                                       D_mat,
+                                                                      diff_type,
                                                                       D_vec );
       }
 
@@ -484,6 +504,7 @@ namespace Antioch
   void WilkeTransportEvaluator<Diff,Visc,TherCond,CoeffType>::diffusion_mixing_rule( const ChemicalMixture<CoeffType> & mixture,
                                                                                      const VectorStateType & mass_fractions,
                                                                                      const MatrixStateType & D_mat,
+                                                                                     DiffusivityType diff_type,
                                                                                      VectorStateType & D_vec ) const
   {
     antioch_assert_equal_to(D_vec.size(),mixture.n_species());
@@ -496,27 +517,44 @@ namespace Antioch
       antioch_assert_equal_to(D_vec.size(),D_mat[s].size());
 #endif
 
-    VectorStateType molar_fractions = zero_clone(mass_fractions);
-
-    mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
-
-    // D_s = (1 - Y_s) / (sum_{j \neq s} x_j/D_{s,j})
-    for(unsigned int s = 0; s < D_vec.size(); s++)
+    switch(diff_type)
       {
-        D_vec[s] = constant_clone(mass_fractions[s],1) - mass_fractions[s];
+      case(MASS_FLUX_MOLE_FRACTION):
+        {
+          VectorStateType molar_fractions = zero_clone(mass_fractions);
 
-        typename value_type<VectorStateType>::type denom = zero_clone(mass_fractions[0]);
+          mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
 
-        for(unsigned int j = 0; j < D_vec.size(); j++)
-          {
-            if(j == s)
-              continue;
+          // D_s = (1 - Y_s) / (sum_{j \neq s} x_j/D_{s,j})
+          for(unsigned int s = 0; s < D_vec.size(); s++)
+            {
+              D_vec[s] = constant_clone(mass_fractions[s],1) - mass_fractions[s];
 
-            denom += molar_fractions[j] / D_mat[s][j];
-          }
+              typename value_type<VectorStateType>::type denom = zero_clone(mass_fractions[0]);
 
-        D_vec[s] /= denom;
-      }
+              for(unsigned int j = 0; j < D_vec.size(); j++)
+                {
+                  if(j == s)
+                    continue;
+
+                  denom += molar_fractions[j] / D_mat[s][j];
+                }
+
+              D_vec[s] /= denom;
+            }
+          break;
+        }
+      case(MOLE_FLUX_MOLE_FRACTION):
+      case(MASS_FLUX_MASS_FRACTION):
+        {
+          antioch_not_implemented();
+        }
+      default:
+        {
+          antioch_msg_error("ERROR: Invalid DiffusivityType in WilkeTransportEvaluator::diffusion_mixing_rule");
+          antioch_error();
+        }
+      } // switch(diff_type)
   }
 
 } // end namespace Antioch
