@@ -3,7 +3,7 @@
 # Programs and libraries we want to build
 #----------------------------------------
 
-bin_PROGRAMS    = antioch_version 
+bin_PROGRAMS    = antioch_version
 
 #----------------------------
 # INCLUDES we want distributed
@@ -100,8 +100,8 @@ pkginclude_HEADERS += transport/include/antioch/mixture_conductivity.h
 pkginclude_HEADERS += transport/include/antioch/mixture_diffusion.h
 pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
 pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
-pkginclude_HEADERS += transport/include/antioch/wilke_transport_mixture.h
-pkginclude_HEADERS += transport/include/antioch/wilke_transport_evaluator.h
+pkginclude_HEADERS += transport/include/antioch/mixture_averaged_transport_mixture.h
+pkginclude_HEADERS += transport/include/antioch/mixture_averaged_transport_evaluator.h
 pkginclude_HEADERS += transport/include/antioch/lennard_jones_potential.h
 pkginclude_HEADERS += transport/include/antioch/stockmayer_potential.h
 pkginclude_HEADERS += transport/include/antioch/transport_mixture.h
@@ -184,4 +184,3 @@ if CODE_COVERAGE_ENABLED
 endif
 
 EXTRA_DIST = common
-

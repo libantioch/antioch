@@ -34,7 +34,7 @@
 // Antioch
 #include "antioch/metaprogramming.h"
 #include "antioch/kinetics_conditions.h"
-#include "antioch/wilke_transport_mixture.h"
+#include "antioch/mixture_averaged_transport_mixture.h"
 #include "antioch/cmath_shims.h"
 #include "antioch/mixture_diffusion.h"
 #include "antioch/mixture_viscosity.h"

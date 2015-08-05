@@ -63,8 +63,8 @@
 //
 #include "antioch/wilke_mixture.h"  // backward compatiblity
 #include "antioch/wilke_evaluator.h"  // backward compatiblity
-#include "antioch/wilke_transport_mixture.h"
-#include "antioch/wilke_transport_evaluator.h"
+#include "antioch/mixture_averaged_transport_mixture.h"
+#include "antioch/mixture_averaged_transport_evaluator.h"
 
 #include "antioch/blottner_parsing.h"
 #include "antioch/eucken_thermal_conductivity_building.h"

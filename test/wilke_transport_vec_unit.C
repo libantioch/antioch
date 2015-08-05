@@ -67,8 +67,8 @@
 #include "antioch/mixture_diffusion.h"
 
 #include "antioch/wilke_mixture.h"
-#include "antioch/wilke_transport_mixture.h"
-#include "antioch/wilke_transport_evaluator.h"
+#include "antioch/mixture_averaged_transport_mixture.h"
+#include "antioch/mixture_averaged_transport_evaluator.h"
 #include "antioch/blottner_parsing.h"
 #include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/constant_lewis_diffusivity_building.h"

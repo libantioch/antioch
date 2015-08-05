@@ -35,7 +35,7 @@
 #include "antioch/metaprogramming.h"
 #include "antioch/wilke_mixture.h"
 #include "antioch/mixture_viscosity.h"
-#include "antioch/wilke_transport_evaluator.h"
+#include "antioch/mixture_averaged_transport_evaluator.h"
 #include "antioch/antioch_asserts.h"
 #include "antioch/eucken_thermal_conductivity_building.h"
 
