@@ -68,6 +68,15 @@ namespace Antioch
     void reset_coeffs( const unsigned int s,
                        const std::vector<CoeffType> coeffs );
 
+    //! Extrapolate to input maximum temperature, given in [K]
+    /*!
+     * For certain species viscosity models, interpolation of various quantities may be
+     * done based on the temperature. This method will use linear extrapolation to extend
+     * the range of temperature for all the species viscosity models.
+     */
+    template <typename StateType>
+    void extrapolate_max_temp(const StateType& Tmax);
+
     const std::vector<Viscosity*> & species_viscosities() const;
 
     //! Formatted print, by default to \p std::cout
@@ -142,6 +151,18 @@ namespace Antioch
     antioch_assert( _species_viscosities[s] );
 
     return (*_species_viscosities[s])(T);
+  }
+
+  template<typename Viscosity, class CoeffType>
+  template <typename StateType>
+  inline
+  void MixtureViscosity<Viscosity,CoeffType>::extrapolate_max_temp(const StateType& Tmax)
+  {
+    for( typename std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*>::iterator it = _species_viscosities.begin();
+	 it != _species_viscosities.end(); ++it )
+      {
+        (*it)->extrapolate_max_temp(Tmax);
+      }
   }
 
   template<typename Viscosity, class CoeffType>
