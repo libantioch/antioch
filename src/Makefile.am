@@ -3,7 +3,7 @@
 # Programs and libraries we want to build
 #----------------------------------------
 
-bin_PROGRAMS    = antioch_version 
+bin_PROGRAMS    = antioch_version
 
 #----------------------------
 # INCLUDES we want distributed
@@ -78,7 +78,6 @@ pkginclude_HEADERS += parsing/include/antioch/ascii_parser.h
 pkginclude_HEADERS += parsing/include/antioch/parser_base.h
 pkginclude_HEADERS += parsing/include/antioch/constant_lewis_diffusivity_building.h
 pkginclude_HEADERS += parsing/include/antioch/eucken_thermal_conductivity_building.h
-pkginclude_HEADERS += parsing/include/antioch/molecular_binary_diffusion_building.h
 pkginclude_HEADERS += parsing/include/antioch/kinetics_theory_viscosity_building.h
 pkginclude_HEADERS += parsing/include/antioch/kinetics_theory_thermal_conductivity_building.h
 
@@ -93,47 +92,40 @@ pkginclude_HEADERS += thermo/include/antioch/cea_evaluator.h
 pkginclude_HEADERS += thermo/include/antioch/cea_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/stat_mech_thermo.h
 pkginclude_HEADERS += thermo/include/antioch/ideal_gas_micro_thermo.h
-pkginclude_HEADERS += thermo/include/antioch/thermo_handler.h
 
 # transport
+pkginclude_HEADERS += transport/include/antioch/mixture_transport_base.h
 pkginclude_HEADERS += transport/include/antioch/mixture_viscosity.h
+pkginclude_HEADERS += transport/include/antioch/mixture_conductivity.h
+pkginclude_HEADERS += transport/include/antioch/mixture_diffusion.h
 pkginclude_HEADERS += transport/include/antioch/wilke_mixture.h
 pkginclude_HEADERS += transport/include/antioch/wilke_evaluator.h
-pkginclude_HEADERS += transport/include/antioch/wilke_transport_mixture.h
-pkginclude_HEADERS += transport/include/antioch/wilke_transport_evaluator.h
+pkginclude_HEADERS += transport/include/antioch/mixture_averaged_transport_mixture.h
+pkginclude_HEADERS += transport/include/antioch/mixture_averaged_transport_evaluator.h
 pkginclude_HEADERS += transport/include/antioch/lennard_jones_potential.h
 pkginclude_HEADERS += transport/include/antioch/stockmayer_potential.h
 pkginclude_HEADERS += transport/include/antioch/transport_mixture.h
 pkginclude_HEADERS += transport/include/antioch/transport_species.h
-pkginclude_HEADERS += transport/include/antioch/physical_set.h
 
 # viscosity
+pkginclude_HEADERS += viscosity/include/antioch/species_viscosity_base.h
 pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity.h
-pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils_decl.h
-pkginclude_HEADERS += viscosity/include/antioch/blottner_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity.h
-pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils_decl.h
-pkginclude_HEADERS += viscosity/include/antioch/sutherland_viscosity_utils.h
 pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity.h
-pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity_utils_decl.h
-pkginclude_HEADERS += viscosity/include/antioch/kinetics_theory_viscosity_utils.h
 
 # diffusion
 pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity.h
-pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils_decl.h
-pkginclude_HEADERS += diffusion/include/antioch/constant_lewis_diffusivity_utils.h
 pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion.h
-pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils_decl.h
-pkginclude_HEADERS += diffusion/include/antioch/molecular_binary_diffusion_utils.h
+pkginclude_HEADERS += diffusion/include/antioch/binary_diffusion_base.h
+pkginclude_HEADERS += diffusion/include/antioch/species_diffusion_base.h
+pkginclude_HEADERS += diffusion/include/antioch/diffusion_traits.h
 
 # thermal conduction
 pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity.h
-pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity_utils_decl.h
-pkginclude_HEADERS += thermal_conduction/include/antioch/eucken_thermal_conductivity_utils.h
 pkginclude_HEADERS += thermal_conduction/include/antioch/kinetics_theory_thermal_conductivity.h
-pkginclude_HEADERS += thermal_conduction/include/antioch/kinetics_theory_thermal_cond_utils_decl.h
-pkginclude_HEADERS += thermal_conduction/include/antioch/kinetics_theory_thermal_conductivity_utils.h
 pkginclude_HEADERS += thermal_conduction/include/antioch/rotational_relaxation.h
+pkginclude_HEADERS += thermal_conduction/include/antioch/species_conductivity_base.h
+pkginclude_HEADERS += thermal_conduction/include/antioch/conductivity_traits.h
 
 # utilities
 pkginclude_HEADERS += utilities/include/antioch/antioch_exceptions.h
@@ -157,10 +149,6 @@ pkginclude_HEADERS += utilities/include/antioch/vector_utils_decl.h
 pkginclude_HEADERS += utilities/include/antioch/vexcl_utils.h
 pkginclude_HEADERS += utilities/include/antioch/vexcl_utils_decl.h
 pkginclude_HEADERS += utilities/include/antioch/gsl_spliner.h
-pkginclude_HEADERS += utilities/include/antioch/physics_metaprogramming_decl.h
-pkginclude_HEADERS += utilities/include/antioch/physics_metaprogramming.h
-pkginclude_HEADERS += utilities/include/antioch/physics_placeholder.h
-pkginclude_HEADERS += utilities/include/antioch/physics_utils.h
 
 # Needs to be builddir since this is generated by configure
 pkginclude_HEADERS += $(top_builddir)/src/utilities/include/antioch/antioch_version.h
@@ -181,7 +169,10 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
-AM_CPPFLAGS +=  $(antioch_optional_INCLUDES)
+AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
+
+AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
+LIBS = $(antioch_optional_test_LIBS)
 
 CLEANFILES =
 
@@ -193,4 +184,3 @@ if CODE_COVERAGE_ENABLED
 endif
 
 EXTRA_DIST = common
-

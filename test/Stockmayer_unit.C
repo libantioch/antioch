@@ -28,25 +28,19 @@
 
 // Antioch
 #include "antioch/vector_utils_decl.h"
-#include "antioch/physics_metaprogramming_decl.h"
-#include "antioch/physics_utils.h"
+#include "antioch/mixture_viscosity.h"
+#include "antioch/mixture_diffusion.h"
 #include "antioch/molecular_binary_diffusion.h"
 #include "antioch/kinetics_theory_viscosity.h"
+#include "antioch/kinetics_theory_viscosity_building.h"
 #include "antioch/cea_curve_fit.h"
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_evaluator.h"
 #include "antioch/ideal_gas_micro_thermo.h"
-#include "antioch/thermo_handler.h"
 #include "antioch/transport_mixture.h"
 #include "antioch/gsl_spliner.h"
-#include "antioch/physical_set.h"
 #include "antioch/cea_mixture_parsing.h"
-#include "antioch/kinetics_theory_viscosity_building.h"
-#include "antioch/molecular_binary_diffusion_building.h"
 #include "antioch/default_filename.h"
-#include "antioch/physics_metaprogramming.h"
-#include "antioch/kinetics_theory_viscosity_utils.h"
-#include "antioch/molecular_binary_diffusion_utils.h"
 #include "antioch/vector_utils.h"
 
 // C++
@@ -90,39 +84,35 @@ int tester()
 
   // macro thermo
   Antioch::NASAThermoMixture<Scalar, Antioch::NASA9CurveFit<Scalar> > nasa_mixture( chem_mixture );
-  Antioch::read_nasa_mixture_data( nasa_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true); // ASCII and true are default, but let's be verbose
-  Antioch::NASAEvaluator<Scalar, Antioch::NASA9CurveFit<Scalar> > nasa_thermo( nasa_mixture );
+
+  // ASCII and true are default, but let's be verbose
+  Antioch::read_nasa_mixture_data( nasa_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true);
 
   typedef Antioch::NASAEvaluator<Scalar, Antioch::NASA9CurveFit<Scalar> > MacroThermo;
+  MacroThermo nasa_thermo( nasa_mixture );
 
-  // micro thermo 
-  Antioch::IdealGasMicroThermo<MacroThermo,Scalar> micro_thermo(nasa_thermo, chem_mixture);
-
+  // micro thermo
   typedef Antioch::IdealGasMicroThermo<MacroThermo,Scalar> MicroThermo;
-
-  // thermo, micro is implicit 
-  Antioch::ThermoHandler<Scalar,MacroThermo > thermo(nasa_thermo,micro_thermo);
-
-  typedef Antioch::ThermoHandler<Scalar,MacroThermo, MicroThermo > Thermo;
+  MicroThermo micro_thermo(nasa_thermo, chem_mixture);
 
   // transport
-  Antioch::TransportMixture<Thermo,Scalar> transport(chem_mixture, thermo);
-  Antioch::ASCIIParser<Scalar> transport_parser(Antioch::DefaultFilename::transport_mixture(),true);
-  Antioch::read_transport_species_data(&transport_parser,transport);
+  Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  typedef Antioch::TransportMixture<Thermo,Scalar> Transport;
 
   // sets, GSLSpliner implicit
-  Antioch::PhysicalSet<Antioch::KineticsTheoryViscosity<Scalar>,Transport> viscosity(transport);
+  Antioch::MixtureViscosity<Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,Scalar >
+    ps_mu(tran_mixture);
+  Antioch::build_kinetics_theory_viscosity<Scalar,Antioch::GSLSpliner>(ps_mu);
 
-  Antioch::PhysicalSet<Antioch::MolecularBinaryDiffusion<Scalar>,Transport> diffusion(transport);
+  Antioch::MixtureDiffusion<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,Scalar>
+    bimol_D( tran_mixture );
 
   int return_flag(0);
 
-  Scalar T_max(8000.L);
-  
-  extrapolate_to_high_temperatures(viscosity,T_max);
-  extrapolate_to_high_temperatures(diffusion,T_max);
+  //Scalar T_max(8000.L);
+
+  //extrapolate_to_high_temperatures(viscosity,T_max);
+  //extrapolate_to_high_temperatures(diffusion,T_max);
 
   return return_flag;
 }

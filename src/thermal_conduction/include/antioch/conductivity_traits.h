@@ -23,32 +23,29 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_SUTHERLAND_VISCOSITY_UTILS_DECL_H
-#define ANTIOCH_SUTHERLAND_VISCOSITY_UTILS_DECL_H
+#ifndef ANTIOCH_CONDUCTIVITY_TRAITS_H
+#define ANTIOCH_CONDUCTIVITY_TRAITS_H
 
-#include "antioch/physics_metaprogramming_decl.h"
+#include "antioch/eucken_thermal_conductivity.h"
+#include "antioch/kinetics_theory_thermal_conductivity.h"
 
 namespace Antioch
 {
-// metaprogramming for physics
-   // tag
-   struct sutherland_viscosity_tag{};
+  template<typename ConductivityModel>
+  struct ConductivityTraits;
 
-   // getting tag
-   template <typename CoeffType>
-   struct physical_tag<SutherlandViscosity<CoeffType> >;
+  template<typename ThermoEvaluator>
+  struct ConductivityTraits<EuckenThermalConductivity<ThermoEvaluator> >
+  {
+    static bool const requires_diffusion = false;
+  };
 
-   // physical set boolean
-   template<typename CoeffType>
-   struct is_physical_set<SutherlandViscosity<CoeffType> >;
+  template <typename ThermoEvaluator, typename CoeffType>
+  struct ConductivityTraits<KineticsTheoryThermalConductivity<ThermoEvaluator,CoeffType> >
+  {
+    static bool const requires_diffusion = true;
+  };
 
-   // species
-   template<typename Model, typename StateType>
-   void physical_set_operator_viscosity(const Model & set, unsigned int s, const StateType & T, StateType & mu, sutherland_viscosity_tag);
+} // end namespace Antioch
 
-   // mixture
-   template<typename Model, typename StateType, typename VectorStateType>
-   void physical_set_operator_viscosity(const Model & set, const StateType & T, VectorStateType & mu, sutherland_viscosity_tag);
-}
-
-#endif
+#endif // ANTIOCH_CONDUCTIVITY_TRAITS_H

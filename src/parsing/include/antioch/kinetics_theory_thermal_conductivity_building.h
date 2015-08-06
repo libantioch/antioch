@@ -28,7 +28,7 @@
 
 // Antioch
 #include "antioch/kinetics_theory_thermal_conductivity.h"
-#include "antioch/physical_set.h"
+#include "antioch/mixture_conductivity.h"
 
 // C++
 #include <iostream>
@@ -38,28 +38,24 @@
 namespace Antioch
 {
 
-  template <typename ThermoEvaluator, typename NumericType>
+  template <typename NumericType>
   class TransportMixture;
-
-
-  template<class ThermoTC, class ThermoTran, class NumericType>
-  void build_kinetics_theory_thermal_conductivity( PhysicalSet<KineticsTheoryThermalConductivity<ThermoTC,NumericType> , TransportMixture<ThermoTran,NumericType> >& k);
 
 // ----------------------------------------- //
 
-  template<class ThermoTC, class ThermoTran,class NumericType>
-  void build_kinetics_theory_thermal_conductivity( PhysicalSet<KineticsTheoryThermalConductivity<ThermoTC,NumericType>, TransportMixture<ThermoTran,NumericType> >& k)
+  template<class MicroThermo, class NumericType>
+  void build_kinetics_theory_thermal_conductivity(MixtureConductivity<KineticsTheoryThermalConductivity<MicroThermo,NumericType>,NumericType>& k,
+                                                  const MicroThermo& thermo )
   {
-       for(unsigned int s = 0; s < k.mixture().n_species(); s++)
+    for(unsigned int s = 0; s < k.mixture().n_species(); s++)
        {
-           Initializer<KineticsTheoryThermalConductivity<ThermoTC,NumericType>, kinetics_theory_thermal_conductivity_tag >
-             init(k.mixture().thermo().micro_thermo(),
-                  k.mixture().transport_species()[s]->rotational_relaxation(),
-                  k.mixture().transport_species()[s]->LJ_depth());
-           k.add_model(k.mixture().species_inverse_name_map().at(s),init);
+         std::vector<NumericType> coeffs(2);
+         coeffs[0] = k.mixture().transport_species()[s]->rotational_relaxation();
+         coeffs[1] = k.mixture().transport_species()[s]->LJ_depth();
+         k.add(s,coeffs,thermo);
        }
   }
 
-}
+} // end namespace Antioch
 
-#endif
+#endif // ANTIOCH_KINETICS_THEORY_THERMAL_CONDUCTIVITY_BUILDING_H

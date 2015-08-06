@@ -28,7 +28,7 @@
 
 // Antioch
 #include "antioch/eucken_thermal_conductivity.h"
-#include "antioch/physical_set.h"
+#include "antioch/mixture_conductivity.h"
 
 // C++
 #include <iostream>
@@ -37,25 +37,18 @@
 
 namespace Antioch
 {
-  //forward declaration
-  template <typename ThermoEval, typename NumericType>
-  class TransportMixture;
-
-  // backward compatibility
-  template<class ThermoEvaluator, class Mixture>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEvaluator> , Mixture>& /*k*/){}
-
-  template<class ThermoEucken,class ThermoTran, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEucken> , TransportMixture<ThermoTran,NumericType> >& k);
-
-// ----------------------------------------- //
-
-  template<class ThermoEucken,class ThermoTran, class NumericType>
-  void build_eucken_thermal_conductivity( PhysicalSet<EuckenThermalConductivity<ThermoEucken>, TransportMixture<ThermoTran,NumericType> >& k)
+  template<class MicroThermo, class NumericType>
+  void build_eucken_thermal_conductivity( MixtureConductivity<EuckenThermalConductivity<MicroThermo>,NumericType>& k,
+                                          const MicroThermo& thermo )
   {
-       k.add_model(k.mixture().thermo().micro_thermo());
+    for(unsigned int s = 0; s < k.mixture().n_species(); s++)
+       {
+         // Eucken doesn't have any coefficients to cache so we provide a dummy vector
+         std::vector<NumericType> dummy;
+         k.add(s,dummy,thermo);
+       }
   }
 
-}
+} // end namespace Antioch
 
-#endif
+#endif // ANTIOCH_EUCKEN_THERMAL_CONDUCTIVITY_BUILDING_H

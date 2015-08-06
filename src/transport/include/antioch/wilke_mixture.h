@@ -32,8 +32,7 @@
 #define ANTIOCH_WILKE_MIXTURE_H
 
 // Antioch
-#include "antioch/wilke_transport_mixture.h"
-#include "antioch/physics_placeholder.h"
+#include "antioch/mixture_averaged_transport_mixture.h"
 #include "antioch/antioch_asserts.h"
 
 // C++
@@ -57,7 +56,7 @@ namespace Antioch
 
     CoeffType Mr_Ms_to_the_one_fourth( const unsigned int r,
                                        const unsigned int s ) const;
-    
+
     CoeffType denominator( const unsigned int r,
                            const unsigned int s ) const;
 
@@ -73,7 +72,7 @@ namespace Antioch
 
     //! Cache for numerator term
     std::vector<std::vector<CoeffType> > _Mr_Ms_to_the_one_fourth;
-    
+
     //! Cache for denominator term
     std::vector<std::vector<CoeffType> > _denom;
 
@@ -120,8 +119,8 @@ namespace Antioch
   {
     return _Mr_Ms_to_the_one_fourth[r][s];
   }
-    
-  
+
+
   template<class CoeffType>
   inline
   CoeffType WilkeMixture<CoeffType>::denominator( const unsigned int r,

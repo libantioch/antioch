@@ -75,7 +75,7 @@ int tester()
 
   const Scalar D = diff.D( rho, cp, k );
 
-  const Scalar D_exact = Le*k/(rho*cp);
+  const Scalar D_exact = k/(Le*rho*cp);
 
   return test_val( D, D_exact, tol, std::string("D") );
 }

@@ -40,18 +40,18 @@
 namespace Antioch{
 
   //Forward declaration
-  template <typename ThermoEvaluator, typename NumericType>
+  template <typename NumericType>
   class TransportMixture;
 
 
-  template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename);
+  template <typename NumericType>
+  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename);
 
 /*----------- inline functions ----------------*/
 
 
-  template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<ThermoEvaluator,NumericType> & transport, const std::string & filename)
+  template <typename NumericType>
+  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename)
   {
     antioch_deprecated();
 

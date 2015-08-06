@@ -59,22 +59,16 @@
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_evaluator.h"
 #include "antioch/nasa_mixture_parsing.h"
-#include "antioch/thermo_handler.h"
 
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
+#include "antioch/mixture_viscosity.h"
 #include "antioch/constant_lewis_diffusivity.h"
-#include "antioch/eucken_thermal_conductivity_utils.h"
-#include "antioch/blottner_viscosity_utils.h"
-#include "antioch/constant_lewis_diffusivity_utils.h"
-
-#include "antioch/physical_set.h"
-#include "antioch/physics_metaprogramming.h"
+#include "antioch/mixture_diffusion.h"
 
 #include "antioch/wilke_mixture.h"
-#include "antioch/wilke_evaluator.h"
-#include "antioch/wilke_transport_mixture.h"
-#include "antioch/wilke_transport_evaluator.h"
+#include "antioch/mixture_averaged_transport_mixture.h"
+#include "antioch/mixture_averaged_transport_evaluator.h"
 #include "antioch/blottner_parsing.h"
 #include "antioch/eucken_thermal_conductivity_building.h"
 #include "antioch/constant_lewis_diffusivity_building.h"
@@ -138,48 +132,36 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  typedef Antioch::ChemicalMixture< Scalar >          ChemicalType;
-
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
 
-  typedef Antioch::StatMechThermodynamics< Scalar >   ThermoType;
+  typedef Antioch::StatMechThermodynamics< Scalar >   MicroThermo;
 
 // thermo for cp (diffusion)
   Antioch::NASAThermoMixture<Scalar,Antioch::NASA9CurveFit<Scalar> > cea_mixture( chem_mixture );
   Antioch::read_nasa_mixture_data( cea_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true );
   Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> > thermo_mix( cea_mixture );
 
-  typedef Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> >  ThermoMixType;
+  Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  Antioch::ThermoHandler<Scalar,ThermoMixType,Antioch::StatMechThermodynamics<Scalar> > thermo_handler(thermo_mix,thermo);
+  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,Scalar>
+    k( tran_mixture );
 
-  typedef Antioch::ThermoHandler<Scalar,ThermoMixType,ThermoType > Thermo;
-
-  Antioch::TransportMixture<Thermo,Scalar> tran_mixture( chem_mixture, thermo_handler );
-
-  typedef Antioch::TransportMixture< Thermo, Scalar > TransportType;
-
-  Antioch::PhysicalSet< Antioch::EuckenThermalConductivity<ThermoType>, TransportType > k( tran_mixture );
-
-  Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, ChemicalType> mu( chem_mixture );
-
-  Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType > D( chem_mixture );
-
-
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> mu( tran_mixture );
   Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
+
+  Antioch::MixtureDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
+    D( tran_mixture );
 
   Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
 
-  typedef Antioch::PhysicalSet< Antioch::EuckenThermalConductivity<ThermoType>, TransportType > TCType;
-  typedef Antioch::PhysicalSet<Antioch::BlottnerViscosity<Scalar>, ChemicalType>                VType;
-  typedef Antioch::PhysicalSet<Antioch::ConstantLewisDiffusivity<Scalar>, ChemicalType >        DType;
 
+  Antioch::MixtureAveragedTransportMixture<Scalar> wilke_mixture( tran_mixture );
 
-  Antioch::WilkeTransportMixture<Thermo,Scalar> wilke_mixture( tran_mixture );
-
-  typedef Antioch::WilkeTransportMixture<Thermo,Scalar>  WilkeMixType;
-
-  Antioch::WilkeTransportEvaluator< DType, VType, TCType, WilkeMixType, Scalar > wilke( wilke_mixture, D, mu, k );
+  Antioch::MixtureAveragedTransportEvaluator<Antioch::ConstantLewisDiffusivity<Scalar>,
+                                             Antioch::BlottnerViscosity<Scalar>,
+                                             Antioch::EuckenThermalConductivity<MicroThermo>,
+                                             Scalar>
+    wilke( wilke_mixture, D, mu, k );
 
   int return_flag = 0;
 
@@ -203,7 +185,7 @@ int tester(const PairScalars& example, const std::string& testname)
         mu[2][2*tuple+1] = 0.3L;
         mu[3][2*tuple+1] = 0.2L;
         mu[4][2*tuple+1] = 0.1L;
-    
+
         chi[0][2*tuple  ] = 0.1L;
         chi[1][2*tuple  ] = 0.2L;
         chi[2][2*tuple  ] = 0.3L;
@@ -248,14 +230,14 @@ int tester(const PairScalars& example, const std::string& testname)
 
     return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
-  
+
 
   // PairScalars each_mass = example;
 
   // each_mass[2*tuple  ] = 0.2L;
   // each_mass[2*tuple+1] = 0.2L;
 
-  // std::vector<PairScalars> mass_fractions( 5, each_mass); 
+  // std::vector<PairScalars> mass_fractions( 5, each_mass);
 
   // Currently dummy
   //const Scalar mu_exact = ;
