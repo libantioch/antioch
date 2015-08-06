@@ -151,6 +151,16 @@ namespace Antioch
       //!\return the value of the reduced dipole moment
       const CoeffType & delta_star() const;
 
+    //! Extrapolate to input maximum temperature, given in [K]
+    /*!
+     * The underlying collision integrals are interpolated for a given temperature range.
+     * If the viscosity is to be evaluated outside that range, an error will occur.
+     * This method will reconstruct the interpolation table, but use a linear extrapolation
+     * from the max in the existing table to the input maximum temperature.
+     */
+    template <typename StateType>
+    void extrapolate_max_temp(const StateType& Tmax);
+
     //! Friend base class so we can make implementation protected
     friend class SpeciesViscosityBase<KineticsTheoryViscosity<CoeffType,Interpolator>,CoeffType>;
 
@@ -167,8 +177,7 @@ namespace Antioch
 
       void build_interpolation();
 
-    template <typename StateType>
-    void build_interpolation(const StateType& Tmax);
+
 
         //! building the spline
       void build_spline(const StockmayerPotential<CoeffType> & surface);
@@ -246,7 +255,7 @@ namespace Antioch
   template <typename CoeffType, typename Interpolator>
   template <typename StateType>
   inline
-  void KineticsTheoryViscosity<CoeffType,Interpolator>::build_interpolation(const StateType & Tmax)
+  void KineticsTheoryViscosity<CoeffType,Interpolator>::extrapolate_max_temp(const StateType & Tmax)
   {
 
      StockmayerPotential<CoeffType> surface;
