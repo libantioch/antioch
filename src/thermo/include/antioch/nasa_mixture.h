@@ -181,7 +181,12 @@ namespace Antioch
   inline
   const NASAFit& NASAThermoMixture<CoeffType,NASAFit>::curve_fit( unsigned int s ) const
   {
+    // Did we allocate for enough species?
     antioch_assert_less( s, _species_curve_fits.size() );
+
+    // Did we read in enough mixture data?
+    antioch_assert( _species_curve_fits[s] );
+
     return *_species_curve_fits[s];
   }
 
