@@ -54,6 +54,20 @@ namespace Antioch
     template <typename StateType>
     StateType operator()( const StateType& T ) const;
 
+    //! Extrapolate to input maximum temperature, given in [K]
+    /*!
+     * Some species viscosity models, e.g. KineticsTheoryViscosity, use interpolated
+     * quantities for a given temperature range.
+     * If the viscosity is to be evaluated outside that range, an error will occur.
+     * This method will reconstruct the interpolation table, but use a linear extrapolation
+     * from the max in the existing table to the input maximum temperature.
+     *
+     * This method is only applicable to a subset of species viscosity models. Others will
+     * throw a runtime error.
+     */
+    template <typename StateType>
+    void extrapolate_max_temp(const StateType& Tmax);
+
     //! Resets coefficients associated with the viscosity model
     void reset_coeffs( const std::vector<CoeffType>& coeffs );
 
@@ -74,6 +88,14 @@ namespace Antioch
   StateType SpeciesViscosityBase<Subclass,CoeffType>::operator()( const StateType& T ) const
   {
     return static_cast<const Subclass*>(this)->op_impl(T);
+  }
+
+  template<typename Subclass, typename CoeffType>
+  template <typename StateType>
+  inline
+  void SpeciesViscosityBase<Subclass,CoeffType>::extrapolate_max_temp(const StateType& Tmax)
+  {
+    return static_cast<Subclass*>(this)->extrapolate_max_temp_impl(Tmax);
   }
 
   template<typename Subclass, typename CoeffType>

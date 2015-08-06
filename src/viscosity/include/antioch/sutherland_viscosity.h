@@ -50,7 +50,7 @@ namespace Antioch
 
     CoeffType _mu_ref;
     CoeffType _T_ref;
-    
+
   public:
 
     SutherlandViscosity( const CoeffType mu_ref, const CoeffType T_ref );
@@ -75,8 +75,16 @@ namespace Antioch
 
     void print_impl(std::ostream& os) const;
 
+    //! No extrapolation needed
+    /*!
+     * Implementation needed for the interface, but we just throw an error
+     * is this is called since it's not defined for SutherlandViscosity.
+     */
+    template <typename StateType>
+    void extrapolate_max_temp_impl(const StateType& Tmax);
+
   private:
-    
+
     SutherlandViscosity();
 
   };
@@ -125,6 +133,15 @@ namespace Antioch
   {
     antioch_assert_equal_to(coeffs.size(), 2);
     this->reset_coeffs(coeffs[0], coeffs[1]);
+  }
+
+  template<typename CoeffType>
+  template <typename StateType>
+  inline
+  void SutherlandViscosity<CoeffType>::extrapolate_max_temp_impl(const StateType & /*Tmax*/)
+  {
+    antioch_msg_error("Extrapolation not well defined for SutherlandViscosity!");
+    antioch_error();
   }
 
 } // end namespace Antioch
