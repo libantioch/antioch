@@ -80,6 +80,19 @@ namespace Antioch
      */
     void add_species_diffusion( unsigned int s, const std::vector<CoeffType>& coeffs );
 
+    //! Extrapolate to input maximum temperature, given in [K]
+    /*!
+     * For certain species diffusion models, interpolation of various quantities may be
+     * done based on the temperature. This method will use linear extrapolation to extend
+     * the range of temperature for all the species diffusion models.
+     *
+     * This method is currently only valid for BinaryDiffusionBase subclasses. A static_assert
+     * will be throw if the user tries to instantiate a call to this method with a
+     * SpeciesDiffusionBase sublass (or runtime error if the compiler does not support static_assert).
+     */
+    template <typename StateType>
+    void extrapolate_max_temp(const StateType& Tmax);
+
   protected:
 
     //! Stores species diffusivity models
@@ -275,6 +288,25 @@ namespace Antioch
     // Build tag so we defer to the right species diffusivity function
     AntiochPrivate::diffusion_tag<Diffusion> tag;
     this->private_species_diff_impl(s,rho,cp,k,D,tag);
+  }
+
+  template<typename Diffusion, class CoeffType>
+  template<typename StateType>
+  inline
+  void MixtureDiffusion<Diffusion,CoeffType>::extrapolate_max_temp(const StateType& Tmax)
+  {
+    antioch_static_assert_runtime_fallback( DiffusionTraits<Diffusion>::is_binary_diffusion,
+                                            "Invalid to extrapolate temperature with a non-binary diffusion model!" );
+
+    for( typename std::vector<std::vector<BinaryDiffusionBase<Diffusion,CoeffType>*> >::iterator it_outer = _binary_diffusivities.begin();
+         it_outer != _binary_diffusivities.end(); ++it_outer )
+      {
+        for( typename std::vector<BinaryDiffusionBase<Diffusion,CoeffType>*>::iterator it_inner = it_outer->begin();
+             it_inner != it_outer->end(); ++it_inner )
+          {
+            (*it_inner)->extrapolate_max_temp(Tmax);
+          }
+      }
   }
 
   template<typename Diffusion, class CoeffType>
