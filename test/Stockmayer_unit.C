@@ -53,22 +53,30 @@
 
 // not necessary (yet?)
 template <typename Scalar>
-int check_value(const Scalar & ref, const Scalar & candidate, const Scalar & x, const std::string & words)
+int check_value(const Scalar ref, const Scalar candidate, const Scalar tol, const std::string& test_name)
 {
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10.;
+  int return_flag = 0;
 
-  if(std::abs((ref - candidate)/ref) > tol)
-  {
+  std::cout << "Testing "+test_name << "...";
+
+  Scalar error = std::abs((ref - candidate)/ref);
+
+  if( error > tol)
+    {
+      std::cout << "FAILED!" << std::endl;
       std::cerr << std::scientific << std::setprecision(15);
       std::cerr << "  reference = " << ref << std::endl
                 << "  candidate = " << candidate << std::endl
-                << "  relative difference = " << std::abs((ref - candidate) / ref) << std::endl
-                << "  absolute difference = " << std::abs(ref - candidate) << std::endl
+                << "  relative error = " << error << std::endl
                 << "  tolerance = " << tol << std::endl;
-      return 1;
-  }
+      return_flag = 1;
+    }
+  else
+    {
+      std::cout << "PASSED!" << std::endl;
+    }
 
-  return 0;
+  return return_flag;
 }
 
 template <typename Scalar>
@@ -109,10 +117,25 @@ int tester()
 
   int return_flag(0);
 
-  //Scalar T_max(8000.L);
+  Scalar T_max(8000.L);
 
-  //extrapolate_to_high_temperatures(viscosity,T_max);
-  //extrapolate_to_high_temperatures(diffusion,T_max);
+  ps_mu.extrapolate_max_temp(T_max);
+
+  Scalar mu_CH4 = ps_mu(0,7900.0);
+  Scalar mu_N2 = ps_mu(1,7900.0);
+  Scalar mu_H2 = ps_mu(2,3900.0);
+
+  Scalar mu_CH4_reg = 1.0573148339577483e-04;
+  Scalar mu_N2_reg = 1.5770745584335467e-04;
+  Scalar mu_H2_reg = 4.6078198688681625e-05;
+
+  Scalar tol = 10.0*std::numeric_limits<Scalar>::epsilon();
+
+  return_flag = check_value( mu_CH4_reg, mu_CH4, tol, "mu_CH4" ) ||
+                check_value( mu_N2_reg, mu_N2, tol, "mu_N2" ) ||
+                check_value( mu_H2_reg, mu_H2, tol, "mu_H2" );
+
+  //bimol_D.extrapolate_max_temp(T_max);
 
   return return_flag;
 }
