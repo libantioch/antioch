@@ -64,7 +64,7 @@ int check_value(const Scalar ref, const Scalar candidate, const Scalar tol, cons
   if( error > tol)
     {
       std::cout << "FAILED!" << std::endl;
-      std::cerr << std::scientific << std::setprecision(15);
+      std::cerr << std::scientific << std::setprecision(16);
       std::cerr << "  reference = " << ref << std::endl
                 << "  candidate = " << candidate << std::endl
                 << "  relative error = " << error << std::endl
@@ -86,6 +86,8 @@ int tester()
   molecules.push_back("CH4"); // T_max = 14,140 K; 11,743 K; 7,330 K
   molecules.push_back("N2");  // T_max = 9,753 K;  11,743 K; 6,088 K
   molecules.push_back("H2");  // T_max = 3,800 K;  6,8088 K; 7,330 K
+
+  const unsigned int n_species = molecules.size();
 
   // mixture
   Antioch::ChemicalMixture<Scalar> chem_mixture( molecules );
@@ -120,22 +122,76 @@ int tester()
   Scalar T_max(8000.L);
 
   ps_mu.extrapolate_max_temp(T_max);
+  bimol_D.extrapolate_max_temp(T_max);
 
-  Scalar mu_CH4 = ps_mu(0,7900.0);
-  Scalar mu_N2 = ps_mu(1,7900.0);
-  Scalar mu_H2 = ps_mu(2,3900.0);
+  std::vector<std::vector<Scalar> > D_matrix_reg(n_species);
+  std::vector<std::vector<Scalar> > D_matrix(n_species);
+  for( unsigned int s = 0; s < n_species; s++ )
+    {
+      D_matrix[s].resize(n_species);
+      D_matrix_reg[s].resize(n_species);
+    }
 
   Scalar mu_CH4_reg = 1.0573148339577483e-04;
   Scalar mu_N2_reg = 1.5770745584335467e-04;
   Scalar mu_H2_reg = 4.6078198688681625e-05;
 
+  D_matrix_reg[0][0] = 8.1850066826705467e-03;
+  D_matrix_reg[0][1] = 7.7255676543780075e-03;
+  D_matrix_reg[0][2] = 4.5830263450987500e-02;
+  D_matrix_reg[1][0] = 7.7255676543780075e-03;
+  D_matrix_reg[1][1] = 7.0195276250601020e-03;
+  D_matrix_reg[1][2] = 3.1562763815500983e-03;
+  D_matrix_reg[2][0] = 4.5830263450987500e-02;
+  D_matrix_reg[2][1] = 3.1562763815500983e-03;
+  D_matrix_reg[2][2] = -4.3151204734397887e-03;
+
+  Scalar mu_CH4 = ps_mu(0,7900.0);
+  Scalar mu_N2 = ps_mu(1,7900.0);
+  Scalar mu_H2 = ps_mu(2,3900.0);
+
+  bimol_D.compute_binary_diffusion_matrix(6900.0, 1.0, D_matrix);
+
   Scalar tol = 10.0*std::numeric_limits<Scalar>::epsilon();
 
+  // Check viscosity against regression values
   return_flag = check_value( mu_CH4_reg, mu_CH4, tol, "mu_CH4" ) ||
                 check_value( mu_N2_reg, mu_N2, tol, "mu_N2" ) ||
                 check_value( mu_H2_reg, mu_H2, tol, "mu_H2" );
 
-  //bimol_D.extrapolate_max_temp(T_max);
+  // Matrix had better be symmetric
+  for( unsigned int s = 0; s < n_species; s++ )
+    {
+      for( unsigned int t = s+1; t < n_species; t++ )
+        {
+          std::stringstream convert;
+          convert << s;
+          std::string test_name = "D["+convert.str()+"]";
+          convert.str("");
+          convert << t;
+          test_name += "["+convert.str()+"] symmetry";
+
+          return_flag = return_flag ||
+            check_value( D_matrix[s][t], D_matrix[t][s], tol, test_name );
+        }
+    }
+
+  // Check binary diffusion matrix against regression values
+  for( unsigned int s = 0; s < n_species; s++ )
+    {
+      for( unsigned int t = 0; t < n_species; t++ )
+        {
+          std::stringstream convert;
+          convert << s;
+          std::string test_name = "D["+convert.str()+"]";
+          convert.str("");
+          convert << t;
+          test_name += "["+convert.str()+"]";
+
+          return_flag = return_flag ||
+            check_value( D_matrix_reg[s][t], D_matrix[s][t], tol, test_name );
+        }
+    }
 
   return return_flag;
 }
@@ -148,10 +204,9 @@ int tester()
 int main()
 {
 #ifdef ANTIOCH_HAVE_GSL
-// gsl work in double...
+  // No long double test because GSL (used for splining) only supports double
   return (tester<float>() ||
           tester<double>());
- //         tester<long double>() ||
 #else
   // 77 return code tells Automake we skipped this.
   return 77;
