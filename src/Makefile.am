@@ -12,8 +12,11 @@ lib_LTLIBRARIES = libantioch.la
 #----------------------------------------------
 libantioch_la_SOURCES =
 
-#core
+# core
 libantioch_la_SOURCES += core/src/chemical_mixture.C
+
+# transport
+libantioch_la_SOURCES += transport/src/transport_mixture.C
 
 # utilities
 libantioch_la_SOURCES += utilities/src/antioch_version.C
