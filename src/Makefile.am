@@ -17,6 +17,7 @@ libantioch_la_SOURCES += core/src/chemical_mixture.C
 
 # parsing
 libantioch_la_SOURCES += parsing/src/ascii_parser.C
+libantioch_la_SOURCES += parsing/src/blottner_parsing.C
 
 # transport
 libantioch_la_SOURCES += transport/src/transport_mixture.C
