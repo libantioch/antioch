@@ -28,8 +28,8 @@
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_NASA9_MIXTURE_ASCII_PARSING_H
-#define ANTIOCH_NASA9_MIXTURE_ASCII_PARSING_H
+#ifndef ANTIOCH_CEA_MIXTURE_PARSING_H
+#define ANTIOCH_CEA_MIXTURE_PARSING_H
 
 // C++
 #include <iostream>
@@ -56,50 +56,16 @@ namespace Antioch
   template <class NumericType>
   class CEAThermoMixture;
 
-  // only parser for this
   template <class NumericType>
   class ASCIIParser;
 
   // parser explicit
   template<class NumericType>
-  void read_cea_mixture_data( CEAThermoMixture<NumericType >& thermo, const std::string & filename, ParsingType type, bool verbose = true );
-
-
-/* ------------------------ backward compatibility ---------------------*/
-
-  template<class NumericType>
-  void read_cea_mixture_data( CEAThermoMixture<NumericType >& thermo, const std::string & filename, ParsingType type, bool verbose )
-  {
-
-    ParserBase<NumericType> * parser(NULL);
-    switch(type)
-    {
-      case ASCII:
-         parser = new ASCIIParser<NumericType>(filename,verbose);
-         break;
-      case CHEMKIN:
-         parser = new ChemKinParser<NumericType>(filename,verbose);
-         break;
-      case XML:
-         parser = new XMLParser<NumericType>(filename,verbose);
-         break;
-      default:
-         antioch_parsing_error("unknown type");
-    }
-
-    parser->read_thermodynamic_data(thermo);
-   // Make sure we actually populated everything
-    if( !thermo.check() )
-    {
-       std::cerr << "Error: CEA table not fully populated" << std::endl;
-       antioch_error();
-    }
-
-    return;
-
-  }
-
+  void read_cea_mixture_data( CEAThermoMixture<NumericType >& thermo,
+                              const std::string & filename,
+                              ParsingType type,
+                              bool verbose = true );
 
 } // end namespace Antioch
 
-#endif // ANTIOCH_NASA9_MIXTURE_ASCII_PARSING_H
+#endif // ANTIOCH_CEA_MIXTURE_PARSING_H
