@@ -141,6 +141,13 @@ namespace Antioch{
             return out;
           }
 
+    //! Friend the base class so we can make the implementation protected
+    friend class BinaryDiffusionBase<MolecularBinaryDiffusion<CoeffType,Interpolator>,CoeffType>;
+
+  protected:
+
+    void reset_coeffs_impl(const TransportSpecies<CoeffType> & si, const TransportSpecies<CoeffType> & sj);
+
     //! Extrapolate to input maximum temperature, given in [K]
     /*!
      * The underlying collision integrals are interpolated for a given temperature range.
@@ -149,14 +156,7 @@ namespace Antioch{
      * from the max in the existing table to the input maximum temperature.
      */
     template <typename StateType>
-    void extrapolate_max_temp(const StateType & T);
-
-    //! Friend the base class so we can make the implementation protected
-    friend class BinaryDiffusionBase<MolecularBinaryDiffusion<CoeffType,Interpolator>,CoeffType>;
-
-  protected:
-
-    void reset_coeffs_impl(const TransportSpecies<CoeffType> & si, const TransportSpecies<CoeffType> & sj);
+    void extrapolate_max_temp_impl(const StateType & T);
 
     //! \return molecular binary diffusion coefficient
     template <typename StateType>
@@ -352,7 +352,7 @@ namespace Antioch{
   template <typename CoeffType, typename Interpolator>
   template <typename StateType>
   inline
-  void MolecularBinaryDiffusion<CoeffType,Interpolator>::extrapolate_max_temp(const StateType & Tmax)
+  void MolecularBinaryDiffusion<CoeffType,Interpolator>::extrapolate_max_temp_impl(const StateType& Tmax)
   {
      StockmayerPotential<CoeffType> surface;
     // Stockmayer is where the test is performed

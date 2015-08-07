@@ -55,6 +55,20 @@ namespace Antioch
     void reset_coeffs( const TransportSpecies<CoeffType> & s_i,
                        const TransportSpecies<CoeffType> & s_j );
 
+    //! Extrapolate to input maximum temperature, given in [K]
+    /*!
+     * Some species binary diffusion models, e.g. MolecularBinaryDiffusion, use interpolated
+     * quantities for a given temperature range.
+     * If the diffusivity is to be evaluated outside that range, an error will occur.
+     * This method will reconstruct the interpolation table, but use a linear extrapolation
+     * from the max in the existing table to the input maximum temperature.
+     *
+     * This method is only applicable to a subset of binary diffusion models. Others will
+     * throw a runtime error.
+     */
+    template<typename StateType>
+    void extrapolate_max_temp(const StateType& Tmax);
+
     template <typename StateType>
     const
     ANTIOCH_AUTO(StateType)
@@ -68,6 +82,13 @@ namespace Antioch
                                                              const TransportSpecies<CoeffType> & s_j )
   {
     static_cast<const Subclass*>(this)->reset_coeffs_impl(s_i,s_j);
+  }
+
+  template<typename Subclass, typename CoeffType>
+  template<typename StateType>
+  void BinaryDiffusionBase<Subclass,CoeffType>::extrapolate_max_temp(const StateType& Tmax)
+  {
+    static_cast<Subclass*>(this)->extrapolate_max_temp_impl(Tmax);
   }
 
 } // end namespace Antioch
