@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------el-
 
 #include "antioch/transport_species_parsing.h"
+#include "antioch/transport_species_ascii_parsing.h"
 
 // Antioch
 #include "antioch/parser_base.h"
@@ -61,9 +62,23 @@ namespace Antioch
       }
   }
 
+  template <typename NumericType>
+  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename)
+  {
+    antioch_deprecated();
+
+    ASCIIParser<NumericType> parser(filename,true);
+
+    read_transport_species_data( &parser, transport);
+  }
+
   // Instantiate
   template void read_transport_species_data<float>( ParserBase<float>*, TransportMixture<float>& );
   template void read_transport_species_data<double>( ParserBase<double>*, TransportMixture<double>& );
   template void read_transport_species_data<long double>( ParserBase<long double>*, TransportMixture<long double>& );
+
+  template void read_transport_species_data_ascii<float>( TransportMixture<float>&, const std::string& );
+  template void read_transport_species_data_ascii<double>( TransportMixture<double>&, const std::string& );
+  template void read_transport_species_data_ascii<long double>( TransportMixture<long double>&, const std::string& );
 
 } // end namespace Antioch

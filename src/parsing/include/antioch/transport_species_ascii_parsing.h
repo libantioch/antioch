@@ -26,65 +26,18 @@
 #ifndef ANTIOCH_TRANSPORT_ASCII_PARSING_H
 #define ANTIOCH_TRANSPORT_ASCII_PARSING_H
 
-// Antioch
-#include "antioch/input_utils.h"
-#include "antioch/physical_constants.h"
-#include "antioch/units.h"
-
-//C++
-#include <iostream>
+// C++
 #include <string>
-#include <fstream>
 
-
-namespace Antioch{
-
+namespace Antioch
+{
   //Forward declaration
   template <typename NumericType>
   class TransportMixture;
 
-
   template <typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename);
-
-/*----------- inline functions ----------------*/
-
-
-  template <typename NumericType>
-  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport, const std::string & filename)
-  {
-    antioch_deprecated();
-
-    ASCIIParser<NumericType> parser(filename,true);
-    parser.read_transport_data(transport);
-
-    // sanity check, we may require these informations
-    bool fail(false);
-    for(unsigned int s = 0; s < transport.n_species(); s++)
-    {
-        if(!transport.transport_species()[s])
-        {
-            fail = true;
-            break;
-        }
-    }
-    if(fail)
-    {
-      std::cerr << "Molecule(s) is(are) missing in transport description.  Please update the information."
-                << "  Currently using file " << parser.file() << ".\n"
-                << "You might have some problem later if you need these description.  "
-                << "Missing molecule(s) is(are):" << std::endl;
-      for(unsigned int i = 0; i < transport.n_species(); i++)
-      {
-        if(!transport.transport_species()[i])
-        {
-           std::cerr << transport.species_inverse_name_map().at(i) << std::endl;
-        }
-      }
-    }
-
-    return;
-  }
+  void read_transport_species_data_ascii(TransportMixture<NumericType> & transport,
+                                         const std::string & filename);
 
 } //end namespace Antioch
 

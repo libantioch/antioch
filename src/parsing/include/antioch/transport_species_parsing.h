@@ -46,7 +46,6 @@ namespace Antioch
   template <typename NumericType>
   class TransportMixture;
 
-
   template <typename NumericType>
   void read_transport_species_data(ParserBase<NumericType> * parser,
                                    TransportMixture<NumericType> & transport);
