@@ -15,6 +15,9 @@ libantioch_la_SOURCES =
 # core
 libantioch_la_SOURCES += core/src/chemical_mixture.C
 
+# parsing
+libantioch_la_SOURCES += parsing/src/ascii_parser.C
+
 # transport
 libantioch_la_SOURCES += transport/src/transport_mixture.C
 
