@@ -23,8 +23,8 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_TRANSPORT_PARSING_H
-#define ANTIOCH_TRANSPORT_PARSING_H
+#ifndef ANTIOCH_TRANSPORT_SPECIES_PARSING_H
+#define ANTIOCH_TRANSPORT_SPECIES_PARSING_H
 
 // Antioch
 #include "antioch/ascii_parser.h"
@@ -37,9 +37,12 @@
 #include <fstream>
 
 
-namespace Antioch{
-
+namespace Antioch
+{
   //Forward declaration
+  template <typename NumericType>
+  class ParserBase;
+
   template <typename NumericType>
   class TransportMixture;
 
@@ -48,62 +51,6 @@ namespace Antioch{
   void read_transport_species_data(ParserBase<NumericType> * parser,
                                    TransportMixture<NumericType> & transport);
 
-/*----------- inline functions ----------------*/
-
-
-  template <typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser, TransportMixture<NumericType> & transport)
-  {
-
-    switch(parser->enum_type())
-    {
-      case ASCII:
-      {
-        (static_cast<ASCIIParser<NumericType> *>(parser))->read_transport_data(transport);
-        break;
-      }case CHEMKIN:
-      {
-        (static_cast<ChemKinParser<NumericType> *>(parser))->read_transport_data(transport);
-        break;
-      }case XML:
-      {
-        (static_cast<XMLParser<NumericType> *>(parser))->read_transport_data(transport);
-        break;
-      }default:
-      {
-        antioch_parsing_error("unknown parser type \"" + parser->type() + "\"!!!");
-      }
-    }
-
-    // sanity check, we may require these informations
-    bool fail(false);
-    for(unsigned int s = 0; s < transport.n_species(); s++)
-    {
-        if(!transport.transport_species()[s])
-        {
-            fail = true;
-            break;
-        }
-    }
-    if(fail)
-    {
-      std::cerr << "Molecule(s) is(are) missing in transport description.  Please update the information."
-                << "  Currently using file " << parser->file() << ".\n"
-                << "You might have some problem later if you need these description.  "
-                << "Missing molecule(s) is(are):" << std::endl;
-      for(unsigned int i = 0; i < transport.n_species(); i++)
-      {
-        if(!transport.transport_species()[i])
-        {
-           std::cerr << transport.species_inverse_name_map().at(i) << std::endl;
-        }
-      }
-    }
-
-    return;
-  }
-
 } //end namespace Antioch
 
-#endif
-
+#endif // ANTIOCH_TRANSPORT_SPECIES_PARSING_H
