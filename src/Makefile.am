@@ -23,6 +23,7 @@ libantioch_la_SOURCES += parsing/src/cea_mixture_ascii_parsing.C
 libantioch_la_SOURCES += parsing/src/chemkin_parser.C
 libantioch_la_SOURCES += parsing/src/sutherland_parsing.C
 libantioch_la_SOURCES += parsing/src/transport_species_parsing.C
+libantioch_la_SOURCES += parsing/src/xml_parser.C
 
 # transport
 libantioch_la_SOURCES += transport/src/transport_mixture.C
