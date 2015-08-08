@@ -30,6 +30,17 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/antioch_numeric_type_instantiate_macro.h"
 #include "antioch/xml_parser_instantiation_macro.h"
+#include "antioch/nasa_mixture.h"
+#include "antioch/cea_thermo.h"
+#include "antioch/cea_curve_fit.h"
+#include "antioch/nasa_curve_fit.h"
+
+//XML
+#include "antioch/tinyxml2_imp.h"
+
+// C++
+#include <sstream>
+#include <limits>
 
 namespace Antioch
 {

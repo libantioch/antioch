@@ -28,6 +28,7 @@
 
 // Antioch
 #include "antioch/parser_base.h"
+#include "antioch/transport_mixture.h"
 
 namespace Antioch
 {

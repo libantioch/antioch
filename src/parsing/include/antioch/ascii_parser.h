@@ -33,19 +33,12 @@
 #include "antioch/input_utils.h"
 #include "antioch/string_utils.h"
 #include "antioch/units.h"
-#include "antioch/cea_thermo.h" // because not templated, therefore should be entirely known
-#include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
-#include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
-#include "antioch/transport_mixture.h" // because not templated, therefore should be entirely known
 
 // C++
-#include <iostream>
 #include <fstream>
-#include <algorithm> // std::search_n
 #include <string>
 #include <vector>
 #include <map>
-
 
 namespace Antioch
 {

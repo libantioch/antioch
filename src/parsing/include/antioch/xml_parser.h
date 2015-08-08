@@ -30,18 +30,17 @@
 #include "antioch/string_utils.h"
 #include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
-#include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
-#include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
-
-//XML
-#include "antioch/tinyxml2_imp.h"
 
 //C++
-#include <sstream>
 #include <string>
 #include <vector>
 #include <map>
-#include <limits>
+
+namespace tinyxml2
+{
+  class XMLDocument;
+  class XMLElement;
+}
 
 namespace Antioch{
 

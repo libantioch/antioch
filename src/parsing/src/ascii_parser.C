@@ -29,6 +29,13 @@
 // Antioch
 #include "antioch/antioch_numeric_type_instantiate_macro.h"
 #include "antioch/ascii_parser_instantiation_macro.h"
+#include "antioch/chemical_mixture.h"
+#include "antioch/cea_thermo.h"
+#include "antioch/nasa_mixture.h"
+#include "antioch/transport_mixture.h"
+
+// C++
+#include <algorithm> // std::search_n
 
 namespace Antioch
 {
