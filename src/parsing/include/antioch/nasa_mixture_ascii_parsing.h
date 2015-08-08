@@ -28,16 +28,7 @@
 #define ANTIOCH_NASA_MIXTURE_ASCII_PARSING_H
 
 // C++
-#include <iostream>
-#include <fstream>
-#include <vector>
 #include <string>
-#include <sstream>
-
-// Antioch
-#include "antioch/input_utils.h"
-#include "antioch/chemical_mixture.h"
-#include "antioch/nasa_mixture_parsing.h"
 
 namespace Antioch
 {

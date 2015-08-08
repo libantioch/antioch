@@ -30,6 +30,8 @@
 #include "antioch/string_utils.h"
 #include "antioch/units.h"
 #include "antioch/reaction_set.h"
+#include "antioch/reaction_parsing.h"
+#include "antioch/kinetics_parsing.h"
 #include "antioch/physical_constants.h"
 #include "antioch/ascii_parser.h"
 #include "antioch/chemkin_parser.h"

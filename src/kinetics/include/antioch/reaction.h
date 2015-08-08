@@ -46,6 +46,7 @@
 #include "antioch/reaction_enum.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/kinetics_conditions.h"
+#include "antioch/kinetics_parsing.h" // reset_parameter_of_rate
 
 //C++
 #include <string>

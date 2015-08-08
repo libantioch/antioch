@@ -32,18 +32,12 @@
 #include "antioch/parsing_enum.h"
 #include "antioch/units.h"
 #include "antioch/chemkin_definitions.h"
-#include "antioch/nasa_mixture.h" // because not templated, therefore should be entirely known
-#include "antioch/cea_curve_fit.h" // because not templated, therefore should be entirely known
-#include "antioch/nasa_curve_fit.h" // because not templated, therefore should be entirely known
-
-//ChemKin
 
 //C++
-#include <sstream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
-#include <algorithm>
 
 namespace Antioch{
 

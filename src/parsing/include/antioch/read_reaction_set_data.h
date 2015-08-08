@@ -33,18 +33,12 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
-#include "antioch/string_utils.h"
-#include "antioch/reaction_set.h"
-#include "antioch/kinetics_parsing.h"
-#include "antioch/reaction_parsing.h"
-#include "antioch/physical_constants.h"
 #include "antioch/units.h"
 #include "antioch/parsing_enum.h"
 
 // C++
 #include <string>
 #include <vector>
-#include <map>
 
 namespace Antioch
 {
@@ -57,6 +51,9 @@ namespace Antioch
 
   template <typename NumericType>
   class XMLParser;
+
+  template <typename NumericType>
+  class ReactionSet;
 
  /*!\file read_reaction_set_data.h
   *

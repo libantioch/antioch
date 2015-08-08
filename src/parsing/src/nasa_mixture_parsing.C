@@ -33,6 +33,7 @@
 #include "antioch/ascii_parser.h"
 #include "antioch/xml_parser.h"
 #include "antioch/chemkin_parser.h"
+#include "antioch/nasa_mixture.h"
 
 namespace Antioch
 {
