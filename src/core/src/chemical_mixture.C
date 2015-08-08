@@ -28,6 +28,8 @@
 
 // Antioch
 #include "antioch/antioch_numeric_type_instantiate_macro.h"
+#include "antioch/ascii_parser.h"
+#include "antioch/species_parsing.h"
 
 namespace Antioch
 {

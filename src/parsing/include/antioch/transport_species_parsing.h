@@ -26,17 +26,6 @@
 #ifndef ANTIOCH_TRANSPORT_SPECIES_PARSING_H
 #define ANTIOCH_TRANSPORT_SPECIES_PARSING_H
 
-// Antioch
-#include "antioch/ascii_parser.h"
-#include "antioch/chemkin_parser.h"
-#include "antioch/xml_parser.h"
-
-//C++
-#include <iostream>
-#include <string>
-#include <fstream>
-
-
 namespace Antioch
 {
   //Forward declaration

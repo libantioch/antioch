@@ -37,19 +37,19 @@
 #include "antioch/chemical_species.h"
 #include "antioch/default_filename.h"
 #include "antioch/metaprogramming.h"
-#include "antioch/species_parsing.h"
-#include "antioch/ascii_parser.h"
 
 // C++
 #include <vector>
 #include <map>
 #include <string>
-#include <algorithm>
-#include <iomanip>
 
 namespace Antioch
 {
   typedef unsigned int Species;
+
+  // Forward declarations
+  template <class NumericType>
+  class ParserBase;
 
   //! Class storing chemical mixture properties
   /*!

@@ -27,7 +27,7 @@
 #include "antioch/transport_species_ascii_parsing.h"
 
 // Antioch
-#include "antioch/parser_base.h"
+#include "antioch/ascii_parser.h"
 #include "antioch/transport_mixture.h"
 
 namespace Antioch

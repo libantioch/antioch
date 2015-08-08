@@ -29,6 +29,9 @@
 #include "antioch/cea_thermo.h"
 #include "antioch/input_utils.h"
 
+// C++
+#include <fstream>
+
 namespace Antioch
 {
   template<class NumericType>
