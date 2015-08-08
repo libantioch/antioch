@@ -27,6 +27,7 @@
 #define ANTIOCH_PARSER_BASE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/parsing_enum.h"
 #include "antioch/input_utils.h"
 
@@ -94,7 +95,7 @@ namespace Antioch
                                   charge number) `void read_chemical_species(ChemicalMixture<NumericType> & chem_mixture);'
                 - vibrational data `void read_vibrational_data(ChemicalMixture<NumericType> & chem_mixture);'
                 - electronic data `void read_electronic_data(ChemicalMixture<NumericType> & chem_mixture);'
-        - the kinetics: 
+        - the kinetics:
                 - it requires a boolean to ensure there is a reaction to parse `bool reaction();'
                 - ...
    */
@@ -102,9 +103,13 @@ namespace Antioch
   template <typename NumericType>
   class ParserBase
   {
-     public:
-        ParserBase(const std::string & type, const std::string & file, bool verbose = true, const std::string & comments = "");
-        virtual ~ParserBase();
+  public:
+    ParserBase(const std::string & type,
+               const std::string & file,
+               bool verbose = true,
+               const std::string & comments = "");
+
+    virtual ~ParserBase(){};
 
         // initialize kinetics, mandatory
         virtual bool initialize() = 0;
@@ -236,7 +241,7 @@ namespace Antioch
 
         /*! \return enum*/
         ParsingType enum_type() const;
-        
+
 
      protected:
 
@@ -252,62 +257,6 @@ namespace Antioch
      private:
         ParserBase();
   };
-
-  template <typename NumericType>
-  ParserBase<NumericType>::ParserBase(const std::string & type, const std::string & file, bool verbose, const std::string & comments):
-        _type(type),
-        _file(file),
-        _verbose(verbose),
-        _comments(comments)
-  {
-       std::stringstream os;
-       os <<  "\n*********************************************************\n"
-          << "This method is not available with a " << _type << " parser.\n"
-          << "Parsing file " << _file << ".\n"
-          << "No format has been defined yet.  Maybe contribute?\n"
-          << "https://github.com/libantioch/antioch\n" 
-          << "\n\n*********************************************************\n\n";
-
-      _not_implemented = os.str();
-                        
-      return;
-  }
-
-  template <typename NumericType>
-  ParserBase<NumericType>::~ParserBase()
-  {
-      return;
-  }
-
-  template <typename NumericType>
-  inline
-  void ParserBase<NumericType>::skip_comments(std::istream & doc)
-  {
-     for(unsigned int c = 0; c < _comments.size(); c++)
-     {
-        skip_comment_lines(doc, _comments[c]);
-     }
-  }
-
-  template <typename NumericType>
-  ParsingType ParserBase<NumericType>::enum_type() const
-  {
-      ParsingType PType(ASCII);
-      if(_type == "ascii")
-      {
-          PType = ASCII;
-      }else if(_type == "ChemKin")
-      {
-          PType = CHEMKIN;
-      }else if(_type == "XML")
-      {
-          PType = XML;
-      }else
-      {
-           antioch_parsing_error(std::string("unknown parser type!!! " + _type));
-      }
-      return PType;
-  }
 
 } // end namespace Antioch
 
