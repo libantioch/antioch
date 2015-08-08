@@ -25,6 +25,7 @@
 //--------------------------------------------------------------------------
 
 #include "antioch/nasa_mixture_parsing.h"
+#include "antioch/nasa_mixture_ascii_parsing.h"
 
 // Antioch
 #include "antioch/nasa_mixture_parsing_instantiate_macro.h"
@@ -67,9 +68,20 @@ namespace Antioch
     return;
   }
 
+  template<class NumericType>
+  void read_nasa_mixture_data_ascii( NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo, const std::string &filename )
+  {
+    antioch_deprecated();
+    read_nasa_mixture_data( thermo, filename, CHEMKIN, true);
+  }
+
   // Instantiate
   ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE(NASA7CurveFit);
   ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE(NASA9CurveFit);
   ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE(CEACurveFit);
+
+  template void read_nasa_mixture_data_ascii<float>( NASAThermoMixture<float,NASA7CurveFit<float> >&, const std::string& );
+  template void read_nasa_mixture_data_ascii<double>( NASAThermoMixture<double,NASA7CurveFit<double> >&, const std::string& );
+  template void read_nasa_mixture_data_ascii<long double>( NASAThermoMixture<long double,NASA7CurveFit<long double> >&, const std::string& );
 
 } // end namespace Antioch
