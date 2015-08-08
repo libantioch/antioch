@@ -31,6 +31,9 @@
 #include "antioch/xml_parser.h"
 #include "antioch/cea_mixture.h"
 
+// C++
+#include <iostream>
+
 namespace Antioch
 {
   template<class NumericType>

@@ -42,7 +42,7 @@
 #include "antioch/temp_cache.h"
 #include "antioch/cea_mixture.h"
 #include "antioch/cea_evaluator.h"
-#include "antioch/cea_mixture_parsing.h"
+#include "antioch/nasa_mixture_parsing.h"
 #include "antioch/nasa_mixture_ascii_parsing.h"
 
 template <typename Scalar, typename NASAFit>

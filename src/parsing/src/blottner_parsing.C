@@ -27,6 +27,8 @@
 
 // Antioch
 #include "antioch/blottner_parsing_instantiate_macro.h"
+#include "antioch/mixture_viscosity.h"
+#include "antioch/blottner_viscosity.h"
 
 // C++
 #include <fstream>

@@ -31,15 +31,18 @@
 #ifndef ANTIOCH_BLOTTNER_PARSING_H
 #define ANTIOCH_BLOTTNER_PARSING_H
 
-// Antioch
-#include "antioch/blottner_viscosity.h"
-#include "antioch/mixture_viscosity.h"
-
 // C++
-#include <iostream>
+#include <string>
 
 namespace Antioch
 {
+  // Forward declarations
+  template <typename NumericType>
+  class BlottnerViscosity;
+
+  template<typename Viscosity, typename NumericType>
+  class MixtureViscosity;
+
   template<class NumericType>
   void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
 				 const std::string &filename );
