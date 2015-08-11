@@ -325,6 +325,32 @@ int tester()
 
   }
 
+  // Mole flux, mole fraction test
+  {
+    typename Antioch::MixtureAveragedTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
+                                                        Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
+                                                        Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
+                                                        Scalar>::DiffusivityType
+      diff_type = Antioch::MixtureAveragedTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
+                                                             Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
+                                                             Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
+                                                             Scalar>::MOLE_FLUX_MOLE_FRACTION;
+
+    std::vector<Scalar> D_kt_mole_mole_long_double(5);
+    D_kt_mole_mole_long_double[0] = 2.070373009368896292617e-04L;
+    D_kt_mole_mole_long_double[1] = 2.083783534307470249142e-04L;
+    D_kt_mole_mole_long_double[2] = 2.589403037715613871414e-04L;
+    D_kt_mole_mole_long_double[3] = 2.824017881144487186270e-04L;
+    D_kt_mole_mole_long_double[4] = 2.042449798230576410557e-04L;
+
+    std::vector<Scalar> D_kt_mole_mole(5,0);
+    wilke_ps_evaluator.D(rho, T, mass_fractions, D_kt_mole_mole, diff_type );
+
+    for(unsigned int s = 0; s < D_kt.size(); s++)
+      return_flag = test_val( D_kt_mole_mole[s], D_kt_mole_mole_long_double[s], tol, "kinetics theory diffusion (mass flux, mass fraction) for species " + species_str_list[s]) || return_flag;
+
+  }
+
 
 
 #endif
