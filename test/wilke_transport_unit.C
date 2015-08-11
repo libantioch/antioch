@@ -299,27 +299,33 @@ int tester()
   for(unsigned int s = 0; s < D_kt.size(); s++)
     return_flag = test_val( D_kt_2[s], D_kt_long_double[s], tol, "kinetics theory diffusion for species " + species_str_list[s]) || return_flag;
 
-  typename Antioch::MixtureAveragedTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
-                                                      Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
-                                                      Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                                                      Scalar>::DiffusivityType
-    diff_type = Antioch::MixtureAveragedTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
-                                                      Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
-                                                      Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
-                                                      Scalar>::MASS_FLUX_MASS_FRACTION;
+  // Mass flux, mass fraction test
+  {
+    typename Antioch::MixtureAveragedTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
+                                                        Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
+                                                        Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
+                                                        Scalar>::DiffusivityType
+      diff_type = Antioch::MixtureAveragedTransportEvaluator<Antioch::MolecularBinaryDiffusion<Scalar,Antioch::GSLSpliner>,
+                                                             Antioch::KineticsTheoryViscosity<Scalar,Antioch::GSLSpliner>,
+                                                             Antioch::KineticsTheoryThermalConductivity<MicroThermo,Scalar>,
+                                                             Scalar>::MASS_FLUX_MASS_FRACTION;
 
-  std::vector<Scalar> D_kt_mass_mass_long_double(5);
-  D_kt_mass_mass_long_double[0] = 1.655547010773974715450e-04L;
-  D_kt_mass_mass_long_double[1] = 1.710325200536773860527e-04L;
-  D_kt_mass_mass_long_double[2] = 1.917827099420555571949e-04L;
-  D_kt_mass_mass_long_double[3] = 2.251770073703503986634e-04L;
-  D_kt_mass_mass_long_double[4] = 1.649656567826718721943e-04L;
+    std::vector<Scalar> D_kt_mass_mass_long_double(5);
+    D_kt_mass_mass_long_double[0] = 2.049224418207810845348e-04L;
+    D_kt_mass_mass_long_double[1] = 2.065920312318615510015e-04L;
+    D_kt_mass_mass_long_double[2] = 2.550809908204135170620e-04L;
+    D_kt_mass_mass_long_double[3] = 2.790464132548291530901e-04L;
+    D_kt_mass_mass_long_double[4] = 2.024029424511201457822e-04L;
 
-  std::vector<Scalar> D_kt_mass_mass(5,0);
-  wilke_ps_evaluator.D(rho, T, mass_fractions, D_kt_mass_mass, diff_type );
+    std::vector<Scalar> D_kt_mass_mass(5,0);
+    wilke_ps_evaluator.D(rho, T, mass_fractions, D_kt_mass_mass, diff_type );
 
-  for(unsigned int s = 0; s < D_kt.size(); s++)
-    return_flag = test_val( D_kt_mass_mass[s], D_kt_mass_mass_long_double[s], tol, "kinetics theory diffusion (mass flux, mass fraction) for species " + species_str_list[s]) || return_flag;
+    for(unsigned int s = 0; s < D_kt.size(); s++)
+      return_flag = test_val( D_kt_mass_mass[s], D_kt_mass_mass_long_double[s], tol, "kinetics theory diffusion (mass flux, mass fraction) for species " + species_str_list[s]) || return_flag;
+
+  }
+
+
 
 #endif
 

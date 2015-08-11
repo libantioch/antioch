@@ -563,7 +563,7 @@ namespace Antioch
           typename value_type<VectorStateType>::type one = constant_clone(mass_fractions[0],1);
 
           //               term1               term2
-          // 1/D_s = (sum_j X_j/D_{s,j}) + X_s/(1-Y_s)\sum_j Y_j/D_{s,j}
+          // 1/D_s = (sum_{j\ne s} X_j/D_{s,j}) + X_s/(1-Y_s)\sum_{j\ne s} Y_j/D_{s,j}
           for(unsigned int s = 0; s < D_vec.size(); s++)
             {
               typename value_type<VectorStateType>::type term1 = zero_clone(mass_fractions[0]);
@@ -571,6 +571,9 @@ namespace Antioch
 
               for(unsigned int j = 0; j < D_vec.size(); j++)
                 {
+                  if(j == s)
+                    continue;
+
                   term1 += molar_fractions[j]/D_mat[s][j];
 
                   term2 += mass_fractions[j]/D_mat[s][j];
