@@ -22,30 +22,18 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-#define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#ifndef ANTIOCH_CEA_MIXTURE_ASCII_PARSING_INSTANTIATE_MACRO_H
+#define ANTIOCH_CEA_MIXTURE_ASCII_PARSING_INSTANTIATE_MACRO_H
 
-// C++
-#include <string>
+#define ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(type) \
+  template void read_cea_mixture_data_ascii_default<type>( CEAThermoMixture<type>& ); \
+  template void read_cea_mixture_data_ascii<type>( CEAThermoMixture<type>&, const std::string& ); \
+  template void read_cea_mixture_data_ascii<type>( CEAThermodynamics<type>&, const std::string& )
 
-namespace Antioch
-{
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermodynamics;
+#define ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_INSTANTIATE() \
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(float); \
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(double); \
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(long double)
 
-  // New declarations
-
-  template<class NumericType>
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo,
-                                   const std::string &filename );
-
-} // end namespace Antioch
-
-#endif // ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#endif // ANTIOCH_CEA_MIXTURE_ASCII_PARSING_INSTANTIATE_MACRO_H

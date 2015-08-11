@@ -31,80 +31,24 @@
 #ifndef ANTIOCH_BLOTTNER_PARSING_H
 #define ANTIOCH_BLOTTNER_PARSING_H
 
-// Antioch
-#include "antioch/blottner_viscosity.h"
-#include "antioch/mixture_viscosity.h"
-
 // C++
-#include <iostream>
+#include <string>
 
 namespace Antioch
 {
+  // Forward declarations
+  template <typename NumericType>
+  class BlottnerViscosity;
 
-  /* These two methods use a ViscosityMixture object => deprecated */
+  template<typename Viscosity, typename NumericType>
+  class MixtureViscosity;
+
   template<class NumericType>
   void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
 				 const std::string &filename );
 
   template<class NumericType>
   void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu );
-
-  /* ------------------------- Inline Functions -------------------------*/
-  template<class NumericType>
-  inline
-  void read_blottner_data_ascii( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu,
-				 const std::string &filename )
-  {
-    std::ifstream in(filename.c_str());
-    if(!in.is_open())
-    {
-       std::cerr << "ERROR: unable to load file " << filename << std::endl;
-       antioch_error();
-    }
-    
-    // skip the header
-    skip_comment_lines(in, '#');
-
-    std::string name;
-    NumericType a, b, c;
-
-    while (in.good())
-      {
-        in >> name; // Species Name
-        in >> a;    // 
-        in >> b;    // 
-        in >> c;    // 
-        
-        // If we are still good, we have a valid set of transport
-        // data for this species. Otherwise, we read past end-of-file 
-        // in the section above
-        if (in.good())
-          {
-	    const ChemicalMixture<NumericType>& chem_mixture = mu.chemical_mixture();
-	    
-	    // Check if this is a species we want.
-	    if( chem_mixture.species_name_map().find(name) !=
-		chem_mixture.species_name_map().end() )
-	      {
-		// Pack up coefficients
-		std::vector<NumericType> coeffs(3);
-		coeffs[0] = a;
-		coeffs[1] = b;
-		coeffs[2] = c;
-		mu.add(name, coeffs);
-	      }
-          }
-
-      }
-      in.close();
-    return;
-  }
-
-  template<class NumericType>
-  void read_blottner_data_ascii_default( MixtureViscosity<BlottnerViscosity<NumericType>,NumericType >& mu )
-  {
-    read_blottner_data_ascii(mu, DefaultFilename::blottner_data());
-  }
 
 } // end namespace Antioch
 

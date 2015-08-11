@@ -22,30 +22,13 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-#define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#ifndef ANTIOCH_NUMERIC_TYPE_INSTANTIATE_MACRO_H
+#define ANTIOCH_NUMERIC_TYPE_INSTANTIATE_MACRO_H
 
-// C++
-#include <string>
+#define ANTIOCH_NUMERIC_TYPE_CLASS_INSTANTIATE(classname) \
+  template class classname<float>;                        \
+  template class classname<double>;                       \
+  template class classname<long double>
 
-namespace Antioch
-{
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermodynamics;
-
-  // New declarations
-
-  template<class NumericType>
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo,
-                                   const std::string &filename );
-
-} // end namespace Antioch
-
-#endif // ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#endif // ANTIOCH_NUMERIC_TYPE_INSTANTIATE_MACRO_H

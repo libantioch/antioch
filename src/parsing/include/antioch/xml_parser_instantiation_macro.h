@@ -22,30 +22,19 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-#define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#ifndef ANTIOCH_XML_PARSER_INSTANTIATION_MACRO_H
+#define ANTIOCH_XML_PARSER_INSTANTIATION_MACRO_H
 
-// C++
-#include <string>
+#define ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(type)                     \
+  template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,NASA7CurveFit<type> > >(NASAThermoMixture<type,NASA7CurveFit<type> >& ); \
+  template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,NASA9CurveFit<type> > >(NASAThermoMixture<type,NASA9CurveFit<type> >& ); \
+  template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,CEACurveFit<type> > >(NASAThermoMixture<type,CEACurveFit<type> >& ); \
+  template void XMLParser<type>::read_thermodynamic_data_root<CEAThermodynamics<type> >(CEAThermodynamics<type>& )
 
-namespace Antioch
-{
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermodynamics;
+#define ANTIOCH_XML_PARSER_INSTANTIATE() \
+  ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(float); \
+  ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(double); \
+  ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(long double)
 
-  // New declarations
-
-  template<class NumericType>
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo,
-                                   const std::string &filename );
-
-} // end namespace Antioch
-
-#endif // ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#endif // ANTIOCH_XML_PARSER_INSTANTIATION_MACRO_H

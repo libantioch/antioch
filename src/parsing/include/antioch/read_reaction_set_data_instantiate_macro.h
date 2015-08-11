@@ -22,30 +22,24 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-#define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#ifndef ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE_MACRO_H
+#define ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE_MACRO_H
 
-// C++
-#include <string>
+#define ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(type)   \
+  template void verify_unit_of_parameter<type>( Units<type>&,           \
+                                               const std::string&, \
+                                               const std::vector<std::string>&, \
+                                               const std::string&, \
+                                                const std::string& ); \
+  template void read_reaction_set_data<type>( const std::string&, \
+                                              const bool, \
+                                              ReactionSet<type>&, \
+                                              ParsingType  )
 
-namespace Antioch
-{
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermodynamics;
+#define ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE() \
+  ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(float); \
+  ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(double); \
+  ANTIOCH_READ_REACTION_SET_DATA_TYPE_INSTANTIATE(long double)
 
-  // New declarations
-
-  template<class NumericType>
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo,
-                                   const std::string &filename );
-
-} // end namespace Antioch
-
-#endif // ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#endif // ANTIOCH_READ_REACTION_SET_DATA_INSTANTIATE_MACRO_H

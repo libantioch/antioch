@@ -22,30 +22,41 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-#define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-
-// C++
-#include <string>
+#include "antioch/antioch_version.h"
 
 namespace Antioch
 {
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermodynamics;
+  int get_antioch_version()
+  {
+    /* Note: return format follows the versioning convention xx.yy.zz where
 
-  // New declarations
+       xx = major version number
+       yy = minor version number
+       zz = micro version number
 
-  template<class NumericType>
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo,
-                                   const std::string &filename );
+       For example:
+       v.   0.23  -> 002300 = 2300
+       v   0.23.1 -> 002301 = 2301
+       v. 10.23.2 -> 102302         */
+
+    int major_version = 0;
+    int minor_version = 0;
+    int micro_version = 0;
+
+#ifdef ANTIOCH_MAJOR_VERSION
+    major_version = ANTIOCH_MAJOR_VERSION;
+#endif
+
+#ifdef ANTIOCH_MINOR_VERSION
+    minor_version = ANTIOCH_MINOR_VERSION;
+#endif
+
+#ifdef ANTIOCH_MICRO_VERSION
+    micro_version = ANTIOCH_MICRO_VERSION;
+#endif
+
+    return major_version*10000 + minor_version*100 + micro_version;
+  }
 
 } // end namespace Antioch
-
-#endif // ANTIOCH_CEA_THERMO_ASCII_PARSING_H

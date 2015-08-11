@@ -22,47 +22,40 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H
-#define ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H
+#include "antioch/cea_mixture_ascii_parsing.h"
 
-// C++
-#include <string>
-
-/*! Everything here is deprecated, it is for backward compatibility,
-    using the deprecated name/object CEAThermo...<NumericType>.
-
-    We required to provide:
-      - read_cea_mixture_data_ascii()
-      - read_cea_mixture_data_ascii_default()
-
-    for both descriptions (Mixture, dynamics).
-*/
+// Antioch
+#include "antioch/cea_mixture.h"
+#include "antioch/ascii_parser.h"
+#include "antioch/cea_mixture_parsing.h"
+#include "antioch/cea_mixture_ascii_parsing_instantiate_macro.h"
 
 namespace Antioch
 {
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermoMixture;
-
-  template <class NumericType>
-  class CEAThermodynamics;
+  template<class NumericType>
+  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType>& thermo )
+  {
+    antioch_deprecated();
+    read_cea_mixture_data(thermo, DefaultFilename::thermo_data(), ASCII, true);
+  }
 
   template<class NumericType>
-  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType >& thermo, const std::string &filename );
+  void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType>& thermo, const std::string &filename )
+  {
+    antioch_deprecated();
+    read_cea_mixture_data( thermo, filename, ASCII, true );
+  }
 
   template<class NumericType>
-  void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType >& thermo );
+  void read_cea_mixture_data_ascii( CEAThermodynamics<NumericType>& thermo, const std::string &filename )
+  {
+    antioch_deprecated();
+    ASCIIParser<NumericType> parser(filename);
+    parser.read_thermodynamic_data(thermo);
+  }
 
-  /* that thing is like, double-obsolete*/
-  template<class NumericType>
-  void read_cea_mixture_data_ascii( CEAThermodynamics<NumericType >& thermo, const std::string &filename );
+  // Instantiate
+  ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_INSTANTIATE();
 
 } // end namespace Antioch
-
-#endif // ANTIOCH_CEA_MIXTURE_ASCII_PARSING_H

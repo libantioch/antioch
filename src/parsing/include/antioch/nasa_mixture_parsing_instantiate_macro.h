@@ -22,30 +22,13 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
-#ifndef ANTIOCH_CEA_THERMO_ASCII_PARSING_H
-#define ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#ifndef ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE_MACRO_H
+#define ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE_MACRO_H
 
-// C++
-#include <string>
+#define ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE(curvefit)              \
+  template void read_nasa_mixture_data<float,curvefit<float> >( NASAThermoMixture<float,curvefit<float> >&, const std::string&, ParsingType, bool ); \
+  template void read_nasa_mixture_data<double,curvefit<double> >( NASAThermoMixture<double,curvefit<double> >&, const std::string&, ParsingType, bool ); \
+   template void read_nasa_mixture_data<long double,curvefit<long double> >( NASAThermoMixture<long double,curvefit<long double> >&, const std::string&, ParsingType, bool )
 
-namespace Antioch
-{
-  // Forward declarations
-  template <class NumericType>
-  class CEAThermodynamics;
-
-  // New declarations
-
-  template<class NumericType>
-  void read_cea_thermo_data_ascii( CEAThermodynamics<NumericType>& thermo,
-                                   const std::string &filename );
-
-} // end namespace Antioch
-
-#endif // ANTIOCH_CEA_THERMO_ASCII_PARSING_H
+#endif // ANTIOCH_NASA_MIXTURE_PARSING_INSTANTIATE_MACRO_H

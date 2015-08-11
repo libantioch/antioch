@@ -34,6 +34,7 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h" // Antioch::rebind
+#include "antioch/metaprogramming.h"
 #include "antioch/temp_cache.h"
 
 // C++

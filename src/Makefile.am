@@ -5,6 +5,37 @@
 
 bin_PROGRAMS    = antioch_version
 
+lib_LTLIBRARIES = libantioch.la
+
+#----------------------------------------------
+# List of source files to build dynamic library
+#----------------------------------------------
+libantioch_la_SOURCES =
+
+# core
+libantioch_la_SOURCES += core/src/chemical_mixture.C
+
+# parsing
+libantioch_la_SOURCES += parsing/src/ascii_parser.C
+libantioch_la_SOURCES += parsing/src/blottner_parsing.C
+libantioch_la_SOURCES += parsing/src/cea_mixture_parsing.C
+libantioch_la_SOURCES += parsing/src/cea_mixture_ascii_parsing.C
+libantioch_la_SOURCES += parsing/src/cea_thermo_ascii_parsing.C
+libantioch_la_SOURCES += parsing/src/chemkin_parser.C
+libantioch_la_SOURCES += parsing/src/nasa_mixture_parsing.C
+libantioch_la_SOURCES += parsing/src/parser_base.C
+libantioch_la_SOURCES += parsing/src/read_reaction_set_data.C
+libantioch_la_SOURCES += parsing/src/species_parsing.C
+libantioch_la_SOURCES += parsing/src/sutherland_parsing.C
+libantioch_la_SOURCES += parsing/src/transport_species_parsing.C
+libantioch_la_SOURCES += parsing/src/xml_parser.C
+
+# transport
+libantioch_la_SOURCES += transport/src/transport_mixture.C
+
+# utilities
+libantioch_la_SOURCES += utilities/src/antioch_version.C
+
 #----------------------------
 # INCLUDES we want distributed
 #----------------------------
@@ -155,6 +186,7 @@ pkginclude_HEADERS += $(top_builddir)/src/utilities/include/antioch/antioch_vers
 
 # Version app
 antioch_version_SOURCES = apps/version.C
+antioch_version_LDADD = libantioch.la
 
 #--------------------------------------
 #Local Directories to include for build
@@ -167,6 +199,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/kinetics/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/parsing/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/thermo/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
+AM_CPPFLAGS += -I$(top_srcdir)/src/viscosity/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)

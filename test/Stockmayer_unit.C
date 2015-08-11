@@ -39,7 +39,7 @@
 #include "antioch/ideal_gas_micro_thermo.h"
 #include "antioch/transport_mixture.h"
 #include "antioch/gsl_spliner.h"
-#include "antioch/cea_mixture_parsing.h"
+#include "antioch/nasa_mixture_parsing.h"
 #include "antioch/default_filename.h"
 #include "antioch/vector_utils.h"
 

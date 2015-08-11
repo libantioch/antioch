@@ -37,25 +37,25 @@
 #include "antioch/chemical_species.h"
 #include "antioch/default_filename.h"
 #include "antioch/metaprogramming.h"
-#include "antioch/species_parsing.h"
-#include "antioch/ascii_parser.h"
 
 // C++
 #include <vector>
 #include <map>
 #include <string>
-#include <algorithm>
-#include <iomanip>
 
 namespace Antioch
 {
   typedef unsigned int Species;
 
+  // Forward declarations
+  template <class NumericType>
+  class ParserBase;
+
   //! Class storing chemical mixture properties
   /*!
     This class manages the list of ChemicalSpecies for a requested set
     of species from input.
-    \todo This should probably be a singleton class, but being lazy for now.
+
     We require four types of data:
        - a list of species, in a form of std::vector<std::string>
        - a file for mandatory species information:
@@ -141,8 +141,6 @@ namespace Antioch
 
     const std::vector<Species>& species_list() const;
 
-//    const std::map<Species,unsigned int>& species_list_map() const;
-
     const std::map<std::string,Species>& species_name_map() const;
 
     const std::map<Species,std::string>& species_inverse_name_map() const;
@@ -226,7 +224,6 @@ namespace Antioch
     void build_inverse_name_map();
 
     std::vector<Species> _species_list;
-//    std::map<Species,unsigned int> _species_list_map;
     std::vector<ChemicalSpecies<CoeffType>*> _chemical_species;
     std::map<std::string,Species> _species_name_map;
     std::map<Species,std::string> _species_inv_name_map;
@@ -249,13 +246,6 @@ namespace Antioch
     return _species_list;
   }
 
-/*  template<typename CoeffType>
-  inline
-  const std::map<Species,unsigned int>& ChemicalMixture<CoeffType>::species_list_map() const
-  {
-    return _species_list_map;
-  }
-*/
   template<typename CoeffType>
   inline
   const std::vector<ChemicalSpecies<CoeffType>*>& ChemicalMixture<CoeffType>::chemical_species() const
@@ -321,139 +311,6 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  inline
-  ChemicalMixture<CoeffType>::ChemicalMixture(const std::string & filename, const bool verbose,
-                                              const std::string & species_data,
-                                              const std::string & vibration_data,
-                                              const std::string & electronic_data)
-  {
-      ASCIIParser<CoeffType> parser(filename,verbose);
-
-      read_chemical_species_composition<CoeffType>(static_cast<ParserBase<CoeffType> *> (&parser), *this);
-
-      parser.change_file(species_data);
-      this->read_species_characteristics(&parser,species_data,vibration_data,electronic_data);
-
-      return;
-  }
-
-  template<typename CoeffType>
-  inline
-  ChemicalMixture<CoeffType>::ChemicalMixture(ParserBase<CoeffType> * parser,
-                                              const std::string & species_data,
-                                              const std::string & vibration_data,
-                                              const std::string & electronic_data)
-  {
-      read_chemical_species_composition<CoeffType>(parser, *this);
-
-      this->read_species_characteristics(parser,species_data,vibration_data,electronic_data);
-
-      return;
-  }
-
-  template<typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::read_species_characteristics(ParserBase<CoeffType> * parser,
-                                                                const std::string & /*species_data*/,
-                                                                const std::string & vibration_data,
-                                                                const std::string & electronic_data)
-  {
-   // species file is already in parser object
-     this->read_species_mandatory_characteristics(parser);
-
-    //... and any vibrational data
-     parser->change_file(vibration_data);
-     this->read_species_vibrational_characteristics(parser);
-
-    //... and any electronic data
-     parser->change_file(electronic_data);
-     this->read_species_electronic_characteristics(parser);
-
-    return;
-  }
-
-
-  template <typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::read_species_mandatory_characteristics(ParserBase<CoeffType> * parser)
-  {
-      read_species_data<CoeffType>(parser, *this);
-  }
-
-  template <typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::read_species_vibrational_characteristics(ParserBase<CoeffType> * parser)
-  {
-      read_species_vibrational_data<CoeffType>(parser, *this);
-  }
-
-  template <typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::read_species_electronic_characteristics(ParserBase<CoeffType> * parser)
-  {
-      read_species_electronic_data<CoeffType>(parser, *this);
-  }
-
-  template<typename CoeffType>
-  inline
-  ChemicalMixture<CoeffType>::ChemicalMixture(const std::vector<std::string>& species_list,
-                                              const bool verbose,
-                                              const std::string & species_data,
-                                              const std::string & vibration_data,
-                                              const std::string & electronic_data)
-  {
-      this->initialize_species(species_list);
-
-      Antioch::ASCIIParser<CoeffType> parser(species_data,verbose);
-
-      this->read_species_characteristics(static_cast<ParserBase<CoeffType> *>(&parser),species_data,vibration_data,electronic_data);
-
-      return;
-  }
-
-  template<typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::initialize_species( const std::vector<std::string>& species_list )
-  {
-    _chemical_species.resize( species_list.size(), NULL );
-    // Build up name map for all possible species
-    this->init_species_name_map(species_list);
-
-    // Build up inverse name map
-    this->build_inverse_name_map();
-
-    // Populate species list for requested species
-    _species_list.reserve( species_list.size() );
-    for( unsigned int s = 0; s < species_list.size(); s++ )
-      {
-	if( _species_name_map.find( species_list[s] ) == _species_name_map.end() )
-	  {
-	    std::cerr << "Error in ChemicalMixture: Unknown species " << species_list[s] << std::endl;
-	    antioch_error();
-	  }
-
-	_species_list.push_back( _species_name_map.find( species_list[s] )->second );
-//	_species_list_map.insert( std::make_pair( _species_name_map.find( species_list[s] )->second, s ) );
-      }
-  }
-
-
-  template<typename CoeffType>
-  inline
-  ChemicalMixture<CoeffType>::~ChemicalMixture()
-  {
-    // Clean up all the ChemicalSpecies we stored
-    for( typename std::vector<ChemicalSpecies<CoeffType>* >::iterator it = _chemical_species.begin();
-	 it < _chemical_species.end(); ++it )
-      {
-	delete (*it);
-      }
-
-    return;
-  }
-
-
-  template<typename CoeffType>
   template<typename VectorStateType>
   inline
   typename enable_if_c<
@@ -515,63 +372,6 @@ namespace Antioch
     for( unsigned int s = 0; s < mass_fractions.size(); s++ )
       {
 	mole_fractions[s] = this->X(s, M, mass_fractions[s]);
-      }
-
-    return;
-  }
-
-
-  template<typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::add_species( const unsigned int index,
-					        const std::string& name,
-					        CoeffType mol_wght,
-					        CoeffType h_form,
-					        CoeffType n_tr_dofs, int charge)
-  {
-    _chemical_species[index] =
-      new ChemicalSpecies<CoeffType>(name, mol_wght, h_form, n_tr_dofs, charge);
-
-    return;
-  }
-
-  template<typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::add_species_vibrational_data( const unsigned int index,
-                                                                 const CoeffType theta_v,
-                                                                 const unsigned int ndg_v )
-  {
-    (_chemical_species[index])->add_vibrational_data(theta_v, ndg_v);
-  }
-
-  template<typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::add_species_electronic_data( const unsigned int index,
-                                                                const CoeffType theta_e,
-                                                                const unsigned int ndg_e )
-  {
-    (_chemical_species[index])->add_electronic_data(theta_e, ndg_e);
-  }
-
-  template<typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::init_species_name_map(const std::vector<std::string> & species_list)
-  {
-    _species_name_map.clear();
-    for(unsigned int s = 0; s < species_list.size(); s++)
-    {
-        _species_name_map[species_list[s]] = s;
-    }
-  }
-
-  template<typename CoeffType>
-  inline
-  void ChemicalMixture<CoeffType>::build_inverse_name_map()
-  {
-    for( std::map<std::string,Species>::const_iterator it = _species_name_map.begin();
-	 it != _species_name_map.end(); ++it )
-      {
-	_species_inv_name_map.insert( std::make_pair( it->second, it->first ) );
       }
 
     return;
