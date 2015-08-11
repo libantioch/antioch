@@ -551,9 +551,36 @@ namespace Antioch
           break;
         }
       case(MOLE_FLUX_MOLE_FRACTION):
-      case(MASS_FLUX_MASS_FRACTION):
         {
           antioch_not_implemented();
+        }
+      case(MASS_FLUX_MASS_FRACTION):
+        {
+          VectorStateType molar_fractions = zero_clone(mass_fractions);
+
+          mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
+
+          typename value_type<VectorStateType>::type one = constant_clone(mass_fractions[0],1);
+
+          //               term1               term2
+          // 1/D_s = (sum_j X_j/D_{s,j}) + X_s/(1-Y_s)\sum_j Y_j/D_{s,j}
+          for(unsigned int s = 0; s < D_vec.size(); s++)
+            {
+              typename value_type<VectorStateType>::type term1 = zero_clone(mass_fractions[0]);
+              typename value_type<VectorStateType>::type term2 = zero_clone(mass_fractions[0]);
+
+              for(unsigned int j = 0; j < D_vec.size(); j++)
+                {
+                  term1 += molar_fractions[j]/D_mat[s][j];
+
+                  term2 += mass_fractions[j]/D_mat[s][j];
+                }
+
+              term2 *=  molar_fractions[s]/(one - mass_fractions[s]);
+
+              D_vec[s] = one/(term1+term2);
+            }
+          break;
         }
       default:
         {
