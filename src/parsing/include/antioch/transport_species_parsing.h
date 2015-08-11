@@ -40,19 +40,19 @@
 namespace Antioch{
 
   //Forward declaration
-  template <typename ThermoEvaluator, typename NumericType>
+  template <typename NumericType>
   class TransportMixture;
 
 
-  template <typename ThermoEvaluator, typename NumericType>
+  template <typename NumericType>
   void read_transport_species_data(ParserBase<NumericType> * parser,
-                                   TransportMixture<ThermoEvaluator,NumericType> & transport);
+                                   TransportMixture<NumericType> & transport);
 
 /*----------- inline functions ----------------*/
 
 
-  template <typename ThermoEvaluator, typename NumericType>
-  void read_transport_species_data(ParserBase<NumericType> * parser, TransportMixture<ThermoEvaluator,NumericType> & transport)
+  template <typename NumericType>
+  void read_transport_species_data(ParserBase<NumericType> * parser, TransportMixture<NumericType> & transport)
   {
 
     switch(parser->enum_type())

@@ -1,3 +1,45 @@
+Version 0.3.0
+* Introduced KineticsConditions object.
+  - Beginning to encapsulate quantities necessary for
+    computing reaction rates.
+  - Experimental. Expect future API changes.
+* Added NASA7 and NASA9 fits for thermodynamics
+  - CEA internally uses NASA9
+* Added IdealGasMicroThermo
+  - Alternative to StatMechThermodynamics
+  - Computes vibrational excitation by subtracting
+    translational/rotational from curve fit of total
+    quantity
+  - MacroThermo is the template parameter for the total.
+    Can use, e.g., NASA7, NASA9, etc.
+  - Assumes no electronic excitation
+* Refactored parsing objects
+  - Default ASCII input files provided in share directory
+* Added new ChemKin format parsing capabilities
+* Complete refactoring of transport models
+  - WilkeMixture, WilkeEvaluator now deprecated
+  - Replaced by MixtureAveragedTransportMixture,
+                MixtureAveragedTransportEvaluator
+  - Defined interface for species transport objects
+    using CRTP pattern
+  - MixtureAveraged* objects templated on species
+    transport objects
+  - MixtureViscosity, MixtureConductivity, and
+    MixtureDiffusion hold species objects for the species
+    present in the chemical mixture.
+* Added new "KineticsTheory" species models
+  - Typically referred to as "Pure Species" model. Based on
+    kinetics theory expressions and curve fits of collision
+    integrals
+  - Antioch must be built with GSL (for splining) in order to
+    use KineticsTheory models.
+* Several bugfixes in units/parsing corner cases
+* This is the last release Antioch will be header-only.
+  Subsequent releases will require linking to a built library.
+
+Version 0.2.1
+* Critical bugfix for ConstantLewisDiffusivity
+
 Version 0.2.0
 * Added general units capabilities
 * Update in conversion factor for gas constant

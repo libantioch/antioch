@@ -34,7 +34,7 @@
 // Antioch
 #include "antioch/antioch_asserts.h"
 #include "antioch/metaprogramming_decl.h" // Antioch::rebind
-#include "antioch/temp_cache.h" 
+#include "antioch/temp_cache.h"
 
 // C++
 #include <vector>
@@ -57,8 +57,8 @@ namespace Antioch
 
     //! The interval the input temperature lies in
     /*!
-      @returns which curve fit interval the input temperature 
-      lies in.  The NASA thermodynamic intervals are 
+      @returns which curve fit interval the input temperature
+      lies in.  The NASA thermodynamic intervals are
       [200-1,000], [1,000-6,000], [6,000-20,000] K
      */
     template <typename StateType>
@@ -78,8 +78,8 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{h}{\mathrm{R}T}\f$
         \f[
-            \frac{h}{\mathrm{R}T} = a0  + \frac{a_1}{2} T + \frac{a_2}{3} T^2 
-                                    + \frac{a_3}{4} T^3 + \frac{a_4}{5} T^4 
+            \frac{h}{\mathrm{R}T} = a0  + \frac{a_1}{2} T + \frac{a_2}{3} T^2
+                                    + \frac{a_3}{4} T^3 + \frac{a_4}{5} T^4
                                     + \frac{a_5}{T}
         \f]
      */
@@ -89,8 +89,8 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{s}{\mathrm{R}}\f$
         \f[
-            \frac{s}{\mathrm{R}} =  a_0 \ln(T) + a_1 T + \frac{a_2}{2} T^2 
-                                    + \frac{a_3}{3} T^3 + \frac{a_4}{4} T^4 
+            \frac{s}{\mathrm{R}} =  a_0 \ln(T) + a_1 T + \frac{a_2}{2} T^2
+                                    + \frac{a_3}{3} T^3 + \frac{a_4}{4} T^4
                                     + a_6
         \f]
      */
@@ -100,17 +100,17 @@ namespace Antioch
     /*!
       @returns the value \f$\frac{g}{\mathrm{R}T} = \frac{h}{\mathrm{R}T} - \frac{s}{R}\f$
         \f[
-            \frac{g}{\mathrm{R}T} =   \frac{a_5}{T}      - a0 \ln(T) 
-                                    + (a_0 - a_6) 
+            \frac{g}{\mathrm{R}T} =   \frac{a_5}{T}      - a0 \ln(T)
+                                    + (a_0 - a_6)
                                     - \frac{a_1}{2} T    - \frac{a_2}{6} T^2
-                                    - \frac{a_3}{12} T^3 - \frac{a_4}{20} T^4 
+                                    - \frac{a_3}{12} T^3 - \frac{a_4}{20} T^4
         \f]
      */
     template <typename StateType>
     StateType h_RT_minus_s_R( const TempCache<StateType>& cache) const;
 
     /*!
-      @returns the value \f$\frac{\partial\left(\frac{g}{\mathrm{R}T}\right)}\frac{\partial T} 
+      @returns the value \f$\frac{\partial\left(\frac{g}{\mathrm{R}T}\right)}{\partial T}
                             = \frac{\partial\left(\frac{h}{\mathrm{R}T} - \frac{s}{R}\right)}{\partial T}\f$
         \f[
             \frac{g}{\mathrm{R}T} = - \frac{a_5}{T^2}   - \frac{a_0}{T}
@@ -123,7 +123,7 @@ namespace Antioch
 
 
     //! @returns a pointer to the coefficients in the interval specified.
-    /*!   
+    /*!
       The NASA-style equilibrium curve fits are defined in terms of
       _n_coeffs coefficients for each range fit.
     */
@@ -196,7 +196,7 @@ namespace Antioch
   typename Antioch::rebind<StateType, unsigned int>::type
   NASA7CurveFit<CoeffType>::interval(const StateType& T) const
   {
-    typedef typename 
+    typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
     UIntType interval;
     Antioch::zero_clone(interval, T);
@@ -206,7 +206,7 @@ namespace Antioch
         interval = Antioch::if_else
                    (T > _temp[i-1] && T < _temp[i],
                        i - 1,
-                       interval); 
+                       interval);
     }
     return interval;
   }
@@ -214,7 +214,7 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  unsigned int NASA7CurveFit<CoeffType>::n_intervals() const 
+  unsigned int NASA7CurveFit<CoeffType>::n_intervals() const
   { return _coefficients.size() / _n_coeffs; }
 
 
@@ -224,7 +224,7 @@ namespace Antioch
   {
     antioch_assert_less( interval, this->n_intervals() );
     antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
-    
+
     return &_coefficients[_n_coeffs*interval];
   }
 
@@ -238,7 +238,7 @@ namespace Antioch
     const UIntType interval = this->interval(cache.T);
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     // FIXME - this needs expression templates to be faster...
 
     StateType returnval = Antioch::zero_clone(cache.T);
@@ -265,17 +265,17 @@ namespace Antioch
     const UIntType interval = this->interval(cache.T);
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     StateType returnval = Antioch::zero_clone(cache.T);
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
          const CoeffType *a = this->coefficients(interval);
-    
+
          /* h/RT = a0     + a1*T/2 + a2*T^2/3 + a3*T^3/4 + a4*T^4/5 + a5/T */
         returnval = Antioch::if_else
         ( interval == i,
-           StateType(  a[0] + 
+           StateType(  a[0] +
                        a[1]*cache.T/2.0L + a[2]*cache.T2/3.0L + a[3]*cache.T3/4.0L +
                        a[4]*cache.T4/5.0L + a[5]/cache.T),
            returnval);
@@ -293,18 +293,18 @@ namespace Antioch
     const UIntType interval = this->interval(cache.T);
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     StateType returnval = Antioch::zero_clone(cache.T);
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
          const CoeffType *a = this->coefficients(interval);
-    
+
     /* s/R = a0*lnT + a1*T   + a2*T^2/2 + a3*T^3/3 + a4*T^4/4 + a6 */
         returnval = Antioch::if_else
         ( interval == i,
-           StateType(   a[0]*cache.lnT 
-                      + a[1]*cache.T + a[2]*cache.T2/2.0L + a[3]*cache.T3/3.0L 
+           StateType(   a[0]*cache.lnT
+                      + a[1]*cache.T + a[2]*cache.T2/2.0L + a[3]*cache.T3/3.0L
                       + a[4]*cache.T4/4.0L + a[6]),
            returnval);
        }
@@ -322,13 +322,13 @@ namespace Antioch
     const UIntType interval = this->interval(cache.T);
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     StateType returnval = Antioch::zero_clone(cache.T);
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
          const CoeffType *a = this->coefficients(interval);
-    
+
     /* h/RT =  a[0]     + a[1]*T/2. + a[2]*T2/3. + a[3]*T3/4. + a[4]*T4/5. + a[5]/T,
        s/R  =  a[0]*lnT + a[1]*T    + a[2]*T2/2. + a[3]*T3/3. + a[4]*T4/4. + a[6]   */
         returnval = Antioch::if_else
@@ -352,7 +352,7 @@ namespace Antioch
     const UIntType interval = this->interval(cache.T);
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     // FIXME - this needs expression templates to be faster...
 
     StateType returnval = Antioch::zero_clone(cache.T);
@@ -372,7 +372,7 @@ namespace Antioch
       }
 
     return returnval;
-        
+
    }
 
 } // end namespace Antioch

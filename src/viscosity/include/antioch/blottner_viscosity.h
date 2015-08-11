@@ -33,6 +33,7 @@
 
 // Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/species_viscosity_base.h"
 
 // C++
 #include <cmath>
@@ -42,7 +43,7 @@
 namespace Antioch
 {
   template<typename CoeffType=double>
-  class BlottnerViscosity
+  class BlottnerViscosity : public SpeciesViscosityBase<BlottnerViscosity<CoeffType>,CoeffType>
   {
   public:
 
@@ -50,32 +51,36 @@ namespace Antioch
 
     BlottnerViscosity( const std::vector<CoeffType>& coeffs );
 
-    ~BlottnerViscosity();
+    virtual ~BlottnerViscosity(){};
 
-    template <typename StateType>
-    StateType operator()( const StateType& T ) const;
-    
     void reset_coeffs( const CoeffType a, const CoeffType b, const CoeffType c );
-    void reset_coeffs( const std::vector<CoeffType> coeffs );
 
-    //! Formatted print, by default to \p std::cout
-    void print(std::ostream& os = std::cout) const;
-
-    //! Formatted print.
-    friend std::ostream& operator<<(std::ostream& os, const BlottnerViscosity& mu)
-    {
-      mu.print(os);
-      return os;
-    }
+    //! Friend base class so we can make implementation protected
+    friend class SpeciesViscosityBase<BlottnerViscosity<CoeffType>,CoeffType>;
 
   protected:
+
+    template <typename StateType>
+    StateType op_impl( const StateType& T ) const;
+
+    void reset_coeffs_impl( const std::vector<CoeffType> coeffs );
+
+    void print_impl(std::ostream& os) const;
+
+    //! No extrapolation needed
+    /*!
+     * Implementation needed for the interface, but we just throw an error
+     * is this is called since it's not defined for BlottnerViscosity.
+     */
+    template <typename StateType>
+    void extrapolate_max_temp_impl(const StateType& Tmax);
 
     CoeffType _a;
     CoeffType _b;
     CoeffType _c;
-    
+
   private:
-    
+
     BlottnerViscosity();
 
   };
@@ -84,14 +89,16 @@ namespace Antioch
   BlottnerViscosity<CoeffType>::BlottnerViscosity(const CoeffType a,
 						  const CoeffType b,
 						  const CoeffType c)
-    : _a(a), _b(b), _c(c)
+    : SpeciesViscosityBase<BlottnerViscosity<CoeffType>,CoeffType>(),
+    _a(a), _b(b), _c(c)
   {
     return;
   }
 
   template<typename CoeffType>
   BlottnerViscosity<CoeffType>::BlottnerViscosity( const std::vector<CoeffType>& coeffs )
-    : _a(-1.0), _b(-1.0), _c(-1.0)
+    : SpeciesViscosityBase<BlottnerViscosity<CoeffType>,CoeffType>(),
+    _a(-1.0), _b(-1.0), _c(-1.0)
   {
     antioch_assert_equal_to( coeffs.size(), 3);
     _a = coeffs[0];
@@ -101,13 +108,7 @@ namespace Antioch
   }
 
   template<typename CoeffType>
-  BlottnerViscosity<CoeffType>::~BlottnerViscosity()
-  {
-    return;
-  }
-
-  template<typename CoeffType>
-  void BlottnerViscosity<CoeffType>::print(std::ostream& os) const
+  void BlottnerViscosity<CoeffType>::print_impl(std::ostream& os) const
   {
     os << 0.1 << "*exp(" << _a << "*(logT)^2 + " << _b << "*logT + " << _c << ")" << std::endl;
 
@@ -118,7 +119,7 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType BlottnerViscosity<CoeffType>::operator()( const StateType& T ) const
+  StateType BlottnerViscosity<CoeffType>::op_impl( const StateType& T ) const
   {
     using std::log;
     using std::exp;
@@ -131,8 +132,8 @@ namespace Antioch
   template<typename CoeffType>
   inline
   void BlottnerViscosity<CoeffType>::reset_coeffs( const CoeffType a,
-						   const CoeffType b,
-						   const CoeffType c )
+                                                   const CoeffType b,
+                                                   const CoeffType c )
   {
     _a = a;
     _b = b;
@@ -142,18 +143,21 @@ namespace Antioch
 
   template<typename CoeffType>
   inline
-  void BlottnerViscosity<CoeffType>::reset_coeffs( const std::vector<CoeffType> coeffs )
+  void BlottnerViscosity<CoeffType>::reset_coeffs_impl( const std::vector<CoeffType> coeffs )
   {
     antioch_assert_equal_to(coeffs.size(), 3);
-    _a = coeffs[0];
-    _b = coeffs[1];
-    _c = coeffs[2];
-    return;
+    this->reset_coeffs( coeffs[0], coeffs[1], coeffs[2] );
+  }
+
+  template<typename CoeffType>
+  template <typename StateType>
+  inline
+  void BlottnerViscosity<CoeffType>::extrapolate_max_temp_impl(const StateType & /*Tmax*/)
+  {
+    antioch_msg_error("Extrapolation not well defined for BlottnerViscosity!");
+    antioch_error();
   }
 
 } // end namespace Antioch
-
-#include "antioch/blottner_viscosity_utils_decl.h"
-#include "antioch/blottner_viscosity_utils.h"
 
 #endif //ANTIOCH_BLOTTNER_VISCOSITY_H
