@@ -184,25 +184,25 @@ namespace Antioch{
       {
       case(KineticsModel::CONSTANT):
         {
-          return (static_cast<const ConstantRate<CoeffType>*>(this))->rate(conditions.T());
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::HERCOURT_ESSEN):
         {
-          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate(conditions.T());
+          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::BERTHELOT):
         {
-          return (static_cast<const BerthelotRate<CoeffType>*>(this))->rate(conditions.T());
+          return (static_cast<const BerthelotRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
       case(KineticsModel::ARRHENIUS):
         {
-          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate(conditions.T());
+          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate(conditions);
         }
         break;
 
@@ -261,25 +261,25 @@ namespace Antioch{
       {
       case(KineticsModel::CONSTANT):
         {
-          return (static_cast<const ConstantRate<CoeffType>*>(this))->derivative(conditions.T());
+          return (static_cast<const ConstantRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::HERCOURT_ESSEN):
         {
-          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->derivative(conditions.T());
+          return (static_cast<const HercourtEssenRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::BERTHELOT):
         {
-          return (static_cast<const BerthelotRate<CoeffType>*>(this))->derivative(conditions.T());
+          return (static_cast<const BerthelotRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
       case(KineticsModel::ARRHENIUS):
         {
-          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->derivative(conditions.T());
+          return (static_cast<const ArrheniusRate<CoeffType>*>(this))->derivative(conditions);
         }
         break;
 
@@ -339,25 +339,25 @@ namespace Antioch{
       {
       case(KineticsModel::CONSTANT):
         {
-          (static_cast<const ConstantRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
+          (static_cast<const ConstantRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::HERCOURT_ESSEN):
         {
-          (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
+          (static_cast<const HercourtEssenRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::BERTHELOT):
         {
-          (static_cast<const BerthelotRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
+          (static_cast<const BerthelotRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
       case(KineticsModel::ARRHENIUS):
         {
-          (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate_and_derivative(conditions.T(),rate,drate_dT);
+          (static_cast<const ArrheniusRate<CoeffType>*>(this))->rate_and_derivative(conditions,rate,drate_dT);
         }
         break;
 
