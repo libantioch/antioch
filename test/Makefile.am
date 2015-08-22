@@ -1,6 +1,7 @@
 EXTRA_DIST = input_files
 
 check_PROGRAMS  =
+check_PROGRAMS += standard_unit_tests
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
 check_PROGRAMS += nasa_evaluator_unit
@@ -86,12 +87,20 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/thermal_conduction/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
+AM_CPPFLAGS += -I$(top_srcdir)/test/standard_unit
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
 
 AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
 LIBS = $(antioch_optional_test_LIBS)
 
 LDADD = $(top_builddir)/src/libantioch.la
+
+pkginclude_HEADERS =
+
+standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C \
+                              standard_unit/standard_unit_tests.C
+
+pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
 
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
@@ -170,6 +179,7 @@ stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
 
 #Define tests to actually be run
 TESTS  =
+TESTS += standard_unit_tests
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
 TESTS += nasa_evaluator_unit.sh
