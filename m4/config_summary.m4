@@ -32,6 +32,16 @@ echo Revision id................... : $BUILD_VERSION
 echo
 echo Testing Options:
 echo '  'Number of tuples............ : $n_tuples
+if test "x$HAVE_CPPUNIT" = "x1"; then
+  echo '  'CPPUnit..................... : yes
+  echo '    'CPPUNIT_VERSION........... : $CPPUNIT_VERSION
+  echo '    'CPPUNIT_CPPFLAGS.......... : $CPPUNIT_CPPFLAGS
+  echo '    'CPPUNIT_LIBS.............. : $CPPUNIT_LIBS
+else
+  echo '  'CPPUnit..................... : no
+fi
+echo
+echo Optional Libraries:
 if test "x$HAVE_EIGEN" = "x1"; then
   echo '  'Eigen....................... : yes
 else
