@@ -97,7 +97,7 @@ LDADD = $(top_builddir)/src/libantioch.la
 pkginclude_HEADERS =
 
 standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
-                              standard_unit/arrhenius_rate_vector_test.C \
+                              standard_unit/arrhenius_rate_valarray_test.C \
                               standard_unit/standard_unit_tests.C
 
 pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
