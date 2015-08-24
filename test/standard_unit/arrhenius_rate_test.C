@@ -31,17 +31,17 @@
 #include <limits>
 
 // Antioch
-#include "antioch/arrhenius_rate.h"
 #include "antioch/physical_constants.h"
 #include "antioch/units.h"
 
 // Base class
-#include "reaction_rate_test_base.h"
+#include "arrhenius_rate_test_helper.h"
 
 using namespace Antioch;
 
 template<typename Scalar>
-class ArrheniusRateBaseTest : public ReactionRateBaseTest<ArrheniusRate<Scalar>,Scalar>
+class ArrheniusRateTest : public ArrheniusRateTestHelper<Scalar>,
+                          public ReactionRateBaseTest<Antioch::ArrheniusRate<Scalar>,Scalar>
 {
 public:
   void setUp()
@@ -129,38 +129,21 @@ public:
 
 protected:
 
-  Scalar _Cf, _Ea, _R;
-
   ArrheniusRate<Scalar>* _rate;
-
-  void reset_params( Scalar Cf, Scalar Ea )
-  {
-    _Cf = Cf;
-    _Ea = Ea;
-  }
-
-  void reset_params( Scalar Cf, Scalar Ea, Scalar R )
-  {
-    _Cf = Cf;
-    _Ea = Ea;
-    _R = R;
-  }
 
   virtual Scalar exact_rate( Scalar T )
   {
-    using std::exp;
-    return _Cf*exp(-_Ea/(_R*T));
+    return this->value(T);
   }
 
   virtual Scalar exact_deriv( Scalar T )
   {
-    using std::exp;
-    return _Ea/(_R*T*T)*_Cf *exp(-_Ea/(_R*T));
+    return this->deriv(T);
   }
 
 };
 
-class ArrheniusRateFloatTest : public ArrheniusRateBaseTest<float>
+class ArrheniusRateFloatTest : public ArrheniusRateTest<float>
 {
 public:
   CPPUNIT_TEST_SUITE( ArrheniusRateFloatTest );
@@ -173,7 +156,7 @@ public:
   CPPUNIT_TEST_SUITE_END();
 };
 
-class ArrheniusRateDoubleTest : public ArrheniusRateBaseTest<double>
+class ArrheniusRateDoubleTest : public ArrheniusRateTest<double>
 {
 public:
   CPPUNIT_TEST_SUITE( ArrheniusRateDoubleTest );
@@ -186,7 +169,7 @@ public:
   CPPUNIT_TEST_SUITE_END();
 };
 
-class ArrheniusRateLongDoubleTest : public ArrheniusRateBaseTest<long double>
+class ArrheniusRateLongDoubleTest : public ArrheniusRateTest<long double>
 {
 public:
   CPPUNIT_TEST_SUITE( ArrheniusRateLongDoubleTest );

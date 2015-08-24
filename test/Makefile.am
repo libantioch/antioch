@@ -100,6 +100,7 @@ standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C \
                               standard_unit/standard_unit_tests.C
 
 pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
+pkginclude_HEADERS += standard_unit/arrhenius_rate_test_helper.h
 
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
