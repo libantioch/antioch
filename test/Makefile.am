@@ -2,6 +2,7 @@ EXTRA_DIST = input_files
 
 check_PROGRAMS  =
 check_PROGRAMS += standard_unit_tests
+check_PROGRAMS += eigen_unit_tests
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
 check_PROGRAMS += nasa_evaluator_unit
@@ -100,6 +101,9 @@ standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
                               standard_unit/arrhenius_rate_valarray_test.C \
                               standard_unit/standard_unit_tests.C
 
+eigen_unit_tests_SOURCES = eigen_unit/arrhenius_rate_eigen_test.C \
+                           eigen_unit/eigen_unit_tests.C
+
 pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
 pkginclude_HEADERS += standard_unit/arrhenius_rate_test_helper.h
 
@@ -180,6 +184,7 @@ stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
 #Define tests to actually be run
 TESTS  =
 TESTS += standard_unit_tests
+TESTS += eigen_unit_tests
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
 TESTS += nasa_evaluator_unit.sh
