@@ -23,6 +23,9 @@
 //
 //-----------------------------------------------------------------------el-
 
+#ifndef ANTIOCH_REACTION_RATE_TEST_BASE_H
+#define ANTIOCH_REACTION_RATE_TEST_BASE_H
+
 #include "antioch_config.h"
 
 #ifdef ANTIOCH_HAVE_CPPUNIT
@@ -93,3 +96,5 @@ protected:
 };
 
 #endif // ANTIOCH_HAVE_CPPUNIT
+
+#endif // ANTIOCH_REACTION_RATE_TEST_BASE_H

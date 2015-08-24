@@ -23,6 +23,9 @@
 //
 //-----------------------------------------------------------------------el-
 
+#ifndef ANTIOCH_ARRHENIUS_RATE_TEST_HELPER_H
+#define ANTIOCH_ARRHENIUS_RATE_TEST_HELPER_H
+
 #include "antioch_config.h"
 
 #ifdef ANTIOCH_HAVE_CPPUNIT
@@ -67,3 +70,5 @@ protected:
 };
 
 #endif // ANTIOCH_HAVE_CPPUNIT
+
+#endif // ANTIOCH_ARRHENIUS_RATE_TEST_HELPER_H
