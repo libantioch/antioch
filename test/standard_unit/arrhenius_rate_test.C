@@ -36,6 +36,7 @@
 
 // Base class
 #include "arrhenius_rate_test_helper.h"
+#include "reaction_rate_test_base.h"
 
 using namespace Antioch;
 

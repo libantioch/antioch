@@ -33,9 +33,6 @@
 // Antioch
 #include "antioch/arrhenius_rate.h"
 
-// Base class
-#include "reaction_rate_test_base.h"
-
 template <typename Scalar>
 class ArrheniusRateTestHelper
 {
