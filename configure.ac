@@ -145,7 +145,7 @@ AS_IF([test "x$enable_cppunit" != "xno"], [
 
 if (test x$HAVE_CPPUNIT = x1); then
   antioch_optional_test_INCLUDES="$CPPUNIT_CPPFLAGS $antioch_optional_test_INCLUDES"
-  antioch_optional_test_LIBS="$CPPUNIT_LIBS $antioch_optional_test_LIBS"
+  antioch_optional_test_LDFLAGS="$CPPUNIT_LIBS $antioch_optional_test_LDFLAGS"
 fi
 AM_CONDITIONAL(ANTIOCH_ENABLE_CPPUNIT, test x$enablecppunit = xyes)
 
