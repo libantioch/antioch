@@ -956,11 +956,12 @@ namespace Antioch
             >> temps[0]
             >> temps[2]
             >> temps[1];
-        for(unsigned int i = 0; i < 14; i++)
+        coeffs.resize(14,0);
+        for(unsigned int i = 7; i < 21; i++)
           {
             NumericType a;
             tmp >> a;
-            coeffs.push_back(a);
+            coeffs[i%14] = a;
           }
 
         // If we are still good, we have a valid set of thermodynamic
