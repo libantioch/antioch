@@ -1,3 +1,6 @@
+Version 0.3.1
+* Critical Bugfix for NASA7 Thermo/ChemKin Parser
+
 Version 0.3.0
 * Introduced KineticsConditions object.
   - Beginning to encapsulate quantities necessary for
