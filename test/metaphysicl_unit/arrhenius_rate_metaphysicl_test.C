@@ -39,67 +39,71 @@
 #include "arrhenius_rate_vector_test_base.h"
 #include "antioch/metaphysicl_utils.h"
 
-template <typename Scalar>
-class ArrheniusRateMetaPhysicLTest : public ArrheniusRateVectorTestBase<MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> >
+namespace AntiochTesting
 {
-public:
-
-  virtual void setUp()
+  template <typename Scalar>
+  class ArrheniusRateMetaPhysicLTest : public ArrheniusRateVectorTestBase<MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> >
   {
-    this->init();
-    this->_example = new MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float>(0);
-  }
+  public:
 
-  virtual void tearDown()
+    virtual void setUp()
+    {
+      this->init();
+      this->_example = new MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float>(0);
+    }
+
+    virtual void tearDown()
+    {
+      this->clear();
+      delete this->_example;
+    }
+
+  };
+
+  class ArrheniusRateMetaPhysicLFloatTest : public ArrheniusRateMetaPhysicLTest<float>
   {
-    this->clear();
-    delete this->_example;
-  }
+  public:
 
-};
+    CPPUNIT_TEST_SUITE( ArrheniusRateMetaPhysicLFloatTest );
 
-class ArrheniusRateMetaPhysicLFloatTest : public ArrheniusRateMetaPhysicLTest<float>
-{
-public:
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
 
-  CPPUNIT_TEST_SUITE( ArrheniusRateMetaPhysicLFloatTest );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
+  class ArrheniusRateMetaPhysicLDoubleTest : public ArrheniusRateMetaPhysicLTest<double>
+  {
+  public:
 
-  CPPUNIT_TEST_SUITE_END();
-};
+    CPPUNIT_TEST_SUITE( ArrheniusRateMetaPhysicLDoubleTest );
 
-class ArrheniusRateMetaPhysicLDoubleTest : public ArrheniusRateMetaPhysicLTest<double>
-{
-public:
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
 
-  CPPUNIT_TEST_SUITE( ArrheniusRateMetaPhysicLDoubleTest );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
+  class ArrheniusRateMetaPhysicLLongDoubleTest : public ArrheniusRateMetaPhysicLTest<long double>
+  {
+  public:
 
-  CPPUNIT_TEST_SUITE_END();
-};
+    CPPUNIT_TEST_SUITE( ArrheniusRateMetaPhysicLLongDoubleTest );
 
-class ArrheniusRateMetaPhysicLLongDoubleTest : public ArrheniusRateMetaPhysicLTest<long double>
-{
-public:
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
 
-  CPPUNIT_TEST_SUITE( ArrheniusRateMetaPhysicLLongDoubleTest );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateMetaPhysicLFloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateMetaPhysicLDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateMetaPhysicLLongDoubleTest );
 
-  CPPUNIT_TEST_SUITE_END();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateMetaPhysicLFloatTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateMetaPhysicLDoubleTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateMetaPhysicLLongDoubleTest );
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_METAPHYSICL
 

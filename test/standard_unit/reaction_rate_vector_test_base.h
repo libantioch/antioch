@@ -33,106 +33,110 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestCase.h>
 
-template <typename ReactionRate, typename PairScalars>
-class ReactionRateVectorTestBase : public CppUnit::TestCase
+namespace AntiochTesting
 {
-public:
-
-  void test_rate( const ReactionRate& reaction_rate,
-                  const PairScalars& T,
-                  typename Antioch::value_type<PairScalars>::type /*Scalar*/ tol )
+  template <typename ReactionRate, typename PairScalars>
+  class ReactionRateVectorTestBase : public CppUnit::TestCase
   {
-    const PairScalars rate = reaction_rate(T);
-    const PairScalars exact_rate = this->exact_rate(T);
+  public:
 
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple],
-                                      exact_rate[0],
-                                      tol );
+    void test_rate( const ReactionRate& reaction_rate,
+                    const PairScalars& T,
+                    typename Antioch::value_type<PairScalars>::type /*Scalar*/ tol )
+    {
+      const PairScalars rate = reaction_rate(T);
+      const PairScalars exact_rate = this->exact_rate(T);
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple+1],
-                                      exact_rate[1],
-                                      tol );
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple],
+                                        exact_rate[0],
+                                        tol );
 
-      }
-  }
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple+1],
+                                        exact_rate[1],
+                                        tol );
 
-  void test_deriv( const ReactionRate& reaction_rate,
-                  const PairScalars& T,
-                  typename Antioch::value_type<PairScalars>::type /*Scalar*/ tol )
-  {
-    const PairScalars deriv = reaction_rate.derivative(T);
-    const PairScalars exact_deriv = this->exact_deriv(T);
+        }
+    }
 
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple],
-                                      exact_deriv[0],
-                                      tol );
+    void test_deriv( const ReactionRate& reaction_rate,
+                     const PairScalars& T,
+                     typename Antioch::value_type<PairScalars>::type /*Scalar*/ tol )
+    {
+      const PairScalars deriv = reaction_rate.derivative(T);
+      const PairScalars exact_deriv = this->exact_deriv(T);
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple+1],
-                                      exact_deriv[1],
-                                      tol );
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple],
+                                        exact_deriv[0],
+                                        tol );
 
-      }
-  }
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple+1],
+                                        exact_deriv[1],
+                                        tol );
 
-  void test_rate_and_deriv( const ReactionRate& reaction_rate,
-                            const PairScalars& T,
-                            typename Antioch::value_type<PairScalars>::type /*Scalar*/ tol )
-  {
-    // Init using T as the "example"
-    PairScalars rate = T;
-    PairScalars deriv = T;
+        }
+    }
 
-    reaction_rate.rate_and_derivative(T,rate,deriv);
+    void test_rate_and_deriv( const ReactionRate& reaction_rate,
+                              const PairScalars& T,
+                              typename Antioch::value_type<PairScalars>::type /*Scalar*/ tol )
+    {
+      // Init using T as the "example"
+      PairScalars rate = T;
+      PairScalars deriv = T;
 
-    const PairScalars exact_rate = this->exact_rate(T);
-    const PairScalars exact_deriv = this->exact_deriv(T);
+      reaction_rate.rate_and_derivative(T,rate,deriv);
 
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple],
-                                      exact_rate[0],
-                                      tol );
+      const PairScalars exact_rate = this->exact_rate(T);
+      const PairScalars exact_deriv = this->exact_deriv(T);
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple+1],
-                                      exact_rate[1],
-                                      tol );
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple],
+                                        exact_rate[0],
+                                        tol );
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple],
-                                      exact_deriv[0],
-                                      tol );
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate[2*tuple+1],
+                                        exact_rate[1],
+                                        tol );
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple+1],
-                                      exact_deriv[1],
-                                      tol );
-      }
-  }
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple],
+                                        exact_deriv[0],
+                                        tol );
+
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv[2*tuple+1],
+                                        exact_deriv[1],
+                                        tol );
+        }
+    }
 
 
-protected:
+  protected:
 
-  // Should be new'd/deleted in subclasses for each PairScalar type
-  PairScalars* _example;
+    // Should be new'd/deleted in subclasses for each PairScalar type
+    PairScalars* _example;
 
-  PairScalars setup_T( const PairScalars& example )
-  {
-    // Construct from example to avoid resizing issues
-    PairScalars T = example;
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        T[2*tuple]   = 1500.1;
-        T[2*tuple+1] = 1600.1;
-      }
-    return T;
-  }
+    PairScalars setup_T( const PairScalars& example )
+    {
+      // Construct from example to avoid resizing issues
+      PairScalars T = example;
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          T[2*tuple]   = 1500.1;
+          T[2*tuple+1] = 1600.1;
+        }
+      return T;
+    }
 
-  virtual PairScalars exact_rate( PairScalars T ) =0;
-  virtual PairScalars exact_deriv( PairScalars T ) =0;
+    virtual PairScalars exact_rate( PairScalars T ) =0;
+    virtual PairScalars exact_deriv( PairScalars T ) =0;
 
-};
+  };
+
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_CPPUNIT
 

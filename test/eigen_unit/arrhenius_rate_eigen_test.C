@@ -39,67 +39,71 @@
 #include "arrhenius_rate_vector_test_base.h"
 #include "antioch/eigen_utils.h"
 
-template <typename Scalar>
-class ArrheniusRateEigenTest : public ArrheniusRateVectorTestBase<Eigen::Array<Scalar,2*ANTIOCH_N_TUPLES,1> >
+namespace AntiochTesting
 {
-public:
-
-  virtual void setUp()
+  template <typename Scalar>
+  class ArrheniusRateEigenTest : public ArrheniusRateVectorTestBase<Eigen::Array<Scalar,2*ANTIOCH_N_TUPLES,1> >
   {
-    this->init();
-    this->_example = new Eigen::Array<Scalar, 2*ANTIOCH_N_TUPLES, 1>();
-  }
+  public:
 
-  virtual void tearDown()
+    virtual void setUp()
+    {
+      this->init();
+      this->_example = new Eigen::Array<Scalar, 2*ANTIOCH_N_TUPLES, 1>();
+    }
+
+    virtual void tearDown()
+    {
+      this->clear();
+      delete this->_example;
+    }
+
+  };
+
+  class ArrheniusRateEigenFloatTest : public ArrheniusRateEigenTest<float>
   {
-    this->clear();
-    delete this->_example;
-  }
+  public:
 
-};
+    CPPUNIT_TEST_SUITE( ArrheniusRateEigenFloatTest );
 
-class ArrheniusRateEigenFloatTest : public ArrheniusRateEigenTest<float>
-{
-public:
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
 
-  CPPUNIT_TEST_SUITE( ArrheniusRateEigenFloatTest );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
+  class ArrheniusRateEigenDoubleTest : public ArrheniusRateEigenTest<double>
+  {
+  public:
 
-  CPPUNIT_TEST_SUITE_END();
-};
+    CPPUNIT_TEST_SUITE( ArrheniusRateEigenDoubleTest );
 
-class ArrheniusRateEigenDoubleTest : public ArrheniusRateEigenTest<double>
-{
-public:
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
 
-  CPPUNIT_TEST_SUITE( ArrheniusRateEigenDoubleTest );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
+  class ArrheniusRateEigenLongDoubleTest : public ArrheniusRateEigenTest<long double>
+  {
+  public:
 
-  CPPUNIT_TEST_SUITE_END();
-};
+    CPPUNIT_TEST_SUITE( ArrheniusRateEigenLongDoubleTest );
 
-class ArrheniusRateEigenLongDoubleTest : public ArrheniusRateEigenTest<long double>
-{
-public:
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
 
-  CPPUNIT_TEST_SUITE( ArrheniusRateEigenLongDoubleTest );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateEigenFloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateEigenDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateEigenLongDoubleTest );
 
-  CPPUNIT_TEST_SUITE_END();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateEigenFloatTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateEigenDoubleTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateEigenLongDoubleTest );
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_EIGEN
 

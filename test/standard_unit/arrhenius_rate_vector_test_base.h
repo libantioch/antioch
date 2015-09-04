@@ -41,82 +41,86 @@
 #include "arrhenius_rate_test_helper.h"
 #include "reaction_rate_vector_test_base.h"
 
-template<typename PairScalars>
-class ArrheniusRateVectorTestBase : public ArrheniusRateTestHelper</*Scalar*/typename Antioch::value_type<PairScalars>::type>,
-                                    public ReactionRateVectorTestBase<Antioch::ArrheniusRate</*Scalar*/typename Antioch::value_type<PairScalars>::type>,PairScalars>
+namespace AntiochTesting
 {
-public:
-  virtual void init()
+  template<typename PairScalars>
+  class ArrheniusRateVectorTestBase : public ArrheniusRateTestHelper</*Scalar*/typename Antioch::value_type<PairScalars>::type>,
+                                      public ReactionRateVectorTestBase<Antioch::ArrheniusRate</*Scalar*/typename Antioch::value_type<PairScalars>::type>,PairScalars>
   {
-    typedef typename Antioch::value_type<PairScalars>::type Scalar;
+  public:
+    virtual void init()
+    {
+      typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
-    Scalar Cf = 1.4L;
-    Scalar Ea = 5.0L;
-    Scalar R = 1.0L; // Ea in K
+      Scalar Cf = 1.4L;
+      Scalar Ea = 5.0L;
+      Scalar R = 1.0L; // Ea in K
 
-    this->reset_params(Cf,Ea,R);
-    _rate = new Antioch::ArrheniusRate<Scalar>(Cf,Ea,R);
-  }
+      this->reset_params(Cf,Ea,R);
+      _rate = new Antioch::ArrheniusRate<Scalar>(Cf,Ea,R);
+    }
 
-  virtual void clear()
-  {
-    delete _rate;
-  }
+    virtual void clear()
+    {
+      delete _rate;
+    }
 
-  void test_standard_rate()
-  {
-    typedef typename Antioch::value_type<PairScalars>::type Scalar;
+    void test_standard_rate()
+    {
+      typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-    PairScalars T = this->setup_T(*(this->_example));
-    this->test_rate( *_rate, T, tol );
-  }
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+      PairScalars T = this->setup_T(*(this->_example));
+      this->test_rate( *_rate, T, tol );
+    }
 
-  void test_standard_deriv()
-  {
-    typedef typename Antioch::value_type<PairScalars>::type Scalar;
+    void test_standard_deriv()
+    {
+      typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-    PairScalars T = this->setup_T(*(this->_example));
-    this->test_deriv( *_rate, T, tol );
-  }
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+      PairScalars T = this->setup_T(*(this->_example));
+      this->test_deriv( *_rate, T, tol );
+    }
 
-  void test_standard_rate_and_deriv()
-  {
-    typedef typename Antioch::value_type<PairScalars>::type Scalar;
+    void test_standard_rate_and_deriv()
+    {
+      typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-    PairScalars T = this->setup_T(*(this->_example));
-    this->test_rate_and_deriv( *_rate, T, tol );
-  }
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+      PairScalars T = this->setup_T(*(this->_example));
+      this->test_rate_and_deriv( *_rate, T, tol );
+    }
 
-protected:
+  protected:
 
-  Antioch::ArrheniusRate<typename Antioch::value_type<PairScalars>::type>* _rate;
+    Antioch::ArrheniusRate<typename Antioch::value_type<PairScalars>::type>* _rate;
 
-  virtual PairScalars exact_rate( PairScalars T )
-  {
-    PairScalars e_rate = *(this->_example);
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        e_rate[2*tuple]   =  this->value(T[2*tuple]);
-        e_rate[2*tuple+1] =  this->value(T[2*tuple+1]);
-      }
-    return e_rate;
-  }
+    virtual PairScalars exact_rate( PairScalars T )
+    {
+      PairScalars e_rate = *(this->_example);
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          e_rate[2*tuple]   =  this->value(T[2*tuple]);
+          e_rate[2*tuple+1] =  this->value(T[2*tuple+1]);
+        }
+      return e_rate;
+    }
 
-  virtual PairScalars exact_deriv( PairScalars T )
-  {
-    PairScalars e_deriv = *(this->_example);
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        e_deriv[2*tuple]   =  this->deriv(T[2*tuple]);
-        e_deriv[2*tuple+1] =  this->deriv(T[2*tuple+1]);
-      }
-    return e_deriv;
-  }
+    virtual PairScalars exact_deriv( PairScalars T )
+    {
+      PairScalars e_deriv = *(this->_example);
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          e_deriv[2*tuple]   =  this->deriv(T[2*tuple]);
+          e_deriv[2*tuple+1] =  this->deriv(T[2*tuple+1]);
+        }
+      return e_deriv;
+    }
 
-};
+  };
+
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_CPPUNIT
 

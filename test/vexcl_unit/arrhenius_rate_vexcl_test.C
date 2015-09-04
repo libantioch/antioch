@@ -39,75 +39,79 @@
 #include "arrhenius_rate_vector_test_base.h"
 #include "antioch/vexcl_utils.h"
 
-class ArrheniusRateVexCLFloatTest : public ArrheniusRateVectorTestBase<vex::vector<float> >
+namespace AntiochTesting
 {
-public:
-
-  CPPUNIT_TEST_SUITE( ArrheniusRateVexCLFloatTest );
-
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
-
-  CPPUNIT_TEST_SUITE_END();
-
-private:
-
-  vex::Context* _ctx;
-
-public:
-
-  virtual void setUp()
+  class ArrheniusRateVexCLFloatTest : public ArrheniusRateVectorTestBase<vex::vector<float> >
   {
-    this->init();
-    _ctx = new vex::Context(vex::Filter::All);
-    this->_example = new vex::vector<float>(*_ctx, 2*ANTIOCH_N_TUPLES);
-  }
+  public:
 
-  virtual void tearDown()
-  {
-    this->clear();
-    delete _ctx;
-    delete this->_example;
-  }
+    CPPUNIT_TEST_SUITE( ArrheniusRateVexCLFloatTest );
 
-};
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
 
-class ArrheniusRateVexCLDoubleTest : public ArrheniusRateVectorTestBase<vex::vector<double> >
-{
-public:
-
-  CPPUNIT_TEST_SUITE( ArrheniusRateVexCLDoubleTest );
-
-  CPPUNIT_TEST( test_standard_rate );
-  CPPUNIT_TEST( test_standard_deriv );
-  CPPUNIT_TEST( test_standard_rate_and_deriv );
-
-  CPPUNIT_TEST_SUITE_END();
+    CPPUNIT_TEST_SUITE_END();
 
   private:
 
-  vex::Context* _ctx;
+    vex::Context* _ctx;
 
-public:
+  public:
 
-  virtual void setUp()
+    virtual void setUp()
+    {
+      this->init();
+      _ctx = new vex::Context(vex::Filter::All);
+      this->_example = new vex::vector<float>(*_ctx, 2*ANTIOCH_N_TUPLES);
+    }
+
+    virtual void tearDown()
+    {
+      this->clear();
+      delete _ctx;
+      delete this->_example;
+    }
+
+  };
+
+  class ArrheniusRateVexCLDoubleTest : public ArrheniusRateVectorTestBase<vex::vector<double> >
   {
-    this->init();
-    _ctx = new vex::Context(vex::Filter::DoublePrecision);
-    this->_example = new vex::vector<double>(*_ctx, 2*ANTIOCH_N_TUPLES);
-  }
+  public:
 
-  virtual void tearDown()
-  {
-    this->clear();
-    delete _ctx;
-    delete this->_example;
-  }
-};
+    CPPUNIT_TEST_SUITE( ArrheniusRateVexCLDoubleTest );
 
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateVexCLFloatTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateVexCLDoubleTest );
+    CPPUNIT_TEST( test_standard_rate );
+    CPPUNIT_TEST( test_standard_deriv );
+    CPPUNIT_TEST( test_standard_rate_and_deriv );
+
+    CPPUNIT_TEST_SUITE_END();
+
+  private:
+
+    vex::Context* _ctx;
+
+  public:
+
+    virtual void setUp()
+    {
+      this->init();
+      _ctx = new vex::Context(vex::Filter::DoublePrecision);
+      this->_example = new vex::vector<double>(*_ctx, 2*ANTIOCH_N_TUPLES);
+    }
+
+    virtual void tearDown()
+    {
+      this->clear();
+      delete _ctx;
+      delete this->_example;
+    }
+  };
+
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateVexCLFloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( ArrheniusRateVexCLDoubleTest );
+
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_VEXCL
 

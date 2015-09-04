@@ -59,407 +59,411 @@
 // Base class
 #include "gsl_spliner_test_base.h"
 
-template<typename PairScalars>
-class GSLSplinerVecTest : public GSLSplinerTestBase<typename Antioch::value_type<PairScalars>::type>
+namespace AntiochTesting
 {
-public:
-
-  typedef typename Antioch::value_type<PairScalars>::type Scalar;
-
-  void init_vec_data()
+  template<typename PairScalars>
+  class GSLSplinerVecTest : public GSLSplinerTestBase<typename Antioch::value_type<PairScalars>::type>
   {
-    this->init_data();
-  }
+  public:
 
-  // Helper function
-  template<typename VecFunctionType, typename ScalarFunctionType>
-  void run_manually_inited_test( Scalar tol )
+    typedef typename Antioch::value_type<PairScalars>::type Scalar;
+
+    void init_vec_data()
+    {
+      this->init_data();
+    }
+
+    // Helper function
+    template<typename VecFunctionType, typename ScalarFunctionType>
+    void run_manually_inited_test( Scalar tol )
+    {
+      ScalarFunctionType exact_func;
+      exact_func.init(this->_x_min, this->_x_max);
+
+      this->fill_ref(this->_x_ref,this->_y_ref,this->_n_data, this->_x_min, this->_x_max, exact_func );
+
+      Antioch::GSLSpliner spline;
+      spline.spline_init(this->_x_ref, this->_y_ref);
+
+      VecFunctionType vec_exact_func;
+      vec_exact_func.init(this->_x_min, this->_x_max);
+
+      this->compare_values( tol, spline, vec_exact_func );
+    }
+
+    // Helper function
+    template<typename VecFunctionType, typename ScalarFunctionType>
+    void run_constructor_inited_test( Scalar tol )
+    {
+      ScalarFunctionType exact_func;
+      exact_func.init(this->_x_min, this->_x_max);
+
+      this->fill_ref(this->_x_ref,this->_y_ref,this->_n_data, this->_x_min, this->_x_max, exact_func );
+
+      Antioch::GSLSpliner spline(this->_x_ref, this->_y_ref);
+
+      VecFunctionType vec_exact_func;
+      vec_exact_func.init(this->_x_min, this->_x_max);
+
+      this->compare_values( tol, spline, vec_exact_func );
+    }
+
+    // Helper function
+    void compare_values( Scalar tol,
+                         Antioch::GSLSpliner& spline,
+                         GSLSplinerTestFunction<PairScalars>& exact_func)
+    {
+      // Construct from example to avoid resizing issues
+      PairScalars x = *(this->_example);
+
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          x[2*tuple]   = -3.5;
+          x[2*tuple+1] = 5.1;
+        }
+
+      const PairScalars gsl_value = spline.interpolated_value(x);
+
+      const PairScalars exact_value = exact_func(x);
+
+      for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+        {
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( gsl_value[2*tuple],
+                                        exact_value[2*tuple],
+                                        tol );
+        }
+    }
+
+    void test_manually_inited_spline_constant_func()
+    {
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+
+      this->run_manually_inited_test<ConstantTestFunction<PairScalars>,ConstantTestFunction<Scalar> >(tol);
+    }
+
+    void test_constructor_inited_spline_constant_func()
+    {
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+
+      this->run_constructor_inited_test<ConstantTestFunction<PairScalars>,ConstantTestFunction<Scalar> >(tol);
+    }
+
+    void test_manually_inited_spline_linear_func()
+    {
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
+
+      this->run_manually_inited_test<LinearTestFunction<PairScalars>,LinearTestFunction<Scalar> >(tol);
+    }
+
+    void test_constructor_inited_spline_linear_func()
+    {
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
+
+      this->run_constructor_inited_test<LinearTestFunction<PairScalars>,LinearTestFunction<Scalar> >(tol);
+    }
+
+    void test_manually_inited_spline_cubic_func()
+    {
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
+
+      this->run_manually_inited_test<CubicTestFunction<PairScalars>,CubicTestFunction<Scalar> >(tol);
+    }
+
+    void test_constructor_inited_spline_cubic_func()
+    {
+      const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
+
+      this->run_constructor_inited_test<CubicTestFunction<PairScalars>,CubicTestFunction<Scalar> >(tol);
+    }
+
+  protected:
+    // Should be new'd/deleted in subclasses for each PairScalar type
+    PairScalars* _example;
+  };
+
+  //----------------------------------------------------------------------
+  // valarray tests
+  //----------------------------------------------------------------------
+  template <typename Scalar>
+  class GslSplinerValarrayTest : public GSLSplinerVecTest<std::valarray<Scalar> >
   {
-    ScalarFunctionType exact_func;
-    exact_func.init(this->_x_min, this->_x_max);
+  public:
 
-    this->fill_ref(this->_x_ref,this->_y_ref,this->_n_data, this->_x_min, this->_x_max, exact_func );
+    virtual void setUp()
+    {
+      this->init_vec_data();
+      this->_example = new std::valarray<Scalar>(2*ANTIOCH_N_TUPLES);
+    }
 
-    Antioch::GSLSpliner spline;
-    spline.spline_init(this->_x_ref, this->_y_ref);
+    virtual void tearDown()
+    {
+      delete this->_example;
+    }
 
-    VecFunctionType vec_exact_func;
-    vec_exact_func.init(this->_x_min, this->_x_max);
+  };
 
-    this->compare_values( tol, spline, vec_exact_func );
-  }
-
-  // Helper function
-  template<typename VecFunctionType, typename ScalarFunctionType>
-  void run_constructor_inited_test( Scalar tol )
+  class GslSplinerValarrayFloatTest : public GslSplinerValarrayTest<float>
   {
-    ScalarFunctionType exact_func;
-    exact_func.init(this->_x_min, this->_x_max);
+    CPPUNIT_TEST_SUITE( GslSplinerValarrayFloatTest );
 
-    this->fill_ref(this->_x_ref,this->_y_ref,this->_n_data, this->_x_min, this->_x_max, exact_func );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-    Antioch::GSLSpliner spline(this->_x_ref, this->_y_ref);
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-    VecFunctionType vec_exact_func;
-    vec_exact_func.init(this->_x_min, this->_x_max);
-
-    this->compare_values( tol, spline, vec_exact_func );
-  }
-
-  // Helper function
-  void compare_values( Scalar tol,
-                       Antioch::GSLSpliner& spline,
-                       GSLSplinerTestFunction<PairScalars>& exact_func)
+  class GslSplinerValarrayDoubleTest : public GslSplinerValarrayTest<double>
   {
-    // Construct from example to avoid resizing issues
-    PairScalars x = *(this->_example);
+    CPPUNIT_TEST_SUITE( GslSplinerValarrayDoubleTest );
 
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        x[2*tuple]   = -3.5;
-        x[2*tuple+1] = 5.1;
-      }
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-    const PairScalars gsl_value = spline.interpolated_value(x);
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-    const PairScalars exact_value = exact_func(x);
-
-    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
-      {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( gsl_value[2*tuple],
-                                      exact_value[2*tuple],
-                                      tol );
-      }
-  }
-
-  void test_manually_inited_spline_constant_func()
+  class GslSplinerValarrayLongDoubleTest : public GslSplinerValarrayTest<long double>
   {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    CPPUNIT_TEST_SUITE( GslSplinerValarrayLongDoubleTest );
 
-    this->run_manually_inited_test<ConstantTestFunction<PairScalars>,ConstantTestFunction<Scalar> >(tol);
-  }
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  void test_constructor_inited_spline_constant_func()
-  {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-    this->run_constructor_inited_test<ConstantTestFunction<PairScalars>,ConstantTestFunction<Scalar> >(tol);
-  }
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerValarrayFloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerValarrayDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerValarrayLongDoubleTest );
 
-  void test_manually_inited_spline_linear_func()
-  {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
-
-    this->run_manually_inited_test<LinearTestFunction<PairScalars>,LinearTestFunction<Scalar> >(tol);
-  }
-
-  void test_constructor_inited_spline_linear_func()
-  {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
-
-    this->run_constructor_inited_test<LinearTestFunction<PairScalars>,LinearTestFunction<Scalar> >(tol);
-  }
-
-  void test_manually_inited_spline_cubic_func()
-  {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
-
-    this->run_manually_inited_test<CubicTestFunction<PairScalars>,CubicTestFunction<Scalar> >(tol);
-  }
-
-  void test_constructor_inited_spline_cubic_func()
-  {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
-
-    this->run_constructor_inited_test<CubicTestFunction<PairScalars>,CubicTestFunction<Scalar> >(tol);
-  }
-
-protected:
-  // Should be new'd/deleted in subclasses for each PairScalar type
-  PairScalars* _example;
-};
-
-//----------------------------------------------------------------------
-// valarray tests
-//----------------------------------------------------------------------
-template <typename Scalar>
-class GslSplinerValarrayTest : public GSLSplinerVecTest<std::valarray<Scalar> >
-{
-public:
-
-  virtual void setUp()
-  {
-    this->init_vec_data();
-    this->_example = new std::valarray<Scalar>(2*ANTIOCH_N_TUPLES);
-  }
-
-  virtual void tearDown()
-  {
-    delete this->_example;
-  }
-
-};
-
-class GslSplinerValarrayFloatTest : public GslSplinerValarrayTest<float>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerValarrayFloatTest );
-
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
-
-  CPPUNIT_TEST_SUITE_END();
-};
-
-class GslSplinerValarrayDoubleTest : public GslSplinerValarrayTest<double>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerValarrayDoubleTest );
-
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
-
-  CPPUNIT_TEST_SUITE_END();
-};
-
-class GslSplinerValarrayLongDoubleTest : public GslSplinerValarrayTest<long double>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerValarrayLongDoubleTest );
-
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
-
-  CPPUNIT_TEST_SUITE_END();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerValarrayFloatTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerValarrayDoubleTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerValarrayLongDoubleTest );
-
-//----------------------------------------------------------------------
-// Eigen tests
-//----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  // Eigen tests
+  //----------------------------------------------------------------------
 #ifdef ANTIOCH_HAVE_EIGEN
 
-template <typename Scalar>
-class GslSplinerEigenTest : public GSLSplinerVecTest<Eigen::Array<Scalar,2*ANTIOCH_N_TUPLES,1> >
-{
-public:
-  virtual void setUp()
+  template <typename Scalar>
+  class GslSplinerEigenTest : public GSLSplinerVecTest<Eigen::Array<Scalar,2*ANTIOCH_N_TUPLES,1> >
   {
-    this->init_vec_data();
-    this->_example = new Eigen::Array<Scalar, 2*ANTIOCH_N_TUPLES, 1>();
-  }
+  public:
+    virtual void setUp()
+    {
+      this->init_vec_data();
+      this->_example = new Eigen::Array<Scalar, 2*ANTIOCH_N_TUPLES, 1>();
+    }
 
-  virtual void tearDown()
+    virtual void tearDown()
+    {
+      delete this->_example;
+    }
+  };
+
+  class GslSplinerEigenFloatTest : public GslSplinerEigenTest<float>
   {
-    delete this->_example;
-  }
-};
+    CPPUNIT_TEST_SUITE( GslSplinerEigenFloatTest );
 
-class GslSplinerEigenFloatTest : public GslSplinerEigenTest<float>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerEigenFloatTest );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST_SUITE_END();
-};
+  class GslSplinerEigenDoubleTest : public GslSplinerEigenTest<double>
+  {
+    CPPUNIT_TEST_SUITE( GslSplinerEigenDoubleTest );
 
-class GslSplinerEigenDoubleTest : public GslSplinerEigenTest<double>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerEigenDoubleTest );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST_SUITE_END();
-};
+  class GslSplinerEigenLongDoubleTest : public GslSplinerEigenTest<long double>
+  {
+    CPPUNIT_TEST_SUITE( GslSplinerEigenLongDoubleTest );
 
-class GslSplinerEigenLongDoubleTest : public GslSplinerEigenTest<long double>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerEigenLongDoubleTest );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST_SUITE_END();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerEigenFloatTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerEigenDoubleTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerEigenLongDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerEigenFloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerEigenDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerEigenLongDoubleTest );
 
 #endif // ANTIOCH_HAVE_EIGEN
 
 
-//----------------------------------------------------------------------
-// MetaPhysicL tests
-//----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  // MetaPhysicL tests
+  //----------------------------------------------------------------------
 #ifdef ANTIOCH_HAVE_METAPHYSICL
 
-template <typename Scalar>
-class GslSplinerMetaPhysicLTest : public GSLSplinerVecTest<MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES,Scalar> >
-{
-public:
-  virtual void setUp()
+  template <typename Scalar>
+  class GslSplinerMetaPhysicLTest : public GSLSplinerVecTest<MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES,Scalar> >
   {
-    this->init_vec_data();
-    this->_example = new MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES,Scalar>(0);
-  }
+  public:
+    virtual void setUp()
+    {
+      this->init_vec_data();
+      this->_example = new MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES,Scalar>(0);
+    }
 
-  virtual void tearDown()
+    virtual void tearDown()
+    {
+      delete this->_example;
+    }
+  };
+
+  class GslSplinerMetaPhysicLFloatTest : public GslSplinerMetaPhysicLTest<float>
   {
-    delete this->_example;
-  }
-};
+    CPPUNIT_TEST_SUITE( GslSplinerMetaPhysicLFloatTest );
 
-class GslSplinerMetaPhysicLFloatTest : public GslSplinerMetaPhysicLTest<float>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerMetaPhysicLFloatTest );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST_SUITE_END();
-};
+  class GslSplinerMetaPhysicLDoubleTest : public GslSplinerMetaPhysicLTest<double>
+  {
+    CPPUNIT_TEST_SUITE( GslSplinerMetaPhysicLDoubleTest );
 
-class GslSplinerMetaPhysicLDoubleTest : public GslSplinerMetaPhysicLTest<double>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerMetaPhysicLDoubleTest );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST_SUITE_END();
-};
+  class GslSplinerMetaPhysicLLongDoubleTest : public GslSplinerMetaPhysicLTest<long double>
+  {
+    CPPUNIT_TEST_SUITE( GslSplinerMetaPhysicLLongDoubleTest );
 
-class GslSplinerMetaPhysicLLongDoubleTest : public GslSplinerMetaPhysicLTest<long double>
-{
-  CPPUNIT_TEST_SUITE( GslSplinerMetaPhysicLLongDoubleTest );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+    CPPUNIT_TEST_SUITE_END();
+  };
 
-  CPPUNIT_TEST_SUITE_END();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerMetaPhysicLFloatTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerMetaPhysicLDoubleTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerMetaPhysicLLongDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerMetaPhysicLFloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerMetaPhysicLDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerMetaPhysicLLongDoubleTest );
 
 #endif // ANTIOCH_HAVE_METAPHYSICL
 
 
-//----------------------------------------------------------------------
-// VexCL tests
-//----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  // VexCL tests
+  //----------------------------------------------------------------------
 #ifdef ANTIOCH_HAVE_VEXCL
 
-class GslSplinerVexCLFloatTest : public GSLSplinerVecTest<vex::vector<float> >
-{
-  CPPUNIT_TEST_SUITE( GslSplinerVexCLFloatTest );
+  class GslSplinerVexCLFloatTest : public GSLSplinerVecTest<vex::vector<float> >
+  {
+    CPPUNIT_TEST_SUITE( GslSplinerVexCLFloatTest );
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-  CPPUNIT_TEST_SUITE_END();
+    CPPUNIT_TEST_SUITE_END();
 
   private:
 
-  vex::Context* _ctx;
+    vex::Context* _ctx;
 
-public:
+  public:
 
-  virtual void setUp()
+    virtual void setUp()
+    {
+      this->init_vec_data();
+      _ctx = new vex::Context(vex::Filter::All);
+      this->_example = new vex::vector<float>(*_ctx, 2*ANTIOCH_N_TUPLES);
+    }
+
+    virtual void tearDown()
+    {
+      delete _ctx;
+      delete this->_example;
+    }
+  };
+
+  class GslSplinerVexCLDoubleTest : public GSLSplinerVecTest<vex::vector<double> >
   {
-    this->init_vec_data();
-    _ctx = new vex::Context(vex::Filter::All);
-    this->_example = new vex::vector<float>(*_ctx, 2*ANTIOCH_N_TUPLES);
-  }
+    CPPUNIT_TEST_SUITE( GslSplinerVexCLDoubleTest );
 
-  virtual void tearDown()
-  {
-    delete _ctx;
-    delete this->_example;
-  }
-};
+    CPPUNIT_TEST( test_manually_inited_spline_constant_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
+    CPPUNIT_TEST( test_manually_inited_spline_linear_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
+    CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+    CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
-class GslSplinerVexCLDoubleTest : public GSLSplinerVecTest<vex::vector<double> >
-{
-  CPPUNIT_TEST_SUITE( GslSplinerVexCLDoubleTest );
+    CPPUNIT_TEST_SUITE_END();
 
-  CPPUNIT_TEST( test_manually_inited_spline_constant_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
-  CPPUNIT_TEST( test_manually_inited_spline_linear_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+  private:
 
-  CPPUNIT_TEST_SUITE_END();
+    vex::Context* _ctx;
 
-private:
+  public:
 
-  vex::Context* _ctx;
+    virtual void setUp()
+    {
+      this->init_vec_data();
+      _ctx = new vex::Context(vex::Filter::DoublePrecision);
+      this->_example = new vex::vector<double>(*_ctx, 2*ANTIOCH_N_TUPLES);
+    }
 
-public:
+    virtual void tearDown()
+    {
+      delete _ctx;
+      delete this->_example;
+    }
+  };
 
-  virtual void setUp()
-  {
-    this->init_vec_data();
-    _ctx = new vex::Context(vex::Filter::DoublePrecision);
-    this->_example = new vex::vector<double>(*_ctx, 2*ANTIOCH_N_TUPLES);
-  }
-
-  virtual void tearDown()
-  {
-    delete _ctx;
-    delete this->_example;
-  }
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerVexCLFloatTest );
-CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerVexCLDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerVexCLFloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( GslSplinerVexCLDoubleTest );
 
 #endif // ANTIOCH_HAVE_VEXCL
+
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_CPPUNIT

@@ -33,38 +33,43 @@
 // Antioch
 #include "antioch/arrhenius_rate.h"
 
-template <typename Scalar>
-class ArrheniusRateTestHelper
+namespace AntiochTesting
 {
-protected:
-  Scalar _Cf, _Ea, _R;
 
-  void reset_params( Scalar Cf, Scalar Ea )
+  template <typename Scalar>
+  class ArrheniusRateTestHelper
   {
-    _Cf = Cf;
-    _Ea = Ea;
-  }
+  protected:
+    Scalar _Cf, _Ea, _R;
 
-  void reset_params( Scalar Cf, Scalar Ea, Scalar R )
-  {
-    _Cf = Cf;
-    _Ea = Ea;
-    _R = R;
-  }
+    void reset_params( Scalar Cf, Scalar Ea )
+    {
+      _Cf = Cf;
+      _Ea = Ea;
+    }
 
-  Scalar value( Scalar T )
-  {
-    using std::exp;
-    return _Cf*exp(-_Ea/(_R*T));
-  }
+    void reset_params( Scalar Cf, Scalar Ea, Scalar R )
+    {
+      _Cf = Cf;
+      _Ea = Ea;
+      _R = R;
+    }
 
-  Scalar deriv( Scalar T )
-  {
-    using std::exp;
-    return _Ea/(_R*T*T)*_Cf *exp(-_Ea/(_R*T));
-  }
+    Scalar value( Scalar T )
+    {
+      using std::exp;
+      return _Cf*exp(-_Ea/(_R*T));
+    }
 
-};
+    Scalar deriv( Scalar T )
+    {
+      using std::exp;
+      return _Ea/(_R*T*T)*_Cf *exp(-_Ea/(_R*T));
+    }
+
+  };
+
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_CPPUNIT
 

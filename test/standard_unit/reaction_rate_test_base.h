@@ -33,67 +33,71 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestCase.h>
 
-template <typename ReactionRate, typename Scalar>
-class ReactionRateTestBase : public CppUnit::TestCase
+namespace AntiochTesting
 {
-public:
-  void test_rate( const ReactionRate& reaction_rate,
-                  Scalar tol )
+  template <typename ReactionRate, typename Scalar>
+  class ReactionRateTestBase : public CppUnit::TestCase
   {
-    for(Scalar T = 300.1; T <= 2500.1; T += 10.)
-      {
-        Scalar rate = reaction_rate(T);
-        Scalar exact_rate = this->exact_rate(T);
+  public:
+    void test_rate( const ReactionRate& reaction_rate,
+                    Scalar tol )
+    {
+      for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+        {
+          Scalar rate = reaction_rate(T);
+          Scalar exact_rate = this->exact_rate(T);
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
-                                      exact_rate,
-                                      tol );
-      }
-  }
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
+                                        exact_rate,
+                                        tol );
+        }
+    }
 
-  void test_deriv( const ReactionRate& reaction_rate,
-                   Scalar tol )
-  {
-    for(Scalar T = 300.1; T <= 2500.1; T += 10.)
-      {
-        Scalar deriv = reaction_rate.derivative(T);
-        Scalar exact_deriv = this->exact_deriv(T);
+    void test_deriv( const ReactionRate& reaction_rate,
+                     Scalar tol )
+    {
+      for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+        {
+          Scalar deriv = reaction_rate.derivative(T);
+          Scalar exact_deriv = this->exact_deriv(T);
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
-                                      exact_deriv,
-                                      tol );
-      }
-  }
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
+                                        exact_deriv,
+                                        tol );
+        }
+    }
 
-  void test_rate_and_deriv( const ReactionRate& reaction_rate,
-                            Scalar tol )
-  {
-    for(Scalar T = 300.1; T <= 2500.1; T += 10.)
-      {
-        Scalar rate;
-        Scalar deriv;
+    void test_rate_and_deriv( const ReactionRate& reaction_rate,
+                              Scalar tol )
+    {
+      for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+        {
+          Scalar rate;
+          Scalar deriv;
 
-        reaction_rate.rate_and_derivative(T,rate,deriv);
+          reaction_rate.rate_and_derivative(T,rate,deriv);
 
-        Scalar exact_rate = this->exact_rate(T);
-        Scalar exact_deriv = this->exact_deriv(T);
+          Scalar exact_rate = this->exact_rate(T);
+          Scalar exact_deriv = this->exact_deriv(T);
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
-                                      exact_rate,
-                                      tol );
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( rate,
+                                        exact_rate,
+                                        tol );
 
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
-                                      exact_deriv,
-                                      tol );
-      }
-  }
+          CPPUNIT_ASSERT_DOUBLES_EQUAL( deriv,
+                                        exact_deriv,
+                                        tol );
+        }
+    }
 
-protected:
+  protected:
 
-  virtual Scalar exact_rate( Scalar T ) =0;
-  virtual Scalar exact_deriv( Scalar T ) =0;
+    virtual Scalar exact_rate( Scalar T ) =0;
+    virtual Scalar exact_deriv( Scalar T ) =0;
 
-};
+  };
+
+} // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_CPPUNIT
 
