@@ -256,7 +256,10 @@ AC_SUBST(ANTIOCH_STAMPED_FILES)
 # to make it $datadir/antioch_default_files
 # then we define the default files
 ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP=$TOP_SEARCH_DIR/share/antioch_default_files/
+ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP=$prefix
+
 AC_DEFINE_UNQUOTED(DEFAULT_FILES_SOURCE_PATH,"$ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP",[Path to defaults files])
+AC_DEFINE_UNQUOTED(DEFAULT_FILES_INSTALL_PATH,"$ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP",[Path to defaults files])
 AC_DEFINE(DEFAULT_SPECIES_LIST,"antioch_default_chemical_species.dat",[Default list of species])
 AC_DEFINE(DEFAULT_CHEMICAL_MIXTURE,"antioch_default_chemical_mixture.dat",[Mandatory default informations on species])
 AC_DEFINE(DEFAULT_VIBRATIONAL_DATA,"antioch_default_vibrational_data.dat",[Vibrational default data])
