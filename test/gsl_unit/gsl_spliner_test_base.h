@@ -33,10 +33,12 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestCase.h>
 
-template<typename Scalar>
+template<typename PairScalars>
 struct GSLSplinerTestFunction
 {
-  virtual Scalar operator()( const Scalar x ) =0;
+  typedef typename Antioch::value_type<PairScalars>::type Scalar;
+
+  virtual PairScalars operator()( const PairScalars x ) =0;
 
   void init( Scalar x_min, Scalar x_max )
   {
