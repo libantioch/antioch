@@ -34,7 +34,7 @@
 #include <cppunit/TestCase.h>
 
 template <typename ReactionRate, typename PairScalars>
-class ReactionRateVectorBaseTest : public CppUnit::TestCase
+class ReactionRateVectorTestBase : public CppUnit::TestCase
 {
 public:
 

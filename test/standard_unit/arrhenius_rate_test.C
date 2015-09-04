@@ -42,7 +42,7 @@ using namespace Antioch;
 
 template<typename Scalar>
 class ArrheniusRateTest : public ArrheniusRateTestHelper<Scalar>,
-                          public ReactionRateBaseTest<Antioch::ArrheniusRate<Scalar>,Scalar>
+                          public ReactionRateTestBase<Antioch::ArrheniusRate<Scalar>,Scalar>
 {
 public:
   void setUp()

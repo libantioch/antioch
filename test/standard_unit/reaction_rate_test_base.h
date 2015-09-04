@@ -34,7 +34,7 @@
 #include <cppunit/TestCase.h>
 
 template <typename ReactionRate, typename Scalar>
-class ReactionRateBaseTest : public CppUnit::TestCase
+class ReactionRateTestBase : public CppUnit::TestCase
 {
 public:
   void test_rate( const ReactionRate& reaction_rate,

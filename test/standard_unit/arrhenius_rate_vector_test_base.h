@@ -43,7 +43,7 @@
 
 template<typename PairScalars>
 class ArrheniusRateVectorTestBase : public ArrheniusRateTestHelper</*Scalar*/typename Antioch::value_type<PairScalars>::type>,
-                                    public ReactionRateVectorBaseTest<Antioch::ArrheniusRate</*Scalar*/typename Antioch::value_type<PairScalars>::type>,PairScalars>
+                                    public ReactionRateVectorTestBase<Antioch::ArrheniusRate</*Scalar*/typename Antioch::value_type<PairScalars>::type>,PairScalars>
 {
 public:
   virtual void init()
