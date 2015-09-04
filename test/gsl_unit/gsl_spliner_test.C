@@ -54,6 +54,8 @@ public:
   void run_manually_inited_test( Scalar tol )
   {
     FunctionType exact_func;
+    exact_func.init(this->_x_min, this->_x_max);
+
     this->fill_ref(this->_x_ref,this->_y_ref,this->_n_data, this->_x_min, this->_x_max, exact_func );
 
     Antioch::GSLSpliner spline;
@@ -67,6 +69,8 @@ public:
   void run_constructor_inited_test( Scalar tol )
   {
     FunctionType exact_func;
+    exact_func.init(this->_x_min, this->_x_max);
+
     this->fill_ref(this->_x_ref,this->_y_ref,this->_n_data, this->_x_min, this->_x_max, exact_func );
 
     Antioch::GSLSpliner spline(this->_x_ref, this->_y_ref);

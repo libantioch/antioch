@@ -37,6 +37,15 @@ template<typename Scalar>
 struct GSLSplinerTestFunction
 {
   virtual Scalar operator()( const Scalar x ) =0;
+
+  void init( Scalar x_min, Scalar x_max )
+  {
+    _x_min = x_min;
+    _x_max = x_max;
+  };
+
+protected:
+  Scalar _x_min, _x_max;
 };
 
 template<typename Scalar>
