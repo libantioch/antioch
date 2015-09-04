@@ -112,6 +112,7 @@ metaphysicl_unit_tests_SOURCES = metaphysicl_unit/arrhenius_rate_metaphysicl_tes
                                  metaphysicl_unit/metaphysicl_unit_tests.C
 
 gsl_unit_tests_SOURCES = gsl_unit/gsl_spliner_test.C \
+                         gsl_unit/gsl_spliner_vec_test.C \
                          gsl_unit/gsl_unit_tests.C
 
 pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
