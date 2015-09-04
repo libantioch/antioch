@@ -90,28 +90,28 @@ public:
 
   void test_manually_inited_spline_constant_func()
   {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
 
     this->run_manually_inited_test<ConstantTestFunction<Scalar> >(tol);
   }
 
   void test_constructor_inited_spline_constant_func()
   {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
 
     this->run_constructor_inited_test<ConstantTestFunction<Scalar> >(tol);
   }
 
   void test_manually_inited_spline_linear_func()
   {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
 
     this->run_manually_inited_test<LinearTestFunction<Scalar> >(tol);
   }
 
   void test_constructor_inited_spline_linear_func()
   {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
 
     this->run_constructor_inited_test<LinearTestFunction<Scalar> >(tol);
   }
