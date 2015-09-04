@@ -38,8 +38,6 @@
 #include "arrhenius_rate_test_helper.h"
 #include "reaction_rate_test_base.h"
 
-using namespace Antioch;
-
 template<typename Scalar>
 class ArrheniusRateTest : public ArrheniusRateTestHelper<Scalar>,
                           public ReactionRateTestBase<Antioch::ArrheniusRate<Scalar>,Scalar>
@@ -52,7 +50,7 @@ public:
     Scalar R = 1.0L; // Ea in K
 
     this->reset_params(Cf,Ea,R);
-    _rate = new ArrheniusRate<Scalar>(Cf,Ea,R);
+    _rate = new Antioch::ArrheniusRate<Scalar>(Cf,Ea,R);
   }
 
   void tearDown()
@@ -73,7 +71,7 @@ public:
   {
     Scalar Cf = 1e-7L;
     Scalar Ea = 36000.L;
-    Scalar R = Constants::R_universal<Scalar>()*Units<Scalar>("cal").get_SI_factor();
+    Scalar R = Antioch::Constants::R_universal<Scalar>()*Antioch::Units<Scalar>("cal").get_SI_factor();
 
     this->reset_params( Cf, Ea, R );
 
@@ -111,7 +109,7 @@ public:
   {
     Scalar Cf = 2.1e-11L;
     Scalar Ea = 100000.L;
-    Scalar R = Constants::R_universal<Scalar>();
+    Scalar R = Antioch::Constants::R_universal<Scalar>();
 
     this->reset_params( Cf, Ea, R );
 
@@ -130,7 +128,7 @@ public:
 
 protected:
 
-  ArrheniusRate<Scalar>* _rate;
+  Antioch::ArrheniusRate<Scalar>* _rate;
 
   virtual Scalar exact_rate( Scalar T )
   {
