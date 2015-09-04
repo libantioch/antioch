@@ -69,7 +69,6 @@ check_PROGRAMS += molecular_binary_diffusion_unit
 check_PROGRAMS += molecular_binary_diffusion_vec_unit
 check_PROGRAMS += kinetics_theory_viscosity_unit
 check_PROGRAMS += kinetics_theory_viscosity_vec_unit
-check_PROGRAMS += gsl_spline_unit
 check_PROGRAMS += gsl_spline_vec_unit
 check_PROGRAMS += Stockmayer_unit
 
@@ -181,7 +180,6 @@ molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
 molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
 kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
 kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
-gsl_spline_unit_SOURCES = gsl_spline_unit.C
 gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
 ideal_gas_micro_thermo_unit_SOURCES =  ideal_gas_micro_thermo_unit.C
 Stockmayer_unit_SOURCES = Stockmayer_unit.C
@@ -261,7 +259,6 @@ TESTS += molecular_binary_diffusion_unit
 TESTS += molecular_binary_diffusion_vec_unit
 TESTS += kinetics_theory_viscosity_unit
 TESTS += kinetics_theory_viscosity_vec_unit
-TESTS += gsl_spline_unit
 TESTS += gsl_spline_vec_unit
 TESTS += Stockmayer_unit
 
