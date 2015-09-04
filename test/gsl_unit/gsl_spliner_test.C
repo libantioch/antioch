@@ -120,16 +120,16 @@ public:
     this->run_constructor_inited_test<LinearTestFunction<Scalar> >(tol);
   }
 
-  void test_manually_inited_cubic_spline()
+  void test_manually_inited_spline_cubic_func()
   {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
 
     this->run_manually_inited_test<CubicTestFunction<Scalar> >(tol);
   }
 
-  void test_constructor_inited_cubic_spline()
+  void test_constructor_inited_spline_cubic_func()
   {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
 
     this->run_constructor_inited_test<CubicTestFunction<Scalar> >(tol);
   }
@@ -144,8 +144,8 @@ public:
   CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
   CPPUNIT_TEST( test_manually_inited_spline_linear_func );
   CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  //CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  //CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
   CPPUNIT_TEST_SUITE_END();
 };
@@ -159,8 +159,8 @@ public:
   CPPUNIT_TEST( test_constructor_inited_spline_constant_func );
   CPPUNIT_TEST( test_manually_inited_spline_linear_func );
   CPPUNIT_TEST( test_constructor_inited_spline_linear_func );
-  //CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
-  //CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
+  CPPUNIT_TEST( test_manually_inited_spline_cubic_func );
+  CPPUNIT_TEST( test_constructor_inited_spline_cubic_func );
 
   CPPUNIT_TEST_SUITE_END();
 };

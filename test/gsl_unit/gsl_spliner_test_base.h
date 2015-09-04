@@ -77,11 +77,25 @@ struct CubicTestFunction : public GSLSplinerTestFunction<Scalar>
   virtual Scalar operator()( const Scalar x )
   {
     // Scalar may actually be a PairScalar, so do this to handle those cases too.
-    Scalar ten  = Antioch::constant_clone(x,10);
+    Scalar one  = Antioch::constant_clone(x,1);
     Scalar two  = Antioch::constant_clone(x,2);
-    Scalar five = Antioch::constant_clone(x,5);
+    Scalar three = Antioch::constant_clone(x,3);
+    Scalar xmin = Antioch::constant_clone(x,this->_x_min);
+    Scalar xmax = Antioch::constant_clone(x,this->_x_max);
 
-    return ten + five * x + ten * x * x - two * x * x * x;
+    Scalar t = (x-xmin)/(xmax-xmin);
+
+    // Constructing cubit hermite that interpolates xmin/xmax
+    // and has second derivatives of 0 at xmin,xmax
+    // Turns out you need first derivatives = 1 at the end points
+    Scalar t2 = t*t;
+    Scalar t3 = t*t*t;
+    Scalar h00 = two*t3 - three*t2 + one;
+    Scalar h10 = t3 - 2*t2 + t;
+    Scalar h01 = -two*t3 + three*t2;
+    Scalar h11 = t3 - t2;
+
+    return h00*xmin + h10*(xmax-xmin) + h01*xmax + h11*(xmax-xmin);
   }
 };
 
