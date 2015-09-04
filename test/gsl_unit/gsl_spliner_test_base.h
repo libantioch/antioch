@@ -91,7 +91,7 @@ struct CubicTestFunction : public GSLSplinerTestFunction<Scalar>
     Scalar t2 = t*t;
     Scalar t3 = t*t*t;
     Scalar h00 = two*t3 - three*t2 + one;
-    Scalar h10 = t3 - 2*t2 + t;
+    Scalar h10 = t3 - two*t2 + t;
     Scalar h01 = -two*t3 + three*t2;
     Scalar h11 = t3 - t2;
 
