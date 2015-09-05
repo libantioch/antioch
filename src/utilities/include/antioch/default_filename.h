@@ -43,7 +43,7 @@
 namespace Antioch
 {
 
-class DefaultFilename {
+class DefaultSourceFilename {
 public:
   static const std::string& species_list() {
     static const std::string filename =
@@ -101,6 +101,9 @@ public:
     return filename;
   }
 };
+
+// Backward Compatibility
+typedef DefaultSourceFilename DefaultFilename;
 
 } // end namespace Antioch
 
