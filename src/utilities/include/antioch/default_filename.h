@@ -109,6 +109,72 @@ public:
 // Backward Compatibility
 typedef DefaultSourceFilename DefaultFilename;
 
+
+  //! Default filenames in the install tree
+  /*! These include the full path to default files in
+   *  in the Antioch *install* tree. These *must not*
+   *  be used internally in Antioch; these are meant
+   *  *only* for applications.
+   */
+class DefaultInstallFilename {
+public:
+  static const std::string& species_list() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_SPECIES_LIST);
+    return filename;
+  }
+
+  static const std::string& chemical_mixture() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_CHEMICAL_MIXTURE);
+    return filename;
+  }
+
+  static const std::string& vibrational_data() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_VIBRATIONAL_DATA);
+    return filename;
+  }
+
+  static const std::string& electronic_data() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_ELECTRONIC_DATA);
+    return filename;
+  }
+
+  static const std::string& thermo_data() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_THERMO_DATA);
+    return filename;
+  }
+
+  static const std::string& sutherland_data() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_SUTHERLAND_DATA);
+    return filename;
+  }
+
+  static const std::string& blottner_data() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_BLOTTNER_DATA);
+    return filename;
+  }
+
+  static const std::string& transport_mixture() {
+    static const std::string filename =
+      std::string(ANTIOCH_DEFAULT_FILES_INSTALL_PATH) +
+      std::string(ANTIOCH_DEFAULT_TRANSPORT_DATA);
+    return filename;
+  }
+};
+
 } // end namespace Antioch
 
 #endif //ANTIOCH_DEFAULT_FILENAME_H

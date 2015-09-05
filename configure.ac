@@ -255,8 +255,9 @@ AC_SUBST(ANTIOCH_STAMPED_FILES)
 # step (see install-data-hook)
 # to make it $datadir/antioch_default_files
 # then we define the default files
+# Need to make sure to have the `/` at the end
 ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP=$TOP_SEARCH_DIR/share/antioch_default_files/
-ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP=$prefix
+ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP=$prefix/share/antioch_default_files/
 
 AC_DEFINE_UNQUOTED(DEFAULT_FILES_SOURCE_PATH,"$ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP",[Path to defaults files])
 AC_DEFINE_UNQUOTED(DEFAULT_FILES_INSTALL_PATH,"$ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP",[Path to defaults files])
