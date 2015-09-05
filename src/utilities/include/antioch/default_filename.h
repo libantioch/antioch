@@ -38,11 +38,15 @@
 // C++ headers
 #include <string>
 
-// Create shim methods Antioch::ant_exp() for exp(), etcetera.
-
 namespace Antioch
 {
 
+  //! Default filenames in the source tree
+  /*! These include the full path to default files in
+   *  in the Antioch *source* tree. If you decide to use
+   *  these in your application, you must *not* delete the
+   *  source tree.
+   */
 class DefaultSourceFilename {
 public:
   static const std::string& species_list() {
