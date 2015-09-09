@@ -1,6 +1,11 @@
 EXTRA_DIST = input_files
 
 check_PROGRAMS  =
+check_PROGRAMS += standard_unit_tests
+check_PROGRAMS += eigen_unit_tests
+check_PROGRAMS += vexcl_unit_tests
+check_PROGRAMS += metaphysicl_unit_tests
+check_PROGRAMS += gsl_unit_tests
 check_PROGRAMS += chem_mixture_unit
 check_PROGRAMS += chem_mixture_vec_unit
 check_PROGRAMS += nasa_evaluator_unit
@@ -14,8 +19,6 @@ check_PROGRAMS += hercourtessen_rate_vec_unit
 check_PROGRAMS += berthelot_rate_unit
 check_PROGRAMS += berthelot_rate_vec_unit
 check_PROGRAMS += arrhenius_rate_deriv
-check_PROGRAMS += arrhenius_rate_unit
-check_PROGRAMS += arrhenius_rate_vec_unit
 check_PROGRAMS += kooij_rate_unit
 check_PROGRAMS += kooij_rate_vec_unit
 check_PROGRAMS += berthelothercourtessen_rate_unit
@@ -66,8 +69,6 @@ check_PROGRAMS += molecular_binary_diffusion_unit
 check_PROGRAMS += molecular_binary_diffusion_vec_unit
 check_PROGRAMS += kinetics_theory_viscosity_unit
 check_PROGRAMS += kinetics_theory_viscosity_vec_unit
-check_PROGRAMS += gsl_spline_unit
-check_PROGRAMS += gsl_spline_vec_unit
 check_PROGRAMS += Stockmayer_unit
 
 # Eigen Tests
@@ -86,12 +87,35 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/thermal_conduction/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
+AM_CPPFLAGS += -I$(top_srcdir)/test/standard_unit
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
 
 AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
 LIBS = $(antioch_optional_test_LIBS)
 
 LDADD = $(top_builddir)/src/libantioch.la
+
+pkginclude_HEADERS =
+
+standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
+                              standard_unit/arrhenius_rate_valarray_test.C \
+                              standard_unit/standard_unit_tests.C
+
+eigen_unit_tests_SOURCES = eigen_unit/arrhenius_rate_eigen_test.C \
+                           eigen_unit/eigen_unit_tests.C
+
+vexcl_unit_tests_SOURCES = vexcl_unit/arrhenius_rate_vexcl_test.C \
+                           vexcl_unit/vexcl_unit_tests.C
+
+metaphysicl_unit_tests_SOURCES = metaphysicl_unit/arrhenius_rate_metaphysicl_test.C \
+                                 metaphysicl_unit/metaphysicl_unit_tests.C
+
+gsl_unit_tests_SOURCES = gsl_unit/gsl_spliner_test.C \
+                         gsl_unit/gsl_spliner_vec_test.C \
+                         gsl_unit/gsl_unit_tests.C
+
+pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
+pkginclude_HEADERS += standard_unit/arrhenius_rate_test_helper.h
 
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
@@ -107,8 +131,6 @@ hercourtessen_rate_vec_unit_SOURCES = hercourtessen_rate_vec_unit.C
 berthelot_rate_unit_SOURCES = berthelot_rate_unit.C
 berthelot_rate_vec_unit_SOURCES = berthelot_rate_vec_unit.C
 arrhenius_rate_deriv_SOURCES = arrhenius_rate_deriv.C
-arrhenius_rate_unit_SOURCES = arrhenius_rate_unit.C
-arrhenius_rate_vec_unit_SOURCES = arrhenius_rate_vec_unit.C
 berthelothercourtessen_rate_unit_SOURCES = berthelothercourtessen_rate_unit.C
 berthelothercourtessen_rate_vec_unit_SOURCES = berthelothercourtessen_rate_vec_unit.C
 kooij_rate_unit_SOURCES = kooij_rate_unit.C
@@ -158,8 +180,6 @@ molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
 molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
 kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
 kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
-gsl_spline_unit_SOURCES = gsl_spline_unit.C
-gsl_spline_vec_unit_SOURCES = gsl_spline_vec_unit.C
 ideal_gas_micro_thermo_unit_SOURCES =  ideal_gas_micro_thermo_unit.C
 Stockmayer_unit_SOURCES = Stockmayer_unit.C
 
@@ -170,6 +190,11 @@ stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
 
 #Define tests to actually be run
 TESTS  =
+TESTS += standard_unit_tests
+TESTS += eigen_unit_tests
+TESTS += vexcl_unit_tests
+TESTS += metaphysicl_unit_tests
+TESTS += gsl_unit_tests
 TESTS += chem_mixture_unit
 TESTS += chem_mixture_vec_unit
 TESTS += nasa_evaluator_unit.sh
@@ -183,8 +208,6 @@ TESTS += hercourtessen_rate_unit
 TESTS += berthelot_rate_vec_unit
 TESTS += berthelot_rate_vec_unit
 TESTS += arrhenius_rate_deriv
-TESTS += arrhenius_rate_unit
-TESTS += arrhenius_rate_vec_unit
 TESTS += berthelothercourtessen_rate_unit
 TESTS += berthelothercourtessen_rate_vec_unit
 TESTS += kooij_rate_unit
@@ -235,8 +258,6 @@ TESTS += molecular_binary_diffusion_unit
 TESTS += molecular_binary_diffusion_vec_unit
 TESTS += kinetics_theory_viscosity_unit
 TESTS += kinetics_theory_viscosity_vec_unit
-TESTS += gsl_spline_unit
-TESTS += gsl_spline_vec_unit
 TESTS += Stockmayer_unit
 
 

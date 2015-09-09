@@ -133,6 +133,21 @@ if (test x$HAVE_GSL = x1); then
 fi
 AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$HAVE_GSL = x1)
 
+# -------------------------------------------------------------
+# cppunit C++ unit testing -- enabled by default
+# -------------------------------------------------------------
+AC_ARG_ENABLE(cppunit,
+              AS_HELP_STRING([--disable-cppunit],
+                             [Build without cppunit C++ unit testing support]))
+AS_IF([test "x$enable_cppunit" != "xno"], [
+   AM_PATH_CPPUNIT([1.10.0],[enablecppunit=yes],[enablecppunit=no])
+])
+
+if (test x$HAVE_CPPUNIT = x1); then
+  antioch_optional_test_INCLUDES="$CPPUNIT_CPPFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LDFLAGS="$CPPUNIT_LIBS $antioch_optional_test_LDFLAGS"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_CPPUNIT, test x$enablecppunit = xyes)
 
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
