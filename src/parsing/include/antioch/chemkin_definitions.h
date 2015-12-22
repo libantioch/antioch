@@ -51,8 +51,10 @@ namespace Antioch
                  TB = 0,
                  FAL,
                  PHOTO,
-                 ELECTRO 
-               };
+                 ELECTRO,
+                 FORD,
+                 RORD
+             };
 
     const std::map<Delim,std::string> & delim()   const;
 
@@ -102,6 +104,8 @@ namespace Antioch
     _symbol[FAL]     = "(+M)";
     _symbol[PHOTO]   = "HV";
     _symbol[ELECTRO] = "E";
+    _symbol[FORD]    = "FORD";
+    _symbol[RORD]    = "RORD";
   }
 
   inline
