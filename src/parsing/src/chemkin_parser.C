@@ -57,6 +57,8 @@ namespace Antioch
     _map[ParsingKey::REACTION_DATA]    = "REAC"; //REACTIONS || REAC
     _map[ParsingKey::FALLOFF_LOW_NAME] = "LOW";
     _map[ParsingKey::TROE_FALLOFF]     = "TROE";
+    _map[ParsingKey::FORWARD_ORDER]    = "FORD";
+    _map[ParsingKey::BACKWARD_ORDER]   = "BORD";
 
     // typically chemkin files list
     //      pre-exponential parameters in (m3/kmol)^(m-1)/s
@@ -209,6 +211,8 @@ namespace Antioch
 
         _reactants.clear();
         _products.clear();
+        _reactants_orders.clear();
+        _products_orders.clear();
       }else
       {
         _next_is_reverse = false;
@@ -227,8 +231,11 @@ namespace Antioch
 
         // reverse products and reactants
         std::vector<std::pair<std::string,NumericType> > tmp(_reactants);
+        std::vector<std::pair<std::string,NumericType> > tmp_o(_reactants_orders);
         _reactants = _products;
+        _reactants_orders = _products_orders;
         _products = tmp;
+        _products_orders = tmp_o;
 
         // reverse the reaction
         typename ChemKinDefinitions::Delim delim = _spec.equation_delimiter(_equation);
@@ -314,6 +321,28 @@ namespace Antioch
         products_pair[i] = std::make_pair(_products[i].first,(int)_products[i].second);
       }
     return !(_products.empty());
+  }
+
+  template <typename NumericType>
+  const std::map<std::string,NumericType> ChemKinParser<NumericType>::reactants_orders() const
+  {
+      std::map<std::string,NumericType> orders;
+      for(unsigned int s = 0; s < _reactants_orders.size(); s++)
+      {
+         orders.insert(_reactants_orders[s]);
+      }
+      return orders;
+  }
+
+  template <typename NumericType>
+  const std::map<std::string,NumericType> ChemKinParser<NumericType>::products_orders() const
+  {
+      std::map<std::string,NumericType> orders;
+      for(unsigned int s = 0; s < _products_orders.size(); s++)
+      {
+         orders.insert(_products_orders[s]);
+      }
+      return orders;
   }
 
   template <typename NumericType>
@@ -432,10 +461,13 @@ namespace Antioch
     std::string capital_line(line);
     std::transform(capital_line.begin(),capital_line.end(), capital_line.begin(),::toupper);
 
+      // reaction equation
     if(line.find(_spec.delim().at(_spec.REVERSIBLE)) != std::string::npos) //equation a beta ea, "="
       {
         this->parse_equation_coef(line);
         _nrates++;
+
+      // reverse reaction
       }else if(capital_line.find(_spec.reversible()) != std::string::npos) // reversible reaction is explicit "REV"
       {
         _reversible = false;
@@ -447,10 +479,22 @@ namespace Antioch
           {
             _next_is_reverse = true;
           }
+
+      // duplicate reaction
       }else if(capital_line.find(_spec.duplicate()) != std::string::npos) // duplicate, "DUPLICATE" or "DUP" , search for "DUP"
       {
         _chemical_process = "Duplicate";
         _duplicate_process = true;
+
+      // custom forward orders
+      }else if(capital_line.find(_spec.symbol().at(_spec.FORD)) != std::string::npos) // forward order, "FORD"
+      {
+        this->parse_forward_orders(line);
+      // custom backward orders
+      }else if(capital_line.find(_spec.symbol().at(_spec.RORD)) != std::string::npos) // backward order, "RORD" (for 'reverse')
+      {
+        this->parse_backward_orders(line);
+      // data about pressure dependence
       }else if(line.find(_spec.parser()) != std::string::npos) // "/"
       {
         if(_chemical_process.find("Falloff") != std::string::npos &&
@@ -494,7 +538,7 @@ namespace Antioch
     // line looks like "REV / A beta Ea /"
 
     std::vector<std::string> out;
-    SplitString(line,"/",out,false);
+    SplitString(line,_spec.parser(),out,false);
     if(out.size() < 2)antioch_parsing_error("ChemKin parser: unrecognized reversible reaction parameters input line:\n" + line);
 
     std::vector<std::string> pars;
@@ -606,6 +650,10 @@ namespace Antioch
 
     if(real)this->rescale_stoichiometry();
 
+    // orders are by default the stoichiometric coeffs
+    _reactants_orders = _reactants;
+    _products_orders  = _products;
+
     // order of reaction
     for(unsigned int r = 0; r < _reactants.size(); r++)
       {
@@ -635,6 +683,52 @@ namespace Antioch
              c == '6' || c == '7' || c == '8' ||
              c == '9' || c == '.');
 
+  }
+
+  template <typename NumericType>
+  void ChemKinParser<NumericType>::parse_orders(const std::string & line, std::vector<std::pair<std::string, NumericType> > & reaction_orders)
+  {
+    // 1 - parse the line
+    std::vector<std::string> out;
+    SplitString(line,_spec.parser(),out,false);
+    out.erase(out.begin()); // keyword (RORD or FORD)
+
+    std::vector< std::pair<std::string, NumericType> > orders;
+    for(unsigned int i = 0; i < out.size(); i++)
+    {
+      std::vector<std::string> you;
+      SplitString(out[i]," ",you,false);
+      if(you.size() != 2)antioch_parsing_error("ChemKin parser: I don't recognize this part:\n" + out[i]);
+      NumericType order = std::atof(you[1].c_str());
+      orders.push_back(std::make_pair(you[0],order));
+    }
+
+    // 2 - replace if found
+    for(unsigned int s = 0; s < reaction_orders.size(); s++)
+    {
+      // good ol' search & find without any clue about where it can be
+      unsigned int i;
+      for(i = 0; i < orders.size(); i++)
+      {
+        if(orders[i].first == reaction_orders[s].first)
+        {
+          reaction_orders[s] = orders[i];
+          break;
+        }
+      }
+    }
+  }
+
+  template <typename NumericType>
+  void ChemKinParser<NumericType>::parse_forward_orders(const std::string & line)
+  {
+    this->parse_orders(line, _reactants_orders);
+  }
+
+  template <typename NumericType>
+  void ChemKinParser<NumericType>::parse_backward_orders(const std::string & line)
+  {
+    this->parse_orders(line, _products_orders);
   }
 
   template <typename NumericType>

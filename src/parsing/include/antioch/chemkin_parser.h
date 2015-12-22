@@ -155,6 +155,12 @@ namespace Antioch{
          /*! return pairs of products and stoichiometric coefficients*/
          bool products_pairs(std::vector<std::pair<std::string,int> > & products_pair) const;
 
+         /*! return a map between reactants' name and found partial orders */
+         const std::map<std::string,NumericType> reactants_orders() const;
+
+         /*! return a map between products' name and found partial orders */
+         const std::map<std::string,NumericType> products_orders() const;
+
          /*! return true if "name" attribute is found with value "k0"*/
          bool is_k0(unsigned int nrc, const std::string & kin_model) const;
 
@@ -222,6 +228,15 @@ namespace Antioch{
           void parse_coefficients_line(const std::string &line);
 
           /*! Convenient method */
+          void parse_forward_orders(const std::string & line);
+
+          /*! Convenient method */
+          void parse_backward_orders(const std::string & line);
+
+          /*! Convenient method */
+          void parse_orders(const std::string & line, std::vector<std::pair<std::string, NumericType> > & reaction_orders);
+
+          /*! Convenient method */
           std::pair<std::string,NumericType> parse_molecule(const std::string & molecule);
 
           /*! Convenient method */
@@ -256,6 +271,9 @@ namespace Antioch{
           // ChemKin allows real stoichiometric coefficients
           std::vector<std::pair<std::string,NumericType> > _reactants;
           std::vector<std::pair<std::string,NumericType> > _products;
+
+          std::vector<std::pair<std::string,NumericType> > _reactants_orders;
+          std::vector<std::pair<std::string,NumericType> > _products_orders;
 
           std::string                      _equation;
           std::string                      _chemical_process;
