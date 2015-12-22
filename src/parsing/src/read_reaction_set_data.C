@@ -229,11 +229,16 @@ namespace Antioch
 
         if(parser->reactants_pairs(molecules_pairs))
           {
+
+            std::map<std::string,NumericType> orders = parser->reactants_orders();
             if (verbose)
               {
                 std::cout << "\n   reactants: ";
                 for(unsigned int ir = 0; ir < molecules_pairs.size(); ir++)
-                  std::cout << molecules_pairs[ir].first << ":" << molecules_pairs[ir].second << " ";
+                {
+                  NumericType order = (orders.count(molecules_pairs[ir].first))?orders.at(molecules_pairs[ir].first):static_cast<NumericType>(molecules_pairs[ir].second);
+                  std::cout << molecules_pairs[ir].first << ":" << molecules_pairs[ir].second << "," << order << ", ";
+                }
               }
 
             for( unsigned int p=0; p < molecules_pairs.size(); p++ )
@@ -249,10 +254,11 @@ namespace Antioch
                   }
                 else
                   {
+                    NumericType order = (orders.count(molecules_pairs[p].first))?orders.at(molecules_pairs[p].first):static_cast<NumericType>(molecules_pairs[p].second);
                     my_rxn->add_reactant( molecules_pairs[p].first,
                                           chem_mixture.species_name_map().find( molecules_pairs[p].first )->second,
-                                          molecules_pairs[p].second );
-                    order_reaction += molecules_pairs[p].second;
+                                          molecules_pairs[p].second, order );
+                    order_reaction += order;
                   }
               }
           }
@@ -260,9 +266,14 @@ namespace Antioch
         molecules_pairs.clear();
         if(parser->products_pairs(molecules_pairs))
           {
+
+            std::map<std::string,NumericType> orders = parser->products_orders();
             if(verbose) std::cout << "\n   products: ";
             for(unsigned int ir = 0; ir < molecules_pairs.size(); ir++)
-              std::cout << molecules_pairs[ir].first << ":" << molecules_pairs[ir].second << " ";
+            {
+              NumericType order = (orders.count(molecules_pairs[ir].first))?orders.at(molecules_pairs[ir].first):static_cast<NumericType>(molecules_pairs[ir].second);
+              std::cout << molecules_pairs[ir].first << ":" << molecules_pairs[ir].second << "," << order << ", ";
+            }
 
             for (unsigned int p=0; p < molecules_pairs.size(); p++)
               {
@@ -277,9 +288,10 @@ namespace Antioch
                   }
                 else
                   {
+                    NumericType order = (orders.count(molecules_pairs[p].first))?orders.at(molecules_pairs[p].first):static_cast<NumericType>(molecules_pairs[p].second);
                     my_rxn->add_product( molecules_pairs[p].first,
                                          chem_mixture.species_name_map().find( molecules_pairs[p].first )->second,
-                                         molecules_pairs[p].second );
+                                         molecules_pairs[p].second, order );
                   }
               }
             if(verbose) std::cout << std::endl;
