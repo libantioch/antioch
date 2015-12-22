@@ -79,6 +79,8 @@ namespace Antioch
     _map[ParsingKey::KINETICS_MODEL]        = "rateCoeff";
     _map[ParsingKey::REACTANTS]             = "reactants";
     _map[ParsingKey::PRODUCTS]              = "products";
+    _map[ParsingKey::FORWARD_ORDER]         = "ford";
+    _map[ParsingKey::BACKWARD_ORDER]        = "bord";
     _map[ParsingKey::PREEXP]                = "A";
     _map[ParsingKey::POWER]                 = "b";
     _map[ParsingKey::ACTIVATION_ENERGY]     = "E";
@@ -316,7 +318,45 @@ namespace Antioch
   }
 
   template <typename NumericType>
-  bool XMLParser<NumericType>::molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & molecules_pairs) const
+  const std::map<std::string,NumericType> XMLParser<NumericType>::reactants_orders() const
+  {
+    tinyxml2::XMLElement* orders = _reaction->FirstChildElement(_map.at(ParsingKey::FORWARD_ORDER).c_str());
+    std::map<std::string,NumericType> map;
+    if(orders){
+      std::vector<std::pair<std::string,NumericType> > pairs;
+      if(this->molecules_pairs(orders,pairs))
+      {
+         for(unsigned int s = 0; s < pairs.size(); s++)
+         {
+            map.insert(pairs[s]);
+         }
+      }
+    }
+    return map;
+  }
+
+  template <typename NumericType>
+  const std::map<std::string,NumericType> XMLParser<NumericType>::products_orders() const
+  {
+    tinyxml2::XMLElement* orders = _reaction->FirstChildElement(_map.at(ParsingKey::BACKWARD_ORDER).c_str());
+    std::map<std::string,NumericType> map;
+    if(orders){
+      std::vector<std::pair<std::string,NumericType> > pairs;
+      if(this->molecules_pairs(orders,pairs))
+      {
+         for(unsigned int s = 0; s < pairs.size(); s++)
+         {
+            map.insert(pairs[s]);
+         }
+      }
+    }
+    return map;
+  }
+
+
+  template <typename NumericType>
+  template <typename PairedType>
+  bool XMLParser<NumericType>::molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,PairedType> > & molecules_pairs) const
   {
     bool out(true);
     if(molecules)
@@ -336,7 +376,7 @@ namespace Antioch
 
         for( unsigned int p=0; p < mol_pairs.size(); p++ )
           {
-            std::pair<std::string,int> pair( split_string_int_on_colon(mol_pairs[p]) );
+            std::pair<std::string,PairedType> pair( split_string_int_on_colon(mol_pairs[p]) );
 
             molecules_pairs.push_back(pair);
           }

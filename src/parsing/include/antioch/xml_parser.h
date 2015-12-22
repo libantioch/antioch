@@ -139,6 +139,12 @@ namespace Antioch{
          /*! return pairs of products and stoichiometric coefficients*/
          bool products_pairs(std::vector<std::pair<std::string,int> > & products_pair) const;
 
+         /*! return a map between reactants' name and found partial orders */
+         const std::map<std::string,NumericType> reactants_orders() const;
+
+         /*! return a map between products' name and found partial orders */
+         const std::map<std::string,NumericType> products_orders() const;
+
          /*! return true if "name" attribute is found with value "k0"*/
          bool is_k0(unsigned int nrc, const std::string & kin_model) const;
 
@@ -191,7 +197,8 @@ namespace Antioch{
          void read_thermodynamic_data_root(ThermoType & thermo);
 
          /*! return pairs of molecules and stoichiometric coefficients*/
-         bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & products_pair) const;
+         template <typename PairedType>
+         bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,PairedType> > & products_pair) const;
 
          /*! return a parameter's value*/
          bool get_parameter(const tinyxml2::XMLElement * ptr, const std::string & par, NumericType & par_value, std::string & par_unit) const;
