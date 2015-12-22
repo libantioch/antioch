@@ -210,13 +210,13 @@ namespace Antioch
     void add_reactant( const std::string &name,
                        const unsigned int r_id,
                        const unsigned int stoichiometric_coeff,
-                       const CoeffType partial_order = static_cast<CoeffType>(stoichiometric_coeff));
+                       const CoeffType partial_order = std::numeric_limits<CoeffType>::infinity());// what test could be reliable?
 
     //!
     void add_product( const std::string &name,
                       const unsigned int p_id,
                       const unsigned int stoichiometric_coeff,
-                      const CoeffType partial_order = static_cast<CoeffType>(stoichiometric_coeff));
+                      const CoeffType partial_order = std::numeric_limits<CoeffType>::infinity()); // what test could be reliable?
 
     //!
     void clear_reactant();
@@ -572,18 +572,18 @@ namespace Antioch
   inline
   CoeffType Reaction<CoeffType,VectorCoeffType>::reactant_partial_order(const unsigned int r) const
   {      
-    antioch_assert_less(r, _reactant_partial_order.size());
+    antioch_assert_less(r, _species_reactant_partial_order.size());
     antioch_assert_less(_reactant_ids[r], this->n_species());
-    return _reactant_partial_order[r];
+    return _species_reactant_partial_order[r];
   }
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
-  unsigned int Reaction<CoeffType,VectorCoeffType>::product_partial_order(const unsigned int p) const
+  CoeffType Reaction<CoeffType,VectorCoeffType>::product_partial_order(const unsigned int p) const
   {
-    antioch_assert_less(p, _product_partial_order.size());
+    antioch_assert_less(p, _species_product_partial_order.size());
     antioch_assert_less(_product_ids[p], this->n_species());
-    return _product_partial_order[p];
+    return _species_product_partial_order[p];
   }
 
   template<typename CoeffType, typename VectorCoeffType>
@@ -597,7 +597,9 @@ namespace Antioch
     _reactant_names.push_back(name);
     _reactant_ids.push_back(r_id);
     _reactant_stoichiometry.push_back(stoichiometric_coeff);
-    _reactant_partial_order.push_back(partial_order);
+
+   CoeffType order = (partial_order == std::numeric_limits<CoeffType>::infinity() )?static_cast<CoeffType>(stoichiometric_coeff):partial_order;
+    _species_reactant_partial_order.push_back(order);
     return;
   }
 
@@ -612,7 +614,9 @@ namespace Antioch
     _product_names.push_back(name);
     _product_ids.push_back(p_id);
     _product_stoichiometry.push_back(stoichiometric_coeff);
-    _product_partial_order.push_back(partial_order);
+
+   CoeffType order = (partial_order == std::numeric_limits<CoeffType>::infinity() )?static_cast<CoeffType>(stoichiometric_coeff):partial_order;
+    _species_product_partial_order.push_back(order);
     return;
   }
 
@@ -829,12 +833,14 @@ namespace Antioch
         os << "#   reactants: ";
         for (unsigned int r=0; r<this->n_reactants(); r++)
           os << this->reactant_name(r) << ":"
-             << this->reactant_stoichiometric_coefficient(r) << " ";
+             << this->reactant_stoichiometric_coefficient(r) << ","
+             << this->reactant_partial_order(r) << " ";
         os << "\n"
            << "#   products:  ";
         for (unsigned int p=0; p<this->n_products(); p++)
           os << this->product_name(p) << ":"
-             << this->product_stoichiometric_coefficient(p) << " ";
+             << this->product_stoichiometric_coefficient(p) << ","
+             << this->product_partial_order(p) << " ";
       }
     os << "\n#   Chemical process: " << _type;
     os << "\n#   Kinetics model: "   << _kintype;
