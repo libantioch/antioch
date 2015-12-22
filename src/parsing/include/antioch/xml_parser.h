@@ -139,9 +139,15 @@ namespace Antioch{
          /*! return pairs of products and stoichiometric coefficients*/
          bool products_pairs(std::vector<std::pair<std::string,int> > & products_pair) const;
 
+         /*! return a map between reactants' name and found partial orders */
+         const std::map<std::string,NumericType> reactants_orders() const;
+
+         /*! return a map between products' name and found partial orders */
+         const std::map<std::string,NumericType> products_orders() const;
+
          /*! return true if the concerned reaction rate is the low pressure limit
           *
-          * In the case of falloff reactions, there is the attribute "name" to 
+          * In the case of falloff reactions, there is the attribute "name" to
           * specify which rate constant is the low pressure limit.  This attribute
           * should have "k0" as value, and nothing else.
           *
@@ -200,7 +206,8 @@ namespace Antioch{
          void read_thermodynamic_data_root(ThermoType & thermo);
 
          /*! return pairs of molecules and stoichiometric coefficients*/
-         bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & products_pair) const;
+         template <typename PairedType>
+         bool molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,PairedType> > & products_pair) const;
 
          /*! return a parameter's value*/
          bool get_parameter(const tinyxml2::XMLElement * ptr, const std::string & par, NumericType & par_value, std::string & par_unit) const;
