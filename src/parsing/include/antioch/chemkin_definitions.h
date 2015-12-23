@@ -51,9 +51,7 @@ namespace Antioch
                  TB = 0,
                  FAL,
                  PHOTO,
-                 ELECTRO,
-                 FORD,
-                 RORD
+                 ELECTRO
              };
 
     const std::map<Delim,std::string> & delim()   const;
