@@ -58,7 +58,7 @@ namespace Antioch
     _map[ParsingKey::FALLOFF_LOW_NAME] = "LOW";
     _map[ParsingKey::TROE_FALLOFF]     = "TROE";
     _map[ParsingKey::FORWARD_ORDER]    = "FORD";
-    _map[ParsingKey::BACKWARD_ORDER]   = "BORD";
+    _map[ParsingKey::BACKWARD_ORDER]   = "RORD";
 
     // typically chemkin files list
     //      pre-exponential parameters in (m3/kmol)^(m-1)/s
@@ -487,11 +487,11 @@ namespace Antioch
         _duplicate_process = true;
 
       // custom forward orders
-      }else if(capital_line.find(_spec.symbol().at(_spec.FORD)) != std::string::npos) // forward order, "FORD"
+      }else if(capital_line.find(_map.at(ParsingKey::FORWARD_ORDER)) != std::string::npos) // forward order,
       {
         this->parse_forward_orders(line);
       // custom backward orders
-      }else if(capital_line.find(_spec.symbol().at(_spec.RORD)) != std::string::npos) // backward order, "RORD" (for 'reverse')
+      }else if(capital_line.find(_map.at(ParsingKey::BACKWARD_ORDER)) != std::string::npos) // backward order,
       {
         this->parse_backward_orders(line);
       // data about pressure dependence

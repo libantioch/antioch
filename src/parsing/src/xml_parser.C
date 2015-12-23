@@ -80,7 +80,7 @@ namespace Antioch
     _map[ParsingKey::REACTANTS]             = "reactants";
     _map[ParsingKey::PRODUCTS]              = "products";
     _map[ParsingKey::FORWARD_ORDER]         = "ford";
-    _map[ParsingKey::BACKWARD_ORDER]        = "bord";
+    _map[ParsingKey::BACKWARD_ORDER]        = "rord";
     _map[ParsingKey::PREEXP]                = "A";
     _map[ParsingKey::POWER]                 = "b";
     _map[ParsingKey::ACTIVATION_ENERGY]     = "E";
