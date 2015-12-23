@@ -102,8 +102,6 @@ namespace Antioch
     _symbol[FAL]     = "(+M)";
     _symbol[PHOTO]   = "HV";
     _symbol[ELECTRO] = "E";
-    _symbol[FORD]    = "FORD";
-    _symbol[RORD]    = "RORD";
   }
 
   inline
