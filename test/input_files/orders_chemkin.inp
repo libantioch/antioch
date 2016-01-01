@@ -1,0 +1,19 @@
+!
+! ONE-RXN TEST MODEL
+!
+ELEMENTS
+H O
+END
+SPECIES
+H2O2 H2 H HO2
+END
+REACTIONS
+! Tsang and Hampson, J. Phys. Chem. Ref. Data, 15:1087 (1986)
+! modified for the test:
+! all the orders in the forward direction
+! are changed, only HO2 is in the backward
+! direction
+H2O2+H=HO2+H2             0.482E+14  0.00  0.795E+04
+FORD/H2O2 1.5/H 0.5/
+RORD/HO2 2/
+END
