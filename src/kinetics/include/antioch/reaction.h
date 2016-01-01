@@ -778,7 +778,6 @@ namespace Antioch
         exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
                        h_RT_minus_s_R[_product_ids[s]] );
       }
-
     return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) ) * ant_exp(exppower);
   }
 
@@ -1125,12 +1124,12 @@ namespace Antioch
       {
         const StateType val = 
           ant_pow( molar_densities[this->reactant_id(ro)],
-            static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+            this->reactant_partial_order(ro));
           
         const StateType dval = 
           ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
             ant_pow( molar_densities[this->reactant_id(ro)],
-              static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
+              this->reactant_partial_order(ro) - 1)
             );
 
         facfwd   *= val;
@@ -1203,12 +1202,12 @@ namespace Antioch
         {
           const StateType val = 
             ant_pow( molar_densities[this->product_id(po)],
-              static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+              this->product_partial_order(po));
           
           const StateType dval = 
             ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
               ant_pow( molar_densities[this->product_id(po)],
-                static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
+              this->product_partial_order(po) - 1)
               );
         
           facbkwd   *= val;
