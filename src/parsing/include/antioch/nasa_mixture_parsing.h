@@ -32,6 +32,7 @@
 
 // Antioch
 #include "antioch/parsing_enum.h"
+#include "antioch/default_filename.h"
 
 namespace Antioch
 {
@@ -51,7 +52,7 @@ namespace Antioch
   class ASCIIParser;
 
   template<class NumericType, typename CurveType >
-  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType > & thermo, const std::string &filename, ParsingType = ASCII, bool verbose = true );
+  void read_nasa_mixture_data( NASAThermoMixture<NumericType, CurveType > & thermo, const std::string &filename = DefaultSourceFilename::thermo_data(), ParsingType = ASCII, bool verbose = true );
 
 } // end namespace Antioch
 
