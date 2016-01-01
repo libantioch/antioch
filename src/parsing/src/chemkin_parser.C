@@ -61,7 +61,7 @@ namespace Antioch
     _map[ParsingKey::BACKWARD_ORDER]   = "RORD";
 
     // typically chemkin files list
-    //      pre-exponential parameters in (m3/kmol)^(m-1)/s
+    //      pre-exponential parameters in (cm3/mol)^(m-1)/s
     //      activation energy in cal/mol, but we want it in K.
     //      power parameter without unit
     // if falloff, we need to know who's k0 and kinfty
