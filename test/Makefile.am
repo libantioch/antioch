@@ -63,6 +63,7 @@ check_PROGRAMS += ideal_gas_micro_thermo_unit
 check_PROGRAMS += ascii_parser_unit
 check_PROGRAMS += lindemann_falloff_threebody_unit
 check_PROGRAMS += troe_falloff_threebody_unit
+check_PROGRAMS += kinetics_partial_order_unit
 
 #GSL Tests
 check_PROGRAMS += molecular_binary_diffusion_unit
@@ -174,6 +175,7 @@ rotational_relaxation_vec_unit_SOURCES = rotational_relaxation_vec_unit.C
 ascii_parser_unit_SOURCES = ascii_parser_unit.C
 lindemann_falloff_threebody_unit_SOURCES = lindemann_falloff_threebody_unit.C
 troe_falloff_threebody_unit_SOURCES = troe_falloff_threebody_unit.C
+kinetics_partial_order_unit_SOURCES = kinetics_partial_order_unit.C
 
 # GSL Tests
 molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
@@ -252,6 +254,7 @@ TESTS += ideal_gas_micro_thermo_unit
 TESTS += ascii_parser_unit.sh
 TESTS += lindemann_falloff_threebody_unit
 TESTS += troe_falloff_threebody_unit
+TESTS += kinetics_partial_order_unit.sh
 
 # GSL Tests
 TESTS += molecular_binary_diffusion_unit
