@@ -224,7 +224,7 @@ namespace Antioch
         // We will add the reaction, unless we do not have a
         // reactant or product
         bool relevant_reaction = true;
-        unsigned int order_reaction(0);
+        NumericType order_reaction(0);
         std::vector<std::pair<std::string,int> > molecules_pairs;
 
         if(parser->reactants_pairs(molecules_pairs))
