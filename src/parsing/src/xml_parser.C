@@ -332,6 +332,7 @@ namespace Antioch
          }
       }
     }
+
     return map;
   }
 
@@ -370,7 +371,7 @@ namespace Antioch
 
         for( unsigned int p=0; p < mol_pairs.size(); p++ )
           {
-            std::pair<std::string,PairedType> pair( split_string_int_on_colon(mol_pairs[p]) );
+            std::pair<std::string,PairedType> pair( split_string_on_colon<PairedType>(mol_pairs[p]) );
 
             molecules_pairs.push_back(pair);
           }
@@ -407,7 +408,7 @@ namespace Antioch
           std::string error = "The keyword associated with the \'name\' attribute within the description of a falloff should be, and only be, ";
           error += "\'k0\' to specify the low pressure limit.  It seems that the one you provided, \'";
           error += std::string(_rate_constant->Attribute(_map.at(ParsingKey::FALLOFF_LOW_NAME).c_str()));
-          error += "\' is not this one.  Please correct it at reaction"; 
+          error += "\' is not this one.  Please correct it at reaction";
           error += this->reaction_id();
           error += ": ";
           error += this->reaction_equation();
@@ -572,7 +573,7 @@ namespace Antioch
                 split_string(value_string, " ", values);
 
                 for(unsigned int i = 0; i < values.size(); i++)
-                  par_values.push_back(split_string_double_on_colon (values[i]));
+                    par_values.push_back(split_string_on_colon<NumericType>(values[i]));
 
                 out = true;
               }
