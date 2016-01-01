@@ -332,6 +332,7 @@ namespace Antioch
          }
       }
     }
+
     return map;
   }
 
@@ -376,7 +377,7 @@ namespace Antioch
 
         for( unsigned int p=0; p < mol_pairs.size(); p++ )
           {
-            std::pair<std::string,PairedType> pair( split_string_int_on_colon(mol_pairs[p]) );
+            std::pair<std::string,PairedType> pair( split_string_on_colon<PairedType>(mol_pairs[p]) );
 
             molecules_pairs.push_back(pair);
           }
@@ -553,7 +554,7 @@ namespace Antioch
                             " ",values,false);
                 for(unsigned int i = 0; i < values.size(); i++)
                   {
-                    par_values.push_back(split_string_double_on_colon (values[i]));
+                    par_values.push_back(split_string_on_colon<NumericType>(values[i]));
                   }
                 out = true;
               }

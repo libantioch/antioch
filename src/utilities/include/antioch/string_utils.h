@@ -43,39 +43,54 @@
 #include <vector>
 #include <cstdlib> // atoi
 
+#define ANTIOCH_SPLIT_INT_TYPE(Type) \
+template <> \
+class StringToType<Type> \
+{ \
+public: \
+Type convert(const std::string & src) {return std::atoi(src.c_str());} \
+};
+
+#define ANTIOCH_SPLIT_DOUBLE_TYPE(Type) \
+template <> \
+class StringToType<Type> \
+{ \
+public: \
+Type convert(const std::string & src) {return std::atof(src.c_str());} \
+};
+
 namespace Antioch
 {
+  template <typename Type>
+  class StringToType
+  {
+    public:
+    Type convert(const std::string & src) {antioch_error();}
+  };
+
+ANTIOCH_SPLIT_INT_TYPE(int);
+ANTIOCH_SPLIT_INT_TYPE(unsigned int);
+
+ANTIOCH_SPLIT_DOUBLE_TYPE(float);
+ANTIOCH_SPLIT_DOUBLE_TYPE(double);
+ANTIOCH_SPLIT_DOUBLE_TYPE(long double);
+
   /*!
-    Split on colon, and return name, int value pair.
+    Split on colon, and return name, Type value pair.
     Taken from FIN-S for XML parsing.
    */
+  template <typename Type>
   inline
-  std::pair<std::string, int> split_string_int_on_colon(const std::string &token)
+  std::pair<std::string, Type> split_string_on_colon(const std::string &token)
   {
-    std::pair<std::string, int> ret = std::make_pair(std::string(), 0);
+    std::pair<std::string, Type> ret = std::make_pair(std::string(), 0);
     std::string::size_type colon_position = token.find(":");
     antioch_assert (colon_position != std::string::npos);
     ret.first  = token.substr(0, colon_position);
-    ret.second = std::atoi(token.substr(colon_position + 1).c_str());
+    StringToType<Type> conv;
+    ret.second = conv.convert(token.substr(colon_position + 1));
     return ret;
   }
-
-
-  /*!
-    Split on colon, and return name, double value pair.
-    Taken from FIN-S for XML parsing.
-   */
-  inline
-  std::pair<std::string, double> split_string_double_on_colon(const std::string &token)
-  {
-    std::pair<std::string, double> ret = std::make_pair(std::string(), 0.0);
-    std::string::size_type colon_position = token.find(":");
-    antioch_assert (colon_position != std::string::npos);
-    ret.first  = token.substr(0, colon_position);
-    ret.second = std::atof(token.substr(colon_position + 1).c_str());
-    return ret;
-  }
-
 
   /*!
     Taken from FIN-S for XML parsing.
