@@ -822,13 +822,13 @@ namespace Antioch
     // useful constants
     const StateType P0_RT = _P0_R/conditions.T(); // used to transform equilibrium constant from pressure units
 
-    net_rates.resize(this->n_reactions(),0.);
-    kfwd_const.resize(this->n_reactions(),0.);
-    kfwd.resize(this->n_reactions(),0.);
-    kbkwd_const.resize(this->n_reactions(),0.);
-    kbkwd.resize(this->n_reactions(),0.);
-    fwd_conc.resize(this->n_reactions(),1.);
-    bkwd_conc.resize(this->n_reactions(),1.);
+    net_rates.resize(this->n_reactions(),0);
+    kfwd_const.resize(this->n_reactions(),0);
+    kfwd.resize(this->n_reactions(),0);
+    kbkwd_const.resize(this->n_reactions(),0);
+    kbkwd.resize(this->n_reactions(),0);
+    fwd_conc.resize(this->n_reactions(),1);
+    bkwd_conc.resize(this->n_reactions(),1);
 
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
@@ -840,7 +840,7 @@ namespace Antioch
         for (unsigned int r=0; r<reaction.n_reactants(); r++)
           {
             fwd_conc[rxn] *= pow( molar_densities[reaction.reactant_id(r)],
-                              static_cast<int>(reaction.reactant_stoichiometric_coefficient(r)) );
+                              reaction.reactant_partial_order(r));
           }
         kfwd[rxn] *= fwd_conc[rxn];
 
@@ -853,7 +853,7 @@ namespace Antioch
           for (unsigned int p=0; p<reaction.n_products(); p++)
             {
               bkwd_conc[rxn] *= pow( molar_densities[reaction.product_id(p)],
-                               static_cast<int>(reaction.product_stoichiometric_coefficient(p)) );
+                                  reaction.product_partial_order(p));
             }
           kbkwd[rxn] *= bkwd_conc[rxn];
         }

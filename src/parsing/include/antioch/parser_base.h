@@ -35,6 +35,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <map>
 
 namespace Antioch
 {
@@ -184,6 +185,12 @@ namespace Antioch
 
          /*! \return pairs of products and stoichiometric coefficients*/
          virtual bool products_pairs(std::vector<std::pair<std::string,int> > & /*products_pair*/) const {antioch_not_implemented_msg(_not_implemented); return false;}
+
+         /*! return a map between reactants' name and found partial orders */
+         virtual const std::map<std::string,NumericType> reactants_orders() const {antioch_not_implemented_msg(_not_implemented); return std::map<std::string,NumericType>();}
+
+         /*! return a map between products' name and found partial orders */
+         virtual const std::map<std::string,NumericType> products_orders() const {antioch_not_implemented_msg(_not_implemented); return std::map<std::string,NumericType>();}
 
          /*! \return true if "name" attribute is found with value "k0"*/
          virtual bool is_k0(unsigned int /*nrc*/, const std::string & /*kin_model*/) const {antioch_not_implemented_msg(_not_implemented); return false;}

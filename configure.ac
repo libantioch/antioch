@@ -224,6 +224,7 @@ AC_CONFIG_FILES(test/parsing_chemkin.sh,                 [chmod +x test/parsing_
 AC_CONFIG_FILES(test/kinetics_reactive_scheme_unit.sh,   [chmod +x test/kinetics_reactive_scheme_unit.sh])
 AC_CONFIG_FILES(test/nasa_evaluator_unit.sh,             [chmod +x test/nasa_evaluator_unit.sh])
 AC_CONFIG_FILES(test/ascii_parser_unit.sh,               [chmod +x test/ascii_parser_unit.sh])
+AC_CONFIG_FILES(test/kinetics_partial_order_unit.sh,     [chmod +x test/kinetics_partial_order_unit.sh])
 
 dnl-----------------------------------------------
 dnl Generate header files

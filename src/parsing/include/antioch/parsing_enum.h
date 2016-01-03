@@ -45,6 +45,8 @@ namespace Antioch
                   KINETICS_MODEL,
                   REACTANTS,
                   PRODUCTS,
+                  FORWARD_ORDER,
+                  BACKWARD_ORDER,
                   PREEXP,
                   POWER,
                   ACTIVATION_ENERGY,

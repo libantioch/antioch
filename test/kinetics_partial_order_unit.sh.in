@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROG="@top_builddir@/test/kinetics_partial_order_unit"
+
+INPUT="@top_srcdir@/test/input_files/orders_xml.inp @top_srcdir@/test/input_files/orders_chemkin.inp"
+
+$PROG $INPUT
+
