@@ -417,7 +417,7 @@
     <reaction reversible="yes" type="LindemannFalloff" id="0021">
       <equation>N2 [=] 2 N </equation>
       <rateCoeff>
-        <HercourtEssen>
+        <HercourtEssen name="k0">
            <A>7.e+18</A>
            <b>-1.6</b>
         </HercourtEssen>
@@ -547,7 +547,7 @@
     <reaction reversible="yes" type="TroeFalloff" id="0028">
       <equation>N2 [=] 2 N </equation>
       <rateCoeff>
-        <HercourtEssen>
+        <HercourtEssen name="k0">
            <A>7.e+18</A>
            <b>-1.6</b>
         </HercourtEssen>
@@ -641,7 +641,7 @@
     <reaction reversible="yes" type="TroeFalloff" id="0032">
       <equation>NO + O [=] O2 + N</equation>
       <rateCoeff>
-        <Kooij>
+        <Kooij name="k0">
            <A>8.4e+09</A>
            <b>0.40</b>
            <E units="cal/mol">38526.0</E>
