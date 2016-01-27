@@ -139,7 +139,16 @@ namespace Antioch{
          /*! return pairs of products and stoichiometric coefficients*/
          bool products_pairs(std::vector<std::pair<std::string,int> > & products_pair) const;
 
-         /*! return true if "name" attribute is found with value "k0"*/
+         /*! return true if the concerned reaction rate is the low pressure limit
+          *
+          * In the case of falloff reactions, there is the attribute "name" to 
+          * specify which rate constant is the low pressure limit.  This attribute
+          * should have "k0" as value, and nothing else.
+          *
+          * If no "name" attribute is provided, the first rate constant is the low
+          * pressure limit, if two "name" attribute are provided, or if the value
+          * is not "k0", an exception is thrown.
+          */
          bool is_k0(unsigned int nrc, const std::string & kin_model) const;
 
          /*! return index of k0 (0 or 1)*/
