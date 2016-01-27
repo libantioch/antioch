@@ -132,7 +132,7 @@ typename Antioch::value_type<VectorScalar>::type k_photo(const VectorScalar &sol
 }
 
 template<typename Scalar>
-int tester(const std::string &root_name)
+int tester(const std::string &kin_file, const std::string &solar_file, const std::string & CH4_cs_file)
 {
 
   std::vector<std::string> species_str_list;
@@ -151,11 +151,11 @@ int tester(const std::string &root_name)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::read_reaction_set_data_xml<Scalar>( root_name + "/test_parsing.xml", true, reaction_set );
+  Antioch::read_reaction_set_data_xml<Scalar>( kin_file, true, reaction_set );
 
 //photochemistry set here
   std::vector<Scalar> hv,lambda;
-  std::ifstream solar_flux(root_name + "/solar_flux.dat");
+  std::ifstream solar_flux(solar_file);
   std::string line;
 
 
@@ -180,7 +180,7 @@ int tester(const std::string &root_name)
   solar_flux.close();
 
   std::vector<Scalar> CH4_s,CH4_lambda;
-  std::ifstream CH4_file(root_name + "/CH4_hv_cs.dat");
+  std::ifstream CH4_file(CH4_cs_file);
 
   Scalar T = 2000.L;
   Scalar Tr = 1.;
@@ -561,7 +561,7 @@ int tester(const std::string &root_name)
 
 int main(int argc, char* argv[])
 {
-  return (tester<float>(std::string(argv[1])) ||
-          tester<double>(std::string(argv[1])) ||
-          tester<long double>(std::string(argv[1])));
+  return (tester<float>(std::string(argv[1]),std::string(argv[2]),std::string(argv[3])) ||
+          tester<double>(std::string(argv[1]),std::string(argv[2]),std::string(argv[3])) ||
+          tester<long double>(std::string(argv[1]),std::string(argv[2]),std::string(argv[3])));
 }

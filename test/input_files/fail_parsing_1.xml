@@ -421,7 +421,7 @@
            <A>7.e+18</A>
            <b>-1.6</b>
         </HercourtEssen>
-        <HercourtEssen>
+        <HercourtEssen name="k0">
            <A>5.e+15</A>
            <b>0.5</b>
         </HercourtEssen>

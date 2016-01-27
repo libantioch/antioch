@@ -468,12 +468,12 @@
     <reaction reversible="yes" type="LindemannFalloff" id="0024">
       <equation>N2 + O [=] NO + N</equation>
       <rateCoeff>
-        <BerthelotHercourtEssen>
+        <BerthelotHercourtEssen name="k1">
            <A>5.7e+9</A>
            <b>-0.42</b>
            <D>-5e-3</D>
         </BerthelotHercourtEssen>
-        <BerthelotHercourtEssen name="k0">
+        <BerthelotHercourtEssen>
            <A>5e+9</A>
            <b>0.6</b>
            <D>-5e-4</D>
