@@ -354,7 +354,32 @@ namespace Antioch
     bool k0(false);
     if(_rate_constant->Attribute(_map.at(ParsingKey::FALLOFF_LOW_NAME).c_str()))
       {
-        if(std::string(_rate_constant->Attribute(_map.at(ParsingKey::FALLOFF_LOW_NAME).c_str())) == _map.at(ParsingKey::FALLOFF_LOW))k0 = true;
+        if(std::string(_rate_constant->Attribute(_map.at(ParsingKey::FALLOFF_LOW_NAME).c_str())) == _map.at(ParsingKey::FALLOFF_LOW))
+        {
+          k0 = true;
+        // now verifying the second one
+          if(nrc == 0) // first reaction rate block
+          {
+            antioch_assert(_rate_constant->NextSiblingElement(kin_model.c_str()));
+            if(_rate_constant->NextSiblingElement(kin_model.c_str())->Attribute(_map.at(ParsingKey::FALLOFF_LOW_NAME).c_str())) // HAHA
+            {
+               std::string error = "I can understand the need to put attributes everywhere, really, but in this case, I'm ";
+               error += "afraid that it's not a good idea to have two \'name\' attributes: only the low pressure limit should have it.";
+               antioch_parsing_error(error);
+            }
+          }
+        }else
+        {
+          std::string error = "The keyword associated with the \'name\' attribute within the description of a falloff should be, and only be, ";
+          error += "\'k0\' to specify the low pressure limit.  It seems that the one you provided, \'";
+          error += std::string(_rate_constant->Attribute(_map.at(ParsingKey::FALLOFF_LOW_NAME).c_str()));
+          error += "\' is not this one.  Please correct it at reaction"; 
+          error += this->reaction_id();
+          error += ": ";
+          error += this->reaction_equation();
+          error += ".";
+          antioch_parsing_error(error);
+        }
       }else if(nrc == 0) // if we're indeed at the first reading
       {
         antioch_assert(_rate_constant->NextSiblingElement(kin_model.c_str()));
