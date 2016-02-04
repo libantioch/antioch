@@ -190,6 +190,7 @@ stat_mech_thermo_unit_eigen_SOURCES = stat_mech_thermo_unit_eigen.C
 
 #Define tests to actually be run
 TESTS  =
+XFAIL_TESTS  =
 TESTS += standard_unit_tests
 TESTS += eigen_unit_tests
 TESTS += vexcl_unit_tests
@@ -238,6 +239,8 @@ TESTS += troe_falloff_unit
 TESTS += photochemical_rate_unit.sh
 TESTS += kinetics_reversibility_unit
 TESTS += parsing_xml.sh
+TESTS += fail_parsing_xml_1.sh
+TESTS += fail_parsing_xml_2.sh
 TESTS += parsing_chemkin.sh
 TESTS += units_unit
 TESTS += kinetics_reactive_scheme_unit.sh
@@ -252,6 +255,8 @@ TESTS += ideal_gas_micro_thermo_unit
 TESTS += ascii_parser_unit.sh
 TESTS += lindemann_falloff_threebody_unit
 TESTS += troe_falloff_threebody_unit
+XFAIL_TESTS += fail_parsing_xml_1.sh
+XFAIL_TESTS += fail_parsing_xml_2.sh
 
 # GSL Tests
 TESTS += molecular_binary_diffusion_unit

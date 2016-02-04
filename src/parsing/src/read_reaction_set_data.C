@@ -313,6 +313,8 @@ namespace Antioch
 
             Units<NumericType> def_unit;
             int pow_unit(order_reaction - 1);
+            bool is_falloff(false);
+            bool is_k0(false);
             //threebody always
             if(my_rxn->type() == ReactionType::THREE_BODY)pow_unit++;
             //falloff for k0
@@ -321,8 +323,13 @@ namespace Antioch
                my_rxn->type() == ReactionType::LINDEMANN_FALLOFF_THREE_BODY ||
                my_rxn->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
               {
+                is_falloff = verbose;
                 //k0 is either determined by an explicit name, or is the first of unnamed rate constants
-                if(parser->is_k0(my_rxn->n_rate_constants(),reading_kinetics_model))pow_unit++;
+                if(parser->is_k0(my_rxn->n_rate_constants(),reading_kinetics_model))
+                {
+                  pow_unit++;
+                  is_k0 = verbose;
+                }
               }
 
             NumericType par_value(-1.);
@@ -333,6 +340,9 @@ namespace Antioch
 
             // verbose as we read along
             if(verbose)std::cout << " rate: " << models[kinetics_model_map[kineticsModel]] << " model\n";
+            if(is_falloff){
+              (is_k0)?std::cout << "  Low pressure limit rate constant\n":std::cout << "  High pressure limit rate constant\n";
+            }
 
             // pre-exponential
             if(parser->rate_constant_preexponential_parameter(par_value, par_unit, default_unit))
