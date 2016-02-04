@@ -42,9 +42,28 @@
 #include <string>
 #include <vector>
 #include <cstdlib> // atoi
+#include <sstream>
 
 namespace Antioch
 {
+  //! All characters in delimiter will be treated as a delimiter
+  void split_string( const std::string& input,
+                     const std::string& delimiter,
+                     std::vector<std::string>& results );
+
+
+  template <typename T>
+  inline
+  T string_to_T(const std::string& input)
+  {
+    std::istringstream converter(input);
+    T returnval;
+    converter >> returnval;
+    if (converter.fail())
+      antioch_error();
+    return returnval;
+  }
+
   /*!
     Split on colon, and return name, int value pair.
     Taken from FIN-S for XML parsing.

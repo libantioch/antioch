@@ -99,6 +99,7 @@ pkginclude_HEADERS =
 
 standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
                               standard_unit/arrhenius_rate_valarray_test.C \
+                              standard_unit/string_utils_test.C \
                               standard_unit/standard_unit_tests.C
 
 eigen_unit_tests_SOURCES = eigen_unit/arrhenius_rate_eigen_test.C \
