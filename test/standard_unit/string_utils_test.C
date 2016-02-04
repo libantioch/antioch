@@ -46,6 +46,7 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE( StringUtilitiesTest );
 
     CPPUNIT_TEST(test_split_string);
+    CPPUNIT_TEST(test_string_to_T);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -123,6 +124,28 @@ namespace AntiochTesting
         CPPUNIT_ASSERT_EQUAL(str_split[7],std::string("2.16895191e+05"));
         CPPUNIT_ASSERT_EQUAL(str_split[8],std::string("4.34577527e+00"));
       }
+    }
+
+    void test_string_to_T()
+    {
+      {
+        std::string str("1");
+        int test = Antioch::string_to_T<int>(str);
+        CPPUNIT_ASSERT_EQUAL(1,test);
+      }
+
+      {
+        std::string str("1.0");
+        double test = Antioch::string_to_T<double>(str);
+        CPPUNIT_ASSERT_EQUAL(1.0,test);
+      }
+
+      {
+        std::string str("4.34577527e+00");
+        double test = Antioch::string_to_T<double>(str);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(4.34577527e+00, test, 1.0e-8);
+      }
+
     }
   };
 
