@@ -37,6 +37,7 @@ libantioch_la_SOURCES += transport/src/transport_mixture.C
 libantioch_la_SOURCES += utilities/src/antioch_version.C
 libantioch_la_SOURCES += utilities/src/gsl_spliner_impl.C
 libantioch_la_SOURCES += utilities/src/gsl_spliner_shim.C
+libantioch_la_SOURCES += utilities/src/string_utils.C
 
 #----------------------------
 # INCLUDES we want distributed

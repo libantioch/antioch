@@ -45,6 +45,11 @@
 
 namespace Antioch
 {
+  //! All characters in delimiter will be treated as a delimiter
+  void split_string( const std::string& input,
+                     const std::string& delimiter,
+                     std::vector<std::string>& results );
+
   /*!
     Split on colon, and return name, int value pair.
     Taken from FIN-S for XML parsing.
