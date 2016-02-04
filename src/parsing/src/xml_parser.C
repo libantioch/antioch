@@ -188,7 +188,7 @@ namespace Antioch
 
     if(_species_block)
       {
-        SplitString(std::string(_species_block->GetText())," ",molecules,false);
+        split_string(std::string(_species_block->GetText())," ",molecules);
       }
 
     return molecules;
@@ -326,13 +326,7 @@ namespace Antioch
 
         // Split the reactant string on whitespace. If no entries were found,
         // there is no whitespace - and assume then only one reactant is listed.
-        if( !SplitString(std::string(molecules->GetText()),
-                         " ",
-                         mol_pairs,
-                         /* include_empties = */ false)     )
-          {
-            mol_pairs.push_back(molecules->GetText());
-          }
+        split_string(std::string(molecules->GetText()), " ", mol_pairs);
 
         for( unsigned int p=0; p < mol_pairs.size(); p++ )
           {
@@ -440,16 +434,15 @@ namespace Antioch
     if(ptr->FirstChildElement(par.c_str()))
       {
         std::vector<std::string> values;
-        if(!SplitString(ptr->FirstChildElement(par.c_str())->GetText()," ",values,false))
-          values.push_back(ptr->FirstChildElement(par.c_str())->GetText());
+        split_string(ptr->FirstChildElement(par.c_str())->GetText()," ",values);
 
         par_values.resize(values.size());
         for(unsigned int i = 0; i < values.size(); i++)
-          {
-            par_values[i] =  std::atof(values[i].c_str());
-          }
+          par_values[i] =  string_to_T<NumericType>(values[i].c_str());
+
         if(ptr->FirstChildElement(par.c_str())->Attribute(_map.at(ParsingKey::UNIT).c_str()))
           par_unit = ptr->FirstChildElement(par.c_str())->Attribute(_map.at(ParsingKey::UNIT).c_str());
+
         out = true;
       }
 
@@ -534,12 +527,13 @@ namespace Antioch
             if(rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str()))
               {
                 std::vector<std::string> values;
-                SplitString(std::string((rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str())->GetText())?rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str())->GetText():""),
-                            " ",values,false);
+                std::string value_string = std::string((rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str())->GetText())?rate_constant->FirstChildElement(_map.at(ParsingKey::EFFICIENCY).c_str())->GetText():"");
+
+                split_string(value_string, " ", values);
+
                 for(unsigned int i = 0; i < values.size(); i++)
-                  {
-                    par_values.push_back(split_string_double_on_colon (values[i]));
-                  }
+                  par_values.push_back(split_string_double_on_colon (values[i]));
+
                 out = true;
               }
           }
@@ -611,7 +605,8 @@ namespace Antioch
 
             // now coefs
             std::vector<std::string> coefs_str;
-            SplitString(std::string(nasa->GetText())," ",coefs_str,false);
+            split_string(std::string(nasa->GetText())," ",coefs_str);
+
             for(unsigned int d = 0; d < coefs_str.size(); d++)
               values.push_back(std::atof(coefs_str[d].c_str()));
             // looping
@@ -622,7 +617,7 @@ namespace Antioch
                 temps.push_back(std::atof(nasa->Attribute("Tmax")));
 
                 // now coefs
-                SplitString(std::string(nasa->GetText())," ",coefs_str,false);
+                split_string(std::string(nasa->GetText())," ",coefs_str);
                 for(unsigned int d = 0; d < coefs_str.size(); d++)
                   values.push_back(std::atof(coefs_str[d].c_str()));
 
