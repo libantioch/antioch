@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: berthelot_rate_vec_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // valarray has to be declared before Antioch or gcc can't find the
 // right versions of exp() and pow() to use??
@@ -67,7 +63,7 @@ GRVY::GRVY_Timer_Class gt;
 #endif
 
 template <typename PairScalars>
-int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars & derive_exact, 
+int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars & derive_exact,
                               const PairScalars & rate,       const PairScalars & derive, const PairScalars & T)
 {
     typedef typename Antioch::value_type<PairScalars>::type  Scalar;
@@ -85,7 +81,7 @@ int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars 
                   << "rate_exact = " << rate_exact[2*tuple] << std::endl
                   << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) << std::endl
                   << "tolerance = " <<  tol << std::endl;
- 
+
         return_flag = 1;
       }
     if( abs( (rate[2*tuple+1] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) > tol )
@@ -97,7 +93,7 @@ int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars 
                   << "rate_exact = " << rate_exact[2*tuple+1] << std::endl
                   << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) << std::endl
                   << "tolerance = " <<  tol << std::endl;
- 
+
         return_flag = 1;
       }
     if( abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) > tol )

@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: metaprogramming.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_METAPROGRAMMING_H
 #define ANTIOCH_METAPROGRAMMING_H
@@ -144,7 +140,7 @@ inline
 T custom_clone(const T& /*example*/, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes)
 {
   T returnval(indexes.size()); //bof bof - metaphysicl has size within type, this suppose that size_type<indexes>::type can be changed in value_type<T>::type
-  
+
   for(unsigned int i = 0; i < indexes.size(); i++)
   {
       returnval[i] = values[indexes[i]];

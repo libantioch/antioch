@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_NASA_MIXTURE_H
 #define ANTIOCH_NASA_MIXTURE_H
@@ -47,7 +44,7 @@
 
 namespace Antioch
 {
-  
+
   template<typename CoeffType, typename NASAFit>
   class NASAEvaluator;
 
@@ -76,7 +73,7 @@ namespace Antioch
     bool check() const;
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
-    
+
   protected:
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
@@ -86,7 +83,7 @@ namespace Antioch
     std::vector<CoeffType> _cp_at_200p1;
 
   private:
-    
+
     //! Default constructor
     /*! Private to force to user to supply a ChemicalMixture object.*/
     NASAThermoMixture();

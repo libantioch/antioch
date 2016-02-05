@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: elementary_reaction.h 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_THREEBODY_REACTION_H
 #define ANTIOCH_THREEBODY_REACTION_H
@@ -42,7 +39,7 @@
 
 namespace Antioch
 {
-  //!A single reaction mechanism. 
+  //!A single reaction mechanism.
   /*!\class ThreeBodyReaction
  *
     This class encapsulates a three-body reaction process. A three-body process
@@ -52,7 +49,7 @@ namespace Antioch
     \f]
     with \f$\alpha(T)\f$ being a kinetics model (see base classes Reaction and KineticsType), \f$[M]\f$
     the mixture concentration (or pressure, it's equivalent, \f$[M] = \frac{P}{\mathrm{R}T}\f$
-    in an ideal gas model) and \f$c_i\f$ the concentration of species \f$i\f$.  All reactions are assumed to be reversible. 
+    in an ideal gas model) and \f$c_i\f$ the concentration of species \f$i\f$.  All reactions are assumed to be reversible.
     By default, the KooijRate kinetics model is used.
 
     We have:
@@ -70,24 +67,24 @@ namespace Antioch
   public:
 
     //! Construct a single reaction mechanism.
-    ThreeBodyReaction( const unsigned int n_species, 
+    ThreeBodyReaction( const unsigned int n_species,
                        const std::string &equation,
                        const bool &reversible = true,
                        const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
-    
+
     ~ThreeBodyReaction();
 
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
                                                 const KineticsConditions<StateType,VectorStateType>& conditions ) const;
-    
+
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const KineticsConditions<StateType,VectorStateType>& conditions,  
-                                                           StateType& kfwd,  
-                                                           StateType& dkfwd_dT, 
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                           StateType& kfwd,
+                                                           StateType& dkfwd_dT,
                                                            VectorStateType& dkfwd_dX) const;
 
   };
@@ -98,10 +95,10 @@ namespace Antioch
   ThreeBodyReaction<CoeffType>::ThreeBodyReaction( const unsigned int n_species,
                                                    const std::string &equation ,
                                                    const bool &reversible,
-                                                   const KineticsModel::KineticsModel kin) 
+                                                   const KineticsModel::KineticsModel kin)
     :Reaction<CoeffType>(n_species,equation,reversible,ReactionType::THREE_BODY,kin)
   {
-    Reaction<CoeffType>::_efficiencies.resize(n_species); 
+    Reaction<CoeffType>::_efficiencies.resize(n_species);
     std::fill (Reaction<CoeffType>::_efficiencies.begin(), Reaction<CoeffType>::_efficiencies.end(), 1.);
     return;
   }
@@ -125,7 +122,7 @@ namespace Antioch
     StateType kfwd = (this->efficiency(0) * molar_densities[0] );
 
     for (unsigned int s=1; s<this->n_species(); s++)
-      {        
+      {
         kfwd += ( this->efficiency(s) * molar_densities[s] );
       }
 
@@ -138,8 +135,8 @@ namespace Antioch
   template<typename StateType, typename VectorStateType>
   inline
   void ThreeBodyReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType &molar_densities,
-                                                                                       const KineticsConditions<StateType,VectorStateType>& conditions,  
-                                                                                       StateType& kfwd, 
+                                                                                       const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                                                       StateType& kfwd,
                                                                                        StateType& dkfwd_dT,
                                                                                        VectorStateType& dkfwd_dX) const
   {
@@ -153,7 +150,7 @@ namespace Antioch
     StateType coef = (this->efficiency(0) * molar_densities[0]);
 
     for (unsigned int s=1; s<this->n_species(); s++)
-      {        
+      {
         coef += ( this->efficiency(s) * molar_densities[s] );
         dkfwd_dX[s] = kfwd;
       }
@@ -162,7 +159,7 @@ namespace Antioch
     dkfwd_dT *= coef;
 
     for (unsigned int s=0; s<this->n_species(); s++)
-      {        
+      {
         dkfwd_dX[s] *= this->efficiency(s);
       }
 

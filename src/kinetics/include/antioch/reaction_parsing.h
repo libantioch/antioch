@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: reaction_enum.h 38785 2013-04-19 18:46:58Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_REACTION_PARSING_H
 #define ANTIOCH_REACTION_PARSING_H
@@ -44,20 +40,20 @@ namespace Antioch
 {
 
   template<typename CoeffType>
-  Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
-                                       const std::string& equation, 
+  Reaction<CoeffType>* build_reaction( const unsigned int n_species,
+                                       const std::string& equation,
                                        const bool &reversible,
-                                       const ReactionType::ReactionType& type , 
+                                       const ReactionType::ReactionType& type ,
                                        const KineticsModel::KineticsModel& kin );
 
 // ----------------------
 
   template<typename CoeffType>
   inline
-  Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
-                                       const std::string& equation, 
+  Reaction<CoeffType>* build_reaction( const unsigned int n_species,
+                                       const std::string& equation,
                                        const bool &reversible,
-                                       const ReactionType::ReactionType& type , 
+                                       const ReactionType::ReactionType& type ,
                                        const KineticsModel::KineticsModel& kin )
   {
     Reaction<CoeffType>* reaction = NULL;
@@ -108,7 +104,7 @@ namespace Antioch
         }
 
       } // switch(type)
-    
+
     // Dummy
     return reaction;
   }

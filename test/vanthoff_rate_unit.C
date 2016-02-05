@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // C++
 #include <limits>
@@ -49,7 +45,7 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
   for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
     const Scalar rate_exact = Cf * pow(T/Tref,eta) * exp(-Ea/(R*T) + D*T);
-    const Scalar derive_exact = Cf * pow(T/Tref,eta) * exp(-Ea/(R*T) + D*T) * (D + eta/T + Ea/(R*T*T)); 
+    const Scalar derive_exact = Cf * pow(T/Tref,eta) * exp(-Ea/(R*T) + D*T) * (D + eta/T + Ea/(R*T*T));
 
     Scalar rate1 = vanthoff_rate(T);
     Scalar deriveRate1 = vanthoff_rate.derivative(T);

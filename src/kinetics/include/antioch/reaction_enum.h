@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_REACTION_ENUM_H
 #define ANTIOCH_REACTION_ENUM_H
@@ -38,7 +35,7 @@ namespace Antioch
 
     enum ReactionType { ELEMENTARY = 0,
                         DUPLICATE,
-                        THREE_BODY, 
+                        THREE_BODY,
                         LINDEMANN_FALLOFF,
                         TROE_FALLOFF,
                         LINDEMANN_FALLOFF_THREE_BODY,

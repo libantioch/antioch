@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_REACTION_H
 #define ANTIOCH_REACTION_H
@@ -78,7 +75,7 @@ namespace Antioch
   template <typename CoeffType>
   class TroeFalloff;
 
-  //!A single reaction mechanism. 
+  //!A single reaction mechanism.
   /*!\class Reaction
    *
    * A reaction is characterized by the rate constant \f$k(T,[M])\f$, which can
@@ -117,11 +114,11 @@ namespace Antioch
               const bool &reversible = true,
               const ReactionType::ReactionType type = ReactionType::ELEMENTARY,
               const KineticsModel::KineticsModel kin = KineticsModel::KOOIJ);
-    
+
     virtual ~Reaction();
 
     unsigned int n_species() const;
-    
+
     //! \returns the equation for this reaction.
     const std::string & equation() const;
 
@@ -150,7 +147,7 @@ namespace Antioch
 
     //! Set the model of kinetics.
     void set_kinetics_model( const KineticsModel::KineticsModel kin);
-    
+
     bool initialized() const;
 
     //! reset a parameter from the rate constant
@@ -240,7 +237,7 @@ namespace Antioch
 
     //!
     int gamma() const;
-    
+
     //!
     template <typename StateType, typename VectorStateType>
     StateType equilibrium_constant( const StateType& P0_RT,
@@ -259,7 +256,7 @@ namespace Antioch
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
                                                 const KineticsConditions<StateType,VectorStateType>& conditions) const;
-    
+
     // Deprecated API for backwards compatibility
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
@@ -270,8 +267,8 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const KineticsConditions<StateType,VectorStateType>& conditions, 
-                                                           StateType& kfwd, 
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                           StateType& kfwd,
                                                            StateType& dkfwd_dT,
                                                            VectorStateType& dkfwd_dX) const;
 
@@ -287,8 +284,8 @@ namespace Antioch
     ////
     template <typename StateType, typename VectorStateType>
     StateType compute_rate_of_progress( const VectorStateType& molar_densities,
-                                        const KineticsConditions<StateType,VectorStateType>& conditions,  
-                                        const StateType& P0_RT,  
+                                        const KineticsConditions<StateType,VectorStateType>& conditions,
+                                        const StateType& P0_RT,
                                         const VectorStateType& h_RT_minus_s_R) const;
 
     // Deprecated API for backwards compatibility
@@ -481,14 +478,14 @@ namespace Antioch
   {
     return _forward_rate.size();
   }
-    
+
   template<typename CoeffType, typename VectorCoeffType>
   inline
   void Reaction<CoeffType,VectorCoeffType>::swap_forward_rates(unsigned int irate, unsigned int jrate)
   {
     antioch_assert_less(irate,_forward_rate.size());
     antioch_assert_less(jrate,_forward_rate.size());
-    
+
     KineticsType<CoeffType>* rate_tmp = _forward_rate[jrate];
     _forward_rate[jrate] = _forward_rate[irate];
     _forward_rate[irate] = rate_tmp;
@@ -519,41 +516,41 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType>
   inline
   const std::string& Reaction<CoeffType,VectorCoeffType>::reactant_name(const unsigned int r) const
-  {       
-    antioch_assert_less(r, _reactant_names.size()); 
-    return _reactant_names[r]; 
+  {
+    antioch_assert_less(r, _reactant_names.size());
+    return _reactant_names[r];
   }
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
   const std::string& Reaction<CoeffType,VectorCoeffType>::product_name(const unsigned int p) const
-  { 
-    antioch_assert_less(p, _product_names.size()); 
-    return _product_names[p]; 
+  {
+    antioch_assert_less(p, _product_names.size());
+    return _product_names[p];
   }
-  
+
   template<typename CoeffType, typename VectorCoeffType>
   inline
   unsigned int Reaction<CoeffType,VectorCoeffType>::reactant_id(const unsigned int r) const
-  { 
-    antioch_assert_less(r, _reactant_ids.size()); 
+  {
+    antioch_assert_less(r, _reactant_ids.size());
     antioch_assert_less(_reactant_ids[r], this->n_species());
-    return _reactant_ids[r]; 
+    return _reactant_ids[r];
   }
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
   unsigned int Reaction<CoeffType,VectorCoeffType>::product_id(const unsigned int p) const
-  { 
-    antioch_assert_less(p, _product_ids.size()); 
+  {
+    antioch_assert_less(p, _product_ids.size());
     antioch_assert_less(_product_ids[p], this->n_species());
-    return _product_ids[p]; 
+    return _product_ids[p];
   }
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
   unsigned int Reaction<CoeffType,VectorCoeffType>::reactant_stoichiometric_coefficient(const unsigned int r) const
-  {      
+  {
     antioch_assert_less(r, _reactant_stoichiometry.size());
     antioch_assert_less(_reactant_ids[r], this->n_species());
     return _reactant_stoichiometry[r];
@@ -571,7 +568,7 @@ namespace Antioch
   template<typename CoeffType, typename VectorCoeffType>
   inline
   CoeffType Reaction<CoeffType,VectorCoeffType>::reactant_partial_order(const unsigned int r) const
-  {      
+  {
     antioch_assert_less(r, _species_reactant_partial_order.size());
     antioch_assert_less(_reactant_ids[r], this->n_species());
     return _species_reactant_partial_order[r];
@@ -660,8 +657,8 @@ namespace Antioch
   inline
   CoeffType Reaction<CoeffType,VectorCoeffType>::efficiency( const unsigned int s ) const
   {
-    
-    antioch_assert(s < _efficiencies.size()); 
+
+    antioch_assert(s < _efficiencies.size());
     return _efficiencies[s];
   }
 
@@ -730,19 +727,19 @@ namespace Antioch
       {
         _gamma -= this->reactant_stoichiometric_coefficient(r);
       }
-    
+
     for (unsigned int p=0; p < this->n_products(); p++)
       {
         _gamma += this->product_stoichiometric_coefficient(p);
       }
-    
+
      // gives kinetics object index in reaction set
      for(typename std::vector<KineticsType<CoeffType,VectorCoeffType>* >::iterator it = _forward_rate.begin();
                 it != _forward_rate.end(); it++)
      {
         (*it)->set_index(index);
      }
-   
+
     // set initialization flag
     _initialized = true;
   }
@@ -940,8 +937,8 @@ namespace Antioch
   template <typename StateType, typename VectorStateType>
   inline
   void Reaction<CoeffType,VectorCoeffType>::compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                                              const KineticsConditions<StateType,VectorStateType>& conditions, 
-                                                                              StateType& kfwd, 
+                                                                              const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                                              StateType& kfwd,
                                                                               StateType& dkfwd_dT,
                                                                               VectorStateType& dkfwd_dX) const
   {
@@ -1021,8 +1018,8 @@ namespace Antioch
   template <typename StateType, typename VectorStateType>
   inline
   StateType Reaction<CoeffType,VectorCoeffType>::compute_rate_of_progress( const VectorStateType& molar_densities,
-                                                           const KineticsConditions<StateType,VectorStateType>& conditions,  
-                                                           const StateType& P0_RT,  
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions,
+                                                           const StateType& P0_RT,
                                                            const VectorStateType& h_RT_minus_s_R) const
   {
     StateType kfwd = this->compute_forward_rate_coefficient(molar_densities,conditions);
@@ -1031,7 +1028,7 @@ namespace Antioch
     // Rfwd
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
-        kfwd_times_reactants     *= 
+        kfwd_times_reactants     *=
           ant_pow( molar_densities[this->reactant_id(ro)],
             this->reactant_partial_order(ro));
       }
@@ -1043,13 +1040,13 @@ namespace Antioch
       StateType Keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
       kbkwd_times_products = kfwd/Keq;
 
-      // Rbkwd 
+      // Rbkwd
       for (unsigned int po=0; po< this->n_products(); po++)
         {
-          kbkwd_times_products     *= 
+          kbkwd_times_products     *=
             ant_pow( molar_densities[this->product_id(po)],
               this->product_partial_order(po));
-         
+
         }
     }
 
@@ -1114,7 +1111,7 @@ namespace Antioch
       {
         dRfwd_dX_s[this->reactant_id(r)] = kfwd;
       }
-    
+
     //init
     StateType facfwd = constant_clone(conditions.T(),1);
     dRfwd_dT = dkfwd_dT;
@@ -1122,11 +1119,11 @@ namespace Antioch
     // Rfwd & derivatives
     for (unsigned int ro=0; ro < this->n_reactants(); ro++)
       {
-        const StateType val = 
+        const StateType val =
           ant_pow( molar_densities[this->reactant_id(ro)],
             this->reactant_partial_order(ro));
-          
-        const StateType dval = 
+
+        const StateType dval =
           ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
             ant_pow( molar_densities[this->reactant_id(ro)],
               this->reactant_partial_order(ro) - 1)
@@ -1145,7 +1142,7 @@ namespace Antioch
       {
         dRfwd_dX_s[s] += facfwd * dkfwd_dX_s[s];
       }
-        
+
     net_reaction_rate = facfwd * kfwd;
 
     dnet_rate_dT = dRfwd_dT;
@@ -1200,16 +1197,16 @@ namespace Antioch
       // Rbkwd & derivatives
       for (unsigned int po=0; po< this->n_products(); po++)
         {
-          const StateType val = 
+          const StateType val =
             ant_pow( molar_densities[this->product_id(po)],
               this->product_partial_order(po));
-          
-          const StateType dval = 
+
+          const StateType dval =
             ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
               ant_pow( molar_densities[this->product_id(po)],
               this->product_partial_order(po) - 1)
               );
-        
+
           facbkwd   *= val;
           dRbkwd_dT *= val;
 
@@ -1217,7 +1214,7 @@ namespace Antioch
             {
               dRbkwd_dX_s[this->product_id(pi)] *= (pi == po) ? dval : val;
             }
-        
+
         }
 
       for (unsigned int s = 0; s < this->n_species(); s++)
@@ -1298,7 +1295,7 @@ namespace Antioch
           antioch_error();
           return NULL;
         }
-        
+
       }
   }
 
@@ -1351,7 +1348,7 @@ namespace Antioch
           {
              (static_cast<FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_alpha(new_value);
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              (static_cast<FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_alpha(new_value);
           }else
@@ -1366,7 +1363,7 @@ namespace Antioch
           {
              (static_cast<FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_T1(new_value);
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              (static_cast<FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_T1(new_value);
           }else
@@ -1381,7 +1378,7 @@ namespace Antioch
           {
              (static_cast<FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_T2(new_value);
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              (static_cast<FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_T2(new_value);
           }else
@@ -1396,7 +1393,7 @@ namespace Antioch
           {
              (static_cast<FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_T3(new_value);
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              (static_cast<FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().set_T3(new_value);
           }else
@@ -1431,7 +1428,7 @@ namespace Antioch
           {
              value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_alpha();
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_alpha();
           }else
@@ -1446,7 +1443,7 @@ namespace Antioch
           {
              value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T1();
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T1();
           }else
@@ -1461,7 +1458,7 @@ namespace Antioch
           {
              value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T2();
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T2();
           }else
@@ -1476,7 +1473,7 @@ namespace Antioch
           {
              value = (static_cast<const FalloffReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T3();
           }
-          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY) 
+          else if(this->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
           {
              value = (static_cast<const FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >*>(this))->F().get_T3();
           }else

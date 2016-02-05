@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_NASA_EVALUATOR_H
 #define ANTIOCH_NASA_EVALUATOR_H
@@ -39,10 +36,10 @@
 namespace Antioch
 {
 
-  template<typename CoeffType> 
+  template<typename CoeffType>
   class NASACurveFit;
 
-  template<typename CoeffType, typename NASAFit> 
+  template<typename CoeffType, typename NASAFit>
   class NASAThermoMixture;
 
   template<typename CoeffType=double, typename NASAFit = NASA9CurveFit<CoeffType> >
@@ -63,7 +60,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, StateType
-      >::type 
+      >::type
     cp( const TempCache<StateType>& cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
@@ -76,7 +73,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, StateType
-      >::type 
+      >::type
     cv( const TempCache<StateType>& cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
@@ -89,7 +86,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, void
-      >::type 
+      >::type
     h( const TempCache<StateType>& cache, VectorStateType& h ) const;
 
     //! We currently need different specializations for scalar vs vector inputs here
@@ -100,7 +97,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, void
-      >::type 
+      >::type
     h_RT_minus_s_R( const TempCache<StateType>& cache, VectorStateType& h_RT_minus_s_R ) const;
 
     template<typename StateType>
@@ -110,7 +107,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, void
-      >::type 
+      >::type
     dh_RT_minus_s_R_dT( const TempCache<StateType>& cache, VectorStateType& h_RT_minus_s_R ) const;
 
 
@@ -118,7 +115,7 @@ namespace Antioch
     template<typename StateType>
     StateType cp_over_R( const TempCache<StateType>& cache, unsigned int species ) const;
 
-     //! Cv over R, from ideal gas, 
+     //! Cv over R, from ideal gas,
      // \f[ \frac{C_v}{\mathrm{R} = \frac{C_p}{\mathrm{R}} - 1\f]
     template<typename StateType>
     StateType cv_over_R( const TempCache<StateType>& cache, unsigned int species ) const;
@@ -142,7 +139,7 @@ namespace Antioch
     const ChemicalMixture<CoeffType>& chem_mixture() const;
 
   private:
-    
+
     //! Default constructor
     /*! Private to force to user to supply a NASAThermoMixture object.*/
     NASAEvaluator();
@@ -170,7 +167,7 @@ namespace Antioch
   {
     return _nasa_mixture;
   }
-  
+
   template<typename CoeffType, typename NASAFit>
   inline
   unsigned int NASAEvaluator<CoeffType,NASAFit>::n_species() const
@@ -193,14 +190,14 @@ namespace Antioch
   {
     typedef typename Antioch::value_type<StateType>::type ScalarType;
     // T < 200.1 ? cp_at_200p1 : R * cp_over_R
-        
+
     return
       Antioch::if_else
         (cache.T < ScalarType(200.1),
          Antioch::constant_clone
 	   (cache.T,_nasa_mixture.cp_at_200p1(species)),
 	 StateType
-	   (this->chem_mixture().R(species) * 
+	   (this->chem_mixture().R(species) *
 	    this->cp_over_R(cache, species)));
   }
 
@@ -209,20 +206,20 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, StateType
-    >::type 
+    >::type
   NASAEvaluator<CoeffType,NASAFit>::cp( const TempCache<StateType>& cache,
                                const VectorStateType& mass_fractions ) const
   {
     antioch_assert_equal_to( mass_fractions.size(), this->n_species() );
     antioch_assert_greater( mass_fractions.size(), 0 );
-    
+
     StateType cp = mass_fractions[0]*this->cp(cache,0);
-    
+
     for( unsigned int s = 1; s < this->n_species(); s++ )
       {
         cp += mass_fractions[s]*this->cp(cache,s);
       }
-    
+
     return cp;
   }
 
@@ -232,16 +229,16 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, void
-    >::type 
+    >::type
   NASAEvaluator<CoeffType,NASAFit>::h( const TempCache<StateType>& cache, VectorStateType& h ) const
   {
     antioch_assert_equal_to( h.size(), this->n_species() );
-    
+
     for( unsigned int s = 0; s < this->n_species(); s++ )
       {
         h[s] = this->chem_mixture().R(s)*cache.T*this->h_over_RT(cache,s);
       }
-    
+
     return;
   }
 
@@ -281,7 +278,7 @@ namespace Antioch
     antioch_assert_less( species, this->n_species() );
     antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
                          _nasa_mixture.curve_fit(species).n_intervals() );
-    
+
     return this->_nasa_mixture.curve_fit(species).h_over_RT(cache);
   }
 
@@ -294,10 +291,10 @@ namespace Antioch
     antioch_assert_less( species, this->n_species() );
     antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
                          _nasa_mixture.curve_fit(species).n_intervals() );
-    
+
     return this->_nasa_mixture.curve_fit(species).s_over_R(cache);
   }
-  
+
 
   template<typename CoeffType, typename NASAFit>
   template<typename StateType>
@@ -309,7 +306,7 @@ namespace Antioch
     // FIXME - we need assert_less to be vectorizable
     // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
     //                      _nasa_mixture.curve_fit(species).n_intervals() );
-    
+
     return this->_nasa_mixture.curve_fit(species).h_RT_minus_s_R(cache);
   }
 
@@ -319,17 +316,17 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, void
-    >::type 
+    >::type
   NASAEvaluator<CoeffType,NASAFit>::h_RT_minus_s_R( const TempCache<StateType>& cache,
                                            VectorStateType& h_RT_minus_s_R ) const
   {
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
-    
+
     for( unsigned int s = 0; s < this->n_species(); s++ )
       {
         h_RT_minus_s_R[s] = this->h_RT_minus_s_R(cache,s);
       }
-    
+
     return;
   }
 
@@ -345,7 +342,7 @@ namespace Antioch
     // FIXME - we need assert_less to be vectorizable
     // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
     //                      _nasa_mixture.curve_fit(species).n_intervals() );
-      
+
     return this->_nasa_mixture.curve_fit(species).dh_RT_minus_s_R_dT(cache);
   }
 
@@ -355,27 +352,27 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, void
-    >::type 
+    >::type
   NASAEvaluator<CoeffType,NASAFit>::dh_RT_minus_s_R_dT( const TempCache<StateType>& cache,
                                                VectorStateType& dh_RT_minus_s_R_dT ) const
   {
     antioch_assert_equal_to( dh_RT_minus_s_R_dT.size(), this->n_species() );
-    
+
     for( unsigned int s = 0; s < this->n_species(); s++ )
       {
         dh_RT_minus_s_R_dT[s] = this->dh_RT_minus_s_R_dT(cache,s);
       }
-    
+
     return;
   }
-  
-  
+
+
   template<typename CoeffType, typename NASAFit>
   template<typename StateType, typename VectorStateType>
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, StateType
-    >::type 
+    >::type
   NASAEvaluator<CoeffType,NASAFit>::cv( const TempCache<StateType>& cache,
                                const VectorStateType& mass_fractions ) const
     {

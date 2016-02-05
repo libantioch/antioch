@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: eigen_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_EIGEN_UTILS_DECL_H
 #define ANTIOCH_EIGEN_UTILS_DECL_H
@@ -75,7 +71,7 @@ template <
   template <typename, int, int, int, int, int> class _Matrix,
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >
-struct is_eigen 
+struct is_eigen
 <_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> >
 {
   static const bool value = true;
@@ -158,14 +154,14 @@ struct raw_value_type<_Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCol
 
 template <typename T>
 inline
-typename Antioch::enable_if_c<is_eigen<T>::value, 
+typename Antioch::enable_if_c<is_eigen<T>::value,
   typename value_type<T>::type
   >::type
 max(const T& in);
 
 template <typename T>
 inline
-typename Antioch::enable_if_c<is_eigen<T>::value, 
+typename Antioch::enable_if_c<is_eigen<T>::value,
   typename value_type<T>::type
   >::type
 min(const T& in);
@@ -225,7 +221,7 @@ template <template <typename, int, int, int, int, int> class _Matrix,
   typename VectorScalar
 >
 inline
-_Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> 
+_Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols>
   custom_clone(const _Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & example, const VectorScalar& values, const _Matrix<unsigned int,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & indexes);
 */
 
@@ -242,7 +238,7 @@ const T1& if_true,
 const T2& if_false);
 
 
-template <typename VectorT, 
+template <typename VectorT,
   template <typename, int, int, int, int, int> class _Matrix,
   typename _UIntT, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >

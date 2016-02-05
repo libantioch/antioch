@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_CEA_THERMO_H
 #define ANTIOCH_CEA_THERMO_H
@@ -65,7 +62,7 @@ namespace Antioch
     virtual ~CEAThermodynamics();
 
     template<typename StateType=CoeffType>
-    class Cache 
+    class Cache
     {
     public:
       const StateType &T;
@@ -73,25 +70,25 @@ namespace Antioch
       StateType T3;
       StateType T4;
       StateType lnT;
-      
-      explicit Cache(const StateType &T_in) 
+
+      explicit Cache(const StateType &T_in)
 	: T(T_in), T2(T*T), T3(T2*T), T4(T2*T2), lnT(T_in) {
         using std::log;
         lnT = log(T);
       }
 
-      Cache(const StateType &T_in, 
-            const StateType &T2_in, 
-            const StateType &T3_in, 
-            const StateType &T4_in, 
-            const StateType &lnT_in) 
+      Cache(const StateType &T_in,
+            const StateType &T2_in,
+            const StateType &T3_in,
+            const StateType &T4_in,
+            const StateType &lnT_in)
 	: T(T_in), T2(T2_in), T3(T3_in), T4(T4_in), lnT(lnT_in) {
         //! \todo - correctness assertions?
       }
     private:
-      Cache();      
+      Cache();
     };
-    
+
     void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs );
 
     // ! compatibility for parsers
@@ -109,7 +106,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, StateType
-    >::type 
+    >::type
     cp( const Cache<StateType> &cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
@@ -118,7 +115,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, StateType
-    >::type 
+    >::type
     cv( const Cache<StateType> &cache, const VectorStateType& mass_fractions ) const;
 
     template<typename StateType>
@@ -127,7 +124,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, void
-    >::type 
+    >::type
     h( const Cache<StateType> &cache, VectorStateType& h ) const;
 
     //! We currently need different specializations for scalar vs vector inputs here
@@ -138,7 +135,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, void
-    >::type 
+    >::type
     h_RT_minus_s_R( const Cache<StateType> &cache, VectorStateType& h_RT_minus_s_R ) const;
 
 
@@ -151,7 +148,7 @@ namespace Antioch
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, void
-    >::type 
+    >::type
     dh_RT_minus_s_R_dT( const Cache<StateType> &cache, VectorStateType& dh_RT_minus_s_R_dT ) const;
 
 
@@ -175,13 +172,13 @@ namespace Antioch
     std::vector<CoeffType> _cp_at_200p1;
 
   private:
-    
+
     //! Default constructor
     /*! Private to force to user to supply a ChemicalMixture object.*/
     CEAThermodynamics();
   };
 
-  
+
   /* ------------------------- Inline Functions -------------------------*/
 
   template<typename CoeffType>
@@ -195,7 +192,7 @@ namespace Antioch
      antioch_deprecated();
 
     // Read in CEA coefficients. Note this assumes chem_mixture is fully constructed.
-    /*! deprecated*/  
+    /*! deprecated*/
     read_cea_mixture_data_ascii(*this, filename);
 
     // Cache cp values at small temperatures
@@ -275,7 +272,7 @@ namespace Antioch
          Antioch::constant_clone
 	   (cache.T,_cp_at_200p1[species]),
 	 StateType
-	   (this->_chem_mixture.R(species) * 
+	   (this->_chem_mixture.R(species) *
 	    this->cp_over_R(cache, species)));
   }
 
@@ -285,7 +282,7 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, StateType
-  >::type 
+  >::type
   CEAThermodynamics<CoeffType>::cp( const Cache<StateType> &cache,
 				    const VectorStateType& mass_fractions ) const
   {
@@ -317,7 +314,7 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, void
-  >::type 
+  >::type
   CEAThermodynamics<CoeffType>::h( const Cache<StateType> &cache, VectorStateType& h ) const
   {
     antioch_assert_equal_to( h.size(), _species_curve_fits.size() );
@@ -348,7 +345,7 @@ namespace Antioch
 
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     // FIXME - this needs expression templates to be faster...
 
     StateType returnval = Antioch::zero_clone(cache.T);
@@ -379,9 +376,9 @@ namespace Antioch
 			 _species_curve_fits[species]->n_intervals() );
 
     const unsigned int interval = this->_species_curve_fits[species]->interval(cache.T);
-    
+
     const CoeffType *a = this->_species_curve_fits[species]->coefficients(interval);
-    
+
     typedef typename
       Antioch::raw_value_type<StateType>::type raw_type;
 
@@ -403,14 +400,14 @@ namespace Antioch
 			 _species_curve_fits[species]->n_intervals() );
 
     const unsigned int interval = this->_species_curve_fits[species]->interval(cache.T);
-    
+
     const CoeffType *a = this->_species_curve_fits[species]->coefficients(interval);
-    
+
     typedef typename
       Antioch::raw_value_type<StateType>::type raw_type;
 
     /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a9 */
-    return -a[0]/cache.T2/raw_type(2) - a[1]/cache.T + 
+    return -a[0]/cache.T2/raw_type(2) - a[1]/cache.T +
 	   a[2]*cache.lnT + a[3]*cache.T + a[4]*cache.T2/raw_type(2) +
            a[5]*cache.T3/raw_type(3) + a[6]*cache.T4/raw_type(4) + a[9];
   }
@@ -432,7 +429,7 @@ namespace Antioch
     const UIntType interval = this->_species_curve_fits[species]->interval(cache.T);
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     // FIXME - this needs expression templates to be faster...
 
     StateType returnval = Antioch::zero_clone(cache.T);
@@ -448,12 +445,12 @@ namespace Antioch
           this->_species_curve_fits[species]->coefficients(i);
 	returnval = Antioch::if_else
 	  (interval == i,
-	   StateType(-a[0]/cache.T2/raw_type(2) + 
-                     (a[1] + a[8])/cache.T + 
-		     a[1]*cache.lnT/cache.T - a[2]*cache.lnT + 
-		     (a[2] - a[9]) - a[3]*cache.T/raw_type(2) - 
+	   StateType(-a[0]/cache.T2/raw_type(2) +
+                     (a[1] + a[8])/cache.T +
+		     a[1]*cache.lnT/cache.T - a[2]*cache.lnT +
+		     (a[2] - a[9]) - a[3]*cache.T/raw_type(2) -
 		     a[4]*cache.T2/raw_type(6) -
-                     a[5]*cache.T3/raw_type(12) - 
+                     a[5]*cache.T3/raw_type(12) -
 		     a[6]*cache.T4/raw_type(20)),
 	   returnval);
       }
@@ -467,7 +464,7 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, void
-  >::type 
+  >::type
   CEAThermodynamics<CoeffType>::h_RT_minus_s_R( const Cache<StateType> &cache,
 						VectorStateType& h_RT_minus_s_R ) const
   {
@@ -493,14 +490,14 @@ namespace Antioch
     // FIXME - we need assert_less to be vectorizable
     // antioch_assert_less( _species_curve_fits[species]->interval(cache.T),
     //                      _species_curve_fits[species]->n_intervals() );
-    
+
     typedef typename
       Antioch::rebind<StateType, unsigned int>::type UIntType;
     const UIntType interval = this->_species_curve_fits[species]->interval(cache.T);
 
     const unsigned int begin_interval = Antioch::min(interval);
     const unsigned int end_interval = Antioch::max(interval)+1;
-    
+
     // FIXME - this needs expression templates to be faster...
 
     StateType returnval = Antioch::zero_clone(cache.T);
@@ -533,7 +530,7 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, void
-  >::type 
+  >::type
   CEAThermodynamics<CoeffType>::dh_RT_minus_s_R_dT( const Cache<StateType> &cache,
                                                     VectorStateType& dh_RT_minus_s_R_dT ) const
   {
@@ -563,7 +560,7 @@ namespace Antioch
   inline
   typename enable_if_c<
     has_size<VectorStateType>::value, StateType
-  >::type 
+  >::type
   CEAThermodynamics<CoeffType>::cv( const Cache<StateType> &cache,
 				    const VectorStateType& mass_fractions ) const
   {

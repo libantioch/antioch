@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: metaprogramming.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_METAPROGRAMMING_DECL_H
 #define ANTIOCH_METAPROGRAMMING_DECL_H
@@ -52,7 +48,7 @@ namespace Antioch
   { return Expr; }
 #else
 #define ANTIOCH_AUTO(Type) Type
-#define ANTIOCH_RETURNEXPR(Type, Expr) 
+#define ANTIOCH_RETURNEXPR(Type, Expr)
 #define ANTIOCH_AUTOFUNC(Type, Expr) { return Expr; }
 #endif
 

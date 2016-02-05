@@ -3,8 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
-// Copyright (C) 2014 Paul T. Bauman, Benjamin S. Kirk, Sylvain Plessis,
-//                    Roy H. Stonger
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -22,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // C++
 #include <limits>
@@ -37,7 +33,7 @@
 #include "antioch/units.h"
 
 template <typename Scalar>
-int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_exact, 
+int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_exact,
                               const Scalar & rate, const Scalar & derive, const Scalar & T)
 {
     const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
@@ -51,7 +47,7 @@ int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_e
                   << "rate_exact = " << rate_exact << std::endl
                   << "relative difference = " <<  abs( (rate - rate_exact)/rate_exact ) << std::endl
                   << "tolerance = " <<  tol << std::endl;
- 
+
         return_flag = 1;
       }
     if( abs( (derive - derive_exact)/derive_exact ) > tol )
@@ -81,7 +77,7 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
 
   for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
-  
+
     const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(-Ea/(R*T));
     const Scalar derive_exact = exp(-Ea/(R*T)) * pow(T/Tref,eta) * Cf * (Ea/(R*T*T) + eta/T );
     Antioch::KineticsConditions<Scalar> cond(T);
