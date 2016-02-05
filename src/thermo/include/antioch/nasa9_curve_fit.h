@@ -28,13 +28,8 @@
 #define ANTIOCH_NASA9_CURVE_FIT_H
 
 // Antioch
-#include "antioch/antioch_asserts.h"
-#include "antioch/metaprogramming_decl.h" // Antioch::rebind
+#include "antioch/nasa_curve_fit_base.h"
 #include "antioch/metaprogramming.h"
-#include "antioch/temp_cache.h"
-
-// C++
-#include <vector>
 
 namespace Antioch
 {
@@ -72,7 +67,7 @@ namespace Antioch
    */
 
   template<typename CoeffType=double>
-  class NASA9CurveFit
+  class NASA9CurveFit : public NASACurveFitBase<CoeffType>
   {
   public:
 
@@ -81,20 +76,7 @@ namespace Antioch
 
     NASA9CurveFit( const std::vector<CoeffType>& coeffs );
 
-    ~NASA9CurveFit();
-
-    //! The number of intervals for this NASA9 curve fit
-    unsigned int n_intervals() const;
-
-    //! The interval the input temperature lies in
-    /*!
-      @returns which curve fit interval the input temperature
-      lies in.  The NASA9 thermodynamic intervals are
-      [200-1,000], [1,000-6,000], [6,000-20,000] K
-     */
-    template <typename StateType>
-    typename Antioch::rebind<StateType, unsigned int>::type
-    interval(const StateType& T) const;
+    ~NASA9CurveFit(){};
 
     /*!
       @returns the value \f$\frac{Cp}{\mathrm{R}}\f$
@@ -156,27 +138,6 @@ namespace Antioch
     template <typename StateType>
     StateType dh_RT_minus_s_R_dT( const TempCache<StateType>& cache) const;
 
-
-    //! @returns a pointer to the coefficients in the interval specified.
-    /*!
-      The NASA9-style equilibrium curve fits are defined in terms of
-      _n_coeffs coefficients for each range fit.
-    */
-    const CoeffType* coefficients(const unsigned int interval) const;
-
-  protected:
-
-    //! The number of coefficients in each interval
-    const unsigned int _n_coeffs;
-
-    //! The coefficient data
-    /*!
-      The coeffcients are packed in linear ordering. That is,
-      a0-a9 for the first interval, a0-a9 for the second interval,
-      and so on.
-     */
-    const std::vector<CoeffType> _coefficients;
-
   };
 
 
@@ -184,71 +145,23 @@ namespace Antioch
   template<typename CoeffType>
   inline
   NASA9CurveFit<CoeffType>::NASA9CurveFit( const std::vector<CoeffType>& coeffs,
-                                           const std::vector<CoeffType>& temps )
-    : _n_coeffs(10),
-      _coefficients(coeffs)
-  {}
+                                           const std::vector<CoeffType>& temp )
+    : NASACurveFitBase<CoeffType>(coeffs,temp)
+  {
+    this->_n_coeffs = 10;
+  }
 
   template<typename CoeffType>
   inline
   NASA9CurveFit<CoeffType>::NASA9CurveFit( const std::vector<CoeffType>& coeffs )
-    : _n_coeffs(10),
-      _coefficients(coeffs)
+    : NASACurveFitBase<CoeffType>(coeffs,std::vector<CoeffType>())
   {
-    return;
-  }
-
-
-  template<typename CoeffType>
-  inline
-  NASA9CurveFit<CoeffType>::~NASA9CurveFit()
-  {
-    return;
-  }
-
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  typename Antioch::rebind<StateType, unsigned int>::type
-  NASA9CurveFit<CoeffType>::interval(const StateType& T) const
-  {
-    typedef typename
-      Antioch::rebind<StateType, unsigned int>::type UIntType;
-    UIntType interval;
-    Antioch::zero_clone(interval, T);
-
-    typedef typename Antioch::value_type<StateType>::type ScalarType;
-
-    /* NASA9 thermodynamic intervals are:
-       [200-1,000], [1,000-6,000], [6,000-20,000] K */
-    interval = Antioch::if_else
-      (T > ScalarType(6000.),
-       Antioch::constant_clone(interval,2),
-       UIntType
-         (Antioch::if_else
-            (T > ScalarType(1000.),
-             Antioch::constant_clone(interval,1),
-             Antioch::constant_clone(interval,0))));
-
-    return interval;
-  }
-
-
-  template<typename CoeffType>
-  inline
-  unsigned int NASA9CurveFit<CoeffType>::n_intervals() const
-  { return _coefficients.size() / _n_coeffs; }
-
-
-  template<typename CoeffType>
-  inline
-  const CoeffType* NASA9CurveFit<CoeffType>::coefficients(const unsigned int interval) const
-  {
-    antioch_assert_less( interval, this->n_intervals() );
-    antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
-
-    return &_coefficients[_n_coeffs*interval];
+    this->_n_coeffs = 10;
+    this->_temp.resize(4);
+    this->_temp[0] = 200.L;
+    this->_temp[1] = 1000.L;
+    this->_temp[2] = 6000.L;
+    this->_temp[3] = 20000.L;
   }
 
   template<typename CoeffType>

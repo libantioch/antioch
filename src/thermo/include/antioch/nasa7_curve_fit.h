@@ -25,21 +25,16 @@
 //-----------------------------------------------------------------------el-
 
 
-#ifndef ANTIOCH_NASA_CURVE_FIT_H
-#define ANTIOCH_NASA_CURVE_FIT_H
+#ifndef ANTIOCH_NASA7_CURVE_FIT_H
+#define ANTIOCH_NASA7_CURVE_FIT_H
 
 // Antioch
-#include "antioch/antioch_asserts.h"
-#include "antioch/metaprogramming_decl.h" // Antioch::rebind
-#include "antioch/temp_cache.h"
-
-// C++
-#include <vector>
+#include "antioch/nasa_curve_fit_base.h"
 
 namespace Antioch
 {
   template<typename CoeffType=double>
-  class NASA7CurveFit
+  class NASA7CurveFit : public NASACurveFitBase<CoeffType>
   {
   public:
 
@@ -47,20 +42,7 @@ namespace Antioch
     NASA7CurveFit( const std::vector<CoeffType>& coeffs);
 
     NASA7CurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temp );
-    ~NASA7CurveFit();
-
-    //! The number of intervals for this NASA curve fit
-    unsigned int n_intervals() const;
-
-    //! The interval the input temperature lies in
-    /*!
-      @returns which curve fit interval the input temperature
-      lies in.  The NASA thermodynamic intervals are
-      [200-1,000], [1,000-6,000], [6,000-20,000] K
-     */
-    template <typename StateType>
-    typename Antioch::rebind<StateType, unsigned int>::type
-    interval(const StateType& T) const;
+    ~NASA7CurveFit(){};
 
     /*!
       @returns the value \f$\frac{Cp}{\mathrm{R}}\f$
@@ -118,32 +100,6 @@ namespace Antioch
     template <typename StateType>
     StateType dh_RT_minus_s_R_dT( const TempCache<StateType>& cache) const;
 
-
-    //! @returns a pointer to the coefficients in the interval specified.
-    /*!
-      The NASA-style equilibrium curve fits are defined in terms of
-      _n_coeffs coefficients for each range fit.
-    */
-    const CoeffType* coefficients(const unsigned int interval) const;
-
-  protected:
-
-    //! The number of coefficients in each interval
-    unsigned int _n_coeffs;
-
-    //! The coefficient data
-    /*!
-      The coeffcients are packed in linear ordering. That is,
-      a0-a6 for the first interval, a0-a6 for the second interval,
-      and so on.
-     */
-    std::vector<CoeffType> _coefficients;
-
-    //! The temperatures
-    /*!
-      The temperature defining the intervals
-     */
-    std::vector<CoeffType> _temp;
   };
 
 
@@ -152,77 +108,29 @@ namespace Antioch
   template<typename CoeffType>
   inline
   NASA7CurveFit<CoeffType>::NASA7CurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temp )
-    : _n_coeffs(7),
-      _coefficients(coeffs),
-      _temp(temp)
+    : NASACurveFitBase<CoeffType>(coeffs,temp)
   {
+    this->_n_coeffs = 7;
+
       // consistency checks
-    antioch_assert_equal_to(_coefficients.size()%7,0);
-    antioch_assert_equal_to(_temp.size(),_coefficients.size()/_n_coeffs + 1);
-    return;
+    antioch_assert_equal_to(this->_coefficients.size()%7,0);
+    antioch_assert_equal_to(this->_temp.size(),this->_coefficients.size()/this->_n_coeffs + 1);
   }
 
   template<typename CoeffType>
   inline
   NASA7CurveFit<CoeffType>::NASA7CurveFit( const std::vector<CoeffType>& coeffs)
-    : _n_coeffs(7),
-      _coefficients(coeffs)
+    : NASACurveFitBase<CoeffType>(coeffs,std::vector<CoeffType>())
   {
-      // consistency checks
-    antioch_assert_equal_to(_coefficients.size(),14);
+    this->_n_coeffs = 7;
 
-    _temp.resize(3);
-    _temp[0] = 300.L;
-    _temp[1] = 1000.L;
-    _temp[2] = 5000.L;
-    return;
-  }
+    // consistency checks
+    antioch_assert_equal_to(this->_coefficients.size(),14);
 
-
-  template<typename CoeffType>
-  inline
-  NASA7CurveFit<CoeffType>::~NASA7CurveFit()
-  {
-    return;
-  }
-
-
-  template<typename CoeffType>
-  template<typename StateType>
-  inline
-  typename Antioch::rebind<StateType, unsigned int>::type
-  NASA7CurveFit<CoeffType>::interval(const StateType& T) const
-  {
-    typedef typename
-      Antioch::rebind<StateType, unsigned int>::type UIntType;
-    UIntType interval;
-    Antioch::zero_clone(interval, T);
-
-    for(unsigned int i = 1; i < _temp.size(); ++i)
-    {
-        interval = Antioch::if_else
-                   (T > _temp[i-1] && T < _temp[i],
-                       i - 1,
-                       interval);
-    }
-    return interval;
-  }
-
-
-  template<typename CoeffType>
-  inline
-  unsigned int NASA7CurveFit<CoeffType>::n_intervals() const
-  { return _coefficients.size() / _n_coeffs; }
-
-
-  template<typename CoeffType>
-  inline
-  const CoeffType* NASA7CurveFit<CoeffType>::coefficients(const unsigned int interval) const
-  {
-    antioch_assert_less( interval, this->n_intervals() );
-    antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
-
-    return &_coefficients[_n_coeffs*interval];
+    this->_temp.resize(3);
+    this->_temp[0] = 300.L;
+    this->_temp[1] = 1000.L;
+    this->_temp[2] = 5000.L;
   }
 
   template<typename CoeffType>
@@ -374,4 +282,4 @@ namespace Antioch
 
 } // end namespace Antioch
 
-#endif //ANTIOCH_NASA_CURVE_FIT_H
+#endif //ANTIOCH_NASA7_CURVE_FIT_H
