@@ -201,14 +201,22 @@ namespace Antioch
     unsigned int product_stoichiometric_coefficient(const unsigned int p) const;
 
     //!
+    CoeffType reactant_partial_order(const unsigned int r) const;
+
+    //!
+    CoeffType product_partial_order(const unsigned int p) const;
+
+    //!
     void add_reactant( const std::string &name,
                        const unsigned int r_id,
-                       const unsigned int stoichiometric_coeff);
+                       const unsigned int stoichiometric_coeff,
+                       const CoeffType partial_order = std::numeric_limits<CoeffType>::infinity());// what test could be reliable?
 
     //!
     void add_product( const std::string &name,
                       const unsigned int p_id,
-                      const unsigned int stoichiometric_coeff);
+                      const unsigned int stoichiometric_coeff,
+                      const CoeffType partial_order = std::numeric_limits<CoeffType>::infinity()); // what test could be reliable?
 
     //!
     void clear_reactant();
@@ -358,6 +366,8 @@ namespace Antioch
     std::vector<unsigned int> _product_stoichiometry;
     std::vector<unsigned int> _species_reactant_stoichiometry;
     std::vector<unsigned int> _species_product_stoichiometry;
+    std::vector<CoeffType>    _species_reactant_partial_order;
+    std::vector<CoeffType>    _species_product_partial_order;
     std::vector<int>          _species_delta_stoichiometry;
     int _gamma;
     bool _initialized;
@@ -560,14 +570,36 @@ namespace Antioch
 
   template<typename CoeffType, typename VectorCoeffType>
   inline
+  CoeffType Reaction<CoeffType,VectorCoeffType>::reactant_partial_order(const unsigned int r) const
+  {      
+    antioch_assert_less(r, _species_reactant_partial_order.size());
+    antioch_assert_less(_reactant_ids[r], this->n_species());
+    return _species_reactant_partial_order[r];
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  CoeffType Reaction<CoeffType,VectorCoeffType>::product_partial_order(const unsigned int p) const
+  {
+    antioch_assert_less(p, _species_product_partial_order.size());
+    antioch_assert_less(_product_ids[p], this->n_species());
+    return _species_product_partial_order[p];
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
   void Reaction<CoeffType,VectorCoeffType>::add_reactant (const std::string &name,
                                           const unsigned int r_id,
-                                          const unsigned int stoichiometric_coeff)
+                                          const unsigned int stoichiometric_coeff,
+                                          const CoeffType partial_order)
   {
     antioch_assert_less(r_id, this->n_species());
     _reactant_names.push_back(name);
     _reactant_ids.push_back(r_id);
     _reactant_stoichiometry.push_back(stoichiometric_coeff);
+
+   CoeffType order = (partial_order == std::numeric_limits<CoeffType>::infinity() )?static_cast<CoeffType>(stoichiometric_coeff):partial_order;
+    _species_reactant_partial_order.push_back(order);
     return;
   }
 
@@ -575,12 +607,16 @@ namespace Antioch
   inline
   void Reaction<CoeffType,VectorCoeffType>::add_product (const std::string &name,
                                          const unsigned int p_id,
-                                         const unsigned int stoichiometric_coeff)
+                                         const unsigned int stoichiometric_coeff,
+                                         const CoeffType partial_order)
   {
     antioch_assert_less(p_id, this->n_species());
     _product_names.push_back(name);
     _product_ids.push_back(p_id);
     _product_stoichiometry.push_back(stoichiometric_coeff);
+
+   CoeffType order = (partial_order == std::numeric_limits<CoeffType>::infinity() )?static_cast<CoeffType>(stoichiometric_coeff):partial_order;
+    _species_product_partial_order.push_back(order);
     return;
   }
 
@@ -742,7 +778,6 @@ namespace Antioch
         exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
                        h_RT_minus_s_R[_product_ids[s]] );
       }
-
     return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) ) * ant_exp(exppower);
   }
 
@@ -797,12 +832,14 @@ namespace Antioch
         os << "#   reactants: ";
         for (unsigned int r=0; r<this->n_reactants(); r++)
           os << this->reactant_name(r) << ":"
-             << this->reactant_stoichiometric_coefficient(r) << " ";
+             << this->reactant_stoichiometric_coefficient(r) << ","
+             << this->reactant_partial_order(r) << " ";
         os << "\n"
            << "#   products:  ";
         for (unsigned int p=0; p<this->n_products(); p++)
           os << this->product_name(p) << ":"
-             << this->product_stoichiometric_coefficient(p) << " ";
+             << this->product_stoichiometric_coefficient(p) << ","
+             << this->product_partial_order(p) << " ";
       }
     os << "\n#   Chemical process: " << _type;
     os << "\n#   Kinetics model: "   << _kintype;
@@ -996,7 +1033,7 @@ namespace Antioch
       {
         kfwd_times_reactants     *= 
           ant_pow( molar_densities[this->reactant_id(ro)],
-            static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+            this->reactant_partial_order(ro));
       }
 
     StateType kbkwd_times_products = Antioch::zero_clone(kfwd_times_reactants);
@@ -1011,7 +1048,7 @@ namespace Antioch
         {
           kbkwd_times_products     *= 
             ant_pow( molar_densities[this->product_id(po)],
-              static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+              this->product_partial_order(po));
          
         }
     }
@@ -1087,12 +1124,12 @@ namespace Antioch
       {
         const StateType val = 
           ant_pow( molar_densities[this->reactant_id(ro)],
-            static_cast<int>(this->reactant_stoichiometric_coefficient(ro)) );
+            this->reactant_partial_order(ro));
           
         const StateType dval = 
           ( static_cast<CoeffType>(this->reactant_stoichiometric_coefficient(ro))*
             ant_pow( molar_densities[this->reactant_id(ro)],
-              static_cast<int>(this->reactant_stoichiometric_coefficient(ro))-1 ) 
+              this->reactant_partial_order(ro) - 1)
             );
 
         facfwd   *= val;
@@ -1165,12 +1202,12 @@ namespace Antioch
         {
           const StateType val = 
             ant_pow( molar_densities[this->product_id(po)],
-              static_cast<int>(this->product_stoichiometric_coefficient(po)) );
+              this->product_partial_order(po));
           
           const StateType dval = 
             ( static_cast<CoeffType>(this->product_stoichiometric_coefficient(po))*
               ant_pow( molar_densities[this->product_id(po)],
-                static_cast<int>(this->product_stoichiometric_coefficient(po))-1 )
+              this->product_partial_order(po) - 1)
               );
         
           facbkwd   *= val;

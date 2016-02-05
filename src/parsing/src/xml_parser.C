@@ -79,6 +79,8 @@ namespace Antioch
     _map[ParsingKey::KINETICS_MODEL]        = "rateCoeff";
     _map[ParsingKey::REACTANTS]             = "reactants";
     _map[ParsingKey::PRODUCTS]              = "products";
+    _map[ParsingKey::FORWARD_ORDER]         = "ford";
+    _map[ParsingKey::BACKWARD_ORDER]        = "rord";
     _map[ParsingKey::PREEXP]                = "A";
     _map[ParsingKey::POWER]                 = "b";
     _map[ParsingKey::ACTIVATION_ENERGY]     = "E";
@@ -316,7 +318,46 @@ namespace Antioch
   }
 
   template <typename NumericType>
-  bool XMLParser<NumericType>::molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,int> > & molecules_pairs) const
+  const std::map<std::string,NumericType> XMLParser<NumericType>::reactants_orders() const
+  {
+    tinyxml2::XMLElement* orders = _reaction->FirstChildElement(_map.at(ParsingKey::FORWARD_ORDER).c_str());
+    std::map<std::string,NumericType> map;
+    if(orders){
+      std::vector<std::pair<std::string,NumericType> > pairs;
+      if(this->molecules_pairs(orders,pairs))
+      {
+         for(unsigned int s = 0; s < pairs.size(); s++)
+         {
+            map.insert(pairs[s]);
+         }
+      }
+    }
+
+    return map;
+  }
+
+  template <typename NumericType>
+  const std::map<std::string,NumericType> XMLParser<NumericType>::products_orders() const
+  {
+    tinyxml2::XMLElement* orders = _reaction->FirstChildElement(_map.at(ParsingKey::BACKWARD_ORDER).c_str());
+    std::map<std::string,NumericType> map;
+    if(orders){
+      std::vector<std::pair<std::string,NumericType> > pairs;
+      if(this->molecules_pairs(orders,pairs))
+      {
+         for(unsigned int s = 0; s < pairs.size(); s++)
+         {
+            map.insert(pairs[s]);
+         }
+      }
+    }
+    return map;
+  }
+
+
+  template <typename NumericType>
+  template <typename PairedType>
+  bool XMLParser<NumericType>::molecules_pairs(tinyxml2::XMLElement * molecules, std::vector<std::pair<std::string,PairedType> > & molecules_pairs) const
   {
     bool out(true);
     if(molecules)
@@ -330,7 +371,7 @@ namespace Antioch
 
         for( unsigned int p=0; p < mol_pairs.size(); p++ )
           {
-            std::pair<std::string,int> pair( split_string_int_on_colon(mol_pairs[p]) );
+            std::pair<std::string,PairedType> pair( split_string_on_colon<PairedType>(mol_pairs[p]) );
 
             molecules_pairs.push_back(pair);
           }
@@ -367,7 +408,7 @@ namespace Antioch
           std::string error = "The keyword associated with the \'name\' attribute within the description of a falloff should be, and only be, ";
           error += "\'k0\' to specify the low pressure limit.  It seems that the one you provided, \'";
           error += std::string(_rate_constant->Attribute(_map.at(ParsingKey::FALLOFF_LOW_NAME).c_str()));
-          error += "\' is not this one.  Please correct it at reaction"; 
+          error += "\' is not this one.  Please correct it at reaction";
           error += this->reaction_id();
           error += ": ";
           error += this->reaction_equation();
@@ -532,7 +573,7 @@ namespace Antioch
                 split_string(value_string, " ", values);
 
                 for(unsigned int i = 0; i < values.size(); i++)
-                  par_values.push_back(split_string_double_on_colon (values[i]));
+                    par_values.push_back(split_string_on_colon<NumericType>(values[i]));
 
                 out = true;
               }
