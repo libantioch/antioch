@@ -125,6 +125,7 @@ pkginclude_HEADERS += parsing/include/antioch/xml_parser_instantiation_macro.h
 
 # thermo
 pkginclude_HEADERS += thermo/include/antioch/nasa_curve_fit.h
+pkginclude_HEADERS += thermo/include/antioch/nasa9_curve_fit.h
 pkginclude_HEADERS += thermo/include/antioch/cea_curve_fit.h
 pkginclude_HEADERS += thermo/include/antioch/temp_cache.h
 pkginclude_HEADERS += thermo/include/antioch/nasa_mixture.h
