@@ -38,7 +38,7 @@
 #include "antioch/physical_constants.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_curve_fit.h"
-#include "antioch/nasa_curve_fit.h"
+#include "antioch/nasa7_curve_fit.h"
 #include "antioch/default_filename.h"
 #include "antioch/temp_cache.h"
 #include "antioch/cea_mixture.h"
