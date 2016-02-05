@@ -22,11 +22,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_ARRHENIUS_RATE_H
 #define ANTIOCH_ARRHENIUS_RATE_H
@@ -49,7 +45,7 @@ namespace Antioch
  *
    * The Arrhenius kinetics model is of the form:
    * \f[
-   *   \alpha(T) = A  \exp\left(-\frac{E_a}{\mathrm{R}T}\right) 
+   *   \alpha(T) = A  \exp\left(-\frac{E_a}{\mathrm{R}T}\right)
    * \f]
    * with \f$\mathrm{R}\f$ the ideal gas constant. We have:
    * \f[
@@ -61,7 +57,7 @@ namespace Antioch
   template<typename CoeffType=double>
   class ArrheniusRate: public KineticsType<CoeffType>
   {
-  
+
   // We declare private members early for use with decltype
   private:
 
@@ -69,12 +65,12 @@ namespace Antioch
     CoeffType _raw_Ea;
     CoeffType _Ea;
     CoeffType _rscale;
-    
+
   public:
 
     ArrheniusRate (const CoeffType Cf=0., const CoeffType Ea=0., const CoeffType rscale = Constants::R_universal<CoeffType>());
     ~ArrheniusRate();
-    
+
     void set_Cf(     const CoeffType Cf );
     //! set Ea, rescale the value, unit is known
     void set_Ea(     const CoeffType Ea );
@@ -99,9 +95,9 @@ namespace Antioch
     /*! reset the coeffs
      *
      * Two ways of modifying your rate:
-     *   - you change totally the rate, thus you 
+     *   - you change totally the rate, thus you
      *        require exactly three parameters, the order
-     *        assumed is Cf, Ea, rscale 
+     *        assumed is Cf, Ea, rscale
      *   - you just change the value, thus rscale is not
      *        modified. You require exactly two parameters,
      *        the order assumed is Cf, Ea
@@ -116,19 +112,19 @@ namespace Antioch
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
-    ANTIOCH_AUTO(StateType) 
+    ANTIOCH_AUTO(StateType)
     rate(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf* (ant_exp(-_Ea/T)))
 
     //! \return the rate evaluated at \p T.
     template <typename StateType>
-    ANTIOCH_AUTO(StateType) 
+    ANTIOCH_AUTO(StateType)
     operator()(const StateType& T) const
     ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType>
-    ANTIOCH_AUTO(StateType) 
+    ANTIOCH_AUTO(StateType)
     derivative( const StateType& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_Ea/(T*T)))
 
@@ -140,19 +136,19 @@ namespace Antioch
 
     //! \return the rate evaluated at \p T.
     template <typename StateType, typename VectorStateType>
-    ANTIOCH_AUTO(StateType) 
+    ANTIOCH_AUTO(StateType)
     rate(const KineticsConditions<StateType,VectorStateType>& T) const
     ANTIOCH_AUTOFUNC(StateType, _Cf * ant_exp(- _Ea/T.T()))
 
     //! \return the rate evaluated at \p T.
     template <typename StateType, typename VectorStateType>
-    ANTIOCH_AUTO(StateType) 
+    ANTIOCH_AUTO(StateType)
     operator()(const KineticsConditions<StateType,VectorStateType>& T) const
     ANTIOCH_AUTOFUNC(StateType, this->rate(T))
 
     //! \return the derivative with respect to temperature evaluated at \p T.
     template <typename StateType, typename VectorStateType>
-    ANTIOCH_AUTO(StateType) 
+    ANTIOCH_AUTO(StateType)
     derivative( const KineticsConditions<StateType,VectorStateType>& T ) const
     ANTIOCH_AUTOFUNC(StateType, (*this)(T) * (_Ea/T.temp_cache().T2) )
 
@@ -334,8 +330,8 @@ namespace Antioch
   template<typename CoeffType>
   template <typename StateType,typename VectorStateType>
   inline
-  void ArrheniusRate<CoeffType>::rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& T, 
-                                                     StateType& rate, 
+  void ArrheniusRate<CoeffType>::rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& T,
+                                                     StateType& rate,
                                                      StateType& drate_dT) const
   {
     rate     = (*this)(T);

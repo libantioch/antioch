@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // C++
 #include <limits>
@@ -35,7 +30,7 @@
 #include "antioch/hercourtessen_rate.h"
 
 template <typename Scalar>
-int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_exact, 
+int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_exact,
                               const Scalar & rate, const Scalar & derive, const Scalar & T)
 {
     const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
@@ -49,7 +44,7 @@ int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_e
                   << "rate_exact = " << rate_exact << std::endl
                   << "relative difference = " <<  abs( (rate - rate_exact)/rate_exact ) << std::endl
                   << "tolerance = " <<  tol << std::endl;
- 
+
         return_flag = 1;
       }
     if( abs( (derive - derive_exact)/derive_exact ) > tol )

@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_EXCEPTIONS_H
 #define ANTIOCH_EXCEPTIONS_H
@@ -57,7 +52,7 @@ namespace Antioch
     public:
     NotImplemented() : std::logic_error( "Error: not implemented!" ) {}
   };
-  
+
   /*!
    * A class representing a failed attempt by the library to open a
    * file (or construct an fstream, etc), to be thrown by
@@ -77,7 +72,7 @@ namespace Antioch
   class FailedNewtonTTvInversion : public std::runtime_error
   {
   public:
-    FailedNewtonTTvInversion (const std::string &description) 
+    FailedNewtonTTvInversion (const std::string &description)
       : std::runtime_error (description)
     {}
   };
@@ -88,7 +83,7 @@ namespace Antioch
   class UnitError : public std::runtime_error
   {
   public:
-    UnitError(const std::string &description) 
+    UnitError(const std::string &description)
       : std::runtime_error (description)
     {}
   };
@@ -99,7 +94,7 @@ namespace Antioch
   class ParsingError : public std::runtime_error
   {
   public:
-    ParsingError(const std::string &description) 
+    ParsingError(const std::string &description)
       : std::runtime_error (description)
     {}
   };

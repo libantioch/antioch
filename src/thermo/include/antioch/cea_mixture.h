@@ -22,11 +22,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_CEA_MIXTURE_H
 #define ANTIOCH_CEA_MIXTURE_H
@@ -38,7 +34,7 @@
 
 namespace Antioch
 {
-  
+
   // this is now deprecated, but
   // kept for backward compatibility
   // this is but a name for

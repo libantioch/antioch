@@ -22,11 +22,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_REACTION_SET_H
 #define ANTIOCH_REACTION_SET_H
@@ -71,10 +67,10 @@ namespace Antioch
 
     //! \returns the number of species.
     unsigned int n_species() const;
-     
+
     //! \returns the number of reactions.
     unsigned int n_reactions() const;
-     
+
     //! Add a reaction to the system.
     //
     // The ownership is transfered to the ReactionSet
@@ -151,7 +147,7 @@ namespace Antioch
 
     //! Formatted print, by default to \p std::cout.
     void print( std::ostream& os = std::cout ) const;
-     
+
     //! Formatted print.
     friend std::ostream& operator<<( std::ostream& os, const ReactionSet<CoeffType>& rset )
     {
@@ -160,7 +156,7 @@ namespace Antioch
     }
 
   private:
-     
+
     ReactionSet();
 
     //! helper function
@@ -180,7 +176,7 @@ namespace Antioch
     // If we want to change anything other than an efficiency, well nothing happens here.
     // This function is used for both getter and setter.
     void find_chemical_process_parameter(ReactionType::Parameters paramChem ,const std::vector<std::string> & keywords, unsigned int & species) const;
-     
+
     const ChemicalMixture<CoeffType>& _chem_mixture;
 
     std::vector<Reaction<CoeffType>* > _reactions;
@@ -189,7 +185,7 @@ namespace Antioch
     const CoeffType _P0_R;
 
   };
-  
+
   /* ------------------------- Inline Functions -------------------------*/
   template<typename CoeffType>
   inline
@@ -210,7 +206,7 @@ namespace Antioch
   void ReactionSet<CoeffType>::add_reaction(Reaction<CoeffType>* reaction)
   {
     _reactions.push_back(reaction);
-    
+
     // and make sure it is initialized!
     _reactions.back()->initialize(_reactions.size() - 1);
 
@@ -229,10 +225,10 @@ namespace Antioch
      //second, release the spot
      _reactions.erase(_reactions.begin() + nr);
   }
-  
+
   template<typename CoeffType>
   inline
-  const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const      
+  const Reaction<CoeffType>& ReactionSet<CoeffType>::reaction(const unsigned int r) const
   {
     antioch_assert_less(r, this->n_reactions());
     return *_reactions[r];
@@ -271,7 +267,7 @@ namespace Antioch
     for(unsigned int ir = 0; ir < _reactions.size(); ir++)delete _reactions[ir];
     return;
   }
-  
+
   template<typename CoeffType>
   template<typename StateType, typename VectorStateType, typename VectorReactionsType>
   inline
@@ -296,7 +292,7 @@ namespace Antioch
       {
         net_reaction_rates[rxn] = this->reaction(rxn).compute_rate_of_progress(molar_densities, conditions, P0_RT, h_RT_minus_s_R);
       }
-    
+
     return;
   }
 
@@ -334,13 +330,13 @@ namespace Antioch
     // compute reaction forward rates & other reaction-sized arrays
     for (unsigned int rxn=0; rxn<this->n_reactions(); rxn++)
       {
-        this->reaction(rxn).compute_rate_of_progress_and_derivatives( molar_densities, _chem_mixture, 
+        this->reaction(rxn).compute_rate_of_progress_and_derivatives( molar_densities, _chem_mixture,
                                                                       conditions, P0_RT, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
-                                                                      net_reaction_rates[rxn], 
-                                                                      dnet_rate_dT[rxn], 
+                                                                      net_reaction_rates[rxn],
+                                                                      dnet_rate_dT[rxn],
                                                                       dnet_rate_dX_s[rxn] );
       }
-    
+
     return;
   }
 
@@ -371,7 +367,7 @@ namespace Antioch
   }
 
 
-  
+
   template<typename CoeffType>
   inline
   void ReactionSet<CoeffType>::find_kinetics_model_parameter(const unsigned int r,const std::vector<std::string> & keywords, unsigned int & nr, std::string & unit, int & l) const
@@ -505,8 +501,8 @@ namespace Antioch
          antioch_error();
      }
 
-     return parameter;     
- 
+     return parameter;
+
   }
 
   template<typename CoeffType>
@@ -550,7 +546,7 @@ namespace Antioch
       {
           antioch_error();
       }
-      
+
   }
 
   template<typename CoeffType>
@@ -581,7 +577,7 @@ namespace Antioch
         prodMatrix[s].resize(this->n_reactions(),0.);
         netMatrix[s].resize(this->n_reactions(),0.);
       }
-    
+
 
     //filling matrixes
     for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
@@ -654,7 +650,7 @@ namespace Antioch
         output << std::setw(10) << _chem_mixture.chemical_species()[isp]->species();
         for(unsigned int rxn = 0; rxn < this->n_reactions(); rxn++)
           {
-            output << std::setw(15) << std::scientific << std::setprecision(6) << prodMatrix[isp][rxn] << "," 
+            output << std::setw(15) << std::scientific << std::setprecision(6) << prodMatrix[isp][rxn] << ","
                    << std::setw(15) << std::scientific << std::setprecision(6) << lossMatrix[isp][rxn];
           }
         output << std::endl;
@@ -880,7 +876,7 @@ namespace Antioch
 
     return;
   }
- 
+
 } // end namespace Antioch
 
 #endif // ANTIOCH_REACTION_SET_H

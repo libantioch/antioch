@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_INPUT_UTILS_H
 #define ANTIOCH_INPUT_UTILS_H
@@ -56,7 +51,7 @@ namespace Antioch
 
     in.putback(c);
 
-    while (in.get(c), c==comment_start) 
+    while (in.get(c), c==comment_start)
        in.getline (line, 255);
 
     // put back first character of

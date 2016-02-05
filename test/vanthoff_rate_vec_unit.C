@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: vanthoff_rate_vec_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // valarray has to be declared before Antioch or gcc can't find the
 // right versions of exp() and pow() to use??
@@ -68,7 +63,7 @@ GRVY::GRVY_Timer_Class gt;
 
 
 template <typename PairScalars>
-int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars & derive_exact, 
+int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars & derive_exact,
                               const PairScalars & rate,       const PairScalars & derive, const PairScalars & T)
 {
     typedef typename Antioch::value_type<PairScalars>::type  Scalar;
@@ -86,7 +81,7 @@ int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars 
                   << "rate_exact = " << rate_exact[2*tuple] << std::endl
                   << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) << std::endl
                   << "tolerance = " <<  tol << std::endl;
- 
+
         return_flag = 1;
       }
     if( abs( (rate[2*tuple+1] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) > tol )
@@ -98,7 +93,7 @@ int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars 
                   << "rate_exact = " << rate_exact[2*tuple+1] << std::endl
                   << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) << std::endl
                   << "tolerance = " <<  tol << std::endl;
- 
+
         return_flag = 1;
       }
     if( abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) > tol )
@@ -156,8 +151,8 @@ int vectester(const PairScalars& example, const std::string & testname)
       T[2*tuple+1] = 1600.1;
       rate_exact[2*tuple] = Cf*pow(Scalar(1500.1),eta)*exp(-Ea/1500.1+D*1500.1);
       rate_exact[2*tuple+1] = Cf*pow(Scalar(1600.1),eta)*exp(-Ea/1600.1+D*1600.1);
-      derive_exact[2*tuple] = Cf * pow(Scalar(1500.1),eta) * exp(-Ea/Scalar(1500.1) + D*Scalar(1500.1)) * (D + eta/Scalar(1500.1) + Ea/(Scalar(1500.1)*Scalar(1500.1))); 
-      derive_exact[2*tuple+1] = Cf * pow(Scalar(1600.1),eta) * exp(-Ea/Scalar(1600.1) + D*Scalar(1600.1)) * (D + eta/Scalar(1600.1) + Ea/(Scalar(1600.1)*Scalar(1600.1))); 
+      derive_exact[2*tuple] = Cf * pow(Scalar(1500.1),eta) * exp(-Ea/Scalar(1500.1) + D*Scalar(1500.1)) * (D + eta/Scalar(1500.1) + Ea/(Scalar(1500.1)*Scalar(1500.1)));
+      derive_exact[2*tuple+1] = Cf * pow(Scalar(1600.1),eta) * exp(-Ea/Scalar(1600.1) + D*Scalar(1600.1)) * (D + eta/Scalar(1600.1) + Ea/(Scalar(1600.1)*Scalar(1600.1)));
     }
   Antioch::KineticsConditions<PairScalars> cond(T);
 

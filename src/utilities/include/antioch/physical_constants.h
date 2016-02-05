@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_PHYSICAL_CONSTANTS_H
 #define ANTIOCH_PHYSICAL_CONSTANTS_H
@@ -169,7 +164,7 @@ namespace Antioch
     inline
     CoeffType vacuum_permittivity()
     {
-       return 1.L/ (vacuum_permeability<CoeffType>() * light_celerity<CoeffType>() 
+       return 1.L/ (vacuum_permeability<CoeffType>() * light_celerity<CoeffType>()
                                                      * light_celerity<CoeffType>());
     }
 
@@ -185,5 +180,5 @@ namespace Antioch
 
   } // end namespace Constants
 } // end namespace Antioch
- 
+
 #endif //ANTIOCH_PHYSICAL_CONSTANTS_H

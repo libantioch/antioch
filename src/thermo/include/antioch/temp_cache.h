@@ -22,11 +22,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_TEMP_CACHE_H
 #define ANTIOCH_TEMP_CACHE_H
@@ -43,10 +39,10 @@ namespace Antioch
 
     explicit TempCache(const StateType& T_in);
 
-    TempCache(const StateType& T_in, 
-              const StateType& T2_in, 
-              const StateType& T3_in, 
-              const StateType& T4_in, 
+    TempCache(const StateType& T_in,
+              const StateType& T2_in,
+              const StateType& T3_in,
+              const StateType& T4_in,
               const StateType& lnT_in);
 
     const StateType& T;
@@ -71,10 +67,10 @@ namespace Antioch
   }
 
   template<typename StateType>
-  TempCache<StateType>::TempCache(const StateType& T_in, 
-                                  const StateType& T2_in, 
-                                  const StateType& T3_in, 
-                                  const StateType& T4_in, 
+  TempCache<StateType>::TempCache(const StateType& T_in,
+                                  const StateType& T2_in,
+                                  const StateType& T3_in,
+                                  const StateType& T4_in,
                                   const StateType& lnT_in)
     : T(T_in), T2(T2_in), T3(T3_in), T4(T4_in), lnT(lnT_in)
   {

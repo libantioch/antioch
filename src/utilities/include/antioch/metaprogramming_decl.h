@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: metaprogramming.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_METAPROGRAMMING_DECL_H
 #define ANTIOCH_METAPROGRAMMING_DECL_H
@@ -52,7 +47,7 @@ namespace Antioch
   { return Expr; }
 #else
 #define ANTIOCH_AUTO(Type) Type
-#define ANTIOCH_RETURNEXPR(Type, Expr) 
+#define ANTIOCH_RETURNEXPR(Type, Expr)
 #define ANTIOCH_AUTOFUNC(Type, Expr) { return Expr; }
 #endif
 

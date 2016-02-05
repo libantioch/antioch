@@ -22,11 +22,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
+
 
 #ifndef ANTIOCH_NASA_MIXTURE_H
 #define ANTIOCH_NASA_MIXTURE_H
@@ -47,7 +43,7 @@
 
 namespace Antioch
 {
-  
+
   template<typename CoeffType, typename NASAFit>
   class NASAEvaluator;
 
@@ -76,7 +72,7 @@ namespace Antioch
     bool check() const;
 
     const ChemicalMixture<CoeffType>& chemical_mixture() const;
-    
+
   protected:
 
     const ChemicalMixture<CoeffType>& _chem_mixture;
@@ -86,7 +82,7 @@ namespace Antioch
     std::vector<CoeffType> _cp_at_200p1;
 
   private:
-    
+
     //! Default constructor
     /*! Private to force to user to supply a ChemicalMixture object.*/
     NASAThermoMixture();

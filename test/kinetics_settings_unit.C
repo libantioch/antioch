@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // C++
 #include <limits>
@@ -56,7 +51,7 @@ int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Ea, const 
 
   for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
   {
-  
+
     const Scalar rate_exact = Cf*pow(T/Tref,eta)*exp(-Ea/(R*T) + D * T);
     const Scalar derive_exact = exp(-Ea/(R*T) + D * T) * pow(T/Tref,eta) * Cf * (Ea/(R*T*T) + eta/T + D );
 
@@ -149,7 +144,7 @@ int tester()
 /// building only here
 
    // constant
-  std::vector<Scalar> coeffs(1,Cf); 
+  std::vector<Scalar> coeffs(1,Cf);
 
   Antioch::KineticsType<Scalar> * kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::CONSTANT);
 
@@ -168,7 +163,7 @@ int tester()
   coeffs[2] = Tref;
 
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::HERCOURT_ESSEN);
-  
+
   return_flag = test_values(Cf,eta,zero,zero,Tref,R,*kin_base) || return_flag;
 
   Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::T_REF,Tref_reset);
@@ -184,7 +179,7 @@ int tester()
   coeffs[2] = R;
 
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::ARRHENIUS);
-  
+
   return_flag = test_values(Cf,zero,Ea,zero,Tref,R,*kin_base) || return_flag;
 
   Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::E,Ea_reset,"K");
@@ -199,7 +194,7 @@ int tester()
   coeffs[1] = D;
 
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::BERTHELOT);
-  
+
   return_flag = test_values(Cf,zero,zero,D,Tref,R,*kin_base) || return_flag;
 
   Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::D,D_reset);
@@ -216,7 +211,7 @@ int tester()
   coeffs[3] = Tref;
 
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::BHE);
-  
+
   return_flag = test_values(Cf,eta,zero,D,Tref,R,*kin_base) || return_flag;
 
   Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::A,Cf_reset);
@@ -236,7 +231,7 @@ int tester()
   coeffs[4] = R;
 
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::KOOIJ);
-  
+
   return_flag = test_values(Cf,eta,Ea,zero,Tref,R,*kin_base) || return_flag;
 
   Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::R_SCALE,R_reset);
@@ -257,7 +252,7 @@ int tester()
   coeffs[5] = R;
 
   kin_base = Antioch::build_rate<Scalar>(coeffs,Antioch::KineticsModel::VANTHOFF);
-  
+
   return_flag = test_values(Cf,eta,Ea,D,Tref,R,*kin_base) || return_flag;
 
   Antioch::reset_parameter_of_rate(*kin_base,Antioch::KineticsModel::A,Cf_reset);

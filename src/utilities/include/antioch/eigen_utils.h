@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: eigen_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_EIGEN_UTILS_H
 #define ANTIOCH_EIGEN_UTILS_H
@@ -86,7 +81,7 @@ namespace Antioch
 
 template <typename T>
 inline
-typename Antioch::enable_if_c<is_eigen<T>::value, 
+typename Antioch::enable_if_c<is_eigen<T>::value,
   typename value_type<T>::type
   >::type
 max(const T& in)
@@ -96,7 +91,7 @@ max(const T& in)
 
 template <typename T>
 inline
-typename Antioch::enable_if_c<is_eigen<T>::value, 
+typename Antioch::enable_if_c<is_eigen<T>::value,
   typename value_type<T>::type
   >::type
 min(const T& in)
@@ -150,7 +145,7 @@ zero_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>& e
 {
   // We can't just use setZero here with arbitrary _Scalar types
   if (ex.size())
-    return 
+    return
       _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
         (ex.rows(), ex.cols()).setConstant(zero_clone(ex[0]));
 
@@ -188,11 +183,11 @@ constant_clone(const _Matrix<_Scalar, _Rows, _Cols, _Options,
 {
   // We can't just use setZero here with arbitrary _Scalar types
   if (ex.size())
-    return 
+    return
       _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
         (ex.rows(), ex.cols()).setConstant(value);
 
-  return 
+  return
     _Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>
       (ex.rows(), ex.cols());
 }
@@ -231,7 +226,7 @@ template <template <typename, int, int, int, int, int> class _Matrix,
   typename VectorScalar
 >
 inline
-_Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> 
+_Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols>
   custom_clone(const _Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & /example/, const VectorScalar& values, const _Matrix<unsigned int,_Rows,_Cols,_Options,_MaxRows,_MaxCols> & indexes)
 {
   _Matrix<T,_Rows,_Cols,_Options,_MaxRows,_MaxCols>  returnval;
@@ -260,7 +255,7 @@ const T2& if_false)
 }
 
 
-template <typename VectorT, 
+template <typename VectorT,
   template <typename , int, int, int, int, int> class _Matrix,
   typename _UIntT, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
 >

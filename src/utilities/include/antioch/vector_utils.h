@@ -22,11 +22,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: valarray_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_VECTOR_UTILS_H
 #define ANTIOCH_VECTOR_UTILS_H
@@ -74,7 +69,7 @@ operator* (const std::vector<T>& src, const T & mul)
   const std::size_t size = src.size();
   for (std::size_t i=1; i<size; ++i)
     output[i] = src[i] * mul;
-  
+
   return output;
 }
 
@@ -87,7 +82,7 @@ operator/ (const std::vector<T>& src, const T & mul)
   const std::size_t size = src.size();
   for (std::size_t i=1; i<size; ++i)
     output[i] = src[i] / mul;
-  
+
   return output;
 }
 
