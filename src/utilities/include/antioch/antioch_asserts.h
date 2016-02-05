@@ -123,8 +123,9 @@
 
 
 // Just outputing to std::cerr
-#define antioch_msg_error(errmsg)           do { std::cerr << errmsg << std::endl; }                   while(0)
-#define antioch_not_implemented_msg(errmsg) do {antioch_msg_error(errmsg); antioch_not_implemented();} while(0)
+#define antioch_msg(errmsg)                 do {std::cerr << errmsg << std::endl;} while(0)
+#define antioch_error_msg(errmsg)           do {antioch_msg(errmsg); antioch_error();} while(0)
+#define antioch_not_implemented_msg(errmsg) do {antioch_msg(errmsg); antioch_not_implemented();} while(0)
 
 // Encapsulate guarding static_assert until we require C++11
 #ifdef ANTIOCH_HAVE_CXX_STATIC_ASSERT

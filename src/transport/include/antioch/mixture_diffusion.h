@@ -221,7 +221,7 @@ namespace Antioch
         std::string error = "ERROR: You're trying to construct an object\n";
         error += "       with an unknown diffusion model!\n";
         error += "       Does your compiler not support static_assert?";
-        antioch_msg_error(error);
+        antioch_error_msg(error);
       }
 
     // Build tag so we defer to the right initialization function

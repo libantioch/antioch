@@ -154,8 +154,7 @@ namespace Antioch
   inline
   void BlottnerViscosity<CoeffType>::extrapolate_max_temp_impl(const StateType & /*Tmax*/)
   {
-    antioch_msg_error("Extrapolation not well defined for BlottnerViscosity!");
-    antioch_error();
+    antioch_error_msg("Extrapolation not well defined for BlottnerViscosity!");
   }
 
 } // end namespace Antioch

@@ -140,8 +140,7 @@ namespace Antioch
   inline
   void SutherlandViscosity<CoeffType>::extrapolate_max_temp_impl(const StateType & /*Tmax*/)
   {
-    antioch_msg_error("Extrapolation not well defined for SutherlandViscosity!");
-    antioch_error();
+    antioch_error_msg("Extrapolation not well defined for SutherlandViscosity!");
   }
 
 } // end namespace Antioch
