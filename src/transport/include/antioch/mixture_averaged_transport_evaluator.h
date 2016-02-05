@@ -609,8 +609,7 @@ namespace Antioch
         }
       default:
         {
-          antioch_msg_error("ERROR: Invalid DiffusivityType in MixtureAveragedTransportEvaluator::diffusion_mixing_rule");
-          antioch_error();
+          antioch_error_msg("ERROR: Invalid DiffusivityType in MixtureAveragedTransportEvaluator::diffusion_mixing_rule");
         }
       } // switch(diff_type)
   }
