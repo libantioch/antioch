@@ -29,6 +29,7 @@
 # stores this value in the 1st position. This must be changed for FIN-S to 
 # work correctly.
 # [PB]: HO2/H2O2 values taken from  http://www.grc.nasa.gov/WWW/CEAWeb/ceaThermoBuild.htm 
+# [DLS]: Species starting on line 491 taken from http://www.grc.nasa.gov/WWW/CEAWeb/ceaThermoBuild.htm
 #-------------------------------------------------------------------------------
 
 Ar  3		0.000                                                            
