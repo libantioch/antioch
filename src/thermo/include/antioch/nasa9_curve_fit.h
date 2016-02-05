@@ -149,6 +149,9 @@ namespace Antioch
     : NASACurveFitBase<CoeffType>(coeffs,temp)
   {
     this->_n_coeffs = 10;
+
+    this->check_coeff_size();
+    this->check_temp_coeff_size_consistency();
   }
 
   template<typename CoeffType>
@@ -157,11 +160,19 @@ namespace Antioch
     : NASACurveFitBase<CoeffType>(coeffs,std::vector<CoeffType>())
   {
     this->_n_coeffs = 10;
-    this->_temp.resize(4);
+    this->check_coeff_size();
+
+    // All default NASA9 curve fits should have this
+    this->_temp.resize(3);
     this->_temp[0] = 200.L;
     this->_temp[1] = 1000.L;
     this->_temp[2] = 6000.L;
-    this->_temp[3] = 20000.L;
+
+    // But some also have this last interval. We infer this from the size of the coeffs.
+    if( coeffs.size()/this->_n_coeffs == 3 )
+      this->_temp.push_back(20000.L);
+
+    this->check_temp_coeff_size_consistency();
   }
 
   template<typename CoeffType>

@@ -34,6 +34,7 @@
 
 // C++
 #include <vector>
+#include <sstream>
 
 namespace Antioch
 {
@@ -65,6 +66,10 @@ namespace Antioch
     const CoeffType* coefficients(const unsigned int interval) const;
 
   protected:
+
+    void check_coeff_size() const;
+
+    void check_temp_coeff_size_consistency() const;
 
     //! The number of coefficients in each interval
     unsigned int _n_coeffs;
@@ -133,6 +138,47 @@ namespace Antioch
     antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
 
     return &_coefficients[_n_coeffs*interval];
+  }
+
+  template<typename CoeffType>
+  inline
+  void NASACurveFitBase<CoeffType>::check_coeff_size() const
+  {
+    if( this->_coefficients.size()%this->_n_coeffs != 0 )
+      {
+        std::stringstream ncs;
+        ncs << this->_n_coeffs;
+
+        std::stringstream css;
+        css << this->_coefficients.size()%this->_n_coeffs;
+
+        std::string msg = "ERROR: coeffs size must be a multiple of "+ncs.str()+"\n";
+        msg += "       Found "+css.str()+"\n";
+        antioch_error_msg(msg);
+      }
+  }
+
+  template<typename CoeffType>
+  inline
+  void NASACurveFitBase<CoeffType>::check_temp_coeff_size_consistency() const
+  {
+    if( this->_temp.size() != this->_coefficients.size()/this->_n_coeffs + 1 )
+      {
+        std::stringstream tss;
+        tss << this->_temp.size();
+
+        std::stringstream css;
+        css << this->_coefficients.size();
+
+        std::stringstream cssd;
+        cssd << this->_n_coeffs*(this->_temp.size()-1);
+
+        std::string msg = "ERROR: Inconsistency in temp and coeff size.\n";
+        msg += "       Found temp size of "+tss.str()+"\n";
+        msg += "       Found coeff size of "+css.str()+"\n";
+        msg += "       Expected coeff size of "+cssd.str()+"\n";
+        antioch_error_msg(msg);
+      }
   }
 
 } // end namespace Antioch

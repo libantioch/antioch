@@ -112,9 +112,8 @@ namespace Antioch
   {
     this->_n_coeffs = 7;
 
-      // consistency checks
-    antioch_assert_equal_to(this->_coefficients.size()%7,0);
-    antioch_assert_equal_to(this->_temp.size(),this->_coefficients.size()/this->_n_coeffs + 1);
+    this->check_coeff_size();
+    this->check_temp_coeff_size_consistency();
   }
 
   template<typename CoeffType>
@@ -124,13 +123,13 @@ namespace Antioch
   {
     this->_n_coeffs = 7;
 
-    // consistency checks
-    antioch_assert_equal_to(this->_coefficients.size(),14);
-
     this->_temp.resize(3);
     this->_temp[0] = 300.L;
     this->_temp[1] = 1000.L;
     this->_temp[2] = 5000.L;
+
+    this->check_coeff_size();
+    this->check_temp_coeff_size_consistency();
   }
 
   template<typename CoeffType>
