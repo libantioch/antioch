@@ -151,6 +151,9 @@ namespace Antioch
         //! find the index of the wanted data
         void find_first(unsigned int & index,unsigned int n_data) const;
 
+    //! Warn about species for which Antioch default mixture file has untrusted \Delta H_f values
+    void check_warn_for_species_with_untrusted_hf(const std::string& name) const;
+
         //! not allowed
         ASCIIParser();
 
@@ -162,6 +165,9 @@ namespace Antioch
         const unsigned int _n_columns_vib_data;
         const unsigned int _n_columns_el_data;
         const unsigned int _n_columns_transport_species;
+
+    //! Needed to be able to warn about using not-trusted enthalpies of formation
+    bool _is_antioch_default_mixture_file;
   };
 
 } // end namespace Antioch

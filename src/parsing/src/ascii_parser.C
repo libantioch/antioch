@@ -46,13 +46,18 @@ namespace Antioch
     _n_columns_chemical_species(4), // Spec.     Mol. Wt.,     Hform (0K),  cfs,   zns
     _n_columns_vib_data(2),  // Species     Theta_v  degeneracy
     _n_columns_el_data(2),  // Species     ThetaE     edg  #elevels
-    _n_columns_transport_species(5) // Species, eps/kB (K), sigma (ang), alpha (D), alpha (ang^3), Zrot@298 K
+    _n_columns_transport_species(5), // Species, eps/kB (K), sigma (ang), alpha (D), alpha (ang^3), Zrot@298 K
+    _is_antioch_default_mixture_file(false)
   {
     if(!_doc.is_open())
       {
         std::cerr << "ERROR: unable to load file " << file << std::endl;
         antioch_error();
       }
+
+    if( file == DefaultSourceFilename::chemical_mixture() ||
+        file == DefaultInstallFilename::chemical_mixture() )
+      _is_antioch_default_mixture_file = true;
 
     if(this->verbose())std::cout << "Having opened file " << file << std::endl;
 
@@ -79,6 +84,10 @@ namespace Antioch
         std::cerr << "ERROR: unable to load file " << filename << std::endl;
         antioch_error();
       }
+
+    if( filename == DefaultSourceFilename::chemical_mixture() ||
+        filename == DefaultInstallFilename::chemical_mixture() )
+      _is_antioch_default_mixture_file = true;
 
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
@@ -227,6 +236,8 @@ namespace Antioch
                               << "trans-rot degrees of freedom: " << n_tr_dofs << "\n\t"
                               << "charge: "                       << charge << std::endl;
                   }
+                if(_is_antioch_default_mixture_file)
+                  this->check_warn_for_species_with_untrusted_hf(name);
               }
 
           }
@@ -465,6 +476,35 @@ namespace Antioch
             transport.add_species(place,LJ_eps_kB,LJ_sigma,dipole_moment,pol,Zrot,mass);
           }
       }
+  }
+
+  template <typename NumericType>
+  void ASCIIParser<NumericType>::check_warn_for_species_with_untrusted_hf(const std::string& name) const
+  {
+    std::vector<std::string> species_with_unknown_Hf(9);
+    species_with_unknown_Hf[0] = "CH2O";
+    species_with_unknown_Hf[1] = "HCCO";
+    species_with_unknown_Hf[2] = "HCCOH";
+    species_with_unknown_Hf[3] = "H2CN";
+    species_with_unknown_Hf[4] = "HCNN";
+    species_with_unknown_Hf[5] = "HCNO";
+    species_with_unknown_Hf[6] = "HOCN";
+    species_with_unknown_Hf[7] = "C3H7";
+    species_with_unknown_Hf[8] = "CH2CHO";
+
+    std::vector<std::string>::const_iterator it = std::search_n( species_with_unknown_Hf.begin(),
+                                                                 species_with_unknown_Hf.end(),
+                                                                 1, name );
+    if( it != species_with_unknown_Hf.end() )
+      {
+        std::cout << "WARNING: Detected that you're using Antioch's default chemical mixture file" << std::endl
+                  << "         and using species " << name <<". The Enthaply of formation of this" << std::endl
+                  << "         species is currently NOT TRUSTED. BE AWARE THAT USING StatMechThermodynamics"
+                  << std::endl
+                  << "         WILL LIKELY GIVE INACCURATE RESULTS! All other calculations are unaffected."
+                  << std::endl;
+      }
+
   }
 
   // Instantiate
