@@ -10,6 +10,14 @@
 #
 # [DLS]: Unsure about Hform( 0K ) for CH2O, HCCO, HCCOH, H2CN, HCNN, 
 #                                     HCNO HOCN, C3H7, CH2CHO
+#        They are zeroed out for now.
+# [DLS]: Hform (0K) taken from the site:  http://cccbdb.nist.gov/hf0K.asp
+#        for species starting on line 82 of this file but also including 
+#        HCO and N2O.
+# [DLS]:  NNH data taken from Klippenstein, Stephen J., et al.
+#         "The role of NNH in NO formation and control." Combustion and Flame
+#          158.4 (2011): 774-789 (see pg. 2)
+#
 #    Spec.     Mol. Wt.     Hform (0K),  cfs,   zns
 
 Air	28.96000	  0.000000000000 	2.5 	 0
