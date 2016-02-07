@@ -35,13 +35,13 @@ namespace Antioch
 {
   /*! \class NASA9CurveFit
    *
-   *  This class stores the CEA polynomial fit to
+   *  This class stores the NASA polynomial fit to
    *  the thermodynamics quantities \f$\frac{C_p}{\mathrm{R}}\f$
    *  \f$\frac{h}{\mathrm{R}T}\f$ and \f$\frac{s}{\mathrm{R}T}\f$.
    *  This formulation requires nine coefficients, from \f$a_0\f$
-   *  to \f$a_9\f$, \f$a_7\f$ is always equals to zero.
+   *  to \f$a_8\f$.
    *
-   *  The temperature intervals are imposed as:
+   *  The default temperature intervals are
    *   [200--1,000], [1,000--6,000], [6,000--20,000] K.
    *
    *  The equations are:
@@ -54,14 +54,14 @@ namespace Antioch
    *        \frac{h}{\mathrm{R}T} = -\frac{a_0}{T^2} + \frac{a_1}{T} \ln(T)
    *                                + a2  + \frac{a_3}{2} T + \frac{a_4}{3} T^2
    *                                + \frac{a_5}{4} T^3 + \frac{a_6}{5} T^4
-   *                                + \frac{a_8}{T}
+   *                                + \frac{a_7}{T}
    *    \f]
    *
    *    \f[
    *        \frac{s}{\mathrm{R}} = -\frac{a_0}{2T^2} - \frac{a_1}{T}
    *                                + a_2 \ln(T) + a_3 T + \frac{a_4}{2} T^2
    *                                + \frac{a_5}{3} T^3 + \frac{a_6}{4} T^4
-   *                                + a_9
+   *                                + a_8
    *    \f]
    *
    */
@@ -71,9 +71,12 @@ namespace Antioch
   {
   public:
 
-    // for compatibility with NASA, not used
+    //! Accepts a vector temperatures to specify the temp. intervals
     NASA9CurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType>& temps );
 
+    //! Assumes the coefficients correspond to the default temperature intervals
+    /*! If there are not enough coefficients for the third interval,
+        then this only builds up through the second interval. */
     NASA9CurveFit( const std::vector<CoeffType>& coeffs );
 
     ~NASA9CurveFit(){};

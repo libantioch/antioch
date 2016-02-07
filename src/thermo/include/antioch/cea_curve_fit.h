@@ -33,13 +33,11 @@ namespace Antioch
 {
   /*!\class CEACurveFit
 
-    This is a synomym for NASA9CurveFit, the NASA9
-    name ensures consistency with the NASA7 objects
-    while the CEA name provides backward compatiblity
-    and a more `physics-based' name.
-
-    Note that as nothing happens in the destructor (and
-    nothing should ever), no need to get virtual in NASA9.
+    This class only differs from NASA9CurveFit in the construction. Here,
+    we assume that there are 10 coefficients, with the 7th being zero. This is
+    exactly the format output from NASA's CEA program and, hence, this class
+    was build to enable this compatiblity. Internally, the coefficients are
+    remapped to 9 coefficients and is then functionally identical to NASA9CurveFit.
   */
   template<typename CoeffType=double>
   class CEACurveFit: public NASA9CurveFit<CoeffType>
