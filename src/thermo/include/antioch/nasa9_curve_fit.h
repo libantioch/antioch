@@ -138,6 +138,10 @@ namespace Antioch
     template <typename StateType>
     StateType dh_RT_minus_s_R_dT( const TempCache<StateType>& cache) const;
 
+  protected:
+
+    NASA9CurveFit(){};
+
   };
 
 

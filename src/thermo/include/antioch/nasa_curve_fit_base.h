@@ -67,6 +67,8 @@ namespace Antioch
 
   protected:
 
+    NASACurveFitBase(){};
+
     void check_coeff_size() const;
 
     void check_temp_coeff_size_consistency() const;
@@ -87,10 +89,6 @@ namespace Antioch
       The temperature defining the intervals
      */
     std::vector<CoeffType> _temp;
-
-  private:
-
-    NASACurveFitBase();
 
   };
 
