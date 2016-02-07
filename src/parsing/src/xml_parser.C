@@ -34,7 +34,7 @@
 #include "antioch/nasa_mixture.h"
 #include "antioch/cea_thermo.h"
 #include "antioch/cea_curve_fit.h"
-#include "antioch/nasa_curve_fit.h"
+#include "antioch/nasa7_curve_fit.h"
 
 //XML
 #include "antioch/tinyxml2_imp.h"

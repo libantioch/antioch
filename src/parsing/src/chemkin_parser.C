@@ -31,7 +31,7 @@
 #include "antioch/antioch_numeric_type_instantiate_macro.h"
 #include "antioch/nasa_mixture.h"
 #include "antioch/cea_curve_fit.h"
-#include "antioch/nasa_curve_fit.h"
+#include "antioch/nasa7_curve_fit.h"
 
 // C++
 #include <sstream>
