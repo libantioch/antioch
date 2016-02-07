@@ -51,6 +51,11 @@ namespace Antioch
     CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temps );
 
     ~CEACurveFit(){}
+
+  private:
+
+    void remap_coeffs( const std::vector<CoeffType>& coeffs );
+
   };
 
   template<typename CoeffType>
@@ -64,6 +69,30 @@ namespace Antioch
   CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temps )
     :NASA9CurveFit<CoeffType>(coeffs,temps)
   {}
+
+  template<typename CoeffType>
+  inline
+  void CEACurveFit<CoeffType>::remap_coeffs( const std::vector<CoeffType>& coeffs )
+  {
+    this->_coefficients.resize(this->_n_coeffs*(this->_temp.size()-1),0.0);
+
+    for( unsigned int t = 0; t < this->_temp.size()-1; t++ )
+      {
+        for( unsigned int c = 0; c < 7; c++ )
+          {
+            unsigned int i = 10*t + c;
+            unsigned int j = 9*t + c;
+            this->_coefficients[j] = coeffs[i];
+          }
+
+        for( unsigned int c = 7; c < 9; c++ )
+          {
+            unsigned int i = 10*t + c;
+            unsigned int j = 9*t + c;
+            this->_coefficients[j] = coeffs[i+1];
+          }
+      }
+  }
 
 } // end namespace Antioch
 
