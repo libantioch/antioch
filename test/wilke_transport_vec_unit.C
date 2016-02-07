@@ -138,9 +138,9 @@ int tester(const PairScalars& example, const std::string& testname)
   typedef Antioch::StatMechThermodynamics< Scalar >   MicroThermo;
 
 // thermo for cp (diffusion)
-  Antioch::NASAThermoMixture<Scalar,Antioch::NASA9CurveFit<Scalar> > cea_mixture( chem_mixture );
+  Antioch::NASAThermoMixture<Scalar,Antioch::CEACurveFit<Scalar> > cea_mixture( chem_mixture );
   Antioch::read_nasa_mixture_data( cea_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true );
-  Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> > thermo_mix( cea_mixture );
+  Antioch::NASAEvaluator<Scalar,Antioch::CEACurveFit<Scalar> > thermo_mix( cea_mixture );
 
   Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
