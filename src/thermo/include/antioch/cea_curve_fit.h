@@ -61,14 +61,41 @@ namespace Antioch
   template<typename CoeffType>
   inline
   CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs )
-    :NASA9CurveFit<CoeffType>(coeffs)
-  {}
+    :NASA9CurveFit<CoeffType>()
+  {
+
+    if( this->_coefficients.size()%10 != 0 )
+      antioch_error_msg("ERROR: Expected CEA style of input for coefficients! Must be a multiple of 10!");
+
+    this->_n_coeffs = 9;
+
+    // If no temp is provided, we assume the standard CEA form.
+    this->init_nasa9_temps( coeffs, 10 );
+
+    this->remap_coeffs(coeffs);
+
+    this->check_coeff_size();
+    this->check_temp_coeff_size_consistency();
+  }
 
   template<typename CoeffType>
   inline
-  CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temps )
-    :NASA9CurveFit<CoeffType>(coeffs,temps)
-  {}
+  CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs,
+                                       const std::vector<CoeffType> & temp )
+    :NASA9CurveFit<CoeffType>()
+  {
+    if( this->_coefficients.size()%10 != 0 )
+      antioch_error_msg("ERROR: Expected CEA style of input for coefficients! Must be a multiple of 10!");
+
+    this->_n_coeffs = 9;
+
+    this->_temp = temp;
+
+    this->remap_coeffs(coeffs);
+
+    this->check_coeff_size();
+    this->check_temp_coeff_size_consistency();
+  }
 
   template<typename CoeffType>
   inline

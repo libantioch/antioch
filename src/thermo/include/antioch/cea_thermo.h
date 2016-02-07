@@ -382,11 +382,11 @@ namespace Antioch
     typedef typename
       Antioch::raw_value_type<StateType>::type raw_type;
 
-    /* h/RT = -a0*T^-2   + a1*T^-1*lnT + a2     + a3*T/2 + a4*T^2/3 + a5*T^3/4 + a6*T^4/5 + a8/T */
+    /* h/RT = -a0*T^-2   + a1*T^-1*lnT + a2     + a3*T/2 + a4*T^2/3 + a5*T^3/4 + a6*T^4/5 + a7/T */
     return -a[0]/cache.T2 + a[1]*cache.lnT/cache.T + a[2] +
 	   a[3]*cache.T/raw_type(2) + a[4]*cache.T2/raw_type(3) +
 	   a[5]*cache.T3/raw_type(4) + a[6]*cache.T4/raw_type(5) +
-           a[8]/cache.T;
+           a[7]/cache.T;
   }
 
 
@@ -406,10 +406,10 @@ namespace Antioch
     typedef typename
       Antioch::raw_value_type<StateType>::type raw_type;
 
-    /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a9 */
+    /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a8 */
     return -a[0]/cache.T2/raw_type(2) - a[1]/cache.T +
 	   a[2]*cache.lnT + a[3]*cache.T + a[4]*cache.T2/raw_type(2) +
-           a[5]*cache.T3/raw_type(3) + a[6]*cache.T4/raw_type(4) + a[9];
+           a[5]*cache.T3/raw_type(3) + a[6]*cache.T4/raw_type(4) + a[8];
   }
 
 
@@ -437,8 +437,8 @@ namespace Antioch
     typedef typename
       Antioch::raw_value_type<StateType>::type raw_type;
 
-    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
-       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
+    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[7]/T,
+       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[8]   */
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
         const CoeffType * const a =
@@ -446,9 +446,9 @@ namespace Antioch
 	returnval = Antioch::if_else
 	  (interval == i,
 	   StateType(-a[0]/cache.T2/raw_type(2) +
-                     (a[1] + a[8])/cache.T +
+                     (a[1] + a[7])/cache.T +
 		     a[1]*cache.lnT/cache.T - a[2]*cache.lnT +
-		     (a[2] - a[9]) - a[3]*cache.T/raw_type(2) -
+		     (a[2] - a[8]) - a[3]*cache.T/raw_type(2) -
 		     a[4]*cache.T2/raw_type(6) -
                      a[5]*cache.T3/raw_type(12) -
 		     a[6]*cache.T4/raw_type(20)),
@@ -505,15 +505,15 @@ namespace Antioch
     typedef typename
       Antioch::raw_value_type<StateType>::type raw_type;
 
-    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
-       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
+    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[7]/T,
+       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[8]   */
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
         const CoeffType * const a =
           this->_species_curve_fits[species]->coefficients(i);
 	returnval = Antioch::if_else
 	  (interval == i,
-	   StateType(a[0]/cache.T3 - a[8]/cache.T2 -
+	   StateType(a[0]/cache.T3 - a[7]/cache.T2 -
 		     a[1]*cache.lnT/cache.T2 - a[2]/cache.T -
 		     a[3]/raw_type(2) - a[4]*cache.T/raw_type(3) -
                      a[5]*cache.T2/raw_type(4) -

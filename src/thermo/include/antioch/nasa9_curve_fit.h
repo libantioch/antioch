@@ -142,6 +142,9 @@ namespace Antioch
 
     NASA9CurveFit(){};
 
+    void init_nasa9_temps( const std::vector<CoeffType>& coeffs,
+                           unsigned n_coeffs );
+
   };
 
 
@@ -152,7 +155,7 @@ namespace Antioch
                                            const std::vector<CoeffType>& temp )
     : NASACurveFitBase<CoeffType>(coeffs,temp)
   {
-    this->_n_coeffs = 10;
+    this->_n_coeffs = 9;
 
     this->check_coeff_size();
     this->check_temp_coeff_size_consistency();
@@ -163,9 +166,19 @@ namespace Antioch
   NASA9CurveFit<CoeffType>::NASA9CurveFit( const std::vector<CoeffType>& coeffs )
     : NASACurveFitBase<CoeffType>(coeffs,std::vector<CoeffType>())
   {
-    this->_n_coeffs = 10;
+    this->_n_coeffs = 9;
     this->check_coeff_size();
 
+    this->init_nasa9_temps( coeffs, this->_n_coeffs );
+
+    this->check_temp_coeff_size_consistency();
+  }
+
+  template<typename CoeffType>
+  inline
+  void NASA9CurveFit<CoeffType>::init_nasa9_temps( const std::vector<CoeffType>& coeffs,
+                                                   unsigned n_coeffs )
+  {
     // All default NASA9 curve fits should have this
     this->_temp.resize(3);
     this->_temp[0] = 200.L;
@@ -173,10 +186,8 @@ namespace Antioch
     this->_temp[2] = 6000.L;
 
     // But some also have this last interval. We infer this from the size of the coeffs.
-    if( coeffs.size()/this->_n_coeffs == 3 )
+    if( coeffs.size()/n_coeffs == 3 )
       this->_temp.push_back(20000.L);
-
-    this->check_temp_coeff_size_consistency();
   }
 
   template<typename CoeffType>
@@ -226,12 +237,12 @@ namespace Antioch
       {
          const CoeffType *a = this->coefficients(interval);
 
-         /* h/RT = -a0*T^-2   + a1*T^-1*lnT + a2     + a3*T/2 + a4*T^2/3 + a5*T^3/4 + a6*T^4/5 + a8/T */
+         /* h/RT = -a0*T^-2   + a1*T^-1*lnT + a2     + a3*T/2 + a4*T^2/3 + a5*T^3/4 + a6*T^4/5 + a7/T */
         returnval = Antioch::if_else
         ( interval == i,
            StateType( -a[0]/cache.T2 + a[1]*cache.lnT/cache.T + a[2] +
                        a[3]*cache.T/2.0L + a[4]*cache.T2/3.0L + a[5]*cache.T3/4.0L +
-                       a[6]*cache.T4/5.0L + a[8]/cache.T),
+                       a[6]*cache.T4/5.0L + a[7]/cache.T),
            returnval);
        }
        return returnval;
@@ -254,12 +265,12 @@ namespace Antioch
       {
          const CoeffType *a = this->coefficients(interval);
 
-    /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a9 */
+    /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a8 */
         returnval = Antioch::if_else
         ( interval == i,
            StateType( -a[0]/cache.T2/2.0 - a[1]/cache.T + a[2]*cache.lnT
                       + a[3]*cache.T + a[4]*cache.T2/2.0 + a[5]*cache.T3/3.0
-                      + a[6]*cache.T4/4.0 + a[9]),
+                      + a[6]*cache.T4/4.0 + a[8]),
            returnval);
        }
        return returnval;
@@ -283,13 +294,13 @@ namespace Antioch
       {
          const CoeffType *a = this->coefficients(interval);
 
-    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
-       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
+    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[7]/T,
+       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[8]   */
         returnval = Antioch::if_else
         ( interval == i,
-           StateType(-a[0]/cache.T2/2.0 + (a[1] + a[8])/cache.T +
+           StateType(-a[0]/cache.T2/2.0 + (a[1] + a[7])/cache.T +
                      a[1]*cache.lnT/cache.T - a[2]*cache.lnT +
-                     (a[2] - a[9]) - a[3]*cache.T/2.0 -
+                     (a[2] - a[8]) - a[3]*cache.T/2.0 -
                      a[4]*cache.T2/6.0 - a[5]*cache.T3/12.0 -
                      a[6]*cache.T4/20.0),
            returnval);
@@ -312,15 +323,15 @@ namespace Antioch
 
     StateType returnval = Antioch::zero_clone(cache.T);
 
-    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[8]/T,
-       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[9]   */
+    /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[7]/T,
+       s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[8]   */
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
         const CoeffType * const a =
           this->coefficients(i);
         returnval = Antioch::if_else
           (interval == i,
-           StateType(a[0]/cache.T3 - a[8]/cache.T2 -
+           StateType(a[0]/cache.T3 - a[7]/cache.T2 -
                      a[1]*cache.lnT/cache.T2 - a[2]/cache.T -
                      a[3]/2.  - a[4]*cache.T/3. - a[5]*cache.T2/4. -
                      a[6]*cache.T3/5.),
