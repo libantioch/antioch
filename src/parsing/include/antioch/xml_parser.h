@@ -100,13 +100,13 @@ namespace Antioch{
         void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
                 {this->read_thermodynamic_data_root(thermo);}
 
-        //! reads the thermo, NASA generalist, no templates for virtual
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)
-                {this->read_thermodynamic_data_root(thermo);}
+    //! reads the thermo, NASA generalist, no templates for virtual
+    void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)
+    {antioch_error_msg("ERROR: XML Parsing only supports parsing for NASA7CurveFit and NASA9CurveFit!");}
 
-        //! reads the thermo, CEA deprecated
-        void read_thermodynamic_data(CEAThermodynamics<NumericType >& thermo)
-                {this->read_thermodynamic_data_root(thermo);}
+    //! reads the thermo, CEA deprecated
+    void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)
+    {antioch_error_msg("ERROR: XML Parsing only supports parsing for NASA7CurveFit and NASA9CurveFit!");}
 
 /// reaction
 

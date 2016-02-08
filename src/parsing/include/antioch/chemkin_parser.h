@@ -105,21 +105,21 @@ namespace Antioch{
 // a way so they shadow themselves
 // => we need to implement all or nothing
 
-        //! reads the thermo, NASA generalist, no templates for virtual
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
-                {this->read_thermodynamic_data_root(thermo);}
+    //! reads the thermo, NASA generalist, no templates for virtual
+    void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
+    {this->read_thermodynamic_data_root(thermo);}
 
-        //! reads the thermo, NASA generalist, no templates for virtual
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& /*thermo*/)
-                {antioch_not_implemented_msg(ParserBase<NumericType>::_not_implemented);}
+    //! reads the thermo, NASA generalist, no templates for virtual
+    void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& /*thermo*/)
+    {antioch_error_msg("ERROR: ChemKin Parsing only supports parsing for NASA7CurveFit!");}
 
-        //! reads the thermo, NASA generalist, no templates for virtual
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)
-                {antioch_not_implemented_msg(ParserBase<NumericType>::_not_implemented);}
+    //! reads the thermo, NASA generalist, no templates for virtual
+    void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)
+    {antioch_error_msg("ERROR: ChemKin Parsing only supports parsing for NASA7CurveFit!");}
 
-        //! reads the thermo, CEA deprecated
-        void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)
-                {antioch_not_implemented_msg(ParserBase<NumericType>::_not_implemented);}
+    //! reads the thermo, CEA deprecated
+    void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)
+    {antioch_error_msg("ERROR: ChemKin Parsing only supports parsing for NASA7CurveFit!");}
 
 ///////////////// kinetics
 
