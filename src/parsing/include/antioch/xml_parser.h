@@ -219,6 +219,12 @@ namespace Antioch{
          /*! return the unit of current pointer*/
          const std::string unit(tinyxml2::XMLElement * parameter) const;
 
+          /*! Search the siblings of the element to find the element with the
+              given value for the given attribute. Return pointer to that element. */
+    tinyxml2::XMLElement * find_element_with_attribute( const tinyxml2::XMLElement * element,
+                                                        const std::string& elem_name,
+                                                        const std::string& attribute,
+                                                        const std::string& attr_value ) const;
 
           /*! Never use default constructor*/
           XMLParser();

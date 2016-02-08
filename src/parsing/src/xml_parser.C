@@ -492,6 +492,49 @@ namespace Antioch
   }
 
   template <typename NumericType>
+  tinyxml2::XMLElement* XMLParser<NumericType>::find_element_with_attribute( const tinyxml2::XMLElement * element,
+                                                                             const std::string& elem_name,
+                                                                             const std::string& attribute,
+                                                                             const std::string& attr_value ) const
+  {
+    antioch_assert(element);
+
+    const tinyxml2::XMLElement * elem_with_attr = NULL;
+
+    if( !element->Attribute(attribute.c_str()) )
+      antioch_error_msg("ERROR: Could not find attribute "+attribute+" for current element!");
+
+    // First check if the first element has the attribute we're looking for
+    if( std::string( element->Attribute(attribute.c_str()) ) == attr_value )
+      elem_with_attr = element;
+
+    // Otherwise, look at all the siblings
+    else
+      {
+        elem_with_attr = element->NextSiblingElement(elem_name.c_str());
+
+        while( elem_with_attr )
+          {
+            std::string curr_attr;
+            if( elem_with_attr->Attribute(attribute.c_str()) )
+              curr_attr = std::string(elem_with_attr->Attribute(attribute.c_str()));
+
+            if( curr_attr == attr_value )
+              break;
+
+            elem_with_attr = elem_with_attr->NextSiblingElement(elem_name.c_str());
+          }
+
+        // Error out if we couldn't find the attribute with the correct value
+        if( !elem_with_attr )
+          antioch_error_msg("ERROR: Could not find XMLElement with attribute = "+attribute+" whose value is "+attr_value+"!");
+
+      }
+
+    return const_cast<tinyxml2::XMLElement*>(elem_with_attr);
+  }
+
+  template <typename NumericType>
   bool XMLParser<NumericType>::rate_constant_preexponential_parameter(NumericType & A, std::string & A_unit, std::string & def_unit) const
   {
     def_unit = _default_unit.at(ParsingKey::PREEXP);
