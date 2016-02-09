@@ -122,20 +122,20 @@ namespace Antioch
 ///////////////
 
 //global overload
-        //! reads the thermo, NASA generalist, no templates for virtual
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)
-                {this->read_thermodynamic_data_root(thermo);}
+    //! reads the thermo, NASA generalist, no templates for virtual
+    void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& /*thermo*/)
+    {antioch_error_msg("ERROR: ASCIIParsing only supports parsing for CEACurveFit!");}
+
+    //! reads the thermo, NASA generalist, no templates for virtual
+    void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& /*thermo*/)
+    {antioch_error_msg("ERROR: ASCIIParsing only supports parsing for CEACurveFit!");}
 
         //! reads the thermo, NASA generalist, no templates for virtual
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& thermo)
-                {this->read_thermodynamic_data_root(thermo);}
+    void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)
+    {this->read_thermodynamic_data_root(thermo);}
 
-        //! reads the thermo, NASA generalist, no templates for virtual
-        void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)
-                {this->read_thermodynamic_data_root(thermo);}
-
-        //! read the thermodynamic data, deprecated object
-        void read_thermodynamic_data(CEAThermodynamics<NumericType>& thermo);
+    //! read the thermodynamic data, deprecated object
+    void read_thermodynamic_data(CEAThermodynamics<NumericType>& /*thermo*/);
 
      private:
 

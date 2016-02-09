@@ -296,9 +296,9 @@ int test_type(const std::string& input_name, const Antioch::ParsingType & inputT
   Antioch::read_reaction_set_data<Scalar>( input_name, true, reaction_set, inputType );
 
   // thermo
-  Antioch::NASAThermoMixture<Scalar,Antioch::NASA9CurveFit<Scalar> > thermo_mixture(chem_mixture); 
+  Antioch::NASAThermoMixture<Scalar,Antioch::CEACurveFit<Scalar> > thermo_mixture(chem_mixture); 
   Antioch::read_nasa_mixture_data( thermo_mixture ); // default
-  Antioch::NASAEvaluator<Scalar,Antioch::NASA9CurveFit<Scalar> > thermo(thermo_mixture); 
+  Antioch::NASAEvaluator<Scalar,Antioch::CEACurveFit<Scalar> > thermo(thermo_mixture); 
 
   const Scalar T = 1500.0; // K
   const Scalar P = 1.0e5; // Pa

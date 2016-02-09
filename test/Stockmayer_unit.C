@@ -94,12 +94,12 @@ int tester()
   Antioch::ChemicalMixture<Scalar> chem_mixture( molecules );
 
   // macro thermo
-  Antioch::NASAThermoMixture<Scalar, Antioch::NASA9CurveFit<Scalar> > nasa_mixture( chem_mixture );
+  Antioch::NASAThermoMixture<Scalar, Antioch::CEACurveFit<Scalar> > nasa_mixture( chem_mixture );
 
   // ASCII and true are default, but let's be verbose
   Antioch::read_nasa_mixture_data( nasa_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true);
 
-  typedef Antioch::NASAEvaluator<Scalar, Antioch::NASA9CurveFit<Scalar> > MacroThermo;
+  typedef Antioch::NASAEvaluator<Scalar, Antioch::CEACurveFit<Scalar> > MacroThermo;
   MacroThermo nasa_thermo( nasa_mixture );
 
   // micro thermo
