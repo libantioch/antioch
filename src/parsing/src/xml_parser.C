@@ -202,12 +202,12 @@ namespace Antioch
   template <typename NumericType>
   const std::vector<std::string> XMLParser<NumericType>::species_list()
   {
+    if(!_species_block)
+      antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::SPECIES_SET)+" section in input file!");
+
     std::vector<std::string> molecules;
 
-    if(_species_block)
-      {
-        split_string(std::string(_species_block->GetText())," ",molecules);
-      }
+    split_string(std::string(_species_block->GetText())," ",molecules);
 
     return molecules;
   }
