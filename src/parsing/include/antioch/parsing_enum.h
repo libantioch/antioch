@@ -34,8 +34,16 @@ namespace Antioch
                    CHEMKIN};
 
   enum ParsingKey{SPECIES_SET = 0,
+                  SPECIES_DATA,
+                  SPECIES,
                   THERMO,
                   PHASE_BLOCK,
+//
+                  TMIN,
+                  TMAX,
+                  NASADATA,
+                  NASA7,
+                  NASA9,
 //
                   REACTION_DATA,
                   REACTION,

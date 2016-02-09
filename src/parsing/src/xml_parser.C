@@ -68,9 +68,21 @@ namespace Antioch
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
 
+    // XML block/section names
     _map[ParsingKey::PHASE_BLOCK]           = "phase";
     _map[ParsingKey::SPECIES_SET]           = "speciesArray";
-    _map[ParsingKey::THERMO]                = "species"; // thermo in <species> <thermo> <NASA> <floatArray> </floatArray></NASA> </thermo> </species>
+    _map[ParsingKey::SPECIES_DATA]          = "speciesData";
+    _map[ParsingKey::SPECIES]               = "species";
+    _map[ParsingKey::THERMO]                = "thermo"; // thermo in ,<speciesData> <species> <thermo> <NASA> <floatArray> </floatArray></NASA> </thermo> </species> </speciesData>
+
+    // Thermo parameters
+    _map[ParsingKey::TMIN]                  = "Tmin";
+    _map[ParsingKey::TMAX]                  = "Tmax";
+    _map[ParsingKey::NASADATA]              = "floatArray";
+    _map[ParsingKey::NASA7]                 = "NASA";
+    _map[ParsingKey::NASA9]                 = "NASA9";
+
+    // Kinetics parameters
     _map[ParsingKey::REACTION_DATA]         = "reactionData";
     _map[ParsingKey::REACTION]              = "reaction";
     _map[ParsingKey::REVERSIBLE]            = "reversible";
@@ -122,6 +134,8 @@ namespace Antioch
     _default_unit[ParsingKey::TROE_F_TS]             = "K";
     _default_unit[ParsingKey::TROE_F_TSS]            = "K";
     _default_unit[ParsingKey::TROE_F_TSSS]           = "K";
+
+    this->initialize();
   }
 
   template <typename NumericType>
@@ -154,6 +168,7 @@ namespace Antioch
 
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
+    this->initialize();
   }
 
   template <typename NumericType>
@@ -170,10 +185,10 @@ namespace Antioch
 
     _species_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::PHASE_BLOCK).c_str());
     if(_species_block)
-      {
         _species_block = _species_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
-      }
-    _thermo_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::THERMO).c_str());
+
+    _thermo_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::SPECIES_DATA).c_str());
+
     _reaction_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
 
     _reaction = NULL;
@@ -492,6 +507,49 @@ namespace Antioch
   }
 
   template <typename NumericType>
+  tinyxml2::XMLElement* XMLParser<NumericType>::find_element_with_attribute( const tinyxml2::XMLElement * element,
+                                                                             const std::string& elem_name,
+                                                                             const std::string& attribute,
+                                                                             const std::string& attr_value ) const
+  {
+    antioch_assert(element);
+
+    const tinyxml2::XMLElement * elem_with_attr = NULL;
+
+    if( !element->Attribute(attribute.c_str()) )
+      antioch_error_msg("ERROR: Could not find attribute "+attribute+" for current element!");
+
+    // First check if the first element has the attribute we're looking for
+    if( std::string( element->Attribute(attribute.c_str()) ) == attr_value )
+      elem_with_attr = element;
+
+    // Otherwise, look at all the siblings
+    else
+      {
+        elem_with_attr = element->NextSiblingElement(elem_name.c_str());
+
+        while( elem_with_attr )
+          {
+            std::string curr_attr;
+            if( elem_with_attr->Attribute(attribute.c_str()) )
+              curr_attr = std::string(elem_with_attr->Attribute(attribute.c_str()));
+
+            if( curr_attr == attr_value )
+              break;
+
+            elem_with_attr = elem_with_attr->NextSiblingElement(elem_name.c_str());
+          }
+
+        // Error out if we couldn't find the attribute with the correct value
+        if( !elem_with_attr )
+          antioch_error_msg("ERROR: Could not find XMLElement with attribute = "+attribute+" whose value is "+attr_value+"!");
+
+      }
+
+    return const_cast<tinyxml2::XMLElement*>(elem_with_attr);
+  }
+
+  template <typename NumericType>
   bool XMLParser<NumericType>::rate_constant_preexponential_parameter(NumericType & A, std::string & A_unit, std::string & def_unit) const
   {
     def_unit = _default_unit.at(ParsingKey::PREEXP);
@@ -617,66 +675,100 @@ namespace Antioch
   void XMLParser<NumericType>::read_thermodynamic_data_root(ThermoType & thermo)
   {
     if(!_thermo_block)
-      {
-        std::cerr << "No thermodynamics data found!" << std::endl;
-        antioch_error();
-      }
-
-    // just a temp value to compare NumericType
-    const NumericType tol = std::numeric_limits<NumericType>::epsilon() * 10.;
+      antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES_DATA)+" section found! Cannot parse thermo!");
 
     const ChemicalMixture<NumericType> & chem_mixture = thermo.chemical_mixture();
+    const std::vector<ChemicalSpecies<NumericType>*>& chem_species = chem_mixture.chemical_species();
+
     for(unsigned int s = 0; s < chem_mixture.n_species(); s++)
       {
-        std::string name = chem_mixture.species_inverse_name_map().at(s);
-        tinyxml2::XMLElement * spec = _thermo_block->FirstChildElement(name.c_str());
+        // Step to first species block
+        tinyxml2::XMLElement * species_block = _thermo_block->FirstChildElement(_map.at(ParsingKey::SPECIES).c_str());
+
+        if(!species_block)
+          antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES)+" block found within "+_map.at(ParsingKey::SPECIES_DATA)+" section! Cannot parse thermo!");
+
+
+        const std::string& name = chem_species[s]->species();
+
+        tinyxml2::XMLElement * spec = NULL;
+        spec = this->find_element_with_attribute( species_block,
+                                                  _map.at(ParsingKey::SPECIES),
+                                                  "name",
+                                                  name );
+
         if(!spec)
+          antioch_error_msg("ERROR: Species "+name+" has not been found in the "+_map.at(ParsingKey::SPECIES_DATA)+" section! Cannot parse thermo!");
+
+        else
           {
-            std::cerr << "Species " << name << " has not been found" << std::endl;
-          }else
-          {
-            // temp containers
+            spec = spec->FirstChildElement(_map.at(ParsingKey::THERMO).c_str());
+
+            if(!spec)
+              antioch_error_msg("ERROR: No "+_map.at(ParsingKey::THERMO)+" block found for species "+name+"! Cannot parse thermo!");
+
+            // containers for parsing thermo data
             std::vector<NumericType> temps;
             std::vector<NumericType> values;
+            tinyxml2::XMLElement * coeffs;
+            std::vector<std::string> coeffs_str;
 
-            // xml place
-            tinyxml2::XMLElement * nasa = spec->FirstChildElement("NASA");
-            // temperature
-            temps.push_back(std::atof(nasa->Attribute("Tmin")));
-            temps.push_back(std::atof(nasa->Attribute("Tmax")));
+            // looping for each of the temperature intervals for this species
+            tinyxml2::XMLElement * nasa = spec->FirstChildElement(_map.at(ParsingKey::NASA9).c_str());
+            if(!nasa)
+              antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::NASA9)+" thermo section!");
 
-            // now coefs
-            std::vector<std::string> coefs_str;
-            split_string(std::string(nasa->GetText())," ",coefs_str);
-
-            for(unsigned int d = 0; d < coefs_str.size(); d++)
-              values.push_back(std::atof(coefs_str[d].c_str()));
-            // looping
-            while(nasa->NextSiblingElement("NASA"))
+            while(nasa)
               {
-                nasa = nasa->NextSiblingElement("NASA");
+                if( !(nasa->Attribute(_map.at(ParsingKey::TMIN).c_str())) )
+                  antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::TMIN)+" attribute for species "+name+"!");
+
+                if( !(nasa->Attribute(_map.at(ParsingKey::TMAX).c_str())) )
+                  antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::TMAX)+" attribute for species "+name+"!");
+                // By convention, we put the first TMIN in, and then only the TMAX thereafter
+                // We have a consistency check below to make sure the TMIN's in the input are consistent
+                if( temps.empty() )
+                  temps.push_back(string_to_T<NumericType>(nasa->Attribute(_map.at(ParsingKey::TMIN).c_str())));
+
                 // temperatures, only Tmax as Tmin is suppose to be last Tmax
-                temps.push_back(std::atof(nasa->Attribute("Tmax")));
+                temps.push_back(string_to_T<NumericType>(nasa->Attribute(_map.at(ParsingKey::TMAX).c_str())));
 
-                // now coefs
-                split_string(std::string(nasa->GetText())," ",coefs_str);
-                for(unsigned int d = 0; d < coefs_str.size(); d++)
-                  values.push_back(std::atof(coefs_str[d].c_str()));
+                // now coeffs
+                if( !(nasa->FirstChildElement(_map.at(ParsingKey::NASADATA).c_str())) )
+                  antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::NASADATA)+" data for species "+name+"!");
 
-                // checking this Tmin = last Tmax thing
-                if(std::abs(NumericType(std::atof(nasa->Attribute("Tmin"))) - temps[temps.size() - 2] )/temps[temps.size() - 2] > tol)
+                coeffs = nasa->FirstChildElement(_map.at(ParsingKey::NASADATA).c_str());
+                split_string(std::string(coeffs->GetText())," ",coeffs_str);
+                remove_newline_from_strings(coeffs_str);
+
+                for(unsigned int d = 0; d < coeffs_str.size(); d++)
+                  values.push_back(string_to_T<NumericType>(coeffs_str[d]));
+
+                // If we have more than one interval, make sure the temperature intervals match up
+                if( temps.size() > 1 )
                   {
-                    std::cerr << "No temperature connection between intervals in xml file description"
-                              << std::endl;
-                    antioch_error();
+                    NumericType prev_Tmax = *(temps.end()-2);
+                    NumericType Tmin = string_to_T<NumericType>(nasa->Attribute(_map.at(ParsingKey::TMIN).c_str()));
+                    NumericType diff = (Tmin - prev_Tmax)/prev_Tmax;
+
+                    const NumericType tol = std::numeric_limits<NumericType>::epsilon() * 10.;
+
+                    if(std::abs(diff) > tol)
+                      antioch_error_msg("ERROR: Tmax/Tmin mismatch for species "+name+"!");
                   }
-              }
+
+                // This is meant to store only data one interval at a time, so we must clear at each iteration
+                coeffs_str.clear();
+
+                // Move onto next interval of data
+                nasa = nasa->NextSiblingElement(_map.at(ParsingKey::NASA9).c_str());
+
+              } // end while loop
 
             thermo.add_curve_fit(name, values, temps);
           }
-      }
 
-
+      } // end species loop
   }
 
   // Instantiate

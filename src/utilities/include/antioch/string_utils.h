@@ -47,6 +47,11 @@ namespace Antioch
                      std::vector<std::string>& results );
 
 
+  //! Strips newline characters from strings in the input vector, strings.
+  /*! Note that if an element of the vector is only the newline character,
+      that element will be removed from the vector. */
+  void remove_newline_from_strings( std::vector<std::string>& strings );
+
   template <typename T>
   inline
   T string_to_T(const std::string& input)
