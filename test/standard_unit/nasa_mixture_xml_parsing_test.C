@@ -103,12 +103,19 @@ namespace AntiochTesting
       species_str_list[1] = "N2";
 
       Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+      std::string thermo_filename = std::string(ANTIOCH_TESTING_INPUT_FILES_PATH)+"nasa7_thermo_test.xml";
+
       Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
 
-      std::string filename = std::string(ANTIOCH_TESTING_INPUT_FILES_PATH)+"nasa7_thermo_test.xml";
+      Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
 
-      Antioch::read_nasa_mixture_data( nasa_mixture, filename, Antioch::XML );
+      this->check_curve_fits(nasa_mixture);
+     }
 
+
+    void check_curve_fits( const Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> >& nasa_mixture)
+    {
       const Antioch::NASA7CurveFit<Scalar>& H2_curve_fit =  nasa_mixture.curve_fit(0);
       const Antioch::NASA7CurveFit<Scalar>& N2_curve_fit =  nasa_mixture.curve_fit(1);
 
@@ -122,7 +129,7 @@ namespace AntiochTesting
       // Check NO2 coefficients
       this->check_coefficients( N2_curve_fit.coefficients(0), this->_N2_coeffs_300_1000 );
       this->check_coefficients( N2_curve_fit.coefficients(1), this->_N2_coeffs_1000_5000 );
-     }
+    }
 
     void check_coefficients( const Scalar* parsed_coeffs, std::vector<Scalar>& exact_coeffs )
     {
