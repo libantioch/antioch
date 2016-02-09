@@ -46,12 +46,12 @@ namespace AntiochTesting
     void test_nasa9_default_temp_intervals()
     {
       {
-        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_N2_coeffs );
+        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_standard_N2_coeffs );
         this->three_interval_test(curve_fit);
       }
 
       {
-        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_NO2_coeffs );
+        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_standard_NO2_coeffs );
         this->two_interval_test(curve_fit);
       }
 
@@ -66,7 +66,7 @@ namespace AntiochTesting
         temp[2] = 6000;
         temp[3] = 20000;
 
-        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_N2_coeffs, temp );
+        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_standard_N2_coeffs, temp );
         this->three_interval_test(curve_fit);
       }
 
@@ -76,7 +76,7 @@ namespace AntiochTesting
         temp[1] = 1000;
         temp[2] = 6000;
 
-        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_NO2_coeffs, temp );
+        Antioch::NASA9CurveFit<Scalar> curve_fit( this->_all_standard_NO2_coeffs, temp );
         this->two_interval_test(curve_fit);
       }
 

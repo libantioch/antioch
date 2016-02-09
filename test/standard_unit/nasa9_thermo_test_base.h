@@ -97,15 +97,15 @@ namespace AntiochTesting
 
     void init_all_N2_coeffs()
     {
-      _all_N2_coeffs.insert(  _all_N2_coeffs.end(),
+      _all_standard_N2_coeffs.insert(  _all_standard_N2_coeffs.end(),
                               _N2_coeffs_200_1000.begin(),
                               _N2_coeffs_200_1000.end() );
 
-      _all_N2_coeffs.insert(  _all_N2_coeffs.end(),
+      _all_standard_N2_coeffs.insert(  _all_standard_N2_coeffs.end(),
                               _N2_coeffs_1000_6000.begin(),
                               _N2_coeffs_1000_6000.end() );
 
-      _all_N2_coeffs.insert(  _all_N2_coeffs.end(),
+      _all_standard_N2_coeffs.insert(  _all_standard_N2_coeffs.end(),
                               _N2_coeffs_6000_20000.begin(),
                               _N2_coeffs_6000_20000.end() );
     }
@@ -140,11 +140,11 @@ namespace AntiochTesting
 
     void init_all_NO2_coeffs()
     {
-      _all_NO2_coeffs.insert(  _all_NO2_coeffs.end(),
+      _all_standard_NO2_coeffs.insert(  _all_standard_NO2_coeffs.end(),
                                _NO2_coeffs_200_1000.begin(),
                                _NO2_coeffs_200_1000.end() );
 
-      _all_NO2_coeffs.insert(  _all_NO2_coeffs.end(),
+      _all_standard_NO2_coeffs.insert(  _all_standard_NO2_coeffs.end(),
                                _NO2_coeffs_1000_6000.begin(),
                                _NO2_coeffs_1000_6000.end() );
     }
@@ -158,8 +158,8 @@ namespace AntiochTesting
     std::vector<Scalar> _NO2_coeffs_200_1000;
     std::vector<Scalar> _NO2_coeffs_1000_6000;
 
-    std::vector<Scalar> _all_N2_coeffs;
-    std::vector<Scalar> _all_NO2_coeffs;
+    std::vector<Scalar> _all_standard_N2_coeffs;
+    std::vector<Scalar> _all_standard_NO2_coeffs;
 
   };
 
