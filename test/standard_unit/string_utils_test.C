@@ -48,6 +48,7 @@ namespace AntiochTesting
 
     CPPUNIT_TEST(test_split_string);
     CPPUNIT_TEST(test_string_to_T);
+    CPPUNIT_TEST(test_strip_newlines);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -148,6 +149,27 @@ namespace AntiochTesting
       }
 
     }
+
+    void test_strip_newlines()
+    {
+      std::vector<std::string> strings;
+      strings.push_back("\n");
+      strings.push_back("2.9087450987e-01\n");
+      strings.push_back("3.1415926539e+00\n");
+      strings.push_back("1.1111111111e+10\n");
+
+      std::vector<std::string> strings_exact;
+      strings_exact.push_back("2.9087450987e-01");
+      strings_exact.push_back("3.1415926539e+00");
+      strings_exact.push_back("1.1111111111e+10");
+
+      Antioch::remove_newline_from_strings(strings);
+      CPPUNIT_ASSERT_EQUAL(strings_exact.size(), strings.size());
+
+      for( unsigned int i = 0; i < strings_exact.size(); i++ )
+        CPPUNIT_ASSERT_EQUAL(strings_exact[i], strings[i]);
+    }
+
   };
 
   CPPUNIT_TEST_SUITE_REGISTRATION( StringUtilitiesTest );
