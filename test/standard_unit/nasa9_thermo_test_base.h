@@ -41,17 +41,29 @@ namespace AntiochTesting
 
     void setUp()
     {
+      this->init_N2_coeffs_0_200();
       this->init_N2_coeffs_200_1000();
       this->init_N2_coeffs_1000_6000();
       this->init_N2_coeffs_6000_20000();
+      this->init_N2_coeffs_20000_99999();
       this->init_all_N2_coeffs();
 
+      this->init_NO2_coeffs_0_200();
       this->init_NO2_coeffs_200_1000();
       this->init_NO2_coeffs_1000_6000();
+      this->init_NO2_coeffs_6000_99999();
       this->init_all_NO2_coeffs();
     }
 
     void tearDown(){}
+
+    void init_N2_coeffs_0_200()
+    {
+      _N2_coeffs_0_200.resize(9,0.0L);
+      _N2_coeffs_0_200[2] =  3.50080109e+00L;
+      _N2_coeffs_0_200[7] = -1.04381074e+03L;
+      _N2_coeffs_0_200[8] =  3.09890983e+00L;
+    }
 
     void init_N2_coeffs_200_1000()
     {
@@ -95,6 +107,14 @@ namespace AntiochTesting
       _N2_coeffs_6000_20000[8] = -1.67204791e+03L;
     }
 
+    void init_N2_coeffs_20000_99999()
+    {
+      _N2_coeffs_20000_99999.resize(9,0.0L);
+      _N2_coeffs_20000_99999[2] =  7.27314605e+00L;
+      _N2_coeffs_20000_99999[7] = -2.73414039e+04L;
+      _N2_coeffs_20000_99999[8] = -2.92594085e+01L;
+    }
+
     void init_all_N2_coeffs()
     {
       _all_standard_N2_coeffs.insert(  _all_standard_N2_coeffs.end(),
@@ -108,6 +128,14 @@ namespace AntiochTesting
       _all_standard_N2_coeffs.insert(  _all_standard_N2_coeffs.end(),
                               _N2_coeffs_6000_20000.begin(),
                               _N2_coeffs_6000_20000.end() );
+    }
+
+    void init_NO2_coeffs_0_200()
+    {
+      _NO2_coeffs_0_200.resize(9,0.0L);
+      _NO2_coeffs_0_200[2] = 4.14754156e+00L;
+      _NO2_coeffs_0_200[7] = 2.86078945e+03L;
+      _NO2_coeffs_0_200[8] = 5.19771055e+00L;
     }
 
     void init_NO2_coeffs_200_1000()
@@ -138,6 +166,14 @@ namespace AntiochTesting
       _NO2_coeffs_1000_6000[8] = -4.30507224e+01L;
     }
 
+    void init_NO2_coeffs_6000_99999()
+    {
+      _NO2_coeffs_6000_99999.resize(9,0.0L);
+      _NO2_coeffs_6000_99999[2] =  1.51725546e+02L;
+      _NO2_coeffs_6000_99999[7] = -2.44062907e+06L;
+      _NO2_coeffs_6000_99999[8] = -1.41879306e+03L;
+    }
+
     void init_all_NO2_coeffs()
     {
       _all_standard_NO2_coeffs.insert(  _all_standard_NO2_coeffs.end(),
@@ -151,12 +187,17 @@ namespace AntiochTesting
 
   protected:
 
+    std::vector<Scalar> _N2_coeffs_0_200;
     std::vector<Scalar> _N2_coeffs_200_1000;
     std::vector<Scalar> _N2_coeffs_1000_6000;
     std::vector<Scalar> _N2_coeffs_6000_20000;
+    std::vector<Scalar> _N2_coeffs_20000_99999;
 
+    std::vector<Scalar> _NO2_coeffs_0_200;
     std::vector<Scalar> _NO2_coeffs_200_1000;
     std::vector<Scalar> _NO2_coeffs_1000_6000;
+    std::vector<Scalar> _NO2_coeffs_6000_99999;
+
 
     std::vector<Scalar> _all_standard_N2_coeffs;
     std::vector<Scalar> _all_standard_NO2_coeffs;
