@@ -68,9 +68,21 @@ namespace Antioch
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
 
+    // XML block/section names
     _map[ParsingKey::PHASE_BLOCK]           = "phase";
     _map[ParsingKey::SPECIES_SET]           = "speciesArray";
-    _map[ParsingKey::THERMO]                = "species"; // thermo in <species> <thermo> <NASA> <floatArray> </floatArray></NASA> </thermo> </species>
+    _map[ParsingKey::SPECIES_DATA]          = "speciesData";
+    _map[ParsingKey::SPECIES]               = "species";
+    _map[ParsingKey::THERMO]                = "thermo"; // thermo in ,<speciesData> <species> <thermo> <NASA> <floatArray> </floatArray></NASA> </thermo> </species> </speciesData>
+
+    // Thermo parameters
+    _map[ParsingKey::TMIN]                  = "Tmin";
+    _map[ParsingKey::TMAX]                  = "Tmax";
+    _map[ParsingKey::NASADATA]              = "floatArray";
+    _map[ParsingKey::NASA7]                 = "NASA";
+    _map[ParsingKey::NASA9]                 = "NASA9";
+
+    // Kinetics parameters
     _map[ParsingKey::REACTION_DATA]         = "reactionData";
     _map[ParsingKey::REACTION]              = "reaction";
     _map[ParsingKey::REVERSIBLE]            = "reversible";
