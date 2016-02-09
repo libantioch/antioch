@@ -134,6 +134,8 @@ namespace Antioch
     _default_unit[ParsingKey::TROE_F_TS]             = "K";
     _default_unit[ParsingKey::TROE_F_TSS]            = "K";
     _default_unit[ParsingKey::TROE_F_TSSS]           = "K";
+
+    this->initialize();
   }
 
   template <typename NumericType>
@@ -166,6 +168,7 @@ namespace Antioch
 
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
+    this->initialize();
   }
 
   template <typename NumericType>
