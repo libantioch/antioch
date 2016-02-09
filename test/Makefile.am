@@ -118,8 +118,11 @@ gsl_unit_tests_SOURCES = gsl_unit/gsl_spliner_test.C \
                          gsl_unit/gsl_unit_tests.C
 
 pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
+pkginclude_HEADERS += standard_unit/reaction_rate_vector_test_base.h
 pkginclude_HEADERS += standard_unit/arrhenius_rate_test_helper.h
+pkginclude_HEADERS += standard_unit/arrhenius_rate_vector_test_base.h
 pkginclude_HEADERS += standard_unit/nasa9_thermo_test_base.h
+pkginclude_HEADERS += gsl_unit/gsl_spliner_test_base.h
 
 # Sources for these tests
 chem_mixture_unit_SOURCES = chem_mixture_unit.C
