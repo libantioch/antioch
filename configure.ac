@@ -276,9 +276,22 @@ AC_SUBST(ANTIOCH_STAMPED_FILES)
 # Need to make sure to have the `/` at the end
 ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP=$TOP_SEARCH_DIR/share/antioch_default_files/
 ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP=$prefix/share/antioch_default_files/
+ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH_TMP=$TOP_SEARCH_DIR/share/xml_inputs/
+ANTIOCH_SHARE_XML_INPUT_FILES_INSTALL_PATH_TMP=$prefix/share/xml_inputs/
+ANTIOCH_TESTING_INPUT_FILES_PATH_TMP=$TOP_SEARCH_DIR/test/input_files/
 
-AC_DEFINE_UNQUOTED(DEFAULT_FILES_SOURCE_PATH,"$ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP",[Path to defaults files])
-AC_DEFINE_UNQUOTED(DEFAULT_FILES_INSTALL_PATH,"$ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP",[Path to defaults files])
+
+AC_DEFINE_UNQUOTED(DEFAULT_FILES_SOURCE_PATH,"$ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP",
+                   [Path to defaults files in source tree.])
+AC_DEFINE_UNQUOTED(DEFAULT_FILES_INSTALL_PATH,"$ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP",
+                   [Path to defaults files in install tree.])
+AC_DEFINE_UNQUOTED(SHARE_XML_INPUT_FILES_SOURCE_PATH,"$ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH_TMP",
+                   [Path to shared XML input files in source tree.])
+AC_DEFINE_UNQUOTED(SHARE_XML_INPUT_FILES_INSTALL_PATH,"$ANTIOCH_SHARE_XML_INPUT_FILES_INSTALL_PATH_TMP",
+                   [Path to shared XML input files in install tree.])
+AC_DEFINE_UNQUOTED(TESTING_INPUT_FILES_PATH,"$ANTIOCH_TESTING_INPUT_FILES_PATH_TMP",
+                   [Path to input files for testing.])
+
 AC_DEFINE(DEFAULT_SPECIES_LIST,"antioch_default_chemical_species.dat",[Default list of species])
 AC_DEFINE(DEFAULT_CHEMICAL_MIXTURE,"antioch_default_chemical_mixture.dat",[Mandatory default informations on species])
 AC_DEFINE(DEFAULT_VIBRATIONAL_DATA,"antioch_default_vibrational_data.dat",[Vibrational default data])
