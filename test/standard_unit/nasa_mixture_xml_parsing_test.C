@@ -39,6 +39,7 @@
 #include "antioch/nasa9_curve_fit.h"
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_mixture_parsing.h"
+#include "antioch/xml_parser.h"
 
 namespace AntiochTesting
 {
@@ -113,6 +114,22 @@ namespace AntiochTesting
       this->check_curve_fits(nasa_mixture);
      }
 
+    void test_parsed_species_list()
+    {
+      std::string thermo_filename = std::string(ANTIOCH_TESTING_INPUT_FILES_PATH)+"nasa7_thermo_test.xml";
+
+      Antioch::XMLParser<Scalar> xml_parser(thermo_filename,false);
+
+      std::vector<std::string> species_str_list = xml_parser.species_list();
+
+      Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+      Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
+
+      xml_parser.read_thermodynamic_data(nasa_mixture);
+
+      this->check_curve_fits(nasa_mixture);
+    }
 
     void check_curve_fits( const Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> >& nasa_mixture)
     {
@@ -181,6 +198,7 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE( NASA7XMLParsingTestFloat );
 
     CPPUNIT_TEST(test_supplied_species);
+    CPPUNIT_TEST(test_parsed_species_list);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -192,6 +210,7 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE( NASA7XMLParsingTestDouble );
 
     CPPUNIT_TEST(test_supplied_species);
+    CPPUNIT_TEST(test_parsed_species_list);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -203,6 +222,7 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE( NASA7XMLParsingTestLongDouble );
 
     CPPUNIT_TEST(test_supplied_species);
+    CPPUNIT_TEST(test_parsed_species_list);
 
     CPPUNIT_TEST_SUITE_END();
 
