@@ -30,6 +30,7 @@
 
 // Antioch
 #include "antioch/nasa_curve_fit_base.h"
+#include "antioch/temp_cache.h"
 
 namespace Antioch
 {
