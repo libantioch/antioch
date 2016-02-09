@@ -208,6 +208,7 @@ namespace Antioch
     std::vector<std::string> molecules;
 
     split_string(std::string(_species_block->GetText())," ",molecules);
+    remove_newline_from_strings(molecules);
 
     return molecules;
   }
