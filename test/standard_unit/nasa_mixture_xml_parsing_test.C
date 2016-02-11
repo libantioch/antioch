@@ -32,11 +32,14 @@
 #include <limits>
 
 // Antioch
+#include "nasa7_thermo_test_base.h"
 #include "nasa9_thermo_test_base.h"
 #include "antioch/chemical_mixture.h"
+#include "antioch/nasa7_curve_fit.h"
 #include "antioch/nasa9_curve_fit.h"
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_mixture_parsing.h"
+#include "antioch/xml_parser.h"
 
 namespace AntiochTesting
 {
@@ -89,6 +92,73 @@ namespace AntiochTesting
 
   };
 
+  template<typename Scalar>
+  class NASA7XMLParsingTest : public NASA7ThermoTestBase<Scalar>
+  {
+  public:
+
+    void test_supplied_species()
+    {
+      std::vector<std::string> species_str_list(2);
+      species_str_list[0] = "H2";
+      species_str_list[1] = "N2";
+
+      Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+      std::string thermo_filename = std::string(ANTIOCH_TESTING_INPUT_FILES_PATH)+"nasa7_thermo_test.xml";
+
+      Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
+
+      Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
+
+      this->check_curve_fits(nasa_mixture);
+     }
+
+    void test_parsed_species_list()
+    {
+      std::string thermo_filename = std::string(ANTIOCH_TESTING_INPUT_FILES_PATH)+"nasa7_thermo_test.xml";
+
+      Antioch::XMLParser<Scalar> xml_parser(thermo_filename,false);
+
+      std::vector<std::string> species_str_list = xml_parser.species_list();
+
+      Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+      Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
+
+      xml_parser.read_thermodynamic_data(nasa_mixture);
+
+      this->check_curve_fits(nasa_mixture);
+    }
+
+    void check_curve_fits( const Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> >& nasa_mixture)
+    {
+      const Antioch::NASA7CurveFit<Scalar>& H2_curve_fit =  nasa_mixture.curve_fit(0);
+      const Antioch::NASA7CurveFit<Scalar>& N2_curve_fit =  nasa_mixture.curve_fit(1);
+
+      CPPUNIT_ASSERT_EQUAL( (unsigned int)2, H2_curve_fit.n_intervals() );
+      CPPUNIT_ASSERT_EQUAL( (unsigned int)2, N2_curve_fit.n_intervals() );
+
+      // Check N2 coefficients
+      this->check_coefficients( H2_curve_fit.coefficients(0), this->_H2_coeffs_200_1000 );
+      this->check_coefficients( H2_curve_fit.coefficients(1), this->_H2_coeffs_1000_3500 );
+
+      // Check NO2 coefficients
+      this->check_coefficients( N2_curve_fit.coefficients(0), this->_N2_coeffs_300_1000 );
+      this->check_coefficients( N2_curve_fit.coefficients(1), this->_N2_coeffs_1000_5000 );
+    }
+
+    void check_coefficients( const Scalar* parsed_coeffs, std::vector<Scalar>& exact_coeffs )
+    {
+      for( unsigned int c = 0; c < exact_coeffs.size(); c++ )
+        CPPUNIT_ASSERT_DOUBLES_EQUAL( exact_coeffs[c], parsed_coeffs[c], this->tol() );
+    }
+
+    Scalar tol()
+    { return std::numeric_limits<Scalar>::epsilon() * 10; }
+
+  };
+
   class NASA9XMLParsingTestFloat : public NASA9XMLParsingTest<float>
   {
   public:
@@ -122,9 +192,48 @@ namespace AntiochTesting
 
   };
 
+  class NASA7XMLParsingTestFloat : public NASA7XMLParsingTest<float>
+  {
+  public:
+    CPPUNIT_TEST_SUITE( NASA7XMLParsingTestFloat );
+
+    CPPUNIT_TEST(test_supplied_species);
+    CPPUNIT_TEST(test_parsed_species_list);
+
+    CPPUNIT_TEST_SUITE_END();
+
+  };
+
+  class NASA7XMLParsingTestDouble : public NASA7XMLParsingTest<double>
+  {
+  public:
+    CPPUNIT_TEST_SUITE( NASA7XMLParsingTestDouble );
+
+    CPPUNIT_TEST(test_supplied_species);
+    CPPUNIT_TEST(test_parsed_species_list);
+
+    CPPUNIT_TEST_SUITE_END();
+
+  };
+
+  class NASA7XMLParsingTestLongDouble : public NASA7XMLParsingTest<long double>
+  {
+  public:
+    CPPUNIT_TEST_SUITE( NASA7XMLParsingTestLongDouble );
+
+    CPPUNIT_TEST(test_supplied_species);
+    CPPUNIT_TEST(test_parsed_species_list);
+
+    CPPUNIT_TEST_SUITE_END();
+
+  };
+
   CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestFloat );
   CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestDouble );
   CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestLongDouble );
+  CPPUNIT_TEST_SUITE_REGISTRATION( NASA7XMLParsingTestFloat );
+  CPPUNIT_TEST_SUITE_REGISTRATION( NASA7XMLParsingTestDouble );
+  CPPUNIT_TEST_SUITE_REGISTRATION( NASA7XMLParsingTestLongDouble );
 
 } // end namespace AntiochTesting
 

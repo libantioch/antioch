@@ -202,12 +202,13 @@ namespace Antioch
   template <typename NumericType>
   const std::vector<std::string> XMLParser<NumericType>::species_list()
   {
+    if(!_species_block)
+      antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::SPECIES_SET)+" section in input file!");
+
     std::vector<std::string> molecules;
 
-    if(_species_block)
-      {
-        split_string(std::string(_species_block->GetText())," ",molecules);
-      }
+    split_string(std::string(_species_block->GetText())," ",molecules);
+    remove_newline_from_strings(molecules);
 
     return molecules;
   }
@@ -680,6 +681,9 @@ namespace Antioch
     const ChemicalMixture<NumericType> & chem_mixture = thermo.chemical_mixture();
     const std::vector<ChemicalSpecies<NumericType>*>& chem_species = chem_mixture.chemical_species();
 
+    // Based on the ThermoType, namely the CurveFit, we deduce what the section name is.
+    std::string nasa_xml_section = this->nasa_xml_section(thermo);
+
     for(unsigned int s = 0; s < chem_mixture.n_species(); s++)
       {
         // Step to first species block
@@ -714,9 +718,9 @@ namespace Antioch
             std::vector<std::string> coeffs_str;
 
             // looping for each of the temperature intervals for this species
-            tinyxml2::XMLElement * nasa = spec->FirstChildElement(_map.at(ParsingKey::NASA9).c_str());
+            tinyxml2::XMLElement * nasa = spec->FirstChildElement(nasa_xml_section.c_str());
             if(!nasa)
-              antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::NASA9)+" thermo section!");
+              antioch_error_msg("ERROR: Could not find "+nasa_xml_section+" thermo section!");
 
             while(nasa)
               {
@@ -761,7 +765,7 @@ namespace Antioch
                 coeffs_str.clear();
 
                 // Move onto next interval of data
-                nasa = nasa->NextSiblingElement(_map.at(ParsingKey::NASA9).c_str());
+                nasa = nasa->NextSiblingElement(nasa_xml_section.c_str());
 
               } // end while loop
 

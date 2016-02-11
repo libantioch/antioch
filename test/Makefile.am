@@ -101,6 +101,7 @@ pkginclude_HEADERS =
 standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
                               standard_unit/arrhenius_rate_valarray_test.C \
                               standard_unit/string_utils_test.C \
+                              standard_unit/nasa7_curve_fit_test.C \
                               standard_unit/nasa9_curve_fit_test.C \
                               standard_unit/nasa_mixture_xml_parsing_test.C \
                               standard_unit/standard_unit_tests.C
@@ -122,6 +123,7 @@ pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
 pkginclude_HEADERS += standard_unit/reaction_rate_vector_test_base.h
 pkginclude_HEADERS += standard_unit/arrhenius_rate_test_helper.h
 pkginclude_HEADERS += standard_unit/arrhenius_rate_vector_test_base.h
+pkginclude_HEADERS += standard_unit/nasa7_thermo_test_base.h
 pkginclude_HEADERS += standard_unit/nasa9_thermo_test_base.h
 pkginclude_HEADERS += gsl_unit/gsl_spliner_test_base.h
 

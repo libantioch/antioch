@@ -226,6 +226,24 @@ namespace Antioch{
                                                         const std::string& attribute,
                                                         const std::string& attr_value ) const;
 
+    //! For the given thermo type, return the string for the corresponding XML section
+    std::string nasa_xml_section( NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& /*thermo*/ )
+    { return _map.at(ParsingKey::NASA7); }
+
+    //! For the given thermo type, return the string for the corresponding XML section
+    std::string nasa_xml_section( NASAThermoMixture<NumericType, NASA9CurveFit<NumericType> >& /*thermo*/ )
+    { return _map.at(ParsingKey::NASA9); }
+
+    //! For the given thermo type, return the string for the corresponding XML section
+    std::string nasa_xml_section( NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/ )
+    { antioch_error_msg("ERROR: Only supported for NASA7CurveFit and NASA9CurveFit!"); return "";}
+
+    //! For the given thermo type, return the string for the corresponding XML section
+    std::string nasa_xml_section( CEAThermodynamics<NumericType >& /*thermo*/ )
+    { antioch_error_msg("ERROR: Only supported for NASA7CurveFit and NASA9CurveFit!"); return "";}
+
+
+
           /*! Never use default constructor*/
           XMLParser();
           tinyxml2::XMLDocument * _doc;
