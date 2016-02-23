@@ -9,6 +9,6 @@ script:
   - echo apt-get install -qq libeigen3-dev libgsl0-dev libcppunit-1.12-1 libcppunit-dev fglrx=2:8.960-0ubuntu1 opencl-headers libboost-chrono1.48-dev libboost-date-time1.48-dev libboost-filesystem1.48-dev libboost-system1.48-dev libboost-thread1.48-dev libboost-program-options1.48-dev libboost-test1.48-dev
   - echo git clone https://github.com/ddemidov/vexcl
   - ./bootstrap
-  - echo ./configure --with-vexcl=${PWD}/vexcl "takes too much RAM to compile"
-  - ./configure
+  - echo ./configure --with-eigen-include=/usr/include/eigen3 --with-vexcl=${PWD}/vexcl "VexCL takes too much RAM to compile"
+  - ./configure --with-eigen-include=/usr/include/eigen3
   - make && make check || (cat test/test-suite.log && false)
