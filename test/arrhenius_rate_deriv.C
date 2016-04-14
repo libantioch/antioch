@@ -50,12 +50,11 @@ int tester(const std::string& testname)
   int return_flag = 0;
 
   const Scalar Cf = 1.4;
-  const Scalar eta = 1.2;
   const Scalar Ea = 5.0;
 
   const DualNumber<Scalar> Ea_DN(Ea, 1);
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,eta,Ea);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate(Cf,Ea);
 
   const Scalar T = 1500.1;
 
@@ -65,7 +64,7 @@ int tester(const std::string& testname)
 
 
   Antioch::ArrheniusRate<DualNumber<Scalar> >
-    arrhenius_T_sensitivity(Cf,eta,Ea);
+    arrhenius_T_sensitivity(Cf,Ea);
 
   const DualNumber<Scalar> T_DN(T, 1);
 
@@ -85,13 +84,13 @@ int tester(const std::string& testname)
 
 
   Antioch::ArrheniusRate<DualNumber<Scalar> >
-    arrhenius_Ea_sensitivity(Cf,eta,Ea_DN);
+    arrhenius_Ea_sensitivity(Cf,Ea_DN);
 
   const Scalar perturb =
           std::pow(std::numeric_limits<Scalar>::epsilon(), (1./3.)) * 100;
 
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate_Eaplus(Cf,eta,Ea + perturb);
-  Antioch::ArrheniusRate<Scalar> arrhenius_rate_Eaminus(Cf,eta,Ea - perturb);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate_Eaplus(Cf,Ea + perturb);
+  Antioch::ArrheniusRate<Scalar> arrhenius_rate_Eaminus(Cf,Ea - perturb);
 
   // FIXME - we need to upgrade the return type of templated functions
   // in the case where the input StateType is *weaker* than CoeffType
