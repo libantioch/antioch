@@ -1,5 +1,3 @@
-BUILT_SOURCES   = .license.stamp
-
 # Doxygen support
 include $(top_srcdir)/doxygen/aminclude.am
 
@@ -17,21 +15,8 @@ EXTRA_DIST       = CHANGES LICENSE COPYING share
 # trying to remove stuff.
 dist-hook:
 	chmod -R u+w $(distdir)
-	rm -rf `find $(distdir)/ -name .svn`
 	rm -rf $(distdir)/share/aclocal/antioch.m4
 	cp -L $(top_srcdir)/share/aclocal/antioch.m4 $(distdir)/share/aclocal
-
-#if SVN_CHECKOUT
-#  EXTRA_DIST     += dist_version
-#
-#TODO: check if dist_version is needed in BUILT_SOURCES (in addition to EXTRA_DIST)
-#  BUILT_SOURCES   = dist_version
-#
-#dist_version: FORCE
-#	@SVN_REVISION@ > $(top_srcdir)/dist_version
-#
-#FORCE:
-#endif
 
 # Tools in the auxiliary directory
 AUX_DIST         = build-aux/install-sh
@@ -65,7 +50,7 @@ install-data-hook:
 	cd $(DESTDIR)$(includedir) && mv config.replaced antioch_config.h ;
 
 # Install config file
-BUILT_SOURCES += antioch_config.h
+BUILT_SOURCES = antioch_config.h
 include_HEADERS	= antioch_config.h
 
 # Additional files to be deleted by 'make distclean'
@@ -107,11 +92,16 @@ MAINTAINERCLEANFILES += m4/lt~obsolete.m4
 #     works.
 #STAMPED_FILES  = $(shell find $(top_srcdir)/src -name '*.h' -or -name '*.C')
 
+# Since we don't distribute the lic_utils, check and make sure it's there.
+# This way, we won't run this on distributed tarballs, only on the repos clones
+if ANTIOCH_LICENSESTAMPEXISTS
+BUILT_SOURCES += .license.stamp
 .license.stamp: $(top_srcdir)/LICENSE
 	@$(top_srcdir)/src/common/lic_utils/update_license.pl $(top_srcdir)/LICENSE $(ANTIOCH_STAMPED_FILES)
 	echo 'updated source license headers' >$@
 
 CLEANFILES = .license.stamp
+endif
 
 # -------------------------------------------
 # Optional support for code coverage analysis

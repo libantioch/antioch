@@ -516,9 +516,9 @@ namespace Antioch
     return CoeffType(1.5)*_chem_mixture.R(species);
   }
 
-   template<typename CoeffType>
-   inline
-  CoeffType StatMechThermodynamics<CoeffType>::cv_trans_over_R( const unsigned int species ) const
+  template<typename CoeffType>
+  inline
+  CoeffType StatMechThermodynamics<CoeffType>::cv_trans_over_R( const unsigned int /*species*/ ) const
   {
     return CoeffType(1.5);
   }

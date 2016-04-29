@@ -52,7 +52,14 @@ fi
 # package requirement; if not specified, the default is to assume that
 # the package is optional
 
-is_package_required=ifelse([$2], ,no, $2 )
+gsl_is_package_required=ifelse([$2], ,no, $2 )
+
+if test "$gsl_is_package_required" != "yes"; then
+   if test "$gsl_is_package_required" != "no"; then
+      AC_MSG_ERROR([ Must specify "yes" or "no" for package requirement.
+                     This is specified within the build system, not the command line.])
+   fi
+fi
 
 HAVE_GSL=0
 
@@ -82,14 +89,17 @@ HAVE_GSL=0
     # Minimum version check
     #----------------------
 
-    AC_PATH_PROG([GSL_CONFIG], 
-                 [gsl-config], 
+    AC_PATH_PROG([GSL_CONFIG],
+                 [gsl-config],
                  [])
 
-    if test "x$GSL_CONFIG" = "x"; then
-       AC_MSG_ERROR([ Could not find gsl-config problem. 
-                   Please use --with-gsl to specify the location
-                   of the GSL library. ])
+    # Only error out if the user required GSL
+    if test "gsl_is_package_required" = "yes"; then
+       if test "x$GSL_CONFIG" = "x"; then
+          AC_MSG_ERROR([ Could not find gsl-config problem.
+                         Please use --with-gsl to specify the location
+                         of the GSL library. ])
+       fi
     fi
 
     min_gsl_version=ifelse([$1], ,1.0, $1)
@@ -130,7 +140,7 @@ HAVE_GSL=0
     fi
 
     AC_MSG_CHECKING(for gsl - version >= $min_gsl_version)
-    version_succeeded=no
+    gsl_version_succeeded=no
 
     AC_LANG_PUSH([C++])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
@@ -145,14 +155,14 @@ HAVE_GSL=0
             #endif
         ]])],[
             AC_MSG_RESULT(yes)
-            version_succeeded=yes
+            gsl_version_succeeded=yes
         ],[
             AC_MSG_RESULT(no)
         ])
     AC_LANG_POP([C++])
 
-    if test "$version_succeeded" != "yes";then
-       if test "$is_package_required" = yes; then
+    if test "$gsl_version_succeeded" != "yes";then
+       if test "$gsl_is_package_required" = yes; then
           AC_MSG_ERROR([
 
    Your GSL version does not meet the minimum versioning
@@ -168,42 +178,43 @@ HAVE_GSL=0
     #-------------------------
 
     AC_LANG_PUSH([C])
-    AC_CHECK_HEADER([gsl/gsl_math.h],[found_header=yes],[found_header=no])
+    AC_CHECK_HEADER([gsl/gsl_math.h],[gsl_found_header=yes],[gsl_found_header=no])
     AC_LANG_POP([C])
 
 
     #-------------------------------
     # Check for a common function
-    # gamma function has been around 
+    # gamma function has been around
     # since before v1.0
     #-------------------------------
+    gsl_succeeded=no
 
-    AC_MSG_CHECKING([for -lgsl linkage])
+    # Don't bother checking the lib unless we actually found the header
+    if test "$gsl_found_header" = "yes"; then
+       AC_MSG_CHECKING([for -lgsl linkage])
 
-    AC_LANG_PUSH([C])
+       AC_LANG_PUSH([C])
 
-    AC_CHECK_LIB([gsl],
-                 [gsl_sf_gamma],
-                 [found_library=yes],
-                 [found_library=no])
+       AC_CHECK_LIB([gsl],
+                    [gsl_sf_gamma],
+                    [gsl_found_library=yes],
+                    [gsl_found_library=no])
 
-    AC_LANG_POP([C])
+       AC_LANG_POP([C])
+
+        if test "$gsl_version_succeeded" = yes; then
+           if test "$gsl_found_library" = yes; then
+              gsl_succeeded=yes
+           fi
+        fi
+    fi
 
     CPPFLAGS="$ac_GSL_save_CPPFLAGS"
     LDFLAGS="$ac_GSL_save_LDFLAGS"
     LIBS="$ac_GSL_save_LIBS"
 
-    succeeded=no
-    if test "$found_header" = yes; then
-        if test "$version_succeeded" = yes; then
-           if test "$found_library" = yes; then
-              succeeded=yes
-           fi
-        fi
-    fi
-
-    if test "$succeeded" = no; then
-       if test "$is_package_required" = yes; then
+    if test "$gsl_succeeded" = no; then
+       if test "$gsl_is_package_required" = yes; then
           AC_MSG_ERROR([GSL not found.  Try either --with-gsl or setting GSL_DIR.])
        else
           AC_MSG_NOTICE([optional GSL library not found])
