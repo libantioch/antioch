@@ -17,21 +17,8 @@ EXTRA_DIST       = CHANGES LICENSE COPYING share
 # trying to remove stuff.
 dist-hook:
 	chmod -R u+w $(distdir)
-	rm -rf `find $(distdir)/ -name .svn`
 	rm -rf $(distdir)/share/aclocal/antioch.m4
 	cp -L $(top_srcdir)/share/aclocal/antioch.m4 $(distdir)/share/aclocal
-
-#if SVN_CHECKOUT
-#  EXTRA_DIST     += dist_version
-#
-#TODO: check if dist_version is needed in BUILT_SOURCES (in addition to EXTRA_DIST)
-#  BUILT_SOURCES   = dist_version
-#
-#dist_version: FORCE
-#	@SVN_REVISION@ > $(top_srcdir)/dist_version
-#
-#FORCE:
-#endif
 
 # Tools in the auxiliary directory
 AUX_DIST         = build-aux/install-sh
