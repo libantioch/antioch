@@ -2,7 +2,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([Antioch], [0.4.0], [antioch-users@googlegroups.com], [antioch])
+AC_INIT([Antioch], [0.5.0], [antioch-users@googlegroups.com], [antioch])
 PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
 AC_SUBST([PACKAGE_DESCRIPTION])
 PACKAGE_URL="https://github.com/libantioch/antioch/"

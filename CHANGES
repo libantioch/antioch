@@ -1,4 +1,6 @@
-Version 0.4.0 (currently in development)
+Version 0.5.0 (currently in development)
+
+Version 0.4.0
 * Antioch no longer header-only
   - The parsing and a few "core" class implementations
     have been move to .C files and their symbols are
