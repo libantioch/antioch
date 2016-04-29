@@ -1,4 +1,24 @@
 Version 0.4.0 (currently in development)
+* Antioch no longer header-only
+  - The parsing and a few "core" class implementations
+    have been move to .C files and their symbols are
+    in libantioch. Thus, users must now link against
+    libantioch in their applications.
+* Added temperature exptrapolation capability to
+  KineticsTherory transport models
+* Added API to allow resetting kinetics parameters
+* Added capability to remove reaction from ReactionSet
+* Added (optional) CppUnit-based unit testing
+  - Migration of the many existing unit tests to CppUnit
+    is still in progress.
+* Added partial order support to kinetics
+  - Includes support for ChemKin-type specification
+    of forward and backward reaction orders
+* Several enhancements and bugfixes to XML, ChemKin
+  parsing classes
+* More testing of AD capabilities with (optional)
+  MetaPhsycL library
+* Several other smaller bugfixes
 
 Version 0.3.1
 * Critical Bugfix for NASA7 Thermo/ChemKin Parser
