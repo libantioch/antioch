@@ -192,11 +192,11 @@ namespace Antioch
 
     //! Invalid to call species diffusivity calculation with BinaryDiffusionBase model
     template<typename StateType>
-    void private_species_diff_impl( unsigned int s,
-                                    const StateType& rho,
-                                    const StateType& cp,
-                                    const StateType& k,
-                                    StateType& D,
+    void private_species_diff_impl( unsigned int /*s*/,
+                                    const StateType& /*rho*/,
+                                    const StateType& /*cp*/,
+                                    const StateType& /*k*/,
+                                    StateType& /*D*/,
                                     AntiochPrivate::diffusion_tag<BinaryDiffusionBase<Diffusion,CoeffType> >& /*tag*/ ) const
     {
       antioch_error();
