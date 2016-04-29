@@ -262,6 +262,11 @@ dnl-----------------------------------------------
 _AC_SRCDIRS(.)
 TOP_SEARCH_DIR=$ac_abs_top_srcdir
 
+# Since we don't distribute the lic_utils, check and make sure it's there.
+# This way, we won't run the license stamping perl script on distributed
+# tarballs, only on the repository clones
+AM_CONDITIONAL(ANTIOCH_LICENSESTAMPEXISTS, [test -f $TOP_SEARCH_DIR/src/common/lic_utils/update_license.pl])
+
 # We have to do this by subdirectory because otherwise distcheck
 # breaks as we start picking up files in the directories
 # that it uses.

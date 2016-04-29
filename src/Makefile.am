@@ -233,4 +233,4 @@ if CODE_COVERAGE_ENABLED
   CLEANFILES += *.gcda *.gcno
 endif
 
-EXTRA_DIST = common
+EXTRA_DIST = common/lcov
