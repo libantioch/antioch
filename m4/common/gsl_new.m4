@@ -89,8 +89,8 @@ HAVE_GSL=0
     # Minimum version check
     #----------------------
 
-    AC_PATH_PROG([GSL_CONFIG], 
-                 [gsl-config], 
+    AC_PATH_PROG([GSL_CONFIG],
+                 [gsl-config],
                  [])
 
     # Only error out if the user required GSL
@@ -184,7 +184,7 @@ HAVE_GSL=0
 
     #-------------------------------
     # Check for a common function
-    # gamma function has been around 
+    # gamma function has been around
     # since before v1.0
     #-------------------------------
     gsl_succeeded=no
