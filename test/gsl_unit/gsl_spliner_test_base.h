@@ -29,6 +29,7 @@
 
 #include "antioch_config.h"
 
+#ifdef ANTIOCH_HAVE_GSL
 #ifdef ANTIOCH_HAVE_CPPUNIT
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -143,5 +144,6 @@ namespace AntiochTesting
 } // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_CPPUNIT
+#endif // ANTIOCH_HAVE_GSL
 
 #endif // ANTIOCH_GSL_SPLINER_TEST_BASE_H

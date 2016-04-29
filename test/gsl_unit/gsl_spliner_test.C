@@ -26,6 +26,7 @@
 
 #include "antioch_config.h"
 
+#ifdef ANTIOCH_HAVE_GSL
 #ifdef ANTIOCH_HAVE_CPPUNIT
 
 // C++
@@ -174,3 +175,4 @@ namespace AntiochTesting
 } // end namespace AntiochTesting
 
 #endif // ANTIOCH_HAVE_CPPUNIT
+#endif // ANTIOCH_HAVE_GSL
