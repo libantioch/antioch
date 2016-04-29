@@ -54,6 +54,13 @@ fi
 
 gsl_is_package_required=ifelse([$2], ,no, $2 )
 
+if test "$gsl_is_package_required" != "yes"; then
+   if test "$gsl_is_package_required" != "no"; then
+      AC_MSG_ERROR([ Must specify "yes" or "no" for package requirement.
+                     This is specified within the build system, not the command line.])
+   fi
+fi
+
 HAVE_GSL=0
 
 # logic change: if the user called the macro, check for package,
