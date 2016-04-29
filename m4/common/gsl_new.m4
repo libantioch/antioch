@@ -52,7 +52,7 @@ fi
 # package requirement; if not specified, the default is to assume that
 # the package is optional
 
-is_package_required=ifelse([$2], ,no, $2 )
+gsl_is_package_required=ifelse([$2], ,no, $2 )
 
 HAVE_GSL=0
 
@@ -86,10 +86,13 @@ HAVE_GSL=0
                  [gsl-config], 
                  [])
 
-    if test "x$GSL_CONFIG" = "x"; then
-       AC_MSG_ERROR([ Could not find gsl-config problem. 
-                   Please use --with-gsl to specify the location
-                   of the GSL library. ])
+    # Only error out if the user required GSL
+    if test "gsl_is_package_required" = "yes"; then
+       if test "x$GSL_CONFIG" = "x"; then
+          AC_MSG_ERROR([ Could not find gsl-config problem.
+                         Please use --with-gsl to specify the location
+                         of the GSL library. ])
+       fi
     fi
 
     min_gsl_version=ifelse([$1], ,1.0, $1)
@@ -152,7 +155,7 @@ HAVE_GSL=0
     AC_LANG_POP([C++])
 
     if test "$version_succeeded" != "yes";then
-       if test "$is_package_required" = yes; then
+       if test "$gsl_is_package_required" = yes; then
           AC_MSG_ERROR([
 
    Your GSL version does not meet the minimum versioning
@@ -203,7 +206,7 @@ HAVE_GSL=0
     fi
 
     if test "$succeeded" = no; then
-       if test "$is_package_required" = yes; then
+       if test "$gsl_is_package_required" = yes; then
           AC_MSG_ERROR([GSL not found.  Try either --with-gsl or setting GSL_DIR.])
        else
           AC_MSG_NOTICE([optional GSL library not found])
