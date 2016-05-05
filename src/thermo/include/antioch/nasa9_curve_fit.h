@@ -238,7 +238,7 @@ namespace Antioch
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
-         const CoeffType *a = this->coefficients(interval);
+         const CoeffType *a = this->coefficients(i);
 
          /* h/RT = -a0*T^-2   + a1*T^-1*lnT + a2     + a3*T/2 + a4*T^2/3 + a5*T^3/4 + a6*T^4/5 + a7/T */
         returnval = Antioch::if_else
@@ -266,7 +266,7 @@ namespace Antioch
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
-         const CoeffType *a = this->coefficients(interval);
+         const CoeffType *a = this->coefficients(i);
 
     /* s/R = -a0*T^-2/2 - a1*T^-1     + a2*lnT + a3*T   + a4*T^2/2 + a5*T^3/3 + a6*T^4/4 + a8 */
         returnval = Antioch::if_else
@@ -295,7 +295,7 @@ namespace Antioch
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
-         const CoeffType *a = this->coefficients(interval);
+         const CoeffType *a = this->coefficients(i);
 
     /* h/RT = -a[0]/T2    + a[1]*lnT/T + a[2]     + a[3]*T/2. + a[4]*T2/3. + a[5]*T3/4. + a[6]*T4/5. + a[7]/T,
        s/R  = -a[0]/T2/2. - a[1]/T     + a[2]*lnT + a[3]*T    + a[4]*T2/2. + a[5]*T3/3. + a[6]*T4/4. + a[8]   */
