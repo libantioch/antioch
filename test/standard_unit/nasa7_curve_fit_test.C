@@ -136,21 +136,6 @@ namespace AntiochTesting
     Scalar tol()
     { return std::numeric_limits<Scalar>::epsilon() * 500; }
 
-    Scalar cp_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2, Scalar a3, Scalar a4 )
-    {
-      return a0 + a1*T + a2*T*T + a3*T*T*T + a4*(T*T*T*T);
-    }
-
-    Scalar h_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2, Scalar a3, Scalar a4, Scalar a5 )
-    {
-      return a0 + a1/2.0L*T + a2/3.0L*T*T + a3/4.0L*T*T*T + a4/5.0L*(T*T*T*T) + a5/T;
-    }
-
-    Scalar s_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2, Scalar a3, Scalar a4, Scalar a6 )
-    {
-      return a0*std::log(T) + a1*T + a2/2.0L*T*T + a3/3.0L*T*T*T + a4/4.0L*(T*T*T*T) + a6;
-    }
-
   };
 
   class NASA7CurveFitTestFloat : public NASA7CurveFitTest<float>
