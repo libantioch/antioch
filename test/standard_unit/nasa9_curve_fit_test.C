@@ -28,6 +28,10 @@
 
 #ifdef ANTIOCH_HAVE_CPPUNIT
 
+// CppUnit
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/TestCase.h>
+
 // C++
 #include <limits>
 
@@ -39,9 +43,15 @@
 namespace AntiochTesting
 {
   template<typename Scalar>
-  class NASA9CurveFitTest : public NASA9ThermoTestBase<Scalar>
+  class NASA9CurveFitTest : public NASA9ThermoTestBase<Scalar>,
+                            public CppUnit::TestCase
   {
   public:
+
+    virtual void setUp()
+    {
+      this->init();
+    }
 
     void test_nasa9_default_temp_intervals()
     {
@@ -168,28 +178,6 @@ namespace AntiochTesting
 
     Scalar tol()
     { return std::numeric_limits<Scalar>::epsilon() * 500; }
-
-    Scalar cp_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2,
-                     Scalar a3, Scalar a4, Scalar a5, Scalar a6 )
-    {
-      return a0/(T*T) + a1/T + a2 + a3*T + a4*(T*T) + a5*(T*T*T) + a6*(T*T*T*T);
-    }
-
-    Scalar h_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2,
-                    Scalar a3, Scalar a4, Scalar a5, Scalar a6,
-                    Scalar a7 )
-    {
-      return -a0/(T*T) + a1*std::log(T)/T + a2 + a3*T/2.0L + a4*(T*T)/3.0L
-        + a5*(T*T*T)/4.0L + a6*(T*T*T*T)/5.0L + a7/T;
-    }
-
-    Scalar s_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2,
-                    Scalar a3, Scalar a4, Scalar a5, Scalar a6,
-                    Scalar a8 )
-    {
-      return -a0/(2.L*T*T) - a1/T + a2*std::log(T) + a3*T + a4*(T*T)/2.0L
-        + a5*(T*T*T)/3.0L + a6*(T*T*T*T)/4.0L + a8;
-    }
 
   };
 

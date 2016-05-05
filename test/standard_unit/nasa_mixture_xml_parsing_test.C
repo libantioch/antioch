@@ -48,7 +48,8 @@
 namespace AntiochTesting
 {
   template<typename Scalar>
-  class NASA9XMLParsingTest : public NASA9ThermoTestBase<Scalar>
+  class NASA9XMLParsingTest : public NASA9ThermoTestBase<Scalar>,
+                              public CppUnit::TestCase
   {
   public:
 
