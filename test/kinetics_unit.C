@@ -42,7 +42,8 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction_set.h"
 #include "antioch/read_reaction_set_data.h"
-#include "antioch/cea_thermo.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 #include "antioch/kinetics_evaluator.h"
 
 template <typename Scalar>
@@ -58,7 +59,10 @@ int tester_N2N(const std::string& input_name)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
 
@@ -88,9 +92,9 @@ int tester_N2N(const std::string& input_name)
       chem_mixture.molar_densities(rho,Y,molar_densities);
       const Antioch::KineticsConditions<Scalar> cond(T);
 
-      typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
+      Antioch::TempCache<Scalar> temp_cache(T);
 
-      thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+      thermo.h_RT_minus_s_R(temp_cache,h_RT_minus_s_R);
 
       if( i == 0 )
         {
@@ -100,7 +104,7 @@ int tester_N2N(const std::string& input_name)
 
           reaction_set.print_chemical_scheme( std::cout, cond, molar_densities, h_RT_minus_s_R, loss_matrix, prod_matrix, net_matrix );
         }
-      
+
       kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
       // Omega dot had better sum to 0.0
@@ -126,7 +130,7 @@ int tester_N2N(const std::string& input_name)
 	  std::cout << std::endl << std::endl;
 	}
     }
-  
+
   return return_flag;
 }
 
@@ -147,7 +151,10 @@ int tester(const std::string& input_name)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
 
@@ -175,11 +182,11 @@ int tester(const std::string& input_name)
       const Scalar T = T0 + T_inc*static_cast<Scalar>(i);
       const Scalar rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
-      const Antioch::KineticsConditions<Scalar> cond(T); 
+      const Antioch::KineticsConditions<Scalar> cond(T);
 
-      typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
+      Antioch::TempCache<Scalar> temp_cache(T);
 
-      thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+      thermo.h_RT_minus_s_R(temp_cache,h_RT_minus_s_R);
 
       kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
@@ -207,7 +214,7 @@ int tester(const std::string& input_name)
 	  std::cout << std::endl << std::endl;
 	}
     }
-  
+
   return return_flag;
 }
 
@@ -234,4 +241,3 @@ int main(int argc, char* argv[])
 
   return return_flag;
 }
-

@@ -23,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #include "antioch_config.h"
 
@@ -59,7 +54,8 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction_set.h"
 #include "antioch/read_reaction_set_data.h"
-#include "antioch/cea_thermo.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 #include "antioch/kinetics_evaluator.h"
 
 #include "antioch/eigen_utils.h"
@@ -89,7 +85,7 @@ int vec_compare (const SpeciesVector1 &a, const SpeciesVector2 &b, const std::st
   typedef typename Antioch::value_type<SpeciesVector1>::type StateType;
   typedef typename Antioch::value_type<StateType>::type Scalar;
 
-  if (static_cast<std::size_t>(a.size()) != 
+  if (static_cast<std::size_t>(a.size()) !=
       static_cast<std::size_t>(b.size()))
     {
       std::cerr << "Error: Mismatch in vector sizes " << name << std::endl;
@@ -154,7 +150,10 @@ int vectester(const std::string& input_name,
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
@@ -190,7 +189,7 @@ int vectester(const std::string& input_name,
 
   std::vector<std::vector<PairScalars> > domega_dot_drhos
     (n_species, omega_dot); // omega_dot is a good example vec<Pair>
-  
+
 
 #ifdef ANTIOCH_HAVE_GRVY
   const std::string testnormal = testname + "-normal";
@@ -203,10 +202,9 @@ int vectester(const std::string& input_name,
 
   chem_mixture.molar_densities(rho,Y,molar_densities);
 
-  typedef typename Antioch::CEAThermodynamics<Scalar>::
-    template Cache<PairScalars> Cache;
-  thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
-  thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
+  Antioch::TempCache<PairScalars> temp_cache(T);
+  thermo.h_RT_minus_s_R(temp_cache,h_RT_minus_s_R);
+  thermo.dh_RT_minus_s_R_dT(temp_cache,dh_RT_minus_s_R_dT);
 
   kinetics.compute_mass_sources( conditions, molar_densities, h_RT_minus_s_R, omega_dot );
 
@@ -249,18 +247,18 @@ int vectester(const std::string& input_name,
 
     SpeciesVecEigenType eigen_omega_dot;
     Antioch::init_constant(eigen_omega_dot, example);
-  
+
     SpeciesVecEigenType eigen_domega_dot_dT;
     Antioch::init_constant(eigen_domega_dot_dT, example);
 
     // FIXME: What to do for domega_dot_drhos type?
-  
+
     const PairScalars eigen_R = chem_mixture.R(eigen_Y);
     chem_mixture.molar_densities(rho,eigen_Y,eigen_molar_densities);
 
-    thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
+    thermo.h_RT_minus_s_R(temp_cache,eigen_h_RT_minus_s_R);
 
-    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
+    thermo.dh_RT_minus_s_R_dT(temp_cache,eigen_dh_RT_minus_s_R_dT);
 
     kinetics.compute_mass_sources( eigen_conditions, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
@@ -310,7 +308,7 @@ int vectester(const std::string& input_name,
     Antioch::init_constant(eigen_domega_dot_dT, example);
 
     // FIXME: What to do for domega_dot_drhos type?
-  
+
 #ifdef ANTIOCH_HAVE_GRVY
     const std::string testeigenV = testname + "-eigenV";
     gt.BeginTimer(testeigenV);
@@ -320,9 +318,9 @@ int vectester(const std::string& input_name,
 
     chem_mixture.molar_densities(rho,eigen_Y,eigen_molar_densities);
 
-    thermo.h_RT_minus_s_R(Cache(T),eigen_h_RT_minus_s_R);
+    thermo.h_RT_minus_s_R(temp_cache,eigen_h_RT_minus_s_R);
 
-    thermo.dh_RT_minus_s_R_dT(Cache(T),eigen_dh_RT_minus_s_R_dT);
+    thermo.dh_RT_minus_s_R_dT(temp_cache,eigen_dh_RT_minus_s_R_dT);
 
     kinetics.compute_mass_sources( eigen_conditions, eigen_molar_densities, eigen_h_RT_minus_s_R, eigen_omega_dot );
 
@@ -442,7 +440,7 @@ int vectester(const std::string& input_name,
 
       for (unsigned int i = 0; i != 5; ++i)
         for (unsigned int j = 0; j != 5; ++j)
-          domega_dot_drhos_reg[i][j][2*tuple+1] = 
+          domega_dot_drhos_reg[i][j][2*tuple+1] =
             Scalar(domega_dot_drhos_reg[i][j][2*tuple  ]);
     }
 

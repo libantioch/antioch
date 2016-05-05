@@ -104,9 +104,6 @@ namespace Antioch{
     void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)
     {antioch_error_msg("ERROR: XML Parsing only supports parsing for NASA7CurveFit and NASA9CurveFit!");}
 
-    //! reads the thermo, CEA deprecated
-    void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)
-    {antioch_error_msg("ERROR: XML Parsing only supports parsing for NASA7CurveFit and NASA9CurveFit!");}
 
 /// reaction
 
@@ -237,11 +234,6 @@ namespace Antioch{
     //! For the given thermo type, return the string for the corresponding XML section
     std::string nasa_xml_section( NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/ )
     { antioch_error_msg("ERROR: Only supported for NASA7CurveFit and NASA9CurveFit!"); return "";}
-
-    //! For the given thermo type, return the string for the corresponding XML section
-    std::string nasa_xml_section( CEAThermodynamics<NumericType >& /*thermo*/ )
-    { antioch_error_msg("ERROR: Only supported for NASA7CurveFit and NASA9CurveFit!"); return "";}
-
 
 
           /*! Never use default constructor*/
