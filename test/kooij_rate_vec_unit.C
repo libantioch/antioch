@@ -62,65 +62,44 @@
 GRVY::GRVY_Timer_Class gt;
 #endif
 
+template <typename Scalar>
+bool excessive_difference(Scalar T, Scalar approx, Scalar exact, Scalar tol, const std::string & name)
+{
+  using std::abs;
+  using std::max;
+
+  Scalar relative_difference = abs(approx - exact)/max(abs(exact),tol);
+  if (relative_difference > tol)
+    std::cout << std::scientific << std::setprecision(16)
+             << "Error: Mismatch in " << name << '.' << std::endl
+             << "T = " << T << " K" << std::endl
+             << "approx(T) = " << approx << std::endl
+             << "exact(T)  = " << exact << std::endl
+             << "relative difference = " << relative_difference << std::endl
+             << "tolerance = " <<  tol << std::endl;
+
+  return (relative_difference > tol);
+}
+
+
 template <typename PairScalars>
 int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars & derive_exact,
                               const PairScalars & rate,       const PairScalars & derive, const PairScalars & T)
 {
     typedef typename Antioch::value_type<PairScalars>::type  Scalar;
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 5;
 
     int return_flag(0);
    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
    {
-    if( abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) > tol )
-      {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
-                  << "T = " << T << " K" << std::endl
-                  << "rate(T) = " << rate[2*tuple] << std::endl
-                  << "rate_exact = " << rate_exact[2*tuple] << std::endl
-                  << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) << std::endl
-                  << "tolerance = " <<  tol << std::endl;
-
-        return_flag = 1;
-      }
-    if( abs( (rate[2*tuple+1] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) > tol )
-      {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
-                  << "T = " << T << " K" << std::endl
-                  << "rate(T) = " << rate[2*tuple] << std::endl
-                  << "rate_exact = " << rate_exact[2*tuple+1] << std::endl
-                  << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) << std::endl
-                  << "tolerance = " <<  tol << std::endl;
-
-        return_flag = 1;
-      }
-    if( abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) > tol )
-      {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate derivative values." << std::endl
-                  << "T = " << T << " K" << std::endl
-                  << "drate_dT(T) = " << derive[2*tuple] << std::endl
-                  << "derive_exact = " << derive_exact[2*tuple] << std::endl
-                  << "relative difference = " <<  abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) << std::endl
-                  << "tolerance = " <<  tol << std::endl;
-
-        return_flag = 1;
-      }
-    if( abs( (derive[2*tuple+1] - derive_exact[2*tuple+1])/derive_exact[2*tuple+1] ) > tol )
-      {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate derivative values." << std::endl
-                  << "T = " << T << " K" << std::endl
-                  << "drate_dT(T) = " << derive[2*tuple+1] << std::endl
-                  << "derive_exact = " << derive_exact[2*tuple+1] << std::endl
-                  << "relative difference = " <<  abs( (derive[2*tuple+1] - derive_exact[2*tuple+1])/derive_exact[2*tuple+1] ) << std::endl
-                  << "tolerance = " <<  tol << std::endl;
-
-        return_flag = 1;
-      }
-
+     if( excessive_difference(T[2*tuple],   rate[2*tuple],     rate_exact[2*tuple],     tol, "rate values") )
+       return_flag = 1;
+     if( excessive_difference(T[2*tuple+1], rate[2*tuple+1],   rate_exact[2*tuple+1],   tol, "rate values") )
+       return_flag = 1;
+     if( excessive_difference(T[2*tuple],   derive[2*tuple],   derive_exact[2*tuple],   tol, "derivative values") )
+       return_flag = 1;
+     if( excessive_difference(T[2*tuple+1], derive[2*tuple+1], derive_exact[2*tuple+1], tol, "derivative values") )
+       return_flag = 1;
    }
    return return_flag;
 }
