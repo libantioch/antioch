@@ -28,6 +28,10 @@
 
 #ifdef ANTIOCH_HAVE_CPPUNIT
 
+// CppUnit
+#include <cppunit/TestCase.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 // C++
 #include <limits>
 
@@ -93,9 +97,15 @@ namespace AntiochTesting
   };
 
   template<typename Scalar>
-  class NASA7XMLParsingTest : public NASA7ThermoTestBase<Scalar>
+  class NASA7XMLParsingTest : public NASA7ThermoTestBase<Scalar>,
+                              public CppUnit::TestCase
   {
   public:
+
+    virtual void setUp()
+    {
+      this->init();
+    }
 
     void test_supplied_species()
     {

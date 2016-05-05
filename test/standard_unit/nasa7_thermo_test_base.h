@@ -27,25 +27,17 @@
 #ifndef ANTIOCH_NASA7_THERMO_TEST_BASE_H
 #define ANTIOCH_NASA7_THERMO_TEST_BASE_H
 
-#include "antioch_config.h"
-
-#ifdef ANTIOCH_HAVE_CPPUNIT
-
-// CppUnit
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/TestCase.h>
-
 // Antioch
 #include "antioch/cmath_shims.h"
 
 namespace AntiochTesting
 {
   template<typename Scalar>
-  class NASA7ThermoTestBase : public CppUnit::TestCase
+  class NASA7ThermoTestBase
   {
   public:
 
-    virtual void setUp()
+    virtual void init()
     {
       this->init_H2_coeffs_200_1000();
       this->init_H2_coeffs_1000_3500();
@@ -55,8 +47,6 @@ namespace AntiochTesting
       this->init_N2_coeffs_1000_5000();
       this->init_all_N2_coeffs();
     }
-
-    virtual void tearDown(){}
 
     Scalar cp_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2, Scalar a3, Scalar a4 )
     {
@@ -158,7 +148,5 @@ namespace AntiochTesting
   };
 
 } // end namespace AntiochTesting
-
-#endif // ANTIOCH_HAVE_CPPUNIT
 
 #endif // ANTIOCH_NASA7_THERMO_TEST_BASE_H

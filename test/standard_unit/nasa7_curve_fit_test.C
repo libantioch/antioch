@@ -28,6 +28,10 @@
 
 #ifdef ANTIOCH_HAVE_CPPUNIT
 
+// CppUnit
+#include <cppunit/TestCase.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 // C++
 #include <limits>
 
@@ -39,9 +43,15 @@
 namespace AntiochTesting
 {
   template<typename Scalar>
-  class NASA7CurveFitTest : public NASA7ThermoTestBase<Scalar>
+  class NASA7CurveFitTest : public NASA7ThermoTestBase<Scalar>,
+                            public CppUnit::TestCase
   {
   public:
+
+    virtual void setUp()
+    {
+      this->init();
+    }
 
     void test_nasa7_default_temp_intervals()
     {
