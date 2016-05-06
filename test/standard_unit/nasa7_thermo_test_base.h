@@ -27,22 +27,17 @@
 #ifndef ANTIOCH_NASA7_THERMO_TEST_BASE_H
 #define ANTIOCH_NASA7_THERMO_TEST_BASE_H
 
-#include "antioch_config.h"
-
-#ifdef ANTIOCH_HAVE_CPPUNIT
-
-// CppUnit
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/TestCase.h>
+// Antioch
+#include "antioch/cmath_shims.h"
 
 namespace AntiochTesting
 {
   template<typename Scalar>
-  class NASA7ThermoTestBase : public CppUnit::TestCase
+  class NASA7ThermoTestBase
   {
   public:
 
-    void setUp()
+    virtual void init()
     {
       this->init_H2_coeffs_200_1000();
       this->init_H2_coeffs_1000_3500();
@@ -53,7 +48,20 @@ namespace AntiochTesting
       this->init_all_N2_coeffs();
     }
 
-    void tearDown(){}
+    Scalar cp_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2, Scalar a3, Scalar a4 )
+    {
+      return a0 + a1*T + a2*T*T + a3*T*T*T + a4*(T*T*T*T);
+    }
+
+    Scalar h_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2, Scalar a3, Scalar a4, Scalar a5 )
+    {
+      return a0 + a1/2.0L*T + a2/3.0L*T*T + a3/4.0L*T*T*T + a4/5.0L*(T*T*T*T) + a5/T;
+    }
+
+    Scalar s_exact( Scalar T, Scalar a0, Scalar a1, Scalar a2, Scalar a3, Scalar a4, Scalar a6 )
+    {
+      return a0*std::log(T) + a1*T + a2/2.0L*T*T + a3/3.0L*T*T*T + a4/4.0L*(T*T*T*T) + a6;
+    }
 
     void init_H2_coeffs_200_1000()
     {
@@ -140,7 +148,5 @@ namespace AntiochTesting
   };
 
 } // end namespace AntiochTesting
-
-#endif // ANTIOCH_HAVE_CPPUNIT
 
 #endif // ANTIOCH_NASA7_THERMO_TEST_BASE_H

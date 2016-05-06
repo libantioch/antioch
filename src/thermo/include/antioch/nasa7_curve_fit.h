@@ -175,14 +175,17 @@ namespace Antioch
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
-         const CoeffType *a = this->coefficients(interval);
+         const CoeffType *a = this->coefficients(i);
 
          /* h/RT = a0     + a1*T/2 + a2*T^2/3 + a3*T^3/4 + a4*T^4/5 + a5/T */
         returnval = Antioch::if_else
         ( interval == i,
            StateType(  a[0] +
-                       a[1]*cache.T/2.0L + a[2]*cache.T2/3.0L + a[3]*cache.T3/4.0L +
-                       a[4]*cache.T4/5.0L + a[5]/cache.T),
+                       a[1]*cache.T/2 +
+                       a[2]*cache.T2/3 +
+                       a[3]*cache.T3/4 +
+                       a[4]*cache.T4/5 +
+                       a[5]/cache.T),
            returnval);
        }
        return returnval;
@@ -203,14 +206,17 @@ namespace Antioch
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
-         const CoeffType *a = this->coefficients(interval);
+         const CoeffType *a = this->coefficients(i);
 
     /* s/R = a0*lnT + a1*T   + a2*T^2/2 + a3*T^3/3 + a4*T^4/4 + a6 */
         returnval = Antioch::if_else
         ( interval == i,
-           StateType(   a[0]*cache.lnT
-                      + a[1]*cache.T + a[2]*cache.T2/2.0L + a[3]*cache.T3/3.0L
-                      + a[4]*cache.T4/4.0L + a[6]),
+           StateType(   a[0]*cache.lnT +
+                        a[1]*cache.T +
+                        a[2]*cache.T2/2 +
+                        a[3]*cache.T3/3 +
+                        a[4]*cache.T4/4 +
+                        a[6]),
            returnval);
        }
        return returnval;
@@ -232,7 +238,7 @@ namespace Antioch
 
     for (unsigned int i=begin_interval; i != end_interval; ++i)
       {
-         const CoeffType *a = this->coefficients(interval);
+         const CoeffType *a = this->coefficients(i);
 
     /* h/RT =  a[0]     + a[1]*T/2. + a[2]*T2/3. + a[3]*T3/4. + a[4]*T4/5. + a[5]/T,
        s/R  =  a[0]*lnT + a[1]*T    + a[2]*T2/2. + a[3]*T3/3. + a[4]*T4/4. + a[6]   */
@@ -240,8 +246,10 @@ namespace Antioch
         ( interval == i,
 	   StateType(a[5]/cache.T - a[0]*cache.lnT
                      + a[0] - a[6]
-		     - a[1]/2.L*cache.T   - a[2]*cache.T2/6.L
-                     - a[3]*cache.T3/12.L - a[4]*cache.T4/20.L),
+		     - a[1]/2*cache.T
+                     - a[2]*cache.T2/6
+                     - a[3]*cache.T3/12
+                     - a[4]*cache.T4/20 ),
            returnval);
        }
        return returnval;
@@ -271,8 +279,8 @@ namespace Antioch
 	returnval = Antioch::if_else
 	  (interval == i,
 	   StateType(- a[5]/cache.T2     - a[0]/cache.T
-		     - a[1]/2.L          - a[2]*cache.T/3.L
-                     - a[3]*cache.T2/4.L - a[4]*cache.T3/5.L),
+		     - a[1]/2          - a[2]*cache.T/3
+                     - a[3]*cache.T2/4 - a[4]*cache.T3/5 ),
 	   returnval);
       }
 

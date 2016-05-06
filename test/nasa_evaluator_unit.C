@@ -84,7 +84,7 @@ int test_h( const std::string& species_name, unsigned int species, Scalar h_exac
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
   typedef typename Antioch::template TempCache<Scalar> Cache;
 

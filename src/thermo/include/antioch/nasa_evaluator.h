@@ -276,9 +276,9 @@ namespace Antioch
   StateType NASAEvaluator<CoeffType,NASAFit>::h_over_RT( const TempCache<StateType>& cache, unsigned int species ) const
   {
     antioch_assert_less( species, this->n_species() );
-    antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
-                         _nasa_mixture.curve_fit(species).n_intervals() );
-
+    // FIXME - we need assert_less to be vectorizable
+    // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+    //                      _nasa_mixture.curve_fit(species).n_intervals() );
     return this->_nasa_mixture.curve_fit(species).h_over_RT(cache);
   }
 
@@ -289,9 +289,9 @@ namespace Antioch
   StateType NASAEvaluator<CoeffType,NASAFit>::s_over_R( const TempCache<StateType>& cache, unsigned int species ) const
   {
     antioch_assert_less( species, this->n_species() );
-    antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
-                         _nasa_mixture.curve_fit(species).n_intervals() );
-
+    // FIXME - we need assert_less to be vectorizable
+    // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
+    //                      _nasa_mixture.curve_fit(species).n_intervals() );
     return this->_nasa_mixture.curve_fit(species).s_over_R(cache);
   }
 
@@ -306,7 +306,6 @@ namespace Antioch
     // FIXME - we need assert_less to be vectorizable
     // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
     //                      _nasa_mixture.curve_fit(species).n_intervals() );
-
     return this->_nasa_mixture.curve_fit(species).h_RT_minus_s_R(cache);
   }
 
@@ -326,8 +325,6 @@ namespace Antioch
       {
         h_RT_minus_s_R[s] = this->h_RT_minus_s_R(cache,s);
       }
-
-    return;
   }
 
 
@@ -342,7 +339,6 @@ namespace Antioch
     // FIXME - we need assert_less to be vectorizable
     // antioch_assert_less( _nasa_mixture.curve_fit(species).interval(cache.T),
     //                      _nasa_mixture.curve_fit(species).n_intervals() );
-
     return this->_nasa_mixture.curve_fit(species).dh_RT_minus_s_R_dT(cache);
   }
 
@@ -362,8 +358,6 @@ namespace Antioch
       {
         dh_RT_minus_s_R_dT[s] = this->dh_RT_minus_s_R_dT(cache,s);
       }
-
-    return;
   }
 
 
