@@ -32,6 +32,20 @@
 //C++
 #include <iostream>
 
+// If we have MetaPhysicL, we can use its CompareTypes interface to
+// allow the underlying data types in a Converter to be upgraded.
+
+#include "antioch_config.h"
+
+#ifdef ANTIOCH_HAVE_METAPHYSICL
+#include "metaphysicl/compare_types.h"
+
+#define ANTIOCH_CONVERTER_RETURN_TYPE \
+Converter<typename MetaPhysicL::SymmetricCompareTypes<T,P>::supertype>
+#else
+#define ANTIOCH_CONVERTER_RETURN_TYPE Converter<T>
+#endif
+
 namespace Antioch{
 
 /*! \class Converter
@@ -119,10 +133,12 @@ class Converter{
         Converter & operator+= (const Converter<P> &rhs);
 /*! \brief Dividing operator, same operations as Converter &operator/=(const Converter&)*/
         template <typename P>
-        Converter operator/    (const Converter<P> &rhs) const;
+        ANTIOCH_CONVERTER_RETURN_TYPE
+        operator/    (const Converter<P> &rhs) const;
 /*! \brief Multiplying operator, same operations as Converter &operator*=(const Converter&)*/
         template <typename P>
-        Converter operator*    (const Converter<P> &rhs) const;
+        ANTIOCH_CONVERTER_RETURN_TYPE
+        operator*    (const Converter<P> &rhs) const;
 /*! \brief Multiplying operator with a scalar, only multiply the multiplicative value*/
         template <typename P>
         Converter & operator*= (const P &coef);
@@ -131,10 +147,12 @@ class Converter{
         Converter & operator/= (const P &coef);
 /*! \brief Multiplying operator with a scalar, only multiply the multiplicative value*/
         template <typename P>
-        Converter operator*    (const P &coef)   const;
+        ANTIOCH_CONVERTER_RETURN_TYPE
+        operator*    (const P &coef)   const;
 /*! \brief Dividing operator with a scalar, only divide the multiplicative value*/
         template <typename P>
-        Converter operator/    (const P &coef)   const;
+        ANTIOCH_CONVERTER_RETURN_TYPE
+        operator/    (const P &coef)   const;
 
       private:
 /*! \brief Two double for a multiplicative and translationnal part of a coefficient*/
@@ -223,33 +241,39 @@ Converter<T> & Converter<T>::operator+= (const Converter<P> &rhs)
 template<typename T>
 template<typename P>
 inline
-Converter<T> Converter<T>::operator*  (const P &coef) const
+ANTIOCH_CONVERTER_RETURN_TYPE
+Converter<T>::operator*  (const P &coef) const
 {
-  return Converter<T>(a*coef,b);
+  return ANTIOCH_CONVERTER_RETURN_TYPE(a*coef,b);
 }
 
 template<typename T>
 template<typename P>
 inline
-Converter<T> Converter<T>::operator/  (const P &coef) const
+ANTIOCH_CONVERTER_RETURN_TYPE
+Converter<T>::operator/  (const P &coef) const
 {
-  return Converter<T>(a/coef,b);
+  return ANTIOCH_CONVERTER_RETURN_TYPE(a/coef,b);
 }
 
 template<typename T>
 template<typename P>
 inline
-Converter<T> Converter<T>::operator/  (const Converter<P> &rhs) const
+ANTIOCH_CONVERTER_RETURN_TYPE
+Converter<T>::operator/  (const Converter<P> &rhs) const
 {
-  return Converter(a/rhs.geta(),(b-rhs.getb())/rhs.geta());
+  return ANTIOCH_CONVERTER_RETURN_TYPE
+    (a/rhs.geta(),(b-rhs.getb())/rhs.geta());
 }
 
 template<typename T>
 template<typename P>
 inline
-Converter<T> Converter<T>::operator*  (const Converter<P> &rhs) const
+ANTIOCH_CONVERTER_RETURN_TYPE
+Converter<T>::operator*  (const Converter<P> &rhs) const
 {
-  return Converter<T>(a * rhs.geta() , (b + rhs.getb())/rhs.geta());
+  return ANTIOCH_CONVERTER_RETURN_TYPE
+    (a * rhs.geta() , (b + rhs.getb())/rhs.geta());
 }
 }// end namespace
 
