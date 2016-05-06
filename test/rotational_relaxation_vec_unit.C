@@ -124,7 +124,7 @@ std::cout << "entering " << testname << std::endl;
       const Scalar Z_exact0 = z( (Scalar)1500.1, eps_kb, z_298);
       const Scalar Z_exact1 = z( (Scalar)1600.1, eps_kb, z_298);
 
-      if( abs( (Z[2*tuple] - Z_exact0)/Z_exact0 ) > tol )
+      if( std::abs( (Z[2*tuple] - Z_exact0)/Z_exact0 ) > tol )
         {
           std::cout << std::scientific << std::setprecision(20)
                     << "Error: Mismatch in Z values in test " << testname << std::endl
@@ -138,7 +138,7 @@ std::cout << "entering " << testname << std::endl;
 	  break;
         }
 
-      if( abs( (Z[2*tuple+1] - Z_exact1)/Z_exact1 ) > tol )
+      if( std::abs( (Z[2*tuple+1] - Z_exact1)/Z_exact1 ) > tol )
         {
           std::cout << std::scientific << std::setprecision(20)
                     << "Error: Mismatch in Z values in test " << testname << std::endl

@@ -73,6 +73,9 @@ int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars 
     const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
 
     int return_flag(0);
+
+   using std::abs;
+
    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
    {
     if( abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) > tol )
