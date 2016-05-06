@@ -42,7 +42,8 @@
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction_set.h"
 #include "antioch/read_reaction_set_data.h"
-#include "antioch/cea_thermo.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 #include "antioch/kinetics_evaluator.h"
 
 
@@ -85,7 +86,10 @@ int tester(const std::string& input_name)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
@@ -105,10 +109,10 @@ int tester(const std::string& input_name)
 
   std::vector<Scalar> h_RT_minus_s_R(n_species);
   std::vector<Scalar> dh_RT_minus_s_R_dT(n_species);
+  Antioch::TempCache<Scalar> temp_cache(T);
 
-  typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
-  thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
-  thermo.dh_RT_minus_s_R_dT(Cache(T),dh_RT_minus_s_R_dT);
+  thermo.h_RT_minus_s_R(temp_cache,h_RT_minus_s_R);
+  thermo.dh_RT_minus_s_R_dT(temp_cache,dh_RT_minus_s_R_dT);
 
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
 
@@ -126,7 +130,7 @@ int tester(const std::string& input_name)
       domega_dot_drho_s[s].resize(n_species);
       domega_dot_drho_s_2[s].resize(n_species);
     }
-  
+
 // backward compatibility
 
   kinetics.compute_mass_sources( T , molar_densities, h_RT_minus_s_R, omega_dot);
@@ -153,7 +157,7 @@ int tester(const std::string& input_name)
       for( unsigned int t = 0; t < n_species; t++)
         {
           std::cout << std::scientific << std::setprecision(16)
-                    << "domega_dot_drho_s(" << chem_mixture.chemical_species()[s]->species() 
+                    << "domega_dot_drho_s(" << chem_mixture.chemical_species()[s]->species()
                     << ", " << chem_mixture.chemical_species()[t]->species() << ") = "
                     << domega_dot_drho_s[s][t] << std::endl;
         }
@@ -168,7 +172,7 @@ int tester(const std::string& input_name)
   omega_dot_reg[2] = -2.1139216712069495e+05;
   omega_dot_reg[3] =  1.9782018625609628e+05;
   omega_dot_reg[4] =  2.5656853231019735e+05;
-    
+
 
 // omega_dots tests
   for( unsigned int s = 0; s < n_species; s++)
@@ -255,7 +259,7 @@ int tester(const std::string& input_name)
   keywords.push_back("O2");
   new_value = 1.2L;
   reaction_set.set_parameter_of_reaction(reaction_id,keywords,new_value);
- 
+
 //recomputing
   Antioch::set_zero(omega_dot);
   kinetics.compute_mass_sources( conditions , molar_densities, h_RT_minus_s_R, omega_dot);
@@ -296,7 +300,7 @@ int tester(const std::string& input_name)
     {
       return_flag = checker(omega_dot_reg[s],omega_dot[s] ,"loop-resetted omega dot of species "  + chem_mixture.chemical_species()[s]->species()) || return_flag;
     }
- 
+
   return return_flag;
 }
 

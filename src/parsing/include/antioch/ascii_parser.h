@@ -72,9 +72,6 @@ namespace Antioch
   class CEACurveFit;
 
   template <typename NumericType>
-  class CEAThermodynamics;
-
-  template <typename NumericType>
   class CEAEvaluator;
 
 // micro
@@ -133,9 +130,6 @@ namespace Antioch
         //! reads the thermo, NASA generalist, no templates for virtual
     void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& thermo)
     {this->read_thermodynamic_data_root(thermo);}
-
-    //! read the thermodynamic data, deprecated object
-    void read_thermodynamic_data(CEAThermodynamics<NumericType>& /*thermo*/);
 
      private:
 

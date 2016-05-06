@@ -31,7 +31,6 @@
   template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,NASA7CurveFit<type> > >(NASAThermoMixture<type,NASA7CurveFit<type> >& ); \
   template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,NASA9CurveFit<type> > >(NASAThermoMixture<type,NASA9CurveFit<type> >& ); \
   template void XMLParser<type>::read_thermodynamic_data_root<NASAThermoMixture<type,CEACurveFit<type> > >(NASAThermoMixture<type,CEACurveFit<type> >& ); \
-  template void XMLParser<type>::read_thermodynamic_data_root<CEAThermodynamics<type> >(CEAThermodynamics<type>& )
 
 #define ANTIOCH_XML_PARSER_INSTANTIATE() \
   ANTIOCH_XML_PARSER_TYPE_INSTANTIATE(float); \

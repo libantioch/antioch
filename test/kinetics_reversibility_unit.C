@@ -33,7 +33,8 @@
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/physical_constants.h"
-#include "antioch/cea_thermo.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 #include "antioch/cmath_shims.h"
 
 //C++
@@ -57,7 +58,10 @@ int tester(const std::string& testname)
   species_str_list.push_back( "N" );
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
  //fill on hand reaction_set
   const std::string equation("N2 + O [=] NO + N");
@@ -75,8 +79,9 @@ int tester(const std::string& testname)
   const Scalar P0_RT(1.0e5/Antioch::Constants::R_universal<Scalar>()/T);
   std::vector<Scalar> h_RT_minus_s_R(n_species);
 
-  typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
-  thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+  Antioch::TempCache<Scalar> temp_cache(T);
+  thermo.h_RT_minus_s_R(temp_cache,h_RT_minus_s_R);
+
   // Molar densities, equimolar
   std::vector<Scalar> molar_densities(n_species , P/Antioch::Constants::R_universal<Scalar>()/T/Scalar(n_species));
 // Theory
@@ -87,7 +92,7 @@ int tester(const std::string& testname)
   Scalar rate_back = kback * molar_densities[2] * molar_densities[3];
   Scalar net_rate  = rate_fwd - rate_back;
 
-//reversible reaction  
+//reversible reaction
   Antioch::Reaction<Scalar>* my_rxn = Antioch::build_reaction<Scalar>(n_species, equation,reversible,typeReaction,kineticsModel);
   std::vector<Scalar> data;
   data.push_back(A);

@@ -48,14 +48,6 @@ namespace Antioch
     read_cea_mixture_data( thermo, filename, ASCII, true );
   }
 
-  template<class NumericType>
-  void read_cea_mixture_data_ascii( CEAThermodynamics<NumericType>& thermo, const std::string &filename )
-  {
-    antioch_deprecated();
-    ASCIIParser<NumericType> parser(filename);
-    parser.read_thermodynamic_data(thermo);
-  }
-
   // Instantiate
   ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_INSTANTIATE();
 

@@ -30,7 +30,6 @@
 #define ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(type) \
   template void read_cea_mixture_data_ascii_default<type>( CEAThermoMixture<type>& ); \
   template void read_cea_mixture_data_ascii<type>( CEAThermoMixture<type>&, const std::string& ); \
-  template void read_cea_mixture_data_ascii<type>( CEAThermodynamics<type>&, const std::string& )
 
 #define ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_INSTANTIATE() \
   ANTIOCH_CEA_MIXTURE_DATA_ASCII_PARSING_TYPE_INSTANTIATE(float); \

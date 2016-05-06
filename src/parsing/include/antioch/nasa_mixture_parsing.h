@@ -41,14 +41,6 @@ namespace Antioch
   template <class NumericType, class NASAFit>
   class NASAThermoMixture;
 
-  // definition problems du to backward compatibilities...
-  /*
-     ASCIIParser -> CEAThermodynamics
-                 ->  "antioch/cea_mixture_ascii_parsing.h"
-                 ->  "antioch/cea_mixture_parsing.h"
-                 ->  "antioch/nasa_mixture_parsing.h"
-                 -> ASCIIParser
-   */
   template <class NumericType>
   class ASCIIParser;
 

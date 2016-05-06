@@ -31,7 +31,6 @@
 #include "antioch/antioch_numeric_type_instantiate_macro.h"
 #include "antioch/ascii_parser_instantiation_macro.h"
 #include "antioch/chemical_mixture.h"
-#include "antioch/cea_thermo.h"
 #include "antioch/nasa_mixture.h"
 #include "antioch/transport_mixture.h"
 
@@ -389,49 +388,6 @@ namespace Antioch
       } // end while
   }
 
-
-  template <typename NumericType>
-  void ASCIIParser<NumericType>::read_thermodynamic_data(CEAThermodynamics<NumericType>& thermo)
-  {
-    std::string name;
-    unsigned int n_int;
-    std::vector<NumericType> coeffs;
-    NumericType h_form, val;
-
-    const ChemicalMixture<NumericType>& chem_mixture = thermo.chemical_mixture();
-
-// \todo: only cea, should do NASA
-    while (_doc.good())
-      {
-        this->skip_comments(_doc);
-
-        _doc >> name;   // Species Name
-        _doc >> n_int;  // Number of T intervals: [200-1000], [1000-6000], ([6000-20000])
-        _doc >> h_form; // Formation Enthalpy @ 298.15 K
-
-        coeffs.clear();
-        for (unsigned int interval=0; interval<n_int; interval++)
-          {
-            for (unsigned int n=0; n<10; n++)
-              {
-                _doc >> val, coeffs.push_back(val);
-              }
-          }
-
-        // If we are still good, we have a valid set of thermodynamic
-        // data for this species. Otherwise, we read past end-of-file
-        // in the section above
-        if (_doc.good())
-          {
-            // Check if this is a species we want.
-            if( chem_mixture.species_name_map().find(name) !=
-                chem_mixture.species_name_map().end() )
-              {
-                thermo.add_curve_fit(name, coeffs);
-              }
-          }
-      } // end while
-  }
 
   template <typename NumericType>
   template <typename Mixture>

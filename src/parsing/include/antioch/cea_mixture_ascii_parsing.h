@@ -47,18 +47,11 @@ namespace Antioch
   template <class NumericType>
   class CEAThermoMixture;
 
-  template <class NumericType>
-  class CEAThermodynamics;
-
   template<class NumericType>
   void read_cea_mixture_data_ascii( CEAThermoMixture<NumericType >& thermo, const std::string &filename );
 
   template<class NumericType>
   void read_cea_mixture_data_ascii_default( CEAThermoMixture<NumericType >& thermo );
-
-  /* that thing is like, double-obsolete*/
-  template<class NumericType>
-  void read_cea_mixture_data_ascii( CEAThermodynamics<NumericType >& thermo, const std::string &filename );
 
 } // end namespace Antioch
 

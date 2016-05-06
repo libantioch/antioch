@@ -117,9 +117,6 @@ namespace Antioch{
     void read_thermodynamic_data(NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/)
     {antioch_error_msg("ERROR: ChemKin Parsing only supports parsing for NASA7CurveFit!");}
 
-    //! reads the thermo, CEA deprecated
-    void read_thermodynamic_data(CEAThermodynamics<NumericType >& /*thermo*/)
-    {antioch_error_msg("ERROR: ChemKin Parsing only supports parsing for NASA7CurveFit!");}
 
 ///////////////// kinetics
 
