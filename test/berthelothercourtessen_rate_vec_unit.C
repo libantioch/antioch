@@ -46,12 +46,14 @@
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/berthelothercourtessen_rate.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vexcl_utils.h"
 
 #include <cmath>
 #include <limits>
@@ -91,13 +93,13 @@ int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars 
     int return_flag(0);
    for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
    {
-     if( excessive_difference(T[2*tuple],   rate[2*tuple],     rate_exact[2*tuple],     tol, "rate values") )
+     if( excessive_difference<Scalar>(T[2*tuple],   rate[2*tuple],     rate_exact[2*tuple],     tol, "rate values") )
        return_flag = 1;
-     if( excessive_difference(T[2*tuple+1], rate[2*tuple+1],   rate_exact[2*tuple+1],   tol, "rate values") )
+     if( excessive_difference<Scalar>(T[2*tuple+1], rate[2*tuple+1],   rate_exact[2*tuple+1],   tol, "rate values") )
        return_flag = 1;
-     if( excessive_difference(T[2*tuple],   derive[2*tuple],   derive_exact[2*tuple],   tol, "derivative values") )
+     if( excessive_difference<Scalar>(T[2*tuple],   derive[2*tuple],   derive_exact[2*tuple],   tol, "derivative values") )
        return_flag = 1;
-     if( excessive_difference(T[2*tuple+1], derive[2*tuple+1], derive_exact[2*tuple+1], tol, "derivative values") )
+     if( excessive_difference<Scalar>(T[2*tuple+1], derive[2*tuple+1], derive_exact[2*tuple+1], tol, "derivative values") )
        return_flag = 1;
    }
    return return_flag;

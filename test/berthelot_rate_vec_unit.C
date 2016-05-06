@@ -46,12 +46,14 @@
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/berthelot_rate.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vexcl_utils.h"
 
 #include <cmath>
 #include <limits>
