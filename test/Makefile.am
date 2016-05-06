@@ -109,6 +109,7 @@ standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
                               standard_unit/standard_unit_tests.C
 
 eigen_unit_tests_SOURCES = eigen_unit/arrhenius_rate_eigen_test.C \
+                           eigen_unit/nasa_mixture_eigen_test.C \
                            eigen_unit/eigen_unit_tests.C
 
 vexcl_unit_tests_SOURCES = vexcl_unit/arrhenius_rate_vexcl_test.C \
