@@ -36,8 +36,11 @@ template <typename Scalar>
 int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_exact,
                               const Scalar & rate, const Scalar & derive, const Scalar & T)
 {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
     int return_flag(0);
+
+    using std::abs;
+
     if( abs( (rate - rate_exact)/rate_exact ) > tol )
       {
         std::cout << std::scientific << std::setprecision(16)

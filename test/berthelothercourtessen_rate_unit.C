@@ -35,9 +35,13 @@ template <typename Scalar>
 int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_exact,
                               const Scalar & rate, const Scalar & derive, const Scalar & T)
 {
-    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 50;
     int return_flag(0);
-    if( abs( (rate - rate_exact)/rate_exact ) > tol )
+
+    using std::abs;
+    using std::max;
+
+    if( abs(rate - rate_exact)/max(abs(rate_exact),tol) > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error: Mismatch in rate values." << std::endl
@@ -49,7 +53,7 @@ int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_e
 
         return_flag = 1;
       }
-    if( abs( (derive - derive_exact)/derive_exact ) > tol )
+    if( abs(derive - derive_exact)/max(abs(derive_exact),tol) > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error: Mismatch in rate derivative values." << std::endl
