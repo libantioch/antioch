@@ -113,6 +113,7 @@ eigen_unit_tests_SOURCES = eigen_unit/arrhenius_rate_eigen_test.C \
                            eigen_unit/eigen_unit_tests.C
 
 vexcl_unit_tests_SOURCES = vexcl_unit/arrhenius_rate_vexcl_test.C \
+                           vexcl_unit/nasa_mixture_vexcl_test.C \
                            vexcl_unit/vexcl_unit_tests.C
 
 metaphysicl_unit_tests_SOURCES = metaphysicl_unit/arrhenius_rate_metaphysicl_test.C \
