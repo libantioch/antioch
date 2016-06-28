@@ -80,9 +80,31 @@ namespace Antioch
 		mu.add(name, coeffs);
 	      }
           }
-
       }
     in.close();
+
+    // If we requested Blottner viscosity for our mixture, we'd better
+    // have Blottner viscosity data for every species in our mixture.
+    const TransportMixture<NumericType>& trans_mixture = mu.chemical_mixture();
+    const unsigned int n_species = trans_mixture.n_species();
+
+    if (mu.species_viscosities().size() < n_species)
+      antioch_error_msg
+        ("Could not find Blottner viscosity data for more than " <<
+         mu.species_viscosities().size() << " of " << n_species <<
+         " requested species in '" << filename << "'.");
+
+    for (unsigned int s=0; s != n_species; ++s)
+      if (!mu.species_viscosities()[s])
+        {
+          const Species& species = trans_mixture.species_list()[s];
+          const std::string& name = trans_mixture.species_inverse_name_map().find(species)->second;
+
+          antioch_error_msg
+            ("Could not find Blottner viscosity data for species '" << name <<
+             "' in '" << filename << "'.");
+        }
+
     return;
   }
 
