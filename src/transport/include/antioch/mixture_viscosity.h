@@ -78,7 +78,8 @@ namespace Antioch
     template <typename StateType>
     void extrapolate_max_temp(const StateType& Tmax);
 
-    const std::vector<Viscosity*> & species_viscosities() const;
+    const std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*> &
+    species_viscosities() const;
 
     //! Formatted print, by default to \p std::cout
     void print(std::ostream& os = std::cout) const;
@@ -168,7 +169,8 @@ namespace Antioch
 
   template<typename Viscosity, class CoeffType>
   inline
-  const std::vector<Viscosity*>& MixtureViscosity<Viscosity,CoeffType>::species_viscosities() const
+  const std::vector<SpeciesViscosityBase<Viscosity,CoeffType>*> &
+  MixtureViscosity<Viscosity,CoeffType>::species_viscosities() const
   {
     return _species_viscosities;
   }
