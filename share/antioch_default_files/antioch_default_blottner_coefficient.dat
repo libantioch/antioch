@@ -24,6 +24,11 @@
 # H    -- AIAA-1997-2474
 # H2   -- AIAA-1997-2474
 # e    -- Sandia Report SC-RR-70-754
+#
+# Calculations from NIST WebBook data, fitting at 300K, 600K, and
+# 1200K, at 0.1 MPa pressure (or at the highest vapor-phase pressure
+# in cases where 0.1 MPa leaves liquid the stable phase):
+# H2O  -- mu = 9.92623e-6, 2.14069e-5, 4.50539e-5 Pa*s
 
 Air     2.68142000000e-02  3.17783800000e-01 -1.13155513000e+01
 CPAir   2.68142000000e-02  3.17783800000e-01 -1.13155513000e+01
@@ -43,4 +48,5 @@ CO2     -0.019527387       1.047818          -14.32212
 HCN     -2.4241e-2         1.0946550         -14.5835500
 H       -8.3912e-3         0.7743270         -13.6653000
 H2      -8.3346e-3         0.7815380         -13.5351000
+H2O     -2.5378e-2         1.4158554         -16.4678353
 e       0.00000000000e+00  0.00000000000e+00 -1.16031403000e+01
