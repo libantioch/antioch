@@ -292,8 +292,8 @@ namespace Antioch
       const std::string Troe = "TroeFalloff";
       const std::string falloff = std::string(_reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())
           ->FirstChildElement(_gri_map.at(GRI30Comp::FALLOFF).c_str())->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str()));
-      chem_proc = (falloff.find(Lind) != std::string::npos) ? Lind.c_str() :
-        (falloff.find(Troe) != std::string::npos) ? Troe.c_str() : chem_proc;
+      chem_proc = (Lind.find(falloff) != std::string::npos) ? Lind.c_str() :
+        (Troe.find(falloff) != std::string::npos) ? Troe.c_str() : chem_proc;
     }
 
     return (chem_proc)?
