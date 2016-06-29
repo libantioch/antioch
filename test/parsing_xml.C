@@ -377,12 +377,14 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
 ///Lindemann Falloff
 // falloff is k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
 // F = 1
+// every reaction is doubled for GRI parsing testing
 
 // N2 -> 2 N
   A     = 7e18 * unitA_1.get_SI_factor();
   beta  = -1.6;
   A2    = 5e15 * unitA_0.get_SI_factor();
   beta2 = 0.5;
+  k.push_back(HE(T,A,beta) / (1./tot_dens + HE(T,A,beta)/HE(T,A2,beta2)) );
   k.push_back(HE(T,A,beta) / (1./tot_dens + HE(T,A,beta)/HE(T,A2,beta2)) );
 
 // O2 -> 2 O
@@ -391,12 +393,14 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   A2 = 2e18 * unitA_0.get_SI_factor();
   D2 = -5e-3;
   k.push_back(Bert(T,A,D) / (1./tot_dens + Bert(T,A,D)/Bert(T,A2,D2)) );
+  k.push_back(Bert(T,A,D) / (1./tot_dens + Bert(T,A,D)/Bert(T,A2,D2)) );
 
 //NO -> N + O
   A   = 5.e+12 * unitA_1.get_SI_factor();
   Ea  = 149943.0;
   A2  = 3e+15 * unitA_0.get_SI_factor();
   Ea2 =  200000.0;
+  k.push_back(Arrh(T,A,Ea,Rcal) / (1./tot_dens + Arrh(T,A,Ea,Rcal)/Arrh(T,A2,Ea2,Rcal)) );
   k.push_back(Arrh(T,A,Ea,Rcal) / (1./tot_dens + Arrh(T,A,Ea,Rcal)/Arrh(T,A2,Ea2,Rcal)) );
 
 //N2 + O -> NO + N
@@ -407,6 +411,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   beta2 = -0.42;
   D2    = -5e-3;
   k.push_back(BHE(T,A,beta,D) / (1./tot_dens + BHE(T,A,beta,D)/BHE(T,A2,beta2,D2)) );
+  k.push_back(BHE(T,A,beta,D) / (1./tot_dens + BHE(T,A,beta,D)/BHE(T,A2,beta2,D2)) );
 
 //NO + O -> NO + N
   A     = 8.4e+09 * unitA_2.get_SI_factor();
@@ -416,6 +421,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   beta2 = 0.02;
   Ea2   = 3526.0;
   k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./tot_dens + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) ); 
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./tot_dens + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) ); 
 
 //C2 -> 2 C
   A     = 3.7e+11 * unitA_1.get_SI_factor();
@@ -424,6 +430,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   A2    = 3.7e+12 * unitA_0.get_SI_factor();
   beta2 = -0.52;
   Ea2   = 135000.8;
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./tot_dens + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) );
   k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./tot_dens + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) );
 
 //CN -> C + N
@@ -435,6 +442,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   beta2 = 0.40;
   D2    = -0.005;
   Ea2   = 174240.9;
+  k.push_back(VH(T,A,beta,Ea,D,Tr,Rcal) / (1./tot_dens + VH(T,A,beta,Ea,D,Tr,Rcal)/VH(T,A2,beta2,Ea2,D2,Tr,Rcal)) );
   k.push_back(VH(T,A,beta,Ea,D,Tr,Rcal) / (1./tot_dens + VH(T,A,beta,Ea,D,Tr,Rcal)/VH(T,A2,beta2,Ea2,D2,Tr,Rcal)) );
 //Troe falloff
 //falloff is k(T,[M]) = k0*[M]/(1 + [M]*k0/kinf) * F = k0 * ([M]^-1 + k0 * kinf^-1)^-1 * F    
@@ -456,6 +464,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   kinf = HE(T,A2,beta2);
   Pr = tot_dens * k0/kinf;
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 
 // O2 -> 2 O
   A  = 5e17 * unitA_1.get_SI_factor();
@@ -466,6 +475,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   kinf = Bert(T,A2,D2);
   Pr = tot_dens * k0/kinf;
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 
 //NO -> N + O
   A   = 5.e+12 * unitA_1.get_SI_factor();
@@ -475,6 +485,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   k0    = Arrh(T,A,Ea,Rcal);
   kinf  = Arrh(T,A2,Ea2,Rcal);
   Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 
 //N2 + O -> NO + N
@@ -488,6 +499,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   kinf  = BHE(T,A2,beta2,D2);
   Pr = tot_dens * k0/kinf;
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 
 //NO + O -> NO + N
   A     = 8.4e+09 * unitA_2.get_SI_factor();
@@ -500,6 +512,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   kinf  = Kooij(T,A2,beta2,Ea2,Tr,Rcal);
   Pr = tot_dens * k0/kinf;
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 
 //C2 -> 2 C
   A     = 3.7e+11 * unitA_1.get_SI_factor();
@@ -511,6 +524,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   k0    = Kooij(T,A,beta,Ea,Tr,Rcal); 
   kinf  = Kooij(T,A2,beta2,Ea2,Tr,Rcal);
   Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 
 //CN -> C + N
@@ -525,6 +539,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   k0    = VH(T,A,beta,Ea,D,Tr,Rcal); 
   kinf  = VH(T,A2,beta2,Ea2,D2,Tr,Rcal);
   Pr = tot_dens * k0/kinf;
+  k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
 //
 //photochemistry

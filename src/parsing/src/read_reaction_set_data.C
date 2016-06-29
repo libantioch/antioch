@@ -181,7 +181,7 @@ namespace Antioch
             if(!proc_keyword.count(parser->reaction_chemical_process()))
               {
                 std::cerr << "The type of chemical process you provided (" << parser->reaction_chemical_process() << ")"
-                          << "does not correspond to any Antioch knows.\n"
+                          << " does not correspond to any Antioch knows.\n"
                           << "Implemented chemical processes are:\n"
                           << "  Elementary (default)\n"
                           << "  Duplicate\n"

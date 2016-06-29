@@ -283,17 +283,25 @@ namespace Antioch
   {
     const char * chem_proc = _reaction->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str());
 
-      // we're GRI
-    if(chem_proc == _gri_map.at(GRI30Comp::FALLOFF).c_str())
+    if(chem_proc)
     {
-      // find the falloff block
-      // <reaction><rateCoeff><falloff type=''/></rateCoeff></reaction>
-      const std::string Lind = "LindemannFalloff";
-      const std::string Troe = "TroeFalloff";
-      const std::string falloff = std::string(_reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())
-          ->FirstChildElement(_gri_map.at(GRI30Comp::FALLOFF).c_str())->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str()));
-      chem_proc = (Lind.find(falloff) != std::string::npos) ? Lind.c_str() :
-        (Troe.find(falloff) != std::string::npos) ? Troe.c_str() : chem_proc;
+       // we're GRI
+     if(std::string(chem_proc).compare(_gri_map.at(GRI30Comp::FALLOFF)) == 0)
+     {
+       // find the falloff block
+       // <reaction><rateCoeff><falloff type=''/></rateCoeff></reaction>
+       const std::string Lind = "LindemannFalloff";
+       const std::string Troe = "TroeFalloff";
+       const std::string falloff = std::string(_reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())
+           ->FirstChildElement(_gri_map.at(GRI30Comp::FALLOFF).c_str())->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str()));
+       const char * cp = (Lind.find(falloff) != std::string::npos) ? Lind.c_str() :
+         (Troe.find(falloff) != std::string::npos) ? Troe.c_str() : chem_proc;
+
+        return (cp)?
+          std::string(cp) :
+          std::string();
+     }
+
     }
 
     return (chem_proc)?

@@ -430,6 +430,24 @@
       <products>N:2.0</products>
     </reaction>
 
+    <!-- reaction 0021bis GRI style    -->
+    <reaction reversible="yes" type="falloff" id="0021bis">
+      <equation>N2 [=] 2 N </equation>
+      <rateCoeff>
+        <HercourtEssen name="k0">
+           <A>7.e+18</A>
+           <b>-1.6</b>
+        </HercourtEssen>
+        <HercourtEssen>
+           <A>5.e+15</A>
+           <b>0.5</b>
+        </HercourtEssen>
+        <falloff type='Lindemann'/>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
     <!-- reaction 0022    -->
     <reaction reversible="yes" type="LindemannFalloff" id="0022">
       <equation>O2 [=] 2 O </equation>
@@ -447,6 +465,24 @@
       <products>O:2.0</products>
     </reaction>
 
+    <!-- reaction 0022bis GRI    -->
+    <reaction reversible="yes" type="falloff" id="0022bis">
+      <equation>O2 [=] 2 O </equation>
+      <rateCoeff>
+        <Berthelot>
+           <A>2.e+18</A>
+           <D>-5e-3</D>
+        </Berthelot>
+        <Berthelot name="k0">
+           <A>5.e+17</A>
+           <D>-2.5e-5</D>
+        </Berthelot>
+        <falloff type='Lindemann'/>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
     <!-- reaction 0023    -->
     <reaction reversible="yes" type="LindemannFalloff" id="0023">
       <equation>NO [=] N + O </equation>
@@ -459,6 +495,24 @@
            <A>3e+15</A>
            <E units="cal/mol">200000.0</E>
         </Arrhenius>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0023bis    -->
+    <reaction reversible="yes" type="falloff" id="0023bis">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>3e+15</A>
+           <E units="cal/mol">200000.0</E>
+        </Arrhenius>
+        <falloff type='Lindemann'/>
       </rateCoeff>
       <reactants>NO:1</reactants>
       <products>N:1 O:1</products>
@@ -483,6 +537,26 @@
       <products>NO:1 N:1</products>
     </reaction>
 
+    <!-- reaction 0024bis    -->
+    <reaction reversible="yes" type="falloff" id="0024bis">
+      <equation>N2 + O [=] NO + N</equation>
+      <rateCoeff>
+        <BerthelotHercourtEssen>
+           <A>5.7e+9</A>
+           <b>-0.42</b>
+           <D>-5e-3</D>
+        </BerthelotHercourtEssen>
+        <BerthelotHercourtEssen name="k0">
+           <A>5e+9</A>
+           <b>0.6</b>
+           <D>-5e-4</D>
+        </BerthelotHercourtEssen>
+        <falloff type='Lindemann'/>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
     <!-- reaction 0025    -->
     <reaction reversible="yes" type="LindemannFalloff" id="0025">
       <equation>NO + O [=] O2 + N</equation>
@@ -497,6 +571,26 @@
            <b>0.02</b>
            <E units="cal/mol">3526.0</E>
         </Kooij>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0025bis    -->
+    <reaction reversible="yes" type="falloff" id="0025bis">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>8.4e+09</A>
+           <b>0.40</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+        <Kooij>
+           <A>8.4e+05</A>
+           <b>0.02</b>
+           <E units="cal/mol">3526.0</E>
+        </Kooij>
+        <falloff type='Lindemann'/>
       </rateCoeff>
       <reactants>NO:1 O:1</reactants>
       <products>O2:1 N:1</products>
@@ -521,6 +615,26 @@
       <products>C:2</products>
     </reaction>
 
+    <!-- reaction 0026bis    -->
+    <reaction reversible="yes" type="falloff" id="0026bis">
+      <equation>C2 [=] 2 C </equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>3.7e+11</A>
+           <b>-0.42</b>
+           <E units="cal/mol">138812.8</E>
+        </ModifiedArrhenius>
+        <ModifiedArrhenius>
+           <A>3.7e+12</A>
+           <b>-0.52</b>
+           <E units="cal/mol">135000.8</E>
+        </ModifiedArrhenius>
+        <falloff type='Lindemann'/>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
     <!-- reaction 0027    -->
     <reaction reversible="yes" type="LindemannFalloff" id="0027">
       <equation>CN [=] C + N </equation>
@@ -537,6 +651,28 @@
            <D>1.5e-3</D>
            <E units="cal/mol">150240.9</E>
         </VantHoff>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0027 bis GRI style   -->
+    <reaction reversible="yes" type="falloff" id="0027bis">
+      <equation>CN [=] C + N </equation>
+      <rateCoeff>
+        <VantHoff>
+           <A>2.5e+11</A>
+           <b>0.40</b>
+           <D>-0.005</D>
+           <E units="cal/mol">174240.9</E>
+        </VantHoff>
+        <VantHoff name="k0">
+           <A>5e+10</A>
+           <b>-0.10</b>
+           <D>1.5e-3</D>
+           <E units="cal/mol">150240.9</E>
+        </VantHoff>
+        <falloff type='Lindemann'/>
       </rateCoeff>
       <reactants>CN:1</reactants>
       <products>C:1 N:1</products>
@@ -566,6 +702,24 @@
       <products>N:2.0</products>
     </reaction>
 
+    <!-- reaction 0028bis    -->
+    <reaction reversible="yes" type="falloff" id="0028bis">
+      <equation>N2 [=] 2 N </equation>
+      <rateCoeff>
+        <HercourtEssen name="k0">
+           <A>7.e+18</A>
+           <b>-1.6</b>
+        </HercourtEssen>
+        <HercourtEssen>
+           <A>5.e+15</A>
+           <b>0.5</b>
+        </HercourtEssen>
+        <falloff type="Troe">0.562 91 5836 8552</falloff>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
     <!-- reaction 0029    -->
     <reaction reversible="yes" type="TroeFalloff" id="0029">
       <equation>O2 [=] 2 O </equation>
@@ -589,6 +743,24 @@
       <products>O:2.0</products>
     </reaction>
 
+    <!-- reaction 0029bis    -->
+    <reaction reversible="yes" type="falloff" id="0029bis">
+      <equation>O2 [=] 2 O </equation>
+      <rateCoeff>
+        <Berthelot>
+           <A>2.e+18</A>
+           <D>-5e-3</D>
+        </Berthelot>
+        <Berthelot name="k0">
+           <A>5.e+17</A>
+           <D>-2.5e-5</D>
+        </Berthelot>
+        <falloff type="Troe">0.562 91 5836 8552</falloff>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
     <!-- reaction 0030    -->
     <reaction reversible="yes" type="TroeFalloff" id="0030">
       <equation>NO [=] N + O </equation>
@@ -607,6 +779,24 @@
           <T2> 8552 </T2> 
           <T3> 91   </T3> 
         </Troe>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0030bis    -->
+    <reaction reversible="yes" type="falloff" id="0030bis">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>3e+15</A>
+           <E units="cal/mol">200000.0</E>
+        </Arrhenius>
+        <falloff type="Troe">0.562 91 5836 8552</falloff>
       </rateCoeff>
       <reactants>NO:1</reactants>
       <products>N:1 O:1</products>
@@ -637,6 +827,26 @@
       <products>NO:1 N:1</products>
     </reaction>
 
+    <!-- reaction 0031bis    -->
+    <reaction reversible="yes" type="falloff" id="0031bis">
+      <equation>N2 + O [=] NO + N</equation>
+      <rateCoeff>
+        <BerthelotHercourtEssen>
+           <A>5.7e+9</A>
+           <b>-0.42</b>
+           <D>-5e-3</D>
+        </BerthelotHercourtEssen>
+        <BerthelotHercourtEssen name="k0">
+           <A>5e+9</A>
+           <b>0.6</b>
+           <D>-5e-4</D>
+        </BerthelotHercourtEssen>
+        <falloff type="Troe">0.562 91 5836 8552</falloff>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
     <!-- reaction 0032    -->
     <reaction reversible="yes" type="TroeFalloff" id="0032">
       <equation>NO + O [=] O2 + N</equation>
@@ -657,6 +867,26 @@
           <T2> 8552 </T2> 
           <T3> 91   </T3> 
         </Troe>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0032bis    -->
+    <reaction reversible="yes" type="falloff" id="0032bis">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Kooij name="k0">
+           <A>8.4e+09</A>
+           <b>0.40</b>
+           <E units="cal/mol">38526.0</E>
+        </Kooij>
+        <Kooij>
+           <A>8.4e+05</A>
+           <b>0.02</b>
+           <E units="cal/mol">3526.0</E>
+        </Kooij>
+        <falloff type="Troe">0.562 91 5836 8552</falloff>
       </rateCoeff>
       <reactants>NO:1 O:1</reactants>
       <products>O2:1 N:1</products>
@@ -687,6 +917,26 @@
       <products>C:2</products>
     </reaction>
 
+    <!-- reaction 0033bis    -->
+    <reaction reversible="yes" type="falloff" id="0033bis">
+      <equation>C2 [=] 2 C </equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>3.7e+11</A>
+           <b>-0.42</b>
+           <E units="cal/mol">138812.8</E>
+        </ModifiedArrhenius>
+        <ModifiedArrhenius>
+           <A>3.7e+12</A>
+           <b>-0.52</b>
+           <E units="cal/mol">135000.8</E>
+        </ModifiedArrhenius>
+        <falloff type="Troe">0.562 91 5836 8552</falloff>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
     <!-- reaction 0034    -->
     <reaction reversible="yes" type="TroeFalloff" id="0034">
       <equation>CN [=] C + N </equation>
@@ -709,6 +959,28 @@
           <T2> 8552 </T2> 
           <T3> 91   </T3> 
         </Troe>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0034bis    -->
+    <reaction reversible="yes" type="falloff" id="0034bis">
+      <equation>CN [=] C + N </equation>
+      <rateCoeff>
+        <VantHoff>
+           <A>2.5e+11</A>
+           <b>0.40</b>
+           <D>-0.005</D>
+           <E units="cal/mol">174240.9</E>
+        </VantHoff>
+        <VantHoff name="k0">
+           <A>5e+10</A>
+           <b>-0.10</b>
+           <D>1.5e-3</D>
+           <E units="cal/mol">150240.9</E>
+        </VantHoff>
+        <falloff type="Troe">0.562 91 5836 8552</falloff>
       </rateCoeff>
       <reactants>CN:1</reactants>
       <products>C:1 N:1</products>
