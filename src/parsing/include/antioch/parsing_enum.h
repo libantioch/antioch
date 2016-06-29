@@ -74,6 +74,11 @@ namespace Antioch
                   TROE_F_TSSS
                  };
 
+// GRI30 compatibility
+  enum GRI30Comp{FALLOFF = 0,
+                 TROE
+                };
+
   enum ParsingUnit{
                     MOL_WEIGHT = 0,
                     MASS_ENTHALPY
