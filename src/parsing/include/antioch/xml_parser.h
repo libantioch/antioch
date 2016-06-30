@@ -185,17 +185,20 @@ namespace Antioch{
          /*! return true if efficiencies are found*/
          bool efficiencies(std::vector<std::pair<std::string,NumericType> > & par_values) const;
 
-         /*! return true is alpha*/
+         /*! return true if alpha*/
          bool Troe_alpha_parameter(NumericType & alpha, std::string & alpha_unit, std::string & def_unit) const;
 
-         /*! return true is alpha*/
+         /*! return true if T1*/
          bool Troe_T1_parameter(   NumericType & T1,    std::string & T1_unit,    std::string & def_unit) const;
 
-         /*! return true is alpha*/
+         /*! return true if T2*/
          bool Troe_T2_parameter(   NumericType & T2,    std::string & T2_unit,    std::string & def_unit) const;
 
-         /*! return true is alpha*/
+         /*! return true if T3*/
          bool Troe_T3_parameter(   NumericType & T3,    std::string & T3_unit,    std::string & def_unit) const;
+
+         /*! return true if a Troe parameter in a GRI way*/
+         bool Troe_GRI_parameter(  NumericType & pa,    unsigned int index) const;
 
         private:
 
@@ -251,6 +254,8 @@ namespace Antioch{
 
           std::map<ParsingKey,std::string> _map;
           std::map<ParsingKey,std::string> _default_unit;
+// GRI30
+          std::map<GRI30Comp, std::string> _gri_map;
 
   };
 

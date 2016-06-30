@@ -134,6 +134,10 @@ namespace Antioch
     _default_unit[ParsingKey::TROE_F_TSS]            = "K";
     _default_unit[ParsingKey::TROE_F_TSSS]           = "K";
 
+    //gri30
+     _gri_map[GRI30Comp::FALLOFF] = "falloff";
+     _gri_map[GRI30Comp::TROE]    = "Troe";
+
     this->initialize();
   }
 
@@ -279,8 +283,29 @@ namespace Antioch
   {
     const char * chem_proc = _reaction->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str());
 
+    if(chem_proc)
+    {
+       // we're GRI
+     if(std::string(chem_proc).compare(_gri_map.at(GRI30Comp::FALLOFF)) == 0)
+     {
+       // find the falloff block
+       // <reaction><rateCoeff><falloff type=''/></rateCoeff></reaction>
+       const std::string Lind = "LindemannFalloff";
+       const std::string Troe = "TroeFalloff";
+       const std::string falloff = std::string(_reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())
+           ->FirstChildElement(_gri_map.at(GRI30Comp::FALLOFF).c_str())->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str()));
+       const char * cp = (Lind.find(falloff) != std::string::npos) ? Lind.c_str() :
+         (Troe.find(falloff) != std::string::npos) ? Troe.c_str() : chem_proc;
+
+        return (cp)?
+          std::string(cp) :
+          std::string();
+     }
+
+    }
+
     return (chem_proc)?
-      std::string(chem_proc):
+      std::string(chem_proc) :
       std::string();
   }
 
@@ -642,31 +667,67 @@ namespace Antioch
   }
 
   template <typename NumericType>
+  bool XMLParser<NumericType>::Troe_GRI_parameter(NumericType & parameter, unsigned int index) const
+  {
+   // Troe parameters block
+   // [alpha, T***, T*, T**]
+    tinyxml2::XMLElement * troe = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(_gri_map.at(GRI30Comp::TROE).c_str());
+    std::string Troe_block = troe ? std::string(troe->GetText()) : std::string();
+   // do we have something?
+    bool gri = Troe_block.size() != 0;
+    if(gri)
+    {
+      std::vector<std::string> values;
+      split_string(Troe_block, " ", values);
+      // T** is optional, we generalize ?? should we ??
+      if(index < values.size())
+      {
+        parameter = std::atof(values[index].c_str());
+      }else{
+        gri = false;
+      }
+     }
+     return gri;
+   }
+
+  template <typename NumericType>
   bool XMLParser<NumericType>::Troe_alpha_parameter(NumericType & alpha, std::string & alpha_unit, std::string & def_unit) const
   {
     def_unit = _default_unit.at(ParsingKey::TROE_F_ALPHA);
-    return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_ALPHA),alpha,alpha_unit);
+    // if defined as Antioch wants it
+    bool antioch = this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_ALPHA),alpha,alpha_unit);
+    // if not, we try GRI30
+    return antioch ? antioch : this->Troe_GRI_parameter(alpha,0);
   }
 
   template <typename NumericType>
   bool XMLParser<NumericType>::Troe_T1_parameter(NumericType & T1, std::string & T1_unit, std::string & def_unit) const
   {
     def_unit = _default_unit.at(ParsingKey::TROE_F_TS);
-    return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TS),T1,T1_unit);
+    // if defined as Antioch wants it
+    bool antioch = this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TS),T1,T1_unit);
+    // if not, we try GRI30
+    return antioch ? antioch : this->Troe_GRI_parameter(T1,2);
   }
 
   template <typename NumericType>
   bool XMLParser<NumericType>::Troe_T2_parameter(NumericType & T2, std::string & T2_unit, std::string & def_unit) const
   {
     def_unit = _default_unit.at(ParsingKey::TROE_F_TSS);
-    return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSS),T2,T2_unit);
+    // if defined as Antioch wants it
+    bool antioch = this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSS),T2,T2_unit);
+    // if not, we try GRI30
+    return antioch ? antioch : this->Troe_GRI_parameter(T2,3);
   }
 
   template <typename NumericType>
   bool XMLParser<NumericType>::Troe_T3_parameter(NumericType & T3, std::string & T3_unit, std::string & def_unit) const
   {
     def_unit = _default_unit.at(ParsingKey::TROE_F_TSSS);
-    return this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSSS),T3,T3_unit);
+    // if defined as Antioch wants it
+    bool antioch = this->get_parameter(_Troe,_map.at(ParsingKey::TROE_F_TSSS),T3,T3_unit);
+    // if not, we try GRI30
+    return antioch ? antioch : this->Troe_GRI_parameter(T3,1);
   }
 
 

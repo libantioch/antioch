@@ -180,7 +180,9 @@ namespace Antioch
             if (verbose) std::cout << " type: " << parser->reaction_chemical_process() << std::endl;
             if(!proc_keyword.count(parser->reaction_chemical_process()))
               {
-                std::cerr << "Implemented chemical processes are:\n"
+                std::cerr << "The type of chemical process you provided (" << parser->reaction_chemical_process() << ")"
+                          << " does not correspond to any Antioch knows.\n"
+                          << "Implemented chemical processes are:\n"
                           << "  Elementary (default)\n"
                           << "  Duplicate\n"
                           << "  ThreeBody\n"
