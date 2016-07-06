@@ -98,6 +98,13 @@ typename Antioch::enable_if_c<
 min (const T& in);
 
 template <typename T>
+inline
+typename Antioch::enable_if_c<
+  is_metaphysicl<T>::value,
+  bool>::type
+isnan (const T& in);
+
+template <typename T>
 struct has_size<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>;
 
 template <typename T>
