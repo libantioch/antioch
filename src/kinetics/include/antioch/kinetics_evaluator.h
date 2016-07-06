@@ -204,6 +204,13 @@ namespace Antioch
       {
         const Reaction<CoeffType>& reaction = this->_reaction_set.reaction(rxn);
         const StateType rate = _net_reaction_rates[rxn];
+
+        // We'd *like* to assert that our rates aren't NaN, but if we
+        // have two infinitely-stiff reactions contributing in
+        // opposite directions to the same rate, then NaN is the
+        // correct output, and hopefully our user code has some way to
+        // recover from that.
+//        antioch_assert(!isnan(rate));
         
         // reactant contributions
         for (unsigned int r = 0; r < reaction.n_reactants(); r++)
