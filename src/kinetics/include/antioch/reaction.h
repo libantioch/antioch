@@ -752,8 +752,7 @@ namespace Antioch
                                                        const VectorStateType& h_RT_minus_s_R ) const
   {
     antioch_assert( this->initialized() );
-    //!\todo Make this assertion vector-compatible
-    // antioch_assert_greater( P0_RT, 0.0 );
+    antioch_assert(Antioch::min(typename Antioch::rebind<StateType,bool>::type(P0_RT > Antioch::zero_clone(P0_RT))));
     antioch_assert_greater( h_RT_minus_s_R.size(), 0 );
     antioch_assert_equal_to( h_RT_minus_s_R.size(), this->n_species() );
 
