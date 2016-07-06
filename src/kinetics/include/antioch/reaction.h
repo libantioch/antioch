@@ -1021,6 +1021,8 @@ namespace Antioch
                                                            const StateType& P0_RT,
                                                            const VectorStateType& h_RT_minus_s_R) const
   {
+    using std::abs;
+
     StateType kfwd = this->compute_forward_rate_coefficient(molar_densities,conditions);
     StateType kfwd_times_reactants = kfwd;
 
@@ -1032,12 +1034,23 @@ namespace Antioch
             this->reactant_partial_order(ro));
       }
 
-    StateType kbkwd_times_products = Antioch::zero_clone(kfwd_times_reactants);
     if(_reversible)
     {
-
       StateType Keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
-      kbkwd_times_products = kfwd/Keq;
+      antioch_assert(!isnan(Keq));
+
+      StateType kbkwd_times_products = kfwd/Keq;
+
+      // If we have an equilibrium constant of zero, our reverse
+      // reaction rate should be infinity, not NaN.
+      static const typename Antioch::value_type<StateType>::type my_infinity =
+        std::numeric_limits<typename Antioch::value_type<StateType>::type>::infinity();
+
+      typename Antioch::rebind<StateType,bool>::type is_nonzero = (Keq != Antioch::zero_clone(Keq));
+      kbkwd_times_products =
+	Antioch::if_else(is_nonzero, kbkwd_times_products,
+                         Antioch::constant_clone(Keq, my_infinity));
+      antioch_assert(!isnan(kbkwd_times_products));
 
       // Rbkwd
       for (unsigned int po=0; po< this->n_products(); po++)
@@ -1046,11 +1059,13 @@ namespace Antioch
             ant_pow( molar_densities[this->product_id(po)],
               this->product_partial_order(po));
 
+          antioch_assert(!isnan(kbkwd_times_products));
         }
+
+      return kfwd_times_reactants - kbkwd_times_products;
     }
 
-    return kfwd_times_reactants - kbkwd_times_products;
-
+    return kfwd_times_reactants;
   }
 
   template<typename CoeffType, typename VectorCoeffType>
