@@ -27,7 +27,7 @@ LDADD = $(top_builddir)/src/libantioch.la
 
 pkginclude_HEADERS =
 
-standard_unit_tests_SOURCES = antioch_init.C
+antioch_init_tests_SOURCES = antioch_init.C
 
 #Define examples to actually be run
 TESTS  =
