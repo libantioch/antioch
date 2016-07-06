@@ -1,4 +1,4 @@
-EXTRA_DIST = input_files
+EXTRA_DIST = 
 
 check_PROGRAMS  =
 check_PROGRAMS += antioch_init
@@ -27,7 +27,7 @@ LDADD = $(top_builddir)/src/libantioch.la
 
 pkginclude_HEADERS =
 
-antioch_init_tests_SOURCES = antioch_init.C
+antioch_init_SOURCES = antioch_init.C
 
 #Define examples to actually be run
 TESTS  =
