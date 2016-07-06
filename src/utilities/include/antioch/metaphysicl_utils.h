@@ -94,6 +94,23 @@ min (const T& in)
 }
 
 template <typename T>
+inline
+typename Antioch::enable_if_c<
+  is_metaphysicl<T>::value,
+  bool>::type
+isnan (const T& in)
+{
+  using std::isnan;
+
+  const std::size_t size = in.size();
+  for (std::size_t i = 1; i < size; ++i)
+    if (isnan(in[i]))
+      return true;
+
+  return false;
+}
+
+template <typename T>
 struct has_size<T, typename Antioch::enable_if_c<is_metaphysicl<T>::value,void>::type>
 {
   static const bool value = true;

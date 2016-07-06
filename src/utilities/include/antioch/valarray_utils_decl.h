@@ -61,6 +61,11 @@ struct state_type<T, typename enable_if_c<is_valarray<T>::value,void>::type> {
 // Class to allow tag dispatching to std::valarray specializations
 struct valarray_library_tag : public numeric_library_tag {};
 
+template <typename T>
+inline
+bool
+isnan (const std::valarray<T>& in);
+
 }
 
 
