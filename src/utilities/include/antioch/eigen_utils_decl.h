@@ -166,6 +166,13 @@ typename Antioch::enable_if_c<is_eigen<T>::value,
   >::type
 min(const T& in);
 
+template <typename T>
+inline
+typename Antioch::enable_if_c<is_eigen<T>::value,
+  bool>::type
+isnan(const T& in);
+
+
 template <
   template <typename, int, int, int, int, int> class _Matrix,
   typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols
