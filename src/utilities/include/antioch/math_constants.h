@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -24,6 +27,8 @@
 #ifndef ANTIOCH_MATH_CONSTANTS_H
 #define ANTIOCH_MATH_CONSTANTS_H
 
+#include <cmath>
+
 namespace Antioch
 {
   namespace Constants
@@ -36,6 +41,17 @@ namespace Antioch
     CoeffType log10_to_log()
     {
       return 1.0L/std::log(10.0L);
+    }
+
+    /*! pi
+     *
+     */
+    template<typename CoeffType>
+    inline
+    CoeffType pi()
+    {
+      static const CoeffType my_pi = std::atan(CoeffType(1))*4;
+      return my_pi;
     }
 
   } // end namespace Constants

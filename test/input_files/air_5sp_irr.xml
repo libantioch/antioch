@@ -79,7 +79,7 @@
       <equation>N2 + O [=] NO + N</equation>
       <rateCoeff>
         <Kooij>
-           <A>5.7e+9</A>
+           <A units="m3/mol/s">5.7e+9</A>
            <b>0.42</b>
            <E units="cal/mol">85269.6</E>
         </Kooij>
@@ -93,7 +93,7 @@
       <equation>NO + O [=] O2 + N</equation>
       <rateCoeff>
         <Arrhenius>
-           <A>8.4e+09</A>
+           <A units="m3/mol/s">8.4e+09</A>
            <b>0.0</b>
            <E units="cal/mol">38526.0</E>
         </Arrhenius>

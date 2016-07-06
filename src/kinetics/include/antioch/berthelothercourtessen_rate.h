@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -25,6 +28,7 @@
 #define ANTIOCH_BERTHELOT_HERCOURT_ESSEN_RATE_H
 
 //Antioch
+#include "antioch/antioch_asserts.h"
 #include "antioch/kinetics_type.h"
 #include "antioch/cmath_shims.h"
 
@@ -71,6 +75,31 @@ namespace Antioch
     void set_D(   const CoeffType D );
     void set_Tref(const CoeffType Tref );
 
+    //! set one parameter, characterized by enum
+    void set_parameter(KineticsModel::Parameters parameter, CoeffType new_value);
+
+    //! get one parameter, characterized by enum
+    CoeffType get_parameter(KineticsModel::Parameters parameter) const;
+
+    //! for compatibility purpose with photochemistry (particle flux reactions)
+    //
+    // \todo, solve this
+    template <typename VectorCoeffType>
+    void set_parameter(KineticsModel::Parameters parameter, VectorCoeffType new_value){antioch_error();}
+
+    /*! reset the coeffs
+     *
+     * Two ways of modifying your rate:
+     *   - you change totally the rate, thus you 
+     *        require exactly four parameters, the order
+     *        assumed is Cf, eta, D, Tref
+     *   - you just change the value, thus Tref is not
+     *        modified. You require exactly three parameters,
+     *        the order assumed is Cf, eta, D
+     */
+    template <typename VectorCoeffType>
+    void reset_coefs(const VectorCoeffType & coefficients);
+
     CoeffType Cf()   const;
     CoeffType eta()  const;
     CoeffType D()    const;
@@ -98,6 +127,30 @@ namespace Antioch
     template <typename StateType>
     void rate_and_derivative(const StateType& T, StateType& rate, StateType& drate_dT) const;
 
+//KineticsConditions overloads
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+    rate(const KineticsConditions<StateType,VectorStateType>& T) const
+    ANTIOCH_AUTOFUNC(StateType, _Cf * ant_exp(_eta * T.temp_cache().lnT + _D*T.T()))
+
+    //! \return the rate evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+    operator()(const KineticsConditions<StateType,VectorStateType>& T) const
+    ANTIOCH_AUTOFUNC(StateType, this->rate(T))
+
+    //! \return the derivative with respect to temperature evaluated at \p T.
+    template <typename StateType, typename VectorStateType>
+    ANTIOCH_AUTO(StateType)
+    derivative( const KineticsConditions<StateType,VectorStateType>& T ) const
+    ANTIOCH_AUTOFUNC(StateType, (*this)(T)*(_eta/T.T() + _D))
+
+    //! Simultaneously evaluate the rate and its derivative at \p T.
+    template <typename StateType,typename VectorStateType>
+    void rate_and_derivative(const KineticsConditions<StateType,VectorStateType>& T, StateType& rate, StateType& drate_dT) const;
+
     //! print equation
     const std::string numeric() const;
 
@@ -114,7 +167,6 @@ namespace Antioch
       _D(D),
       _Tref(Tref)
   {
-    using std::pow;
     this->compute_cf();
     return;
   }
@@ -141,7 +193,6 @@ namespace Antioch
   inline
   void BerthelotHercourtEssenRate<CoeffType>::set_Cf( const CoeffType Cf )
   {
-    using std::pow;
     _raw_Cf = Cf;
     this->compute_cf();
     return;
@@ -151,7 +202,6 @@ namespace Antioch
   inline
   void BerthelotHercourtEssenRate<CoeffType>::set_Tref( const CoeffType Tref )
   {
-    using std::pow;
     _Tref = Tref;
     this->compute_cf();
     return;
@@ -162,6 +212,7 @@ namespace Antioch
   void BerthelotHercourtEssenRate<CoeffType>::set_eta( const CoeffType eta )
   {
     _eta = eta;
+    this->compute_cf();
     return;
   }
 
@@ -171,6 +222,89 @@ namespace Antioch
   {
     _D = D;
     return;
+  }
+
+  template<typename CoeffType>
+  template <typename VectorCoeffType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::reset_coefs(const VectorCoeffType & coefficients)
+  {
+    antioch_assert_greater(coefficients.size(),2);
+    antioch_assert_less(coefficients.size(),5);
+
+    if(coefficients.size() == 4)this->set_Tref(coefficients[3]);
+    this->set_Cf(coefficients[0]);
+    this->set_eta(coefficients[1]);
+    this->set_D(coefficients[2]);
+  }
+
+  template<typename CoeffType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::set_parameter(KineticsModel::Parameters parameter, CoeffType new_value)
+  {
+    switch(parameter)
+    {
+     case KineticsModel::Parameters::A:
+     {
+       this->set_Cf(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::B:
+     {
+       this->set_eta(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::D:
+     {
+       this->set_D(new_value);
+     }
+      break;
+     case KineticsModel::Parameters::T_REF:
+     {
+       this->set_Tref(new_value);
+     }
+      break;
+     default:
+     {
+       antioch_error();
+     }
+      break;
+     }
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType BerthelotHercourtEssenRate<CoeffType>::get_parameter(KineticsModel::Parameters parameter) const
+  {
+    switch(parameter)
+    {
+     case KineticsModel::Parameters::A:
+     {
+       return this->Cf();
+     }
+      break;
+     case KineticsModel::Parameters::B:
+     {
+       return this->eta();
+     }
+      break;
+     case KineticsModel::Parameters::D:
+     {
+       return this->D();
+     }
+      break;
+     case KineticsModel::Parameters::T_REF:
+     {
+       return this->Tref();
+     }
+      break;
+     default:
+     {
+       antioch_error();
+     }
+      break;
+     }
+     return 0;
   }
 
   template<typename CoeffType>
@@ -206,10 +340,22 @@ namespace Antioch
   }
 
   template<typename CoeffType>
+  template<typename StateType, typename VectorStateType>
+  inline
+  void BerthelotHercourtEssenRate<CoeffType>::rate_and_derivative( const KineticsConditions<StateType,VectorStateType>& T,
+                                                                   StateType& rate,
+                                                                   StateType& drate_dT) const
+  {
+    rate     = (*this)(T);
+    drate_dT = rate*(_eta/T.T() + _D);
+    return;
+  }
+
+  template<typename CoeffType>
   inline
   void BerthelotHercourtEssenRate<CoeffType>::compute_cf()
   {
-    _Cf = _raw_Cf * pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
+    _Cf = _raw_Cf * ant_pow(KineticsModel::Tref<CoeffType>()/_Tref,_eta);
     return;
   }
 

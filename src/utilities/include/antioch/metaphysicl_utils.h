@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: valarray_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_METAPHYSICL_UTILS_H
 #define ANTIOCH_METAPHYSICL_UTILS_H
@@ -142,6 +140,24 @@ if_else(const Tbool& condition,
 
   for (std::size_t i=0; i != condition.size(); ++i)
     returnval[i] = condition[i] ? if_true[i] : if_false[i];
+
+  return returnval;
+}
+
+template <typename VectorT, typename UIntType>
+inline
+typename Antioch::enable_if_c<
+   is_metaphysicl<typename Antioch::value_type<VectorT>::type >::value &&
+   is_metaphysicl<UIntType>::value,
+   typename Antioch::value_type<VectorT>::type
+>::type
+eval_index(const VectorT & vec, const UIntType & indexes)
+{
+  typename Antioch::value_type<VectorT>::type returnval;
+
+  for(typename Antioch::size_type<typename Antioch::value_type<VectorT>::type>::type i = 0;
+                i < indexes.size(); i++)
+    returnval[i] = vec[indexes[i]][i];
 
   return returnval;
 }

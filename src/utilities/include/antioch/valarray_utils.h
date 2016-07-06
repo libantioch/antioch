@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: valarray_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_VALARRAY_UTILS_H
 #define ANTIOCH_VALARRAY_UTILS_H
@@ -207,6 +205,20 @@ init_clone(std::valarray<T>& output, const std::valarray<T>& example)
     init_clone(output[i], example[i]);
 }
 
+/*
+template <typename T, typename VectorScalar>
+inline
+std::valarray<T> custom_clone(const std::valarray<T>& example, const VectorScalar& values, const std::valarray<unsigned int> & indexes)
+{
+  std::valarray<T> returnval;
+  returnval.resize(indexes.size());
+  for(std::size_t i = 0; i < indexes.size(); i++)
+  {
+      returnval[i] = values[indexes[i]];
+  }
+  return returnval;
+}
+*/
 
 template <typename T>
 inline
@@ -226,6 +238,24 @@ if_else(const std::valarray<bool>& condition,
 
   return returnval;
 }
+
+
+template <typename VectorT>
+inline
+typename Antioch::enable_if_c<
+        Antioch::is_valarray<typename value_type<VectorT>::type>::value,
+        typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const std::valarray<unsigned int>& index)
+{
+  typename value_type<VectorT>::type returnval;
+  std::size_t sz = index.size();
+  returnval.resize(sz);
+  for (std::size_t i=0; i != sz; ++i)
+    returnval[i] = vec[index[i]][i];
+  return returnval;
+}
+
 
 } // end namespace Antioch
 

@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -36,25 +39,28 @@ int tester()
   using std::exp;
   using std::pow;
 
-  const Scalar Cf = 1.4;
-  const Scalar Ea = 5.0;
-  const Scalar beta = 1.2;
-  const Scalar D = 2.5;
+  const Scalar Cf = 1.4L;
+  const Scalar Ea = 5.0L;
+  const Scalar beta = 1.2L;
+  const Scalar D = 2.5e-2L;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);
 
   int return_flag = 0;
   std::vector<Scalar> mol_densities;
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
 
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -117,12 +123,12 @@ int tester()
 
     Antioch::ElementaryReaction<Scalar> * elem_reaction = new Antioch::ElementaryReaction<Scalar>(n_species,equation,true,kin_mod);
     elem_reaction->add_forward_rate(rate_kinetics);
-    Scalar rate1 = elem_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = elem_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    elem_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    elem_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
     if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
       {

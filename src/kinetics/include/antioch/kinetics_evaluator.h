@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -26,7 +29,8 @@
 
 // Antioch
 #include "antioch/metaprogramming.h"
-#include "antioch/reaction.h"
+#include "antioch/reaction_set.h"
+#include "antioch/kinetics_conditions.h"
 
 // C++
 #include <vector>
@@ -64,8 +68,8 @@ namespace Antioch
 
     //! Compute species production/destruction rates per unit volume
     /*! \f$ \left(kg/sec/m^3\right)\f$ */
-    template <typename VectorStateType>
-    void compute_mass_sources( const StateType& T,
+    template <typename VectorStateType, typename KC>
+    void compute_mass_sources( const KC& conditions,
                                const VectorStateType& molar_densities,
                                const VectorStateType& h_RT_minus_s_R,
                                VectorStateType& mass_sources );
@@ -73,8 +77,8 @@ namespace Antioch
     //! Compute species production/destruction rate derivatives
     /*! In mass units, e.g. \f$ \frac{\partial \dot{\omega}}{dT}
       [\left(kg/sec/m^3/K\right)]\f$ */
-    template <typename VectorStateType>
-    void compute_mass_sources_and_derivs( const StateType& T,
+    template <typename VectorStateType, typename KC>
+    void compute_mass_sources_and_derivs( const KC& conditions,
                                           const VectorStateType& molar_densities,
                                           const VectorStateType& h_RT_minus_s_R,
                                           const VectorStateType& dh_RT_minus_s_R_dT,
@@ -84,8 +88,8 @@ namespace Antioch
 
     //! Compute species molar production/destruction rates per unit volume
     /*! \f$ \left(mole/sec/m^3\right)\f$ */
-    template <typename VectorStateType>
-    void compute_mole_sources( const StateType& T,
+    template <typename VectorStateType, typename KC>
+    void compute_mole_sources( const KC& conditions,
                                const VectorStateType& molar_densities,
                                const VectorStateType& h_RT_minus_s_R,
                                VectorStateType& mole_sources );
@@ -93,8 +97,8 @@ namespace Antioch
     //! Compute species production/destruction rate derivatives
     /*! In mass units, e.g. \f$ \frac{\partial \dot{\omega}}{dT}
       [\left(mole/sec/m^3/K\right)]\f$ */
-    template <typename VectorStateType>
-    void compute_mole_sources_and_derivs( const StateType& T,
+    template <typename VectorStateType, typename KC>
+    void compute_mole_sources_and_derivs( const KC& conditions,
                                           const VectorStateType& molar_densities,
                                           const VectorStateType& h_RT_minus_s_R,
                                           const VectorStateType& dh_RT_minus_s_R_dT,
@@ -154,7 +158,7 @@ namespace Antioch
       _dnet_rate_dX_s( reaction_set.n_reactions() )
   {
 
-    for( unsigned int r = 0; r < reaction_set.n_reactions(); r++ )
+    for( unsigned int r = 0; r < this->n_reactions(); r++ )
       {
         _dnet_rate_dX_s[r].resize( reaction_set.n_species(), example );
       }
@@ -171,9 +175,9 @@ namespace Antioch
   }
 
   template<typename CoeffType, typename StateType>
-  template<typename VectorStateType>
+  template<typename VectorStateType, typename KC>
   inline
-  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources( const StateType& T,
+  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources( const KC& conditions,
                                                                      const VectorStateType& molar_densities,
                                                                      const VectorStateType& h_RT_minus_s_R,
                                                                      VectorStateType& mole_sources )
@@ -189,8 +193,10 @@ namespace Antioch
 
     Antioch::set_zero(mole_sources);
 
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                kinetics_conditions(conditions);
     // compute the requisite reaction rates
-    this->_reaction_set.compute_reaction_rates( T, molar_densities,
+    this->_reaction_set.compute_reaction_rates( kinetics_conditions, molar_densities,
                                                 h_RT_minus_s_R, _net_reaction_rates );
 
     // compute the actual mole sources in kmol/sec/m^3
@@ -223,15 +229,15 @@ namespace Antioch
 
 
   template<typename CoeffType, typename StateType>
-  template<typename VectorStateType>
+  template<typename VectorStateType, typename KC>
   inline
-  void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources( const StateType& T,
+  void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources( const KC& conditions,
                                                                      const VectorStateType& molar_densities,
                                                                      const VectorStateType& h_RT_minus_s_R,
                                                                      VectorStateType& mass_sources )
   {
     // Quantities asserted in compute_mole_sources call
-    this->compute_mole_sources( T, molar_densities, h_RT_minus_s_R, mass_sources );
+    this->compute_mole_sources( conditions, molar_densities, h_RT_minus_s_R, mass_sources );
 
     // finally scale by molar mass
     for (unsigned int s=0; s < this->n_species(); s++)
@@ -243,9 +249,9 @@ namespace Antioch
   }
 
   template<typename CoeffType, typename StateType>
-  template<typename VectorStateType>
+  template<typename VectorStateType, typename KC>
   inline
-  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources_and_derivs( const StateType& T,
+  void KineticsEvaluator<CoeffType,StateType>::compute_mole_sources_and_derivs( const KC& conditions,
                                                                                 const VectorStateType& molar_densities,
                                                                                 const VectorStateType& h_RT_minus_s_R,
                                                                                 const VectorStateType& dh_RT_minus_s_R_dT,
@@ -278,13 +284,18 @@ namespace Antioch
     for (unsigned int s=0; s < this->n_species(); s++)
       {
         Antioch::set_zero(dmole_dX_s[s]);
-
-        /*! \todo Do we need to really initialize this? */
-        Antioch::set_zero(_dnet_rate_dX_s[s]);
       }
 
+    for (unsigned int rxn=0; rxn < this->n_reactions(); rxn++)
+      {
+        /*! \todo Do we need to really initialize this? */
+        Antioch::set_zero(_dnet_rate_dX_s[rxn]);
+      }
+
+    typename constructor_or_reference<const KineticsConditions<StateType,VectorStateType>, const KC>::type  //either (KineticsConditions<> &) or (KineticsConditions<>)
+                                        kinetics_conditions(conditions);
     // compute the requisite reaction rates
-    this->_reaction_set.compute_reaction_rates_and_derivs( T, molar_densities, 
+    this->_reaction_set.compute_reaction_rates_and_derivs( kinetics_conditions, molar_densities, 
                                                            h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                                            _net_reaction_rates,
                                                            _dnet_rate_dT, 
@@ -342,9 +353,9 @@ namespace Antioch
 
 
   template<typename CoeffType, typename StateType>
-  template <typename VectorStateType>
+  template <typename VectorStateType, typename KC>
   inline
-  void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources_and_derivs( const StateType& T,
+  void KineticsEvaluator<CoeffType,StateType>::compute_mass_sources_and_derivs( const KC& conditions,
                                                                                 const VectorStateType& molar_densities,
                                                                                 const VectorStateType& h_RT_minus_s_R,
                                                                                 const VectorStateType& dh_RT_minus_s_R_dT,
@@ -353,7 +364,7 @@ namespace Antioch
                                                                                 std::vector<VectorStateType>& dmass_drho_s )
   {
     // Asserts are in compute_mole_sources
-    this->compute_mole_sources_and_derivs( T, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
+    this->compute_mole_sources_and_derivs( conditions, molar_densities, h_RT_minus_s_R, dh_RT_minus_s_R_dT,
                                            mass_sources, dmass_dT, dmass_drho_s );
     
     // Convert from mole units to mass units

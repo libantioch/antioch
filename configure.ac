@@ -2,10 +2,10 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([Antioch], [0.0.7], [pbauman@ices.utexas.edu], [antioch])
+AC_INIT([Antioch], [0.5.0], [antioch-users@googlegroups.com], [antioch])
 PACKAGE_DESCRIPTION="A New, Templated Implementation of Chemistry for Hydrodynamics"
 AC_SUBST([PACKAGE_DESCRIPTION])
-PACKAGE_URL="http://red.ices.utexas.edu/projects/antioch/"
+PACKAGE_URL="https://github.com/libantioch/antioch/"
 AC_SUBST([PACKAGE_URL])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -15,7 +15,7 @@ AX_PREFIX_CONFIG_H(antioch_config.h,ANTIOCH,antioch_config.h.tmp)
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CANONICAL_TARGET()
-AM_INIT_AUTOMAKE([dist-bzip2 tar-ustar 1.11 no-define color-tests parallel-tests])
+AM_INIT_AUTOMAKE([dist-bzip2 tar-ustar filename-length-max=99 1.11 no-define color-tests parallel-tests subdir-objects])
 AM_SILENT_RULES(yes)  # use silent rules where available - automake 1.11
 
 LT_INIT
@@ -124,6 +124,31 @@ if (test x$HAVE_GRVY = x1); then
   antioch_optional_test_LIBS="$GRVY_LIBS $antioch_optional_test_LIBS"
 fi
 
+dnl GSL for spline method
+AX_PATH_GSL_NEW(1.10,no)
+if (test x$HAVE_GSL = x1); then
+  antioch_optional_test_INCLUDES="$GSL_CPPFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LIBS="$GSL_LIBS $antioch_optional_test_LIBS"
+  antioch_optional_test_LDFLAGS="$GSL_LDFLAGS $antioch_optional_test_LDFLAGS"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_GSL, test x$HAVE_GSL = x1)
+
+# -------------------------------------------------------------
+# cppunit C++ unit testing -- enabled by default
+# -------------------------------------------------------------
+AC_ARG_ENABLE(cppunit,
+              AS_HELP_STRING([--disable-cppunit],
+                             [Build without cppunit C++ unit testing support]))
+AS_IF([test "x$enable_cppunit" != "xno"], [
+   AM_PATH_CPPUNIT([1.10.0],[enablecppunit=yes],[enablecppunit=no])
+])
+
+if (test x$HAVE_CPPUNIT = x1); then
+  antioch_optional_test_INCLUDES="$CPPUNIT_CPPFLAGS $antioch_optional_test_INCLUDES"
+  antioch_optional_test_LDFLAGS="$CPPUNIT_LIBS $antioch_optional_test_LDFLAGS"
+fi
+AM_CONDITIONAL(ANTIOCH_ENABLE_CPPUNIT, test x$enablecppunit = xyes)
+
 AC_SUBST(antioch_optional_INCLUDES)
 AC_SUBST(antioch_optional_test_INCLUDES)
 AC_SUBST(antioch_optional_test_LDFLAGS)
@@ -148,9 +173,11 @@ AC_ARG_ENABLE(cxx11,
 if (test x$enablecxx11 = xyes); then
   AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
   AX_CXX_AUTO_THIS(optional)
+  AX_CXX_STATIC_ASSERT(optional)
 elif (test x$enablecxx11 = xoptional); then
   AX_CXX_COMPILE_STDCXX_11(noext, optional)
   AX_CXX_AUTO_THIS(optional)
+  AX_CXX_STATIC_ASSERT(optional)
 fi
 
 
@@ -191,8 +218,15 @@ AC_CONFIG_FILES(test/kinetics_unit_thrust_air_5sp.sh,    [chmod +x test/kinetics
 AC_CONFIG_FILES(test/kinetics_vec_unit_air_5sp.sh,       [chmod +x test/kinetics_vec_unit_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_air_5sp.sh,     [chmod +x test/kinetics_regression_air_5sp.sh])
 AC_CONFIG_FILES(test/kinetics_regression_vec_air_5sp.sh, [chmod +x test/kinetics_regression_vec_air_5sp.sh])
+AC_CONFIG_FILES(test/photochemical_rate_unit.sh,         [chmod +x test/photochemical_rate_unit.sh])
 AC_CONFIG_FILES(test/parsing_xml.sh,                     [chmod +x test/parsing_xml.sh])
+AC_CONFIG_FILES(test/fail_parsing_xml_1.sh,              [chmod +x test/fail_parsing_xml_1.sh])
+AC_CONFIG_FILES(test/fail_parsing_xml_2.sh,              [chmod +x test/fail_parsing_xml_2.sh])
+AC_CONFIG_FILES(test/parsing_chemkin.sh,                 [chmod +x test/parsing_chemkin.sh])
 AC_CONFIG_FILES(test/kinetics_reactive_scheme_unit.sh,   [chmod +x test/kinetics_reactive_scheme_unit.sh])
+AC_CONFIG_FILES(test/nasa_evaluator_unit.sh,             [chmod +x test/nasa_evaluator_unit.sh])
+AC_CONFIG_FILES(test/ascii_parser_unit.sh,               [chmod +x test/ascii_parser_unit.sh])
+AC_CONFIG_FILES(test/kinetics_partial_order_unit.sh,     [chmod +x test/kinetics_partial_order_unit.sh])
 
 dnl-----------------------------------------------
 dnl Generate header files
@@ -207,9 +241,71 @@ AC_CONFIG_FILES([
   doxygen/Makefile
   doxygen/antioch.dox
   Makefile
+  share/Makefile
   src/Makefile
   test/Makefile
 ])
+
+dnl-----------------------------------------------
+dnl Collect files for "header stamping" here
+dnl-----------------------------------------------
+
+# PB: Although the documentation says that ac_top_srcdir should be defined,
+#     it doesn't get activated until _AC_SRCDIRS gets called
+#     (used to be _AC_SRCPATHS), according to this thread:
+#     http://lists.gnu.org/archive/html/autoconf-patches/2003-02/msg00003.html
+#     My own hacking revealed that we could also do the following:
+#     TOP_SEARCH_DIR=$ac_pwd/$srcdir
+#     I'm not sure which will be more "future proof", but this is the alternative
+#     to using $(shell) calls in the Makefile.am which 1. requires
+#     GNU Make and 2. Causes automake to issue a warning
+_AC_SRCDIRS(.)
+TOP_SEARCH_DIR=$ac_abs_top_srcdir
+
+# Since we don't distribute the lic_utils, check and make sure it's there.
+# This way, we won't run the license stamping perl script on distributed
+# tarballs, only on the repository clones
+AM_CONDITIONAL(ANTIOCH_LICENSESTAMPEXISTS, [test -f $TOP_SEARCH_DIR/src/common/lic_utils/update_license.pl])
+
+# We have to do this by subdirectory because otherwise distcheck
+# breaks as we start picking up files in the directories
+# that it uses.
+ANTIOCH_STAMPED_FILES=$(find $TOP_SEARCH_DIR/{src,test} -name "*.h" -or -name "*.C" | tr "\n" " ")
+AC_SUBST(ANTIOCH_STAMPED_FILES)
+
+# defaults files, set here for tests
+# changed in Makefile.am at install
+# step (see install-data-hook)
+# to make it $datadir/antioch_default_files
+# then we define the default files
+# Need to make sure to have the `/` at the end
+ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP=$TOP_SEARCH_DIR/share/antioch_default_files/
+ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP=$prefix/share/antioch_default_files/
+ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH_TMP=$TOP_SEARCH_DIR/share/xml_inputs/
+ANTIOCH_SHARE_XML_INPUT_FILES_INSTALL_PATH_TMP=$prefix/share/xml_inputs/
+ANTIOCH_TESTING_INPUT_FILES_PATH_TMP=$TOP_SEARCH_DIR/test/input_files/
+
+
+AC_DEFINE_UNQUOTED(DEFAULT_FILES_SOURCE_PATH,"$ANTIOCH_DEFAULT_FILES_SOURCE_PATH_TMP",
+                   [Path to defaults files in source tree.])
+AC_DEFINE_UNQUOTED(DEFAULT_FILES_INSTALL_PATH,"$ANTIOCH_DEFAULT_FILES_INSTALL_PATH_TMP",
+                   [Path to defaults files in install tree.])
+AC_DEFINE_UNQUOTED(SHARE_XML_INPUT_FILES_SOURCE_PATH,"$ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH_TMP",
+                   [Path to shared XML input files in source tree.])
+AC_DEFINE_UNQUOTED(SHARE_XML_INPUT_FILES_INSTALL_PATH,"$ANTIOCH_SHARE_XML_INPUT_FILES_INSTALL_PATH_TMP",
+                   [Path to shared XML input files in install tree.])
+AC_DEFINE_UNQUOTED(TESTING_INPUT_FILES_PATH,"$ANTIOCH_TESTING_INPUT_FILES_PATH_TMP",
+                   [Path to input files for testing.])
+
+AC_DEFINE(DEFAULT_SPECIES_LIST,"antioch_default_chemical_species.dat",[Default list of species])
+AC_DEFINE(DEFAULT_CHEMICAL_MIXTURE,"antioch_default_chemical_mixture.dat",[Mandatory default informations on species])
+AC_DEFINE(DEFAULT_VIBRATIONAL_DATA,"antioch_default_vibrational_data.dat",[Vibrational default data])
+AC_DEFINE(DEFAULT_ELECTRONIC_DATA,"antioch_default_electronic_data.dat",[Electronic default data])
+AC_DEFINE(DEFAULT_THERMO_DATA,"antioch_default_thermo_data.dat",[Thermodynamic default data, NASA polynom])
+AC_DEFINE(DEFAULT_BLOTTNER_DATA,"antioch_default_blottner_coefficient.dat",[Blottner model, default data])
+AC_DEFINE(DEFAULT_SUTHERLAND_DATA,"antioch_default_sutherland_coefficient.dat",[Sutherland model, default data])
+AC_DEFINE(DEFAULT_TRANSPORT_DATA,"antioch_default_transport_species_data.dat",[Data needed for transport computations])
+
 
 # Must still call AC_OUTPUT() after generating all the files
 AC_OUTPUT()

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/libantioch/antioch.png)](https://travis-ci.org/libantioch/antioch)
+
 Antioch
 =======
 
@@ -38,3 +40,10 @@ Antioch uses an Autotools build system, so typical GNU build commands are used.
 3. make (note parallel builds are supported)
 4. make check (note parallel-tests are supported)
 5. make install
+
+Discussion and Development
+==========================
+
+Pull Requests for bug fixes and new features are welcome. Mailing lists have been setup for
+user questions and discussion (antioch-users@googlegroups.com) as well as development questions
+and discussion (antioch-devel@googlegroups.com).

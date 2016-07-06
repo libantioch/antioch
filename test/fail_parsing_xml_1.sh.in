@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROG="@top_builddir@/test/parsing_xml"
+
+INPUT="@top_srcdir@/test/input_files/fail_parsing_1.xml  @top_srcdir@/test/input_files/solar_flux.dat @top_srcdir@/test/input_files/CH4_hv_cs.dat"
+
+$PROG $INPUT
+

@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -55,8 +58,9 @@
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/reaction_set.h"
-#include "antioch/read_reaction_set_data_xml.h"
-#include "antioch/cea_thermo.h"
+#include "antioch/read_reaction_set_data.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 #include "antioch/kinetics_evaluator.h"
 
 #include "antioch/eigen_utils.h"
@@ -78,7 +82,7 @@ GRVY::GRVY_Timer_Class gt;
 
 
 template <typename PairScalars>
-int vectester(const std::string& input_name, 
+int vectester(const std::string& input_name,
 	      const PairScalars& example,
 	      const std::string& testname)
 {
@@ -97,7 +101,9 @@ int vectester(const std::string& input_name,
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
   Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, true, reaction_set );
 
@@ -144,6 +150,8 @@ int vectester(const std::string& input_name,
           T[2*tuple+1] = T[0]+T_inc/2;
 	}
 
+      const Antioch::KineticsConditions<PairScalars> cond(T);
+
 #ifdef ANTIOCH_HAVE_GRVY
   const std::string testnormal = testname + "-normal";
   gt.BeginTimer(testnormal);
@@ -152,12 +160,11 @@ int vectester(const std::string& input_name,
       const PairScalars rho = P/(R_mix*T);
       chem_mixture.molar_densities(rho,Y,molar_densities);
 
-      typedef typename Antioch::CEAThermodynamics<Scalar>::
-	template Cache<PairScalars> Cache;
+       Antioch::TempCache<PairScalars> temp_cache(T);
 
-      thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+      thermo.h_RT_minus_s_R(temp_cache,h_RT_minus_s_R);
 
-      kinetics.compute_mass_sources( T, molar_densities, h_RT_minus_s_R, omega_dot );
+      kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testnormal);
@@ -187,7 +194,7 @@ int vectester(const std::string& input_name,
 	  std::cout << std::endl << std::endl;
 	}
     }
-  
+
 #ifdef ANTIOCH_HAVE_EIGEN
   {
     // To do: tests with Eigen instead of std vectors

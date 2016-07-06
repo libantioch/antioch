@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -30,7 +33,8 @@
 #include "antioch/chemical_species.h"
 #include "antioch/chemical_mixture.h"
 #include "antioch/physical_constants.h"
-#include "antioch/cea_thermo.h"
+#include "antioch/cea_evaluator.h"
+#include "antioch/cea_mixture_ascii_parsing.h"
 #include "antioch/cmath_shims.h"
 
 //C++
@@ -54,7 +58,10 @@ int tester(const std::string& testname)
   species_str_list.push_back( "N" );
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
-  Antioch::CEAThermodynamics<Scalar> thermo( chem_mixture );
+
+  Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
+  Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
  //fill on hand reaction_set
   const std::string equation("N2 + O [=] NO + N");
@@ -67,12 +74,14 @@ int tester(const std::string& testname)
 
   const Scalar T = 1500.0L; // K
   const Scalar P = 1.0e5L; // Pa
+  const Antioch::KineticsConditions<Scalar> conditions(T);
 
   const Scalar P0_RT(1.0e5/Antioch::Constants::R_universal<Scalar>()/T);
   std::vector<Scalar> h_RT_minus_s_R(n_species);
 
-  typedef typename Antioch::CEAThermodynamics<Scalar>::template Cache<Scalar> Cache;
-  thermo.h_RT_minus_s_R(Cache(T),h_RT_minus_s_R);
+  Antioch::TempCache<Scalar> temp_cache(T);
+  thermo.h_RT_minus_s_R(temp_cache,h_RT_minus_s_R);
+
   // Molar densities, equimolar
   std::vector<Scalar> molar_densities(n_species , P/Antioch::Constants::R_universal<Scalar>()/T/Scalar(n_species));
 // Theory
@@ -83,7 +92,7 @@ int tester(const std::string& testname)
   Scalar rate_back = kback * molar_densities[2] * molar_densities[3];
   Scalar net_rate  = rate_fwd - rate_back;
 
-//reversible reaction  
+//reversible reaction
   Antioch::Reaction<Scalar>* my_rxn = Antioch::build_reaction<Scalar>(n_species, equation,reversible,typeReaction,kineticsModel);
   std::vector<Scalar> data;
   data.push_back(A);
@@ -93,19 +102,19 @@ int tester(const std::string& testname)
   data.push_back(1.9858775L);
   Antioch::KineticsType<Scalar>* rate = Antioch::build_rate<Scalar>(data,kineticsModel);
   my_rxn->add_forward_rate(rate);
-  my_rxn->add_reactant("N2",chem_mixture.species_list_map().at(Antioch::Species::N2),1);
-  my_rxn->add_reactant("O" ,chem_mixture.species_list_map().at(Antioch::Species::O) ,1);
-  my_rxn->add_product ("NO",chem_mixture.species_list_map().at(Antioch::Species::NO),1);
-  my_rxn->add_product ("N" ,chem_mixture.species_list_map().at(Antioch::Species::N) ,1);
+  my_rxn->add_reactant("N2",chem_mixture.species_name_map().at("N2"),1);
+  my_rxn->add_reactant("O" ,chem_mixture.species_name_map().at("O") ,1);
+  my_rxn->add_product ("NO",chem_mixture.species_name_map().at("NO"),1);
+  my_rxn->add_product ("N" ,chem_mixture.species_name_map().at("N") ,1);
   my_rxn->initialize();
   my_rxn->print();
 
 //
-  Scalar rate_reversible = my_rxn->compute_rate_of_progress(molar_densities,T,P0_RT,h_RT_minus_s_R);
+  Scalar rate_reversible = my_rxn->compute_rate_of_progress(molar_densities,conditions,P0_RT,h_RT_minus_s_R);
 
 //irreversible reaction
   my_rxn->set_reversibility(false);
-  Scalar rate_irreversible = my_rxn->compute_rate_of_progress(molar_densities,T,P0_RT,h_RT_minus_s_R);
+  Scalar rate_irreversible = my_rxn->compute_rate_of_progress(molar_densities,conditions,P0_RT,h_RT_minus_s_R);
 
   int return_flag = 0;
 

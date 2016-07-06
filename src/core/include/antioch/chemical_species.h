@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -74,7 +77,7 @@ namespace Antioch
     //! Returns a descriptive name for this species.
     const std::string& species() const;
 
-    //!Returns the molar mass in (g/mol) or (kg/kmol).
+    //!Returns the molar mass in (kg/mol)
     CoeffType molar_mass() const;
 
     //! Returns the species ideal gas constant in [J/kg-K]
@@ -142,7 +145,7 @@ namespace Antioch
     //! Name of chemical species
     const std::string _name;
 
-    //! Molecular weight (or molar mass) in units of [g/mol] or [kg/kmol]
+    //! Molecular weight (or molar mass) in units of [kg/mol]
     const CoeffType _mol_wght;
 
     //! Gas constant in units of [J/kg-K]

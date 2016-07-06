@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,132 +23,102 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_CEA_CURVE_FIT_H
 #define ANTIOCH_CEA_CURVE_FIT_H
 
-// Antioch
-#include "antioch/antioch_asserts.h"
-#include "antioch/metaprogramming_decl.h" // Antioch::rebind
-
-// C++
-#include <vector>
+#include "antioch/nasa9_curve_fit.h"
 
 namespace Antioch
 {
+  /*!\class CEACurveFit
+
+    This class only differs from NASA9CurveFit in the construction. Here,
+    we assume that there are 10 coefficients, with the 7th being zero. This is
+    exactly the format output from NASA's CEA program and, hence, this class
+    was build to enable this compatiblity. Internally, the coefficients are
+    remapped to 9 coefficients and is then functionally identical to NASA9CurveFit.
+  */
   template<typename CoeffType=double>
-  class CEACurveFit
+  class CEACurveFit: public NASA9CurveFit<CoeffType>
   {
   public:
-    
+
     CEACurveFit( const std::vector<CoeffType>& coeffs );
-    ~CEACurveFit();
 
-    //! The number of intervals for this CEA curve fit
-    unsigned int n_intervals() const;
+    CEACurveFit( const std::vector<CoeffType>& coeffs, const std::vector<CoeffType> & temps );
 
-    //! The interval the input temperature lies in
-    /*!
-      @returns which curve fit interval the input temperature 
-      lies in.  The CEA thermodynamic intervals are 
-      [200-1,000], [1,000-6,000], [6,000-20,000] K
-     */
-    template <typename StateType>
-    typename Antioch::rebind<StateType, unsigned int>::type
-    interval(const StateType& T) const;
+    ~CEACurveFit(){}
 
-    
-    //! @returns a pointer to the coefficients in the interval specified.
-    /*!   
-      The CEA-style equilibrium curve fits are defined in terms of
-      _n_coeffs coefficients for each range fit.
-    */
-    const CoeffType* coefficients(const unsigned int interval) const;
+  private:
 
-  protected:
+    void remap_coeffs( const std::vector<CoeffType>& coeffs );
 
-    //! The number of coefficients in each interval
-    const unsigned int _n_coeffs;
-
-    //! The coefficient data
-    /*!
-      The coeffcients are packed in linear ordering. That is,
-      a0-a9 for the first interval, a0-a9 for the second interval,
-      and so on.
-     */
-    const std::vector<CoeffType> _coefficients;
   };
-
-
-  /* ------------------------- Inline Functions -------------------------*/
 
   template<typename CoeffType>
   inline
   CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs )
-    : _n_coeffs(10),
-      _coefficients(coeffs)
+    :NASA9CurveFit<CoeffType>()
   {
-    return;
+
+    if( this->_coefficients.size()%10 != 0 )
+      antioch_error_msg("ERROR: Expected CEA style of input for coefficients! Must be a multiple of 10!");
+
+    this->_n_coeffs = 9;
+
+    // If no temp is provided, we assume the standard CEA form.
+    this->init_nasa9_temps( coeffs, 10 );
+
+    this->remap_coeffs(coeffs);
+
+    this->check_coeff_size();
+    this->check_temp_coeff_size_consistency();
   }
 
-
   template<typename CoeffType>
   inline
-  CEACurveFit<CoeffType>::~CEACurveFit()
+  CEACurveFit<CoeffType>::CEACurveFit( const std::vector<CoeffType>& coeffs,
+                                       const std::vector<CoeffType> & temp )
+    :NASA9CurveFit<CoeffType>()
   {
-    return;
+    if( this->_coefficients.size()%10 != 0 )
+      antioch_error_msg("ERROR: Expected CEA style of input for coefficients! Must be a multiple of 10!");
+
+    this->_n_coeffs = 9;
+
+    this->_temp = temp;
+
+    this->remap_coeffs(coeffs);
+
+    this->check_coeff_size();
+    this->check_temp_coeff_size_consistency();
   }
 
-
   template<typename CoeffType>
-  template<typename StateType>
   inline
-  typename Antioch::rebind<StateType, unsigned int>::type
-  CEACurveFit<CoeffType>::interval(const StateType& T) const
+  void CEACurveFit<CoeffType>::remap_coeffs( const std::vector<CoeffType>& coeffs )
   {
-    typedef typename 
-      Antioch::rebind<StateType, unsigned int>::type UIntType;
-    UIntType interval;
-    Antioch::zero_clone(interval, T);
+    this->_coefficients.resize(this->_n_coeffs*(this->_temp.size()-1),0.0);
 
-    typedef typename Antioch::value_type<StateType>::type ScalarType;
+    for( unsigned int t = 0; t < this->_temp.size()-1; t++ )
+      {
+        for( unsigned int c = 0; c < 7; c++ )
+          {
+            unsigned int i = 10*t + c;
+            unsigned int j = 9*t + c;
+            this->_coefficients[j] = coeffs[i];
+          }
 
-    /* CEA thermodynamic intervals are:
-       [200-1,000], [1,000-6,000], [6,000-20,000] K */
-    interval = Antioch::if_else
-      (T > ScalarType(6000.),
-       Antioch::constant_clone(interval,2),
-       UIntType
-         (Antioch::if_else
-            (T > ScalarType(1000.),
-	     Antioch::constant_clone(interval,1),
-	     Antioch::constant_clone(interval,0))));
-
-    return interval;
-  }
-
-
-  template<typename CoeffType>
-  inline
-  unsigned int CEACurveFit<CoeffType>::n_intervals() const 
-  { return _coefficients.size() / _n_coeffs; }
-
-
-  template<typename CoeffType>
-  inline
-  const CoeffType* CEACurveFit<CoeffType>::coefficients(const unsigned int interval) const
-  {
-    antioch_assert_less( interval, this->n_intervals() );
-    antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
-    
-    return &_coefficients[_n_coeffs*interval];
+        for( unsigned int c = 7; c < 9; c++ )
+          {
+            unsigned int i = 10*t + c;
+            unsigned int j = 9*t + c;
+            this->_coefficients[j] = coeffs[i+1];
+          }
+      }
   }
 
 } // end namespace Antioch
 
-#endif //ANTIOCH_CEA_CURVE_FIT_H
+#endif // ANTIOCH_CEA_CURVE_FIT_H

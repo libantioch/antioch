@@ -28,10 +28,20 @@ echo Build user.................... : $USER
 echo Build host.................... : $BUILD_HOST
 echo Configure date................ : $BUILD_DATE
 echo Build architecture............ : $BUILD_ARCH
-echo SVN revision number........... : $BUILD_VERSION
+echo Revision id................... : $BUILD_VERSION
 echo
 echo Testing Options:
 echo '  'Number of tuples............ : $n_tuples
+if test "x$HAVE_CPPUNIT" = "x1"; then
+  echo '  'CPPUnit..................... : yes
+  echo '    'CPPUNIT_VERSION........... : $CPPUNIT_VERSION
+  echo '    'CPPUNIT_CPPFLAGS.......... : $CPPUNIT_CPPFLAGS
+  echo '    'CPPUNIT_LIBS.............. : $CPPUNIT_LIBS
+else
+  echo '  'CPPUnit..................... : no
+fi
+echo
+echo Optional Libraries:
 if test "x$HAVE_EIGEN" = "x1"; then
   echo '  'Eigen....................... : yes
 else
@@ -67,6 +77,14 @@ if test "x$HAVE_GRVY" = "x1"; then
   echo '    'GRVY_LIBS................. : $GRVY_LIBS
 else
   echo '  'GRVY........................ : no
+fi
+if test "x$HAVE_GSL" = "x1"; then
+  echo '  'GSL......................... : yes
+  echo '    'GSL_CPPFLAGS.............. : $GSL_CPPFLAGS
+  echo '    'GSL_LDFLAGS............... : $GSL_LDFLAGS
+  echo '    'GSL_LIBS.................. : $GSL_LIBS
+else
+  echo '  'GSL......................... : no
 fi
 echo
 echo '-------------------------------------------------------------------------------'

@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id$
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #include "antioch_config.h"
 
@@ -51,6 +49,7 @@
 
 #include "antioch/chemical_mixture.h"
 #include "antioch/cea_evaluator.h"
+#include "antioch/default_filename.h"
 #include "antioch/physical_constants.h"
 #include "antioch/cea_mixture_ascii_parsing.h"
 
@@ -79,7 +78,7 @@ int test_cp( const std::string& species_name, unsigned int species,
 
   int return_flag = 0;
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 20;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 25;
 
   typedef typename Antioch::
 		     template TempCache<TrioScalars> Cache;
@@ -95,7 +94,7 @@ int test_cp( const std::string& species_name, unsigned int species,
 #endif
 
   // Workaround for a non-standard gcc definition of valarray binary operator-
-  const TrioScalars diff = cp_exact - cp; 
+  const TrioScalars diff = cp_exact - cp;
   const TrioScalars rel_cp_error = abs(diff/cp_exact);
 
   if( Antioch::max(rel_cp_error) > tol )
@@ -118,7 +117,7 @@ int test_cp( const std::string& species_name, unsigned int species,
 
 
 template <typename Scalar>
-Scalar cp( Scalar T, Scalar a0, Scalar a1, Scalar a2, 
+Scalar cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
 	   Scalar a3, Scalar a4, Scalar a5, Scalar a6 )
 {
   if( T < 200.1)
@@ -142,10 +141,16 @@ int vectester(const TrioScalars& example, const std::string& testname)
   species_str_list.push_back( "O" );
   species_str_list.push_back( "NO" );
 
+  const Scalar Mm_N = 14.008e-3L;
+  const Scalar Mm_O = 16.000e-3L;
+  const Scalar Mm_N2 = 2.L * Mm_N;
+  const Scalar Mm_O2 = 2.L * Mm_O;
+  const Scalar Mm_NO = Mm_N + Mm_O;
+
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
   Antioch::CEAThermoMixture<Scalar> cea_mixture( chem_mixture );
-  Antioch::read_cea_mixture_data_ascii_default( cea_mixture );
+  Antioch::read_cea_mixture_data_ascii( cea_mixture, Antioch::DefaultFilename::thermo_data() );
   Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   //const Scalar P = 100000.0;
@@ -157,11 +162,11 @@ int vectester(const TrioScalars& example, const std::string& testname)
       T[3*tuple+2] = 10000.0;
     }
 
-  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/28.016;
-  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/32.0;
-  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/14.008;
-  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/16.0;
-  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/30.008;
+  const Scalar R_N2 = Antioch::Constants::R_universal<Scalar>()/Mm_N2;
+  const Scalar R_O2 = Antioch::Constants::R_universal<Scalar>()/Mm_O2;
+  const Scalar R_N = Antioch::Constants::R_universal<Scalar>()/Mm_N;
+  const Scalar R_O = Antioch::Constants::R_universal<Scalar>()/Mm_O;
+  const Scalar R_NO = Antioch::Constants::R_universal<Scalar>()/Mm_NO;
 
   int return_flag = 0;
 
@@ -171,7 +176,7 @@ int vectester(const TrioScalars& example, const std::string& testname)
     TrioScalars cp_N2 = example;
     for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
       {
-        cp_N2[3*tuple  ] = R_N2*cp( Scalar(T[0]), Scalar(2.21037122e+04), Scalar(-3.81846145e+02), Scalar(6.08273815e+00), 
+        cp_N2[3*tuple  ] = R_N2*cp( Scalar(T[0]), Scalar(2.21037122e+04), Scalar(-3.81846145e+02), Scalar(6.08273815e+00),
 			    Scalar(-8.53091381e-03),  Scalar(1.38464610e-05), Scalar(-9.62579293e-09),  Scalar(2.51970560e-12));
 
         cp_N2[3*tuple+1] = R_N2*cp( Scalar(T[1]), Scalar(5.87709908e+05), Scalar(-2.23924255e+03),  Scalar(6.06694267e+00),
@@ -180,7 +185,7 @@ int vectester(const TrioScalars& example, const std::string& testname)
         cp_N2[3*tuple+2] = R_N2*cp( Scalar(T[2]), Scalar(8.30971200e+08), Scalar(-6.42048187e+05),  Scalar(2.02020507e+02), Scalar(-3.06501961e-02),
 			Scalar(2.48685558e-06), Scalar(-9.70579208e-11), Scalar(1.43751673e-15));
       }
- 
+
     const Antioch::Species species = chem_mixture.species_list()[index];
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
@@ -195,16 +200,16 @@ int vectester(const TrioScalars& example, const std::string& testname)
     TrioScalars cp_O2 = example;
     for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
       {
-        cp_O2[3*tuple  ] = R_O2*cp( Scalar(T[0]), Scalar(-3.42556269e+04), Scalar(4.84699986e+02), Scalar(1.11901159e+00), 
+        cp_O2[3*tuple  ] = R_O2*cp( Scalar(T[0]), Scalar(-3.42556269e+04), Scalar(4.84699986e+02), Scalar(1.11901159e+00),
 			    Scalar(4.29388743e-03), Scalar(-6.83627313e-07), Scalar(-2.02337478e-09) , Scalar(1.03904064e-12) );
 
-        cp_O2[3*tuple+1] = R_O2*cp( Scalar(T[1]), Scalar(-1.03793994e+06), Scalar(2.34483275e+03), Scalar(1.81972949e+00), Scalar(1.26784887e-03), 
+        cp_O2[3*tuple+1] = R_O2*cp( Scalar(T[1]), Scalar(-1.03793994e+06), Scalar(2.34483275e+03), Scalar(1.81972949e+00), Scalar(1.26784887e-03),
 			    Scalar(-2.18807142e-07), Scalar(2.05372411e-11), Scalar(-8.19349062e-16) );
 
-        cp_O2[3*tuple+2] = R_O2*cp( Scalar(T[2]), Scalar(4.97515261e+08), Scalar(-2.86602339e+05), Scalar(6.69015464e+01), Scalar(-6.16971869e-03),  
+        cp_O2[3*tuple+2] = R_O2*cp( Scalar(T[2]), Scalar(4.97515261e+08), Scalar(-2.86602339e+05), Scalar(6.69015464e+01), Scalar(-6.16971869e-03),
 			    Scalar(3.01623757e-07), Scalar(-7.42087888e-12), Scalar(7.27744063e-17));
       }
- 
+
     const Antioch::Species species = chem_mixture.species_list()[index];
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
@@ -228,7 +233,7 @@ int vectester(const TrioScalars& example, const std::string& testname)
         cp_N[3*tuple+2] = R_N*cp( Scalar(T[2]), Scalar(5.47518105e+08), Scalar(-3.10757498e+05), Scalar(6.91678274e+01), Scalar(-6.84798813e-03),
 		          Scalar(3.82757240e-07), Scalar(-1.09836771e-11), Scalar(1.27798602e-16));
       }
- 
+
     const Antioch::Species species = chem_mixture.species_list()[index];
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
@@ -247,13 +252,13 @@ int vectester(const TrioScalars& example, const std::string& testname)
         cp_O[3*tuple  ] = R_O*cp( Scalar(T[0]), Scalar(-7.95361130e+03) , Scalar(1.60717779e+02), Scalar(1.96622644e+00), Scalar(1.01367031e-03),
 		          Scalar(-1.11041542e-06), Scalar(6.51750750e-10), Scalar(-1.58477925e-13) );
 
-        cp_O[3*tuple+1] = R_O*cp( Scalar(T[1]), Scalar(2.61902026e+05), Scalar(-7.29872203e+02), Scalar(3.31717727e+00), Scalar(-4.28133436e-04), 
+        cp_O[3*tuple+1] = R_O*cp( Scalar(T[1]), Scalar(2.61902026e+05), Scalar(-7.29872203e+02), Scalar(3.31717727e+00), Scalar(-4.28133436e-04),
 		          Scalar(1.03610459e-07), Scalar(-9.43830433e-12), Scalar(2.72503830e-16) );
 
         cp_O[3*tuple+2] = R_O*cp( Scalar(T[2]), Scalar(1.77900426e+08), Scalar(-1.08232826e+05), Scalar(2.81077837e+01), Scalar(-2.97523226e-03),
 		          Scalar(1.85499753e-07), Scalar(-5.79623154e-12), Scalar(7.19172016e-17) );
       }
- 
+
     const Antioch::Species species = chem_mixture.species_list()[index];
     const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
 
@@ -272,10 +277,10 @@ int vectester(const TrioScalars& example, const std::string& testname)
         cp_NO[3*tuple  ] = R_NO*cp( Scalar(T[0]), Scalar(-1.14391658e+04), Scalar(1.53646774e+02), Scalar(3.43146865e+00), Scalar(-2.66859213e-03),
 			    Scalar(8.48139877e-06), Scalar(-7.68511079e-09), Scalar(2.38679758e-12) );
 
-        cp_NO[3*tuple+1] = R_NO*cp( Scalar(T[1]), Scalar(2.23903708e+05), Scalar(-1.28965624e+03), Scalar(5.43394039e+00), Scalar(-3.65605546e-04), 
+        cp_NO[3*tuple+1] = R_NO*cp( Scalar(T[1]), Scalar(2.23903708e+05), Scalar(-1.28965624e+03), Scalar(5.43394039e+00), Scalar(-3.65605546e-04),
 			    Scalar(9.88101763e-08), Scalar(-1.41608327e-11), Scalar(9.38021642e-16) );
 
-        cp_NO[3*tuple+2] = R_NO*cp( Scalar(T[2]), Scalar(-9.57530764e+08), Scalar(5.91243671e+05), Scalar(-1.38456733e+02), Scalar(1.69433998e-02), 
+        cp_NO[3*tuple+2] = R_NO*cp( Scalar(T[2]), Scalar(-9.57530764e+08), Scalar(5.91243671e+05), Scalar(-1.38456733e+02), Scalar(1.69433998e-02),
 			    Scalar(-1.00735146e-06), Scalar(2.91258526e-11), Scalar(-3.29511091e-16) );
       }
 

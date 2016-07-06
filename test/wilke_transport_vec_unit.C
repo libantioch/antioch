@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -49,12 +52,27 @@
 #include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/chemical_mixture.h"
+#include "antioch/transport_mixture.h"
+#include "antioch/default_filename.h"
+
 #include "antioch/stat_mech_thermo.h"
+#include "antioch/cea_curve_fit.h"
+#include "antioch/nasa_mixture.h"
+#include "antioch/nasa_evaluator.h"
+#include "antioch/nasa_mixture_parsing.h"
+
 #include "antioch/eucken_thermal_conductivity.h"
 #include "antioch/blottner_viscosity.h"
+#include "antioch/mixture_viscosity.h"
+#include "antioch/constant_lewis_diffusivity.h"
+#include "antioch/mixture_diffusion.h"
+
 #include "antioch/wilke_mixture.h"
-#include "antioch/wilke_evaluator.h"
+#include "antioch/mixture_averaged_transport_mixture.h"
+#include "antioch/mixture_averaged_transport_evaluator.h"
 #include "antioch/blottner_parsing.h"
+#include "antioch/eucken_thermal_conductivity_building.h"
+#include "antioch/constant_lewis_diffusivity_building.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
@@ -115,19 +133,36 @@ int tester(const PairScalars& example, const std::string& testname)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::WilkeMixture<Scalar> wilke_mixture( chem_mixture );
-  
   Antioch::StatMechThermodynamics<Scalar> thermo( chem_mixture );
 
-  Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> > k( thermo );
+  typedef Antioch::StatMechThermodynamics< Scalar >   MicroThermo;
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar> mu( chem_mixture );
+// thermo for cp (diffusion)
+  Antioch::NASAThermoMixture<Scalar,Antioch::CEACurveFit<Scalar> > cea_mixture( chem_mixture );
+  Antioch::read_nasa_mixture_data( cea_mixture, Antioch::DefaultFilename::thermo_data(), Antioch::ASCII, true );
+  Antioch::NASAEvaluator<Scalar,Antioch::CEACurveFit<Scalar> > thermo_mix( cea_mixture );
 
-  Antioch::read_blottner_data_ascii_default( mu );
+  Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  Antioch::WilkeEvaluator< Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>, Scalar>,
-                           Antioch::EuckenThermalConductivity<Antioch::StatMechThermodynamics<Scalar> >,
-                           Scalar > wilke( wilke_mixture, mu, k );
+  Antioch::MixtureConductivity<Antioch::EuckenThermalConductivity<MicroThermo>,Scalar>
+    k( tran_mixture );
+
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> mu( tran_mixture );
+  Antioch::read_blottner_data_ascii( mu, Antioch::DefaultFilename::blottner_data() );
+
+  Antioch::MixtureDiffusion<Antioch::ConstantLewisDiffusivity<Scalar>,Scalar>
+    D( tran_mixture );
+
+  Antioch::build_constant_lewis_diffusivity<Scalar>( D, 1.4);
+
+
+  Antioch::MixtureAveragedTransportMixture<Scalar> wilke_mixture( tran_mixture );
+
+  Antioch::MixtureAveragedTransportEvaluator<Antioch::ConstantLewisDiffusivity<Scalar>,
+                                             Antioch::BlottnerViscosity<Scalar>,
+                                             Antioch::EuckenThermalConductivity<MicroThermo>,
+                                             Scalar>
+    wilke( wilke_mixture, D, mu, k );
 
   int return_flag = 0;
 
@@ -151,7 +186,7 @@ int tester(const PairScalars& example, const std::string& testname)
         mu[2][2*tuple+1] = 0.3L;
         mu[3][2*tuple+1] = 0.2L;
         mu[4][2*tuple+1] = 0.1L;
-    
+
         chi[0][2*tuple  ] = 0.1L;
         chi[1][2*tuple  ] = 0.2L;
         chi[2][2*tuple  ] = 0.3L;
@@ -179,7 +214,12 @@ int tester(const PairScalars& example, const std::string& testname)
   gt.BeginTimer(testname);
 #endif
 
-    const PairScalars phi_N = wilke.compute_phi( mu, chi, N_index );
+    std::vector<std::vector<PairScalars> > mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
+    Antioch::set_zero(mu_mu_sqrt);
+
+    wilke.compute_mu_mu_sqrt( mu, mu_mu_sqrt);
+    const PairScalars phi_N = wilke.compute_phi( mu_mu_sqrt, chi, N_index );
 
 #ifdef ANTIOCH_HAVE_GRVY
   gt.EndTimer(testname);
@@ -191,14 +231,14 @@ int tester(const PairScalars& example, const std::string& testname)
 
     return_flag = test_val( phi_N, phi_N_exact, tol, std::string("phi") );
   }
-  
+
 
   // PairScalars each_mass = example;
 
   // each_mass[2*tuple  ] = 0.2L;
   // each_mass[2*tuple+1] = 0.2L;
 
-  // std::vector<PairScalars> mass_fractions( 5, each_mass); 
+  // std::vector<PairScalars> mass_fractions( 5, each_mass);
 
   // Currently dummy
   //const Scalar mu_exact = ;

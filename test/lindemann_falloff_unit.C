@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -30,21 +33,23 @@
 #include "antioch/falloff_reaction.h"
 
 template <typename Scalar>
-int tester()
+int tester(const std::string & type)
 {
   using std::abs;
   using std::exp;
   using std::pow;
 
 
-  const Scalar Cf1 = 1.4;
-  const Scalar Ea1 = 5.0;
-  const Scalar beta1 = 1.2;
-  const Scalar D1 = 2.5;
-  const Scalar Cf2 = 2.0;
-  const Scalar Ea2 = 3.0;
-  const Scalar beta2 = 0.8;
-  const Scalar D2 = 3.0;
+//values for 2 CH3 (+M) <=> C2H6 (+M) for the Kooij model, Ds are made up
+
+  const Scalar Cf1 = 1.135e36L * 1e6L * 1e-12L; //(cm3/mol)^2/s -> kmol -> m3
+  const Scalar beta1 = 1.246L; //true value is -5.246
+  const Scalar Ea1 = 1704.8L / 1.9858775L; //cal/mol
+  const Scalar D1 = -4e-2L; // K^-1
+  const Scalar Cf2 = 6.22e16L * 1e3L * 1e-12L; //cm3/mol/s -> kmol -> m3
+  const Scalar beta2 = -1.174L;
+  const Scalar Ea2 = 635.8L / 1.9858775L; //cal/mol
+  const Scalar D2 = -5e-3L;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);
@@ -61,10 +66,15 @@ int tester()
      M += mol_densities[i];
   }
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 80;
+  std::cout << type << ", tolerance = " << tol;
+  Scalar max_diff(-1.L);
 
-  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+  for(Scalar T = 300.1; T <= 1500.1; T += 10.)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -95,6 +105,7 @@ int tester()
         rate_kinetics2 = new Antioch::BerthelotRate<Scalar>(Cf2,D2);
         k0 = Cf1 * exp(D1*T); kinf = Cf2 * exp(D2*T);
         dk0_dT = Cf1 * exp(D1*T) * D1; dkinf_dT = Cf2 * exp(D2*T) * D2;
+
         break;
       }
       case 2:
@@ -148,19 +159,21 @@ int tester()
 
     fall_reaction->add_forward_rate(rate_kinetics1);
     fall_reaction->add_forward_rate(rate_kinetics2);
-    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
     for(unsigned int i = 0; i < n_species; i++)
     {
-      if( abs( (drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i] ) > tol )
+      Scalar diff = abs( (drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i] );
+      if(diff > max_diff)max_diff = diff;
+      if( diff > tol )
       {
           std::cout << std::scientific << std::setprecision(16)
-                    << "Error: Mismatch in rate values." << std::endl
+                    << "\nError: Mismatch in rate values." << std::endl
                     << "Kinetics model (see enum) " << kin_mod << std::endl
                     << "species " << i << std::endl
                     << "drate_dc(T) = " << drate_dx[i] << std::endl
@@ -170,10 +183,12 @@ int tester()
           return_flag = 1;
       }
     }
-    if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
+    Scalar diff = abs( (rate1 - rate_exact)/rate_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
+                  << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate1 << std::endl
@@ -183,10 +198,12 @@ int tester()
 
         return_flag = 1;
       }
-    if( abs( (rate - rate_exact)/rate_exact ) > tol )
+    diff = abs( (rate - rate_exact)/rate_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
+                  << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate << std::endl
@@ -196,10 +213,12 @@ int tester()
 
         return_flag = 1;
       }
-    if( abs( (drate_dT - derive_exact)/derive_exact ) > tol )
+    diff = abs( (drate_dT - derive_exact)/derive_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate derivative values." << std::endl
+                  << "\nError: Mismatch in rate derivative values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "drate_dT(T) = " << drate_dT << std::endl
@@ -211,16 +230,17 @@ int tester()
       }
 
     delete fall_reaction;
-    if(return_flag)return return_flag;
     }
   }
+
+  std::cout << " and maximum difference = " << max_diff << std::endl;
 
   return return_flag;
 }
 
 int main()
 {
-  return (tester<double>() ||
-          tester<long double>() ||
-          tester<float>());
+  return (tester<double>("double") ||
+          tester<long double>("long double") ||
+          tester<float>("float"));
 }

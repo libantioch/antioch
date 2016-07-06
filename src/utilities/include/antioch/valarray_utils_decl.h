@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: valarray_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_VALARRAY_UTILS_DECL_H
 #define ANTIOCH_VALARRAY_UTILS_DECL_H
@@ -149,12 +147,27 @@ inline
 void
 init_clone(std::valarray<T>& output, const std::valarray<T>& example);
 
+/*template <typename T, typename VectorScalar>
+inline
+std::valarray<T> custom_clone(const std::valarray<T>& example, const VectorScalar& values, const std::valarray<unsigned int> & indexes);
+*/
+
 template <typename T>
 inline
 std::valarray<T>
 if_else(const std::valarray<bool>& condition,
         const std::valarray<T>& if_true,
         const std::valarray<T>& if_false);
+
+
+template <typename VectorT>
+inline
+typename Antioch::enable_if_c<
+        Antioch::is_valarray<typename value_type<VectorT>::type>::value,
+        typename value_type<VectorT>::type
+>::type
+eval_index(const VectorT& vec, const std::valarray<unsigned int>& index);
+
 } // end namespace Antioch
 
 

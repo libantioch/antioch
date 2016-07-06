@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -51,18 +54,35 @@ namespace Antioch
   namespace KineticsModel
   {
 
-    enum KineticsModel { HERCOURT_ESSEN = 0,// A * T^beta
-                         BERTHELOT,   // A * exp(D*T)
-                         ARRHENIUS,   // A * exp(-Ea/T)
-                         BHE,         // A * T^beta * exp(D*T)
-                         KOOIJ,       // A * T^beta * exp(-Ea/T)
-                         VANTHOFF };  // A * T^beta * exp(-Ea/T + D*T)
+    enum KineticsModel { CONSTANT = 0,   // A
+                         HERCOURT_ESSEN, // A * T^beta
+                         BERTHELOT,      // A * exp(D*T)
+                         ARRHENIUS,      // A * exp(-Ea/T)
+                         BHE,            // A * T^beta * exp(D*T)
+                         KOOIJ,          // A * T^beta * exp(-Ea/T)
+                         VANTHOFF,       // A * T^beta * exp(-Ea/T + D*T)
+                         PHOTOCHEM };    // int_0^\infty f(\lambda)\sigma(\lambda) d\lambda = const(T)
 
     template<typename CoeffType>
     CoeffType Tref()
     {
       return 1.0; // this HAS to stay this way because it is hard-coded for performances (see eq. above)
     }
+
+    enum Parameters{ NOT_FOUND = 0,
+                     A,
+                     B,
+                     E,
+                     D,
+                     T_REF,
+                     R_SCALE,
+                     SIGMA,
+                     LAMBDA,
+        // now for the falloff, we need to know if we want
+        // the low-pressure limit or HIGH
+                     LOW_PRESSURE,
+                     HIGH_PRESSURE
+                   };
 
   } // end namespace KineticsModel
 

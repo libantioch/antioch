@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: valarray_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_VECTOR_UTILS_H
 #define ANTIOCH_VECTOR_UTILS_H
@@ -60,6 +58,32 @@ operator<< (std::ostream& output, const std::vector<T>& a)
   for (std::size_t i=1; i<size; ++i)
     output << ',' << a[i];
   output << '}';
+  return output;
+}
+
+template <typename T>
+inline
+std::vector<T>
+operator* (const std::vector<T>& src, const T & mul)
+{
+  std::vector<T> output(src);
+  const std::size_t size = src.size();
+  for (std::size_t i=1; i<size; ++i)
+    output[i] = src[i] * mul;
+
+  return output;
+}
+
+template <typename T>
+inline
+std::vector<T>
+operator/ (const std::vector<T>& src, const T & mul)
+{
+  std::vector<T> output(src);
+  const std::size_t size = src.size();
+  for (std::size_t i=1; i<size; ++i)
+    output[i] = src[i] / mul;
+
   return output;
 }
 
@@ -144,6 +168,17 @@ void set_zero(std::vector<T>& a)
 {
   if (a.size())
     std::fill(a.begin(), a.end(), zero_clone(a[0]));
+}
+
+template <typename T, typename VectorScalar>
+inline
+std::vector<T> custom_clone(const std::vector<T> & /*vec*/, const VectorScalar & vecsrc, std::vector<unsigned int> & indexes)
+{
+  std::vector<T> returnval;
+  returnval.resize(indexes.size());
+  for (std::size_t i=0; i != indexes.size(); ++i)
+    returnval[i] = vecsrc[indexes[i]];
+  return returnval;
 }
 
 } // end namespace Antioch

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<ctml>
+  <validate reactions="yes" species="yes"/>
+
+  <phase dim="3" id="test_orders">
+    <elementArray>H O</elementArray>
+    <speciesArray>H2 H H2O2 HO2</speciesArray>
+    <reactionArray datasrc="#test_orders_reaction">
+      <skip species="undeclared"/>
+    </reactionArray>
+    <state>
+      <temperature units="K">300.0</temperature>
+      <pressure units="Pa">101325.0</pressure>
+      <moleFractions>O2:0.22, N2:0.78</moleFractions>
+    </state>
+    <thermo model="IdealGas"/>
+    <kinetics model="GasKinetics"/>
+    <transport model="Pecos"/>
+  </phase>
+
+
+  <reactionData id="test_orders_reaction">
+    <!-- reaction 0001    -->
+    <reaction reversible="yes" type="Elementary" id="0001">
+      <equation>H2O2 + H [=] HO2 + H2</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A units="(cm3/mol)/s">4.82e13</A>
+           <E units="cal/mol">7.95e3</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>H2O2:1 H:1</reactants>
+      <products>HO2:1 H2:1</products>
+      <ford>H2O2:1.5 H:0.5</ford>
+      <rord>HO2:2</rord>
+    </reaction>
+
+  </reactionData>
+</ctml>

@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -88,6 +91,8 @@ int test_species( const unsigned int species,
   int return_flag = 0;
 
   const Antioch::ChemicalSpecies<Scalar>& chem_species = *(chemical_species[species]);
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                           std::numeric_limits<Scalar>::epsilon() * 10;
 
   if( chem_species.species() != species_name )
     {
@@ -96,21 +101,21 @@ int test_species( const unsigned int species,
       return_flag = 1;
     }
 
-  if( chem_species.molar_mass() != molar_mass )
+  if( std::abs(chem_species.molar_mass() - molar_mass)/molar_mass > tol )
     {
       std::cerr << "Error: Molar mass mismatch for "<< species_name << std::endl
 		<< "molar mass = " << chem_species.molar_mass() << std::endl;
       return_flag = 1;
     }
 
-  if( chem_species.gas_constant() != gas_constant )
+  if( std::abs(chem_species.gas_constant() - gas_constant)/gas_constant > tol )
     {
       std::cerr << "Error: Gas constant mismatch for "<< species_name << std::endl
 		<< "gas constant = " << chem_species.gas_constant() << std::endl;
       return_flag = 1;
     }
 
-  if( chem_species.formation_enthalpy() != formation_enthalpy )
+  if( std::abs(chem_species.formation_enthalpy() - formation_enthalpy)/formation_enthalpy )
     {
       std::cerr << "Error: Formation enthalpy mismatch for "<< species_name << std::endl
 		<< "formation enthalpy = " << chem_species.formation_enthalpy() << std::endl;
@@ -142,6 +147,12 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   typedef typename Antioch::value_type<PairScalars>::type Scalar;
 
+  const Scalar Mm_N = 14.008e-3L;
+  const Scalar Mm_O = 16.000e-3L;
+  const Scalar Mm_N2 = 2.L * Mm_N;
+  const Scalar Mm_O2 = 2.L * Mm_O;
+  const Scalar Mm_NO = Mm_N + Mm_O;
+
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
   species_str_list.reserve(n_species);
@@ -159,6 +170,9 @@ int vectester(const PairScalars& example, const std::string& testname)
   const std::vector<Antioch::Species> species_list = chem_mixture.species_list();
 
   int return_flag = 0;
+
+  const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                           std::numeric_limits<Scalar>::epsilon() * 10;
 
   // Check name map consistency
   for( unsigned int i = 0; i < n_species; i++ )
@@ -187,8 +201,8 @@ int vectester(const PairScalars& example, const std::string& testname)
   // Check N2 properties
   {
     unsigned int index = 0;
-    Scalar molar_mass = 28.01600L;
-    if( molar_mass != chem_mixture.M(index) )
+    Scalar molar_mass = Mm_N2;
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -202,8 +216,8 @@ int vectester(const PairScalars& example, const std::string& testname)
   // Check O2 properties
   {
     unsigned int index = 1;
-    Scalar molar_mass = 32.00000L;
-    if( molar_mass != chem_mixture.M(index) )
+    Scalar molar_mass = Mm_O2;
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -217,8 +231,8 @@ int vectester(const PairScalars& example, const std::string& testname)
   // Check N properties
   {
     unsigned int index = 2;
-    Scalar molar_mass = 14.00800L;
-    if( molar_mass != chem_mixture.M(index) )
+    Scalar molar_mass = Mm_N;
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -232,8 +246,8 @@ int vectester(const PairScalars& example, const std::string& testname)
   // Check O properties
   {
     unsigned int index = 3;
-    Scalar molar_mass = 16.00000L;
-    if( molar_mass != chem_mixture.M(index) )
+    Scalar molar_mass = Mm_O;
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -247,8 +261,8 @@ int vectester(const PairScalars& example, const std::string& testname)
   // Check NO properties
   {
     unsigned int index = 4;
-    Scalar molar_mass = 30.00800L;
-    if( molar_mass != chem_mixture.M(index) )
+    Scalar molar_mass = Mm_NO;
+    if( std::abs(molar_mass - chem_mixture.M(index))/molar_mass > tol )
       {
 	std::cerr << "Error: Molar mass inconsistency in mixture" << std::endl
 		  << "molar mass = " << chem_mixture.M(index) << std::endl;
@@ -277,22 +291,22 @@ int vectester(const PairScalars& example, const std::string& testname)
       mass_fractions[3][2*tuple+1] = 0.2L;
       mass_fractions[4][2*tuple+1] = 0.2L;
 
-      R_exact[2*tuple  ] = Antioch::Constants::R_universal<Scalar>()*( 0.25L/28.016L + 0.25L/32.0L + 0.25L/14.008L + 0.25L/16.0L);
-      R_exact[2*tuple+1] = Antioch::Constants::R_universal<Scalar>()*( 0.2L/28.016L + 0.2L/32.0L + 0.2L/14.008L + 0.2L/16.0L + 0.2L/30.008L );
+      R_exact[2*tuple  ] = Antioch::Constants::R_universal<Scalar>()*( 0.25L/Mm_N2 + 0.25L/Mm_O2 + 0.25L/Mm_N + 0.25L/Mm_O);
+      R_exact[2*tuple+1] = Antioch::Constants::R_universal<Scalar>()*( 0.2L/Mm_N2 + 0.2L/Mm_O2 + 0.2L/Mm_N + 0.2L/Mm_O + 0.2L/Mm_NO );
 
-      M_exact[2*tuple  ] = 1.0L/( 0.25L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L) );
-      M_exact[2*tuple+1] = 1.0L/( 0.2L*( 1.0L/28.016L + 1.0L/32.0L + 1.0L/14.008L + 1.0L/16.0L + 1.0L/30.008L) );
+      M_exact[2*tuple  ] = 1.0L/( 0.25L*( 1.0L/Mm_N2 + 1.0L/Mm_O2 + 1.0L/Mm_N + 1.0L/Mm_O) );
+      M_exact[2*tuple+1] = 1.0L/( 0.2L*( 1.0L/Mm_N2 + 1.0L/Mm_O2 + 1.0L/Mm_N + 1.0L/Mm_O + 1.0L/Mm_NO) );
   
-      X_exact[0][2*tuple  ] = 0.25L*M_exact[0]/28.016L;
-      X_exact[1][2*tuple  ] = 0.25L*M_exact[0]/32.0L;
-      X_exact[2][2*tuple  ] = 0.25L*M_exact[0]/14.008L;
-      X_exact[3][2*tuple  ] = 0.25L*M_exact[0]/16.0L;
+      X_exact[0][2*tuple  ] = 0.25L*M_exact[0]/Mm_N2;
+      X_exact[1][2*tuple  ] = 0.25L*M_exact[0]/Mm_O2;
+      X_exact[2][2*tuple  ] = 0.25L*M_exact[0]/Mm_N;
+      X_exact[3][2*tuple  ] = 0.25L*M_exact[0]/Mm_O;
       X_exact[4][2*tuple  ] = 0L;
-      X_exact[0][2*tuple+1] = 0.2L*M_exact[1]/28.016L;
-      X_exact[1][2*tuple+1] = 0.2L*M_exact[1]/32.0L;
-      X_exact[2][2*tuple+1] = 0.2L*M_exact[1]/14.008L;
-      X_exact[3][2*tuple+1] = 0.2L*M_exact[1]/16.0L;
-      X_exact[4][2*tuple+1] = 0.2L*M_exact[1]/30.008L;
+      X_exact[0][2*tuple+1] = 0.2L*M_exact[1]/Mm_N2;
+      X_exact[1][2*tuple+1] = 0.2L*M_exact[1]/Mm_O2;
+      X_exact[2][2*tuple+1] = 0.2L*M_exact[1]/Mm_N;
+      X_exact[3][2*tuple+1] = 0.2L*M_exact[1]/Mm_O;
+      X_exact[4][2*tuple+1] = 0.2L*M_exact[1]/Mm_NO;
     }
 
 #ifdef ANTIOCH_HAVE_GRVY
@@ -310,16 +324,14 @@ int vectester(const PairScalars& example, const std::string& testname)
   gt.EndTimer(testnormal);
 #endif
 
-  Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
-
   const PairScalars rel_R_error = 
     abs( (R - R_exact)/R_exact);
   if( Antioch::max(rel_R_error) > tol )
     {
       std::cerr << "Error: Mismatch in mixture gas constant." << std::endl
 		<< std::setprecision(16) << std::scientific
-		<< "R       = " << R << std::endl
-		<< "R_exact = " << R_exact <<  std::endl;
+		<< "R       = "  << R << std::endl
+		<< "R_exact = "  << R_exact <<  std::endl;
       return_flag = 1;
     }
 
@@ -389,7 +401,8 @@ int vectester(const PairScalars& example, const std::string& testname)
     gt.EndTimer(testeigenA);
 #endif
 
-    Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                             std::numeric_limits<Scalar>::epsilon() * 10;
 
     const PairScalars eigen_rel_R_error = 
       abs( (R_eigen - R_exact)/R_exact);
@@ -468,7 +481,8 @@ int vectester(const PairScalars& example, const std::string& testname)
     gt.EndTimer(testeigenV);
 #endif
 
-    Scalar tol = std::numeric_limits<Scalar>::epsilon() * 10;
+    const Scalar tol = (std::numeric_limits<Scalar>::epsilon() * 10 < 5e-17)?5e-17:
+                                                                             std::numeric_limits<Scalar>::epsilon() * 10;
 
     const PairScalars eigen_rel_R_error = 
       abs( (R_eigen - R_exact)/R_exact);

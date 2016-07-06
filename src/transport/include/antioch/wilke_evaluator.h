@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -33,182 +36,108 @@
 #include "antioch/metaprogramming.h"
 #include "antioch/wilke_mixture.h"
 #include "antioch/mixture_viscosity.h"
+#include "antioch/mixture_averaged_transport_evaluator.h"
+#include "antioch/antioch_asserts.h"
+#include "antioch/eucken_thermal_conductivity_building.h"
 
 namespace Antioch
 {
-
-  
-  template<class Viscosity, class ThermalConductivity, class CoeffType=double>
+  //! Deprecated. Use MixtureAveragedTransportEvaluator instead.
+  template<class MixtureViscosity, class ThermalConductivity, class CoeffType=double>
   class WilkeEvaluator
   {
   public:
 
     WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
-		    const Viscosity& viscosity,
-		    const ThermalConductivity& conductivity );
+                    const MixtureViscosity& viscosity,
+                    const ThermalConductivity& conductivity );
 
     ~WilkeEvaluator();
 
+
     template <typename StateType, typename VectorStateType>
     StateType mu( const StateType& T,
-		  const VectorStateType& mass_fractions ) const;
+                  const VectorStateType& mass_fractions ) const {return _wilke_eval->mu(T,mass_fractions);}
 
     template <typename StateType, typename VectorStateType>
     StateType k( const StateType& T,
-		 const VectorStateType& mass_fractions ) const;
+                 const VectorStateType& mass_fractions ) const {return _wilke_eval->k(T,mass_fractions);}
 
     template <typename StateType, typename VectorStateType>
     void mu_and_k( const StateType& T,
-		   const VectorStateType& mass_fractions,
-		   StateType& mu, StateType& k ) const;
+                   const VectorStateType& mass_fractions,
+                   StateType& mu, StateType& k ) const {_wilke_eval->mu_and_k(T,mass_fractions,mu,k);}
 
     //! Helper function to reduce code duplication.
     /*! Populates species viscosities and the intermediate \chi variable
         needed for Wilke's mixing rule. */
     template <typename StateType, typename VectorStateType>
     void compute_mu_chi( const StateType& T,
-			 const VectorStateType& mass_fractions,
-			 VectorStateType& mu,
-			 VectorStateType& chi ) const;
+                         const VectorStateType& mass_fractions,
+                               VectorStateType& mu,
+                               VectorStateType& chi ) const {_wilke_eval->compute_mu_chi(T,mass_fractions,mu,chi);}
 
-    //! Helper function to reduce code duplication.
-    /*! Computes the intermediate \phi variable needed for Wilke's mixing rule.  */
-    template <typename VectorStateType>
-    typename
-    Antioch::value_type<VectorStateType>::type
-    compute_phi( const VectorStateType& mu,
-		 const VectorStateType& chi,
-		 const unsigned int s ) const;
+     //! Helper function to reduce code duplication.
+     /*! Computes the intermediate \phi variable needed for Wilke's mixing rule. */
+     template <typename VectorStateType>
+     typename
+       Antioch::value_type<VectorStateType>::type
+        compute_phi( const VectorStateType& mu,
+                     const VectorStateType& chi,
+                     const unsigned int s ) const;
 
-  protected:
-
-    const WilkeMixture<CoeffType>& _mixture;
-
-    const Viscosity& _viscosity;
-
-    const ThermalConductivity& _conductivity;
 
   private:
 
     WilkeEvaluator();
 
+    TransportMixture<CoeffType>* _transport_mixture;
+
+    MixtureAveragedTransportMixture<CoeffType>* _wilke_mixture;
+
+    //! This is dummy.
+    /*! WilkeEvaluator doesn't support diffusion, but the new MixtureAveragedTransportEvaluator does
+        so we create a dummy diffusion class, don't bother building it and pass it along
+        to MixtureAveragedTransportEvaluator. */
+    MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>* _diffusion;
+
+    MixtureConductivity<ThermalConductivity,CoeffType>* _conductivity;
+
+    typename ThermalConductivity::micro_thermo_type* _micro_thermo;
+
+    typedef  MixtureAveragedTransportEvaluator<ConstantLewisDiffusivity<CoeffType>,
+                                               typename MixtureViscosity::species_viscosity_type,
+                                               ThermalConductivity,
+                                               CoeffType> Evaluator;
+
+    Evaluator* _wilke_eval;
+
   };
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::WilkeEvaluator( const WilkeMixture<CoeffType>& mixture,
-									   const Viscosity& viscosity,
-									   const ThermalConductivity& conductivity )
-    : _mixture(mixture),
-      _viscosity(viscosity),
-      _conductivity(conductivity)
+                                                                           const Viscosity& viscosity,
+                                                                           const ThermalConductivity& /*conductivity*/ )
+    : _transport_mixture( new TransportMixture<CoeffType>(mixture.chem_mixture()) ),
+      _wilke_mixture( new MixtureAveragedTransportMixture<CoeffType>(*_transport_mixture) ),
+      _diffusion( new MixtureDiffusion<ConstantLewisDiffusivity<CoeffType>,CoeffType>(*_transport_mixture) ),
+      _conductivity( new MixtureConductivity<ThermalConductivity,CoeffType>(*_transport_mixture) ),
+      _micro_thermo( new typename ThermalConductivity::micro_thermo_type(mixture.chem_mixture()) ),
+      _wilke_eval(new Evaluator(*_wilke_mixture,*_diffusion,viscosity,*_conductivity))
   {
-    return;
+    antioch_deprecated();
+    Antioch::build_eucken_thermal_conductivity<typename ThermalConductivity::micro_thermo_type,CoeffType>(*_conductivity, *_micro_thermo );
   }
 
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::~WilkeEvaluator()
   {
-    return;
-  }
-
-  template<class Viscosity, class ThermalConductivity, class CoeffType>
-  template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu( const StateType& T,
-									 const VectorStateType& mass_fractions ) const
-  {
-    StateType mu_mix = zero_clone(T);
-    
-    VectorStateType mu  = zero_clone(mass_fractions);
-    VectorStateType chi = zero_clone(mass_fractions);
-    
-    this->compute_mu_chi( T, mass_fractions, mu, chi );
-
-    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
-      {
-	StateType phi_s = this->compute_phi( mu, chi, s );
-	
-	mu_mix += mu[s]*chi[s]/phi_s;
-      }
-
-    return mu_mix;
-  }
-
-  template<class Viscosity, class ThermalConductivity, class CoeffType>
-  template <typename StateType, typename VectorStateType>
-  StateType WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::k( const StateType& T,
-									const VectorStateType& mass_fractions ) const
-  {
-    antioch_assert_equal_to(mass_fractions.size(), _mixture.chem_mixture().n_species());
-
-    StateType k_mix = zero_clone(T);
-
-    VectorStateType mu  = zero_clone(mass_fractions);
-    VectorStateType chi = zero_clone(mass_fractions);
-
-    this->compute_mu_chi( T, mass_fractions, mu, chi );
-
-    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
-      {
-	StateType phi_s = this->compute_phi( mu, chi, s );
-	
-        StateType k_s = _conductivity.trans( s, mu[s] )
-                      + _conductivity.rot( s, mu[s] )
-                      + _conductivity.vib( s, mu[s], T )
-                      + _conductivity.elec( s, mu[s], T );
-
-	k_mix += k_s*chi[s]/phi_s;
-      }
-
-    return k_mix;
-  }
-
-  template<class Viscosity, class ThermalConductivity, class CoeffType>
-  template <typename StateType, typename VectorStateType>
-  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::mu_and_k( const StateType& T,
-									  const VectorStateType& mass_fractions,
-									  StateType& mu_mix,
-                                                                          StateType& k_mix ) const
-  {
-    mu_mix = zero_clone(T);
-    k_mix  = zero_clone(T);
-
-    VectorStateType mu  = zero_clone(mass_fractions);
-    VectorStateType chi = zero_clone(mass_fractions);
-
-    this->compute_mu_chi( T, mass_fractions, mu, chi );
-
-    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
-      {
-	StateType phi_s = this->compute_phi( mu, chi, s );
-	
-        StateType k_s = _conductivity.trans( s, mu[s] )
-                      + _conductivity.rot( s, mu[s] )
-                      + _conductivity.vib( s, mu[s], T )
-                      + _conductivity.elec( s, mu[s], T );
-
-        mu_mix += mu[s]*chi[s]/phi_s;
-	k_mix += k_s*chi[s]/phi_s;
-      }
-
-    return;
-  }
-
-  template<class Viscosity, class ThermalConductivity, class CoeffType>
-  template <typename StateType, typename VectorStateType>
-  void WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_mu_chi( const StateType& T,
-										const VectorStateType& mass_fractions,
-										VectorStateType& mu,
-										VectorStateType& chi ) const
-  {
-    const StateType M = _viscosity.chemical_mixture().M(mass_fractions);
-
-    // Precompute needed quantities
-    // chi_s = w_s*M/M_s
-    for( unsigned int s = 0; s < _mixture.chem_mixture().n_species(); s++ )
-      {
-	mu[s] = _viscosity(s,T);
-	chi[s] = mass_fractions[s]*M/_viscosity.chemical_mixture().M(s);
-      }
+    delete _wilke_eval;
+    delete _micro_thermo;
+    delete _conductivity;
+    delete _diffusion;
+    delete _wilke_mixture;
+    delete _transport_mixture;
 
     return;
   }
@@ -216,30 +145,18 @@ namespace Antioch
   template<class Viscosity, class ThermalConductivity, class CoeffType>
   template <typename VectorStateType>
   typename
-  Antioch::value_type<VectorStateType>::type
-  WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_phi( const VectorStateType& mu,
-									const VectorStateType& chi,
-									const unsigned int s ) const
+    Antioch::value_type<VectorStateType>::type
+        WilkeEvaluator<Viscosity,ThermalConductivity,CoeffType>::compute_phi( const VectorStateType& mu,
+                     const VectorStateType& chi,
+                     const unsigned int s ) const
   {
-    using std::sqrt;
 
-    typedef typename
-      Antioch::value_type<VectorStateType>::type StateType;
+    typename Antioch::rebind<VectorStateType,VectorStateType>::type mu_mu_sqrt(mu.size());
+    Antioch::init_constant(mu_mu_sqrt,mu);
 
-    /* We initialize to the first iterate and loop starting from 1
-       since some StateTypes have a hard time initializing from
-       a constant. */
-    // phi_s = sum_r (chi_r*(1+sqrt(mu_s/mu_r)*(Mr/Ms)^(1/4))^2)/sqrt(8*(1+Ms/Mr))
-    const StateType dummy = 1 + sqrt(mu[s]/mu[0])*_mixture.Mr_Ms_to_the_one_fourth(0,s);
-    StateType phi_s = chi[0]*dummy*dummy/_mixture.denominator(0,s);
+    _wilke_eval->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
 
-    for(unsigned int r = 1; r < _mixture.chem_mixture().n_species(); r++ )
-      {
-	const StateType numerator = 1 + sqrt(mu[s]/mu[r])*_mixture.Mr_Ms_to_the_one_fourth(r,s);
-	phi_s += chi[r]*numerator*numerator/_mixture.denominator(r,s);
-      }
-
-    return phi_s;
+    return _wilke_eval->compute_phi( mu_mu_sqrt, chi, s );
   }
 
 } // end namespace Antioch

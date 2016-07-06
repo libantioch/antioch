@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: valarray_utils.h 37170 2013-02-19 21:40:39Z roystgnr $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_VECTOR_UTILS_DECL_H
 #define ANTIOCH_VECTOR_UTILS_DECL_H
@@ -49,6 +47,16 @@ template <typename T>
 inline
 std::ostream&
 operator<< (std::ostream& output, const std::vector<T>& a);
+
+template <typename T>
+inline
+std::vector<T>
+operator* (const std::vector<T>& src, const T & mul);
+
+template <typename T>
+inline
+std::vector<T>
+operator/ (const std::vector<T>& src, const T & mul);
 
 } // end namespace std
 
@@ -95,6 +103,10 @@ constant_clone(const std::vector<T>& example, const Scalar& value);
 template <typename T>
 inline
 void set_zero(std::vector<T>& a);
+
+template <typename T, typename VectorScalar>
+inline
+std::vector<T> custom_clone(const std::vector<T> & vec, const VectorScalar & vecsrc, const std::vector<unsigned int> & indexes);
 
 } // end namespace Antioch
 

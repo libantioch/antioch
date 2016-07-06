@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: hercourtessen_rate_vec_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // valarray has to be declared before Antioch or gcc can't find the
 // right versions of exp() and pow() to use??
@@ -41,21 +39,100 @@
 #include "metaphysicl/numberarray.h"
 #endif
 
+#ifdef ANTIOCH_HAVE_VEXCL
+#include "vexcl/vexcl.hpp"
+#endif
+
 #include "antioch/eigen_utils_decl.h"
 #include "antioch/metaphysicl_utils_decl.h"
 #include "antioch/valarray_utils_decl.h"
+#include "antioch/vexcl_utils_decl.h"
 
 #include "antioch/hercourtessen_rate.h"
 
 #include "antioch/eigen_utils.h"
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
+#include "antioch/vexcl_utils.h"
 
 #include <cmath>
 #include <limits>
 
+#ifdef ANTIOCH_HAVE_GRVY
+#include "grvy.h"
+
+GRVY::GRVY_Timer_Class gt;
+#endif
+
+
 template <typename PairScalars>
-int vectester(const PairScalars& example)
+int check_rate_and_derivative(const PairScalars & rate_exact, const PairScalars & derive_exact,
+                              const PairScalars & rate,       const PairScalars & derive, const PairScalars & T)
+{
+    typedef typename Antioch::value_type<PairScalars>::type  Scalar;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 2;
+
+    int return_flag(0);
+
+   using std::abs;
+
+   for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+   {
+    if( abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "rate(T) = " << rate[2*tuple] << std::endl
+                  << "rate_exact = " << rate_exact[2*tuple] << std::endl
+                  << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple])/rate_exact[2*tuple] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+
+        return_flag = 1;
+      }
+    if( abs( (rate[2*tuple+1] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "rate(T) = " << rate[2*tuple] << std::endl
+                  << "rate_exact = " << rate_exact[2*tuple+1] << std::endl
+                  << "relative difference = " <<  abs( (rate[2*tuple] - rate_exact[2*tuple+1])/rate_exact[2*tuple+1] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+
+        return_flag = 1;
+      }
+    if( abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate derivative values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "drate_dT(T) = " << derive[2*tuple] << std::endl
+                  << "derive_exact = " << derive_exact[2*tuple] << std::endl
+                  << "relative difference = " <<  abs( (derive[2*tuple] - derive_exact[2*tuple])/derive_exact[2*tuple] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+
+        return_flag = 1;
+      }
+    if( abs( (derive[2*tuple+1] - derive_exact[2*tuple+1])/derive_exact[2*tuple+1] ) > tol )
+      {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Error: Mismatch in rate derivative values." << std::endl
+                  << "T = " << T << " K" << std::endl
+                  << "drate_dT(T) = " << derive[2*tuple+1] << std::endl
+                  << "derive_exact = " << derive_exact[2*tuple+1] << std::endl
+                  << "relative difference = " <<  abs( (derive[2*tuple+1] - derive_exact[2*tuple+1])/derive_exact[2*tuple+1] ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+
+        return_flag = 1;
+      }
+
+   }
+   return return_flag;
+}
+
+template <typename PairScalars>
+int vectester(const PairScalars& example, const std::string & testname)
 {
   using std::abs;
   using std::pow;
@@ -69,60 +146,70 @@ int vectester(const PairScalars& example)
 
   // Construct from example to avoid resizing issues
   PairScalars T = example;
-  T[0] = 1500.1;
-  T[1] = 1600.1;
-  
-  const Scalar rate_exact0 = Cf*pow(Scalar(1500.1),eta);
-  const Scalar rate_exact1 = Cf*pow(Scalar(1600.1),eta);
-  const Scalar derive_exact0 = eta * Cf * pow(Scalar(1500.1),eta)/Scalar(1500.1);
-  const Scalar derive_exact1 = eta * Cf * pow(Scalar(1600.1),eta)/Scalar(1600.1);
+  PairScalars rate_exact = example;
+  PairScalars derive_exact =  example;
+  for (unsigned int tuple=0; tuple != ANTIOCH_N_TUPLES; ++tuple)
+  {
+    T[2*tuple] = 1500.1L;
+    T[2*tuple+1] = 1600.1L;
+    rate_exact[2*tuple] = Cf*pow(Scalar(1500.1),eta);
+    rate_exact[2*tuple+1] = Cf*pow(Scalar(1600.1),eta);
+    derive_exact[2*tuple] = eta * Cf * pow(Scalar(1500.1),eta)/Scalar(1500.1);
+    derive_exact[2*tuple+1] = eta * Cf * pow(Scalar(1600.1),eta)/Scalar(1600.1);
+  }
+  Antioch::KineticsConditions<PairScalars> cond(T);
 
   int return_flag = 0;
 
-  const PairScalars rate = hercourtessen_rate(T);//Antioch::zero_clone(T);
-  const PairScalars deriveRate = hercourtessen_rate.derivative(T);//Antioch::zero_clone(T);
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon()*10;
+// KineticsConditions
+  PairScalars rate = hercourtessen_rate(cond);
+  PairScalars derive = hercourtessen_rate.derivative(cond);
 
-//  hercourtessen_rate.rate_and_derivative(T,rate,deriveRate);
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
 
-  if( abs( (rate[0] - rate_exact0)/rate_exact0 ) > tol )
-    {
-      std::cout << "Error: Mismatch in rate values." << std::endl
-		<< "rate(T0)   = " << rate[0] << std::endl
-		<< "rate_exact = " << rate_exact0 << std::endl
-		<< "difference = " << rate[0] - rate_exact0 << std::endl;
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
 
-      return_flag = 1;
-    }
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
 
-  if( abs( (rate[1] - rate_exact1)/rate_exact1 ) > tol )
-    {
-      std::cout << "Error: Mismatch in rate values." << std::endl
-		<< "rate(T1)   = " << rate[1] << std::endl
-		<< "rate_exact = " << rate_exact1 << std::endl
-		<< "difference = " << rate[1] - rate_exact1 << std::endl;
+  hercourtessen_rate.rate_and_derivative(cond,rate,derive);
 
-      return_flag = 1;
-    }
-  if( abs( (deriveRate[0] - derive_exact0)/derive_exact0 ) > tol )
-    {
-      std::cout << std::scientific << std::setprecision(16)
-                << "Error: Mismatch in rate derivative values." << std::endl
-		<< "drate_dT(T0) = " << deriveRate[0] << std::endl
-		<< "derive_exact = " << derive_exact0 << std::endl;
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
 
-      return_flag = 1;
-    }
-  if( abs( (deriveRate[1] - derive_exact1)/derive_exact1 ) > tol )
-    {
-      std::cout << std::scientific << std::setprecision(16)
-                << "Error: Mismatch in rate derivative values." << std::endl
-		<< "drate_dT(T1) = " << deriveRate[1] << std::endl
-		<< "derive_exact = " << derive_exact1 << std::endl;
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
 
-      return_flag = 1;
-    }
+// T
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
+  rate = hercourtessen_rate(T);
+  derive = hercourtessen_rate.derivative(T);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
+
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.BeginTimer(testname);
+#endif
+  hercourtessen_rate.rate_and_derivative(T,rate,derive);
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.EndTimer(testname);
+#endif
+
+  return_flag = check_rate_and_derivative(rate_exact, derive_exact, rate, derive,T) || return_flag;
 
   std::cout << "Hercourt Essen rate: " << hercourtessen_rate << std::endl;
 
@@ -135,26 +222,42 @@ int main()
   int returnval = 0;
 
   returnval = returnval ||
-    vectester (std::valarray<float>(2));
+    vectester (std::valarray<float>(2*ANTIOCH_N_TUPLES), "valarray<float>");
   returnval = returnval ||
-    vectester (std::valarray<double>(2));
+    vectester (std::valarray<double>(2*ANTIOCH_N_TUPLES), "valarray<double>");
   returnval = returnval ||
-    vectester (std::valarray<long double>(2));
+    vectester (std::valarray<long double>(2*ANTIOCH_N_TUPLES), "valarray<ld>");
 #ifdef ANTIOCH_HAVE_EIGEN
   returnval = returnval ||
-    vectester (Eigen::Array2f());
+    vectester (Eigen::Array<float, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXf");
   returnval = returnval ||
-    vectester (Eigen::Array2d());
+    vectester (Eigen::Array<double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXd");
   returnval = returnval ||
-    vectester (Eigen::Array<long double, 2, 1>());
+    vectester (Eigen::Array<long double, 2*ANTIOCH_N_TUPLES, 1>(), "Eigen::ArrayXld");
 #endif
 #ifdef ANTIOCH_HAVE_METAPHYSICL
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, float> (0));
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, float> (0), "NumberArray<float>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, double> (0));
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, double> (0), "NumberArray<double>");
   returnval = returnval ||
-    vectester (MetaPhysicL::NumberArray<2, long double> (0));
+    vectester (MetaPhysicL::NumberArray<2*ANTIOCH_N_TUPLES, long double> (0), "NumberArray<ld>");
+#endif
+#ifdef ANTIOCH_HAVE_VEXCL
+  vex::Context ctx_f (vex::Filter::All);
+  if (!ctx_f.empty())
+    returnval = returnval ||
+      vectester (vex::vector<float> (ctx_f, 2*ANTIOCH_N_TUPLES), "vex::vector<float>");
+
+  vex::Context ctx_d (vex::Filter::DoublePrecision);
+  if (!ctx_d.empty())
+    returnval = returnval ||
+      vectester (vex::vector<double> (ctx_d, 2*ANTIOCH_N_TUPLES), "vex::vector<double>");
+#endif
+
+#ifdef ANTIOCH_HAVE_GRVY
+  gt.Finalize();
+  gt.Summarize();
 #endif
 
   return returnval;

@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -26,6 +29,7 @@
 
 // Antioch
 #include "antioch/reaction.h"
+#include "antioch/kinetics_conditions.h"
 
 //C++
 #include <string>
@@ -72,12 +76,12 @@ namespace Antioch
     //!
     template <typename StateType, typename VectorStateType>
     StateType compute_forward_rate_coefficient( const VectorStateType& molar_densities,
-                                                const StateType& T ) const;
+                                                const KineticsConditions<StateType,VectorStateType>& conditions ) const;
     
     //!
     template <typename StateType, typename VectorStateType>
     void compute_forward_rate_coefficient_and_derivatives( const VectorStateType& molar_densities,
-                                                           const StateType& T, 
+                                                           const KineticsConditions<StateType,VectorStateType>& conditions,
                                                            StateType& kfwd,  
                                                            StateType& dkfwd_dT, 
                                                            VectorStateType& dkfwd_dX) const;
@@ -110,12 +114,12 @@ namespace Antioch
   inline
   StateType DuplicateReaction<CoeffType>::compute_forward_rate_coefficient
     ( const VectorStateType& /* molar_densities */,
-      const StateType& T  ) const
+      const KineticsConditions<StateType,VectorStateType>& conditions) const
   {
-    StateType kfwd = (*this->_forward_rate[0])(T);
+    StateType kfwd = (*this->_forward_rate[0])(conditions);
     for(unsigned int ir = 1; ir < this->_forward_rate.size(); ir++)
       {
-        kfwd += (*this->_forward_rate[ir])(T);
+        kfwd += (*this->_forward_rate[ir])(conditions);
       }
 
     return kfwd;
@@ -126,20 +130,20 @@ namespace Antioch
   inline
   void DuplicateReaction<CoeffType>::compute_forward_rate_coefficient_and_derivatives
     ( const VectorStateType& /* molar_densities */,
-      const StateType& T,
+      const KineticsConditions<StateType,VectorStateType>& conditions,
       StateType& kfwd,
       StateType& dkfwd_dT,
       VectorStateType& dkfwd_dX) const
   {
     //dk_dT = sum_p dalpha_p_dT
-    StateType kfwd_tmp = Antioch::zero_clone(T);
-    StateType dkfwd_dT_tmp = Antioch::zero_clone(T);
+    StateType kfwd_tmp = Antioch::zero_clone(conditions.T());
+    StateType dkfwd_dT_tmp = Antioch::zero_clone(conditions.T());
 
-    this->_forward_rate[0]->compute_rate_and_derivative(T,kfwd,dkfwd_dT);
+    this->_forward_rate[0]->compute_rate_and_derivative(conditions,kfwd,dkfwd_dT);
 
     for(unsigned int ir = 1; ir < Reaction<CoeffType>::_forward_rate.size(); ir++)
       {
-        this->_forward_rate[ir]->compute_rate_and_derivative(T,kfwd_tmp,dkfwd_dT_tmp);
+        this->_forward_rate[ir]->compute_rate_and_derivative(conditions,kfwd_tmp,dkfwd_dT_tmp);
         kfwd += kfwd_tmp;
         dkfwd_dT += dkfwd_dT_tmp;
       }

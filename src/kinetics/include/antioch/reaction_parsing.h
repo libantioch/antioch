@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,11 +23,6 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: reaction_enum.h 38785 2013-04-19 18:46:58Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 #ifndef ANTIOCH_REACTION_PARSING_H
 #define ANTIOCH_REACTION_PARSING_H
@@ -36,23 +34,26 @@
 #include "antioch/duplicate_reaction.h"
 #include "antioch/threebody_reaction.h"
 #include "antioch/falloff_reaction.h"
+#include "antioch/falloff_threebody_reaction.h"
 
 namespace Antioch
 {
 
   template<typename CoeffType>
-  Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
-                                       const std::string& equation, 
+  Reaction<CoeffType>* build_reaction( const unsigned int n_species,
+                                       const std::string& equation,
                                        const bool &reversible,
-                                       const ReactionType::ReactionType& type , 
+                                       const ReactionType::ReactionType& type ,
                                        const KineticsModel::KineticsModel& kin );
+
+// ----------------------
 
   template<typename CoeffType>
   inline
-  Reaction<CoeffType>* build_reaction( const unsigned int n_species, 
-                                       const std::string& equation, 
+  Reaction<CoeffType>* build_reaction( const unsigned int n_species,
+                                       const std::string& equation,
                                        const bool &reversible,
-                                       const ReactionType::ReactionType& type , 
+                                       const ReactionType::ReactionType& type ,
                                        const KineticsModel::KineticsModel& kin )
   {
     Reaction<CoeffType>* reaction = NULL;
@@ -87,13 +88,23 @@ namespace Antioch
         }
         break;
 
+      case(ReactionType::LINDEMANN_FALLOFF_THREE_BODY):
+        {
+          reaction = new FalloffThreeBodyReaction<CoeffType,LindemannFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
+        }
+      case(ReactionType::TROE_FALLOFF_THREE_BODY):
+        {
+          reaction = new FalloffThreeBodyReaction<CoeffType,TroeFalloff<CoeffType> >(n_species,equation,reversible,type,kin);
+        }
+        break;
+
       default:
         {
           antioch_error();
         }
 
       } // switch(type)
-    
+
     // Dummy
     return reaction;
   }

@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -50,6 +53,7 @@
 #include "antioch/valarray_utils_decl.h"
 #include "antioch/vexcl_utils_decl.h"
 
+#include "antioch/default_filename.h"
 #include "antioch/sutherland_viscosity.h"
 #include "antioch/blottner_viscosity.h"
 #include "antioch/mixture_viscosity.h"
@@ -60,6 +64,8 @@
 #include "antioch/metaphysicl_utils.h"
 #include "antioch/valarray_utils.h"
 #include "antioch/vexcl_utils.h"
+
+#include "antioch/stat_mech_thermo.h"
 
 #ifdef ANTIOCH_HAVE_GRVY
 #include "grvy.h"
@@ -84,12 +90,19 @@ int vectester(const PairScalars& example, const std::string& testname)
 
   Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
 
-  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar> s_mu_mixture(chem_mixture);
+  typedef Antioch::StatMechThermodynamics<Scalar> MicroThermo;
+  MicroThermo thermo_stat( chem_mixture );
 
-  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar> b_mu_mixture(chem_mixture);
+  Antioch::TransportMixture<Scalar> tran_mixture( chem_mixture );
 
-  Antioch::read_sutherland_data_ascii_default<Scalar>( s_mu_mixture );
-  Antioch::read_blottner_data_ascii_default<Scalar>( b_mu_mixture );
+  Antioch::MixtureViscosity<Antioch::SutherlandViscosity<Scalar>,Scalar>
+    s_mu_mixture(tran_mixture);
+
+  Antioch::MixtureViscosity<Antioch::BlottnerViscosity<Scalar>,Scalar>
+    b_mu_mixture(tran_mixture);
+
+  Antioch::read_sutherland_data_ascii<Scalar>( s_mu_mixture, Antioch::DefaultFilename::sutherland_data() );
+  Antioch::read_blottner_data_ascii<Scalar>( b_mu_mixture, Antioch::DefaultFilename::blottner_data() );
 
   std::cout << s_mu_mixture << std::endl;
   std::cout << b_mu_mixture << std::endl;

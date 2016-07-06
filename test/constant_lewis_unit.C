@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -73,7 +76,7 @@ int tester()
 
   const Scalar D = diff.D( rho, cp, k );
 
-  const Scalar D_exact = Le*k/(rho*cp);
+  const Scalar D_exact = k/(Le*rho*cp);
 
   return test_val( D, D_exact, tol, std::string("D") );
 }

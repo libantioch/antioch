@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -30,8 +33,9 @@
 #include "antioch/falloff_reaction.h"
 
 template <typename Scalar>
-int tester()
+int tester(const std::string & type)
 {
+
   using std::abs;
   using std::exp;
   using std::pow;
@@ -39,17 +43,17 @@ int tester()
 
 //values for 2 CH3 (+M) <=> C2H6 (+M) for the Kooij model, Ds are made up
 
-  const Scalar Cf1 = 1.135e36 * 1e6 * 1e-12; //(cm3/mol)^2/s -> kmol -> m3
-  const Scalar beta1 = 1.246; //true value is -5.246
-  const Scalar Ea1 = 1704.8 / 1.9858775; //cal/mol
-  const Scalar D1 = -4e-2; // K^-1
-  const Scalar Cf2 = 6.22e16 * 1e3 * 1e-12; //cm3/mol/s -> kmol -> m3
-  const Scalar beta2 = -1.174;
-  const Scalar Ea2 = 635.8 / 1.9858775; //cal/mol
-  const Scalar D2 = -5e-3;
-  const Scalar alpha = 0.405;
-  const Scalar T3 = 1120; //K
-  const Scalar T1 = 69.6; //K
+  const Scalar Cf1 = 1.135e36L * 1e6L * 1e-12L; //(cm3/mol)^2/s -> kmol -> m3
+  const Scalar beta1 = 1.246L; //true value is -5.246
+  const Scalar Ea1 = 1704.8L / 1.9858775L; //cal/mol
+  const Scalar D1 = -4e-2L; // K^-1
+  const Scalar Cf2 = 6.22e16L * 1e3L * 1e-12L; //cm3/mol/s -> kmol -> m3
+  const Scalar beta2 = -1.174L;
+  const Scalar Ea2 = 635.8L / 1.9858775L; //cal/mol
+  const Scalar D2 = -5e-3L;
+  const Scalar alpha = 0.405L;
+  const Scalar T3 = 1120L; //K
+  const Scalar T1 = 69.6L; //K
 // T2 too high, negligible
 
   const std::string equation("A + B -> AB");
@@ -57,19 +61,24 @@ int tester()
 
   int return_flag = 0;
   std::vector<Scalar> mol_densities;
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
-  mol_densities.push_back(1e-2);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
+  mol_densities.push_back(1e-2L);
   Scalar M = mol_densities[0];
   for(unsigned int i = 1; i < n_species; i++)
   {
      M += mol_densities[i];
   }
 
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 1e6;
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 1500;
 
-  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
+  std::cout << type << ", tolerance = " << tol;
+  Scalar max_diff(-1.L);
+  for(Scalar T = 300.1L; T <= 1500.1L; T += 10.L)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -97,8 +106,8 @@ int tester()
       case 0:
       {
         kin_mod = Antioch::KineticsModel::HERCOURT_ESSEN;
-        rate_kinetics1 =  new Antioch::HercourtEssenRate<Scalar>(Cf1,beta1,1.);
-        rate_kinetics2 =  new Antioch::HercourtEssenRate<Scalar>(Cf2,beta2,1.);
+        rate_kinetics1 =  new Antioch::HercourtEssenRate<Scalar>(Cf1,beta1,1.L);
+        rate_kinetics2 =  new Antioch::HercourtEssenRate<Scalar>(Cf2,beta2,1.L);
         k0 = Cf1 * pow(T,beta1); kinf = Cf2 * pow(T,beta2);
         dk0_dT = Cf1 * pow (T,beta1) * beta1/T; dkinf_dT = Cf2 * pow (T,beta2) * beta2/T;
         break;
@@ -115,8 +124,8 @@ int tester()
       case 2:
       {
         kin_mod = Antioch::KineticsModel::ARRHENIUS;
-        rate_kinetics1 = new Antioch::ArrheniusRate<Scalar>(Cf1,Ea1,1.);
-        rate_kinetics2 = new Antioch::ArrheniusRate<Scalar>(Cf2,Ea2,1.);
+        rate_kinetics1 = new Antioch::ArrheniusRate<Scalar>(Cf1,Ea1,1.L);
+        rate_kinetics2 = new Antioch::ArrheniusRate<Scalar>(Cf2,Ea2,1.L);
         k0 = Cf1 * exp(-Ea1/T); kinf = Cf2 * exp(-Ea2/T);
         dk0_dT = Cf1 * exp(-Ea1/T) * Ea1/pow(T,2); dkinf_dT = Cf2 * exp(-Ea2/T) * Ea2/pow(T,2);
         break;
@@ -124,8 +133,8 @@ int tester()
       case 3:
       {
         kin_mod = Antioch::KineticsModel::BHE;
-        rate_kinetics1 = new Antioch::BerthelotHercourtEssenRate<Scalar>(Cf1,beta1,D1,1.);
-        rate_kinetics2 = new Antioch::BerthelotHercourtEssenRate<Scalar>(Cf2,beta2,D2,1.);
+        rate_kinetics1 = new Antioch::BerthelotHercourtEssenRate<Scalar>(Cf1,beta1,D1,1.L);
+        rate_kinetics2 = new Antioch::BerthelotHercourtEssenRate<Scalar>(Cf2,beta2,D2,1.L);
         k0 = Cf1 * pow(T,beta1) * exp(D1 * T); kinf = Cf2 * pow(T,beta2) * exp(D2 * T);
         dk0_dT = Cf1 * pow(T,beta1) * exp(D1 * T) * (beta1/T + D1); dkinf_dT = Cf2 * pow(T,beta2) * exp(D2 * T) * (beta2/T + D2);
         break;
@@ -133,8 +142,8 @@ int tester()
       case 4:
       {
         kin_mod = Antioch::KineticsModel::KOOIJ;
-        rate_kinetics1 = new Antioch::KooijRate<Scalar>(Cf1,beta1,Ea1,1.,1.);
-        rate_kinetics2 = new Antioch::KooijRate<Scalar>(Cf2,beta2,Ea2,1.,1.);
+        rate_kinetics1 = new Antioch::KooijRate<Scalar>(Cf1,beta1,Ea1,1.L,1.L);
+        rate_kinetics2 = new Antioch::KooijRate<Scalar>(Cf2,beta2,Ea2,1.L,1.L);
         k0 = Cf1 * pow(T,beta1) * exp(-Ea1/T); kinf = Cf2 * pow(T,beta2) * exp(-Ea2/T);
         dk0_dT = Cf1 * pow(T,beta1) * exp(-Ea1/T) * (beta1/T + Ea1/pow(T,2)); dkinf_dT = Cf2 * pow(T,beta2) * exp(-Ea2/T) * (beta2/T + Ea2/pow(T,2));
         break;
@@ -142,8 +151,8 @@ int tester()
       case 5:
       {
         kin_mod = Antioch::KineticsModel::VANTHOFF;
-        rate_kinetics1 = new Antioch::VantHoffRate<Scalar>(Cf1,beta1,Ea1,D1,1.,1.);
-        rate_kinetics2 = new Antioch::VantHoffRate<Scalar>(Cf2,beta2,Ea2,D2,1.,1.);
+        rate_kinetics1 = new Antioch::VantHoffRate<Scalar>(Cf1,beta1,Ea1,D1,1.L,1.L);
+        rate_kinetics2 = new Antioch::VantHoffRate<Scalar>(Cf2,beta2,Ea2,D2,1.L,1.L);
         k0 = Cf1 * pow(T,beta1) * exp(-Ea1/T + D1 * T); kinf = Cf2 * pow(T,beta2) * exp(-Ea2/T + D2 * T);
         dk0_dT = Cf1 * pow(T,beta1) * exp(-Ea1/T + D1 * T) * (D1 + beta1/T + Ea1/pow(T,2));
         dkinf_dT = Cf2 * pow(T,beta2) * exp(-Ea2/T + D2 * T) * (D2 + beta2/T + Ea2/pow(T,2)); 
@@ -196,19 +205,22 @@ int tester()
     fall_reaction->F().set_alpha(alpha);
     fall_reaction->F().set_T1(T1);
     fall_reaction->F().set_T3(T3);
-    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = fall_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    fall_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
     for(unsigned int i = 0; i < n_species; i++)
     {
-      if( abs( (drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i] ) > tol )
+      Scalar diff = abs( (drate_dx[i] - derive_dX_exact[i])/derive_dX_exact[i] );
+      if(diff > max_diff)max_diff = diff;
+
+      if(diff > tol )
       {
-          std::cout << std::scientific << std::setprecision(16)
-                    << "Error: Mismatch in rate values." << std::endl
+          std::cerr << std::scientific << std::setprecision(16)
+                    << "\nError: Mismatch in rate values." << std::endl
                     << "Kinetics model (see enum) " << kin_mod << std::endl
                     << "species " << i << std::endl
                     << "T = " << T << " K" << std::endl
@@ -221,10 +233,12 @@ int tester()
           return_flag = 1;
       }
     }
-    if(abs( (rate1 - rate_exact)/rate_exact ) > tol ) 
+    Scalar diff = abs( (rate1 - rate_exact)/rate_exact );
+    if(diff > max_diff)max_diff = diff;
+    if(diff > tol ) 
       {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
+        std::cerr << std::scientific << std::setprecision(16)
+                  << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate1 << std::endl
@@ -234,10 +248,12 @@ int tester()
 
         return_flag = 1;
       }
-    if( abs( (rate - rate_exact)/rate_exact ) > tol )
+    diff = abs( (rate - rate_exact)/rate_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
+        std::cerr << std::scientific << std::setprecision(16)
+                  << "\nError: Mismatch in rate values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate << std::endl
@@ -247,10 +263,12 @@ int tester()
 
         return_flag = 1;
       }
-    if( abs( (drate_dT - derive_exact)/derive_exact ) > tol )
+    diff = abs( (drate_dT - derive_exact)/derive_exact );
+    if(diff > max_diff)max_diff = diff;
+    if( diff > tol )
       {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate derivative values." << std::endl
+        std::cerr << std::scientific << std::setprecision(16)
+                  << "\nError: Mismatch in rate derivative values." << std::endl
                   << "Kinetics model (see enum) " << kin_mod << std::endl
                   << "T = " << T << " K" << std::endl
                   << "drate_dT(T) = " << drate_dT << std::endl
@@ -261,16 +279,17 @@ int tester()
         return_flag = 1;
       }
     delete fall_reaction;
-    if(return_flag)return return_flag;
     }
   }
+
+  std::cout << " and maximum difference = " << max_diff << std::endl;
 
   return return_flag;
 }
 
 int main()
 {
-  return (tester<double>() ||
-          tester<long double>() ||
-          tester<float>());
+  return (tester<double>("double") ||
+          tester<long double>("long double") ||
+          tester<float>("float"));
 }

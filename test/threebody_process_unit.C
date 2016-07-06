@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -39,7 +42,7 @@ int tester()
   const Scalar Cf = 1.4;
   const Scalar Ea = 5.0;
   const Scalar beta = 1.2;
-  const Scalar D = 2.5;
+  const Scalar D = 2.5e-2;
 
   const std::string equation("A + B -> C + D");
   const unsigned int n_species(4);
@@ -67,6 +70,9 @@ int tester()
 
   for(Scalar T = 300.1; T <= 2500.1; T += 10.)
   {
+
+    const Antioch::KineticsConditions<Scalar> conditions(T);
+
     for(unsigned int ikinmod = 0; ikinmod < 6; ikinmod++)
     {
 
@@ -159,12 +165,12 @@ int tester()
     {
         TB_reaction->set_efficiency("",i,species_eff[i]);
     }
-    Scalar rate1 = TB_reaction->compute_forward_rate_coefficient(mol_densities,T);
+    Scalar rate1 = TB_reaction->compute_forward_rate_coefficient(mol_densities,conditions);
     Scalar rate;
     Scalar drate_dT;
     std::vector<Scalar> drate_dx;
     drate_dx.resize(n_species);
-    TB_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,T,rate,drate_dT,drate_dx);
+    TB_reaction->compute_forward_rate_coefficient_and_derivatives(mol_densities,conditions,rate,drate_dT,drate_dx);
 
 
     for(unsigned int i = 0; i < n_species; i++)

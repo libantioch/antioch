@@ -9,5 +9,5 @@ Description: @PACKAGE_DESCRIPTION@
 URL: @PACKAGE_URL@
 Requires:
 Version: @VERSION@
-Libs: -L${libdir} -l@PACKAGE_TARNAME@
+Libs: # @PACKAGE_TARNAME@ is a header-only library
 Cflags: -I${includedir}

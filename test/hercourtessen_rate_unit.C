@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -20,87 +23,123 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-//
-// $Id: arrhenius_rate_unit.C 38747 2013-04-17 23:26:39Z splessis $
-//
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
 
 // C++
 #include <limits>
+#include <vector>
 // Antioch
 #include "antioch/hercourtessen_rate.h"
 
 template <typename Scalar>
-int tester()
+int check_rate_and_derivative(const Scalar & rate_exact, const Scalar & derive_exact,
+                              const Scalar & rate, const Scalar & derive, const Scalar & T)
 {
-  using std::abs;
-  using std::pow;
+    const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
+    int return_flag(0);
 
-  const Scalar Cf = 1.4;
-  const Scalar eta = 1.2;
+    using std::abs;
 
-  Antioch::HercourtEssenRate<Scalar> hercourtessen_rate(Cf,eta);
-
-  int return_flag = 0;
-  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-
-  for(Scalar T = 300.1; T <= 2500.1; T += 10.)
-  {
-    const Scalar rate_exact = Cf*pow(T,eta);
-    const Scalar derive_exact = eta * Cf * pow(T,eta)/T;
-
-    Scalar rate1 = hercourtessen_rate(T);
-    Scalar deriveRate1 = hercourtessen_rate.derivative(T);
-    Scalar rate;
-    Scalar deriveRate;
-
-    hercourtessen_rate.rate_and_derivative(T,rate,deriveRate);
-
-    if( abs( (rate1 - rate_exact)/rate_exact ) > tol )
-      {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate values." << std::endl
-                  << "T = " << T << " K" << std::endl
-                  << "rate(T) = " << rate1 << std::endl
-                  << "rate_exact = " << rate_exact << std::endl;
- 
-        return_flag = 1;
-      }
     if( abs( (rate - rate_exact)/rate_exact ) > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error: Mismatch in rate values." << std::endl
                   << "T = " << T << " K" << std::endl
                   << "rate(T) = " << rate << std::endl
-                  << "rate_exact = " << rate_exact << std::endl;
- 
+                  << "rate_exact = " << rate_exact << std::endl
+                  << "relative difference = " <<  abs( (rate - rate_exact)/rate_exact ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
+
         return_flag = 1;
       }
-    if( abs( (deriveRate1 - derive_exact)/derive_exact ) > tol )
+    if( abs( (derive - derive_exact)/derive_exact ) > tol )
       {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error: Mismatch in rate derivative values." << std::endl
                   << "T = " << T << " K" << std::endl
-                  << "drate_dT(T) = " << deriveRate1 << std::endl
-                  << "derive_exact = " << derive_exact << std::endl;
+                  << "drate_dT(T) = " << derive << std::endl
+                  << "derive_exact = " << derive_exact << std::endl
+                  << "relative difference = " <<  abs( (derive - derive_exact)/derive_exact ) << std::endl
+                  << "tolerance = " <<  tol << std::endl;
 
         return_flag = 1;
       }
-    if( abs( (deriveRate - derive_exact)/derive_exact ) > tol )
-      {
-        std::cout << std::scientific << std::setprecision(16)
-                  << "Error: Mismatch in rate derivative values." << std::endl
-                  << "T = " << T << " K" << std::endl
-                  << "drate_dT(T) = " << deriveRate << std::endl
-                  << "derive_exact = " << derive_exact << std::endl;
 
-        return_flag = 1;
-      }
-   if(return_flag)break;
+     return return_flag;
+}
+
+template <typename Scalar>
+int test_values(const Scalar & Cf, const Scalar & eta, const Scalar & Tref, const Antioch::HercourtEssenRate<Scalar> & hercourtessen_rate)
+{
+  using std::abs;
+  using std::pow;
+  int return_flag = 0;
+
+  for(Scalar T = 300.1L; T <= 2500.1L; T += 10.L)
+  {
+    const Scalar rate_exact = Cf * pow(T/Tref,eta);
+    const Scalar derive_exact = Cf * eta * pow(T/Tref,eta)/T;
+    Antioch::KineticsConditions<Scalar> cond(T);
+
+
+// KineticsConditions
+    Scalar rate = hercourtessen_rate(cond);
+    Scalar deriveRate = hercourtessen_rate.derivative(cond);
+
+    return_flag = check_rate_and_derivative(rate_exact,derive_exact,rate,deriveRate,T) || return_flag;
+
+    hercourtessen_rate.rate_and_derivative(cond,rate,deriveRate);
+
+    return_flag = check_rate_and_derivative(rate_exact,derive_exact,rate,deriveRate,T) || return_flag;
+
+// T
+    rate = hercourtessen_rate(T);
+    deriveRate = hercourtessen_rate.derivative(T);
+
+    return_flag = check_rate_and_derivative(rate_exact,derive_exact,rate,deriveRate,T) || return_flag;
+
+    hercourtessen_rate.rate_and_derivative(T,rate,deriveRate);
+
+    return_flag = check_rate_and_derivative(rate_exact,derive_exact,rate,deriveRate,T) || return_flag;
 
   }
-//  std::cout << "Hercourt-Essen rate: " << hercourtessen_rate << std::endl;
+  return return_flag;
+}
+
+template <typename Scalar>
+int tester()
+{
+
+  Scalar Cf = 1.4L;
+  Scalar eta = 1.2L;
+  Scalar Tref = 1.L;
+
+  Antioch::HercourtEssenRate<Scalar> hercourtessen_rate(Cf,eta); // default
+
+  int return_flag = test_values(Cf,eta,Tref,hercourtessen_rate);
+  Cf = 1e-7L;
+  eta = 0.7L;
+  Tref = 300.L;
+  hercourtessen_rate.set_Cf(Cf);
+  hercourtessen_rate.set_eta(eta);
+  hercourtessen_rate.set_Tref(Tref);
+  return_flag = test_values(Cf,eta,Tref,hercourtessen_rate) || return_flag;
+
+  Cf = 2.1e-11L;
+  eta = -2.3L;
+  std::vector<Scalar> values(2);
+  values[0] = Cf;
+  values[1] = eta;
+  hercourtessen_rate.reset_coefs(values);
+  return_flag = test_values(Cf,eta,Tref,hercourtessen_rate) || return_flag;
+
+  Tref = 298.L;
+  values.resize(3);
+  values[0] = Cf;
+  values[1] = eta;
+  values[2] = Tref;
+  hercourtessen_rate.reset_coefs(values);
+  return_flag = test_values(Cf,eta,Tref,hercourtessen_rate) || return_flag;
+
   return return_flag;
 }
 

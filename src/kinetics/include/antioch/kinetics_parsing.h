@@ -3,6 +3,9 @@
 //
 // Antioch - A Gas Dynamics Thermochemistry Library
 //
+// Copyright (C) 2014-2016 Paul T. Bauman, Benjamin S. Kirk,
+//                         Sylvain Plessis, Roy H. Stonger
+//
 // Copyright (C) 2013 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
@@ -26,13 +29,17 @@
 
 //Antioch
 #include "antioch/antioch_asserts.h"
+#include "antioch/metaprogramming_decl.h"
+#include "antioch/physical_constants.h"
 #include "antioch/kinetics_type.h"
+#include "antioch/constant_rate.h"
 #include "antioch/hercourtessen_rate.h"
 #include "antioch/berthelot_rate.h"
 #include "antioch/arrhenius_rate.h"
 #include "antioch/berthelothercourtessen_rate.h"
 #include "antioch/kooij_rate.h"
 #include "antioch/vanthoff_rate.h"
+#include "antioch/photochemical_rate.h"
 #include "antioch/reaction_enum.h"
 
 namespace Antioch
@@ -40,10 +47,36 @@ namespace Antioch
 /*! cross-road to kinetics model
  */
 
-  template<typename CoeffType>
-  KineticsType<CoeffType>* build_rate( const std::vector<CoeffType> &data,
-                                       const KineticsModel::KineticsModel &kin );
+  template<typename CoeffType, typename VectorCoeffType>
+  KineticsType<CoeffType, VectorCoeffType>* build_rate( const VectorCoeffType &data,
+                                                        const KineticsModel::KineticsModel &kin );
 
+  template<typename CoeffType, typename VectorCoeffType, typename VectorType>
+  void reset_rate( KineticsType<CoeffType,VectorCoeffType> & kin, const VectorType & coefs);
+
+  /*!
+   * The rate constant models derived from the Arrhenius model have
+   * an activation energy which is stored and used, for efficiency reasons,
+   * in the reduced \f$\frac{E_a}{\mathrm{R}}\f$ form in K.
+   * This calls for a subtle management of the get/set function.
+   * This is done by a unit management, by default an activation energy is
+   * an energy by quantity, so the default is to consider the SI unit
+   * for an energy, (J/mol). Therefore if the provided value is in Kelvin,
+   * it should be explicitely provided.
+   */
+  template <typename CoeffType, typename VectorCoeffType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const CoeffType new_value, const std::string & unit = "SI");
+
+  // vectorized parameter
+  template <typename CoeffType, typename VectorCoeffType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const CoeffType new_value, int l, const std::string & unit = "SI");
+
+
+//----------------------------------------
 
   //! We take here the parameters as:
   //  - \f$A\f$, \f$\beta\f$, \f$E_a\f$, \f$D\f$, \f$\mathrm{T_{ref}}\f$, \f$\mathrm{scale}\f$.
@@ -51,17 +84,24 @@ namespace Antioch
   //  to K.
   //
   //  We check the number of parameters then initialize.
-  template<typename CoeffType>
+  template<typename CoeffType, typename VectorCoeffType>
   inline
-  KineticsType<CoeffType>* build_rate( const std::vector<CoeffType> &data,
-                                       const KineticsModel::KineticsModel &kin )
+  KineticsType<CoeffType, VectorCoeffType>* build_rate( const VectorCoeffType &data,
+                                                        const KineticsModel::KineticsModel &kin )
   {
     using std::pow;
 
-    KineticsType<CoeffType>* rate = NULL;
+    KineticsType<CoeffType,VectorCoeffType>* rate = NULL;
 
     switch(kin)
       {
+      case(KineticsModel::CONSTANT):
+        {
+          antioch_assert_equal_to(1,data.size());
+          rate = new ConstantRate<CoeffType>(data[0]);//Cf
+        }
+        break;
+
       case(KineticsModel::HERCOURT_ESSEN):
         {
           antioch_assert_equal_to(3,data.size());
@@ -104,6 +144,20 @@ namespace Antioch
         }
         break;
 
+      case(KineticsModel::PHOTOCHEM):
+        {
+          antioch_assert_equal_to(0,data.size()%2); //two vectors in one: lambda then cross-section
+          VectorCoeffType cs;
+          VectorCoeffType lambda;
+          for(unsigned int i = 0; i < data.size()/2; i++)
+          {
+             lambda.push_back(data[i]);
+             cs.push_back(data[i + data.size()/2]); 
+          }
+          rate = new PhotochemicalRate<CoeffType,VectorCoeffType>(cs,lambda);//cs,lambda
+        }
+        break;
+
       default:
         {
           antioch_error();
@@ -113,6 +167,177 @@ namespace Antioch
 
     return rate;
   }
+
+  template<typename CoeffType, typename VectorCoeffType, typename VectorType>
+  void reset_rate( KineticsType<CoeffType,VectorCoeffType> & kin, const VectorType & coefs)
+  {
+
+    switch(kin.type())
+      {
+      case(KineticsModel::CONSTANT):
+        {
+          static_cast<ConstantRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::HERCOURT_ESSEN):
+        {
+          static_cast< HercourtEssenRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::BERTHELOT):
+        {
+          static_cast< BerthelotRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::ARRHENIUS):
+        {
+          static_cast< ArrheniusRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::BHE):
+        {
+          static_cast< BerthelotHercourtEssenRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::KOOIJ):
+        {
+          static_cast< KooijRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::VANTHOFF):
+        {
+          static_cast< VantHoffRate<CoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      case(KineticsModel::PHOTOCHEM):
+        {
+          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&kin)->reset_coefs(coefs);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(kin.type())
+  }
+
+
+  template <typename CoeffType, typename VectorCoeffType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const CoeffType new_value, const std::string & unit)
+  {
+
+// this is crude at the moment, no test
+// this will be replaced by a unit manager
+// at some point, to be able to have an explicit
+// custom internal unit system with appropriate testing
+    CoeffType new_coef = (unit == "SI")?new_value:
+                                        new_value * Units<typename value_type<CoeffType>::type>(unit).get_SI_factor();
+
+// Ea management, we want K, two possibilities now
+// 1 - Ea is already in K
+// 2 - Ea is in J.mol-1
+   if(parameter == KineticsModel::Parameters::E)
+   {
+      if(unit != "K")
+      {
+         new_coef = new_coef / Constants::R_universal<typename value_type<CoeffType>::type>();
+      }
+   }
+   
+
+    switch(rate.type())
+      {
+      case(KineticsModel::CONSTANT):
+        {
+          static_cast<ConstantRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+        }
+        break;
+
+      case(KineticsModel::HERCOURT_ESSEN):
+        {
+          static_cast< HercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+        }
+        break;
+
+      case(KineticsModel::BERTHELOT):
+        {
+          static_cast< BerthelotRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+        }
+        break;
+
+      case(KineticsModel::ARRHENIUS):
+        {
+          static_cast< ArrheniusRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+        }
+        break;
+
+      case(KineticsModel::BHE):
+        {
+          static_cast< BerthelotHercourtEssenRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+        }
+        break;
+
+      case(KineticsModel::KOOIJ):
+        {
+          static_cast< KooijRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+        }
+        break;
+
+      case(KineticsModel::VANTHOFF):
+        {
+          static_cast< VantHoffRate<CoeffType>*>(&rate)->set_parameter(parameter,new_coef);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(kin.type())
+  }
+
+  template <typename CoeffType, typename VectorCoeffType>
+  void reset_parameter_of_rate(KineticsType<CoeffType,VectorCoeffType> & rate,
+                               KineticsModel::Parameters parameter,
+                               const CoeffType new_value, int l, const std::string & unit)
+  {
+
+// this is crude at the moment, no test
+// this will be replaced by a unit manager
+// at some point, to be able to have an explicit
+// custom internal unit system with appropriate testing
+    CoeffType new_coef = (unit == "SI")?new_value:
+                                        new_value * Units<typename value_type<CoeffType>::type>(unit).get_SI_factor();
+
+    switch(rate.type())
+    {
+      case(KineticsModel::PHOTOCHEM):
+        {
+          static_cast<PhotochemicalRate<CoeffType,VectorCoeffType>*>(&rate)->set_parameter(parameter,l,new_coef);
+        }
+        break;
+
+      default:
+        {
+          antioch_error();
+        }
+
+      } // switch(kin.type())
+  }
+
+
 
 } // end namespace Antioch
 
