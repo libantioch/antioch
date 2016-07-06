@@ -94,7 +94,6 @@ Version 0.0.8
 
 Version 0.0.7
 * Auto-function optimizations, when compiler is new enough.
->>>>>>> upstream/master
 
 Version 0.0.6
 * More test coverage for newer reaction types
