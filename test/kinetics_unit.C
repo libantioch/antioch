@@ -139,6 +139,7 @@ template <typename Scalar>
 int tester(const std::string& input_name)
 {
   using std::abs;
+  using std::isnan;
 
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
@@ -194,10 +195,26 @@ int tester(const std::string& input_name)
       Scalar sum = 0;
       for( unsigned int s = 0; s < n_species; s++ )
 	{
+	  // reactions are allowed to be infinite, but in this test
+	  // case we don't have any competing ridiculously-stiff
+          // reactions so we shouldn't get a NaN.
+          if (isnan(omega_dot[s]))
+	    {
+	      return_flag = 1;
+	      std::cerr << "Error: omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = NaN\n"
+		        << std::scientific << std::setprecision(16)
+		        << "T = " << T << std::endl;
+	    }
+
 	  sum += omega_dot[s];
 	}
       // [PB]: Need to raise the tol scaling to 5.0e6 for my Mac laptop.
       const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 5.0e6; // 1.6e-10;
+
+      // This condition is *false* (as is any comparison) for sum ==
+      // NaN.  This isn't a regression failure: omega_dot is allowed
+      // to be +/- infinity, and infinities of opposite sign sum to
+      // NaN.
       if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
