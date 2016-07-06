@@ -774,6 +774,9 @@ namespace Antioch
         exppower -= ( static_cast<CoeffType>(_product_stoichiometry[s])*
                        h_RT_minus_s_R[_product_ids[s]] );
       }
+
+    antioch_assert(!isnan(exppower));
+
     return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) ) * ant_exp(exppower);
   }
 
@@ -1024,6 +1027,8 @@ namespace Antioch
     using std::abs;
 
     StateType kfwd = this->compute_forward_rate_coefficient(molar_densities,conditions);
+    antioch_assert(!isnan(kfwd));
+
     StateType kfwd_times_reactants = kfwd;
 
     // Rfwd
@@ -1033,6 +1038,7 @@ namespace Antioch
           ant_pow( molar_densities[this->reactant_id(ro)],
             this->reactant_partial_order(ro));
       }
+    antioch_assert(!isnan(kfwd_times_reactants));
 
     if(_reversible)
     {
