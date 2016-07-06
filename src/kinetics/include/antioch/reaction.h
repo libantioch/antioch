@@ -142,6 +142,10 @@ namespace Antioch
      */
     void set_reversibility( const bool reversible);
 
+    /*! Set the maximum reaction rate (default infinity).
+     */
+    void set_maximum_rate( const CoeffType max_rate);
+
     //! Model of kinetics.
     KineticsModel::KineticsModel kinetics_model() const;
 
@@ -369,6 +373,7 @@ namespace Antioch
     int _gamma;
     bool _initialized;
     bool _reversible;
+    CoeffType _max_rate;
     ReactionType::ReactionType _type;
     KineticsModel::KineticsModel _kintype;
 
@@ -433,6 +438,13 @@ namespace Antioch
   {
     _reversible = reversible;
     return;
+  }
+
+  template<typename CoeffType, typename VectorCoeffType>
+  inline
+  void Reaction<CoeffType,VectorCoeffType>::set_maximum_rate( const CoeffType max_rate)
+  {
+    _max_rate = max_rate;
   }
 
   template<typename CoeffType,typename VectorCoeffType>
@@ -698,6 +710,7 @@ namespace Antioch
       _gamma(0),
       _initialized(false),
       _reversible(reversible),
+      _max_rate(std::numeric_limits<CoeffType>::infinity()),
       _type(type),
       _kintype(kin)
   {
@@ -844,6 +857,7 @@ namespace Antioch
     os << "\n#   Kinetics model: "   << _kintype;
     (_reversible)?os << "\n#   reversible":
                   os << "\n#   irreversible";
+    os << "\n#   Maximum reaction rate: "   << _max_rate << "\n";
     for(unsigned int ir = 0; ir < _forward_rate.size(); ir++)
       {
         os << "\n#   forward rate eqn: " << *_forward_rate[ir];
@@ -1047,26 +1061,22 @@ namespace Antioch
 
       StateType kbkwd_times_products = kfwd/Keq;
 
-      // If we have an equilibrium constant of zero, our reverse
-      // reaction rate should be infinity, not NaN.
-      static const typename Antioch::value_type<StateType>::type my_infinity =
-        std::numeric_limits<typename Antioch::value_type<StateType>::type>::infinity();
-
-      typename Antioch::rebind<StateType,bool>::type is_nonzero = (Keq != Antioch::zero_clone(Keq));
-      kbkwd_times_products =
-	Antioch::if_else(is_nonzero, kbkwd_times_products,
-                         Antioch::constant_clone(Keq, my_infinity));
-      antioch_assert(!isnan(kbkwd_times_products));
-
       // Rbkwd
       for (unsigned int po=0; po< this->n_products(); po++)
         {
           kbkwd_times_products     *=
             ant_pow( molar_densities[this->product_id(po)],
               this->product_partial_order(po));
-
-          antioch_assert(!isnan(kbkwd_times_products));
         }
+
+      // If we have an equilibrium constant of zero, our reverse
+      // reaction rate should be infinity or a user-specified
+      // _max_rate, not NaN.
+      typename Antioch::rebind<StateType,bool>::type is_nonzero = (Keq != Antioch::zero_clone(Keq));
+      kbkwd_times_products =
+	Antioch::if_else(is_nonzero, kbkwd_times_products,
+                         Antioch::constant_clone(Keq, this->_max_rate));
+      antioch_assert(!isnan(kbkwd_times_products));
 
       return kfwd_times_reactants - kbkwd_times_products;
     }
