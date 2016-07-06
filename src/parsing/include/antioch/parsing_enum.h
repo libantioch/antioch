@@ -76,6 +76,7 @@ namespace Antioch
 
 // GRI30 compatibility
   enum GRI30Comp{FALLOFF = 0,
+                 FALLOFF_TYPE,
                  TROE
                 };
 
