@@ -257,6 +257,23 @@ eval_index(const VectorT& vec, const std::valarray<unsigned int>& index)
 }
 
 
+
+template <typename T>
+inline
+bool
+isnan (const std::valarray<T>& in)
+{
+  using std::isnan;
+
+  const size_t size = in.size();
+  for (size_t i=0; i != size; ++i)
+    if(isnan(in[i]))
+      return true;
+  return false;
+}
+
+
+
 } // end namespace Antioch
 
 

@@ -101,6 +101,23 @@ min(const T& in)
 }
 
 template <typename T>
+inline
+typename Antioch::enable_if_c<is_eigen<T>::value,
+  bool>::type
+isnan(const T& in)
+{
+  using std::isnan;
+
+  const size_t n_rows = in.rows();
+  const size_t n_cols = in.cols();
+  for (size_t i=0; i != n_rows; ++i)
+    for (size_t j=0; j != n_cols; ++j)
+      if(isnan(in(i,j)))
+        return true;
+  return false;
+}
+
+template <typename T>
 struct has_size<T, typename Antioch::enable_if_c<is_eigen<T>::value,void>::type>
 {
   const static bool value = true;
