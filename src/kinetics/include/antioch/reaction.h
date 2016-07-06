@@ -1252,7 +1252,31 @@ namespace Antioch
           dRbkwd_dX_s[s] += facbkwd * dkbkwd_dX_s[s];
         }
 
-      net_reaction_rate -= facbkwd * kbkwd;
+      StateType kbkwd_times_products = facbkwd * kbkwd;
+
+      // If we have an equilibrium constant of zero, our reverse
+      // reaction rate should be infinity or a user-specified
+      // _max_rate, not NaN.
+      typename Antioch::rebind<StateType,bool>::type is_nonzero = (keq != Antioch::zero_clone(keq));
+      kbkwd_times_products =
+	Antioch::if_else(is_nonzero, kbkwd_times_products,
+                         Antioch::constant_clone(keq, this->_max_rate));
+      antioch_assert(!isnan(kbkwd_times_products));
+
+      // If our rate is maxed out then our derivatives are zero.
+      dRbkwd_dT =
+	Antioch::if_else(is_nonzero, dRbkwd_dT,
+                         Antioch::zero_clone(keq));
+      antioch_assert(!isnan(dRbkwd_dT));
+
+      for (unsigned int s = 0; s < this->n_species(); s++)
+        {
+          dRbkwd_dX_s[s] =
+	    Antioch::if_else(is_nonzero, dRbkwd_dX_s[s],
+                             Antioch::zero_clone(keq));
+        }
+
+      net_reaction_rate -= kbkwd_times_products;
 
       dnet_rate_dT -= dRbkwd_dT;
 
