@@ -176,7 +176,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
      hv.push_back(i /(Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l) // irr/(h*c/lambda): power -> number of photons.s-1
                                 * i_unit.get_SI_factor()); //SI for cs, keep nm for bin
      lambda.push_back(l * solar_wave.factor_to_some_unit("nm")); //nm
-     if(lambda.size() == 796)break;
+     if(!solar_flux.good())break;
   }
   solar_flux.close();
 
@@ -199,7 +199,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
      CH4_file >> l >> s;
      CH4_s.push_back(s * factor_cs);
      CH4_lambda.push_back(l * lambda_input.factor_to_some_unit("nm"));
-     if(CH4_s.size() == 137)break;
+     if(!CH4_file.good())break;
   }
   CH4_file.close();
 
@@ -541,12 +541,41 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   Pr = tot_dens * k0/kinf;
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
   k.push_back(k0 / (1./tot_dens + k0/kinf)  * FTroe(Fc,Pr));
+
 //
 //photochemistry
   k.push_back(k_photo(lambda,hv,CH4_lambda,CH4_s));
   conditions.add_particle_flux(photons,k.size()-1);
 //Constant
   k.push_back(2.5e11);
+
+// TroeFalloffThreeBody, an absurdity
+  Scalar M = (Scalar(n_species) - 2 + 1.5 + 2) * 5e-4;
+    // H + CH3 (+ M) [=] CH4 (+ M)
+  A    = 6e+11 * unitA_1.get_SI_factor();
+  beta = 0;
+  Ea   = 0;
+  kinf = Kooij(T,A,beta,Ea,Tr,Rcal);
+  A    = 1.04E+20 * unitA_2.get_SI_factor();
+  beta = -2.76;
+  Ea   = 1600;
+  k0   = Kooij(T,A,beta,Ea,Tr,Rcal);
+  Pr   = M * k0/kinf;
+  k.push_back(k0 / (1./M + k0/kinf)  * FTroe(Fc,Pr)); 
+  k.push_back(k0 / (1./M + k0/kinf)  * FTroe(Fc,Pr)); 
+
+// LindemannFalloffThreeBody, not better...
+// H + CH3 (+ M) [=] CH4 (+ M)
+  A    = 6e+11 * unitA_1.get_SI_factor();
+  beta = 0;
+  Ea   = 0;
+  kinf = Kooij(T,A,beta,Ea,Tr,Rcal);
+  A    = 1.04E+20 * unitA_2.get_SI_factor();
+  beta = -2.76;
+  Ea   = 1600;
+  k.push_back(k0 / (1./M + k0/kinf) ); 
+  k.push_back(k0 / (1./M + k0/kinf) ); 
+
   
 
   const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?

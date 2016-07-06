@@ -1010,6 +1010,95 @@
       <reactants>CH4:1.0</reactants>
       <products>CH3:1.0 H:1</products>
     </reaction>
+
+    <!-- reaction 0037    -->
+    <reaction reversible="yes" type="TroeFalloffThreeBody" id="0037">
+      <equation>H + CH3 (+ M) [=] CH4 (+ M)</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>6.000000E+11</A>
+           <b>0</b>
+           <E units="cal/mol">0.000000</E>
+        </Kooij>
+        <Kooij name="k0">
+           <A>1.040000E+20</A>
+           <b>-2.7599999999999998</b>
+           <E units="cal/mol">1600.000000</E>
+        </Kooij>
+        <efficiencies default="1.0">AR:0.7  C2H6:3  CH4:1.5  CO:1.5  CO2:2  H:2  CH2:6 </efficiencies>
+        <Troe>
+          <alpha>0.562</alpha> 
+          <T3>91</T3> 
+          <T1>5836</T1>
+          <T2>8552</T2>
+        </Troe>
+      </rateCoeff>
+      <reactants>H:1 CH3:1</reactants>
+      <products>CH4:1</products>
+    </reaction>
+
+    <!-- reaction 0037bis    -->
+    <reaction reversible="yes" type="falloff" id="0037bis">
+      <equation>H + CH3 (+ M) [=] CH4 (+ M)</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>6.000000E+11</A>
+           <b>0</b>
+           <E units="cal/mol">0.000000</E>
+        </Kooij>
+        <Kooij name="k0">
+           <A>1.040000E+20</A>
+           <b>-2.7599999999999998</b>
+           <E units="cal/mol">1600.000000</E>
+        </Kooij>
+        <efficiencies default="1.0">AR:0.7  C2H6:3  CH4:1.5  CO:1.5  CO2:2  H:2  CH2:6 </efficiencies>
+        <falloff type="Troe">0.562 91 5836 8552 </falloff>
+      </rateCoeff>
+      <reactants>H:1 CH3:1</reactants>
+      <products>CH4:1</products>
+    </reaction>
+
+    <!-- reaction 0038    -->
+    <reaction reversible="yes" type="LindemannFalloffThreeBody" id="0038">
+      <equation>H + CH3 (+ M) [=] CH4 (+ M)</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>6.000000E+11</A>
+           <b>0</b>
+           <E units="cal/mol">0.000000</E>
+        </Kooij>
+        <Kooij name="k0">
+           <A>1.040000E+20</A>
+           <b>-2.7599999999999998</b>
+           <E units="cal/mol">1600.000000</E>
+        </Kooij>
+        <efficiencies default="1.0">AR:0.7  C2H6:3  CH4:1.5  CO:1.5  CO2:2  H:2  CH2:6 </efficiencies>
+      </rateCoeff>
+      <reactants>H:1 CH3:1</reactants>
+      <products>CH4:1</products>
+    </reaction>
+
+    <!-- reaction 0038bis    -->
+    <reaction reversible="yes" type="falloff" id="0038bis">
+      <equation>H + CH3 (+ M) [=] CH4 (+ M)</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>6.000000E+11</A>
+           <b>0</b>
+           <E units="cal/mol">0.000000</E>
+        </Kooij>
+        <Kooij name="k0">
+           <A>1.040000E+20</A>
+           <b>-2.7599999999999998</b>
+           <E units="cal/mol">1600.000000</E>
+        </Kooij>
+        <efficiencies default="1.0">AR:0.7  C2H6:3  CH4:1.5  CO:1.5  CO2:2  H:2  CH2:6 </efficiencies>
+        <falloff type="Lindemann"> </falloff>
+      </rateCoeff>
+      <reactants>H:1 CH3:1</reactants>
+      <products>CH4:1</products>
+    </reaction>
+
   </reactionData>
 
 </ctml>
