@@ -107,13 +107,14 @@ int tester_N2N(const std::string& input_name)
 
       kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
-      // Omega dot had better sum to 0.0
-      Scalar sum = 0;
+      // Omega dot had better sum to 0.0, relatively speaking
+      Scalar sum = 0, max = 0;
       for( unsigned int s = 0; s < n_species; s++ )
 	{
 	  sum += omega_dot[s];
+          max = std::max(max, abs(omega_dot[s]));
 	}
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 1.0e6; // 1.0e-10;
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * max * 1e2;
       if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
@@ -136,9 +137,10 @@ int tester_N2N(const std::string& input_name)
 
 
 template <typename Scalar>
-int tester(const std::string& input_name)
+int tester(const std::string& input_name, Scalar max_reaction_rate, const std::string& scalar_name)
 {
   using std::abs;
+  using std::isfinite;
   using std::isnan;
 
   std::vector<std::string> species_str_list;
@@ -158,6 +160,11 @@ int tester(const std::string& input_name)
   Antioch::CEAEvaluator<Scalar> thermo( cea_mixture );
 
   Antioch::read_reaction_set_data_xml<Scalar>( input_name, false, reaction_set );
+
+  // Potentially test with limited reaction rates
+  if (isfinite(max_reaction_rate))
+    for (unsigned int r = 0; r != reaction_set.n_reactions(); ++r)
+      reaction_set.reaction(r).set_maximum_rate(max_reaction_rate);
 
   Antioch::KineticsEvaluator<Scalar> kinetics( reaction_set, 0 );
   std::vector<Scalar> omega_dot(n_species);
@@ -191,25 +198,36 @@ int tester(const std::string& input_name)
 
       kinetics.compute_mass_sources( cond, molar_densities, h_RT_minus_s_R, omega_dot );
 
-      // Omega dot had better sum to 0.0
-      Scalar sum = 0;
+      // Omega dot had better sum to 0.0, relatively speaking
+      Scalar sum = 0, max = 0;
       for( unsigned int s = 0; s < n_species; s++ )
 	{
-	  // reactions are allowed to be infinite, but in this test
-	  // case we don't have any competing ridiculously-stiff
-          // reactions so we shouldn't get a NaN.
+	  // reactions are allowed to be infinite unless user-limited,
+	  // but in this test case we don't have any competing
+	  // ridiculously-stiff reactions so we shouldn't get a NaN.
           if (isnan(omega_dot[s]))
 	    {
 	      return_flag = 1;
-	      std::cerr << "Error: omega_dot(" << chem_mixture.chemical_species()[s]->species() << ") = NaN\n"
+	      std::cerr << "Error: omega_dot(" << chem_mixture.chemical_species()[s]->species()
+                        << ") = " << scalar_name << "(NaN)\n"
+		        << std::scientific << std::setprecision(16)
+		        << "T = " << T << std::endl;
+	    }
+
+          if (isfinite(max_reaction_rate) && !isfinite(omega_dot[s]))
+	    {
+	      return_flag = 1;
+	      std::cerr << "Error: omega_dot(" << chem_mixture.chemical_species()[s]->species()
+                        << ") not finite<" << scalar_name << ">\n"
 		        << std::scientific << std::setprecision(16)
 		        << "T = " << T << std::endl;
 	    }
 
 	  sum += omega_dot[s];
+          max = std::max(max, abs(omega_dot[s]));
 	}
-      // [PB]: Need to raise the tol scaling to 5.0e6 for my Mac laptop.
-      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * 5.0e6; // 1.6e-10;
+
+      const Scalar sum_tol = std::numeric_limits<Scalar>::epsilon() * max * 1e2;
 
       // This condition is *false* (as is any comparison) for sum ==
       // NaN.  This isn't a regression failure: omega_dot is allowed
@@ -218,7 +236,8 @@ int tester(const std::string& input_name)
       if( abs( sum ) > sum_tol )
 	{
 	  return_flag = 1;
-	  std::cerr << "Error: omega_dot did not sum to 0.0." << std::endl
+	  std::cerr << "Error: omega_dot did not sum to "
+                    << scalar_name << "(0)." << std::endl
 		    << std::scientific << std::setprecision(16)
 		    << "T = " << T << std::endl
 		    << "sum = " << sum << ", sum_tol = " << sum_tol << std::endl;
@@ -248,9 +267,12 @@ int main(int argc, char* argv[])
 
   int return_flag=0;
 
-  return_flag += (tester<double>(std::string(argv[1])) ||
-                  tester<long double>(std::string(argv[1])) ||
-                  tester<float>(std::string(argv[1])));
+  return_flag += (tester<double>(std::string(argv[1]), std::numeric_limits<double>::infinity(), "double") ||
+                  tester<long double>(std::string(argv[1]), std::numeric_limits<long double>::infinity(), "long double") ||
+                  tester<float>(std::string(argv[1]), std::numeric_limits<float>::infinity(), "float") ||
+                  tester<double>(std::string(argv[1]), 1e20, "double") ||
+                  tester<long double>(std::string(argv[1]), 1e30, "long double") ||
+                  tester<float>(std::string(argv[1]), 1e10, "float"));
 
   return_flag += (tester_N2N<double>(std::string(argv[1])) ||
                   tester_N2N<long double>(std::string(argv[1])) ||
