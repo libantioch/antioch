@@ -1,0 +1,143 @@
+\form#0:$ \frac{1}{M} = \sum_s \frac{w_s}{M_s}$
+\form#1:$ w_s $
+\form#2:$ s $
+\form#3:$ M_s $
+\form#4:$ w_i = x_i \frac{M_i}{M} $
+\form#5:$ R \equiv \frac{\hat{R}}{M} $
+\form#6:$ R$
+\form#7:$ M $
+\form#8:$Le = \frac{k}{\rho c_p D}$
+\form#9:\[ \alpha(T) = A \exp\left(-\frac{E_a}{\mathrm{R}T}\right) \]
+\form#10:$\mathrm{R}$
+\form#11:\[ \frac{\partial\alpha(T)}{\partial T} = \alpha(T) \frac{E_a}{\mathrm{R}T^2} \]
+\form#12:$e = \frac{E_a}{\mathrm{R}}$
+\form#13:\[ \alpha(T) = A \exp\left(D T\right) \]
+\form#14:\[ \frac{\partial\alpha(T)}{\partial T} = \alpha(T) D \]
+\form#15:\[ \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \exp\left(D T\right) \]
+\form#16:\[ \frac{\partial \alpha(T)}{\partial T} = \alpha(T) \left(\frac{\beta}{T} + D\right) \]
+\form#17:$t = \frac{T}{\mathrm{T_\text{ref}}}$
+\form#18:\[ \alpha(T) = A \]
+\form#19:\[ \frac{\partial \alpha(T)}{\partial T} = 0 \]
+\form#20:\[ k(T,[M]) = \sum_n\alpha_n(T) \]
+\form#21:$\alpha_i(T)$
+\form#22:$ith$
+\form#23:$[M]$
+\form#24:$[M] = \frac{P}{\mathrm{R}T}$
+\form#25:$\alpha_i$
+\form#26:\[ \begin{split} \frac{\partial k(T,[M])}{\partial T} & = \sum_n\frac{\partial \alpha_n(T)}{\partial T} \\[10pt] \frac{\partial k(T,[M])}{\partial c_i} & = 0 \end{split} \]
+\form#27:$c_i$
+\form#28:$i$
+\form#29:\[ k(T,[M]) = \alpha(T) \]
+\form#30:$\alpha(T)$
+\form#31:\[ \begin{split} \frac{\partial k(T,[M])}{\partial T} & = \frac{\partial \alpha(T)}{\partial T} \\[10pt] \frac{\partial k(T,[M])}{\partial c_i} & = 0 \end{split} \]
+\form#32:\[ k(T,[M]) = \frac{[M] k_0(T)}{1+[M]\frac{k_0(T)}{k_\infty(T)}}\times F \]
+\form#33:\[ \begin{split} k_0(T) & = \lim_{[M] \rightarrow 0} k(T,[M])\\ k_\infty(T) & = \lim_{[M] \rightarrow \infty} k(T,[M]) \end{split} \]
+\form#34:$k_0$
+\form#35:$k_\infty$
+\form#36:\[ \begin{split} k_0(T) & = \alpha_0(T) \\ k_\infty(T) & = \alpha_\infty(T) \end{split} \]
+\form#37:$\alpha_{i,\,i=0,\infty}(T)$
+\form#38:\[ \begin{split} \frac{\partial k(T,[M])}{\partial T} & = k(T,[M]) F \left( \frac{\partial k_0(T)}{\partial T}\frac{1}{k_0(T)} - \frac{\partial k_0(T)}{\partial T}\frac{1}{k_0(T) + \frac{k_\infty(T)}{[M]}} + \frac{\partial k_\infty(T)}{\partial T} \frac{k_0(T)}{k_\infty \left(k_0(T) + \frac{k_\infty(T)}{[M]}\right)} \right) + k(T,[M]) \frac{\partial F}{\partial T} \\[10pt] \frac{\partial k(T,[M])}{\partial c_i} & = F \frac{k(T,[M])}{[M] + [M]^2\frac{k_0(T)}{k_\infty(T)}} + k(T,[M]) \frac{\partial F}{\partial c_i} \end{split} \]
+\form#39:\[ [M] = \sum_{s=1}^{n} \epsilon_sc_n \]
+\form#40:\[ \begin{split} \frac{\partial k(T,[M])}{\partial T} & = k(T,[M]) F \left( \frac{\partial k_0(T)}{\partial T}\frac{1}{k_0(T)} - \frac{\partial k_0(T)}{\partial T}\frac{1}{k_0(T) + \frac{k_\infty(T)}{[M]}} + \frac{\partial k_\infty(T)}{\partial T} \frac{k_0(T)}{k_\infty \left(k_0(T) + \frac{k_\infty(T)}{[M]}\right)} \right) + k(T,[M]) \frac{\partial F}{\partial T} \\[10pt] \frac{\partial k(T,[M])}{\partial c_i} & = F \epsilon_i\frac{k(T,[M])}{[M] + [M]^2\frac{k_0(T)}{k_\infty(T)}} + k(T,[M]) \frac{\partial F}{\partial c_i} \end{split} \]
+\form#41:\[ \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \]
+\form#42:\[ \frac{\partial \alpha(T)}{\partial T} = \alpha(T) \frac{\beta}{T} \]
+\form#43:$a = \frac{A}{\mathrm{T_\text{ref}}^{\beta}}$
+\form#44:$k(T) = A * \left(\frac{T}{\mathrm{T_0}}\right)^\beta \exp\left(-\frac{E_a}{\mathrm{R}T} + D T\right)$
+\form#45:$\mathrm{T_0}$
+\form#46:\[ \begin{array}{ccc}\toprule \text{Parameter} & \text{reduced parameter} \\\midrule A & A \mathrm{T_0}^\beta \\ \beta & \beta \\ E_a & \frac{E_a}{\mathrm{R}}\\ D & D\\\bottomrule \end{array} \]
+\form#47:$\frac{T}{\mathrm{T_0}}$
+\form#48:$ \left(kg/sec/m^3\right)$
+\form#49:$ \frac{\partial \dot{\omega}}{dT} [\left(kg/sec/m^3/K\right)]$
+\form#50:$ \left(mole/sec/m^3\right)$
+\form#51:$ \frac{\partial \dot{\omega}}{dT} [\left(mole/sec/m^3/K\right)]$
+\form#52:$\frac{E_a}{\mathrm{R}}$
+\form#53:\[ \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \exp\left(-\frac{E_a}{\mathrm{R}T}\right) \]
+\form#54:\[ \frac{\partial\alpha(T)}{\partial T} = \alpha(T) \left(\frac{\beta}{T} + \frac{E_a}{\mathrm{R}T^2}\right) \]
+\form#55:$a = \frac{A}{\mathrm{T_\text{ref}}^\beta}$
+\form#56:$F = 1$
+\form#57:\[ F = 1 \]
+\form#58:\[ \begin{split} \frac{\partial F}{\partial T} & = 0\\[10pt] \frac{\partial F}{\partial c_i} & = 0 \end{split} \]
+\form#59:$k(T,[M])$
+\form#60:\[ k(T,[M]) = \chi([M],\alpha(T)) \]
+\form#61:$\chi$
+\form#62:$\alpha$
+\form#63:\[ k(T,[M]) = \alpha(T)\times \sum_i\epsilon_ic_i \]
+\form#64:\[ \begin{split} \frac{\partial k(T,[M])}{\partial T} & = \frac{\partial \alpha(T)}{\partial T} \sum_i\epsilon_ic_i \\[10pt] \frac{\partial k(T,[M])}{\partial c_i} & = \alpha(T) \epsilon_i \end{split} \]
+\form#65:\[ \log_{10}\left(F\right) = \frac{\log_{10}\left(F_{\text{cent}}\right)} {1 + \left[ \frac{\log_{10}\left(P_r\right) + c} {n - d \cdot \left[\log_{10}\left(P_r\right) + c\right]} \right]^2} \]
+\form#66:\[ \begin{split} P_r & = [\mathrm{M}] \frac{k_0}{k_\infty} \\ n & = 0.75 - 1.27 \log_{10}\left(F_{\text{cent}}\right) \\ c & = - 0.40 - 0.67 \log_{10}\left(F_{\text{cent}}\right) \\ d & = 0.14 \\ F_{\text{cent}} & = (1 - \alpha) \cdot \exp\left(-\frac{T}{T^{***}}\right) + \alpha \cdot \exp\left(-\frac{T}{T^*}\right) + \exp\left(-\frac{T^{**}}{T}\right) \end{split} \]
+\form#67:\[ \begin{split} \frac{\partial F_{\text{cent}}}{\partial T} & = \frac{\alpha - 1}{T^{***}} \cdot \exp\left(-\frac{T}{T^{***}}\right) - \frac{\alpha}{T^{*}} \cdot \exp\left(-\frac{T}{T^*}\right) + \frac{T^{**}}{T^{2}} \exp\left(-\frac{T^{**}}{T}\right) \\ \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} & = \frac{1}{\ln(10) F_\text{cent}}\frac{\partial F_\text{cent}}{\partial T} \\ \frac{\partial n}{\partial T} & = - 1.27 \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} \\ \frac{\partial c}{\partial T} & = - 0.67 \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} \\\\ \frac{\partial P_r}{\partial T} & = P_r \left(\frac{\partial k_0}{\partial T} \frac{1}{k_0} - \frac{\partial k_\infty}{\partial T} \frac{1}{k_\infty} \right)\\ \frac{\partial \log_{10}(P_r)}{\partial T} & = \frac{1}{\ln(10) P_r} \frac{\partial P_r}{\partial T} \\\\ \frac{\partial \log_{10}(F)}{\partial T} & = \frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} \frac{1}{1 + \left[\frac{\log_{10}\left(P_r\right) + c} {n - d\left(\log_{10}\left(P_r\right) + c\right)}\right]^2} - \log_{10}\left(F_\text{cent}\right) 2\left[\frac{\log_{10}\left(P_r\right) + c}{n - d \left[\log_{10}\left(P_r\right) + c\right]}\right]^2 \left[\frac{\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}} {\log_{10}\left(P_r\right) + c} - \frac{\frac{\partial n}{\partial T} - d \left[\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}\right]} {n - d \left[\log_{10}\left(P_r\right) + c\right]} \right] \frac{1}{\left[1 + \left[\frac{\log_{10}\left(P_r\right) + c} {n - d\left(\log_{10}\left(P_r\right) + c\right)} \right]^2 \right]^2} \\ & = \log_{10}\left(F\right) \left[\frac{\partial \log_{10}\left(F_\text{cent}\right)}{\partial T} \frac{1}{F_\text{cent}} - 2\left[\frac{\log_{10}\left(P_r\right) + c}{n - d \left[\log_{10}\left(P_r\right) + c\right]}\right]^2 \left[\frac{\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}} {\log_{10}\left(P_r\right) + c} - \frac{\frac{\partial n}{\partial T} - d \left[\frac{\partial \log_{10}\left(P_r\right)}{\partial T} + \frac{\partial c}{\partial T}\right]} {n - d \left[\log_{10}\left(P_r\right) + c\right]} \right] \frac{1}{1 + \left[\frac{\log_{10}\left(P_r\right) + c} {n - d\left(\log_{10}\left(P_r\right) + c\right)} \right]^2} \right] \\ \frac{\partial F}{\partial T} & = \ln(10) F \frac{\partial \log_{10}\left(F\right)}{\partial T} \\\\\\\\ \frac{\partial P_r}{\partial c_i} & = \frac{k_0}{k_\infty} \\ \frac{\partial \log_{10}(P_r)}{\partial c_i} & = \frac{1}{\ln(10) P_r} \frac{\partial P_r}{\partial c_i} = \frac{1}{\ln(10) [\mathrm{M}]}\\\\ \frac{\partial \log_{10}\left(F\right)}{\partial c_i} & = -\frac{\log_{10}^2\left(F\right)}{\log_{10}\left(F_\text{cent}\right)} \frac{\partial \log_{10}\left(P_r\right)}{\partial c_i} \left(1 - \frac{1}{n - d\left[\log_{10}\left(P_r\right) + c\right]}\right) \left(\log_{10}\left(P_r\right) + c\right) \\ \frac{\partial F}{\partial c_i} & = \ln(10) F \frac{\partial \log_{10}\left(F\right)}{\partial c_i} \end{split} \]
+\form#68:$T^{*}$
+\form#69:$T^{**}$
+\form#70:$T^{***}$
+\form#71:\[ \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta \exp\left(-\frac{E_a}{\mathrm{R}T} + D T\right) \]
+\form#72:\[ \frac{\partial\alpha(T)}{\partial T} = \alpha(T)\left(D + \frac{\beta}{T} + \frac{E_a}{\mathrm{R}T^2}\right) \]
+\form#73:\[ \frac{\partial c}{\partial t} = k \prod_{s \in \text{reactants}} c_s^{l_s} \]
+\form#74:$l$
+\form#75:$s$
+\form#76:\[ \unit{[k] = [M]^{m - 1} s^{-1}} \]
+\form#77:$m$
+\form#78:\[ m = \sum_{s \in \text{reactants}} l_s \]
+\form#79:$l_s = -\nu_s$
+\form#80:$\nu_s$
+\form#81:\[ \begin{array}{c} \ce{a A + b B -> c C + d D} \\ m = a + b \end{array} \]
+\form#82:\[ \alpha(T) = A \left(\frac{T}{\mathrm{T_\text{ref}}}\right)^\beta\exp\left(-\frac{E_a}{\mathrm{R}T} + D T\right) \]
+\form#83:\[ \begin{array}{lcccc}\toprule & A & \beta & E_a & D \\\midrule \text{Elementary} & \unit{\left(m^3mol^{-1}\right)^{m-1}s^{-1}} & - & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\ \text{Duplicate} & \unit{\left(m^3mol^{-1}\right)^{m-1}s^{-1}} & - & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\ \text{Three body} & \unit{\left(m^3mol^{-1}\right)^{m}s^{-1}} & - & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\ \text{Falloff}\quad k_0 & \unit{\left(m^3mol^{-1}\right)^{m}s^{-1}} & - & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\ \text{Falloff}\quad k_\infty & \unit{\left(m^3mol^{-1}\right)^{m-1}s^{-1}} & - & \unit{J\,mol^{-1}} & \unit{K^{-1}} \\\bottomrule \end{array} \]
+\form#84:\[ \begin{array}{cccc}\toprule \alpha & T^* & T^{**} & T^{***} \\\midrule - & \unit{K} & \unit{K} & \unit{K} \\\bottomrule \end{array} \]
+\form#85:$A$
+\form#86:$\frac{Cp}{\mathrm{R}}$
+\form#87:\[ \frac{Cp}{\mathrm{R}} = \frac{a_0}{T^2} + \frac{a_1}{T} + a_2 + a_3 T + a_4 T^2 + a_5 T^3 + a_6 T^4 \]
+\form#88:$\frac{h}{\mathrm{R}T}$
+\form#89:\[ \frac{h}{\mathrm{R}T} = a0 + \frac{a_1}{2} T + \frac{a_2}{3} T^2 + \frac{a_3}{4} T^3 + \frac{a_4}{5} T^4 + \frac{a_5}{T} \]
+\form#90:$\frac{s}{\mathrm{R}}$
+\form#91:\[ \frac{s}{\mathrm{R}} = a_0 \ln(T) + a_1 T + \frac{a_2}{2} T^2 + \frac{a_3}{3} T^3 + \frac{a_4}{4} T^4 + a_6 \]
+\form#92:$\frac{g}{\mathrm{R}T} = \frac{h}{\mathrm{R}T} - \frac{s}{R}$
+\form#93:\[ \frac{g}{\mathrm{R}T} = \frac{a_5}{T} - a0 \ln(T) + (a_0 - a_6) - \frac{a_1}{2} T - \frac{a_2}{6} T^2 - \frac{a_3}{12} T^3 - \frac{a_4}{20} T^4 \]
+\form#94:$\frac{\partial\left(\frac{g}{\mathrm{R}T}\right)}{\partial T} = \frac{\partial\left(\frac{h}{\mathrm{R}T} - \frac{s}{R}\right)}{\partial T}$
+\form#95:\[ \frac{g}{\mathrm{R}T} = - \frac{a_5}{T^2} - \frac{a_0}{T} - \frac{a_1}{2} - \frac{a_2}{3} T - \frac{a_3}{4} T^2 - \frac{a_4}{5} T^3 \]
+\form#96:$\frac{C_p}{\mathrm{R}}$
+\form#97:$\frac{s}{\mathrm{R}T}$
+\form#98:$a_0$
+\form#99:$a_8$
+\form#100:\[ \frac{h}{\mathrm{R}T} = -\frac{a_0}{T^2} + \frac{a_1}{T} \ln(T) + a2 + \frac{a_3}{2} T + \frac{a_4}{3} T^2 + \frac{a_5}{4} T^3 + \frac{a_6}{5} T^4 + \frac{a_7}{T} \]
+\form#101:\[ \frac{s}{\mathrm{R}} = -\frac{a_0}{2T^2} - \frac{a_1}{T} + a_2 \ln(T) + a_3 T + \frac{a_4}{2} T^2 + \frac{a_5}{3} T^3 + \frac{a_6}{4} T^4 + a_8 \]
+\form#102:\[ \frac{h}{\mathrm{R}T} = -\frac{a_0}{T^2} + \frac{a_1}{T} \ln(T) + a2 + \frac{a_3}{2} T + \frac{a_4}{3} T^2 + \frac{a_5}{4} T^3 + \frac{a_6}{5} T^4 + \frac{a_8}{T} \]
+\form#103:\[ \frac{s}{\mathrm{R}} = -\frac{a_0}{2T^2} - \frac{a_1}{T} + a_2 \ln(T) + a_3 T + \frac{a_4}{2} T^2 + \frac{a_5}{3} T^3 + \frac{a_6}{4} T^4 + a_9 \]
+\form#104:\[ \frac{g}{\mathrm{R}T} = -\frac{a_0}{2T^2} - \frac{a_1 + a_8}{T} + \frac{a_1}{T} \ln(T) - a2 \ln(T) + (a_2 - a_9) - \frac{a_3}{2} T - \frac{a_4}{6} T^2 - \frac{a_5}{12} T^3 - \frac{a_6}{20} T^4 \]
+\form#105:\[ \frac{g}{\mathrm{R}T} = \frac{a_0}{T^3} + \frac{a_1 + a_8}{T^2} + a_1 \ln(T) + a_1 - \frac{a2}{T} - \frac{a_3}{2} - \frac{a_4}{3} T - \frac{a_5}{4} T^2 - \frac{a_6}{5} T^3 \]
+\form#106:\[ C^{trans}_{v,s} \equiv \frac{\partial e^{trans}_s}{\partial T} = \frac{3}{2} R_s \]
+\form#107:\[ \frac{C^{trans}_{v,s}}{\mathrm{R}} = \frac{3}{2} \]
+\form#108:\[ C^{tr}_{v,s} \equiv C^{trans}_{v,s} + C^{rot}_{v,s} \]
+\form#109:\[ C^{rot}_{v,s} \equiv C^{tr}_{v,s} - C^{trans}_{v,s} \]
+\form#110:\[ \frac{C^{rot}_{v,s}}{\mathrm{R}} \equiv \frac{C^{tr}_{v,s}}{\mathrm{R}} - \frac{C^{trans}_{v,s}}{\mathrm{R}} \]
+\form#111:\[ LJ(r_{ij}) = 4\epsilon_{ij} \left[\left(\frac{\sigma_{ij}}{r}\right)^{12} - \left(\frac{\sigma_{ij}}{r}\right)^6\right] \]
+\form#112:$\epsilon$
+\form#113:$\sigma$
+\form#114:\[ \epsilon_{ij} = \sqrt{\epsilon_i \epsilon_j} \]
+\form#115:\[ \sigma_{ij} = \frac{\sigma_i + \sigma_j}{2} \]
+\form#116:\[ \left(\frac{M_r}{M_s}\right)^{1/4} \]
+\form#117:\[ \sqrt{8\left( 1 + \frac{M_r}{M_s} \right)} \]
+\form#118:$\frac{\epsilon}{\mathrm{k_B}}$
+\form#119:\[ a = a \times c \]
+\form#120:\[ b = \frac{b + d}{c} \]
+\form#121:\[ a = \frac{a}{c} \]
+\form#122:\[ b = \frac{b - d}{c} \]
+\form#123:\[ b = b + d \]
+\form#124:\[ [\mathrm{meter,kilogram,second,ampere,kelvin,mole,candela,radian}] \]
+\form#125:$\mathrm{m} + \mathrm{A} - \mathrm{s}$
+\form#126:\[ \mathrm{Units}_1 + \mathrm{Units}_2 \Rightarrow \left\{\begin{array}{l} \mathrm{InSI}_1 + \mathrm{InSI}_2\\ \mathrm{Converter}_1 \times \mathrm{Converter}_2 \end{array}\right. \]
+\form#127:\[ \mathrm{Units}_1 - \mathrm{Units}_2 \Rightarrow \left\{\begin{array}{l} \mathrm{InSI}_1 - \mathrm{InSI}_2\\ \frac{\mathrm{Converter}_1}{\mathrm{Converter}_2} \end{array}\right. \]
+\form#128:\[ \left.\begin{array}{l} \mathrm{SI} = f_1 \times \mathrm{unit}_1 + t_1 \\ \mathrm{SI} = f_2 \times \mathrm{unit}_2 + t_2 \end{array}\right\} \Rightarrow \mathrm{unit}_2 = \mathrm{unit}_1 \times \frac{f_1}{f_2} + \frac{t_1 - t_2}{f_2} \]
+\form#129:$_1$
+\form#130:$_2$
+\form#131:$\frac{f_1}{f_2}$
+\form#132:$\frac{t_1 - t_2}{f_2}$
+\form#133:\[ <p> = <p> + \left(<p>_{iUnit} \times s_u \times p_u\right) \]
+\form#134:$<p>$
+\form#135:$p_u$
+\form#136:$<p>_{iUnit}$
+\form#137:\[ (c) = (c) \times \left( pr_{iPre} \times (c)_{iUnit}\right)^{s_u \times p_u} \]
+\form#138:$(c)$
+\form#139:$(c)_{iUnit}$
+\form#140:$pr_{iPre}$
+\form#141:$s_u$
+\form#142:\[ (a,b)^i =\left\{\begin{array}{ll} (a^i,b) & \mathrm{if}\ i\ \mathrm{equal\ 1} \\ (a^i,0) & \mathrm{else} \end{array}\right. \]
