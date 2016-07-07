@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = antioch.dox antioch.page txt_common fig_common
+EXTRA_DIST = antioch.sty antioch.dox antioch.page txt_common fig_common
 
 DISTCLEANFILES  = antioch.dox
 DISTCLEANFILES += Makefile
