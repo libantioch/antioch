@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!-- Reaction rate parameters from: -->
+<!-- Forman Williams -->
+<ctml>
+  <reactionData id="reduced_hydrogen_mechanism">
+    <!-- reaction 01  -->
+    <reaction reversible="yes" type="Elementary" id="reaction01">
+      <equation>H + O2 [=] OH + O</equation>
+      <rateCoeff>
+        <Kooij>
+          <A units="cm3/mol/s">3.52e+16</A>
+          <b>-0.7</b>
+          <E units="kJ/mol">71.4</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>H:1 O2:1</reactants>
+      <products>OH:1 O:1</products>
+    </reaction>
+
+    <reaction reversible="yes" type="Elementary" id="reaction02">
+      <equation>H2 + O [=] OH + H</equation>
+      <rateCoeff>
+        <Kooij>
+          <A units="cm3/mol/s">5.06e+4</A>
+          <b>2.7</b>
+          <E units="kJ/mol">26.3</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>H2:1 O:1</reactants>
+      <products>OH:1 H:1</products>
+    </reaction>
+
+    <reaction reversible="yes" type="Elementary" id="reaction03">
+      <equation>H2 + OH [=] H2O + H</equation>
+      <rateCoeff>
+        <Kooij>
+          <A units="cm3/mol/s">1.17e+9</A>
+          <b>1.3</b>
+          <E units="kJ/mol">15.2</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>H2:1 OH:1</reactants>
+      <products>H2O:1 H:1</products>
+    </reaction>
+
+    <reaction reversible="yes" type="ThreeBody" id="reaction10">
+      <equation>H + O2 + M [=] HO2 + M</equation>
+      <rateCoeff>
+        <Kooij>
+          <A units="cm6/mol2/s">5.75e+19</A>
+          <b>-1.4</b>
+          <E units="kJ/mol">1.0e-16</E>
+        </Kooij>
+        <efficiencies default="1.0">H2:2.5 H2O:12.0 CO:1.9 CO2:2.4 Ar:0.7
+          He:0.7</efficiencies>
+      </rateCoeff>
+      <reactants>H:1 O2:1</reactants>
+      <products>HO2:1</products>
+    </reaction>
+
+    <reaction reversible="yes" type="Elementary" id="reaction12b">
+      <equation>H2 + O2 [=] HO2 + H</equation>
+      <rateCoeff>
+        <Kooij>
+          <A units="cm3/mol/s">1.4e+14</A>
+          <b>1.0e-16</b>
+          <E units="kJ/mol">249.5</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>H2:1 O2:1</reactants>
+      <products>HO2:1 H:1</products>
+    </reaction>
+  </reactionData>
+</ctml>
