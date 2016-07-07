@@ -41,6 +41,13 @@ Antioch uses an Autotools build system, so typical GNU build commands are used.
 4. make check (note parallel-tests are supported)
 5. make install
 
+Documentation
+=============
+
+Documentation for various versions of Antioch can be found below:
+
+- [v0.4.0](https://libantioch.github.io/antioch/v0.4.0/html/)
+
 Discussion and Development
 ==========================
 
