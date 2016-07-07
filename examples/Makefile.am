@@ -1,9 +1,11 @@
-EXTRA_DIST = 
+EXTRA_DIST = five_rxn.xml
+EXTRA_DIST += nasa7_thermo.xml
 
 examplesdir = $(top_srcdir)/examples
 
 examples_PROGRAMS  =
 examples_PROGRAMS += antioch_init
+examples_PROGRAMS += antioch_kinetics
 
 AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
@@ -33,6 +35,7 @@ pkginclude_HEADERS =
 # CPP TESTS
 #
 antioch_init_SOURCES = antioch_init.C
+antioch_kinetics_SOURCES = antioch_init.C
 
 #Define examples to actually be run
 TESTS  =
