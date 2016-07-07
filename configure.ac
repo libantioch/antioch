@@ -229,6 +229,7 @@ AC_CONFIG_FILES([
   share/Makefile
   src/Makefile
   test/Makefile
+  examples/Makefile
 ])
 
 dnl-----------------------------------------------
