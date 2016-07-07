@@ -156,29 +156,14 @@ AC_SUBST(antioch_optional_test_LIBS)
 
 
 dnl--------------------------
-dnl Even if no dependency needed it,
-dnl C++11 makes our asserts nicer,
-dnl so let's try and enable it.
+dnl Basic C++11 support is now required for Antioch.
+dnl We'll test separately for required dependencies of some of our
+dnl optional features just in case the user's compiler doesn't have
+dnl full support.
 dnl--------------------------
-AC_ARG_ENABLE(cxx11,
-              AC_HELP_STRING([--enable-cxx11],
-                             [build with C++11 support]),
-	      [case "${enableval}" in
-	        yes)  enablecxx11=yes ;;
-	         no)  enablecxx11=no ;;
-	          *)  AC_MSG_ERROR(bad value ${enableval} for --enable-cxx11) ;;
-	       esac],
-	       [enablecxx11=optional])
-
-if (test x$enablecxx11 = xyes); then
-  AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
-  AX_CXX_AUTO_THIS(optional)
-  AX_CXX_STATIC_ASSERT(optional)
-elif (test x$enablecxx11 = xoptional); then
-  AX_CXX_COMPILE_STDCXX_11(noext, optional)
-  AX_CXX_AUTO_THIS(optional)
-  AX_CXX_STATIC_ASSERT(optional)
-fi
+AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
+AX_CXX_AUTO_THIS(optional)
+AX_CXX_STATIC_ASSERT(optional)
 
 
 dnl--------------------------
