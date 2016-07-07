@@ -141,7 +141,6 @@ int tester(const std::string& input_name, Scalar max_reaction_rate, const std::s
 {
   using std::abs;
   using std::isfinite;
-  using std::isnan;
 
   std::vector<std::string> species_str_list;
   const unsigned int n_species = 5;
@@ -205,7 +204,7 @@ int tester(const std::string& input_name, Scalar max_reaction_rate, const std::s
 	  // reactions are allowed to be infinite unless user-limited,
 	  // but in this test case we don't have any competing
 	  // ridiculously-stiff reactions so we shouldn't get a NaN.
-          if (isnan(omega_dot[s]))
+          if (Antioch::has_nan(omega_dot[s]))
 	    {
 	      return_flag = 1;
 	      std::cerr << "Error: omega_dot(" << chem_mixture.chemical_species()[s]->species()

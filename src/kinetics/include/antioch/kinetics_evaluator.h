@@ -210,7 +210,7 @@ namespace Antioch
         // opposite directions to the same rate, then NaN is the
         // correct output, and hopefully our user code has some way to
         // recover from that.
-//        antioch_assert(!isnan(rate));
+//        antioch_assert(!has_nan(rate));
         
         // reactant contributions
         for (unsigned int r = 0; r < reaction.n_reactants(); r++)
