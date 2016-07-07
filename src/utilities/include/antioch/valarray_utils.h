@@ -261,7 +261,7 @@ eval_index(const VectorT& vec, const std::valarray<unsigned int>& index)
 template <typename T>
 inline
 bool
-isnan (const std::valarray<T>& in)
+has_nan (const std::valarray<T>& in)
 {
   using std::isnan;
 

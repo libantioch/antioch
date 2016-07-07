@@ -46,10 +46,11 @@
 #include "antioch/kinetics_parsing.h" // reset_parameter_of_rate
 
 //C++
-#include <string>
-#include <vector>
+#include <cmath>
 #include <iostream>
 #include <limits>
+#include <string>
+#include <vector>
 
 namespace Antioch
 {
@@ -788,7 +789,7 @@ namespace Antioch
                        h_RT_minus_s_R[_product_ids[s]] );
       }
 
-    antioch_assert(!isnan(exppower));
+    antioch_assert(!has_nan(exppower));
 
     return ant_pow( P0_RT, static_cast<CoeffType>(this->gamma()) ) * ant_exp(exppower);
   }
@@ -1041,7 +1042,7 @@ namespace Antioch
     using std::abs;
 
     StateType kfwd = this->compute_forward_rate_coefficient(molar_densities,conditions);
-    antioch_assert(!isnan(kfwd));
+    antioch_assert(!has_nan(kfwd));
 
     StateType kfwd_times_reactants = kfwd;
 
@@ -1052,12 +1053,12 @@ namespace Antioch
           ant_pow( molar_densities[this->reactant_id(ro)],
             this->reactant_partial_order(ro));
       }
-    antioch_assert(!isnan(kfwd_times_reactants));
+    antioch_assert(!has_nan(kfwd_times_reactants));
 
     if(_reversible)
     {
       StateType Keq = this->equilibrium_constant( P0_RT, h_RT_minus_s_R );
-      antioch_assert(!isnan(Keq));
+      antioch_assert(!has_nan(Keq));
 
       StateType kbkwd_times_products = kfwd/Keq;
 
@@ -1076,7 +1077,7 @@ namespace Antioch
       kbkwd_times_products =
 	Antioch::if_else(is_nonzero, kbkwd_times_products,
                          Antioch::constant_clone(Keq, this->_max_rate));
-      antioch_assert(!isnan(kbkwd_times_products));
+      antioch_assert(!has_nan(kbkwd_times_products));
 
       return kfwd_times_reactants - kbkwd_times_products;
     }
@@ -1261,13 +1262,13 @@ namespace Antioch
       kbkwd_times_products =
 	Antioch::if_else(is_nonzero, kbkwd_times_products,
                          Antioch::constant_clone(keq, this->_max_rate));
-      antioch_assert(!isnan(kbkwd_times_products));
+      antioch_assert(!has_nan(kbkwd_times_products));
 
       // If our rate is maxed out then our derivatives are zero.
       dRbkwd_dT =
 	Antioch::if_else(is_nonzero, dRbkwd_dT,
                          Antioch::zero_clone(keq));
-      antioch_assert(!isnan(dRbkwd_dT));
+      antioch_assert(!has_nan(dRbkwd_dT));
 
       for (unsigned int s = 0; s < this->n_species(); s++)
         {

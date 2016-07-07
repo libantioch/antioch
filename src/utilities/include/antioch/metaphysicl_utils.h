@@ -98,7 +98,7 @@ inline
 typename Antioch::enable_if_c<
   is_metaphysicl<T>::value,
   bool>::type
-isnan (const T& in)
+has_nan (const T& in)
 {
   using std::isnan;
 

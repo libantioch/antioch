@@ -64,7 +64,7 @@ struct valarray_library_tag : public numeric_library_tag {};
 template <typename T>
 inline
 bool
-isnan (const std::valarray<T>& in);
+has_nan (const std::valarray<T>& in);
 
 }
 

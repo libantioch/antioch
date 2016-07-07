@@ -27,6 +27,9 @@
 #ifndef ANTIOCH_METAPROGRAMMING_DECL_H
 #define ANTIOCH_METAPROGRAMMING_DECL_H
 
+// C++
+#include <cmath>   // For isnan
+
 namespace Antioch
 {
   // A workaround for trying to use commas in arguments to macros
@@ -253,6 +256,78 @@ namespace Antioch
   template <typename T>
   inline
   bool disjunction(const T & vec);
+
+#define ANTIOCH_PLAIN_SCALAR(Type) \
+ \
+inline \
+Type \
+max (const Type& in) { return in; } \
+ \
+inline \
+Type \
+min (const Type& in) { return in; } \
+ \
+inline \
+bool \
+has_nan (const Type & in) \
+{ \
+  using std::isnan; \
+ \
+  return isnan(in); \
+} \
+\
+template <> \
+inline \
+Type if_else(bool condition, \
+             Type if_true, \
+             Type if_false) \
+{ \
+  if (condition) \
+    return if_true; \
+  else \
+    return if_false; \
+} \
+ \
+template <> \
+struct has_size<Type> \
+{ \
+  const static bool value = false; \
+}; \
+ \
+template <> \
+struct return_auto<Type> \
+{ \
+  const static bool value = false; \
+}; \
+ \
+template <> \
+struct value_type<Type> \
+{ \
+  typedef Type type; \
+}; \
+ \
+template <> \
+struct raw_value_type<Type> \
+{ \
+  typedef Type type; \
+}; \
+ \
+template <typename NewScalar> \
+struct rebind<Type, NewScalar> \
+{ \
+  typedef NewScalar type; \
+}
+
+ANTIOCH_PLAIN_SCALAR(float);
+ANTIOCH_PLAIN_SCALAR(double);
+ANTIOCH_PLAIN_SCALAR(long double);
+ANTIOCH_PLAIN_SCALAR(bool);
+ANTIOCH_PLAIN_SCALAR(short);
+ANTIOCH_PLAIN_SCALAR(int);
+ANTIOCH_PLAIN_SCALAR(long);
+ANTIOCH_PLAIN_SCALAR(unsigned short);
+ANTIOCH_PLAIN_SCALAR(unsigned int);
+ANTIOCH_PLAIN_SCALAR(unsigned long);
 
 } // end namespace Antioch
 
