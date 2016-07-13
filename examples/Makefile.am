@@ -1,10 +1,5 @@
 EXTRA_DIST = 
 
-examplesdir = $(top_srcdir)/examples
-
-examples_PROGRAMS  =
-examples_PROGRAMS += antioch_init
-
 AM_CPPFLAGS  =
 AM_CPPFLAGS += -I$(top_srcdir)/src/core/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/units/include
@@ -32,7 +27,9 @@ pkginclude_HEADERS =
 #
 # CPP TESTS
 #
+antioch_initdir = $(prefix)/share/examples/antioch_init
 antioch_init_SOURCES = antioch_init.C
+antioch_init_DATA    = ${antioch_init_SOURCES}
 
 #Define examples to actually be run
 TESTS  =
