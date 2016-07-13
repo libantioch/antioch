@@ -28,6 +28,7 @@ pkginclude_HEADERS =
 # CPP TESTS
 #
 antioch_initdir = $(prefix)/share/examples/antioch_init
+antioch_init_PROGRAMS = antioch_init
 antioch_init_SOURCES = antioch_init.C
 antioch_init_DATA    = ${antioch_init_SOURCES}
 
