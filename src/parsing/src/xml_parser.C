@@ -41,7 +41,6 @@
 // C++
 #include <sstream>
 #include <limits>
-#include <regex>
 
 namespace Antioch
 {
@@ -304,11 +303,27 @@ namespace Antioch
        // find the falloff block
        // are we threebody?
        // if equation contains (+M)
-       const std::string eq = this->reaction_equation();
+       const std::string & eq = this->reaction_equation();
        // <reaction><rateCoeff><falloff type=''/></rateCoeff></reaction>
        std::string Lind = "LindemannFalloff";
        std::string Troe = "TroeFalloff";
-       if(std::regex_search(eq,std::regex("\\(\\s*\\+\\s*M\\s*\\)")))
+
+       // Travis CI gives us regex errors so we'll fall back on this:
+       const char * searchfor = "(+M)";
+       for (std::size_t pos = eq.find('('); pos < eq.size() && *searchfor; ++pos)
+         {
+           if (eq[pos] == *searchfor)
+             {
+               ++searchfor;
+               continue;
+             }
+
+           if (eq[pos] != ' ')
+             break;
+         }
+
+       // If we found everything then *searchfor is NULL
+       if (!*searchfor)
        {
           Lind += "ThreeBody";
           Troe += "ThreeBody";
