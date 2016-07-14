@@ -122,6 +122,8 @@ namespace Antioch
         kfwd += (*this->_forward_rate[ir])(conditions);
       }
 
+    antioch_assert(!has_nan(kfwd));
+
     return kfwd;
   }
 
@@ -147,6 +149,8 @@ namespace Antioch
         kfwd += kfwd_tmp;
         dkfwd_dT += dkfwd_dT_tmp;
       }
+
+    antioch_assert(!has_nan(kfwd));
 
     //dk_dCi = 0
     antioch_assert_equal_to(dkfwd_dX.size(),this->n_species());
