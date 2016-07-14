@@ -585,19 +585,28 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   for(unsigned int ir = 0; ir < k.size(); ir++)
   {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
-     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] > tol)
+
+     Scalar antioch_rate = reac->compute_forward_rate_coefficient(molar_densities,conditions);
+
+     if(!(std::abs(k[ir] - antioch_rate)/k[ir] < tol))
      {
-        std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
                   << "Error in kinetics comparison\n"
+                  << *reac << '\n'
                   << "reaction #" << ir << "\n"
                   << "temperature: " << T << " K" << "\n"
                   << "theory: " << k[ir] << "\n"
-                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,conditions) << "\n"
-                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] << "\n"
+                  << "calculated: " << antioch_rate << "\n"
+                  << "relative error = " << std::abs(k[ir] - antioch_rate)/k[ir] << "\n"
                   << "tolerance = " <<  tol
                   << std::endl;
         return_flag = 1;
+     }
+     else
+     {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Success in kinetics comparison\n"
+                  << *reac << std::endl;
      }
   }
 
