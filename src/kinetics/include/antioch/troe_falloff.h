@@ -112,7 +112,7 @@ namespace Antioch
   public:
     TroeFalloff(const unsigned int nspec, const CoeffType alpha=0,
                 const CoeffType T3 = 0, const CoeffType T1 = 0,
-                const CoeffType T2 = 1e50);
+                const CoeffType T2 = std::numeric_limits<CoeffType>::max());
 
     ~TroeFalloff();
 
@@ -238,19 +238,23 @@ namespace Antioch
                                                const StateType &k0, 
                                                const StateType &kinf) const
   {
+    StateType F_cent = this->Fcent(T);  // = 0
+    antioch_assert(!has_nan(F_cent));
 
-    //compute log(Fcent) once
-    StateType logFcent = ant_log(this->Fcent(T));
+    //compute log(F_cent) once.
+    // This may give us -infinity, so we'll have to consider that case
+    // carefully to avoid returning NaN.
+    StateType logFcent = ant_log(F_cent);  // = -huge
 
     // Pr = [M] * k0/kinf
     ANTIOCH_AUTO(StateType) Pr = M * k0/kinf;
     // c = -0.4 - 0.67 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    StateType  c = - CoeffType(0.4L) - _c_coeff * logFcent;
+    StateType  c = - CoeffType(0.4L) - _c_coeff * logFcent;  // = _c_coeff*huge
 
     // n = 0.75 - 1.27 * log10(Fcent)
     // Note log10(x) = (1.0/log(10))*log(x)
-    ANTIOCH_AUTO(StateType) n = CoeffType(0.75L) - _n_coeff * logFcent;
+    ANTIOCH_AUTO(StateType) n = CoeffType(0.75L) - _n_coeff * logFcent;  // = _n_coeff*huge
     ANTIOCH_AUTO(StateType) d = constant_clone(T,CoeffType(0.14L));
 
     StateType log10Pr = Constants::log10_to_log<CoeffType>() * ant_log(Pr);
@@ -260,7 +264,20 @@ namespace Antioch
     ANTIOCH_AUTO(StateType) logF =
       logFcent/(1 + ant_pow(((log10Pr + c)/(n - d*(log10Pr + c) )),2) );
 
-    return ant_exp(logF);
+    // logF
+    // = -huge/(pow(_c_coeff*huge/(_n_coeff*huge-d*_c_coeff*huge),2))
+    // = -huge/(pow(_c_coeff/(_n_coeff-d*_c_coeff),2))
+
+    StateType returnval = ant_exp(logF);
+
+    typename Antioch::rebind<StateType, bool>::type Fcent_is_nonzero = (F_cent != Antioch::zero_clone(T));
+
+    returnval = Antioch::if_else(Fcent_is_nonzero, returnval, Antioch::zero_clone(T));
+    // = exp(-huge) = 0
+
+    antioch_assert(!has_nan(returnval));
+
+    return returnval;
   }
 
 
@@ -273,7 +290,8 @@ namespace Antioch
     // Fcent = (1.-alpha)*exp(-T/T***) + alpha * exp(-T/T*) + exp(-T**/T)
     StateType Fc = (1 - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
 
-    if(_T2 != 1e50)Fc += ant_exp(-_T2/T);
+    if(_T2 != std::numeric_limits<CoeffType>::max())
+      Fc += ant_exp(-_T2/T);
 
     return Fc;
   }
@@ -288,7 +306,7 @@ namespace Antioch
     Fc = (1 - _alpha) * ant_exp(-T/_T3) + _alpha * ant_exp(-T/_T1);
     dFc_dT = (_alpha - 1)/_T3 * ant_exp(-T/_T3) - _alpha/_T1 * ant_exp(-T/_T1);
 
-    if(_T2 != 1e50)
+    if(_T2 != std::numeric_limits<CoeffType>::max())
       {
         Fc += ant_exp(-_T2/T);
         dFc_dT += _T2/(T*T) * ant_exp(-_T2/T);
@@ -328,6 +346,8 @@ namespace Antioch
     StateType Fcent = Antioch::zero_clone(T);
     StateType dFcent_dT = Antioch::zero_clone(T);
     this->Fcent_and_derivatives(T,Fcent,dFcent_dT);
+    antioch_assert(!has_nan(Fcent));
+
     StateType dlog10Fcent_dT = Constants::log10_to_log<CoeffType>()*dFcent_dT/Fcent;
     // Compute log(Fcent) once
     StateType logFcent = ant_log(Fcent);
@@ -354,6 +374,10 @@ namespace Antioch
       }
 
     F = ant_exp(logF);
+    typename Antioch::rebind<StateType, bool>::type Fcent_is_nonzero = (Fcent != Antioch::zero_clone(T));
+    F = Antioch::if_else(Fcent_is_nonzero, F, Antioch::zero_clone(T));
+    antioch_assert(!has_nan(F));
+
     dF_dT = F * dlogF_dT;
     for(unsigned int ip = 0; ip < dlog10Pr_dX.size(); ip++)
       {//dF_dX =  F * dlogF_dX
