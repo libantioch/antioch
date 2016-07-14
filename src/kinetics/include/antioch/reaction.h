@@ -839,7 +839,7 @@ namespace Antioch
   inline
   void Reaction<CoeffType,VectorCoeffType>::print( std::ostream& os ) const
   {
-    os << "# Gas-Phase Reaction \"" << _equation << "\":\n";
+    os << "# Gas-Phase Reaction \"" << _id << "\", \"" << _equation << "\":\n";
     if (this->n_species())
       {
         os << "#   reactants: ";
