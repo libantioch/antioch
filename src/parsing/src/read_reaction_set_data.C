@@ -402,8 +402,15 @@ namespace Antioch
                 accepted_unit.push_back("");
                 def_unit.set_unit(default_unit);
                 verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_rxn->equation(), "beta");
-                if(par_value == 0.)//if ARRHENIUS parameterized as KOOIJ, bad test, need to rethink it
+                if(par_value == 0. && //if ARRHENIUS parameterized as KOOIJ, bad test, need to rethink it
+                  // if a falloff, maybe the other reaction is a Kooij, we keep all the parameters, just in case
+                  !(my_rxn->type() == ReactionType::LINDEMANN_FALLOFF            ||
+                    my_rxn->type() == ReactionType::TROE_FALLOFF                 ||
+                    my_rxn->type() == ReactionType::LINDEMANN_FALLOFF_THREE_BODY ||
+                    my_rxn->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
+                  )
                   {
+                    
                     std::cerr << "In reaction " << parser->reaction_id() << "\n"
                               << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
                               << "and most certainly not a Kooij one\n"
@@ -669,6 +676,11 @@ namespace Antioch
             def_unit.set_unit(default_unit);
             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "alpha");
             my_fall_rxn->F().set_alpha(par_value * def_unit.get_SI_factor());
+            if(verbose)
+            {
+              std::cout  << "   alpha: " << par_value
+                         << " "      << def_unit.get_symbol() << std::endl;
+            }
 
             // T***
             if(!parser->Troe_T3_parameter(par_value,par_unit,default_unit))
@@ -681,6 +693,11 @@ namespace Antioch
             def_unit.set_unit(default_unit);
             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "T***");
             my_fall_rxn->F().set_T3(par_value * def_unit.get_SI_factor());
+            if(verbose)
+            {
+              std::cout  << "   T***:  " << par_value
+                         << " "      << def_unit.get_symbol() << std::endl;
+            }
 
             // T*
             if(!parser->Troe_T1_parameter(par_value,par_unit,default_unit))
@@ -692,6 +709,11 @@ namespace Antioch
             def_unit.set_unit(default_unit);
             verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "T*");
             my_fall_rxn->F().set_T1(par_value * def_unit.get_SI_factor());
+            if(verbose)
+            {
+              std::cout  << "   T*:    " << par_value
+                         << " "      << def_unit.get_symbol() << std::endl;
+            }
 
             // T** is optional
             if(parser->Troe_T2_parameter(par_value,par_unit,default_unit))
@@ -699,6 +721,11 @@ namespace Antioch
                 def_unit.set_unit(default_unit);
                 verify_unit_of_parameter(def_unit, par_unit, accepted_unit, my_fall_rxn->equation(), "T**");
                 my_fall_rxn->F().set_T2(par_value * def_unit.get_SI_factor());
+                if(verbose)
+                {
+                  std::cout  << "   T**:   " << par_value
+                             << " "      << def_unit.get_symbol() << std::endl;
+                }
               }
           }
 

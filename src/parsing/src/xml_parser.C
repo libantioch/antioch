@@ -41,6 +41,7 @@
 // C++
 #include <sstream>
 #include <limits>
+#include <regex>
 
 namespace Antioch
 {
@@ -135,8 +136,9 @@ namespace Antioch
     _default_unit[ParsingKey::TROE_F_TSSS]           = "K";
 
     //gri30
-     _gri_map[GRI30Comp::FALLOFF] = "falloff";
-     _gri_map[GRI30Comp::TROE]    = "Troe";
+     _gri_map[GRI30Comp::FALLOFF]      = "falloff";
+     _gri_map[GRI30Comp::FALLOFF_TYPE] = "type";
+     _gri_map[GRI30Comp::TROE]         = "Troe";
 
     this->initialize();
   }
@@ -245,10 +247,21 @@ namespace Antioch
             // first one, we need to set _rate_constant and _Troe, because they contain environments
             // we suppose that there is a rateCoeff environement
             // _rate_constant => <rateCoeff> <kin model> </kin model> </rateCoeff>
-            // _Troe          => <rateCoeff> <Troe> </Troe> </rateCoeff>
+            // _Troe          => <rateCoeff> <Troe> </Troe> </rateCoeff> || <rateCoeff><falloff type="Troe"></falloff></rateCoef>
             antioch_assert(_reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str()));
             _rate_constant = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(kinetics_model.c_str());
-            _Troe          = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(_map[ParsingKey::TROE_FALLOFF].c_str());
+            _Troe          = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(_map.at(ParsingKey::TROE_FALLOFF).c_str());
+            if(_Troe == NULL)
+            {
+              _Troe = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(_gri_map.at(GRI30Comp::FALLOFF).c_str());
+              if(_Troe)
+              {
+                if(std::string(_Troe->Attribute(_gri_map.at(GRI30Comp::FALLOFF_TYPE).c_str())).compare(_gri_map.at(GRI30Comp::TROE)) != 0)
+                {
+                  _Troe = NULL;
+                }
+              }
+            }
           }
       }else
       {
@@ -289,11 +302,19 @@ namespace Antioch
      if(std::string(chem_proc).compare(_gri_map.at(GRI30Comp::FALLOFF)) == 0)
      {
        // find the falloff block
+       // are we threebody?
+       // if equation contains (+M)
+       const std::string eq = this->reaction_equation();
        // <reaction><rateCoeff><falloff type=''/></rateCoeff></reaction>
-       const std::string Lind = "LindemannFalloff";
-       const std::string Troe = "TroeFalloff";
-       const std::string falloff = std::string(_reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())
-           ->FirstChildElement(_gri_map.at(GRI30Comp::FALLOFF).c_str())->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str()));
+       std::string Lind = "LindemannFalloff";
+       std::string Troe = "TroeFalloff";
+       if(std::regex_search(eq,std::regex("\\(\\s*\\+\\s*M\\s*\\)")))
+       {
+          Lind += "ThreeBody";
+          Troe += "ThreeBody";
+       }
+       tinyxml2::XMLElement * fall = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(_gri_map.at(GRI30Comp::FALLOFF).c_str());
+       const char * falloff = fall->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str());
        const char * cp = (Lind.find(falloff) != std::string::npos) ? Lind.c_str() :
          (Troe.find(falloff) != std::string::npos) ? Troe.c_str() : chem_proc;
 
@@ -671,8 +692,7 @@ namespace Antioch
   {
    // Troe parameters block
    // [alpha, T***, T*, T**]
-    tinyxml2::XMLElement * troe = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str())->FirstChildElement(_gri_map.at(GRI30Comp::TROE).c_str());
-    std::string Troe_block = troe ? std::string(troe->GetText()) : std::string();
+    std::string Troe_block = std::string(_Troe->GetText());
    // do we have something?
     bool gri = Troe_block.size() != 0;
     if(gri)
