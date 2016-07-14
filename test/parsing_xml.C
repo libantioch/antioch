@@ -588,7 +588,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
 
      Scalar antioch_rate = reac->compute_forward_rate_coefficient(molar_densities,conditions);
 
-     if(!(std::abs(k[ir] - antioch_rate)/k[ir] < tol))
+     if(!(std::abs(k[ir] - antioch_rate)/std::max(std::abs(k[ir]),tol) < tol))
      {
         std::cout << std::scientific << std::setprecision(16)
                   << "Error in kinetics comparison\n"
