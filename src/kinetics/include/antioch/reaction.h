@@ -1042,6 +1042,8 @@ namespace Antioch
     using std::abs;
 
     StateType kfwd = this->compute_forward_rate_coefficient(molar_densities,conditions);
+    if (has_nan(kfwd))
+      antioch_error();
     antioch_assert(!has_nan(kfwd));
 
     StateType kfwd_times_reactants = kfwd;
