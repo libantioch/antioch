@@ -172,11 +172,12 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   {
      Scalar l,i,di;
      solar_flux >> l >> i >> di;
-     
+
+     if(!solar_flux.good())break;
+
      hv.push_back(i /(Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l) // irr/(h*c/lambda): power -> number of photons.s-1
                                 * i_unit.get_SI_factor()); //SI for cs, keep nm for bin
      lambda.push_back(l * solar_wave.factor_to_some_unit("nm")); //nm
-     if(!solar_flux.good())break;
   }
   solar_flux.close();
 
