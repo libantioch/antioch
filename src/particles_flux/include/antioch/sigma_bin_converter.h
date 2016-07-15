@@ -125,6 +125,8 @@ void SigmaBinConverter<VectorCoeffType>::y_on_custom_grid(const VectorCoeffType 
   for(unsigned int ic = 0; ic < x_custom.size() - 1; ic++) // right stairs, last one = 0
   {
     y_custom[ic] = this->custom_bin_value(x_custom[ic], x_custom[ic + 1],ihead, ic, x_old, y_old);
+
+    antioch_assert (!Antioch::has_nan(y_custom[ic]));
   }
 
   return;
