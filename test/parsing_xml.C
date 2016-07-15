@@ -127,6 +127,8 @@ typename Antioch::value_type<VectorScalar>::type k_photo(const VectorScalar &sol
   for(unsigned int il = 0; il < solar_irr.size() - 1; il++)
   {
      _k += sigma_rescaled[il] * solar_irr[il] * (solar_lambda[il+1] - solar_lambda[il]);
+
+     antioch_assert(!Antioch::has_nan(_k));
   }
 
   return _k;
