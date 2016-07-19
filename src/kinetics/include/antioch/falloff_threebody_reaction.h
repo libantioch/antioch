@@ -192,7 +192,11 @@ namespace Antioch
     const StateType k0   = (*this->_forward_rate[0])(conditions);
     const StateType kinf = (*this->_forward_rate[1])(conditions);
 
-    return k0 / (ant_pow(M,-1) + k0 / kinf) * _F(conditions.T(),M,k0,kinf);
+    StateType kfwd = k0 / (ant_pow(M,-1) + k0 / kinf) * _F(conditions.T(),M,k0,kinf);
+
+    antioch_assert(!has_nan(kfwd));
+
+    return kfwd;
   }
 
   template<typename CoeffType, typename FalloffType>
@@ -246,6 +250,8 @@ namespace Antioch
       }
 
     kfwd *= f; //finalize
+
+    antioch_assert(!has_nan(kfwd));
 
     return;
   }

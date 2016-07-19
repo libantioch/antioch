@@ -127,7 +127,11 @@ namespace Antioch
       }
 
     //... alpha(T)
-    return (kfwd * (*this->_forward_rate[0])(conditions));
+    kfwd *= (*this->_forward_rate[0])(conditions);
+
+    antioch_assert(!has_nan(kfwd));
+
+    return kfwd;
   }
 
 
@@ -162,6 +166,8 @@ namespace Antioch
       {
         dkfwd_dX[s] *= this->efficiency(s);
       }
+
+    antioch_assert(!has_nan(kfwd));
 
     return;
   }

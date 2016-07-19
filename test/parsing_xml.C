@@ -127,6 +127,8 @@ typename Antioch::value_type<VectorScalar>::type k_photo(const VectorScalar &sol
   for(unsigned int il = 0; il < solar_irr.size() - 1; il++)
   {
      _k += sigma_rescaled[il] * solar_irr[il] * (solar_lambda[il+1] - solar_lambda[il]);
+
+     antioch_assert(!Antioch::has_nan(_k));
   }
 
   return _k;
@@ -172,11 +174,12 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   {
      Scalar l,i,di;
      solar_flux >> l >> i >> di;
-     
+
+     if(!solar_flux.good())break;
+
      hv.push_back(i /(Antioch::Constants::Planck_constant<Scalar>() * Antioch::Constants::light_celerity<Scalar>() / l) // irr/(h*c/lambda): power -> number of photons.s-1
                                 * i_unit.get_SI_factor()); //SI for cs, keep nm for bin
      lambda.push_back(l * solar_wave.factor_to_some_unit("nm")); //nm
-     if(!solar_flux.good())break;
   }
   solar_flux.close();
 
@@ -585,19 +588,28 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   for(unsigned int ir = 0; ir < k.size(); ir++)
   {
      const Antioch::Reaction<Scalar> * reac = &reaction_set.reaction(ir);
-     if(std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] > tol)
+
+     Scalar antioch_rate = reac->compute_forward_rate_coefficient(molar_densities,conditions);
+
+     if(!(std::abs(k[ir] - antioch_rate)/std::max(std::abs(k[ir]),tol) < tol))
      {
-        std::cout << *reac << std::endl;
         std::cout << std::scientific << std::setprecision(16)
                   << "Error in kinetics comparison\n"
+                  << *reac << '\n'
                   << "reaction #" << ir << "\n"
                   << "temperature: " << T << " K" << "\n"
                   << "theory: " << k[ir] << "\n"
-                  << "calculated: " << reac->compute_forward_rate_coefficient(molar_densities,conditions) << "\n"
-                  << "relative error = " << std::abs(k[ir] - reac->compute_forward_rate_coefficient(molar_densities,conditions))/k[ir] << "\n"
+                  << "calculated: " << antioch_rate << "\n"
+                  << "relative error = " << std::abs(k[ir] - antioch_rate)/k[ir] << "\n"
                   << "tolerance = " <<  tol
                   << std::endl;
         return_flag = 1;
+     }
+     else
+     {
+        std::cout << std::scientific << std::setprecision(16)
+                  << "Success in kinetics comparison\n"
+                  << *reac << std::endl;
      }
   }
 

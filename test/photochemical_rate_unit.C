@@ -47,11 +47,11 @@
 #include "antioch/vector_utils.h"
 
 template <typename Scalar>
-int check_rate(const Scalar & rate_exact, const Scalar & rate)
+bool is_rate_bad(const Scalar & rate_exact, const Scalar & rate)
 {
   const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 100;
-  int return_flag = (rate_exact > tol); // not zero
-  if(return_flag)std::cout << "Error: rate is null" << std::endl;
+
+  bool return_flag = false;
   if( std::abs( (rate - rate_exact)/rate_exact ) > tol )
   {
     std::cout << std::scientific << std::setprecision(16)
@@ -61,14 +61,14 @@ int check_rate(const Scalar & rate_exact, const Scalar & rate)
               << "relative error = " << std::abs(rate_exact - rate)/rate_exact << std::endl
               << "tolerance = "      << tol            << std::endl;
 
-    return_flag = 1;
+    return true;
   }
 
-  return return_flag;
+  return false;
 }
 
 template <typename Scalar>
-int tester(std::string path_to_files)
+bool tester(std::string path_to_files)
 {
   std::ifstream CH4(path_to_files + "/CH4_hv_cs.dat");
   std::ifstream  hv(path_to_files + "/solar_flux.dat");
@@ -122,7 +122,7 @@ int tester(std::string path_to_files)
       rate_exact += sigma_rescaled[il] * hv_irr[il] * (hv_lambda[il+1] - hv_lambda[il]);
   }
 
-  int return_flag = check_rate(rate_exact,rate);
+  bool return_flag = is_rate_bad(rate_exact,rate);
 
  // multiplying by 2 the cross-section
   int il = CH4_cs.size() * 2 / 3; 
@@ -138,7 +138,7 @@ int tester(std::string path_to_files)
   rate_hv.set_parameter(Antioch::KineticsModel::Parameters::SIGMA, il, CH4_cs[il]);
   rate = rate_hv.rate(part_flux);
 
-  return_flag = check_rate(rate_exact,rate) || return_flag;
+  return_flag = is_rate_bad(rate_exact,rate) || return_flag;
 
  // multiplying by 2 one value of the cross-section
   il = CH4_cs.size()/2;
@@ -156,7 +156,7 @@ int tester(std::string path_to_files)
   Antioch::reset_parameter_of_rate(rate_hv,Antioch::KineticsModel::Parameters::SIGMA, CH4_cs[il] , il, "SI");
   rate = rate_hv.rate(part_flux);
 
-  return_flag = check_rate(rate_exact,rate) || return_flag;
+  return_flag = is_rate_bad(rate_exact,rate) || return_flag;
 
   return return_flag;
 }
