@@ -667,9 +667,12 @@ namespace Antioch
     tinyxml2::XMLElement * rate_constant = _reaction->FirstChildElement(_map.at(ParsingKey::KINETICS_MODEL).c_str());
     antioch_assert(rate_constant->FirstChildElement("Arrhenius"));
     rate_constant = rate_constant->FirstChildElement("Arrhenius");
+    const char * chem_proc = _reaction->Attribute(_map.at(ParsingKey::CHEMICAL_PROCESS).c_str());
+    bool i_am_a_falloff = (chem_proc && std::string(chem_proc).compare(_gri_map.at(GRI30Comp::FALLOFF)) == 0);
     if(rate_constant->FirstChildElement(_map.at(ParsingKey::POWER).c_str()))
       {
-        if(std::atof(rate_constant->FirstChildElement(_map.at(ParsingKey::POWER).c_str())->GetText()) != 0.) //not a very good test
+        if(std::atof(rate_constant->FirstChildElement(_map.at(ParsingKey::POWER).c_str())->GetText()) != 0. || //not a very good test
+          i_am_a_falloff)
           out = true;
       }
 
