@@ -65,6 +65,12 @@ namespace Antioch
     */
     const CoeffType* coefficients(const unsigned int interval) const;
 
+    //! @changes the value of the coefficient specified in the
+    //  interval specified.
+    void set_coefficient(unsigned int interval,
+                         unsigned int coeff_index,
+                         const CoeffType & new_value);
+
   protected:
 
     NASACurveFitBase(){};
@@ -136,6 +142,18 @@ namespace Antioch
     antioch_assert_less_equal( _n_coeffs*(interval+1), _coefficients.size() );
 
     return &_coefficients[_n_coeffs*interval];
+  }
+
+  template<typename CoeffType>
+  inline
+  void NASACurveFitBase<CoeffType>::set_coefficient(unsigned int interval,
+                                                    unsigned int coeff_index,
+                                                    const CoeffType & new_value)
+  {
+    antioch_assert_less( interval, this->n_intervals() );
+    antioch_assert_less( coeff_index, _n_coeffs );
+
+    _coefficients[_n_coeffs*interval + coeff_index] = new_value;
   }
 
   template<typename CoeffType>
