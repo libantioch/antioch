@@ -57,6 +57,11 @@ namespace Antioch
     StateType
     cp( const TempCache<StateType>& cache, unsigned int species ) const;
 
+    //! derivative of c_p with respect to temperature for one species
+    template<typename StateType>
+    StateType
+    dcp_dT( const TempCache<StateType>& cache, unsigned int species ) const;
+
     template<typename StateType, typename VectorStateType>
     typename enable_if_c<
       has_size<VectorStateType>::value, StateType
@@ -199,6 +204,25 @@ namespace Antioch
 	 StateType
 	   (this->chem_mixture().R(species) *
 	    this->cp_over_R(cache, species)));
+  }
+
+
+  template<typename CoeffType, typename NASAFit>
+  template<typename StateType>
+  inline
+  StateType
+  NASAEvaluator<CoeffType,NASAFit>::dcp_dT( const TempCache<StateType>& cache, unsigned int species ) const
+  {
+    typedef typename Antioch::value_type<StateType>::type ScalarType;
+    // T < 200.1 ? 0 : R * dcp_over_R_dT
+
+    return
+      Antioch::if_else
+        (cache.T < ScalarType(200.1),
+         Antioch::zero_clone (cache.T),
+         StateType
+           (this->chem_mixture().R(species) *
+            this->dcp_over_R_dT(cache, species)));
   }
 
   template<typename CoeffType, typename NASAFit>
