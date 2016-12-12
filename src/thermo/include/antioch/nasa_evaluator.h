@@ -222,7 +222,7 @@ namespace Antioch
          Antioch::zero_clone (cache.T),
          StateType
            (this->chem_mixture().R(species) *
-            this->curve_fit(species).dcp_over_R_dT(cache)));
+            this->_nasa_mixture.curve_fit(species).dcp_over_R_dT(cache)));
   }
 
   template<typename CoeffType, typename NASAFit>
