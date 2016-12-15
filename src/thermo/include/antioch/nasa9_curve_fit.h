@@ -92,6 +92,17 @@ namespace Antioch
     const StateType cp_over_R (const TempCache<StateType> & cache) const;
 
     /*!
+      @returns the derivative of \f$\frac{Cp}{\mathrm{R}}\f$ with
+      respect to temperature
+        \f[
+           \frac{Cp}{\mathrm{R}} = \frac{-2 a_0}{T^3} - \frac{a_1}{T^2} + a_3 +
+                                    2 a_4 T + 3 a_5 T^2 + 4 a_6 T^3
+        \f]
+     */
+    template <typename StateType>
+    const StateType dcp_over_R_dT (const TempCache<StateType> & cache) const;
+
+    /*!
       @returns the value \f$\frac{h}{\mathrm{R}T}\f$
         \f[
             \frac{h}{\mathrm{R}T} = -\frac{a_0}{T^2} + \frac{a_1}{T} \ln(T)
@@ -216,6 +227,36 @@ namespace Antioch
           (interval == i,
            StateType(a[0]/cache.T2 + a[1]/cache.T + a[2] + a[3]*cache.T +
                      a[4]*cache.T2 + a[5]*cache.T3 + a[6]*cache.T4),
+           returnval);
+      }
+
+    return returnval;
+
+  }
+
+  template<typename CoeffType>
+  template <typename StateType>
+  inline
+  const StateType NASA9CurveFit<CoeffType>::dcp_over_R_dT(const TempCache<StateType>& cache) const
+  {
+    typedef typename
+      Antioch::rebind<StateType, unsigned int>::type UIntType;
+    const UIntType interval = this->interval(cache.T);
+    const unsigned int begin_interval = Antioch::min(interval);
+    const unsigned int end_interval = Antioch::max(interval)+1;
+
+    // FIXME - this needs expression templates to be faster...
+
+    StateType returnval = Antioch::zero_clone(cache.T);
+
+    for (unsigned int i=begin_interval; i != end_interval; ++i)
+      {
+        const CoeffType * const a =
+          this->coefficients(i);
+        returnval = Antioch::if_else
+          (interval == i,
+           StateType(-2*a[0]/cache.T3 - a[1]/cache.T2 + a[3] +
+                     2*a[4]*cache.T + 3*a[5]*cache.T2 + 4*a[6]*cache.T3),
            returnval);
       }
 
