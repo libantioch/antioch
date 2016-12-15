@@ -69,6 +69,12 @@ namespace Antioch
 
     CoeffType cp_at_200p1( unsigned int s ) const;
 
+    // Change one coefficient in the curve for species s
+    void set_curve_fit_coefficient( unsigned int s,
+                                    unsigned int interval,
+                                    unsigned int coeff_index,
+                                    const CoeffType & new_value );
+
     //! Checks that curve fits have been specified for all species in the mixture.
     bool check() const;
 
@@ -155,6 +161,23 @@ namespace Antioch
     _cp_at_200p1[s] = evaluator.cp( TempCache<CoeffType>(200.1), s );
 
     return;
+  }
+
+
+  template<typename CoeffType, typename NASAFit>
+  inline
+  void NASAThermoMixture<CoeffType,NASAFit>::set_curve_fit_coefficient
+    ( unsigned int s,
+      unsigned int interval,
+      unsigned int coeff_index,
+      const CoeffType & new_value )
+  {
+    this->curve_fit(s).set_coefficient
+      (interval, coeff_index, new_value);
+
+    // Our cp may have changed, so reevaluate the cached cp(200.1)
+    NASAEvaluator<CoeffType,NASAFit> evaluator( *this );
+    _cp_at_200p1[s] = evaluator.cp( TempCache<CoeffType>(200.1), s );
   }
 
 
