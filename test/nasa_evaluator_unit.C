@@ -77,6 +77,36 @@ int test_cp( const std::string& species_name, unsigned int species, Scalar cp_ex
 }
 
 template <typename Scalar, typename NASAFit>
+int test_dcp_dT( const std::string& species_name, unsigned int species, Scalar dcp_dT_exact, Scalar T,
+	     const Antioch::NASAEvaluator<Scalar,NASAFit>& thermo )
+{
+  using std::abs;
+
+  int return_flag = 0;
+
+  const Scalar tol = std::numeric_limits<Scalar>::epsilon() * 1000;
+
+  typedef typename Antioch::template TempCache<Scalar> Cache;
+
+  const Scalar dcp_dT = thermo.dcp_dT(Cache(T), species);
+
+  if( abs( (dcp_dT_exact - dcp_dT)/dcp_dT_exact ) > tol )
+    {
+      std::cerr << std::scientific << std::setprecision(16)
+                << "Error: Mismatch in derivatives of species specific heat."
+		<< "\nspecies        = " << species_name
+		<< "\ndcp_dT         = " << dcp_dT
+		<< "\ndcp_dT_exact   = " << dcp_dT_exact
+		<< "\ndifference     = " << (dcp_dT_exact - dcp_dT)
+		<< "\ntolerance      = " << tol
+		<< "\nT              = " << T << std::endl;
+      return_flag = 1;
+    }
+
+  return return_flag;
+}
+
+template <typename Scalar, typename NASAFit>
 int test_h( const std::string& species_name, unsigned int species, Scalar h_exact, Scalar T,
             const Antioch::NASAEvaluator<Scalar,NASAFit>& thermo )
 {
@@ -178,6 +208,21 @@ Scalar cea_cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
 }
 
 template <typename Scalar>
+Scalar cea_dcp_dT( Scalar T, Scalar a0, Scalar a1, Scalar a3, 
+	   Scalar a4, Scalar a5, Scalar a6 )
+{
+  Scalar dcp_dT;
+  if( T < 200.1) {
+    dcp_dT = 0.0L;
+  }
+  else {
+    dcp_dT = -2.0L*a0/(T*T*T) - a1/(T*T) + a3 + 2.0L*a4*T + 3.0L*a5*(T*T) + 4.0L*a6*(T*T*T);
+  }
+
+  return dcp_dT;
+}
+
+template <typename Scalar>
 Scalar cea_h( Scalar T, Scalar a0, Scalar a1, Scalar a2, 
           Scalar a3, Scalar a4, Scalar a5, Scalar a6,
           Scalar a8 )
@@ -200,6 +245,16 @@ Scalar nasa_cp( Scalar T, Scalar a0, Scalar a1, Scalar a2,
     T = 200.1L;
 
   return a0 + a1*T + a2*T*T + a3*T*T*T + a4*T*T*T*T;
+}
+
+template <typename Scalar>
+Scalar nasa_dcp_dT( Scalar T, Scalar a1, Scalar a2, 
+	   Scalar a3, Scalar a4)
+{
+  if( T < 200.1)
+    T = 200.1L;
+
+  return a1 + 2.0L*a2*T + 3.0L*a3*T*T + 4.0L*a4*T*T*T;
 }
 
 template <typename Scalar>
@@ -359,6 +414,45 @@ int tester(const std::string & nasa_filename)
 
   }
 
+  // Test N2 dcp_dT
+  {
+    unsigned int index = 0;
+
+// CEA
+    const Scalar cea_dcp_dT_N2_1 = R_N2*cea_dcp_dT( T1, cea_N2_a1[0], cea_N2_a1[1], cea_N2_a1[3], cea_N2_a1[4], cea_N2_a1[5], cea_N2_a1[6]);
+
+    const Scalar cea_dcp_dT_N2_2 = R_N2*cea_dcp_dT( T2, cea_N2_a2[0], cea_N2_a2[1], cea_N2_a2[3], cea_N2_a2[4], cea_N2_a2[5], cea_N2_a2[6]);
+
+    const Scalar cea_dcp_dT_N2_3 = R_N2*cea_dcp_dT( T3, cea_N2_a3[0], cea_N2_a3[1], cea_N2_a3[3], cea_N2_a3[4], cea_N2_a3[5], cea_N2_a3[6]);
+
+    const Antioch::Species species = chem_mixture.species_list()[index];
+    const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
+
+    int return_flag_temp = 0;
+
+    return_flag_temp = test_dcp_dT( species_name, index, cea_dcp_dT_N2_1, T1, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, cea_dcp_dT_N2_2, T2, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, cea_dcp_dT_N2_3, T3, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+// NASA [300 - 1000] [1000 - 5000]
+
+    const Scalar nasa_dcp_dT_N2_1 = R_N2 * nasa_dcp_dT(T4, nasa_N2_a1[1], nasa_N2_a1[2], nasa_N2_a1[3], nasa_N2_a1[4]);
+
+    const Scalar nasa_dcp_dT_N2_2 = R_N2 * nasa_dcp_dT(T2, nasa_N2_a2[1], nasa_N2_a2[2], nasa_N2_a2[3], nasa_N2_a2[4]);
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_N2_1, T4, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_N2_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+  }
+
   // Test O2 cp
   {
     unsigned int index = 1;
@@ -393,6 +487,41 @@ int tester(const std::string & nasa_filename)
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
+  // Test O2 dcp_dT
+  {
+    unsigned int index = 1;
+    const Scalar dcp_dT_1 = R_O2*cea_dcp_dT( T1, cea_O2_a1[0], cea_O2_a1[1], cea_O2_a1[3], cea_O2_a1[4], cea_O2_a1[5], cea_O2_a1[6]);
+
+    const Scalar dcp_dT_2 = R_O2*cea_dcp_dT( T2, cea_O2_a2[0], cea_O2_a2[1], cea_O2_a2[3], cea_O2_a2[4], cea_O2_a2[5], cea_O2_a2[6]);
+
+    const Scalar dcp_dT_3 = R_O2*cea_dcp_dT( T3, cea_O2_a3[0], cea_O2_a3[1], cea_O2_a3[3], cea_O2_a3[4], cea_O2_a3[5], cea_O2_a3[6]);
+    
+    const Antioch::Species species = chem_mixture.species_list()[index];
+    const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
+
+    int return_flag_temp = 0;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_1, T1, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_2, T2, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_3, T3, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+// NASA [300 - 1000] [1000 - 5000]
+    const Scalar nasa_dcp_dT_O2_1 = R_O2 * nasa_dcp_dT(T4, nasa_O2_a1[1], nasa_O2_a1[2], nasa_O2_a1[3], nasa_O2_a1[4]);
+
+    const Scalar nasa_dcp_dT_O2_2 = R_O2 * nasa_dcp_dT(T2, nasa_O2_a2[1], nasa_O2_a2[2], nasa_O2_a2[3], nasa_O2_a2[4]);
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_O2_1, T4, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_O2_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+  }
+
   // Test OH cp
   {
     unsigned int index = 2;
@@ -424,8 +553,43 @@ int tester(const std::string & nasa_filename)
     if( return_flag_temp != 0 ) return_flag = 1;
 
     return_flag_temp = test_cp( species_name, index, nasa_cp_OH_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
   }
 
+  // Test OH dcp_dT
+  {
+    unsigned int index = 2;
+    const Scalar dcp_dT_1 = R_OH*cea_dcp_dT( T1, cea_OH_a1[0], cea_OH_a1[1], cea_OH_a1[3], cea_OH_a1[4], cea_OH_a1[5], cea_OH_a1[6]);
+
+    const Scalar dcp_dT_2 = R_OH*cea_dcp_dT( T2, cea_OH_a2[0], cea_OH_a2[1], cea_OH_a2[3], cea_OH_a2[4], cea_OH_a2[5], cea_OH_a2[6]);
+
+    const Scalar dcp_dT_3 = R_OH*cea_dcp_dT( T3, cea_OH_a3[0], cea_OH_a3[1], cea_OH_a3[3], cea_OH_a3[4], cea_OH_a3[5], cea_OH_a3[6]);
+    
+    const Antioch::Species species = chem_mixture.species_list()[index];
+    const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
+
+    int return_flag_temp = 0;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_1, T1, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_2, T2, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_3, T3, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+// NASA [300 - 1000] [1000 - 5000]
+    const Scalar nasa_dcp_dT_OH_1 = R_OH * nasa_dcp_dT(T4, nasa_OH_a1[1], nasa_OH_a1[2], nasa_OH_a1[3], nasa_OH_a1[4]);
+
+    const Scalar nasa_dcp_dT_OH_2 = R_OH * nasa_dcp_dT(T2, nasa_OH_a2[1], nasa_OH_a2[2], nasa_OH_a2[3], nasa_OH_a2[4]);
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_OH_1, T4, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_OH_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+  }
 
   // Test O cp
   {
@@ -458,8 +622,43 @@ int tester(const std::string & nasa_filename)
     if( return_flag_temp != 0 ) return_flag = 1;
 
     return_flag_temp = test_cp( species_name, index, nasa_cp_O_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
   }
 
+  // Test O dcp_dT
+  {
+    unsigned int index = 3;
+    const Scalar dcp_dT_1 = R_O*cea_dcp_dT( T1, cea_O_a1[0], cea_O_a1[1], cea_O_a1[3], cea_O_a1[4], cea_O_a1[5], cea_O_a1[6]);
+
+    const Scalar dcp_dT_2 = R_O*cea_dcp_dT( T2, cea_O_a2[0], cea_O_a2[1], cea_O_a2[3], cea_O_a2[4], cea_O_a2[5], cea_O_a2[6]);
+
+    const Scalar dcp_dT_3 = R_O*cea_dcp_dT( T3, cea_O_a3[0], cea_O_a3[1], cea_O_a3[3], cea_O_a3[4], cea_O_a3[5], cea_O_a3[6]);
+    
+    const Antioch::Species species = chem_mixture.species_list()[index];
+    const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
+
+    int return_flag_temp = 0;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_1, T1, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_2, T2, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_3, T3, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+// NASA [300 - 1000] [1000 - 5000]
+    const Scalar nasa_dcp_dT_O_1 = R_O * nasa_dcp_dT(T4, nasa_O_a1[1], nasa_O_a1[2], nasa_O_a1[3], nasa_O_a1[4]);
+
+    const Scalar nasa_dcp_dT_O_2 = R_O * nasa_dcp_dT(T2, nasa_O_a2[1], nasa_O_a2[2], nasa_O_a2[3], nasa_O_a2[4]);
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_O_1, T4, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_O_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+  }
 
   // Test H2 cp
   {
@@ -493,6 +692,42 @@ int tester(const std::string & nasa_filename)
     if( return_flag_temp != 0 ) return_flag = 1;
 
     return_flag_temp = test_cp( species_name, index, nasa_cp_H2_2, T2, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+  }
+
+  // Test H2 dcp_dT
+  {
+    unsigned int index = 4;
+    const Scalar dcp_dT_1 = R_H2*cea_dcp_dT( T1, cea_H2_a1[0], cea_H2_a1[1], cea_H2_a1[3], cea_H2_a1[4], cea_H2_a1[5], cea_H2_a1[6]);
+
+    const Scalar dcp_dT_2 = R_H2*cea_dcp_dT( T2, cea_H2_a2[0], cea_H2_a2[1], cea_H2_a2[3], cea_H2_a2[4], cea_H2_a2[5], cea_H2_a2[6]);
+
+    const Scalar dcp_dT_3 = R_H2*cea_dcp_dT( T3, cea_H2_a3[0], cea_H2_a3[1], cea_H2_a3[3], cea_H2_a3[4], cea_H2_a3[5], cea_H2_a3[6]);
+    
+    const Antioch::Species species = chem_mixture.species_list()[index];
+    const std::string species_name = chem_mixture.species_inverse_name_map().find(species)->second;
+
+    int return_flag_temp = 0;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_1, T1, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_2, T2, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, dcp_dT_3, T3, thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+
+// NASA [300 - 1000] [1000 - 5000]
+    const Scalar nasa_dcp_dT_H2_1 = R_H2 * nasa_dcp_dT(T4, nasa_H2_a1[1], nasa_H2_a1[2], nasa_H2_a1[3], nasa_H2_a1[4]);
+
+    const Scalar nasa_dcp_dT_H2_2 = R_H2 * nasa_dcp_dT(T2, nasa_H2_a2[1], nasa_H2_a2[2], nasa_H2_a2[3], nasa_H2_a2[4]);
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_H2_1, T4, nasa_thermo );
+    if( return_flag_temp != 0 ) return_flag = 1;
+
+    return_flag_temp = test_dcp_dT( species_name, index, nasa_dcp_dT_H2_2, T2, nasa_thermo );
     if( return_flag_temp != 0 ) return_flag = 1;
   }
 
