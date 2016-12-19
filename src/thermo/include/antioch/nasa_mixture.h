@@ -65,7 +65,10 @@ namespace Antioch
      //NASA general
     void add_curve_fit( const std::string& species_name, const std::vector<CoeffType>& coeffs, const std::vector<CoeffType>& temps );
 
+    // Accessors for individual curve fits
     const NASAFit& curve_fit( unsigned int s ) const;
+
+    NASAFit& curve_fit( unsigned int s );
 
     CoeffType cp_at_200p1( unsigned int s ) const;
 
@@ -200,6 +203,19 @@ namespace Antioch
   template<typename CoeffType, typename NASAFit>
   inline
   const NASAFit& NASAThermoMixture<CoeffType,NASAFit>::curve_fit( unsigned int s ) const
+  {
+    // Did we allocate for enough species?
+    antioch_assert_less( s, _species_curve_fits.size() );
+
+    // Did we read in enough mixture data?
+    antioch_assert( _species_curve_fits[s] );
+
+    return *_species_curve_fits[s];
+  }
+
+  template<typename CoeffType, typename NASAFit>
+  inline
+  NASAFit& NASAThermoMixture<CoeffType,NASAFit>::curve_fit( unsigned int s )
   {
     // Did we allocate for enough species?
     antioch_assert_less( s, _species_curve_fits.size() );
