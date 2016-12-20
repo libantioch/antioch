@@ -228,6 +228,8 @@ int vectester(const std::string& input_name,
 // compile anymore.  Not even
 // SpeciesVecEigenType v_test(4);
 // We'll disable it for now.
+//
+// Similarly for Eigen::Matrix!!
 /*
   {
     typedef Eigen::Array<PairScalars,n_species,1> SpeciesVecEigenType;
@@ -290,7 +292,6 @@ int vectester(const std::string& input_name,
     return_flag +=
       vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
   }
-*/
 
   {
     typedef Eigen::Matrix<PairScalars,Eigen::Dynamic,1> SpeciesVecEigenType;
@@ -353,6 +354,7 @@ int vectester(const std::string& input_name,
     return_flag +=
       vec_compare(eigen_omega_dot,omega_dot,"eigen_omega_dot");
   }
+*/
 
 #endif // ANTIOCH_HAVE_EIGEN
 
