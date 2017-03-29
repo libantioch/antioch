@@ -29,9 +29,9 @@
 #define ANTIOCH_STAT_MECH_THERMO_H
 
 // Antioch
-#include "antioch/chemical_mixture.h"
 #include "antioch/input_utils.h"
 #include "antioch/metaprogramming.h"
+#include "antioch/micro_thermo_base.h"
 #include "antioch/antioch_exceptions.h"
 
 // C++
@@ -44,15 +44,15 @@ namespace Antioch
 {
 
   template<typename CoeffType=double>
-  class StatMechThermodynamics
+  class StatMechThermodynamics : public MicroThermoBase<CoeffType>
   {
   public:
 
-    StatMechThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture );
+    StatMechThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture )
+      : MicroThermoBase<CoeffType>(chem_mixture)
+    {}
 
-    //! Destructor
-    /*! virtual so this can be subclassed by the user. */
-    virtual ~StatMechThermodynamics();
+    virtual ~StatMechThermodynamics(){}
 
     /**
      * @returns species translational specific heat at constant volume.
@@ -480,10 +480,6 @@ namespace Antioch
        const typename Antioch::value_type<VectorStateType>::type& p,
        const VectorStateType& mass_fractions) const;
 
-  protected:
-
-    const ChemicalMixture<CoeffType>& _chem_mixture;
-
   private:
 
     //! Default constructor
@@ -493,27 +489,11 @@ namespace Antioch
 
 
   /* ------------------------- Inline Functions -------------------------*/
-
-  template<typename CoeffType>
-  inline
-  StatMechThermodynamics<CoeffType>::StatMechThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture )
-    : _chem_mixture(chem_mixture)
-  {
-    // NOP
-  }
-
-  template<typename CoeffType>
-  inline
-  StatMechThermodynamics<CoeffType>::~StatMechThermodynamics ()
-  {
-    // NOP
-  }
-
   template<typename CoeffType>
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_trans( const unsigned int species ) const
   {
-    return CoeffType(1.5)*_chem_mixture.R(species);
+    return CoeffType(1.5)*this->_chem_mixture.R(species);
   }
 
   template<typename CoeffType>
@@ -545,14 +525,14 @@ namespace Antioch
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_tr (const unsigned int species) const
   {
-    return _chem_mixture.R(species)*(_chem_mixture.chemical_species()[species])->n_tr_dofs();
+    return this->_chem_mixture.R(species)*(this->_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
 
   template<typename CoeffType>
   inline
   CoeffType StatMechThermodynamics<CoeffType>::cv_tr_over_R (const unsigned int species) const
   {
-    return (_chem_mixture.chemical_species()[species])->n_tr_dofs();
+    return (this->_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
 
   template<typename CoeffType>
@@ -567,7 +547,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       cv_tr = mass_fractions[0]*this->cv_tr(0);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         cv_tr += mass_fractions[s]*this->cv_tr(s);
       }
@@ -581,7 +561,7 @@ namespace Antioch
   StateType StatMechThermodynamics<CoeffType>::cv_vib (const unsigned int species,
                                                        const StateType& Tv) const
   {
-      return this->cv_vib_over_R(species,Tv) * (_chem_mixture.chemical_species()[species])->gas_constant();
+      return this->cv_vib_over_R(species,Tv) * (this->_chem_mixture.chemical_species()[species])->gas_constant();
   }
 
   template<typename CoeffType>
@@ -593,7 +573,7 @@ namespace Antioch
     using std::exp;
 
     // convenience
-    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const ChemicalSpecies<CoeffType>& chem_species = *(this->_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_v  = chem_species.theta_v();
     const std::vector<unsigned int>& ndg_v = chem_species.ndg_v();
 
@@ -631,7 +611,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       cv_vib = mass_fractions[0]*this->cv_vib(0, Tv);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         cv_vib += mass_fractions[s]*this->cv_vib(s, Tv);
       }
@@ -648,7 +628,7 @@ namespace Antioch
     using std::exp;
 
     // convenience
-    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const ChemicalSpecies<CoeffType>& chem_species = *(this->_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_e  = chem_species.theta_e();
     const std::vector<unsigned int>& ndg_e = chem_species.ndg_e();
 
@@ -706,7 +686,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       cv_el = mass_fractions[0]*this->cv_el(0, Te);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         cv_el += mass_fractions[s]*this->cv_el(s, Te);
       }
@@ -782,7 +762,7 @@ namespace Antioch
                                                       const StateType& T,
                                                       const StateType& Tv) const
   {
-    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const ChemicalSpecies<CoeffType>& chem_species = *(this->_chem_mixture.chemical_species()[species]);
     return (this->e_tot(species, T, Tv) + chem_species.gas_constant()*T);
   }
 
@@ -810,7 +790,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       h_tot = mass_fractions[0]*this->h_tot(0, T, Tv);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         h_tot += mass_fractions[s]*this->h_tot(s, T, Tv);
       }
@@ -900,7 +880,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       e_tr = mass_fractions[0]*this->e_tr(0, T);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         e_tr += mass_fractions[s]*this->e_tr(s, T);
       }
@@ -917,7 +897,7 @@ namespace Antioch
     using std::exp;
 
     // convenience
-    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const ChemicalSpecies<CoeffType>& chem_species = *(this->_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_v  = chem_species.theta_v();
     const std::vector<unsigned int>& ndg_v = chem_species.ndg_v();
 
@@ -946,7 +926,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       e_vib = mass_fractions[0]*this->e_vib(0, Tv);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         e_vib += mass_fractions[s]*this->e_vib(s, Tv);
       }
@@ -963,7 +943,7 @@ namespace Antioch
     using std::exp;
 
     // convenience
-    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const ChemicalSpecies<CoeffType>& chem_species = *(this->_chem_mixture.chemical_species()[species]);
     const std::vector<CoeffType>& theta_e  = chem_species.theta_e();
     const std::vector<unsigned int>& ndg_e = chem_species.ndg_e();
 
@@ -998,7 +978,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       e_el = mass_fractions[0]*this->e_el(0, Te);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         e_el += mass_fractions[s]*this->e_el(s, Te);
       }
@@ -1051,7 +1031,7 @@ namespace Antioch
   inline
   CoeffType StatMechThermodynamics<CoeffType>::e_0 (const unsigned int species) const
   {
-    const ChemicalSpecies<CoeffType>& chem_species = *(_chem_mixture.chemical_species()[species]);
+    const ChemicalSpecies<CoeffType>& chem_species = *(this->_chem_mixture.chemical_species()[species]);
     return chem_species.formation_enthalpy();
   }
 
@@ -1067,7 +1047,7 @@ namespace Antioch
     typename Antioch::value_type<VectorStateType>::type
       e_0 = mass_fractions[0]*this->e_0(0);
 
-    for( unsigned int s = 1; s < _chem_mixture.n_species(); s++ )
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
       {
         e_0 += mass_fractions[s]*this->e_0(s);
       }
