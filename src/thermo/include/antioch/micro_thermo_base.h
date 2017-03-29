@@ -46,6 +46,77 @@ namespace Antioch
     /*! This is pure virtual to force this object to be abstract. */
     virtual ~MicroThermoBase() =0;
 
+    /*!
+     * @returns species translational specific heat at constant volume, [J/kg-K].
+     * Since the translational modes are assumed to be fully polulated
+     * this is simply
+     * \f[
+     *   C^{trans}_{v,s} \equiv \frac{\partial e^{trans}_s}{\partial T} = \frac{3}{2} R_s
+     * \f]
+     */
+    CoeffType cv_trans( const unsigned int species ) const;
+
+    /*!
+     * @returns species translational specific over R heat at constant volume.
+     * Since the translational modes are assumed to be fully polulated
+     * this is simply
+     * \f[
+     *   \frac{C^{trans}_{v,s}}{\mathrm{R}} = \frac{3}{2}
+     * \f]
+     */
+    CoeffType cv_trans_over_R( const unsigned int species ) const;
+
+    /*!
+     * @returns species rotational specific heat at constant volume, [J/kg-K].
+     * By convention, we lump the translational/rotational components
+     * \f[
+     *   C^{tr}_{v,s} \equiv C^{trans}_{v,s} + C^{rot}_{v,s}
+     * \f]
+     * so then
+     * \f[
+     *   C^{rot}_{v,s} \equiv C^{tr}_{v,s} - C^{trans}_{v,s}
+     * \f]
+     */
+    CoeffType cv_rot( const unsigned int species ) const;
+
+    /*!
+     * @returns species rotational specific heat at constant volume, normalized
+     * by the species gas constant.
+     * By convention, we lump the translational/rotational components
+     * \f[
+     *   C^{tr}_{v,s} \equiv C^{trans}_{v,s} + C^{rot}_{v,s}
+     * \f]
+     * so then
+     * \f[
+     *   \frac{C^{rot}_{v,s}}{\mathrm{R}} \equiv \frac{C^{tr}_{v,s}}{\mathrm{R}} - \frac{C^{trans}_{v,s}}{\mathrm{R}}
+     * \f]
+     */
+    CoeffType cv_rot_over_R( const unsigned int species ) const;
+
+    /*!
+     * @returns species translational+rotational specific heat at
+     * constant volume, [J/kg-K].
+     */
+    CoeffType cv_tr (const unsigned int species) const;
+
+    /*!
+     * @returns vector-type of translational+rotational specific heat at
+     * constant volume, [J/kg-K], for each corresponding species in the
+     * input mass_fractions vector-type.
+     */
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type
+    >::type
+    cv_tr (const VectorStateType& mass_fractions) const;
+
+    /**
+     * @returns species translational+rotational specific heat at
+     * constant volume, normalized by the species gas constant.
+     */
+    CoeffType cv_tr_over_R (const unsigned int species) const;
+
   protected:
 
     const ChemicalMixture<CoeffType> & _chem_mixture;
@@ -61,6 +132,70 @@ namespace Antioch
   template<typename CoeffType>
   inline
   MicroThermoBase<CoeffType>::~MicroThermoBase(){}
+
+  template<typename CoeffType>
+  inline
+  CoeffType MicroThermoBase<CoeffType>::cv_trans( const unsigned int species ) const
+  {
+    return CoeffType(1.5)*this->_chem_mixture.R(species);
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType MicroThermoBase<CoeffType>::cv_trans_over_R( const unsigned int /*species*/ ) const
+  {
+    return CoeffType(1.5);
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType MicroThermoBase<CoeffType>::cv_rot( const unsigned int species ) const
+  {
+    using std::max;
+
+    return max(this->cv_tr(species) - this->cv_trans(species), CoeffType(0) );
+  }
+
+   template<typename CoeffType>
+   inline
+  CoeffType MicroThermoBase<CoeffType>::cv_rot_over_R( const unsigned int species ) const
+  {
+    using std::max;
+
+    return max(this->cv_tr_over_R(species) - this->cv_trans_over_R(species), CoeffType(0) );
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType MicroThermoBase<CoeffType>::cv_tr (const unsigned int species) const
+  {
+    return this->_chem_mixture.R(species)*(this->_chem_mixture.chemical_species()[species])->n_tr_dofs();
+  }
+
+  template<typename CoeffType>
+  inline
+  CoeffType MicroThermoBase<CoeffType>::cv_tr_over_R (const unsigned int species) const
+  {
+    return (this->_chem_mixture.chemical_species()[species])->n_tr_dofs();
+  }
+
+  template<typename CoeffType>
+  template<typename VectorStateType>
+  inline
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type
+  >::type
+  MicroThermoBase<CoeffType>::cv_tr (const VectorStateType& mass_fractions) const
+  {
+    typename Antioch::value_type<VectorStateType>::type
+      cv_tr = mass_fractions[0]*this->cv_tr(0);
+
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
+      cv_tr += mass_fractions[s]*this->cv_tr(s);
+
+    return cv_tr;
+  }
 
 } // end namespace Antioch
 
