@@ -52,23 +52,6 @@ namespace Antioch
     virtual ~StatMechThermodynamics(){}
 
     /**
-     * @returns species electronic specific heat at constant volume.
-     */
-    template<typename StateType>
-    StateType cv_el (const unsigned int species, const StateType& Te) const;
-
-    /**
-     * @returns mixture electronic specific heat at constant volume.
-     */
-    template<typename VectorStateType>
-    typename enable_if_c<
-      has_size<VectorStateType>::value,
-      typename Antioch::value_type<VectorStateType>::type
-    >::type
-    cv_el (const typename Antioch::value_type<VectorStateType>::type& Te,
-           const VectorStateType& mass_fractions) const;
-
-    /**
      * @returns species vibrational/electronic specific heat
      * constant volume.
      */
@@ -387,13 +370,17 @@ namespace Antioch
 
   private:
 
-    //! Implemenation of species vibrational species heat, [J/kg-K]
+    //! Implemenation of species vibrational specific heat, [J/kg-K]
     template<typename StateType>
     StateType cv_vib_impl (const unsigned int species, const StateType & T) const;
 
-    //! Implemenation of normalized species vibrational species heat.
+    //! Implemenation of normalized species vibrational specific heat.
     template<typename StateType>
     StateType cv_vib_over_R_impl (const unsigned int species, const StateType & T) const;
+
+    //! Implemenation of species electronic specific heat, [J/kg-K]
+    template<typename StateType>
+    StateType cv_el_impl (const unsigned int species, const StateType & T) const;
 
     //! Default constructor
     /*! Private to force to user to supply a ChemicalMixture object.*/
@@ -452,8 +439,8 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::cv_el (const unsigned int species,
-                                                      const StateType& Te) const
+  StateType StatMechThermodynamics<CoeffType>::cv_el_impl (const unsigned int species,
+                                                           const StateType& T) const
   {
     using std::exp;
 
@@ -464,7 +451,7 @@ namespace Antioch
 
     antioch_assert_equal_to(ndg_e.size(), theta_e.size());
 
-    StateType cv_el = Antioch::zero_clone(Te);
+    StateType cv_el = Antioch::zero_clone(T);
 
     // Really < 2?  Yes, b/c theta_e[0] = 0.0 always.  See
     // antioch_default_electronic_data.dat
@@ -473,12 +460,12 @@ namespace Antioch
     typedef typename Antioch::raw_value_type<StateType>::type raw_type;
     const raw_type one = static_cast<raw_type>(1);
 
-    const StateType Teinv = one/Te;
+    const StateType Teinv = one/T;
     const StateType Te2inv = Teinv*Teinv;
 
     StateType
-      num = Antioch::zero_clone(Te), dnum = Antioch::zero_clone(Te),
-      den = Antioch::zero_clone(Te), dden = Antioch::zero_clone(Te);
+      num = Antioch::zero_clone(T), dnum = Antioch::zero_clone(T),
+      den = Antioch::zero_clone(T), dden = Antioch::zero_clone(T);
 
     for (unsigned int level=0; level<theta_e.size(); level++)
       {
@@ -499,27 +486,6 @@ namespace Antioch
     const StateType invden = one/den;
 
     cv_el = chem_species.gas_constant()*(dnum - num*dden*invden) * invden;
-
-    return cv_el;
-  }
-
-  template<typename CoeffType>
-  template<typename VectorStateType>
-  inline
-  typename enable_if_c<
-    has_size<VectorStateType>::value,
-    typename Antioch::value_type<VectorStateType>::type
-  >::type
-  StatMechThermodynamics<CoeffType>::cv_el (const typename Antioch::value_type<VectorStateType>::type& Te,
-                                            const VectorStateType& mass_fractions) const
-  {
-    typename Antioch::value_type<VectorStateType>::type
-      cv_el = mass_fractions[0]*this->cv_el(0, Te);
-
-    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
-      {
-        cv_el += mass_fractions[s]*this->cv_el(s, Te);
-      }
 
     return cv_el;
   }

@@ -56,19 +56,28 @@ namespace Antioch
 
     const MacroThermo & _ext_therm;
 
-    //! cv_vib
+    //! Implementation of species vibrational specific heat, [J/kg-K]
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
     cv_vib_impl(unsigned int s, const StateType & T) const
     ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))
                                 ? zero_clone(T) : _ext_therm.cv(TempCache<StateType>(T),s) - this->cv_tr(s) )
 
-    //! cv_vib/R
+    //! Implementation of normalized species vibrational specific heat.
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
     cv_vib_over_R_impl(unsigned int s, const StateType & T) const
     ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))
                                 ? zero_clone(T) :  _ext_therm.cv_over_R(TempCache<StateType>(T),s) - this->cv_tr_over_R(s) )
+
+    //! Implementation of species electronic specific heat, [J/kg-K]
+    /*! For this class, we assume there is no population of electronic states, so cv_el is
+        just zero. */
+    template<typename StateType>
+    StateType cv_el_impl (const unsigned int /*species*/, const StateType & T) const
+    {
+      return zero_clone(T);
+    }
 
   };
 

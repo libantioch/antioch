@@ -149,6 +149,28 @@ namespace Antioch
     cv_vib (const typename Antioch::value_type<VectorStateType>::type& T,
             const VectorStateType& mass_fractions) const;
 
+    /*!
+     * @returns species electronic specific heat at constant volume in [J/kg-K]
+     * at the given temperature. This is a CRTP shim, subclasses are required to
+     * implement this function.
+     */
+    template<typename StateType>
+    StateType cv_el (const unsigned int species, const StateType& T) const;
+
+    /*!
+     * @returns mixture electronic specific heat at constant volume in [J/kg-K]
+     * at the given temperature. The return type is based on the type of T:
+     * if T is a scalar type, the return type will also be the scalar type;
+     * if T is a vector type, the return type will be the vector type, etc.
+     */
+    template<typename VectorStateType>
+    typename enable_if_c<
+      has_size<VectorStateType>::value,
+      typename Antioch::value_type<VectorStateType>::type
+    >::type
+    cv_el (const typename Antioch::value_type<VectorStateType>::type& T,
+           const VectorStateType& mass_fractions) const;
+
   protected:
 
     const ChemicalMixture<CoeffType> & _chem_mixture;
@@ -248,6 +270,25 @@ namespace Antioch
     return cv_vib;
   }
 
+  template<typename CoeffType, typename Subclass>
+  template<typename VectorStateType>
+  inline
+  typename enable_if_c<
+    has_size<VectorStateType>::value,
+    typename Antioch::value_type<VectorStateType>::type
+  >::type
+  MicroThermoBase<CoeffType,Subclass>::cv_el (const typename Antioch::value_type<VectorStateType>::type& T,
+                                              const VectorStateType& mass_fractions) const
+  {
+    typename Antioch::value_type<VectorStateType>::type
+      cv_el = mass_fractions[0]*this->cv_el(0, T);
+
+    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
+      cv_el += mass_fractions[s]*this->cv_el(s, T);
+
+    return cv_el;
+  }
+
   /* ------------------------- CRTP Shims -------------------------*/
   template<typename CoeffType, typename Subclass>
   template<typename StateType>
@@ -267,6 +308,14 @@ namespace Antioch
     return static_cast<const Subclass*>(this)->cv_vib_over_R_impl(species,T);
   }
 
+  template<typename CoeffType, typename Subclass>
+  template<typename StateType>
+  inline
+  StateType
+  MicroThermoBase<CoeffType,Subclass>::cv_el (const unsigned int species, const StateType& T) const
+  {
+    return static_cast<const Subclass*>(this)->cv_el_impl(species,T);
+  }
 
 } // end namespace Antioch
 
