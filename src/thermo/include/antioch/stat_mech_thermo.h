@@ -41,41 +41,15 @@ namespace Antioch
 {
 
   template<typename CoeffType=double>
-  class StatMechThermodynamics : public MicroThermoBase<CoeffType>
+  class StatMechThermodynamics : public MicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >
   {
   public:
 
     StatMechThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture )
-      : MicroThermoBase<CoeffType>(chem_mixture)
+      : MicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >(chem_mixture)
     {}
 
     virtual ~StatMechThermodynamics(){}
-
-    /**
-     * @returns species vibrational specific heat
-     * constant volume.
-     */
-    template<typename StateType>
-    StateType cv_vib (const unsigned int species, const StateType& Tv) const;
-
-    /**
-     * @returns species vibrational specific heat over R
-     * constant volume.
-     */
-    template<typename StateType>
-    StateType cv_vib_over_R (const unsigned int species, const StateType& Tv) const;
-
-    /**
-     * @returns mixture vibrational specific heat
-     * constant volume.
-     */
-    template<typename VectorStateType>
-    typename enable_if_c<
-      has_size<VectorStateType>::value,
-      typename Antioch::value_type<VectorStateType>::type
-    >::type
-    cv_vib (const typename Antioch::value_type<VectorStateType>::type& Tv,
-            const VectorStateType& mass_fractions) const;
 
     /**
      * @returns species electronic specific heat at constant volume.
@@ -407,7 +381,19 @@ namespace Antioch
        const typename Antioch::value_type<VectorStateType>::type& p,
        const VectorStateType& mass_fractions) const;
 
+    // Friend the base class so we can make the CRTP implementation functions
+    // private.
+    friend class  MicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >;
+
   private:
+
+    //! Implemenation of species vibrational species heat, [J/kg-K]
+    template<typename StateType>
+    StateType cv_vib_impl (const unsigned int species, const StateType & T) const;
+
+    //! Implemenation of normalized species vibrational species heat.
+    template<typename StateType>
+    StateType cv_vib_over_R_impl (const unsigned int species, const StateType & T) const;
 
     //! Default constructor
     /*! Private to force to user to supply a ChemicalMixture object.*/
@@ -419,17 +405,17 @@ namespace Antioch
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::cv_vib (const unsigned int species,
-                                                       const StateType& Tv) const
+  StateType StatMechThermodynamics<CoeffType>::cv_vib_impl (const unsigned int species,
+                                                            const StateType& T) const
   {
-      return this->cv_vib_over_R(species,Tv) * (this->_chem_mixture.chemical_species()[species])->gas_constant();
+      return this->cv_vib_over_R(species,T) * (this->_chem_mixture.chemical_species()[species])->gas_constant();
   }
 
   template<typename CoeffType>
   template<typename StateType>
   inline
-  StateType StatMechThermodynamics<CoeffType>::cv_vib_over_R (const unsigned int species,
-                                                       const StateType& Tv) const
+  StateType StatMechThermodynamics<CoeffType>::cv_vib_over_R_impl (const unsigned int species,
+                                                                   const StateType& T) const
   {
     using std::exp;
 
@@ -441,7 +427,7 @@ namespace Antioch
     antioch_assert_equal_to(ndg_v.size(), theta_v.size());
 
     // Use an input datum to make sure we get the size right
-    StateType cv_vib_over_R = Antioch::zero_clone(Tv);
+    StateType cv_vib_over_R = Antioch::zero_clone(T);
 
     if (theta_v.empty())
       return cv_vib_over_R;
@@ -449,36 +435,19 @@ namespace Antioch
     for (unsigned int level=0; level<ndg_v.size(); level++)
       {
         typedef typename Antioch::raw_value_type<StateType>::type raw_type;
-        const StateType expval = exp(theta_v[level]/Tv);
+
+        const StateType expval = exp(theta_v[level]/T);
+
         const StateType expvalminusone = expval - raw_type(1);
 
         cv_vib_over_R += (static_cast<CoeffType>(ndg_v[level])*
-                          theta_v[level]*theta_v[level]*expval/(expvalminusone*expvalminusone)/(Tv*Tv));
+                          theta_v[level]*theta_v[level]*expval/(expvalminusone*expvalminusone)/(T*T));
       }
 
     return cv_vib_over_R;
   }
 
-  template<typename CoeffType>
-  template<typename VectorStateType>
-  inline
-  typename enable_if_c<
-    has_size<VectorStateType>::value,
-    typename Antioch::value_type<VectorStateType>::type
-  >::type
-  StatMechThermodynamics<CoeffType>::cv_vib (const typename Antioch::value_type<VectorStateType>::type& Tv,
-                                             const VectorStateType& mass_fractions) const
-  {
-    typename Antioch::value_type<VectorStateType>::type
-      cv_vib = mass_fractions[0]*this->cv_vib(0, Tv);
 
-    for( unsigned int s = 1; s < this->_chem_mixture.n_species(); s++ )
-      {
-        cv_vib += mass_fractions[s]*this->cv_vib(s, Tv);
-      }
-
-    return cv_vib;
-  }
 
   template<typename CoeffType>
   template<typename StateType>

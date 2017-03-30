@@ -37,34 +37,39 @@ namespace Antioch
   class TempCache;
 
   template <typename MacroThermo, typename CoeffType = double>
-  class IdealGasMicroThermo : public MicroThermoBase<CoeffType>
+  class IdealGasMicroThermo : public MicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >
   {
   public:
 
     IdealGasMicroThermo(const MacroThermo & ext_thermo, const ChemicalMixture<CoeffType> & chem_mix)
-      : MicroThermoBase<CoeffType>(chem_mix),
+      : MicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >(chem_mix),
       _ext_therm(ext_thermo)
     {}
 
     virtual ~IdealGasMicroThermo(){}
 
-        //! cv_vib
-        template <typename StateType>
-        const ANTIOCH_AUTO(StateType)
-           cv_vib(unsigned int s, const StateType & T) const
-         ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))?zero_clone(T):
-                                                                                                    _ext_therm.cv(TempCache<StateType>(T),s) - this->cv_tr(s))
-
-        //! cv_vib/R
-        template <typename StateType>
-        const ANTIOCH_AUTO(StateType)
-           cv_vib_over_R(unsigned int s, const StateType & T) const
-         ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))?zero_clone(T):
-                                                                                                    _ext_therm.cv_over_R(TempCache<StateType>(T),s) - this->cv_tr_over_R(s))
+    // Friend the base class so we can make the CRTP implementation functions
+    // private.
+    friend class  MicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >;
 
   private:
 
-     const MacroThermo & _ext_therm;
+    const MacroThermo & _ext_therm;
+
+    //! cv_vib
+    template <typename StateType>
+    const ANTIOCH_AUTO(StateType)
+    cv_vib_impl(unsigned int s, const StateType & T) const
+    ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))
+                                ? zero_clone(T) : _ext_therm.cv(TempCache<StateType>(T),s) - this->cv_tr(s) )
+
+    //! cv_vib/R
+    template <typename StateType>
+    const ANTIOCH_AUTO(StateType)
+    cv_vib_over_R_impl(unsigned int s, const StateType & T) const
+    ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))
+                                ? zero_clone(T) :  _ext_therm.cv_over_R(TempCache<StateType>(T),s) - this->cv_tr_over_R(s) )
+
   };
 
 } // end namespace Antioch
