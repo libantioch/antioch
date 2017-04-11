@@ -34,17 +34,17 @@ namespace Antioch
 {
 
   template<typename CoeffType, typename Subclass>
-  class MicroThermoBase
+  class MacroMicroThermoBase
   {
   public:
 
-    MicroThermoBase( const ChemicalMixture<CoeffType>& chem_mixture )
+    MacroMicroThermoBase( const ChemicalMixture<CoeffType>& chem_mixture )
       : _chem_mixture(chem_mixture)
     {}
 
     //! Pure virtual destructor
     /*! This is pure virtual to force this object to be abstract. */
-    virtual ~MicroThermoBase() =0;
+    virtual ~MacroMicroThermoBase() =0;
 
     /*!
      * @returns species translational specific heat at constant volume, [J/kg-K].
@@ -179,31 +179,31 @@ namespace Antioch
 
     //! Default constructor
     /*! Private to force to user to supply a ChemicalMixture object.*/
-    MicroThermoBase();
+    MacroMicroThermoBase();
   };
 
   /* ------------------------- Inline Functions -------------------------*/
   template<typename CoeffType, typename Subclass>
   inline
-  MicroThermoBase<CoeffType,Subclass>::~MicroThermoBase(){}
+  MacroMicroThermoBase<CoeffType,Subclass>::~MacroMicroThermoBase(){}
 
   template<typename CoeffType, typename Subclass>
   inline
-  CoeffType MicroThermoBase<CoeffType,Subclass>::cv_trans( const unsigned int species ) const
+  CoeffType MacroMicroThermoBase<CoeffType,Subclass>::cv_trans( const unsigned int species ) const
   {
     return CoeffType(1.5)*this->_chem_mixture.R(species);
   }
 
   template<typename CoeffType, typename Subclass>
   inline
-  CoeffType MicroThermoBase<CoeffType,Subclass>::cv_trans_over_R( const unsigned int /*species*/ ) const
+  CoeffType MacroMicroThermoBase<CoeffType,Subclass>::cv_trans_over_R( const unsigned int /*species*/ ) const
   {
     return CoeffType(1.5);
   }
 
   template<typename CoeffType, typename Subclass>
   inline
-  CoeffType MicroThermoBase<CoeffType,Subclass>::cv_rot( const unsigned int species ) const
+  CoeffType MacroMicroThermoBase<CoeffType,Subclass>::cv_rot( const unsigned int species ) const
   {
     using std::max;
 
@@ -212,7 +212,7 @@ namespace Antioch
 
    template<typename CoeffType, typename Subclass>
    inline
-  CoeffType MicroThermoBase<CoeffType,Subclass>::cv_rot_over_R( const unsigned int species ) const
+  CoeffType MacroMicroThermoBase<CoeffType,Subclass>::cv_rot_over_R( const unsigned int species ) const
   {
     using std::max;
 
@@ -221,14 +221,14 @@ namespace Antioch
 
   template<typename CoeffType, typename Subclass>
   inline
-  CoeffType MicroThermoBase<CoeffType,Subclass>::cv_tr (const unsigned int species) const
+  CoeffType MacroMicroThermoBase<CoeffType,Subclass>::cv_tr (const unsigned int species) const
   {
     return this->_chem_mixture.R(species)*(this->_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
 
   template<typename CoeffType, typename Subclass>
   inline
-  CoeffType MicroThermoBase<CoeffType,Subclass>::cv_tr_over_R (const unsigned int species) const
+  CoeffType MacroMicroThermoBase<CoeffType,Subclass>::cv_tr_over_R (const unsigned int species) const
   {
     return (this->_chem_mixture.chemical_species()[species])->n_tr_dofs();
   }
@@ -240,7 +240,7 @@ namespace Antioch
     has_size<VectorStateType>::value,
     typename Antioch::value_type<VectorStateType>::type
   >::type
-  MicroThermoBase<CoeffType,Subclass>::cv_tr (const VectorStateType& mass_fractions) const
+  MacroMicroThermoBase<CoeffType,Subclass>::cv_tr (const VectorStateType& mass_fractions) const
   {
     typename Antioch::value_type<VectorStateType>::type
       cv_tr = mass_fractions[0]*this->cv_tr(0);
@@ -258,7 +258,7 @@ namespace Antioch
     has_size<VectorStateType>::value,
     typename Antioch::value_type<VectorStateType>::type
   >::type
-  MicroThermoBase<CoeffType,Subclass>::cv_vib (const typename Antioch::value_type<VectorStateType>::type& T,
+  MacroMicroThermoBase<CoeffType,Subclass>::cv_vib (const typename Antioch::value_type<VectorStateType>::type& T,
                                       const VectorStateType& mass_fractions) const
   {
     typename Antioch::value_type<VectorStateType>::type
@@ -277,7 +277,7 @@ namespace Antioch
     has_size<VectorStateType>::value,
     typename Antioch::value_type<VectorStateType>::type
   >::type
-  MicroThermoBase<CoeffType,Subclass>::cv_el (const typename Antioch::value_type<VectorStateType>::type& T,
+  MacroMicroThermoBase<CoeffType,Subclass>::cv_el (const typename Antioch::value_type<VectorStateType>::type& T,
                                               const VectorStateType& mass_fractions) const
   {
     typename Antioch::value_type<VectorStateType>::type
@@ -294,7 +294,7 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType
-  MicroThermoBase<CoeffType,Subclass>::cv_vib (const unsigned int species, const StateType& T) const
+  MacroMicroThermoBase<CoeffType,Subclass>::cv_vib (const unsigned int species, const StateType& T) const
   {
     return static_cast<const Subclass*>(this)->cv_vib_impl(species,T);
   }
@@ -303,7 +303,7 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType
-  MicroThermoBase<CoeffType,Subclass>::cv_vib_over_R (const unsigned int species, const StateType& T) const
+  MacroMicroThermoBase<CoeffType,Subclass>::cv_vib_over_R (const unsigned int species, const StateType& T) const
   {
     return static_cast<const Subclass*>(this)->cv_vib_over_R_impl(species,T);
   }
@@ -312,7 +312,7 @@ namespace Antioch
   template<typename StateType>
   inline
   StateType
-  MicroThermoBase<CoeffType,Subclass>::cv_el (const unsigned int species, const StateType& T) const
+  MacroMicroThermoBase<CoeffType,Subclass>::cv_el (const unsigned int species, const StateType& T) const
   {
     return static_cast<const Subclass*>(this)->cv_el_impl(species,T);
   }

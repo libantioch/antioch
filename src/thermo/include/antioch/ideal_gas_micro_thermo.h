@@ -28,7 +28,7 @@
 #define ANTIOCH_IDEAL_GAS_MICRO_THERMO_H
 
 // Antioch
-#include "antioch/micro_thermo_base.h"
+#include "antioch/macro_micro_thermo_base.h"
 
 namespace Antioch
 {
@@ -37,12 +37,12 @@ namespace Antioch
   class TempCache;
 
   template <typename MacroThermo, typename CoeffType = double>
-  class IdealGasMicroThermo : public MicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >
+  class IdealGasMicroThermo : public MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >
   {
   public:
 
     IdealGasMicroThermo(const MacroThermo & ext_thermo, const ChemicalMixture<CoeffType> & chem_mix)
-      : MicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >(chem_mix),
+      : MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >(chem_mix),
       _ext_therm(ext_thermo)
     {}
 
@@ -50,7 +50,7 @@ namespace Antioch
 
     // Friend the base class so we can make the CRTP implementation functions
     // private.
-    friend class  MicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >;
+    friend class  MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >;
 
   private:
 

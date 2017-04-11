@@ -29,7 +29,7 @@
 #define ANTIOCH_STAT_MECH_THERMO_H
 
 // Antioch
-#include "antioch/micro_thermo_base.h"
+#include "antioch/macro_micro_thermo_base.h"
 #include "antioch/antioch_exceptions.h"
 
 // C++
@@ -41,12 +41,12 @@ namespace Antioch
 {
 
   template<typename CoeffType=double>
-  class StatMechThermodynamics : public MicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >
+  class StatMechThermodynamics : public MacroMicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >
   {
   public:
 
     StatMechThermodynamics( const ChemicalMixture<CoeffType>& chem_mixture )
-      : MicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >(chem_mixture)
+      : MacroMicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >(chem_mixture)
     {}
 
     virtual ~StatMechThermodynamics(){}
@@ -366,7 +366,7 @@ namespace Antioch
 
     // Friend the base class so we can make the CRTP implementation functions
     // private.
-    friend class  MicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >;
+    friend class  MacroMicroThermoBase<CoeffType,StatMechThermodynamics<CoeffType> >;
 
   private:
 
