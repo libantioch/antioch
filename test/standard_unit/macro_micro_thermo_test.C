@@ -36,6 +36,7 @@
 
 // Anitoch testing
 #include "testing_utils.h"
+#include "nasa_test_helper.h"
 
 // Antioch
 #include "antioch/vector_utils_decl.h"
@@ -324,13 +325,29 @@ namespace AntiochTesting
 
   };
 
+  template<typename Scalar>
+  class IdealGasMicroThermoTestNASA7Base :
+    public IdealGasMicroThermoTestBase<Scalar,Antioch::NASA7CurveFit<Scalar> >,
+    public NASA7ThermoTestHelper<Scalar>
+  {
+  public:
 
-#define DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(classname,scalar,CurveFit) \
-  class classname :                      \
-    public IdealGasMicroThermoTestBase<scalar,Antioch::CurveFit<scalar> > \
+  };
+
+  template<typename Scalar>
+  class IdealGasMicroThermoTestNASA9Base :
+    public IdealGasMicroThermoTestBase<Scalar,Antioch::NASA9CurveFit<Scalar> >,
+    public NASA9ThermoTestHelper<Scalar>
+  {
+  public:
+
+  };
+
+#define DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(Classname,BaseClass,Scalar) \
+  class Classname : public BaseClass<Scalar>                            \
   {                                                                     \
   public:                                                               \
-    CPPUNIT_TEST_SUITE( classname );                                    \
+    CPPUNIT_TEST_SUITE( Classname );                                    \
     CPPUNIT_TEST(test_cv_trans);                                        \
     CPPUNIT_TEST(test_cv_trans_over_R);                                 \
     CPPUNIT_TEST(test_cv_tr);                                           \
@@ -341,12 +358,25 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7FloatTest,float,NASA7CurveFit);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7DoubleTest,double,NASA7CurveFit);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7LongDoubleTest,long double,NASA7CurveFit);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9FloatTest,float,NASA9CurveFit);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9DoubleTest,double,NASA9CurveFit);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9LongDoubleTest,long double,NASA9CurveFit);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7FloatTest,
+                                         IdealGasMicroThermoTestNASA7Base,
+                                         float);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7DoubleTest,
+                                         IdealGasMicroThermoTestNASA7Base,
+                                         double);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7LongDoubleTest,
+                                         IdealGasMicroThermoTestNASA7Base,
+                                         long double);
+
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9FloatTest,
+                                         IdealGasMicroThermoTestNASA9Base,
+                                         float);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9DoubleTest,
+                                         IdealGasMicroThermoTestNASA9Base,
+                                         double);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9LongDoubleTest,
+                                         IdealGasMicroThermoTestNASA9Base,
+                                         long double);
 
   CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7FloatTest );
   CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7DoubleTest );
