@@ -153,6 +153,22 @@ namespace AntiochTesting
                                std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_rot()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( (this->_n_tr_dofs[s]-Scalar(1.5))*this->_gas_consts[s],
+                               _thermo->cv_rot(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
+    void test_cv_rot_over_R()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( this->_n_tr_dofs[s]-Scalar(1.5),
+                               _thermo->cv_rot_over_R(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void setUp()
     {
       this->init();
@@ -180,6 +196,8 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_trans_over_R);                         \
     CPPUNIT_TEST(test_cv_tr);                                   \
     CPPUNIT_TEST(test_cv_tr_over_R);                            \
+    CPPUNIT_TEST(test_cv_rot);                                  \
+    CPPUNIT_TEST(test_cv_rot_over_R);                           \
     CPPUNIT_TEST_SUITE_END();                                   \
   }
 
@@ -234,6 +252,22 @@ namespace AntiochTesting
                                std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_rot()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( (this->_n_tr_dofs[s]-Scalar(1.5))*this->_gas_consts[s],
+                               _thermo->cv_rot(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
+    void test_cv_rot_over_R()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( this->_n_tr_dofs[s]-Scalar(1.5),
+                               _thermo->cv_rot_over_R(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void setUp()
     {
       this->init();
@@ -261,6 +295,7 @@ namespace AntiochTesting
 
   };
 
+
 #define DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(classname,scalar,CurveFit) \
   class classname :                      \
     public IdealGasMicroThermoTestBase<scalar,Antioch::CurveFit<scalar> > \
@@ -271,6 +306,8 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_trans_over_R);                                 \
     CPPUNIT_TEST(test_cv_tr);                                           \
     CPPUNIT_TEST(test_cv_tr_over_R);                                    \
+    CPPUNIT_TEST(test_cv_rot);                                          \
+    CPPUNIT_TEST(test_cv_rot_over_R);                                   \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
