@@ -34,8 +34,12 @@
 // C++
 #include <limits>
 
+// Anitoch testing
+#include "testing_utils.h"
+
 // Antioch
 #include "antioch/chemical_mixture.h"
+#include "antioch/stat_mech_thermo.h"
 
 namespace AntiochTesting
 {
@@ -104,6 +108,56 @@ namespace AntiochTesting
 
     Antioch::ChemicalMixture<Scalar> * _chem_mixture;
   };
+
+  template<typename Scalar>
+  class StatMechThermoTestBase : public CppUnit::TestCase,
+                                 public TestingUtilities<Scalar>,
+                                 public MacroMicroThermoTestBase<Scalar>
+  {
+  public:
+
+    void test_cv_trans_over_R()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( Scalar(1.5),
+                               _thermo->cv_trans_over_R(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
+    void setUp()
+    {
+      this->init();
+      _thermo = new Antioch::StatMechThermodynamics<Scalar>( *(this->_chem_mixture) );
+    }
+
+    void tearDown()
+    {
+      this->clear();
+      delete _thermo;
+    }
+
+  private:
+
+    Antioch::StatMechThermodynamics<Scalar> * _thermo;
+
+  };
+
+#define DEFINE_STATMECHTHERMO_SCALAR_TEST(classname,scalar)     \
+  class classname : public StatMechThermoTestBase<scalar>       \
+  {                                                             \
+  public:                                                       \
+    CPPUNIT_TEST_SUITE( classname );                            \
+    CPPUNIT_TEST(test_cv_trans_over_R);                         \
+    CPPUNIT_TEST_SUITE_END();                                   \
+  }
+
+  DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestFloat,float);
+  DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestDouble,double);
+  DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestLongDouble,long double);
+
+  CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestFloat );
+  CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestDouble );
+  CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestLongDouble );
 
 } // end namespace AntiochTesting
 
