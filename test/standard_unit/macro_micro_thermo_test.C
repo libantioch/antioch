@@ -121,6 +121,14 @@ namespace AntiochTesting
   {
   public:
 
+    void test_cv_trans()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( Scalar(1.5)*this->_gas_consts[s],
+                               _thermo->cv_trans(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void test_cv_trans_over_R()
     {
       for( unsigned int s = 0; s < this->_n_species; s++ )
@@ -152,6 +160,7 @@ namespace AntiochTesting
   {                                                             \
   public:                                                       \
     CPPUNIT_TEST_SUITE( classname );                            \
+    CPPUNIT_TEST(test_cv_trans);                                \
     CPPUNIT_TEST(test_cv_trans_over_R);                         \
     CPPUNIT_TEST_SUITE_END();                                   \
   }
@@ -174,6 +183,14 @@ namespace AntiochTesting
                                       public MacroMicroThermoTestBase<Scalar>
   {
   public:
+
+    void test_cv_trans()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( Scalar(1.5)*this->_gas_consts[s],
+                               _thermo->cv_trans(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
 
     void test_cv_trans_over_R()
     {
@@ -215,7 +232,8 @@ namespace AntiochTesting
     public IdealGasMicroThermoTestBase<scalar,Antioch::CurveFit<scalar> > \
   {                                                                     \
   public:                                                               \
-    CPPUNIT_TEST_SUITE( classname );     \
+    CPPUNIT_TEST_SUITE( classname );                                    \
+    CPPUNIT_TEST(test_cv_trans);                                        \
     CPPUNIT_TEST(test_cv_trans_over_R);                                 \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
