@@ -137,6 +137,22 @@ namespace AntiochTesting
                                std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_tr()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( this->_n_tr_dofs[s]*this->_gas_consts[s],
+                               _thermo->cv_tr(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
+    void test_cv_tr_over_R()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( this->_n_tr_dofs[s],
+                               _thermo->cv_tr_over_R(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void setUp()
     {
       this->init();
@@ -162,6 +178,8 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE( classname );                            \
     CPPUNIT_TEST(test_cv_trans);                                \
     CPPUNIT_TEST(test_cv_trans_over_R);                         \
+    CPPUNIT_TEST(test_cv_tr);                                   \
+    CPPUNIT_TEST(test_cv_tr_over_R);                            \
     CPPUNIT_TEST_SUITE_END();                                   \
   }
 
@@ -200,6 +218,22 @@ namespace AntiochTesting
                                std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_tr()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( this->_n_tr_dofs[s]*this->_gas_consts[s],
+                               _thermo->cv_tr(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
+    void test_cv_tr_over_R()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( this->_n_tr_dofs[s],
+                               _thermo->cv_tr_over_R(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void setUp()
     {
       this->init();
@@ -235,6 +269,8 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE( classname );                                    \
     CPPUNIT_TEST(test_cv_trans);                                        \
     CPPUNIT_TEST(test_cv_trans_over_R);                                 \
+    CPPUNIT_TEST(test_cv_tr);                                           \
+    CPPUNIT_TEST(test_cv_tr_over_R);                                    \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
