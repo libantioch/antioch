@@ -40,6 +40,11 @@
 // Antioch
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
+#include "antioch/ideal_gas_micro_thermo.h"
+#include "antioch/nasa_mixture.h"
+#include "antioch/nasa_evaluator.h"
+#include "antioch/nasa7_curve_fit.h"
+#include "antioch/nasa9_curve_fit.h"
 
 namespace AntiochTesting
 {
@@ -155,9 +160,79 @@ namespace AntiochTesting
   DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestDouble,double);
   DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestLongDouble,long double);
 
+
   CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestFloat );
   CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestDouble );
   CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestLongDouble );
+
+
+
+
+  template<typename Scalar, typename NASACurveFit>
+  class IdealGasMicroThermoTestBase : public CppUnit::TestCase,
+                                      public TestingUtilities<Scalar>,
+                                      public MacroMicroThermoTestBase<Scalar>
+  {
+  public:
+
+    void test_cv_trans_over_R()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( Scalar(1.5),
+                               _thermo->cv_trans_over_R(s),
+                               std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
+    void setUp()
+    {
+      this->init();
+      _nasa_mixture = new Antioch::NASAThermoMixture<Scalar,NASACurveFit>( *(this->_chem_mixture) );
+      _nasa_evaluator = new Antioch::NASAEvaluator<Scalar,NASACurveFit>( *(_nasa_mixture) );
+      _thermo = new Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar>
+        ( *(_nasa_evaluator), *(this->_chem_mixture) );
+    }
+
+    void tearDown()
+    {
+      delete _thermo;
+      delete _nasa_evaluator;
+      delete _nasa_mixture;
+      this->clear();
+    }
+
+  private:
+
+    Antioch::NASAThermoMixture<Scalar,NASACurveFit> * _nasa_mixture;
+
+    Antioch::NASAEvaluator<Scalar,NASACurveFit> * _nasa_evaluator;
+
+    Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar> * _thermo;
+
+  };
+
+#define DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(classname,scalar,CurveFit) \
+  class classname :                      \
+    public IdealGasMicroThermoTestBase<scalar,Antioch::CurveFit<scalar> > \
+  {                                                                     \
+  public:                                                               \
+    CPPUNIT_TEST_SUITE( classname );     \
+    CPPUNIT_TEST(test_cv_trans_over_R);                                 \
+    CPPUNIT_TEST_SUITE_END();                                           \
+  }
+
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7FloatTest,float,NASA7CurveFit);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7DoubleTest,double,NASA7CurveFit);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7LongDoubleTest,long double,NASA7CurveFit);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9FloatTest,float,NASA9CurveFit);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9DoubleTest,double,NASA9CurveFit);
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9LongDoubleTest,long double,NASA9CurveFit);
+
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7FloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7DoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7LongDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA9FloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA9DoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA9LongDoubleTest );
 
 } // end namespace AntiochTesting
 
