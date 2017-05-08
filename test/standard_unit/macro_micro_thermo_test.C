@@ -38,6 +38,8 @@
 #include "testing_utils.h"
 
 // Antioch
+#include "antioch/vector_utils_decl.h"
+
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
 #include "antioch/ideal_gas_micro_thermo.h"
@@ -45,6 +47,8 @@
 #include "antioch/nasa_evaluator.h"
 #include "antioch/nasa7_curve_fit.h"
 #include "antioch/nasa9_curve_fit.h"
+
+#include "antioch/vector_utils.h"
 
 namespace AntiochTesting
 {
@@ -169,6 +173,18 @@ namespace AntiochTesting
                                std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_tr_mix()
+    {
+      Scalar cv_exact(0.0);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        cv_exact += this->_n_tr_dofs[s]*this->_gas_consts[s]*this->_mass_fractions[s];
+
+      this->test_scalar_rel( cv_exact,
+                             _thermo->cv_tr(this->_mass_fractions),
+                             std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void setUp()
     {
       this->init();
@@ -198,6 +214,7 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_tr_over_R);                            \
     CPPUNIT_TEST(test_cv_rot);                                  \
     CPPUNIT_TEST(test_cv_rot_over_R);                           \
+    CPPUNIT_TEST(test_cv_tr_mix);                               \
     CPPUNIT_TEST_SUITE_END();                                   \
   }
 
@@ -268,6 +285,18 @@ namespace AntiochTesting
                                std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_tr_mix()
+    {
+      Scalar cv_exact(0.0);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        cv_exact += this->_n_tr_dofs[s]*this->_gas_consts[s]*this->_mass_fractions[s];
+
+      this->test_scalar_rel( cv_exact,
+                             _thermo->cv_tr(this->_mass_fractions),
+                             std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void setUp()
     {
       this->init();
@@ -308,6 +337,7 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_tr_over_R);                                    \
     CPPUNIT_TEST(test_cv_rot);                                          \
     CPPUNIT_TEST(test_cv_rot_over_R);                                   \
+    CPPUNIT_TEST(test_cv_tr_mix);                                       \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
