@@ -88,6 +88,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS += -I$(top_srcdir)/test/standard_unit
+AM_CPPFLAGS += -I$(top_srcdir)/test/common
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
 
 AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
@@ -121,6 +122,7 @@ gsl_unit_tests_SOURCES = gsl_unit/gsl_spliner_test.C \
                          gsl_unit/gsl_spliner_vec_test.C \
                          gsl_unit/gsl_unit_tests.C
 
+pkginclude_HEADERS += common/testing_utils.h
 pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
 pkginclude_HEADERS += standard_unit/reaction_rate_vector_test_base.h
 pkginclude_HEADERS += standard_unit/arrhenius_rate_test_helper.h
