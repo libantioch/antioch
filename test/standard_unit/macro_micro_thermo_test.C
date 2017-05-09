@@ -299,6 +299,34 @@ namespace AntiochTesting
                              std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_vib()
+    {
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        {
+          // Test first temp interval
+          {
+            Scalar T(501.2);
+
+            Scalar cv_vib_exact = this->eval_cv_vib_exact(s,T);
+
+            this->test_scalar_rel( cv_vib_exact,
+                                   _thermo->cv_vib(s,T),
+                                   std::numeric_limits<Scalar>::epsilon()*50 );
+          }
+
+          // Test second temp interval
+          {
+            Scalar T(1501.2);
+
+            Scalar cv_vib_exact = this->eval_cv_vib_exact(s,T);
+
+            this->test_scalar_rel( cv_vib_exact,
+                                   _thermo->cv_vib(s,T),
+                                   std::numeric_limits<Scalar>::epsilon()*50 );
+          }
+        }
+    }
+
     void setUp()
     {
       this->init();
@@ -334,8 +362,40 @@ namespace AntiochTesting
     std::map<std::string,std::vector<Scalar> > _nasa_coeffs_lower_interval;
     std::map<std::string,std::vector<Scalar> > _nasa_coeffs_upper_interval;
 
-    virtual void parse_nasa_coeffs( Antioch::NASAThermoMixture<Scalar,NASACurveFit> & nasa_mixture ) =0;
+    Scalar eval_cv_vib_exact( unsigned int species, Scalar T )
+    {
+      Scalar cv_vib_exact(0.0);
 
+      // cv_vib should only be non-zero if there are rot modes
+      if( this->_n_tr_dofs[species] > Scalar(1.5) )
+        {
+          Scalar cp_over_R = this->eval_cp_exact(species,T);
+
+          // Evaluate cv/R exact
+          Scalar cv_over_R = cp_over_R - Scalar(1.0);
+
+          cv_vib_exact = (cv_over_R - this->_n_tr_dofs[species])*this->_gas_consts[species];
+        }
+
+      return cv_vib_exact;
+    }
+
+    const std::vector<Scalar> & get_nasa_coeffs(  unsigned int species, Scalar T )
+    {
+      CPPUNIT_ASSERT( _nasa_coeffs_lower_interval.find(this->_species_name_list[species]) !=
+                      _nasa_coeffs_lower_interval.end() );
+
+      CPPUNIT_ASSERT( _nasa_coeffs_upper_interval.find(this->_species_name_list[species]) !=
+                      _nasa_coeffs_upper_interval.end() );
+
+      if( T < Scalar(1000) )
+        return _nasa_coeffs_lower_interval.find(this->_species_name_list[species])->second;
+      else
+        return _nasa_coeffs_upper_interval.find(this->_species_name_list[species])->second;
+    }
+    virtual Scalar eval_cp_exact( unsigned int species, Scalar T ) =0;
+
+    virtual void parse_nasa_coeffs( Antioch::NASAThermoMixture<Scalar,NASACurveFit> & nasa_mixture ) =0;
     virtual void init_nasa_coeffs() =0;
 
   };
@@ -430,6 +490,15 @@ namespace AntiochTesting
         std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
 
        Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
+    }
+
+    virtual Scalar eval_cp_exact( unsigned int species, Scalar T )
+    {
+      const std::vector<Scalar> & coeffs = this->get_nasa_coeffs(species,T);
+
+      CPPUNIT_ASSERT( coeffs.size() == 7 );
+
+      return this->cp_exact( T, coeffs[0], coeffs[1], coeffs[2], coeffs[3], coeffs[4] );
     }
 
   };
@@ -529,6 +598,16 @@ namespace AntiochTesting
       }
     }
 
+    virtual Scalar eval_cp_exact( unsigned int species, Scalar T )
+    {
+      const std::vector<Scalar> & coeffs = this->get_nasa_coeffs(species,T);
+
+      CPPUNIT_ASSERT( coeffs.size() == 9 );
+
+      return this->cp_exact( T, coeffs[0], coeffs[1], coeffs[2],
+                             coeffs[3], coeffs[4], coeffs[5], coeffs[6] );
+    }
+
     virtual void parse_nasa_coeffs( Antioch::NASAThermoMixture<Scalar,Antioch::NASA9CurveFit<Scalar> > & nasa_mixture )
     {
       std::string thermo_filename =
@@ -551,6 +630,7 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_rot);                                          \
     CPPUNIT_TEST(test_cv_rot_over_R);                                   \
     CPPUNIT_TEST(test_cv_tr_mix);                                       \
+    CPPUNIT_TEST(test_cv_vib);                                          \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
