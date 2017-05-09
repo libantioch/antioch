@@ -53,19 +53,19 @@ namespace Antioch
       }
   }
 
-  void remove_newline_from_strings( std::vector<std::string>& strings )
+  void remove_newline_from_strings( std::vector<std::string> & strings )
   {
-    std::string newline_str = "\n";
+    const std::string newline_str("\n");
 
     strings.erase( std::remove(strings.begin(),strings.end(),newline_str), strings.end() );
 
     // Now, strip any newline characters in the remaining elements
     for( std::vector<std::string>::iterator it = strings.begin(); it != strings.end(); ++it )
       {
-        std::string& elem = *it;
+        std::string & elem = *it;
 
         // Compiler will not accept newline_str as the third argument to std::remove
-        elem.erase( std::remove(elem.begin(), elem.end(), '\n'), elem.end() );
+        elem.erase( std::remove(elem.begin(), elem.end(), *newline_str.c_str()), elem.end() );
       }
   }
 
