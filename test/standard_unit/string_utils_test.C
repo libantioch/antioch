@@ -49,6 +49,7 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_split_string);
     CPPUNIT_TEST(test_string_to_T);
     CPPUNIT_TEST(test_strip_newlines);
+    CPPUNIT_TEST(test_strip_newlines_gri30N2);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -164,12 +165,45 @@ namespace AntiochTesting
       strings_exact.push_back("1.1111111111e+10");
 
       Antioch::remove_newline_from_strings(strings);
+      this->compare_string_vectors(strings,strings_exact);
+    }
+
+    void test_strip_newlines_gri30N2()
+    {
+      std::vector<std::string> strings;
+      strings.push_back("\n");
+      strings.push_back("3.298677000E+00,");
+      strings.push_back("1.408240400E-03,");
+      strings.push_back("-3.963222000E-06,");
+      strings.push_back("5.641515000E-09,");
+      strings.push_back("\n");
+      strings.push_back("-2.444854000E-12,");
+      strings.push_back("-1.020899900E+03,");
+      strings.push_back("3.950372000E+00");
+
+      std::vector<std::string> strings_exact;
+      strings_exact.push_back("3.298677000E+00,");
+      strings_exact.push_back("1.408240400E-03,");
+      strings_exact.push_back("-3.963222000E-06,");
+      strings_exact.push_back("5.641515000E-09,");
+      strings_exact.push_back("-2.444854000E-12,");
+      strings_exact.push_back("-1.020899900E+03,");
+      strings_exact.push_back("3.950372000E+00");
+
+      Antioch::remove_newline_from_strings(strings);
+      this->compare_string_vectors(strings,strings_exact);
+    }
+
+  private:
+
+    void compare_string_vectors( const std::vector<std::string> & strings,
+                                 const std::vector<std::string> & strings_exact )
+    {
       CPPUNIT_ASSERT_EQUAL(strings_exact.size(), strings.size());
 
       for( unsigned int i = 0; i < strings_exact.size(); i++ )
         CPPUNIT_ASSERT_EQUAL(strings_exact[i], strings[i]);
     }
-
   };
 
   CPPUNIT_TEST_SUITE_REGISTRATION( StringUtilitiesTest );
