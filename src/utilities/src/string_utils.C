@@ -57,17 +57,7 @@ namespace Antioch
   {
     std::string newline_str = "\n";
 
-    // First, detect any elements that are purely newlines, cache their iterator position,
-    // and them remove them.
-    std::vector<std::vector<std::string>::iterator> its_to_be_removed;
-
-    for( std::vector<std::string>::iterator it = strings.begin(); it != strings.end(); ++it )
-      if( (*it) == newline_str )
-        its_to_be_removed.push_back(it);
-
-    for(  std::vector<std::vector<std::string>::iterator>::iterator it = its_to_be_removed.begin();
-          it != its_to_be_removed.end(); ++it )
-      strings.erase( *it );
+    strings.erase( std::remove(strings.begin(),strings.end(),newline_str), strings.end() );
 
     // Now, strip any newline characters in the remaining elements
     for( std::vector<std::string>::iterator it = strings.begin(); it != strings.end(); ++it )
