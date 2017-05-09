@@ -161,6 +161,23 @@ namespace AntiochTesting
       this->check_curve_fits(nasa_mixture);
     }
 
+    void test_gri30_xml()
+    {
+      std::vector<std::string> species_str_list(2);
+      species_str_list[0] = "H2";
+      species_str_list[1] = "N2";
+
+      Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+      std::string thermo_filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
+
+      Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
+
+      Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
+
+      this->check_curve_fits(nasa_mixture);
+     }
+
     void check_curve_fits( const Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> >& nasa_mixture)
     {
       const Antioch::NASA7CurveFit<Scalar>& H2_curve_fit =  nasa_mixture.curve_fit(0);
@@ -197,6 +214,7 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE( Classname );                                    \
     CPPUNIT_TEST(test_supplied_species);                                \
     CPPUNIT_TEST(test_parsed_species_list);                             \
+    CPPUNIT_TEST(test_gri30_xml);                                       \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
