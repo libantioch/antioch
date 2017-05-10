@@ -97,6 +97,25 @@ namespace AntiochTesting
 
   };
 
+#define DEFINE_NASA9XMLPARSING_SCALAR_TEST(Classname,BaseClass,Scalar)  \
+  class Classname : public BaseClass<Scalar>                            \
+  {                                                                     \
+  public:                                                               \
+    CPPUNIT_TEST_SUITE( Classname );                                    \
+    CPPUNIT_TEST(test_supplied_species);                                \
+    CPPUNIT_TEST_SUITE_END();                                           \
+  }
+
+  DEFINE_NASA9XMLPARSING_SCALAR_TEST(NASA9XMLParsingTestFloat,NASA9XMLParsingTest,float);
+  DEFINE_NASA9XMLPARSING_SCALAR_TEST(NASA9XMLParsingTestDouble,NASA9XMLParsingTest,double);
+  DEFINE_NASA9XMLPARSING_SCALAR_TEST(NASA9XMLParsingTestLongDouble,NASA9XMLParsingTest,long double);
+
+  CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestFloat );
+  CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestDouble );
+  CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestLongDouble );
+
+
+
   template<typename Scalar>
   class NASA7XMLParsingTest : public NASA7ThermoTestBase<Scalar>,
                               public CppUnit::TestCase
@@ -142,6 +161,23 @@ namespace AntiochTesting
       this->check_curve_fits(nasa_mixture);
     }
 
+    void test_gri30_xml()
+    {
+      std::vector<std::string> species_str_list(2);
+      species_str_list[0] = "H2";
+      species_str_list[1] = "N2";
+
+      Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
+
+      std::string thermo_filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
+
+      Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
+
+      Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
+
+      this->check_curve_fits(nasa_mixture);
+     }
+
     void check_curve_fits( const Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> >& nasa_mixture)
     {
       const Antioch::NASA7CurveFit<Scalar>& H2_curve_fit =  nasa_mixture.curve_fit(0);
@@ -170,78 +206,23 @@ namespace AntiochTesting
 
   };
 
-  class NASA9XMLParsingTestFloat : public NASA9XMLParsingTest<float>
-  {
-  public:
-    CPPUNIT_TEST_SUITE( NASA9XMLParsingTestFloat );
 
-    CPPUNIT_TEST(test_supplied_species);
+#define DEFINE_NASA7XMLPARSING_SCALAR_TEST(Classname,BaseClass,Scalar)  \
+  class Classname : public BaseClass<Scalar>                            \
+  {                                                                     \
+  public:                                                               \
+    CPPUNIT_TEST_SUITE( Classname );                                    \
+    CPPUNIT_TEST(test_supplied_species);                                \
+    CPPUNIT_TEST(test_parsed_species_list);                             \
+    CPPUNIT_TEST(test_gri30_xml);                                       \
+    CPPUNIT_TEST_SUITE_END();                                           \
+  }
 
-    CPPUNIT_TEST_SUITE_END();
+  DEFINE_NASA7XMLPARSING_SCALAR_TEST(NASA7XMLParsingTestFloat,NASA7XMLParsingTest,float);
+  DEFINE_NASA7XMLPARSING_SCALAR_TEST(NASA7XMLParsingTestDouble,NASA7XMLParsingTest,double);
+  DEFINE_NASA7XMLPARSING_SCALAR_TEST(NASA7XMLParsingTestLongDouble,NASA7XMLParsingTest,long double);
 
-  };
 
-  class NASA9XMLParsingTestDouble : public NASA9XMLParsingTest<double>
-  {
-  public:
-    CPPUNIT_TEST_SUITE( NASA9XMLParsingTestDouble );
-
-    CPPUNIT_TEST(test_supplied_species);
-
-    CPPUNIT_TEST_SUITE_END();
-
-  };
-
-  class NASA9XMLParsingTestLongDouble : public NASA9XMLParsingTest<long double>
-  {
-  public:
-    CPPUNIT_TEST_SUITE( NASA9XMLParsingTestLongDouble );
-
-    CPPUNIT_TEST(test_supplied_species);
-
-    CPPUNIT_TEST_SUITE_END();
-
-  };
-
-  class NASA7XMLParsingTestFloat : public NASA7XMLParsingTest<float>
-  {
-  public:
-    CPPUNIT_TEST_SUITE( NASA7XMLParsingTestFloat );
-
-    CPPUNIT_TEST(test_supplied_species);
-    CPPUNIT_TEST(test_parsed_species_list);
-
-    CPPUNIT_TEST_SUITE_END();
-
-  };
-
-  class NASA7XMLParsingTestDouble : public NASA7XMLParsingTest<double>
-  {
-  public:
-    CPPUNIT_TEST_SUITE( NASA7XMLParsingTestDouble );
-
-    CPPUNIT_TEST(test_supplied_species);
-    CPPUNIT_TEST(test_parsed_species_list);
-
-    CPPUNIT_TEST_SUITE_END();
-
-  };
-
-  class NASA7XMLParsingTestLongDouble : public NASA7XMLParsingTest<long double>
-  {
-  public:
-    CPPUNIT_TEST_SUITE( NASA7XMLParsingTestLongDouble );
-
-    CPPUNIT_TEST(test_supplied_species);
-    CPPUNIT_TEST(test_parsed_species_list);
-
-    CPPUNIT_TEST_SUITE_END();
-
-  };
-
-  CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestFloat );
-  CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestDouble );
-  CPPUNIT_TEST_SUITE_REGISTRATION( NASA9XMLParsingTestLongDouble );
   CPPUNIT_TEST_SUITE_REGISTRATION( NASA7XMLParsingTestFloat );
   CPPUNIT_TEST_SUITE_REGISTRATION( NASA7XMLParsingTestDouble );
   CPPUNIT_TEST_SUITE_REGISTRATION( NASA7XMLParsingTestLongDouble );

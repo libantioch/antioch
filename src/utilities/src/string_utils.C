@@ -53,29 +53,19 @@ namespace Antioch
       }
   }
 
-  void remove_newline_from_strings( std::vector<std::string>& strings )
+  void remove_newline_from_strings( std::vector<std::string> & strings )
   {
-    std::string newline_str = "\n";
+    const std::string newline_str("\n");
 
-    // First, detect any elements that are purely newlines, cache their iterator position,
-    // and them remove them.
-    std::vector<std::vector<std::string>::iterator> its_to_be_removed;
-
-    for( std::vector<std::string>::iterator it = strings.begin(); it != strings.end(); ++it )
-      if( (*it) == newline_str )
-        its_to_be_removed.push_back(it);
-
-    for(  std::vector<std::vector<std::string>::iterator>::iterator it = its_to_be_removed.begin();
-          it != its_to_be_removed.end(); ++it )
-      strings.erase( *it );
+    strings.erase( std::remove(strings.begin(),strings.end(),newline_str), strings.end() );
 
     // Now, strip any newline characters in the remaining elements
     for( std::vector<std::string>::iterator it = strings.begin(); it != strings.end(); ++it )
       {
-        std::string& elem = *it;
+        std::string & elem = *it;
 
         // Compiler will not accept newline_str as the third argument to std::remove
-        elem.erase( std::remove(elem.begin(), elem.end(), '\n'), elem.end() );
+        elem.erase( std::remove(elem.begin(), elem.end(), *newline_str.c_str()), elem.end() );
       }
   }
 
