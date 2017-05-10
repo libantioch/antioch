@@ -58,7 +58,6 @@ check_PROGRAMS += kinetics_theory_thermal_conductivity_unit
 check_PROGRAMS += kinetics_theory_thermal_conductivity_vec_unit
 check_PROGRAMS += rotational_relaxation_unit
 check_PROGRAMS += rotational_relaxation_vec_unit
-check_PROGRAMS += ideal_gas_micro_thermo_unit
 check_PROGRAMS += ascii_parser_unit
 check_PROGRAMS += lindemann_falloff_threebody_unit
 check_PROGRAMS += troe_falloff_threebody_unit
@@ -199,7 +198,6 @@ molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
 molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
 kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
 kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
-ideal_gas_micro_thermo_unit_SOURCES =  ideal_gas_micro_thermo_unit.C
 Stockmayer_unit_SOURCES = Stockmayer_unit.C
 
 
@@ -273,7 +271,6 @@ TESTS += kinetics_theory_thermal_conductivity_unit
 TESTS += kinetics_theory_thermal_conductivity_vec_unit
 TESTS += rotational_relaxation_unit
 TESTS += rotational_relaxation_vec_unit
-TESTS += ideal_gas_micro_thermo_unit
 TESTS += ascii_parser_unit.sh
 TESTS += lindemann_falloff_threebody_unit
 TESTS += troe_falloff_threebody_unit
