@@ -327,6 +327,37 @@ namespace AntiochTesting
         }
     }
 
+    void test_cv_vib_mix()
+    {
+      // Test first temp interval
+      {
+        Scalar T(501.2);
+        Scalar cv_vib_exact = 0.0;
+
+        for( unsigned int s = 0; s < this->_n_species; s++ )
+          cv_vib_exact += this->eval_cv_vib_exact(s,T)*this->_mass_fractions[s];
+
+        this->test_scalar_rel( cv_vib_exact,
+                               _thermo->cv_vib(T,this->_mass_fractions),
+                               std::numeric_limits<Scalar>::epsilon()*50 );
+      }
+
+      // Test second temp interval
+      {
+        Scalar T(1501.2);
+
+        Scalar cv_vib_exact = 0.0;
+
+        for( unsigned int s = 0; s < this->_n_species; s++ )
+          cv_vib_exact += this->eval_cv_vib_exact(s,T)*this->_mass_fractions[s];
+
+        this->test_scalar_rel( cv_vib_exact,
+                               _thermo->cv_vib(T,this->_mass_fractions),
+                               std::numeric_limits<Scalar>::epsilon()*50 );
+      }
+    }
+
+
     void setUp()
     {
       this->init();
@@ -631,6 +662,7 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_rot_over_R);                                   \
     CPPUNIT_TEST(test_cv_tr_mix);                                       \
     CPPUNIT_TEST(test_cv_vib);                                          \
+    CPPUNIT_TEST(test_cv_vib_mix);                                      \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
