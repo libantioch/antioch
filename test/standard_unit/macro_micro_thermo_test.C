@@ -357,6 +357,30 @@ namespace AntiochTesting
       }
     }
 
+    void test_cv_el()
+    {
+      Scalar T(1501.2);
+
+      // For IdealGasMicroThermo, none of the electronic modes are populated by assumption.
+      Scalar cv_el_exact(0.0);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        this->test_scalar_rel( cv_el_exact,
+                               _thermo->cv_el(s,T),
+                               std::numeric_limits<Scalar>::epsilon() );
+    }
+
+    void test_cv_el_mix()
+    {
+      Scalar T(1501.2);
+
+      // For IdealGasMicroThermo, none of the electronic modes are populated by assumption.
+      Scalar cv_el_exact(0.0);
+
+      this->test_scalar_rel( cv_el_exact,
+                             _thermo->cv_el(T,this->_mass_fractions),
+                             std::numeric_limits<Scalar>::epsilon() );
+    }
 
     void setUp()
     {
@@ -663,6 +687,8 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_tr_mix);                                       \
     CPPUNIT_TEST(test_cv_vib);                                          \
     CPPUNIT_TEST(test_cv_vib_mix);                                      \
+    CPPUNIT_TEST(test_cv_el);                                           \
+    CPPUNIT_TEST(test_cv_el_mix);                                       \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
