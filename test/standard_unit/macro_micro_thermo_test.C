@@ -196,33 +196,44 @@ namespace AntiochTesting
         {
           Scalar cv_exact(0.0);
 
-          // We only have vibrational contributions if we have a a diatomic (or bigger) molecule
-          if( this->_n_tr_dofs[s] > Scalar(2.0) )
-            {
-              CPPUNIT_ASSERT( this->_theta_v.find(this->_species_name_list[s]) != this->_theta_v.end() );
-              CPPUNIT_ASSERT( this->_vib_degeneracy.find(this->_species_name_list[s]) !=
-                              this->_vib_degeneracy.end() );
-
-              const std::vector<Scalar> & theta_v =
-                this->_theta_v.find(this->_species_name_list[s])->second;
-
-              const std::vector<unsigned int> & degeneracy =
-                this->_vib_degeneracy.find(this->_species_name_list[s])->second;
-
-              CPPUNIT_ASSERT( theta_v.size() == degeneracy.size() );
-
-              for( unsigned int level = 0; level < theta_v.size(); level++ )
-                {
-                  CPPUNIT_ASSERT(level < degeneracy.size() );
-
-                  cv_exact += Scalar(degeneracy[level])*this->eval_cv_vib_over_R_exact(T,theta_v[level]);
-                }
-            }
+          cv_exact = this->eval_cv_vib_over_R_exact_species(s,T);
 
           this->test_scalar_rel( cv_exact,
                                  _thermo->cv_vib_over_R(s,T),
                                  std::numeric_limits<Scalar>::epsilon()*10 );
         }
+    }
+
+    void test_cv_vib()
+    {
+      // Pick a temperature high enough that should excite the modes
+      Scalar T(3141.5);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        {
+          Scalar cv_exact(0.0);
+
+          cv_exact = this->_gas_consts[s]*this->eval_cv_vib_over_R_exact_species(s,T);
+
+          this->test_scalar_rel( cv_exact,
+                                 _thermo->cv_vib(s,T),
+                                 std::numeric_limits<Scalar>::epsilon()*10 );
+        }
+    }
+
+    void test_cv_vib_mix()
+    {
+      // Pick a temperature high enough that should excite the modes
+      Scalar T(3141.5);
+
+      Scalar cv_exact(0.0);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        cv_exact += this->_gas_consts[s]*this->eval_cv_vib_over_R_exact_species(s,T)*this->_mass_fractions[s];
+
+      this->test_scalar_rel( cv_exact,
+                             _thermo->cv_vib(T,this->_mass_fractions),
+                             std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
     void setUp()
@@ -291,6 +302,38 @@ namespace AntiochTesting
       return ((theta*theta)*std::exp(theta/T))/((T*T)*std::pow((exp(theta/T)-Scalar(1.0)),2));
     }
 
+    Scalar eval_cv_vib_over_R_exact_species( unsigned int species,
+                                             Scalar T )
+    {
+      Scalar cv_exact(0.0);
+
+      // We only have vibrational contributions if we have a a diatomic (or bigger) molecule
+      if( this->_n_tr_dofs[species] > Scalar(2.0) )
+        {
+          CPPUNIT_ASSERT( this->_theta_v.find(this->_species_name_list[species]) != this->_theta_v.end() );
+          CPPUNIT_ASSERT( this->_vib_degeneracy.find(this->_species_name_list[species]) !=
+                          this->_vib_degeneracy.end() );
+
+          const std::vector<Scalar> & theta_v =
+            this->_theta_v.find(this->_species_name_list[species])->second;
+
+          const std::vector<unsigned int> & degeneracy =
+            this->_vib_degeneracy.find(this->_species_name_list[species])->second;
+
+          CPPUNIT_ASSERT( theta_v.size() == degeneracy.size() );
+
+          for( unsigned int level = 0; level < theta_v.size(); level++ )
+            {
+              CPPUNIT_ASSERT(level < degeneracy.size() );
+
+              cv_exact +=
+                Scalar(degeneracy[level])*this->eval_cv_vib_over_R_exact(T,theta_v[level]);
+            }
+        }
+
+      return cv_exact;
+    }
+
   };
 
   // These tests can be run at any precision
@@ -316,6 +359,8 @@ namespace AntiochTesting
   public:                                                               \
     CPPUNIT_TEST_SUITE( classname );                                    \
     CPPUNIT_TEST(test_cv_vib_over_R);                                   \
+    CPPUNIT_TEST(test_cv_vib);                                          \
+    CPPUNIT_TEST(test_cv_vib_mix);                                      \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
