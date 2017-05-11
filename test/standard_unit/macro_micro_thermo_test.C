@@ -54,76 +54,9 @@
 
 namespace AntiochTesting
 {
-  template<typename Scalar>
-  class MacroMicroThermoTestBase
-  {
-  protected:
-
-    void init()
-    {
-      _n_species = 5;
-
-      _species_name_list.reserve(_n_species);
-      _species_name_list.push_back( "N2" );
-      _species_name_list.push_back( "O2" );
-      _species_name_list.push_back( "N" );
-      _species_name_list.push_back( "O" );
-      _species_name_list.push_back( "NO" );
-
-      _molar_mass.resize(5);
-      _molar_mass[2]  = 14.008e-3L; //in SI kg/mol
-      _molar_mass[3]  = 16e-3L;     //in SI kg/mol
-      _molar_mass[0] = 2.L * _molar_mass[2]; //in SI kg/mol
-      _molar_mass[1] = 2.L * _molar_mass[3]; //in SI kg/mol
-      _molar_mass[4] = _molar_mass[3] + _molar_mass[2]; //in SI kg/mol
-
-      _gas_consts.resize(5);
-      _gas_consts[0] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[0];
-      _gas_consts[1] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[1];
-      _gas_consts[2] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[2];
-      _gas_consts[3] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[3];
-      _gas_consts[4] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[4];
-
-      _n_tr_dofs.resize(5);
-      _n_tr_dofs[0] = 2.5L;
-      _n_tr_dofs[1] = 2.5L;
-      _n_tr_dofs[2] = 1.5L;
-      _n_tr_dofs[3] = 1.5L;
-      _n_tr_dofs[4] = 2.5L;
-
-      _chem_mixture = new Antioch::ChemicalMixture<Scalar>( _species_name_list );
-
-      // Mass fractions
-      _mass_fractions.resize( _n_species, 0.2 );
-      _mass_fractions[0] = 0.5L;
-      _mass_fractions[1] = 0.2L;
-      _mass_fractions[2] = 0.1L;
-      _mass_fractions[3] = 0.1L;
-      _mass_fractions[4] = 0.1L;
-    }
-
-    void clear()
-    {
-      delete _chem_mixture;
-    }
-
-    unsigned int _n_species;
-
-    std::vector<std::string> _species_name_list;
-
-    std::vector<Scalar> _molar_mass;
-    std::vector<Scalar> _gas_consts;
-    std::vector<Scalar> _n_tr_dofs;
-
-    std::vector<Scalar> _mass_fractions;
-
-    Antioch::ChemicalMixture<Scalar> * _chem_mixture;
-  };
-
-  template<typename Scalar>
-  class StatMechThermoTestBase : public CppUnit::TestCase,
-                                 public TestingUtilities<Scalar>,
-                                 public MacroMicroThermoTestBase<Scalar>
+  template<typename Scalar,typename ThermoSubclass>
+  class MacroMicroThermoTestBase : public TestingUtilities<Scalar>,
+                                   public CppUnit::TestCase
   {
   public:
 
@@ -187,6 +120,77 @@ namespace AntiochTesting
                              std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+  protected:
+
+    void init()
+    {
+      _n_species = 5;
+
+      _species_name_list.reserve(_n_species);
+      _species_name_list.push_back( "N2" );
+      _species_name_list.push_back( "O2" );
+      _species_name_list.push_back( "N" );
+      _species_name_list.push_back( "O" );
+      _species_name_list.push_back( "NO" );
+
+      _molar_mass.resize(5);
+      _molar_mass[2]  = 14.008e-3L; //in SI kg/mol
+      _molar_mass[3]  = 16e-3L;     //in SI kg/mol
+      _molar_mass[0] = 2.L * _molar_mass[2]; //in SI kg/mol
+      _molar_mass[1] = 2.L * _molar_mass[3]; //in SI kg/mol
+      _molar_mass[4] = _molar_mass[3] + _molar_mass[2]; //in SI kg/mol
+
+      _gas_consts.resize(5);
+      _gas_consts[0] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[0];
+      _gas_consts[1] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[1];
+      _gas_consts[2] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[2];
+      _gas_consts[3] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[3];
+      _gas_consts[4] = Antioch::Constants::R_universal<Scalar>() / _molar_mass[4];
+
+      _n_tr_dofs.resize(5);
+      _n_tr_dofs[0] = 2.5L;
+      _n_tr_dofs[1] = 2.5L;
+      _n_tr_dofs[2] = 1.5L;
+      _n_tr_dofs[3] = 1.5L;
+      _n_tr_dofs[4] = 2.5L;
+
+      _chem_mixture = new Antioch::ChemicalMixture<Scalar>( _species_name_list );
+
+      // Mass fractions
+      _mass_fractions.resize( _n_species, 0.2 );
+      _mass_fractions[0] = 0.5L;
+      _mass_fractions[1] = 0.2L;
+      _mass_fractions[2] = 0.1L;
+      _mass_fractions[3] = 0.1L;
+      _mass_fractions[4] = 0.1L;
+    }
+
+    void clear()
+    {
+      delete _chem_mixture;
+    }
+
+    unsigned int _n_species;
+
+    std::vector<std::string> _species_name_list;
+
+    std::vector<Scalar> _molar_mass;
+    std::vector<Scalar> _gas_consts;
+    std::vector<Scalar> _n_tr_dofs;
+
+    std::vector<Scalar> _mass_fractions;
+
+    Antioch::ChemicalMixture<Scalar> * _chem_mixture;
+
+    Antioch::MacroMicroThermoBase<Scalar,ThermoSubclass> * _thermo;
+  };
+
+
+  template<typename Scalar>
+  class StatMechThermoTestBase : public MacroMicroThermoTestBase<Scalar,Antioch::StatMechThermodynamics<Scalar> >
+  {
+  public:
+
     void test_cv_vib_over_R()
     {
       // Pick a temperature high enough that should excite the modes
@@ -199,7 +203,7 @@ namespace AntiochTesting
           cv_exact = this->eval_cv_vib_over_R_exact_species(s,T);
 
           this->test_scalar_rel( cv_exact,
-                                 _thermo->cv_vib_over_R(s,T),
+                                 this->_thermo->cv_vib_over_R(s,T),
                                  std::numeric_limits<Scalar>::epsilon()*10 );
         }
     }
@@ -216,7 +220,7 @@ namespace AntiochTesting
           cv_exact = this->_gas_consts[s]*this->eval_cv_vib_over_R_exact_species(s,T);
 
           this->test_scalar_rel( cv_exact,
-                                 _thermo->cv_vib(s,T),
+                                 this->_thermo->cv_vib(s,T),
                                  std::numeric_limits<Scalar>::epsilon()*10 );
         }
     }
@@ -232,26 +236,24 @@ namespace AntiochTesting
         cv_exact += this->_gas_consts[s]*this->eval_cv_vib_over_R_exact_species(s,T)*this->_mass_fractions[s];
 
       this->test_scalar_rel( cv_exact,
-                             _thermo->cv_vib(T,this->_mass_fractions),
+                             this->_thermo->cv_vib(T,this->_mass_fractions),
                              std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
     void setUp()
     {
       this->init();
-      _thermo = new Antioch::StatMechThermodynamics<Scalar>( *(this->_chem_mixture) );
+      this->_thermo = new Antioch::StatMechThermodynamics<Scalar>( *(this->_chem_mixture) );
       this->init_vib_data();
     }
 
     void tearDown()
     {
       this->clear();
-      delete _thermo;
+      delete this->_thermo;
     }
 
   private:
-
-    Antioch::StatMechThermodynamics<Scalar> * _thermo;
 
     std::map<std::string,std::vector<Scalar> > _theta_v;
     std::map<std::string,std::vector<unsigned int> > _vib_degeneracy;
@@ -381,71 +383,10 @@ namespace AntiochTesting
 
 
   template<typename Scalar, typename NASACurveFit>
-  class IdealGasMicroThermoTestBase : public CppUnit::TestCase,
-                                      public TestingUtilities<Scalar>,
-                                      public MacroMicroThermoTestBase<Scalar>
+  class IdealGasMicroThermoTestBase :
+    public MacroMicroThermoTestBase<Scalar,Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar> >
   {
   public:
-
-    void test_cv_trans()
-    {
-      for( unsigned int s = 0; s < this->_n_species; s++ )
-        this->test_scalar_rel( Scalar(1.5)*this->_gas_consts[s],
-                               _thermo->cv_trans(s),
-                               std::numeric_limits<Scalar>::epsilon()*10 );
-    }
-
-    void test_cv_trans_over_R()
-    {
-      for( unsigned int s = 0; s < this->_n_species; s++ )
-        this->test_scalar_rel( Scalar(1.5),
-                               _thermo->cv_trans_over_R(s),
-                               std::numeric_limits<Scalar>::epsilon()*10 );
-    }
-
-    void test_cv_tr()
-    {
-      for( unsigned int s = 0; s < this->_n_species; s++ )
-        this->test_scalar_rel( this->_n_tr_dofs[s]*this->_gas_consts[s],
-                               _thermo->cv_tr(s),
-                               std::numeric_limits<Scalar>::epsilon()*10 );
-    }
-
-    void test_cv_tr_over_R()
-    {
-      for( unsigned int s = 0; s < this->_n_species; s++ )
-        this->test_scalar_rel( this->_n_tr_dofs[s],
-                               _thermo->cv_tr_over_R(s),
-                               std::numeric_limits<Scalar>::epsilon()*10 );
-    }
-
-    void test_cv_rot()
-    {
-      for( unsigned int s = 0; s < this->_n_species; s++ )
-        this->test_scalar_rel( (this->_n_tr_dofs[s]-Scalar(1.5))*this->_gas_consts[s],
-                               _thermo->cv_rot(s),
-                               std::numeric_limits<Scalar>::epsilon()*10 );
-    }
-
-    void test_cv_rot_over_R()
-    {
-      for( unsigned int s = 0; s < this->_n_species; s++ )
-        this->test_scalar_rel( this->_n_tr_dofs[s]-Scalar(1.5),
-                               _thermo->cv_rot_over_R(s),
-                               std::numeric_limits<Scalar>::epsilon()*10 );
-    }
-
-    void test_cv_tr_mix()
-    {
-      Scalar cv_exact(0.0);
-
-      for( unsigned int s = 0; s < this->_n_species; s++ )
-        cv_exact += this->_n_tr_dofs[s]*this->_gas_consts[s]*this->_mass_fractions[s];
-
-      this->test_scalar_rel( cv_exact,
-                             _thermo->cv_tr(this->_mass_fractions),
-                             std::numeric_limits<Scalar>::epsilon()*10 );
-    }
 
     void test_cv_vib()
     {
@@ -458,7 +399,7 @@ namespace AntiochTesting
             Scalar cv_vib_exact = this->eval_cv_vib_exact(s,T);
 
             this->test_scalar_rel( cv_vib_exact,
-                                   _thermo->cv_vib(s,T),
+                                   this->_thermo->cv_vib(s,T),
                                    std::numeric_limits<Scalar>::epsilon()*50 );
           }
 
@@ -469,7 +410,7 @@ namespace AntiochTesting
             Scalar cv_vib_exact = this->eval_cv_vib_exact(s,T);
 
             this->test_scalar_rel( cv_vib_exact,
-                                   _thermo->cv_vib(s,T),
+                                   this->_thermo->cv_vib(s,T),
                                    std::numeric_limits<Scalar>::epsilon()*50 );
           }
         }
@@ -486,7 +427,7 @@ namespace AntiochTesting
           cv_vib_exact += this->eval_cv_vib_exact(s,T)*this->_mass_fractions[s];
 
         this->test_scalar_rel( cv_vib_exact,
-                               _thermo->cv_vib(T,this->_mass_fractions),
+                               this->_thermo->cv_vib(T,this->_mass_fractions),
                                std::numeric_limits<Scalar>::epsilon()*50 );
       }
 
@@ -500,7 +441,7 @@ namespace AntiochTesting
           cv_vib_exact += this->eval_cv_vib_exact(s,T)*this->_mass_fractions[s];
 
         this->test_scalar_rel( cv_vib_exact,
-                               _thermo->cv_vib(T,this->_mass_fractions),
+                               this->_thermo->cv_vib(T,this->_mass_fractions),
                                std::numeric_limits<Scalar>::epsilon()*50 );
       }
     }
@@ -514,7 +455,7 @@ namespace AntiochTesting
 
       for( unsigned int s = 0; s < this->_n_species; s++ )
         this->test_scalar_rel( cv_el_exact,
-                               _thermo->cv_el(s,T),
+                               this->_thermo->cv_el(s,T),
                                std::numeric_limits<Scalar>::epsilon() );
     }
 
@@ -526,7 +467,7 @@ namespace AntiochTesting
       Scalar cv_el_exact(0.0);
 
       this->test_scalar_rel( cv_el_exact,
-                             _thermo->cv_el(T,this->_mass_fractions),
+                             this->_thermo->cv_el(T,this->_mass_fractions),
                              std::numeric_limits<Scalar>::epsilon() );
     }
 
@@ -542,13 +483,13 @@ namespace AntiochTesting
 
       _nasa_evaluator = new Antioch::NASAEvaluator<Scalar,NASACurveFit>( *(_nasa_mixture) );
 
-      _thermo = new Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar>
+      this->_thermo = new Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar>
         ( *(_nasa_evaluator), *(this->_chem_mixture) );
     }
 
     void tearDown()
     {
-      delete _thermo;
+      delete this->_thermo;
       delete _nasa_evaluator;
       delete _nasa_mixture;
       this->clear();
@@ -559,8 +500,6 @@ namespace AntiochTesting
     Antioch::NASAThermoMixture<Scalar,NASACurveFit> * _nasa_mixture;
 
     Antioch::NASAEvaluator<Scalar,NASACurveFit> * _nasa_evaluator;
-
-    Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar> * _thermo;
 
     std::map<std::string,std::vector<Scalar> > _nasa_coeffs_lower_interval;
     std::map<std::string,std::vector<Scalar> > _nasa_coeffs_upper_interval;
