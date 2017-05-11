@@ -270,6 +270,30 @@ namespace AntiochTesting
                              std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_T_from_e_tot()
+    {
+      std::vector<Scalar> T(3);
+      T[0] = 300.0L;
+      T[1] = 1000.0L;
+      T[2] = 6001.0L;
+
+      // We a need a pointer to the derived class since these methods are only
+      // in StatMechThermodynamics
+      Antioch::StatMechThermodynamics<Scalar> * sm_thermo =
+        dynamic_cast<Antioch::StatMechThermodynamics<Scalar> *>( this->_thermo );
+
+      CPPUNIT_ASSERT(sm_thermo);
+
+      for( typename std::vector<Scalar>::const_iterator T_it = T.begin(); T_it < T.end(); ++T_it )
+        {
+          const Scalar e_tot = sm_thermo->e_tot(*T_it, this->_mass_fractions);
+
+          const Scalar T_test = sm_thermo->T_from_e_tot(e_tot, this->_mass_fractions);
+
+          this->test_scalar_rel( *T_it, T_test, std::numeric_limits<Scalar>::epsilon()*10 );
+        }
+    }
+
     void setUp()
     {
       this->init();
@@ -633,6 +657,7 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_vib_mix);                                      \
     CPPUNIT_TEST(test_cv_el);                                           \
     CPPUNIT_TEST(test_cv_el_mix);                                       \
+    CPPUNIT_TEST(test_T_from_e_tot);                                    \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
