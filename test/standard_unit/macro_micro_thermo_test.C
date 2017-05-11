@@ -187,10 +187,49 @@ namespace AntiochTesting
                              std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_vib_over_R()
+    {
+      // Pick a temperature high enough that should excite the modes
+      Scalar T(3141.5);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        {
+          Scalar cv_exact(0.0);
+
+          // We only have vibrational contributions if we have a a diatomic (or bigger) molecule
+          if( this->_n_tr_dofs[s] > Scalar(2.0) )
+            {
+              CPPUNIT_ASSERT( this->_theta_v.find(this->_species_name_list[s]) != this->_theta_v.end() );
+              CPPUNIT_ASSERT( this->_vib_degeneracy.find(this->_species_name_list[s]) !=
+                              this->_vib_degeneracy.end() );
+
+              const std::vector<Scalar> & theta_v =
+                this->_theta_v.find(this->_species_name_list[s])->second;
+
+              const std::vector<unsigned int> & degeneracy =
+                this->_vib_degeneracy.find(this->_species_name_list[s])->second;
+
+              CPPUNIT_ASSERT( theta_v.size() == degeneracy.size() );
+
+              for( unsigned int level = 0; level < theta_v.size(); level++ )
+                {
+                  CPPUNIT_ASSERT(level < degeneracy.size() );
+
+                  cv_exact += Scalar(degeneracy[level])*this->eval_cv_vib_over_R_exact(T,theta_v[level]);
+                }
+            }
+
+          this->test_scalar_rel( cv_exact,
+                                 _thermo->cv_vib_over_R(s,T),
+                                 std::numeric_limits<Scalar>::epsilon()*10 );
+        }
+    }
+
     void setUp()
     {
       this->init();
       _thermo = new Antioch::StatMechThermodynamics<Scalar>( *(this->_chem_mixture) );
+      this->init_vib_data();
     }
 
     void tearDown()
@@ -203,9 +242,59 @@ namespace AntiochTesting
 
     Antioch::StatMechThermodynamics<Scalar> * _thermo;
 
+    std::map<std::string,std::vector<Scalar> > _theta_v;
+    std::map<std::string,std::vector<unsigned int> > _vib_degeneracy;
+
+    void init_vib_data()
+    {
+      // N2
+      {
+        std::vector<Scalar> & N2_theta = this->_theta_v["N2"];
+        std::vector<unsigned int> & N2_dg = this->_vib_degeneracy["N2"];
+        N2_theta.resize(1);
+        N2_dg.resize(1);
+
+        N2_theta[0] = 3.39500e+03L;
+        N2_dg[0] = 1;
+      }
+
+      // O2
+      {
+        std::vector<Scalar> & O2_theta = this->_theta_v["O2"];
+        std::vector<unsigned int> & O2_dg = this->_vib_degeneracy["O2"];
+        O2_theta.resize(1);
+        O2_dg.resize(1);
+
+        O2_theta[0] = 2.23900e+03L;
+        O2_dg[0] = 1;
+      }
+
+      // NO
+      {
+        std::vector<Scalar> & NO_theta = this->_theta_v["NO"];
+        std::vector<unsigned int> & NO_dg = this->_vib_degeneracy["NO"];
+        NO_theta.resize(1);
+        NO_dg.resize(1);
+
+        NO_theta[0] = 2.81700e+03L;
+        NO_dg[0] = 1;
+      }
+    }
+
+    Scalar eval_cv_vib_over_R_exact( Scalar T, Scalar theta )
+    {
+      // Symbolic expressions from Matlab:
+      // e = theta/(exp(theta/T)-1)
+      // cv = diff(e,T)
+      // gives
+      // cv = (theta^2*exp(theta/T))/(T^2*(exp(theta/T) - 1)^2)
+      return ((theta*theta)*std::exp(theta/T))/((T*T)*std::pow((exp(theta/T)-Scalar(1.0)),2));
+    }
+
   };
 
-#define DEFINE_STATMECHTHERMO_SCALAR_TEST(classname,scalar)     \
+  // These tests can be run at any precision
+#define DEFINE_STATMECHTHERMO_SCALAR_TEST_ALL(classname,scalar) \
   class classname : public StatMechThermoTestBase<scalar>       \
   {                                                             \
   public:                                                       \
@@ -220,15 +309,29 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE_END();                                   \
   }
 
-  DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestFloat,float);
-  DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestDouble,double);
-  DEFINE_STATMECHTHERMO_SCALAR_TEST(StatMechThermoTestLongDouble,long double);
+  // These tests can't stand up to long double precision
+#define DEFINE_STATMECHTHERMO_SCALAR_TEST_NOLONGDOUBLE(classname,scalar) \
+  class classname : public StatMechThermoTestBase<scalar>               \
+  {                                                                     \
+  public:                                                               \
+    CPPUNIT_TEST_SUITE( classname );                                    \
+    CPPUNIT_TEST(test_cv_vib_over_R);                                   \
+    CPPUNIT_TEST_SUITE_END();                                           \
+  }
+
+  DEFINE_STATMECHTHERMO_SCALAR_TEST_ALL(StatMechThermoTestFloat,float);
+  DEFINE_STATMECHTHERMO_SCALAR_TEST_ALL(StatMechThermoTestDouble,double);
+  DEFINE_STATMECHTHERMO_SCALAR_TEST_ALL(StatMechThermoTestLongDouble,long double);
+
+  DEFINE_STATMECHTHERMO_SCALAR_TEST_NOLONGDOUBLE(StatMechThermoTestFloatNOLD,float);
+  DEFINE_STATMECHTHERMO_SCALAR_TEST_NOLONGDOUBLE(StatMechThermoTestDoubleNOLD,double);
 
 
   CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestFloat );
   CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestDouble );
   CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestLongDouble );
-
+  CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestFloatNOLD );
+  CPPUNIT_TEST_SUITE_REGISTRATION( StatMechThermoTestDoubleNOLD );
 
 
 
