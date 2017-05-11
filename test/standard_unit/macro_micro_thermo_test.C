@@ -240,11 +240,42 @@ namespace AntiochTesting
                              std::numeric_limits<Scalar>::epsilon()*10 );
     }
 
+    void test_cv_el()
+    {
+      // Pick a temperature high enough that should excite the modes
+      Scalar T(13141.5);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        {
+          Scalar cv_exact = this->_gas_consts[s]*this->eval_cv_el_over_R_exact_species(s,T);
+
+          this->test_scalar_rel( cv_exact,
+                                 this->_thermo->cv_el(s,T),
+                                 std::numeric_limits<Scalar>::epsilon()*10 );
+        }
+    }
+
+    void test_cv_el_mix()
+    {
+      // Pick a temperature high enough that should excite the modes
+      Scalar T(13141.5);
+
+      Scalar cv_exact(0.0);
+
+      for( unsigned int s = 0; s < this->_n_species; s++ )
+        cv_exact += this->_gas_consts[s]*this->eval_cv_el_over_R_exact_species(s,T)*this->_mass_fractions[s];
+
+      this->test_scalar_rel( cv_exact,
+                             this->_thermo->cv_el(T,this->_mass_fractions),
+                             std::numeric_limits<Scalar>::epsilon()*10 );
+    }
+
     void setUp()
     {
       this->init();
       this->_thermo = new Antioch::StatMechThermodynamics<Scalar>( *(this->_chem_mixture) );
       this->init_vib_data();
+      this->init_elec_data();
     }
 
     void tearDown()
@@ -257,6 +288,9 @@ namespace AntiochTesting
 
     std::map<std::string,std::vector<Scalar> > _theta_v;
     std::map<std::string,std::vector<unsigned int> > _vib_degeneracy;
+
+    std::map<std::string,std::vector<Scalar> > _theta_el;
+    std::map<std::string,std::vector<unsigned int> > _el_degeneracy;
 
     void init_vib_data()
     {
@@ -291,6 +325,187 @@ namespace AntiochTesting
 
         NO_theta[0] = 2.81700e+03L;
         NO_dg[0] = 1;
+      }
+    }
+
+    void init_elec_data()
+    {
+      // N2
+      {
+        std::vector<Scalar> & N2_theta = this->_theta_el["N2"];
+        std::vector<unsigned int> & N2_dg = this->_el_degeneracy["N2"];
+        N2_theta.resize(15);
+        N2_dg.resize(15);
+
+        N2_theta[0] = 0.0L;
+        N2_dg[0] = 1;
+
+        N2_theta[1] = 7.22316e+04L;
+        N2_dg[1] = 3;
+
+        N2_theta[2] = 8.57786e+04L;
+        N2_dg[2] = 6;
+
+        N2_theta[3] = 8.60503e+04L;
+        N2_dg[3] = 6;
+
+        N2_theta[4] = 9.53512e+04L;
+        N2_dg[4] = 3;
+
+        N2_theta[5] = 9.80564e+04L;
+        N2_dg[5] = 1;
+
+        N2_theta[6] = 9.96827e+04L;
+        N2_dg[6] = 2;
+
+        N2_theta[7] = 1.04898e+05L;
+        N2_dg[7] = 2;
+
+        N2_theta[8] = 1.11649e+05L;
+        N2_dg[8] = 5;
+
+        N2_theta[9] = 1.22584e+05L;
+        N2_dg[9] = 1;
+
+        N2_theta[10] = 1.24886e+05L;
+        N2_dg[10] = 6;
+
+        N2_theta[11] = 1.28248e+05L;
+        N2_dg[11] = 6;
+
+        N2_theta[12] = 1.33806e+05L;
+        N2_dg[12] = 10;
+
+        N2_theta[13] = 1.40430e+05;
+        N2_dg[13] = 6;
+
+        N2_theta[14] = 1.50496e+05;
+        N2_dg[14] = 6;
+      }
+
+      // O2
+      {
+        std::vector<Scalar> & O2_theta = this->_theta_el["O2"];
+        std::vector<unsigned int> & O2_dg = this->_el_degeneracy["O2"];
+        O2_theta.resize(7);
+        O2_dg.resize(7);
+
+        O2_theta[0] = 0.0L;
+        O2_dg[0] = 3;
+
+        O2_theta[1] = 1.13916e+04L;
+        O2_dg[1] = 2;
+
+        O2_theta[2] = 1.89847e+04L;
+        O2_dg[2] = 1;
+
+        O2_theta[3] = 4.75597e+04L;
+        O2_dg[3] = 1;
+
+        O2_theta[4] = 4.99124e+04L;
+        O2_dg[4] = 6;
+
+        O2_theta[5] = 5.09227e+04L;
+        O2_dg[5] = 3;
+
+        O2_theta[6] = 7.18986e+04L;
+        O2_dg[6] = 3;
+      }
+
+      // NO
+      {
+        std::vector<Scalar> & NO_theta = this->_theta_el["NO"];
+        std::vector<unsigned int> & NO_dg = this->_el_degeneracy["NO"];
+        NO_theta.resize(16);
+        NO_dg.resize(16);
+
+        NO_theta[0] = 0.0L;
+        NO_dg[0] = 4;
+
+        NO_theta[1] = 5.46735e+04L;
+        NO_dg[1] = 8;
+
+        NO_theta[2] = 6.31714e+04L;
+        NO_dg[2] = 2;
+
+        NO_theta[3] = 6.59945e+04L;
+        NO_dg[3] = 4;
+
+        NO_theta[4] = 6.90612e+04L;
+        NO_dg[4] = 4;
+
+        NO_theta[5] = 7.05000e+04L;
+        NO_dg[5] = 4;
+
+        NO_theta[6] = 7.49106e+04L;
+        NO_dg[6] = 4;
+
+        NO_theta[7] = 7.62888e+04L;
+        NO_dg[7] = 2;
+
+        NO_theta[8] = 8.67619e+04L;
+        NO_dg[8] = 4;
+
+        NO_theta[9] = 8.71443e+04L;
+        NO_dg[9] = 2;
+
+        NO_theta[10] = 8.88608e+04L;
+        NO_dg[10] = 4;
+
+        NO_theta[11] = 8.98176e+04L;
+        NO_dg[11] = 4;
+
+        NO_theta[12] = 8.98845e+04L;
+        NO_dg[12] = 2;
+
+        NO_theta[13] = 9.04270e+04L;
+        NO_dg[13] = 2;
+
+        NO_theta[14] = 9.06428e+04L;
+        NO_dg[14] = 2;
+
+        NO_theta[15] = 9.11176e+04L;
+        NO_dg[15] = 4;
+      }
+
+      // N
+      {
+        std::vector<Scalar> & N_theta = this->_theta_el["N"];
+        std::vector<unsigned int> & N_dg = this->_el_degeneracy["N"];
+        N_theta.resize(3);
+        N_dg.resize(3);
+
+        N_theta[0] = 0.0L;
+        N_dg[0] = 4;
+
+        N_theta[1] = 2.76647e+04L;
+        N_dg[1] = 10;
+
+        N_theta[2] = 4.14931e+04L;
+        N_dg[2] = 6;
+      }
+
+      // O
+      {
+        std::vector<Scalar> & O_theta = this->_theta_el["O"];
+        std::vector<unsigned int> & O_dg = this->_el_degeneracy["O"];
+        O_theta.resize(5);
+        O_dg.resize(5);
+
+        O_theta[0] = 0.0L;
+        O_dg[0] = 5;
+
+        O_theta[1] = 2.27708e+02L;
+        O_dg[1] = 3;
+
+        O_theta[2] = 3.26569e+02L;
+        O_dg[2] = 1;
+
+        O_theta[3] = 2.28303e+04L;
+        O_dg[3] = 5;
+
+        O_theta[4] = 4.86199e+04L;
+        O_dg[4] = 1;
       }
     }
 
@@ -336,6 +551,59 @@ namespace AntiochTesting
       return cv_exact;
     }
 
+    Scalar eval_cv_el_over_R_exact( Scalar T, const std::vector<Scalar> & theta_e,
+                                    const std::vector<unsigned int> & degeneracy )
+    {
+      CPPUNIT_ASSERT( theta_e.size() == degeneracy.size() );
+
+      // Expression involves a lot of exp(-theta/T) and it's derivatives w.r.t. T
+      // f = exp(-theta/T)
+      // diff(f,T) = (theta*exp(-theta/T))/T^2
+      //
+      // numerator = \sum_{l=levels} \theta_l * g_l * exp(-theta_l/T)
+      //
+      // denominator = \sum_{l=levels} g_l * exp(-theta_l/T)
+      //
+      // e/R = numerator/denominator
+      //
+      // cv = dnum_dT*denominator - numerator/denominator^2*dden_dT
+      //
+      // dnum_dT = \sum_{l=levels} \theta_l * g_l * theta_l*exp(-theta_l/T)/T^2
+      //
+      // dden_dT = \sum_{l=levels} g_l * theta_l*exp(-theta_l/T)/T^2
+
+      Scalar num(0.0), denom(0.0), dnum_dT(0.0), ddenom_dT(0.0);
+      for( unsigned int levels = 0; levels < theta_e.size(); levels++ )
+        {
+          Scalar theta(theta_e[levels]);
+          Scalar g(degeneracy[levels]);
+
+          num += theta*g*std::exp(-theta/T);
+          dnum_dT += theta*g*theta*std::exp(-theta/T)/(T*T);
+
+          denom += g*std::exp(-theta/T);
+          ddenom_dT += g*theta*std::exp(-theta/T)/(T*T);
+        }
+
+      return dnum_dT/denom - num/(denom*denom)*ddenom_dT;
+    }
+
+    Scalar eval_cv_el_over_R_exact_species( unsigned int species,
+                                            Scalar T )
+    {
+      CPPUNIT_ASSERT( this->_theta_el.find(this->_species_name_list[species]) != this->_theta_el.end() );
+      CPPUNIT_ASSERT( this->_el_degeneracy.find(this->_species_name_list[species]) !=
+                      this->_el_degeneracy.end() );
+
+      const std::vector<Scalar> & theta_el =
+        this->_theta_el.find(this->_species_name_list[species])->second;
+
+      const std::vector<unsigned int> & degeneracy =
+        this->_el_degeneracy.find(this->_species_name_list[species])->second;
+
+      return this->eval_cv_el_over_R_exact(T, theta_el, degeneracy);
+    }
+
   };
 
   // These tests can be run at any precision
@@ -363,6 +631,8 @@ namespace AntiochTesting
     CPPUNIT_TEST(test_cv_vib_over_R);                                   \
     CPPUNIT_TEST(test_cv_vib);                                          \
     CPPUNIT_TEST(test_cv_vib_mix);                                      \
+    CPPUNIT_TEST(test_cv_el);                                           \
+    CPPUNIT_TEST(test_cv_el_mix);                                       \
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
