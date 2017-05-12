@@ -34,7 +34,6 @@ check_PROGRAMS += sutherland_viscosity_unit
 check_PROGRAMS += sutherland_viscosity_vec_unit
 check_PROGRAMS += mixture_viscosity_unit
 check_PROGRAMS += mixture_viscosity_vec_unit
-check_PROGRAMS += stat_mech_thermo_unit
 check_PROGRAMS += eucken_thermal_cond_unit
 check_PROGRAMS += mixture_conductivity_regression
 check_PROGRAMS += wilke_transport_unit
@@ -58,7 +57,6 @@ check_PROGRAMS += kinetics_theory_thermal_conductivity_unit
 check_PROGRAMS += kinetics_theory_thermal_conductivity_vec_unit
 check_PROGRAMS += rotational_relaxation_unit
 check_PROGRAMS += rotational_relaxation_vec_unit
-check_PROGRAMS += ideal_gas_micro_thermo_unit
 check_PROGRAMS += ascii_parser_unit
 check_PROGRAMS += lindemann_falloff_threebody_unit
 check_PROGRAMS += troe_falloff_threebody_unit
@@ -88,6 +86,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/src/transport/include
 AM_CPPFLAGS += -I$(top_srcdir)/src/utilities/include
 AM_CPPFLAGS += -I$(top_builddir)/src/utilities/include #antioch_version.h
 AM_CPPFLAGS += -I$(top_srcdir)/test/standard_unit
+AM_CPPFLAGS += -I$(top_srcdir)/test/common
 AM_CPPFLAGS +=  $(antioch_optional_test_INCLUDES)
 
 AM_LDFLAGS = $(antioch_optional_test_LDFLAGS)
@@ -104,6 +103,7 @@ standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
                               standard_unit/nasa9_curve_fit_test.C \
                               standard_unit/nasa_mixture_xml_parsing_test.C \
                               standard_unit/nasa_mixture_valarray_test.C \
+                              standard_unit/macro_micro_thermo_test.C \
                               standard_unit/standard_unit_tests.C
 
 eigen_unit_tests_SOURCES = eigen_unit/arrhenius_rate_eigen_test.C \
@@ -121,10 +121,12 @@ gsl_unit_tests_SOURCES = gsl_unit/gsl_spliner_test.C \
                          gsl_unit/gsl_spliner_vec_test.C \
                          gsl_unit/gsl_unit_tests.C
 
+pkginclude_HEADERS += common/testing_utils.h
 pkginclude_HEADERS += standard_unit/reaction_rate_test_base.h
 pkginclude_HEADERS += standard_unit/reaction_rate_vector_test_base.h
 pkginclude_HEADERS += standard_unit/arrhenius_rate_test_helper.h
 pkginclude_HEADERS += standard_unit/arrhenius_rate_vector_test_base.h
+pkginclude_HEADERS += standard_unit/nasa_test_helper.h
 pkginclude_HEADERS += standard_unit/nasa7_thermo_test_base.h
 pkginclude_HEADERS += standard_unit/nasa9_thermo_test_base.h
 pkginclude_HEADERS += standard_unit/thermo_vector_test_base.h
@@ -161,7 +163,6 @@ sutherland_viscosity_unit_SOURCES = sutherland_viscosity_unit.C
 sutherland_viscosity_vec_unit_SOURCES = sutherland_viscosity_vec_unit.C
 mixture_viscosity_unit_SOURCES = mixture_viscosity_unit.C
 mixture_viscosity_vec_unit_SOURCES = mixture_viscosity_vec_unit.C
-stat_mech_thermo_unit_SOURCES = stat_mech_thermo_unit.C
 eucken_thermal_cond_unit_SOURCES = eucken_thermal_cond_unit.C
 mixture_conductivity_regression_SOURCES = mixture_conductivity_regression.C
 wilke_transport_unit_SOURCES = wilke_transport_unit.C
@@ -195,7 +196,6 @@ molecular_binary_diffusion_unit_SOURCES = molecular_binary_diffusion_unit.C
 molecular_binary_diffusion_vec_unit_SOURCES = molecular_binary_diffusion_vec_unit.C
 kinetics_theory_viscosity_unit_SOURCES = kinetics_theory_viscosity_unit.C
 kinetics_theory_viscosity_vec_unit_SOURCES = kinetics_theory_viscosity_vec_unit.C
-ideal_gas_micro_thermo_unit_SOURCES =  ideal_gas_micro_thermo_unit.C
 Stockmayer_unit_SOURCES = Stockmayer_unit.C
 
 
@@ -239,7 +239,6 @@ TESTS += sutherland_viscosity_unit
 TESTS += sutherland_viscosity_vec_unit
 TESTS += mixture_viscosity_unit
 TESTS += mixture_viscosity_vec_unit
-TESTS += stat_mech_thermo_unit
 TESTS += eucken_thermal_cond_unit
 TESTS += mixture_conductivity_regression
 TESTS += wilke_transport_unit
@@ -269,7 +268,6 @@ TESTS += kinetics_theory_thermal_conductivity_unit
 TESTS += kinetics_theory_thermal_conductivity_vec_unit
 TESTS += rotational_relaxation_unit
 TESTS += rotational_relaxation_vec_unit
-TESTS += ideal_gas_micro_thermo_unit
 TESTS += ascii_parser_unit.sh
 TESTS += lindemann_falloff_threebody_unit
 TESTS += troe_falloff_threebody_unit
