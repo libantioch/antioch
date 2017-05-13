@@ -1099,6 +1099,47 @@
       <products>CH4:1</products>
     </reaction>
 
+    <!-- reaction 0039     -->
+    <reaction reversible="yes" type="falloff" id="0039">
+      <equation>NO [=] N + O </equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <b>0</b>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>3e+15</A>
+           <b>0</b>
+           <E units="cal/mol">200000.0</E>
+        </Arrhenius>
+        <falloff type='Lindemann'/>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0040    -->
+    <reaction reversible="yes" type="falloff" id="0040">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Arrhenius name="k0">
+           <A>8.4e+09</A>
+           <b>0</b>
+           <E units="cal/mol">38526.0</E>
+        </Arrhenius>
+        <Arrhenius>
+           <A>8.4e+05</A>
+           <b>1.2</b>
+           <E units="cal/mol">3526.0</E>
+        </Arrhenius>
+        <falloff type="Lindemann"/>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+
+
   </reactionData>
 
 </ctml>

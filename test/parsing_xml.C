@@ -140,6 +140,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
 
   std::vector<std::string> species_str_list;
   species_str_list.push_back( "N2" );
+  species_str_list.push_back( "N2O" );
   species_str_list.push_back( "O2" );
   species_str_list.push_back( "N" );
   species_str_list.push_back( "O" );
@@ -190,7 +191,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   Scalar Tr = 1.;
   Antioch::Units<Scalar> unitA_m1("kmol/m3/s"),unitA_0("s-1"),unitA_1("m3/kmol/s"),unitA_2("m6/kmol2/s");
 
-  Scalar Rcal = Antioch::Constants::R_universal<Scalar>() * Antioch::Constants::R_universal_unit<Scalar>().factor_to_some_unit("cal/mol/K");
+  const Scalar Rcal = Antioch::Constants::R_universal<Scalar>() * Antioch::Constants::R_universal_unit<Scalar>().factor_to_some_unit("cal/mol/K");
   getline(CH4_file,line);
 
   Antioch::Units<Scalar> cs_input("cm2");
@@ -213,7 +214,7 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
 //
   // Molar densities
   std::vector<Scalar> molar_densities(n_species,5e-4);
-  Scalar tot_dens((Scalar)n_species * 5e-4);
+  const Scalar tot_dens((Scalar)n_species * 5e-4);
 
 ///Elementary, + Kooij - Arrhenius conversion tested
   std::vector<Scalar> k;
@@ -579,7 +580,28 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
   k.push_back(k0 / (1./M + k0/kinf) ); 
   k.push_back(k0 / (1./M + k0/kinf) ); 
 
-  
+
+////////////
+/// double agent Arrhenius
+///////////
+
+//NO -> N + O, Arrhenius falloff I'm saying it's a Kooij
+  A   = 5.e+12 * unitA_1.get_SI_factor();
+  Ea  = 149943.0;
+  A2  = 3e+15 * unitA_0.get_SI_factor();
+  Ea2 =  200000.0;
+  k.push_back(Arrh(T,A,Ea,Rcal) / (1./tot_dens + Arrh(T,A,Ea,Rcal)/Arrh(T,A2,Ea2,Rcal)) );
+
+//NO + O -> NO + N, one is a Arrhenius as a Kooij, the other a regular Kooij
+  A     = 8.4e+09 * unitA_2.get_SI_factor();
+  beta  = 0.;
+  Ea    = 38526.0;
+  A2    = 8.4e+05 * unitA_1.get_SI_factor();
+  beta2 = 1.2;
+  Ea2   = 3526.0;
+  k.push_back(Kooij(T,A,beta,Ea,Tr,Rcal) / (1./tot_dens + Kooij(T,A,beta,Ea,Tr,Rcal)/Kooij(T,A2,beta2,Ea2,Tr,Rcal)) ); 
+
+
 
   const Scalar tol = (std::numeric_limits<Scalar>::epsilon() < 1e-17L)?
                       std::numeric_limits<Scalar>::epsilon() * 5000:
@@ -609,6 +631,8 @@ int tester(const std::string &kin_file, const std::string &solar_file, const std
      {
         std::cout << std::scientific << std::setprecision(16)
                   << "Success in kinetics comparison\n"
+                  << "value: " << k[ir] << "\n"
+                  << "temperature: " << T << " K" << "\n"
                   << *reac << std::endl;
      }
   }

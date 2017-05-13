@@ -359,7 +359,7 @@ namespace Antioch
               (is_k0)?std::cout << "  Low pressure limit rate constant\n":std::cout << "  High pressure limit rate constant\n";
             }
 
-            // pre-exponential
+            // pre-exponential, everyone
             if(parser->rate_constant_preexponential_parameter(par_value, par_unit, default_unit))
               {
                 // using Units object to build accepted_unit
@@ -395,8 +395,12 @@ namespace Antioch
                 data.push_back(par_value * def_unit.get_SI_factor());
               }
 
-            // beta
-            if(parser->rate_constant_power_parameter(par_value,par_unit,default_unit))
+            // beta, not everyone
+            if(( kineticsModel == KineticsModel::HERCOURT_ESSEN ||
+                 kineticsModel == KineticsModel::BHE            ||
+                 kineticsModel == KineticsModel::KOOIJ          ||
+                 kineticsModel == KineticsModel::VANTHOFF  )     &&
+               parser->rate_constant_power_parameter(par_value,par_unit,default_unit))
               {
                 accepted_unit.clear();
                 accepted_unit.push_back("");
@@ -427,8 +431,11 @@ namespace Antioch
                   }
               }
 
-            // activation energy
-            if(parser->rate_constant_activation_energy_parameter(par_value,par_unit,default_unit))
+            // activation energy, not everyone
+            if(( kineticsModel == KineticsModel::ARRHENIUS ||
+                 kineticsModel == KineticsModel::KOOIJ     ||
+                 kineticsModel == KineticsModel::VANTHOFF ) &&
+               parser->rate_constant_activation_energy_parameter(par_value,par_unit,default_unit))
               {
                 accepted_unit.clear();
                 accepted_unit.push_back("J/mol");
@@ -444,8 +451,11 @@ namespace Antioch
               }
 
 
-            // Berthelot coefficient (D)
-            if(parser->rate_constant_Berthelot_coefficient_parameter(par_value,par_unit,default_unit))
+            // Berthelot coefficient (D), not everyone
+            if(( kineticsModel == KineticsModel::BERTHELOT ||
+                kineticsModel == KineticsModel::BHE        ||
+                kineticsModel == KineticsModel::VANTHOFF  ) &&
+               parser->rate_constant_Berthelot_coefficient_parameter(par_value,par_unit,default_unit))
               {
                 accepted_unit.clear();
                 accepted_unit.push_back("K");
