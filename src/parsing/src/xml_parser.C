@@ -317,10 +317,14 @@ namespace Antioch
                ++searchfor;
                continue;
              }
-
-           if (eq[pos] != ' ')
-             break;
-         }
+	   if(eq[pos] ==' ')
+	     continue;
+       // If not '(+M)' parenthesis, search for the next parenthesis and check
+	   searchfor = "(+M)";
+	   pos = eq.find('(',pos+1);
+       // Adjust position before iteration
+	   --pos;
+	 }
 
        // If we found everything then *searchfor is NULL
        if (!*searchfor)
