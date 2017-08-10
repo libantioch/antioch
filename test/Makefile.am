@@ -99,6 +99,7 @@ pkginclude_HEADERS =
 standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
                               standard_unit/arrhenius_rate_valarray_test.C \
                               standard_unit/string_utils_test.C \
+			      standard_unit/gri30_xml_parsing_test.C \
                               standard_unit/nasa7_curve_fit_test.C \
                               standard_unit/nasa9_curve_fit_test.C \
                               standard_unit/nasa_mixture_xml_parsing_test.C \
