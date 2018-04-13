@@ -260,11 +260,11 @@ namespace Antioch
                                                                                const StateType& molar_density,
                                                                                MatrixStateType& D ) const
   {
+    // Make sure it's a square matrix
+#ifndef NDEBUG
     const unsigned int n_cols = D.size();
     antioch_assert_greater(n_cols,0);
 
-    // Make sure it's a square matrix
-#ifndef NDEBUG
     for( unsigned int r = 0; r < n_cols; r++ )
       antioch_assert_equal_to(D[r].size(),n_cols);
 #endif
