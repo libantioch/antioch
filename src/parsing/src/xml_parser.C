@@ -179,21 +179,41 @@ namespace Antioch
   bool XMLParser<NumericType>::initialize()
   {
     //we start here
-    _reaction_block = _doc->FirstChildElement("ctml");
-    if (!_reaction_block)
+     tinyxml2::XMLElement * start_block = _doc->FirstChildElement("ctml");
+    if (!start_block)
       {
         std::cerr << "ERROR:  no <ctml> tag found in input file"
                   << std::endl;
         antioch_error();
       }
 
-    _species_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::PHASE_BLOCK).c_str());
-    if(_species_block)
-        _species_block = _species_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
+    // By default, we grab the first phase block if phase == NONE for backward compatibility
+    // Otherwise, we find the block with the phase id set by the user.
+    // Function will error out if proper id is not found.
+    _phase_block = start_block->FirstChildElement(_map.at(ParsingKey::PHASE_BLOCK).c_str());
 
-    _thermo_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::SPECIES_DATA).c_str());
+    if( !_phase_block )
+      {
+        antioch_warning("Warning! No phase block found in XML file. Will use first "+_map.at(ParsingKey::SPECIES_DATA)+" and "+_map.at(ParsingKey::REACTION_DATA)+" sections found in file!");
+      }
+    // This check should be removed when deprecated XMLParser constructor is removed.
+    // Then, the user will be required to pass in a phase name.
+    else if( _phase == std::string("NONE") )
+      {
+        antioch_warning("Warning! No phase name supplied! Will use first phase found in XML file!");
+      }
+    else
+      _phase_block = this->find_element_with_attribute( _phase_block,
+                                                        _map.at(ParsingKey::PHASE_BLOCK),
+                                                        _map.at(ParsingKey::ID),
+                                                        _phase );
 
-    _reaction_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
+    if( _phase_block )
+      _species_block = _phase_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
+
+    _thermo_block = start_block->FirstChildElement(_map.at(ParsingKey::SPECIES_DATA).c_str());
+
+    _reaction_block = start_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
 
     _reaction = NULL;
     _rate_constant = NULL;
