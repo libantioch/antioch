@@ -47,13 +47,13 @@ namespace Antioch
   template <typename NumericType>
   XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
     ParserBase<NumericType>("XML",filename,verbose),
+    _doc(new tinyxml2::XMLDocument),
     _species_block(NULL),
     _reaction_block(NULL),
     _reaction(NULL),
     _rate_constant(NULL),
     _Troe(NULL)
   {
-    _doc = new tinyxml2::XMLDocument;
     if(_doc->LoadFile(filename.c_str()))
       {
         std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
@@ -69,12 +69,6 @@ namespace Antioch
     this->init_name_maps();
 
     this->initialize();
-  }
-
-  template <typename NumericType>
-  XMLParser<NumericType>::~XMLParser()
-  {
-     delete _doc;
   }
 
   template <typename NumericType>
@@ -163,8 +157,7 @@ namespace Antioch
     _rate_constant  = NULL;
     _Troe           = NULL;
 
-    delete _doc;
-    _doc = new tinyxml2::XMLDocument;
+    _doc.reset(new tinyxml2::XMLDocument);
     if(_doc->LoadFile(filename.c_str()))
       {
         std::cerr << "ERROR: unable to load xml file " << filename << std::endl;

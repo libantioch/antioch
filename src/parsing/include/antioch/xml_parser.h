@@ -32,19 +32,16 @@
 #include "antioch/parser_base.h"
 #include "antioch/parsing_enum.h"
 
+//XML
+#include "antioch/tinyxml2.h"
+
 //C++
 #include <string>
 #include <vector>
 #include <map>
-
-namespace tinyxml2
-{
-  class XMLDocument;
-  class XMLElement;
-}
+#include <memory>
 
 namespace Antioch{
-
 
   template <typename CoeffType>
   class ChemicalMixture;
@@ -80,7 +77,7 @@ namespace Antioch{
   {
   public:
     XMLParser(const std::string &filename, bool verbose = true);
-    ~XMLParser();
+    virtual ~XMLParser() = default;
 
     void change_file(const std::string & filename);
 
@@ -269,7 +266,7 @@ namespace Antioch{
 
     /*! Never use default constructor*/
     XMLParser();
-    tinyxml2::XMLDocument * _doc;
+    std::unique_ptr<tinyxml2::XMLDocument> _doc;
 
     //
     tinyxml2::XMLElement * _species_block;
