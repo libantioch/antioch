@@ -265,6 +265,7 @@ namespace Antioch{
     std::string nasa_xml_section( NASAThermoMixture<NumericType, CEACurveFit<NumericType> >& /*thermo*/ )
     { antioch_error_msg("ERROR: Only supported for NASA7CurveFit and NASA9CurveFit!"); return "";}
 
+    void init_name_maps();
 
     /*! Never use default constructor*/
     XMLParser();

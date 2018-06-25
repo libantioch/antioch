@@ -66,7 +66,20 @@ namespace Antioch
 
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
 
+    this->init_name_maps();
 
+    this->initialize();
+  }
+
+  template <typename NumericType>
+  XMLParser<NumericType>::~XMLParser()
+  {
+     delete _doc;
+  }
+
+  template <typename NumericType>
+  void XMLParser<NumericType>::init_name_maps()
+  {
     // XML block/section names
     _map[ParsingKey::PHASE_BLOCK]           = "phase";
     _map[ParsingKey::SPECIES_SET]           = "speciesArray";
@@ -135,17 +148,9 @@ namespace Antioch
     _default_unit[ParsingKey::TROE_F_TSSS]           = "K";
 
     //gri30
-     _gri_map[GRI30Comp::FALLOFF]      = "falloff";
-     _gri_map[GRI30Comp::FALLOFF_TYPE] = "type";
-     _gri_map[GRI30Comp::TROE]         = "Troe";
-
-    this->initialize();
-  }
-
-  template <typename NumericType>
-  XMLParser<NumericType>::~XMLParser()
-  {
-     delete _doc;
+    _gri_map[GRI30Comp::FALLOFF]      = "falloff";
+    _gri_map[GRI30Comp::FALLOFF_TYPE] = "type";
+    _gri_map[GRI30Comp::TROE]         = "Troe";
   }
 
   template <typename NumericType>
@@ -876,6 +881,8 @@ namespace Antioch
 
       } // end species loop
   }
+
+
 
   // Instantiate
   ANTIOCH_NUMERIC_TYPE_CLASS_INSTANTIATE(XMLParser);
