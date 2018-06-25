@@ -45,6 +45,7 @@ namespace Antioch
                   NASA7,
                   NASA9,
 //
+                  REACTION_SET,
                   REACTION_DATA,
                   REACTION,
                   REVERSIBLE,

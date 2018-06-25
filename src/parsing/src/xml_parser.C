@@ -83,6 +83,7 @@ namespace Antioch
     _map[ParsingKey::NASA9]                 = "NASA9";
 
     // Kinetics parameters
+    _map[ParsingKey::REACTION_SET]          = "reactionArray";
     _map[ParsingKey::REACTION_DATA]         = "reactionData";
     _map[ParsingKey::REACTION]              = "reaction";
     _map[ParsingKey::REVERSIBLE]            = "reversible";
