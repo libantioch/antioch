@@ -48,12 +48,16 @@ namespace Antioch
   XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
     ParserBase<NumericType>("XML",filename,verbose),
     _doc(new tinyxml2::XMLDocument),
+    _phase("NONE"),
+    _phase_block(NULL),
     _species_block(NULL),
     _reaction_block(NULL),
     _reaction(NULL),
     _rate_constant(NULL),
     _Troe(NULL)
   {
+    antioch_deprecated();
+
     this->open_xml_file(filename);
 
     this->init_name_maps();
@@ -157,6 +161,7 @@ namespace Antioch
   void XMLParser<NumericType>::change_file(const std::string & filename)
   {
     ParserBase<NumericType>::_file = filename;
+    _phase_block    = NULL;
     _species_block  = NULL;
     _reaction_block = NULL;
     _reaction       = NULL;

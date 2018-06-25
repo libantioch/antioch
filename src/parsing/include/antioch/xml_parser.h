@@ -270,7 +270,9 @@ namespace Antioch{
     XMLParser();
     std::unique_ptr<tinyxml2::XMLDocument> _doc;
 
+    std::string _phase;
     //
+    tinyxml2::XMLElement * _phase_block;
     tinyxml2::XMLElement * _species_block;
     tinyxml2::XMLElement * _thermo_block;
     tinyxml2::XMLElement * _reaction_block;
