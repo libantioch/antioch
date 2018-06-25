@@ -181,7 +181,7 @@ namespace Antioch
   bool XMLParser<NumericType>::initialize()
   {
     //we start here
-     tinyxml2::XMLElement * start_block = _doc->FirstChildElement("ctml");
+    tinyxml2::XMLElement * start_block = _doc->FirstChildElement("ctml");
     if (!start_block)
       {
         std::cerr << "ERROR:  no <ctml> tag found in input file"
@@ -210,12 +210,59 @@ namespace Antioch
                                                         _map.at(ParsingKey::ID),
                                                         _phase );
 
-    if( _phase_block )
-      _species_block = _phase_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
-
+    // Point to first element by default
     _thermo_block = start_block->FirstChildElement(_map.at(ParsingKey::SPECIES_DATA).c_str());
-
     _reaction_block = start_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
+
+    // If we have a phase block, then grab the names of the data sets for the species data
+    // and the reaction data and then point the XMLElement* at the correct place
+    if( _phase_block )
+      {
+        _species_block = _phase_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
+
+        // If we have a thermo block, then let's try and get the right one
+        if( _thermo_block )
+          {
+            if( !_species_block->Attribute(_map.at(ParsingKey::DATASRC).c_str()) )
+              antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::SPECIES_SET)+" attribute "+_map.at(ParsingKey::DATASRC)+"!\n");
+
+            std::string species_datasrc(_species_block->Attribute(_map.at(ParsingKey::DATASRC).c_str()));
+
+            // By Cantera (?) convention, names referring to internal blocks are prepended with a '#'
+            // but the actual name doesn't have that, so we strip it off
+            if( species_datasrc.find_first_of("#") == 0 )
+              species_datasrc = species_datasrc.substr(1);
+
+
+            // Set thermo_block to the particular speciesData set the user asked for in the phase/speciesArray
+            _thermo_block = this->find_element_with_attribute( _thermo_block,
+                                                               _map.at(ParsingKey::SPECIES_DATA),
+                                                               _map.at(ParsingKey::ID),
+                                                               species_datasrc );
+          }
+
+        // If we have a reaction block, then let's try and get the right one
+        if( _reaction_block )
+          {
+            tinyxml2::XMLElement * reaction_array =
+              _phase_block->FirstChildElement(_map.at(ParsingKey::REACTION_SET).c_str());
+
+            if( !reaction_array->Attribute(_map.at(ParsingKey::DATASRC).c_str()) )
+              antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::REACTION_SET)+" attribute "+_map.at(ParsingKey::DATASRC)+"!\n");
+
+            std::string reaction_datasrc(reaction_array->Attribute(_map.at(ParsingKey::DATASRC).c_str()));
+            // By Cantera (?) convention, names referring to internal blocks are prepended with a '#'
+            // but the actual name doesn't have that, so we strip it off
+              if( reaction_datasrc.find_first_of("#") == 0 )
+                reaction_datasrc = reaction_datasrc.substr(1);
+
+            // Set reaction_block to the particular speciesData set the user asked for in the phase/speciesArray
+            _reaction_block = this->find_element_with_attribute( _reaction_block,
+                                                                 _map.at(ParsingKey::REACTION_DATA),
+                                                                 _map.at(ParsingKey::ID),
+                                                                 reaction_datasrc );
+          }
+      }
 
     _reaction = NULL;
     _rate_constant = NULL;
