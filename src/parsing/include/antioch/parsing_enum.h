@@ -49,6 +49,7 @@ namespace Antioch
                   REACTION,
                   REVERSIBLE,
                   ID,
+                  DATASRC,
                   EQUATION,
                   CHEMICAL_PROCESS,
                   KINETICS_MODEL,

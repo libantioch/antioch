@@ -87,6 +87,7 @@ namespace Antioch
     _map[ParsingKey::REACTION]              = "reaction";
     _map[ParsingKey::REVERSIBLE]            = "reversible";
     _map[ParsingKey::ID]                    = "id";
+    _map[ParsingKey::DATASRC]               = "datasrc";
     _map[ParsingKey::EQUATION]              = "equation";
     _map[ParsingKey::CHEMICAL_PROCESS]      = "type";
     _map[ParsingKey::KINETICS_MODEL]        = "rateCoeff";
