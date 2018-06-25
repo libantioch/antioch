@@ -45,8 +45,27 @@
 namespace Antioch
 {
   template <typename NumericType>
-  XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
-    ParserBase<NumericType>("XML",filename,verbose),
+  XMLParser<NumericType>::XMLParser(const std::string & filename, const std::string & phase_name, bool verbose)
+   : ParserBase<NumericType>("XML",filename,verbose),
+    _doc(new tinyxml2::XMLDocument),
+    _phase(phase_name),
+    _phase_block(NULL),
+    _species_block(NULL),
+    _reaction_block(NULL),
+    _reaction(NULL),
+    _rate_constant(NULL),
+    _Troe(NULL)
+  {
+    this->open_xml_file(filename);
+
+    this->init_name_maps();
+
+    this->initialize();
+  }
+
+  template <typename NumericType>
+  XMLParser<NumericType>::XMLParser(const std::string & filename, bool verbose)
+  : ParserBase<NumericType>("XML",filename,verbose),
     _doc(new tinyxml2::XMLDocument),
     _phase("NONE"),
     _phase_block(NULL),

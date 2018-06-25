@@ -76,7 +76,15 @@ namespace Antioch{
   class XMLParser: public ParserBase<NumericType>
   {
   public:
-    XMLParser(const std::string &filename, bool verbose = true);
+
+    //! Preferred constructor
+    XMLParser(const std::string & filename, const std::string & phase_name, bool verbose = true);
+
+    //! Deprecated constructor
+    XMLParser(const std::string & filename, bool verbose = true);
+
+    XMLParser() = delete;
+
     virtual ~XMLParser() = default;
 
     void change_file(const std::string & filename);
@@ -266,8 +274,6 @@ namespace Antioch{
 
     void open_xml_file( const std::string & filename );
 
-    /*! Never use default constructor*/
-    XMLParser();
     std::unique_ptr<tinyxml2::XMLDocument> _doc;
 
     std::string _phase;
