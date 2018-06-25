@@ -54,17 +54,7 @@ namespace Antioch
     _rate_constant(NULL),
     _Troe(NULL)
   {
-    if(_doc->LoadFile(filename.c_str()))
-      {
-        std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
-        std::cerr << "Error of tinyxml2 library:\n"
-                  << "\tID = "            << _doc->ErrorID() << "\n"
-                  << "\tError String1 = " << _doc->GetErrorStr1() << "\n"
-                  << "\tError String2 = " << _doc->GetErrorStr2() << std::endl;
-        antioch_error();
-      }
-
-    if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
+    this->open_xml_file(filename);
 
     this->init_name_maps();
 
@@ -148,16 +138,8 @@ namespace Antioch
   }
 
   template <typename NumericType>
-  void XMLParser<NumericType>::change_file(const std::string & filename)
+  void XMLParser<NumericType>::open_xml_file( const std::string & filename )
   {
-    ParserBase<NumericType>::_file = filename;
-    _species_block  = NULL;
-    _reaction_block = NULL;
-    _reaction       = NULL;
-    _rate_constant  = NULL;
-    _Troe           = NULL;
-
-    _doc.reset(new tinyxml2::XMLDocument);
     if(_doc->LoadFile(filename.c_str()))
       {
         std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
@@ -169,6 +151,21 @@ namespace Antioch
       }
 
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
+  }
+
+  template <typename NumericType>
+  void XMLParser<NumericType>::change_file(const std::string & filename)
+  {
+    ParserBase<NumericType>::_file = filename;
+    _species_block  = NULL;
+    _reaction_block = NULL;
+    _reaction       = NULL;
+    _rate_constant  = NULL;
+    _Troe           = NULL;
+
+    _doc.reset(new tinyxml2::XMLDocument);
+
+    this->open_xml_file(filename);
 
     this->initialize();
   }

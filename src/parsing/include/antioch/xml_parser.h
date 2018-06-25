@@ -264,6 +264,8 @@ namespace Antioch{
 
     void init_name_maps();
 
+    void open_xml_file( const std::string & filename );
+
     /*! Never use default constructor*/
     XMLParser();
     std::unique_ptr<tinyxml2::XMLDocument> _doc;
