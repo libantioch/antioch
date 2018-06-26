@@ -49,11 +49,11 @@ namespace AntiochTesting
 
       //xml_parser.read_thermodynamic_data(nasa_mixture);
       Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
+      this->check_curve_fits(nasa_mixture);
 
       Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
       Antioch::read_reaction_set_data_xml<Scalar>(thermo_filename, true, reaction_set);
-
-      this->check_curve_fits(nasa_mixture);
+      this->check_reaction_set(reaction_set);
      }
 
     void check_species_list(const std::vector<std::string> & species_list)
@@ -109,6 +109,12 @@ namespace AntiochTesting
 
     Scalar tol()
     { return std::numeric_limits<Scalar>::epsilon() * 10; }
+
+    void check_reaction_set( const Antioch::ReactionSet<Scalar> & reaction_set )
+    {
+      CPPUNIT_ASSERT_EQUAL( (int)_species_exact.size(), (int)reaction_set.n_species() );
+      CPPUNIT_ASSERT_EQUAL( 325, (int)reaction_set.n_reactions() );
+    }
 
   protected:
 
