@@ -30,6 +30,7 @@ namespace AntiochTesting
     virtual void setUp()
     {
       this->init();
+      this->init_exact_species();
     }
 
  
@@ -77,6 +78,75 @@ namespace AntiochTesting
 
     Scalar tol()
     { return std::numeric_limits<Scalar>::epsilon() * 10; }
+
+  protected:
+
+    std::vector<std::string> _species_exact;
+    unsigned int _H2_species_id;
+    unsigned int _N2_species_id;
+    unsigned int _HCNO_species_id;
+
+    void init_exact_species()
+    {
+      _H2_species_id = 0;
+      _N2_species_id = 47;
+      _HCNO_species_id = 43;
+
+      _species_exact.reserve(53);
+      _species_exact.push_back("H2");
+      _species_exact.push_back("H");
+      _species_exact.push_back("O");
+      _species_exact.push_back("O2");
+      _species_exact.push_back("OH");
+      _species_exact.push_back("H2O");
+      _species_exact.push_back("HO2");
+      _species_exact.push_back("H2O2");
+      _species_exact.push_back("C");
+      _species_exact.push_back("CH");
+      _species_exact.push_back("CH2");
+      _species_exact.push_back("CH2(S)");
+      _species_exact.push_back("CH3");
+      _species_exact.push_back("CH4");
+      _species_exact.push_back("CO");
+      _species_exact.push_back("CO2");
+      _species_exact.push_back("HCO");
+      _species_exact.push_back("CH2O");
+      _species_exact.push_back("CH2OH");
+      _species_exact.push_back("CH3O");
+      _species_exact.push_back("CH3OH");
+      _species_exact.push_back("C2H");
+      _species_exact.push_back("C2H2");
+      _species_exact.push_back("C2H3");
+      _species_exact.push_back("C2H4");
+      _species_exact.push_back("C2H5");
+      _species_exact.push_back("C2H6");
+      _species_exact.push_back("HCCO");
+      _species_exact.push_back("CH2CO");
+      _species_exact.push_back("HCCOH");
+      _species_exact.push_back("N");
+      _species_exact.push_back("NH");
+      _species_exact.push_back("NH2");
+      _species_exact.push_back("NH3");
+      _species_exact.push_back("NNH");
+      _species_exact.push_back("NO");
+      _species_exact.push_back("NO2");
+      _species_exact.push_back("N2O");
+      _species_exact.push_back("HNO");
+      _species_exact.push_back("CN");
+      _species_exact.push_back("HCN");
+      _species_exact.push_back("H2CN");
+      _species_exact.push_back("HCNN");
+      _species_exact.push_back("HCNO");
+      _species_exact.push_back("HOCN");
+      _species_exact.push_back("HNCO");
+      _species_exact.push_back("NCO");
+      _species_exact.push_back("N2");
+      _species_exact.push_back("AR");
+      _species_exact.push_back("C3H7");
+      _species_exact.push_back("C3H8");
+      _species_exact.push_back("CH2CHO");
+      _species_exact.push_back("CH3CHO");
+    }
 
   };
 
