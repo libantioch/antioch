@@ -36,10 +36,14 @@ namespace AntiochTesting
  
     void test_gri30_xml()
     {
-      std::string thermo_filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";      
-      Antioch::XMLParser<Scalar> xml_parser(thermo_filename,false);
+      std::string thermo_filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
+      const std::string phase("gri30_mix");
+
+      Antioch::XMLParser<Scalar> xml_parser(thermo_filename,phase,false);
       std::vector<std::string> species_str_list = xml_parser.species_list();
-      
+
+      this->check_species_list(species_str_list);
+
       Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
       Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
 
@@ -51,8 +55,22 @@ namespace AntiochTesting
 
       this->check_curve_fits(nasa_mixture);
      }
-    
-    //could add to check all element coefficients 
+
+    void check_species_list(const std::vector<std::string> & species_list)
+    {
+      CPPUNIT_ASSERT_EQUAL(_species_exact.size(), species_list.size());
+
+      // Check that these particular species are where they are supposed to be
+      // since we check them in the thermo part as well
+      CPPUNIT_ASSERT_EQUAL( std::string("H2"), species_list[_H2_species_id] );
+      CPPUNIT_ASSERT_EQUAL( std::string("N2"), species_list[_N2_species_id] );
+      CPPUNIT_ASSERT_EQUAL( std::string("HCNO"), species_list[_HCNO_species_id] );
+
+      for( unsigned int s = 0; s < _species_exact.size(); s++ )
+        CPPUNIT_ASSERT_EQUAL( _species_exact[s], species_list[s] );
+    }
+
+    //could add to check all element coefficients
     void check_curve_fits( const Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> >& nasa_mixture)
     {
       const Antioch::NASA7CurveFit<Scalar>& H2_curve_fit =  nasa_mixture.curve_fit(0);
