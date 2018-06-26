@@ -73,11 +73,18 @@ namespace AntiochTesting
     //could add to check all element coefficients
     void check_curve_fits( const Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> >& nasa_mixture)
     {
-      const Antioch::NASA7CurveFit<Scalar>& H2_curve_fit =  nasa_mixture.curve_fit(0);
-      const Antioch::NASA7CurveFit<Scalar>& N2_curve_fit =  nasa_mixture.curve_fit(47);
+      const Antioch::NASA7CurveFit<Scalar> & H2_curve_fit =
+        nasa_mixture.curve_fit(_H2_species_id);
+
+      const Antioch::NASA7CurveFit<Scalar> & N2_curve_fit =
+        nasa_mixture.curve_fit(_N2_species_id);
+
+      const Antioch::NASA7CurveFit<Scalar> & HCNO_curve_fit =
+        nasa_mixture.curve_fit(_HCNO_species_id);
 
       CPPUNIT_ASSERT_EQUAL( (unsigned int)2, H2_curve_fit.n_intervals() );
       CPPUNIT_ASSERT_EQUAL( (unsigned int)2, N2_curve_fit.n_intervals() );
+      CPPUNIT_ASSERT_EQUAL( (unsigned int)2, HCNO_curve_fit.n_intervals() );
 
       // Check H2 coefficients
       this->check_coefficients( H2_curve_fit.coefficients(0), this->_H2_coeffs_200_1000 );
@@ -86,6 +93,12 @@ namespace AntiochTesting
       // Check N2 coefficients
       this->check_coefficients( N2_curve_fit.coefficients(0), this->_N2_coeffs_300_1000 );
       this->check_coefficients( N2_curve_fit.coefficients(1), this->_N2_coeffs_1000_5000 );
+
+      // Check the bounds on HCNO curve fit since they're non-standard
+      // We don't give access to the temperature bounds, so we just check
+      // that the interval changes when T crosses the critical value
+      CPPUNIT_ASSERT_EQUAL( 0, (int)HCNO_curve_fit.interval(1381.0) );
+      CPPUNIT_ASSERT_EQUAL( 1, (int)HCNO_curve_fit.interval(1383.0) );
     }
 
     void check_coefficients( const Scalar* parsed_coeffs, std::vector<Scalar>& exact_coeffs )
