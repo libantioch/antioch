@@ -33,7 +33,7 @@ namespace AntiochTesting
       this->init_exact_species();
     }
 
- 
+
     void test_gri30_xml()
     {
       std::string thermo_filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
@@ -43,6 +43,9 @@ namespace AntiochTesting
       std::vector<std::string> species_str_list = xml_parser.species_list();
 
       this->check_species_list(species_str_list);
+
+      // GRI3 is NASA7
+      CPPUNIT_ASSERT( xml_parser.is_nasa7_curve_fit_type() );
 
       Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
       Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
@@ -322,7 +325,7 @@ namespace AntiochTesting
   };
 
 
-  
+
 
 #define DEFINE_GRI30XMLPARSING_SCALAR_TEST(Classname,BaseClass,Scalar)  \
   class Classname : public BaseClass<Scalar>                            \
