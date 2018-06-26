@@ -95,7 +95,15 @@ namespace Antioch{
 
     /// species
     //! reads the species set
-    const std::vector<std::string> species_list() ;
+    const std::vector<std::string> species_list();
+
+    //! Query XML file to ascertain if we have a NASA7 or NASA9 curve fit.
+    /*! Returns true if NASA7 and false if NASA9.
+        This will then enable calling the correct version of read_thermodynamic_data.
+        This function will error if neither is found. Also, we only check the first
+        entry - if there is a mixture of NASA7 and NASA9, then read_thermodynamic_data
+        will error; that is, we assume all species use the same kind of NASA curve fit. */
+    bool is_nasa7_curve_fit_type() const;
 
     //! reads the thermo, NASA generalist, no templates for virtual
     void read_thermodynamic_data(NASAThermoMixture<NumericType, NASA7CurveFit<NumericType> >& thermo)

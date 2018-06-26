@@ -860,6 +860,34 @@ namespace Antioch
     return antioch ? antioch : this->Troe_GRI_parameter(T3,1);
   }
 
+  template <typename NumericType>
+  bool XMLParser<NumericType>::is_nasa7_curve_fit_type() const
+  {
+    if(!_thermo_block)
+      antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES_DATA)+" section found! Cannot parse thermo!");
+
+    // Step to first species block
+    tinyxml2::XMLElement * species_block =
+      _thermo_block->FirstChildElement(_map.at(ParsingKey::SPECIES).c_str());
+
+    if(!species_block)
+      antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES)+" block found within "+_map.at(ParsingKey::SPECIES_DATA)+" section! Cannot parse thermo!");
+
+    tinyxml2::XMLElement * thermo_subblock = species_block->FirstChildElement(_map.at(ParsingKey::THERMO).c_str());
+    if(!thermo_subblock)
+      antioch_error_msg("ERROR: Could not find thermo block within first species block! Cannot parse thermo!");
+
+    bool is_nasa_7 = false;
+
+    if( thermo_subblock->FirstChildElement(_map.at(ParsingKey::NASA7).c_str()) )
+      is_nasa_7 = true;
+    else if( thermo_subblock->FirstChildElement(_map.at(ParsingKey::NASA9).c_str()) )
+      is_nasa_7 = false;
+    else
+      antioch_error_msg("ERROR: No value key for NASA curve it found in first species section!");
+
+    return is_nasa_7;
+  }
 
   template <typename NumericType>
   template <typename ThermoType>
