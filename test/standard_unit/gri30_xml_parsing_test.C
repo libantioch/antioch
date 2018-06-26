@@ -112,8 +112,142 @@ namespace AntiochTesting
 
     void check_reaction_set( const Antioch::ReactionSet<Scalar> & reaction_set )
     {
+      const Antioch::ChemicalMixture<Scalar> & mixture = reaction_set.chemical_mixture();
+
       CPPUNIT_ASSERT_EQUAL( (int)_species_exact.size(), (int)reaction_set.n_species() );
       CPPUNIT_ASSERT_EQUAL( 325, (int)reaction_set.n_reactions() );
+
+      // Every reaction should've gotten the correct value of n_species
+      for( unsigned int r = 0; r < reaction_set.n_reactions(); r++ )
+        {
+          const Antioch::Reaction<Scalar> & reaction = reaction_set.reaction(r);
+          CPPUNIT_ASSERT_EQUAL(reaction_set.n_species(), reaction.n_species());
+        }
+
+      // Check elementary, kooij (modified Arrhenius), reversible
+      {
+        const Antioch::Reaction<Scalar> & elem_modarr = reaction_set.reaction(2);
+        CPPUNIT_ASSERT_EQUAL(Antioch::ReactionType::ELEMENTARY, elem_modarr.type() );
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::KOOIJ, elem_modarr.kinetics_model() );
+        CPPUNIT_ASSERT(elem_modarr.reversible());
+      }
+
+      // Check elementary, Arrhenius, reversible
+      {
+        const Antioch::Reaction<Scalar> & elem_arr = reaction_set.reaction(3);
+        CPPUNIT_ASSERT_EQUAL(Antioch::ReactionType::ELEMENTARY, elem_arr.type() );
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::ARRHENIUS, elem_arr.kinetics_model() );
+        CPPUNIT_ASSERT(elem_arr.reversible());
+      }
+
+      // Check elementary, Arrhenius, irreversible
+      {
+        const Antioch::Reaction<Scalar> & arr_nonrev = reaction_set.reaction(283);
+        CPPUNIT_ASSERT_EQUAL(Antioch::ReactionType::ELEMENTARY ,arr_nonrev.type() );
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::ARRHENIUS, arr_nonrev.kinetics_model() );
+        CPPUNIT_ASSERT(!arr_nonrev.reversible());
+      }
+
+      // Check three body, kooij, reversible
+      {
+        const Antioch::Reaction<Scalar> & modarr_threebody = reaction_set.reaction(0);
+        CPPUNIT_ASSERT_EQUAL(Antioch::ReactionType::THREE_BODY, modarr_threebody.type() );
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::KOOIJ, modarr_threebody.kinetics_model() );
+        CPPUNIT_ASSERT(modarr_threebody.reversible());
+
+        // Check threebody efficiencies
+        for( unsigned int s = 0; s < reaction_set.n_species(); s++ )
+          {
+            std::string species_name = mixture.chemical_species()[s]->species();
+            Scalar efficiency = modarr_threebody.get_efficiency(s);
+
+            if( species_name == std::string("AR") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(0.83, efficiency, this->tol());
+            else if( species_name == std::string("C2H6") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, efficiency, this->tol());
+            else if( species_name == std::string("CH4") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, efficiency, this->tol());
+            else if( species_name == std::string("CO") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(1.75, efficiency, this->tol());
+            else if( species_name == std::string("CO2") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(3.6, efficiency, this->tol());
+            else if( species_name == std::string("H2") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(2.4, efficiency, this->tol());
+            else if( species_name == std::string("H2O") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(15.4, efficiency, this->tol());
+            else
+              // Default should be 1.0
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, efficiency, this->tol());
+          }
+      }
+
+      // Check three body, Arrhenius, reversible
+      {
+        const Antioch::Reaction<Scalar> & arr_threebody = reaction_set.reaction(226);
+        CPPUNIT_ASSERT_EQUAL(Antioch::ReactionType::THREE_BODY, arr_threebody.type() );
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::ARRHENIUS, arr_threebody.kinetics_model() );
+        CPPUNIT_ASSERT(arr_threebody.reversible());
+      }
+
+
+      // Check Lindemann Falloff three body, kooij, reversible
+      {
+        const Antioch::Reaction<Scalar> & lind_falloff_threebody = reaction_set.reaction(11);
+        CPPUNIT_ASSERT_EQUAL(Antioch::ReactionType::LINDEMANN_FALLOFF_THREE_BODY, lind_falloff_threebody.type() );
+        CPPUNIT_ASSERT(lind_falloff_threebody.reversible());
+
+        // This should really be ARRHENIUS since b = 0, see issue #253
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::KOOIJ, lind_falloff_threebody.forward_rate(0).type() );
+        // This should really be ARRHENIUS since b = 0, see issue #253
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::KOOIJ, lind_falloff_threebody.forward_rate(1).type() );
+      }
+
+      // Check Troe Falloff three body, kooij, reversible
+      {
+        const Antioch::Reaction<Scalar> & troe_falloff_threebody = reaction_set.reaction(49);
+        CPPUNIT_ASSERT_EQUAL(Antioch::ReactionType::TROE_FALLOFF_THREE_BODY, troe_falloff_threebody.type() );
+        CPPUNIT_ASSERT(troe_falloff_threebody.reversible());
+
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::KOOIJ, troe_falloff_threebody.forward_rate(0).type() );
+        // This should really be ARRHENIUS since b = 0, see issue #253
+        CPPUNIT_ASSERT_EQUAL(Antioch::KineticsModel::KOOIJ, troe_falloff_threebody.forward_rate(1).type() );
+
+        const Antioch::FalloffThreeBodyReaction<Scalar,Antioch::TroeFalloff<Scalar>> & tf_cast =
+          dynamic_cast<const Antioch::FalloffThreeBodyReaction<Scalar,Antioch::TroeFalloff<Scalar>> &>
+          (troe_falloff_threebody);
+
+        const Antioch::TroeFalloff<Scalar> & falloff = tf_cast.F();
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.562, falloff.get_alpha(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(5836, falloff.get_T1(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(8552, falloff.get_T2(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(91, falloff.get_T3(), this->tol() );
+
+        // Check threebody efficiencies
+        for( unsigned int s = 0; s < reaction_set.n_species(); s++ )
+          {
+            std::string species_name = mixture.chemical_species()[s]->species();
+            Scalar efficiency = troe_falloff_threebody.get_efficiency(s);
+
+            if( species_name == std::string("AR") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(0.7, efficiency, this->tol());
+            else if( species_name == std::string("C2H6") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, efficiency, this->tol());
+            else if( species_name == std::string("CH4") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, efficiency, this->tol());
+            else if( species_name == std::string("CO") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5, efficiency, this->tol());
+            else if( species_name == std::string("CO2") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(2, efficiency, this->tol());
+            else if( species_name == std::string("H2") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(2, efficiency, this->tol());
+            else if( species_name == std::string("H2O") )
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(6, efficiency, this->tol());
+            else
+              // Default should be 1.0
+              CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, efficiency, this->tol());
+          }
+      }
+
     }
 
   protected:
