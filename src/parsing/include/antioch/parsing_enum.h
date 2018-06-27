@@ -45,10 +45,12 @@ namespace Antioch
                   NASA7,
                   NASA9,
 //
+                  REACTION_SET,
                   REACTION_DATA,
                   REACTION,
                   REVERSIBLE,
                   ID,
+                  DATASRC,
                   EQUATION,
                   CHEMICAL_PROCESS,
                   KINETICS_MODEL,

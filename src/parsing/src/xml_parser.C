@@ -45,28 +45,48 @@
 namespace Antioch
 {
   template <typename NumericType>
-  XMLParser<NumericType>::XMLParser(const std::string &filename, bool verbose):
-    ParserBase<NumericType>("XML",filename,verbose),
+  XMLParser<NumericType>::XMLParser(const std::string & filename, const std::string & phase_name, bool verbose)
+   : ParserBase<NumericType>("XML",filename,verbose),
+    _doc(new tinyxml2::XMLDocument),
+    _phase(phase_name),
+    _phase_block(NULL),
     _species_block(NULL),
     _reaction_block(NULL),
     _reaction(NULL),
     _rate_constant(NULL),
     _Troe(NULL)
   {
-    _doc = new tinyxml2::XMLDocument;
-    if(_doc->LoadFile(filename.c_str()))
-      {
-        std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
-        std::cerr << "Error of tinyxml2 library:\n"
-                  << "\tID = "            << _doc->ErrorID() << "\n"
-                  << "\tError String1 = " << _doc->GetErrorStr1() << "\n"
-                  << "\tError String2 = " << _doc->GetErrorStr2() << std::endl;
-        antioch_error();
-      }
+    this->open_xml_file(filename);
 
-    if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
+    this->init_name_maps();
 
+    this->initialize();
+  }
 
+  template <typename NumericType>
+  XMLParser<NumericType>::XMLParser(const std::string & filename, bool verbose)
+  : ParserBase<NumericType>("XML",filename,verbose),
+    _doc(new tinyxml2::XMLDocument),
+    _phase("NONE"),
+    _phase_block(NULL),
+    _species_block(NULL),
+    _reaction_block(NULL),
+    _reaction(NULL),
+    _rate_constant(NULL),
+    _Troe(NULL)
+  {
+    antioch_deprecated();
+
+    this->open_xml_file(filename);
+
+    this->init_name_maps();
+
+    this->initialize();
+  }
+
+  template <typename NumericType>
+  void XMLParser<NumericType>::init_name_maps()
+  {
     // XML block/section names
     _map[ParsingKey::PHASE_BLOCK]           = "phase";
     _map[ParsingKey::SPECIES_SET]           = "speciesArray";
@@ -82,10 +102,12 @@ namespace Antioch
     _map[ParsingKey::NASA9]                 = "NASA9";
 
     // Kinetics parameters
+    _map[ParsingKey::REACTION_SET]          = "reactionArray";
     _map[ParsingKey::REACTION_DATA]         = "reactionData";
     _map[ParsingKey::REACTION]              = "reaction";
     _map[ParsingKey::REVERSIBLE]            = "reversible";
     _map[ParsingKey::ID]                    = "id";
+    _map[ParsingKey::DATASRC]               = "datasrc";
     _map[ParsingKey::EQUATION]              = "equation";
     _map[ParsingKey::CHEMICAL_PROCESS]      = "type";
     _map[ParsingKey::KINETICS_MODEL]        = "rateCoeff";
@@ -135,31 +157,14 @@ namespace Antioch
     _default_unit[ParsingKey::TROE_F_TSSS]           = "K";
 
     //gri30
-     _gri_map[GRI30Comp::FALLOFF]      = "falloff";
-     _gri_map[GRI30Comp::FALLOFF_TYPE] = "type";
-     _gri_map[GRI30Comp::TROE]         = "Troe";
-
-    this->initialize();
+    _gri_map[GRI30Comp::FALLOFF]      = "falloff";
+    _gri_map[GRI30Comp::FALLOFF_TYPE] = "type";
+    _gri_map[GRI30Comp::TROE]         = "Troe";
   }
 
   template <typename NumericType>
-  XMLParser<NumericType>::~XMLParser()
+  void XMLParser<NumericType>::open_xml_file( const std::string & filename )
   {
-     delete _doc;
-  }
-
-  template <typename NumericType>
-  void XMLParser<NumericType>::change_file(const std::string & filename)
-  {
-    ParserBase<NumericType>::_file = filename;
-    _species_block  = NULL;
-    _reaction_block = NULL;
-    _reaction       = NULL;
-    _rate_constant  = NULL;
-    _Troe           = NULL;
-
-    delete _doc;
-    _doc = new tinyxml2::XMLDocument;
     if(_doc->LoadFile(filename.c_str()))
       {
         std::cerr << "ERROR: unable to load xml file " << filename << std::endl;
@@ -171,6 +176,22 @@ namespace Antioch
       }
 
     if(this->verbose())std::cout << "Having opened file " << filename << std::endl;
+  }
+
+  template <typename NumericType>
+  void XMLParser<NumericType>::change_file(const std::string & filename)
+  {
+    ParserBase<NumericType>::_file = filename;
+    _phase_block    = NULL;
+    _species_block  = NULL;
+    _reaction_block = NULL;
+    _reaction       = NULL;
+    _rate_constant  = NULL;
+    _Troe           = NULL;
+
+    _doc.reset(new tinyxml2::XMLDocument);
+
+    this->open_xml_file(filename);
 
     this->initialize();
   }
@@ -179,21 +200,88 @@ namespace Antioch
   bool XMLParser<NumericType>::initialize()
   {
     //we start here
-    _reaction_block = _doc->FirstChildElement("ctml");
-    if (!_reaction_block)
+    tinyxml2::XMLElement * start_block = _doc->FirstChildElement("ctml");
+    if (!start_block)
       {
         std::cerr << "ERROR:  no <ctml> tag found in input file"
                   << std::endl;
         antioch_error();
       }
 
-    _species_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::PHASE_BLOCK).c_str());
-    if(_species_block)
-        _species_block = _species_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
+    // By default, we grab the first phase block if phase == NONE for backward compatibility
+    // Otherwise, we find the block with the phase id set by the user.
+    // Function will error out if proper id is not found.
+    _phase_block = start_block->FirstChildElement(_map.at(ParsingKey::PHASE_BLOCK).c_str());
 
-    _thermo_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::SPECIES_DATA).c_str());
+    if( !_phase_block )
+      {
+        antioch_warning("Warning! No phase block found in XML file. Will use first "+_map.at(ParsingKey::SPECIES_DATA)+" and "+_map.at(ParsingKey::REACTION_DATA)+" sections found in file!");
+      }
+    // This check should be removed when deprecated XMLParser constructor is removed.
+    // Then, the user will be required to pass in a phase name.
+    else if( _phase == std::string("NONE") )
+      {
+        antioch_warning("Warning! No phase name supplied! Will use first phase found in XML file!");
+      }
+    else
+      _phase_block = this->find_element_with_attribute( _phase_block,
+                                                        _map.at(ParsingKey::PHASE_BLOCK),
+                                                        _map.at(ParsingKey::ID),
+                                                        _phase );
 
-    _reaction_block = _reaction_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
+    // Point to first element by default
+    _thermo_block = start_block->FirstChildElement(_map.at(ParsingKey::SPECIES_DATA).c_str());
+    _reaction_block = start_block->FirstChildElement(_map.at(ParsingKey::REACTION_DATA).c_str());
+
+    // If we have a phase block, then grab the names of the data sets for the species data
+    // and the reaction data and then point the XMLElement* at the correct place
+    if( _phase_block )
+      {
+        _species_block = _phase_block->FirstChildElement(_map.at(ParsingKey::SPECIES_SET).c_str());
+
+        // If we have a thermo block, then let's try and get the right one
+        if( _thermo_block )
+          {
+            if( !_species_block->Attribute(_map.at(ParsingKey::DATASRC).c_str()) )
+              antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::SPECIES_SET)+" attribute "+_map.at(ParsingKey::DATASRC)+"!\n");
+
+            std::string species_datasrc(_species_block->Attribute(_map.at(ParsingKey::DATASRC).c_str()));
+
+            // By Cantera (?) convention, names referring to internal blocks are prepended with a '#'
+            // but the actual name doesn't have that, so we strip it off
+            if( species_datasrc.find_first_of("#") == 0 )
+              species_datasrc = species_datasrc.substr(1);
+
+
+            // Set thermo_block to the particular speciesData set the user asked for in the phase/speciesArray
+            _thermo_block = this->find_element_with_attribute( _thermo_block,
+                                                               _map.at(ParsingKey::SPECIES_DATA),
+                                                               _map.at(ParsingKey::ID),
+                                                               species_datasrc );
+          }
+
+        // If we have a reaction block, then let's try and get the right one
+        if( _reaction_block )
+          {
+            tinyxml2::XMLElement * reaction_array =
+              _phase_block->FirstChildElement(_map.at(ParsingKey::REACTION_SET).c_str());
+
+            if( !reaction_array->Attribute(_map.at(ParsingKey::DATASRC).c_str()) )
+              antioch_error_msg("ERROR: Could not find "+_map.at(ParsingKey::REACTION_SET)+" attribute "+_map.at(ParsingKey::DATASRC)+"!\n");
+
+            std::string reaction_datasrc(reaction_array->Attribute(_map.at(ParsingKey::DATASRC).c_str()));
+            // By Cantera (?) convention, names referring to internal blocks are prepended with a '#'
+            // but the actual name doesn't have that, so we strip it off
+              if( reaction_datasrc.find_first_of("#") == 0 )
+                reaction_datasrc = reaction_datasrc.substr(1);
+
+            // Set reaction_block to the particular speciesData set the user asked for in the phase/speciesArray
+            _reaction_block = this->find_element_with_attribute( _reaction_block,
+                                                                 _map.at(ParsingKey::REACTION_DATA),
+                                                                 _map.at(ParsingKey::ID),
+                                                                 reaction_datasrc );
+          }
+      }
 
     _reaction = NULL;
     _rate_constant = NULL;
@@ -772,6 +860,34 @@ namespace Antioch
     return antioch ? antioch : this->Troe_GRI_parameter(T3,1);
   }
 
+  template <typename NumericType>
+  bool XMLParser<NumericType>::is_nasa7_curve_fit_type() const
+  {
+    if(!_thermo_block)
+      antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES_DATA)+" section found! Cannot parse thermo!");
+
+    // Step to first species block
+    tinyxml2::XMLElement * species_block =
+      _thermo_block->FirstChildElement(_map.at(ParsingKey::SPECIES).c_str());
+
+    if(!species_block)
+      antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES)+" block found within "+_map.at(ParsingKey::SPECIES_DATA)+" section! Cannot parse thermo!");
+
+    tinyxml2::XMLElement * thermo_subblock = species_block->FirstChildElement(_map.at(ParsingKey::THERMO).c_str());
+    if(!thermo_subblock)
+      antioch_error_msg("ERROR: Could not find thermo block within first species block! Cannot parse thermo!");
+
+    bool is_nasa_7 = false;
+
+    if( thermo_subblock->FirstChildElement(_map.at(ParsingKey::NASA7).c_str()) )
+      is_nasa_7 = true;
+    else if( thermo_subblock->FirstChildElement(_map.at(ParsingKey::NASA9).c_str()) )
+      is_nasa_7 = false;
+    else
+      antioch_error_msg("ERROR: No value key for NASA curve it found in first species section!");
+
+    return is_nasa_7;
+  }
 
   template <typename NumericType>
   template <typename ThermoType>
@@ -876,6 +992,8 @@ namespace Antioch
 
       } // end species loop
   }
+
+
 
   // Instantiate
   ANTIOCH_NUMERIC_TYPE_CLASS_INSTANTIATE(XMLParser);

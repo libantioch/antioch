@@ -59,12 +59,15 @@ namespace AntiochTesting
       species_str_list[0] = "N2";
       species_str_list[1] = "NO2";
 
+      std::string filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"nasa9_thermo.xml";
+
+      Antioch::XMLParser<Scalar> xml_parser(filename,"NOPHASEINTHISFILE",false);
+      CPPUNIT_ASSERT( !xml_parser.is_nasa7_curve_fit_type() );
+
       Antioch::ChemicalMixture<Scalar> chem_mixture( species_str_list );
       Antioch::NASAThermoMixture<Scalar, Antioch::NASA9CurveFit<Scalar> > nasa_mixture( chem_mixture );
 
-      std::string filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"nasa9_thermo.xml";
-
-      Antioch::read_nasa_mixture_data( nasa_mixture, filename, Antioch::XML );
+      xml_parser.read_thermodynamic_data(nasa_mixture);
 
       const Antioch::NASA9CurveFit<Scalar>& N2_curve_fit =  nasa_mixture.curve_fit(0);
       const Antioch::NASA9CurveFit<Scalar>& NO2_curve_fit =  nasa_mixture.curve_fit(1);
