@@ -36,6 +36,7 @@ namespace Antioch
   template <typename CoeffType>
   class TempCache;
 
+  //! Deprecated, prefer IdealGasThermo class
   template <typename MacroThermo, typename CoeffType = double>
   class IdealGasMicroThermo : public MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >
   {
@@ -44,7 +45,7 @@ namespace Antioch
     IdealGasMicroThermo(const MacroThermo & ext_thermo, const ChemicalMixture<CoeffType> & chem_mix)
       : MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >(chem_mix),
       _ext_therm(ext_thermo)
-    {}
+    {antioch_deprecated();}
 
     virtual ~IdealGasMicroThermo(){}
 
