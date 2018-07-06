@@ -43,7 +43,7 @@
 
 #include "antioch/chemical_mixture.h"
 #include "antioch/stat_mech_thermo.h"
-#include "antioch/ideal_gas_micro_thermo.h"
+#include "antioch/ideal_gas_thermo.h"
 #include "antioch/nasa_mixture.h"
 #include "antioch/nasa_evaluator.h"
 #include "antioch/nasa7_curve_fit.h"
@@ -678,8 +678,8 @@ namespace AntiochTesting
 
 
   template<typename Scalar, typename NASACurveFit>
-  class IdealGasMicroThermoTestBase :
-    public MacroMicroThermoTestBase<Scalar,Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar> >
+  class IdealGasThermoTestBase :
+    public MacroMicroThermoTestBase<Scalar,Antioch::IdealGasThermo<NASACurveFit,Scalar> >
   {
   public:
 
@@ -745,7 +745,7 @@ namespace AntiochTesting
     {
       Scalar T(1501.2);
 
-      // For IdealGasMicroThermo, none of the electronic modes are populated by assumption.
+      // For IdealGasThermo, none of the electronic modes are populated by assumption.
       Scalar cv_el_exact(0.0);
 
       for( unsigned int s = 0; s < this->_n_species; s++ )
@@ -758,7 +758,7 @@ namespace AntiochTesting
     {
       Scalar T(1501.2);
 
-      // For IdealGasMicroThermo, none of the electronic modes are populated by assumption.
+      // For IdealGasThermo, none of the electronic modes are populated by assumption.
       Scalar cv_el_exact(0.0);
 
       this->test_scalar_rel( cv_el_exact,
@@ -775,17 +775,13 @@ namespace AntiochTesting
 
       this->parse_nasa_coeffs( *(this->_nasa_mixture) );
 
-
-      _nasa_evaluator = new Antioch::NASAEvaluator<Scalar,NASACurveFit>( *(_nasa_mixture) );
-
-      this->_thermo = new Antioch::IdealGasMicroThermo<Antioch::NASAEvaluator<Scalar,NASACurveFit>,Scalar>
-        ( *(_nasa_evaluator), *(this->_chem_mixture) );
+      this->_thermo = new Antioch::IdealGasThermo<NASACurveFit,Scalar>
+        ( *(_nasa_mixture), *(this->_chem_mixture) );
     }
 
     void tearDown()
     {
       delete this->_thermo;
-      delete _nasa_evaluator;
       delete _nasa_mixture;
       this->clear();
     }
@@ -793,8 +789,6 @@ namespace AntiochTesting
   protected:
 
     Antioch::NASAThermoMixture<Scalar,NASACurveFit> * _nasa_mixture;
-
-    Antioch::NASAEvaluator<Scalar,NASACurveFit> * _nasa_evaluator;
 
     std::map<std::string,std::vector<Scalar> > _nasa_coeffs_lower_interval;
     std::map<std::string,std::vector<Scalar> > _nasa_coeffs_upper_interval;
@@ -838,8 +832,8 @@ namespace AntiochTesting
   };
 
   template<typename Scalar>
-  class IdealGasMicroThermoTestNASA7Base :
-    public IdealGasMicroThermoTestBase<Scalar,Antioch::NASA7CurveFit<Scalar> >,
+  class IdealGasThermoTestNASA7Base :
+    public IdealGasThermoTestBase<Scalar,Antioch::NASA7CurveFit<Scalar> >,
     public NASA7ThermoTestHelper<Scalar>
   {
   protected:
@@ -941,8 +935,8 @@ namespace AntiochTesting
   };
 
   template<typename Scalar>
-  class IdealGasMicroThermoTestNASA9Base :
-    public IdealGasMicroThermoTestBase<Scalar,Antioch::NASA9CurveFit<Scalar> >,
+  class IdealGasThermoTestNASA9Base :
+    public IdealGasThermoTestBase<Scalar,Antioch::NASA9CurveFit<Scalar> >,
     public NASA9ThermoTestHelper<Scalar>
   {
   protected:
@@ -1074,32 +1068,32 @@ namespace AntiochTesting
     CPPUNIT_TEST_SUITE_END();                                           \
   }
 
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7FloatTest,
-                                         IdealGasMicroThermoTestNASA7Base,
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasThermoNASA7FloatTest,
+                                         IdealGasThermoTestNASA7Base,
                                          float);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7DoubleTest,
-                                         IdealGasMicroThermoTestNASA7Base,
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasThermoNASA7DoubleTest,
+                                         IdealGasThermoTestNASA7Base,
                                          double);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA7LongDoubleTest,
-                                         IdealGasMicroThermoTestNASA7Base,
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasThermoNASA7LongDoubleTest,
+                                         IdealGasThermoTestNASA7Base,
                                          long double);
 
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9FloatTest,
-                                         IdealGasMicroThermoTestNASA9Base,
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasThermoNASA9FloatTest,
+                                         IdealGasThermoTestNASA9Base,
                                          float);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9DoubleTest,
-                                         IdealGasMicroThermoTestNASA9Base,
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasThermoNASA9DoubleTest,
+                                         IdealGasThermoTestNASA9Base,
                                          double);
-  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasMicroThermoNASA9LongDoubleTest,
-                                         IdealGasMicroThermoTestNASA9Base,
+  DEFINE_IDEALGASMICROTHERMO_SCALAR_TEST(IdealGasThermoNASA9LongDoubleTest,
+                                         IdealGasThermoTestNASA9Base,
                                          long double);
 
-  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7FloatTest );
-  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7DoubleTest );
-  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA7LongDoubleTest );
-  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA9FloatTest );
-  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA9DoubleTest );
-  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasMicroThermoNASA9LongDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasThermoNASA7FloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasThermoNASA7DoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasThermoNASA7LongDoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasThermoNASA9FloatTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasThermoNASA9DoubleTest );
+  CPPUNIT_TEST_SUITE_REGISTRATION( IdealGasThermoNASA9LongDoubleTest );
 
 } // end namespace AntiochTesting
 
