@@ -24,11 +24,12 @@
 //
 //-----------------------------------------------------------------------el-
 
-#ifndef ANTIOCH_IDEAL_GAS_MICRO_THERMO_H
-#define ANTIOCH_IDEAL_GAS_MICRO_THERMO_H
+#ifndef ANTIOCH_IDEAL_GAS_THERMO_H
+#define ANTIOCH_IDEAL_GAS_THERMO_H
 
 // Antioch
 #include "antioch/macro_micro_thermo_base.h"
+#include "antioch/nasa_mixture.h"
 
 namespace Antioch
 {
@@ -36,40 +37,46 @@ namespace Antioch
   template <typename CoeffType>
   class TempCache;
 
-  //! Deprecated, prefer IdealGasThermo class
-  template <typename MacroThermo, typename CoeffType = double>
-  class IdealGasMicroThermo : public MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >
+  //! Statistical thermodynamics quantities for ideal gas
+  /*! In this model, we assume that vibrational states are only partially populated and
+      there's no population of electronic states. We use the provided NASAThermoMixture
+      to compute the total cv and then cv_vib = cv - cv_trans - cv_rotational; for atomic
+      species, we just return 0. This model is typically used in combustion settings,
+      for example. */
+  template <typename NASACurveFit, typename CoeffType = double>
+  class IdealGasThermo : public MacroMicroThermoBase<CoeffType,IdealGasThermo<NASACurveFit,CoeffType> >
   {
   public:
 
-    IdealGasMicroThermo(const MacroThermo & ext_thermo, const ChemicalMixture<CoeffType> & chem_mix)
-      : MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >(chem_mix),
-      _ext_therm(ext_thermo)
-    {antioch_deprecated();}
+    IdealGasThermo(const NASAThermoMixture<CoeffType,NASACurveFit> & nasa_mixture,
+                   const ChemicalMixture<CoeffType> & chem_mix)
+      : MacroMicroThermoBase<CoeffType,IdealGasThermo<NASACurveFit,CoeffType> >(chem_mix),
+      _nasa_evaluator(nasa_mixture)
+    {}
 
-    virtual ~IdealGasMicroThermo(){}
+    virtual ~IdealGasThermo() = default;
 
     // Friend the base class so we can make the CRTP implementation functions
     // private.
-    friend class  MacroMicroThermoBase<CoeffType,IdealGasMicroThermo<MacroThermo,CoeffType> >;
+    friend class  MacroMicroThermoBase<CoeffType,IdealGasThermo<NASACurveFit,CoeffType> >;
 
   private:
 
-    const MacroThermo & _ext_therm;
+    NASAEvaluator<CoeffType,NASACurveFit> _nasa_evaluator;
 
     //! Implementation of species vibrational specific heat, [J/kg-K]
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
     cv_vib_impl(unsigned int s, const StateType & T) const
     ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))
-                                ? zero_clone(T) : _ext_therm.cv(TempCache<StateType>(T),s) - this->cv_tr(s) )
+                                ? zero_clone(T) : _nasa_evaluator.cv(TempCache<StateType>(T),s) - this->cv_tr(s) )
 
     //! Implementation of normalized species vibrational specific heat.
     template <typename StateType>
     const ANTIOCH_AUTO(StateType)
     cv_vib_over_R_impl(unsigned int s, const StateType & T) const
     ANTIOCH_AUTOFUNC(StateType, (this->_chem_mixture.chemical_species()[s]->n_tr_dofs() < CoeffType(2.))
-                                ? zero_clone(T) :  _ext_therm.cv_over_R(TempCache<StateType>(T),s) - this->cv_tr_over_R(s) )
+                                ? zero_clone(T) :  _nasa_evaluator.cv_over_R(TempCache<StateType>(T),s) - this->cv_tr_over_R(s) )
 
     //! Implementation of species electronic specific heat, [J/kg-K]
     /*! For this class, we assume there is no population of electronic states, so cv_el is
@@ -85,4 +92,4 @@ namespace Antioch
 } // end namespace Antioch
 
 
-#endif
+#endif // ANTIOCH_IDEAL_GAS_THERMO_H

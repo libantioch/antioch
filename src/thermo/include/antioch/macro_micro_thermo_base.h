@@ -33,6 +33,8 @@
 namespace Antioch
 {
 
+  //! Base class defining API for statistical thermodynamics quantities
+  /*! We use a CRTP pattern here to achieve static polymorphism. */
   template<typename CoeffType, typename Subclass>
   class MacroMicroThermoBase
   {
