@@ -1,0 +1,829 @@
+<?xml version="1.0"?>
+<!-- Reaction rate parameters from: -->
+<!-- Park, Chul. "Review of Chemical-Kinetic Problems of Future NASA Missions, I : Earth Entries." -->
+<!-- AIAA Journal of Thermophysics and Heat Transfer, Vol. 7, No. 3, July-Sept 1993, pp. 385-397. -->
+
+<!-- park_jaffe_partridge_JTHT_2001 - Park, Jaffe, Partridge "Chemical-Kinetic Parameters of Hyperbolic Earth Entry," JTHT, Vol 15, No 1, pp 76-90, 2001. -->
+<!-- Olynick_Chen_Tauber_SRC_Sizing - Olynick, Chen, Tauber, "Forebody TPS Sizing with Radiation and Ablation for the Stardust Sample Return Capsule," AIAA-1997-2474  -->
+
+<ctml>
+  <validate reactions="yes" species="yes"/>
+
+  <!-- phase air5sp     -->
+  <phase dim="3" id="air5sp">
+    <elementArray datasrc="elements.xml">N O</elementArray>
+    <speciesArray datasrc="#FINS_r13324">N2 O2 NO N O</speciesArray>
+    <reactionArray datasrc="#park_jaffe_partridge_JTHT_2001">
+      <skip species="undeclared"/>
+    </reactionArray>
+    <state>
+      <temperature units="K">300.0</temperature>
+      <pressure units="Pa">101325.0</pressure>
+      <moleFractions>O2:0.22, N2:0.78</moleFractions>
+    </state>
+    <thermo model="IdealGas"/>
+    <kinetics model="GasKinetics"/>
+    <transport model="Pecos"/>
+  </phase>
+
+  <phase dim="3" id="ozone">
+    <elementArray datasrc="elements.xml">O </elementArray>
+    <speciesArray datasrc="#species_data">
+      O  O2  O3
+    </speciesArray>
+    <reactionArray datasrc="#BeckerBraackRannacher1999"/>
+    <state>
+      <temperature units="K">300.0</temperature>
+      <pressure units="Pa">101325.0</pressure>
+    </state>
+    <thermo model="IdealGas"/>
+    <kinetics model="GasKinetics"/>
+    <transport model="Mix"/>
+  </phase>
+
+
+  <!-- species definitions     -->
+  <speciesData id="species_data">
+    <!-- species O    -->
+    <species name="O">
+      <atomArray>O:1 </atomArray>
+      <note>L 1/90</note>
+      <thermo>
+        <NASA Tmax="1000.0" Tmin="200.0" P0="100000.0">
+           <floatArray name="coeffs" size="7">
+             3.168267100E+00,  -3.279318840E-03,   6.643063960E-06,  -6.128066240E-09,
+             2.112659710E-12,   2.912225920E+04,   2.051933460E+00</floatArray>
+        </NASA>
+        <NASA Tmax="3500.0" Tmin="1000.0" P0="100000.0">
+           <floatArray name="coeffs" size="7">
+             2.569420780E+00,  -8.597411370E-05,   4.194845890E-08,  -1.001777990E-11,
+             1.228336910E-15,   2.921757910E+04,   4.784338640E+00</floatArray>
+        </NASA>
+      </thermo>
+      <transport model="gas_transport">
+        <string title="geometry">atom</string>
+        <LJ_welldepth units="K">80.000</LJ_welldepth>
+        <LJ_diameter units="A">2.750</LJ_diameter>
+        <dipoleMoment units="Debye">0.000</dipoleMoment>
+        <polarizability units="A3">0.000</polarizability>
+        <rotRelax>0.000</rotRelax>
+      </transport>
+   </species>
+
+   <!-- species O2    -->
+   <species name="O2">
+     <atomArray>O:2 </atomArray>
+     <note>TPIS89</note>
+     <thermo>
+       <NASA Tmax="1000.0" Tmin="200.0" P0="100000.0">
+          <floatArray name="coeffs" size="7">
+            3.782456360E+00,  -2.996734160E-03,   9.847302010E-06,  -9.681295090E-09,
+            3.243728370E-12,  -1.063943560E+03,   3.657675730E+00</floatArray>
+       </NASA>
+       <NASA Tmax="3500.0" Tmin="1000.0" P0="100000.0">
+          <floatArray name="coeffs" size="7">
+            3.282537840E+00,   1.483087540E-03,  -7.579666690E-07,   2.094705550E-10,
+           -2.167177940E-14,  -1.088457720E+03,   5.453231290E+00</floatArray>
+       </NASA>
+    </thermo>
+    <transport model="gas_transport">
+      <string title="geometry">linear</string>
+      <LJ_welldepth units="K">107.400</LJ_welldepth>
+      <LJ_diameter units="A">3.460</LJ_diameter>
+      <dipoleMoment units="Debye">0.000</dipoleMoment>
+      <polarizability units="A3">1.600</polarizability>
+      <rotRelax>3.800</rotRelax>
+    </transport>
+  </species>
+
+  <!-- species O3    -->
+  <species name="O3">
+    <atomArray>O:3 </atomArray>
+    <note>TPIS89</note>
+    <thermo>
+      <NASA Tmax="1000.0" Tmin="200.0" P0="100000.0">
+        <floatArray name="coeffs" size="7">
+          2.46260900E+00, 9.58278100E-03, -7.08735900E-06, 1.36336800E-09,
+          2.96964700E-13, 1.60615200E+04, 1.21418700E+01 </floatArray>
+      </NASA>
+      <NASA Tmax="3500.0" Tmin="1000.0" P0="100000.0">
+        <floatArray name="coeffs" size="7">
+          5.42937100E+00, 1.82038000E-03, -7.70560700E-07,  1.49929300E-10,
+         -1.07556300E-14,  1.52352700E+04, -3.26638700E+00 </floatArray>
+     </NASA>
+   </thermo>
+   <transport model="gas_transport">
+     <string title="geometry">linear</string>
+     <LJ_welldepth units="K">180</LJ_welldepth>
+     <LJ_diameter units="A">4.1</LJ_diameter>
+     <dipoleMoment units="Debye">0.000</dipoleMoment>
+     <polarizability units="A3">0</polarizability>
+     <rotRelax>2</rotRelax>
+   </transport>
+  </species>
+ </speciesData>
+
+
+  <reactionData id="BeckerBraackRannacher1999">
+    <!-- reaction 0001    -->
+    <reaction reversible="yes" type="threeBody" id="0001">
+      <equation>O + O [=] O2</equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A units="cm6/mol2/s">2.9e+17</A>
+           <b>-1.0</b>
+           <E units="kJ/mol">0.0</E>
+        </ModifiedArrhenius>
+        <efficiencies default="1.0"> O3:0.92    O2:0.94   O:1.13 </efficiencies>
+      </rateCoeff>
+      <reactants>O:2.0</reactants>
+      <products>O2:1.0</products>
+    </reaction>
+
+    <!-- reaction 0002    -->
+    <reaction reversible="yes" type="threeBody" id="0002">
+      <equation>O2 + O [=] O3</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A units="cm6/mol2/s">3.427e+13</A>
+           <b>0.0</b>
+           <E units="kJ/mol">-4.234</E>
+        </Arrhenius>
+        <efficiencies default="1.0"> O3:0.92    O2:0.94   O:1.13 </efficiencies>
+      </rateCoeff>
+      <reactants>O2:1.0 O:1.0</reactants>
+      <products>O3:1.0</products>
+    </reaction>
+
+    <!-- reaction 0003    -->
+    <reaction reversible="yes" id="0003">
+      <equation>O + O3 [=] O2 + O2</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A units="cm3/s/mol">5.2e+12</A>
+           <b>0.0</b>
+           <E units="kJ/mol">17.38</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>O:1.0 O3:1.0</reactants>
+      <products>O2:2.0</products>
+    </reaction>
+ </reactionData>
+
+  <!-- FINS_r13324 - derived from thermo table in FIN-S thermodynamic.C r13324 -->
+  <speciesData id="FINS_r13324">
+
+    <!-- species N2    -->
+    <species name="N2">
+      <atomArray>N:2 </atomArray>
+      <thermo>
+        <NASA9 Tmax="200." Tmin="0." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 3.50080109e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, -1.04381074e+03, 3.09890983e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="1000." Tmin="200." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              2.21037122e+04, -3.81846145e+02, 6.08273815e+00, -8.53091381e-03, 1.38464610e-05, -9.62579293e-09, 2.51970560e-12, 7.10845911e+02, -1.07600320e+01
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="6000." Tmin="1000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              5.87709908e+05, -2.23924255e+03, 6.06694267e+00, -6.13965296e-04, 1.49179819e-07, -1.92309442e-11, 1.06194871e-15, 1.28320618e+04, -1.58663484e+01
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="20000." Tmin="6000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              8.30971200e+08, -6.42048187e+05, 2.02020507e+02, -3.06501961e-02, 2.48685558e-06, -9.70579208e-11, 1.43751673e-15, 4.93850663e+06, -1.67204791e+03
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="99999." Tmin="20000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 7.27314605e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, -2.73414039e+04, -2.92594085e+01
+           </floatArray>
+        </NASA9>
+      </thermo>
+      <transport model="Pecos">
+        <string title="geometry">linear</string>
+        <LJ_welldepth units="K">232.400</LJ_welldepth>
+        <LJ_diameter units="A">3.830</LJ_diameter>
+        <dipoleMoment units="Debye">0.000</dipoleMoment>
+        <polarizability units="A3">0.000</polarizability>                                                                                                                                                                                  
+        <rotRelax>1.000</rotRelax>
+      </transport>
+    </species>
+
+    <!-- species NO    -->
+    <species name="NO">
+      <atomArray>N:1 O:1 </atomArray>
+      <thermo>
+        <NASA9 Tmax="200." Tmin="0." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 3.66159889e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 9.88951282e+03, 4.50055125e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="1000." Tmin="200." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              -1.14391658e+04, 1.53646774e+02, 3.43146865e+00, -2.66859213e-03, 8.48139877e-06, -7.68511079e-09, 2.38679758e-12, 9.09794974e+03, 6.72872795e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="6000." Tmin="1000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              2.23903708e+05, -1.28965624e+03, 5.43394039e+00, -3.65605546e-04, 9.88101763e-08, -1.41608327e-11, 9.38021642e-16, 1.75029422e+04, -8.50169908e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="20000." Tmin="6000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              -9.57530764e+08, 5.91243671e+05, -1.38456733e+02, 1.69433998e-02, -1.00735146e-06, 2.91258526e-11, -3.29511091e-16, -4.67750329e+06, 1.24208166e+03
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="99999." Tmin="20000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 4.92408188e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.46876926e+04, -4.36752490e+00
+           </floatArray>
+        </NASA9>
+      </thermo>
+      <transport model="Pecos">
+        <string title="geometry">linear</string>
+        <LJ_welldepth units="K">232.400</LJ_welldepth>
+        <LJ_diameter units="A">3.830</LJ_diameter>
+        <dipoleMoment units="Debye">0.000</dipoleMoment>
+        <polarizability units="A3">0.000</polarizability>
+        <rotRelax>1.000</rotRelax>
+      </transport> 
+    </species>
+
+
+    <!-- species O    -->
+    <species name="O">
+      <atomArray>O:1 </atomArray>
+      <thermo>
+        <NASA9 Tmax="200." Tmin="0." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 2.73425294e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 2.91588838e+04, 3.81302529e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="1000." Tmin="200." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              -7.95361130e+03, 1.60717779e+02, 1.96622644e+00, 1.01367031e-03, -1.11041542e-06, 6.51750750e-10, -1.58477925e-13, 2.84036244e+04, 8.40424182e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="6000." Tmin="1000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              2.61902026e+05, -7.29872203e+02, 3.31717727e+00, -4.28133436e-04, 1.03610459e-07, -9.43830433e-12, 2.72503830e-16, 3.39242806e+04, -6.67958535e-01
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="20000." Tmin="6000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              1.77900426e+08, -1.08232826e+05, 2.81077837e+01, -2.97523226e-03, 1.85499753e-07, -5.79623154e-12, 7.19172016e-17, 8.89094263e+05, -2.18172815e+02
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="99999." Tmin="20000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 2.97304940e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 2.48087860e+04, 9.53355058e-01
+           </floatArray>
+        </NASA9>
+      </thermo>
+      <transport model="Pecos">
+        <string title="geometry">atom</string>
+        <LJ_welldepth units="K">80.000</LJ_welldepth>
+        <LJ_diameter units="A">2.750</LJ_diameter>
+        <dipoleMoment units="Debye">0.000</dipoleMoment>
+        <polarizability units="A3">0.000</polarizability>
+        <rotRelax>0.000</rotRelax>
+      </transport> 
+    </species>
+
+
+    <!-- species O2    -->
+    <species name="O2">
+      <atomArray>O:2 </atomArray>
+      <thermo>
+        <NASA9 Tmax="200." Tmin="0." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 3.50302871e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, -1.04557338e+03, 4.71053220e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="1000." Tmin="200." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              -3.42556269e+04, 4.84699986e+02, 1.11901159e+00, 4.29388743e-03, -6.83627313e-07, -2.02337478e-09, 1.03904064e-12, -3.39145434e+03, 1.84969912e+01
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="6000." Tmin="1000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              -1.03793994e+06, 2.34483275e+03, 1.81972949e+00, 1.26784887e-03, -2.18807142e-07, 2.05372411e-11, -8.19349062e-16, -1.68901253e+04, 1.73871835e+01
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="20000." Tmin="6000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              4.97515261e+08, -2.86602339e+05, 6.69015464e+01, -6.16971869e-03, 3.01623757e-07, -7.42087888e-12, 7.27744063e-17, 2.29348755e+06, -5.53044968e+02
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="99999." Tmin="20000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 3.34722057e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 2.14623522e+04, 1.01250731e+01
+           </floatArray>
+        </NASA9>
+      </thermo>
+      <transport model="Pecos">
+        <string title="geometry">linear</string>
+        <LJ_welldepth units="K">232.400</LJ_welldepth>
+        <LJ_diameter units="A">3.830</LJ_diameter>
+        <dipoleMoment units="Debye">0.000</dipoleMoment>
+        <polarizability units="A3">0.000</polarizability>
+        <rotRelax>1.000</rotRelax>
+      </transport> 
+    </species>
+
+    <!-- species N    -->
+    <species name="N">
+      <atomArray>N:1 </atomArray>
+      <thermo>
+        <NASA9 Tmax="1000." Tmin="0." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 2.50000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 5.61046378e+04, 4.19390932e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="6000." Tmin="1000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              8.87650138e+04, -1.07123150e+02, 2.36218829e+00, 2.91672008e-04, -1.72951510e-07, 4.01265788e-11, -2.67722757e-15, 5.69735133e+04, 4.86523579e+00
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="20000." Tmin="6000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              5.47518105e+08, -3.10757498e+05, 6.91678274e+01, -6.84798813e-03, 3.82757240e-07, -1.09836771e-11, 1.27798602e-16, 2.55058562e+06, -5.84876971e+02
+           </floatArray>
+        </NASA9>
+        <NASA9 Tmax="99999." Tmin="20000." P0="100000.">
+           <floatArray name="coeffs" size="9">
+              0.00000000e+00, 0.00000000e+00, 3.72024068e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 4.81108044e+04, -6.45030945e+00
+           </floatArray>
+        </NASA9>
+      </thermo>
+      <transport model="Pecos">
+        <string title="geometry">atom</string>
+        <LJ_welldepth units="K">80.000</LJ_welldepth>
+        <LJ_diameter units="A">2.750</LJ_diameter>
+        <dipoleMoment units="Debye">0.000</dipoleMoment>
+        <polarizability units="A3">0.000</polarizability>
+        <rotRelax>0.000</rotRelax>
+      </transport> 
+    </species>
+
+
+   </speciesData>
+
+  <!-- park_jaffe_partridge_JTHT_2001 - Park, Jaffe, Partridge "Chemical-Kinetic Parameters of Hyperbolic Earth Entry," JTHT, Vol 15, No 1, pp 76-90, 2001. -->
+  <reactionData id="park_jaffe_partridge_JTHT_2001">
+    <!-- reaction 0001    -->
+    <reaction reversible="yes" type="ThreeBody" id="0001">
+      <equation>N2 + M [=] 2 N + M</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>7.e+18</A>
+           <b>-1.6</b>
+           <E units="cal/mol">224801.3</E>
+        </Kooij>
+        <efficiencies default="1.0">N:4.2857 O:4.2857 </efficiencies>
+      </rateCoeff>
+      <reactants>N2:1.0</reactants>
+      <products>N:2.0</products>
+    </reaction>
+
+    <!-- reaction 0002    -->
+    <reaction reversible="yes" type="ThreeBody" id="0002">
+      <equation>O2 + M [=] 2 O + M</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>2.e+18</A>
+           <b>-1.5</b>
+           <E units="cal/mol">117881.7</E>
+        </Kooij>
+        <efficiencies default="1.0">N:5.0 O:5.0</efficiencies>
+      </rateCoeff>
+      <reactants>O2:1.0</reactants>
+      <products>O:2.0</products>
+    </reaction>
+
+    <!-- reaction 0003    -->
+    <reaction reversible="yes" type="ThreeBody" id="0003">
+      <equation>NO + M [=] N + O + M</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.e+12</A>
+           <b>0.0</b>
+           <E units="cal/mol">149943.0</E>
+        </Arrhenius>
+        <efficiencies default="1.0">NO:22 N:22 O:22</efficiencies>
+      </rateCoeff>
+      <reactants>NO:1</reactants>
+      <products>N:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0004    -->
+    <reaction reversible="yes" id="0004">
+      <equation>N2 + O [=] NO + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>5.7e+9</A>
+           <b>0.42</b>
+           <E units="cal/mol">85269.6</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>N2:1 O:1</reactants>
+      <products>NO:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0005    -->
+    <reaction reversible="yes" id="0005">
+      <equation>NO + O [=] O2 + N</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>8.4e+09</A>
+           <b>0.0</b>
+           <E units="cal/mol">38526.0</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>NO:1 O:1</reactants>
+      <products>O2:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0006    -->
+    <reaction reversible="yes" type="ThreeBody" id="0006">
+      <equation>C2 + M [=] 2 C + M</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>3.7e+11</A>
+           <b>0.0</b>
+           <E units="cal/mol">138812.8</E>
+        </Arrhenius>
+        <efficiencies default="1.0"></efficiencies>
+      </rateCoeff>
+      <reactants>C2:1</reactants>
+      <products>C:2</products>
+    </reaction>
+
+    <!-- reaction 0007    -->
+    <reaction reversible="yes" type="ThreeBody" id="0007">
+      <equation>CN + M [=] C + N + M</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>2.5e+11</A>
+           <b>0.0</b>
+           <E units="cal/mol">174240.9</E>
+        </Arrhenius>
+        <efficiencies default="1.0"></efficiencies>
+      </rateCoeff>
+      <reactants>CN:1</reactants>
+      <products>C:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0008    -->
+    <reaction reversible="yes" type="ThreeBody" id="0008">
+      <equation>H2 + M [=] 2 H + M</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>2.2e+11</A>
+           <b>0.0</b>
+           <E units="cal/mol">95917.9</E>
+        </Arrhenius>
+        <efficiencies default="1.0"></efficiencies>
+      </rateCoeff>
+      <reactants>H2:1</reactants>
+      <products>H:2</products>
+    </reaction>
+
+    <!-- reaction 0009    -->
+    <reaction reversible="yes" id="0009">
+      <equation>CO + C [=] C2 + O</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>2.0e+14</A>
+           <b>-1.0</b>
+           <E units="cal/mol">115180.9</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>CO:1 C:1</reactants>
+      <products>C2:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0010    -->
+    <reaction reversible="yes" id="0010">
+      <equation>CO + O [=] O2 + C</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>3.9e+10</A>
+           <b>-0.18</b>
+           <E units="cal/mol">137422.7</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>CO:1 O:1</reactants>
+      <products>O2:1 C:1</products>
+    </reaction>
+
+    <!-- reaction 0011    -->
+    <reaction reversible="yes" id="0011">
+      <equation>CO + N [=] CN + O</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.0e+11</A>
+           <b>0.0</b>
+           <E units="cal/mol">76654.9</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CO:1 N:1</reactants>
+      <products>CN:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0012    -->
+    <reaction reversible="yes" id="0012">
+      <equation>N2 + C [=] CN + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>1.1e+11</A>
+           <b>-0.11</b>
+           <E units="cal/mol">46072.4</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>N2:1 C:1</reactants>
+      <products>CN:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0013    -->
+    <reaction reversible="yes" id="0013">
+      <equation>CN + O [=] NO + C</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>1.6e+10</A>
+           <b>0.1</b>
+           <E units="cal/mol">28993.8</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>CN:1 O:1</reactants>
+      <products>NO:1 C:1</products>
+    </reaction>
+
+    <!-- reaction 0014    -->
+<!--
+    <reaction reversible="yes" id="0014">
+      <equation>CN + C [=] C2 + N</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.0e+10</A>
+-->
+<!-- 030x060 GRID FAILURES -->
+<!--           <A>5.0e+10</A> -->
+<!--           <A>2.0e+10</A> -->
+<!--           <A>1.0e+10</A> -->
+<!--           <A>8.0e+9</A> -->
+<!--           <A>7.0e+9</A> -->
+<!-- 030x060 GRID SUCCESSES -->
+<!--           <A>6.5e+9</A> -->
+<!--           <A>6.0e+9</A> -->
+<!--           <A>5.0e+9</A> -->
+
+<!-- 060x120 GRID FAILURES -->
+<!--           <A>5.0e+10</A> -->
+<!--           <A>3.5e+10</A> -->
+<!--           <A>3.0e+10</A> -->
+<!-- 060x120 GRID SUCCESSES -->
+<!--           <A>2.5e+10</A> -->
+<!--           <A>2.0e+10</A> -->
+<!--           <A>8.0e+9</A> -->
+<!--
+           <b>0.0</b>
+           <E units="cal/mol">25816.4</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CN:1 C:1</reactants>
+      <products>C2:1 N:1</products>
+    </reaction>
+-->
+
+    <!-- reaction 0015    -->
+    <reaction reversible="yes" id="0015">
+      <equation>CO + C2 [=] C3 + O</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.0e+9</A>
+           <b>0.0</b>
+           <E units="cal/mol">81818.2</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CO:1 C2:1</reactants>
+      <products>C3:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0016    -->
+    <reaction reversible="yes" id="0016">
+      <equation>C3 + N [=] CN + C2</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.0e+9</A>
+           <b>0.0</b>
+           <E units="cal/mol">67917.0</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>C3:1 N:1</reactants>
+      <products>CN:1 C2:1</products>
+    </reaction>
+
+    <!-- reaction 0017    -->
+    <reaction reversible="yes" id="0017">
+      <equation>C3 + C [=] 2 C2</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.0e+9</A>
+           <b>0.0</b>
+           <E units="cal/mol">32568.4</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>C3:1 C:1</reactants>
+      <products>C2:2</products>
+    </reaction>
+
+    <!-- reaction 0018    -->
+    <reaction reversible="yes" id="0018">
+      <equation>C2H + H [=] C2 + H2</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.0e+9</A>
+           <b>0.0</b>
+           <E units="cal/mol">33303.2</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>C2H:1 H:1</reactants>
+      <products>C2:1 H2:1</products>
+    </reaction>
+
+    <!-- reaction 0019    -->
+    <reaction reversible="yes" id="0019">
+      <equation>N2 + e- [=] N + N + e-</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>3.0e+21</A>
+           <b>-1.6</b>
+           <E units="cal/mol">224801.3</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>N2:1 e-:1</reactants>
+      <products>N:2 e-:1</products>
+    </reaction>
+
+    <!-- reaction 0020    -->
+    <reaction reversible="yes" id="0020">
+      <equation>O + e- [=] O+ + e- + e-</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>3.9e+30</A>
+           <b>-3.78</b>
+           <E units="cal/mol">314761.6</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>O:1 e-:1</reactants>
+      <products>O+:1 e-:2</products>
+    </reaction>
+
+    <!-- reaction 0021    -->
+    <reaction reversible="yes" id="0021">
+      <equation>N + e- [=] N+ + e- + e-</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>2.5e+31</A>
+           <b>-3.82</b>
+           <E units="cal/mol">334024.6</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>N:1 e-:1</reactants>
+      <products>N+:1 e-:2</products>
+    </reaction>
+
+    <!-- reaction 0022    -->
+    <reaction reversible="yes" id="0022">
+      <equation>C + e- [=] C+ + e- + e-</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>3.7e+28</A>
+           <b>-3.0</b>
+           <E units="cal/mol">259593.9</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>C:1 e-:1</reactants>
+      <products>C+:1 e-:2</products>
+    </reaction>
+
+    <!-- reaction 0023    -->
+    <reaction reversible="yes" id="0023">
+      <equation>H + e- [=] H+ + e- + e-</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>2.2e+27</A>
+           <b>-2.8</b>
+           <E units="cal/mol">313371.5</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>H:1 e-:1</reactants>
+      <products>H+:1 e-:2</products>
+    </reaction>
+
+    <!-- reaction 0024 -->
+    <reaction reversible="yes" id="0024">
+      <equation>O + N [=] NO+ + e-</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>5.3e+9</A>
+           <b>0.0</b>
+           <E units="cal/mol">63349.5</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>O:1 N:1</reactants>
+      <products>NO+:1 e-:1</products>
+    </reaction>
+
+    <!-- reaction 0025 -->
+    <reaction reversible="yes" id="0025">
+      <equation>N + N [=] N2+ + e-</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>4.4e+3</A>
+           <b>1.5</b>
+           <E units="cal/mol">134046.7</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>N:2</reactants>
+      <products>N2+:1 e-:1</products>
+    </reaction>
+
+    <!-- reaction 0026 -->
+    <reaction reversible="yes" id="0026">
+      <equation>CO + CO [=] CO2 + C</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>2.33e+6</A>
+           <b>-0.5</b>
+           <E units="cal/mol">130492.0</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>CO:2</reactants>
+      <products>CO2:1 C:1</products>
+    </reaction>
+
+    <!-- reaction 0027 -->
+    <reaction reversible="yes" id="0027">
+      <equation>NO + CO [=] CO2 + N</equation>
+      <rateCoeff>
+        <Kooij>
+           <A>4.59e+5</A>
+           <b>-0.5</b>
+           <E units="cal/mol">23969.5</E>
+        </Kooij>
+      </rateCoeff>
+      <reactants>NO:1 CO:1</reactants>
+      <products>CO2:1 N:1</products>
+    </reaction>
+
+    <!-- reaction 0028 -->
+    <reaction reversible="yes" id="0028">
+      <equation>CO2 + O [=] O2 + CO</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>2.1e+10</A>
+           <b>0.0</b>
+           <E units="cal/mol">55207.4</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CO2:1 O:1</reactants>
+      <products>O2:1 CO:1</products>
+    </reaction>
+
+    <!-- reaction 0029 -->
+    <reaction reversible="yes" type="ThreeBody" id="0029">
+      <equation>CO2 + M [=] CO + O + M</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>6.9e+18</A>
+           <b>-1.5</b>
+           <E units="cal/mol">125656.4</E>
+        </Arrhenius>
+        <efficiencies default="1.0">C:2.029 N:2.029 O:2.029 </efficiencies>
+      </rateCoeff>
+      <reactants>CO2:1</reactants>
+      <products>CO:1 O:1</products>
+    </reaction>
+
+    <!-- reaction 0030 -->
+    <reaction reversible="yes" type="ThreeBody" id="0030">
+      <equation>CO + M [=] C + O + M</equation>
+      <rateCoeff>
+        <ModifiedArrhenius>
+           <A>2.3e+17</A>
+           <b>-1.0</b>
+           <E units="cal/mol">256178.2</E>
+        </ModifiedArrhenius>
+        <efficiencies default="1.0">N:1.478 O:1.478 H:1.478 C:1.478 </efficiencies>
+      </rateCoeff>
+      <reactants>CO:1</reactants>
+      <products>C:1 O:1</products>
+    </reaction>
+  </reactionData>
+</ctml>

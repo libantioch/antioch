@@ -105,7 +105,8 @@ standard_unit_tests_SOURCES = standard_unit/arrhenius_rate_test.C        \
                               standard_unit/nasa_mixture_xml_parsing_test.C \
                               standard_unit/nasa_mixture_valarray_test.C \
                               standard_unit/macro_micro_thermo_test.C \
-                              standard_unit/standard_unit_tests.C
+                              standard_unit/standard_unit_tests.C \
+                              standard_unit/xml_parsing_multiple_sections_test.C
 
 eigen_unit_tests_SOURCES = eigen_unit/arrhenius_rate_eigen_test.C \
                            eigen_unit/nasa_mixture_eigen_test.C \

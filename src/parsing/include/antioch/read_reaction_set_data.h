@@ -41,6 +41,9 @@ namespace Antioch
 {
 
   template <typename NumericType>
+  class ParserBase;
+
+  template <typename NumericType>
   class ASCIIParser;
 
   template <typename NumericType>
@@ -127,6 +130,11 @@ namespace Antioch
                               const bool verbose,
                               ReactionSet<NumericType>& reaction_set,
                               ParsingType type = ASCII );
+
+  template<typename NumericType>
+  void read_reaction_set_data(const bool verbose,
+                              ReactionSet<NumericType>& reaction_set,
+                              ParserBase<NumericType> * parser );
 
   template <typename NumericType>
   void verify_unit_of_parameter(Units<NumericType> & default_unit, const std::string & provided_unit,
