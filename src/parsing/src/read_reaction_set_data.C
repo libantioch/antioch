@@ -95,8 +95,20 @@ namespace Antioch
         antioch_parsing_error("unknown type");
       }
 
+    read_reaction_set_data(verbose,reaction_set,parser);
+
+    if(parser)
+      delete parser;
+  }
+
+  template<typename NumericType>
+  void read_reaction_set_data( const bool verbose,
+                               ReactionSet<NumericType>& reaction_set,
+                               ParserBase<NumericType> * parser )
+  {
     //error or no reaction data
-    if(!parser->initialize())return;
+    if(!parser->initialize())
+      return;
 
     const ChemicalMixture<NumericType>& chem_mixture = reaction_set.chemical_mixture();
     unsigned int n_species = chem_mixture.n_species();
@@ -414,7 +426,7 @@ namespace Antioch
                     my_rxn->type() == ReactionType::TROE_FALLOFF_THREE_BODY)
                   )
                   {
-                    
+
                     std::cerr << "In reaction " << parser->reaction_id() << "\n"
                               << "An equation of the form \"A * exp(-Ea/(R*T))\" is an Arrhenius equation,\n"
                               << "and most certainly not a Kooij one\n"
@@ -743,9 +755,6 @@ namespace Antioch
 
         if(verbose) std::cout << "\n\n";
       }
-
-    if(parser)
-      delete parser;
   }
 
   // Instantiate
