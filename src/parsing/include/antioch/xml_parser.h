@@ -235,6 +235,14 @@ namespace Antioch{
 
   private:
 
+    //! Read the transport property given by the particular ParsingKey
+    /*! Currently, we don't support unit conversion for these properties,
+        so we just error out if the specified units aren't what we expected. */
+    NumericType read_transport_property(const std::string & species_name,
+                                        tinyxml2::XMLElement * species_elem,
+                                        ParsingKey key,
+                                        const std::string & expected_unit);
+
     //! reads the thermo, NASA generalist
     template <typename ThermoType>
     void read_thermodynamic_data_root(ThermoType & thermo);

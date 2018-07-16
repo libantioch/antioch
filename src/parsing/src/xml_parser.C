@@ -1002,6 +1002,46 @@ namespace Antioch
   }
 
 
+  template <typename NumericType>
+  NumericType XMLParser<NumericType>::read_transport_property(const std::string & species_name,
+                                                              tinyxml2::XMLElement * species_elem,
+                                                              ParsingKey key,
+                                                              const std::string & expected_unit)
+  {
+    antioch_assert(species_elem);
+
+    // Copy pointer so we don't muck where this is pointing
+    tinyxml2::XMLElement * data = species_elem;
+
+    data = species_elem->FirstChildElement(_map.at(key).c_str());
+
+    if(!data)
+       antioch_error_msg("ERROR: NO "+_map.at(key)+" block found for species "+species_name+"! Cannot parse transport!");
+
+    const char * unit = data->Attribute(_map.at(ParsingKey::UNIT).c_str());
+
+    // There's no unit, then either we're dimensionless (and expected_unit should be empty
+    // or it's an error because it's not supposed to be dimensionless
+    if(!unit)
+      {
+        if(!expected_unit.empty() )
+          antioch_error_msg("ERROR: No unit specified for "+_map.at(key)+" block for species "+species_name+", but expected a unit of "+expected_unit+"!\n");
+      }
+    else
+      {
+        std::string parsed_unit(data->Attribute(_map.at(ParsingKey::UNIT).c_str()));
+
+        if( expected_unit.empty() )
+          antioch_error_msg("ERROR: Unit of " " specified for "+_map.at(key)+" block for species "+species_name+", but expected a unit of "+expected_unit+"!\n");
+
+        if( parsed_unit != expected_unit )
+          antioch_error_msg("ERROR: Specified unit for "+_map.at(key)+" block for species "+species_name+" was "+parsed_unit+", but we expected units of "+expected_unit+"!\n");
+      }
+
+    NumericType value = string_to_T<NumericType>(data->GetText());
+
+    return value;
+  }
 
   // Instantiate
   ANTIOCH_NUMERIC_TYPE_CLASS_INSTANTIATE(XMLParser);
