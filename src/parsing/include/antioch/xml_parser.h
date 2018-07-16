@@ -118,6 +118,8 @@ namespace Antioch{
     {antioch_error_msg("ERROR: XML Parsing only supports parsing for NASA7CurveFit and NASA9CurveFit!");}
 
 
+    virtual void read_transport_data(TransportMixture<NumericType> & transport_mixture);
+
     /// reaction
 
     /*! go to next reaction*/
