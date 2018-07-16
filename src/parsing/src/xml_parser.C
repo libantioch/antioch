@@ -132,6 +132,14 @@ namespace Antioch
     _map[ParsingKey::TROE_F_TSS]            = "T2";
     _map[ParsingKey::TROE_F_TSSS]           = "T3";
 
+    // Transport
+    _map[ParsingKey::TRANSPORT]             = "transport";
+    _map[ParsingKey::LJ_WELLDEPTH]          = "LJ_welldepth";
+    _map[ParsingKey::LJ_DIAMETER]           = "LJ_diameter";
+    _map[ParsingKey::DIPOLE_MOMENT]         = "dipoleMoment";
+    _map[ParsingKey::POLARIZABILITY]        = "polarizability";
+    _map[ParsingKey::ROT_RELAX]             = "rotRelax";
+
     // typically Cantera files list
     //      pre-exponential parameters in (m3/kmol)^(m-1)/s
     //      activation energy in cal/mol, but we want it in K.
