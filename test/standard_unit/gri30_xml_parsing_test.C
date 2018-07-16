@@ -36,10 +36,10 @@ namespace AntiochTesting
 
     void test_gri30_xml()
     {
-      std::string thermo_filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
+      std::string filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
       const std::string phase("gri30_mix");
 
-      Antioch::XMLParser<Scalar> xml_parser(thermo_filename,phase,false);
+      Antioch::XMLParser<Scalar> xml_parser(filename,phase,false);
       std::vector<std::string> species_str_list = xml_parser.species_list();
 
       this->check_species_list(species_str_list);
@@ -51,11 +51,11 @@ namespace AntiochTesting
       Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
 
       //xml_parser.read_thermodynamic_data(nasa_mixture);
-      Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
+      Antioch::read_nasa_mixture_data( nasa_mixture, filename, Antioch::XML );
       this->check_curve_fits(nasa_mixture);
 
       Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-      Antioch::read_reaction_set_data_xml<Scalar>(thermo_filename, true, reaction_set);
+      Antioch::read_reaction_set_data_xml<Scalar>(filename, true, reaction_set);
       this->check_reaction_set(reaction_set);
      }
 
