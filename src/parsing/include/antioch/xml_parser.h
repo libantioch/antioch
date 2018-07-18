@@ -118,6 +118,8 @@ namespace Antioch{
     {antioch_error_msg("ERROR: XML Parsing only supports parsing for NASA7CurveFit and NASA9CurveFit!");}
 
 
+    virtual void read_transport_data(TransportMixture<NumericType> & transport_mixture);
+
     /// reaction
 
     /*! go to next reaction*/
@@ -234,6 +236,14 @@ namespace Antioch{
     bool Troe_GRI_parameter( NumericType & pa, unsigned int index ) const;
 
   private:
+
+    //! Read the transport property given by the particular ParsingKey
+    /*! Currently, we don't support unit conversion for these properties,
+        so we just error out if the specified units aren't what we expected. */
+    NumericType read_transport_property(const std::string & species_name,
+                                        tinyxml2::XMLElement * species_elem,
+                                        ParsingKey key,
+                                        const std::string & expected_unit);
 
     //! reads the thermo, NASA generalist
     template <typename ThermoType>

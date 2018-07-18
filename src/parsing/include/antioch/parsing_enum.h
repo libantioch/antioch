@@ -73,7 +73,14 @@ namespace Antioch
                   TROE_F_ALPHA,
                   TROE_F_TS,
                   TROE_F_TSS,
-                  TROE_F_TSSS
+                  TROE_F_TSSS,
+//
+                  TRANSPORT,
+                  LJ_WELLDEPTH,
+                  LJ_DIAMETER,
+                  DIPOLE_MOMENT,
+                  POLARIZABILITY,
+                  ROT_RELAX
                  };
 
 // GRI30 compatibility

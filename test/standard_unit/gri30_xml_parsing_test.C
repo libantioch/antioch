@@ -18,6 +18,7 @@
 #include "antioch/xml_parser.h"
 #include "antioch/reaction_set.h"
 #include "antioch/read_reaction_set_data.h"
+#include "antioch/transport_mixture.h"
 
 namespace AntiochTesting
 {
@@ -36,10 +37,10 @@ namespace AntiochTesting
 
     void test_gri30_xml()
     {
-      std::string thermo_filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
+      std::string filename = std::string(ANTIOCH_SHARE_XML_INPUT_FILES_SOURCE_PATH)+"gri30.xml";
       const std::string phase("gri30_mix");
 
-      Antioch::XMLParser<Scalar> xml_parser(thermo_filename,phase,false);
+      Antioch::XMLParser<Scalar> xml_parser(filename,phase,false);
       std::vector<std::string> species_str_list = xml_parser.species_list();
 
       this->check_species_list(species_str_list);
@@ -51,12 +52,15 @@ namespace AntiochTesting
       Antioch::NASAThermoMixture<Scalar, Antioch::NASA7CurveFit<Scalar> > nasa_mixture( chem_mixture );
 
       //xml_parser.read_thermodynamic_data(nasa_mixture);
-      Antioch::read_nasa_mixture_data( nasa_mixture, thermo_filename, Antioch::XML );
+      Antioch::read_nasa_mixture_data( nasa_mixture, filename, Antioch::XML );
       this->check_curve_fits(nasa_mixture);
 
       Antioch::ReactionSet<Scalar> reaction_set( chem_mixture );
-      Antioch::read_reaction_set_data_xml<Scalar>(thermo_filename, true, reaction_set);
+      Antioch::read_reaction_set_data_xml<Scalar>(filename, true, reaction_set);
       this->check_reaction_set(reaction_set);
+
+      Antioch::TransportMixture<Scalar> trans_mixture( chem_mixture, &xml_parser );
+      this->check_transport_mixture(trans_mixture);
      }
 
     void check_species_list(const std::vector<std::string> & species_list)
@@ -249,6 +253,54 @@ namespace AntiochTesting
               // Default should be 1.0
               CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, efficiency, this->tol());
           }
+      }
+
+    }
+
+    void check_transport_mixture( const Antioch::TransportMixture<Scalar> & trans_mixture )
+    {
+      CPPUNIT_ASSERT_EQUAL( (int)_species_exact.size(), (int)trans_mixture.n_species() );
+
+
+      // H2
+      {
+        const Antioch::TransportSpecies<Scalar> & trans_species =
+          trans_mixture.transport_species(_H2_species_id);
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(38.000, trans_species.LJ_depth(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(2.920, trans_species.LJ_diameter(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0., trans_species.dipole_moment(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.790, trans_species.polarizability(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(280.000, trans_species.rotational_relaxation(), this->tol() );
+
+      }
+
+      // N2
+      {
+        const Antioch::TransportSpecies<Scalar> & trans_species =
+          trans_mixture.transport_species(_N2_species_id);
+
+        // For floats, we don't get padded zeros, so we lose a little tolerance in the test
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(97.530, trans_species.LJ_depth(), this->tol()*2 );
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(3.620, trans_species.LJ_diameter(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0., trans_species.dipole_moment(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.760, trans_species.polarizability(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(4., trans_species.rotational_relaxation(), this->tol() );
+      }
+
+      // HCNO
+      {
+        const Antioch::TransportSpecies<Scalar> & trans_species =
+          trans_mixture.transport_species(_HCNO_species_id);
+
+        // For floats, we don't get padded zeros, so we lose a little tolerance in the test
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(232.4, trans_species.LJ_depth(), this->tol()*10 );
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(3.83, trans_species.LJ_diameter(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0., trans_species.dipole_moment(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0., trans_species.polarizability(), this->tol() );
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1., trans_species.rotational_relaxation(), this->tol() );
       }
 
     }

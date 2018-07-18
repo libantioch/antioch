@@ -34,6 +34,7 @@
 #include "antioch/nasa_mixture.h"
 #include "antioch/cea_curve_fit.h"
 #include "antioch/nasa7_curve_fit.h"
+#include "antioch/transport_mixture.h"
 
 //XML
 #include "antioch/tinyxml2_imp.h"
@@ -131,6 +132,14 @@ namespace Antioch
     _map[ParsingKey::TROE_F_TS]             = "T1";
     _map[ParsingKey::TROE_F_TSS]            = "T2";
     _map[ParsingKey::TROE_F_TSSS]           = "T3";
+
+    // Transport
+    _map[ParsingKey::TRANSPORT]             = "transport";
+    _map[ParsingKey::LJ_WELLDEPTH]          = "LJ_welldepth";
+    _map[ParsingKey::LJ_DIAMETER]           = "LJ_diameter";
+    _map[ParsingKey::DIPOLE_MOMENT]         = "dipoleMoment";
+    _map[ParsingKey::POLARIZABILITY]        = "polarizability";
+    _map[ParsingKey::ROT_RELAX]             = "rotRelax";
 
     // typically Cantera files list
     //      pre-exponential parameters in (m3/kmol)^(m-1)/s
@@ -993,7 +1002,105 @@ namespace Antioch
       } // end species loop
   }
 
+  template <typename NumericType>
+  void XMLParser<NumericType>::read_transport_data(TransportMixture<NumericType> & transport_mixture)
+  {
+    // The _thermo_block points to the beginning of the relevant speciesData section
+    if(!_thermo_block)
+      antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES_DATA)+" section found! Cannot parse transport!");
 
+    const ChemicalMixture<NumericType> & chem_mixture = transport_mixture.chemical_mixture();
+    const std::vector<ChemicalSpecies<NumericType>*> & chem_species = chem_mixture.chemical_species();
+
+    // Step to first species block
+    tinyxml2::XMLElement * species_block =
+      _thermo_block->FirstChildElement(_map.at(ParsingKey::SPECIES).c_str());
+
+    if(!species_block)
+      antioch_error_msg("ERROR: No "+_map.at(ParsingKey::SPECIES)+" block found within "+_map.at(ParsingKey::SPECIES_DATA)+" section! Cannot parse transport!");
+
+    // Now go through each species in our mixture, parse the transport data and add the
+    // species to our transport mixture
+    for(unsigned int s = 0; s < chem_mixture.n_species(); s++)
+      {
+        const std::string & name = chem_species[s]->species();
+
+        tinyxml2::XMLElement * species = nullptr;
+        species = this->find_element_with_attribute( species_block,
+                                                     _map.at(ParsingKey::SPECIES),
+                                                     "name",
+                                                     name );
+
+        if(!species)
+          antioch_error_msg("ERROR: Species "+name+" has not been found in the "+_map.at(ParsingKey::SPECIES_DATA)+" section! Cannot parse transport!");
+
+        species = species->FirstChildElement(_map.at(ParsingKey::TRANSPORT).c_str());
+
+        if(!species)
+          antioch_error_msg("ERROR: No "+_map.at(ParsingKey::TRANSPORT)+" block found for species "+name+"! Cannot parse transport!");
+
+        // The number of transport numbers we are reading
+        // 0 --> LJ_welldepth
+        // 1 --> LJ_diameter
+        // 2 --> dipoleMoment
+        // 3 --> polarizability
+        // 4 --> rotRelax
+        const unsigned int n_data = 5;
+        std::vector<NumericType> data(n_data);
+
+        data[0] = this->read_transport_property(name,species,ParsingKey::LJ_WELLDEPTH,"K");
+        data[1] = this->read_transport_property(name,species,ParsingKey::LJ_DIAMETER,"A");
+        data[2] = this->read_transport_property(name,species,ParsingKey::DIPOLE_MOMENT,"Debye");
+        data[3] = this->read_transport_property(name,species,ParsingKey::POLARIZABILITY,"A3");
+        data[4] = this->read_transport_property(name,species,ParsingKey::ROT_RELAX,"");
+
+        unsigned int species_idx = chem_mixture.species_name_map().at(name);
+        NumericType species_molar_mass = chem_mixture.M(species_idx);
+
+        transport_mixture.add_species(species_idx,data[0],data[1],data[2],data[3],data[4],species_molar_mass);
+      }
+  }
+
+  template <typename NumericType>
+  NumericType XMLParser<NumericType>::read_transport_property(const std::string & species_name,
+                                                              tinyxml2::XMLElement * species_elem,
+                                                              ParsingKey key,
+                                                              const std::string & expected_unit)
+  {
+    antioch_assert(species_elem);
+
+    // Copy pointer so we don't muck where this is pointing
+    tinyxml2::XMLElement * data = species_elem;
+
+    data = species_elem->FirstChildElement(_map.at(key).c_str());
+
+    if(!data)
+       antioch_error_msg("ERROR: NO "+_map.at(key)+" block found for species "+species_name+"! Cannot parse transport!");
+
+    const char * unit = data->Attribute(_map.at(ParsingKey::UNIT).c_str());
+
+    // There's no unit, then either we're dimensionless (and expected_unit should be empty
+    // or it's an error because it's not supposed to be dimensionless
+    if(!unit)
+      {
+        if(!expected_unit.empty() )
+          antioch_error_msg("ERROR: No unit specified for "+_map.at(key)+" block for species "+species_name+", but expected a unit of "+expected_unit+"!\n");
+      }
+    else
+      {
+        std::string parsed_unit(data->Attribute(_map.at(ParsingKey::UNIT).c_str()));
+
+        if( expected_unit.empty() )
+          antioch_error_msg("ERROR: Unit of " " specified for "+_map.at(key)+" block for species "+species_name+", but expected a unit of "+expected_unit+"!\n");
+
+        if( parsed_unit != expected_unit )
+          antioch_error_msg("ERROR: Specified unit for "+_map.at(key)+" block for species "+species_name+" was "+parsed_unit+", but we expected units of "+expected_unit+"!\n");
+      }
+
+    NumericType value = string_to_T<NumericType>(data->GetText());
+
+    return value;
+  }
 
   // Instantiate
   ANTIOCH_NUMERIC_TYPE_CLASS_INSTANTIATE(XMLParser);
