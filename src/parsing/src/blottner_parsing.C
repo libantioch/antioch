@@ -85,7 +85,7 @@ namespace Antioch
 
     // If we requested Blottner viscosity for our mixture, we'd better
     // have Blottner viscosity data for every species in our mixture.
-    const TransportMixture<NumericType>& trans_mixture = mu.chemical_mixture();
+    const TransportMixture<NumericType> & trans_mixture = mu.transport_mixture();
     const unsigned int n_species = trans_mixture.n_species();
 
     if (mu.species_viscosities().size() < n_species)
