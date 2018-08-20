@@ -579,12 +579,23 @@ namespace Antioch
         }
       case(MASS_FLUX_MASS_FRACTION):
         {
-          VectorStateType molar_fractions = zero_clone(mass_fractions);
+         
+VectorStateType molar_fractions = zero_clone(mass_fractions);
+	  mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
 
-          mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
-
+          //Clipping unrealistic values, and calculating MW_Mixture through the new mole fractions 
+	  typename value_type<VectorStateType>::type MW_Mixture = zero_clone(mass_fractions[0]);
+	  for(unsigned int s=0; s < D_vec.size(); s++)
+	    {
+	      if(molar_fractions[s] > 1)
+		molar_fractions[s] = 1;
+	      if(molar_fractions[s] < 1e-16)
+		molar_fractions[s] = 1e-16;
+	      MW_Mixture += molar_fractions[s]*mixture.M(s);
+	    }
+	        
           typename value_type<VectorStateType>::type one = constant_clone(mass_fractions[0],1);
-
+	
           //               term1               term2
           // 1/D_s = (sum_{j\ne s} X_j/D_{s,j}) + X_s/(1-Y_s)\sum_{j\ne s} Y_j/D_{s,j}
           for(unsigned int s = 0; s < D_vec.size(); s++)
@@ -599,15 +610,16 @@ namespace Antioch
 
                   term1 += molar_fractions[j]/D_mat[s][j];
 
-                  term2 += mass_fractions[j]/D_mat[s][j];
+                  term2 += molar_fractions[j]*mixture.M(j)/D_mat[s][j];
                 }
 
-              term2 *=  molar_fractions[s]/(one - mass_fractions[s]);
+              term2 *=  molar_fractions[s]/(MW_Mixture - mixture.M(s)*molar_fractions[s]);
 
               D_vec[s] = one/(term1+term2);
             }
           break;
         }
+
       default:
         {
           antioch_error_msg("ERROR: Invalid DiffusivityType in MixtureAveragedTransportEvaluator::diffusion_mixing_rule");
