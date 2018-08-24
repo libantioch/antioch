@@ -344,6 +344,8 @@ namespace Antioch
 
     mu_mix = zero_clone(T);
     k_mix  = zero_clone(T);
+    StateType k_sum1 = zero_clone(T);
+    StateType k_sum2 = zero_clone(T);
     D_vec = zero_clone(mass_fractions);
 
     VectorStateType mu  = zero_clone(mass_fractions);
@@ -398,11 +400,12 @@ namespace Antioch
                                                                   mu[s] );
           }
 
-        k_mix += k[s]*chi[s]/phi_s;
+        k_sum1 += k[s]*chi[s];
+	k_sum2 += chi[s]/k[s];
         mu_mix += mu[s]*chi[s]/phi_s;
 
       }
-
+    k_mix = .5*(k_sum1+1/k_sum2);
 
 
     if( DiffusionTraits<Diff>::is_species_diffusion )
