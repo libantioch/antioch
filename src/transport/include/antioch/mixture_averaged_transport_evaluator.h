@@ -43,6 +43,9 @@
 #include "antioch/diffusion_traits.h"
 #include "antioch/conductivity_traits.h"
 
+// C++
+#include <limits>
+
 namespace Antioch
 {
   //! Compute transport properties using ``mixture averaged" model
@@ -86,6 +89,7 @@ namespace Antioch
     enum DiffusivityType { MOLE_FLUX_MOLE_FRACTION,
                            MASS_FLUX_MASS_FRACTION,
                            MASS_FLUX_MOLE_FRACTION };
+
 
     //! Mixture diffusivities for each species, in [m^2/s]
     /*! Only valid for BinaryDiffusionBase species diffusion models.
@@ -165,6 +169,17 @@ namespace Antioch
                                 const MatrixStateType & D_mat,
                                 DiffusivityType diff_type,
                                 VectorStateType & D_vec ) const;
+
+    //! Compute Perturbe mole fractions
+    /*! To avoid singularities from dividing by very small numbers in the vanishing mass fraction regions, we use the EGLIB approach
+     *  (http://blanche.polytechnique.fr/www.eglib/manual.ps page 5)
+     *  We Use a perturbed mole fraction that ensures that the mole fractions are between 0 and 1.
+     */
+    template <typename VectorStateType>
+    void perturbed_molar_fractions( const ChemicalMixture<CoeffType> & mixture,
+                                    const VectorStateType & mass_fractions,
+                                    VectorStateType & perturbed_mass_fractions) const;
+
 
     const MixtureAveragedTransportMixture<CoeffType>& _mixture;
 
@@ -342,6 +357,8 @@ namespace Antioch
                                              DiffusionTraits<Diff>::is_species_diffusion),
                                             "Incompatible thermal conductivity and diffusion models!" );
 
+
+
     mu_mix = zero_clone(T);
     k_mix  = zero_clone(T);
     StateType k_sum1 = zero_clone(T);
@@ -351,21 +368,25 @@ namespace Antioch
     VectorStateType mu  = zero_clone(mass_fractions);
     VectorStateType k  = zero_clone(mass_fractions);
     VectorStateType chi = zero_clone(mass_fractions);
+    VectorStateType perturbed_mass_fractions = zero_clone(mass_fractions);
+    this->perturbed_molar_fractions( _mixture.chem_mixture(),
+                                     mass_fractions,
+                                     perturbed_mass_fractions);
 
     typedef typename Antioch::rebind<VectorStateType,VectorStateType>::type MatrixStateType;
 
     MatrixStateType mu_mu_sqrt(mu.size());
     Antioch::init_constant(mu_mu_sqrt,mu);
 
-    MatrixStateType D_mat(mass_fractions.size());
+    MatrixStateType D_mat(perturbed_mass_fractions.size());
     init_constant(D_mat,D_vec);
 
 
-    this->compute_mu_chi( T, mass_fractions, mu, chi );
+    this->compute_mu_chi( T, perturbed_mass_fractions, mu, chi );
 
     this->compute_mu_mu_sqrt( mu, mu_mu_sqrt);
 
-    const StateType molar_density = rho / _mixture.chem_mixture().M(mass_fractions); // total molar density
+    const StateType molar_density = rho / _mixture.chem_mixture().M(perturbed_mass_fractions); // total molar density
 
     // If we're using a binary diffusion model, compute D_mat, D_vec now
     if( DiffusionTraits<Diff>::is_binary_diffusion )
@@ -373,7 +394,7 @@ namespace Antioch
         _diffusion.compute_binary_diffusion_matrix(T, molar_density, D_mat);
 
         this->diffusion_mixing_rule<VectorStateType,MatrixStateType>( _mixture.chem_mixture(),
-                                                                      mass_fractions,
+                                                                      perturbed_mass_fractions,
                                                                       D_mat,
                                                                       diff_type,
                                                                       D_vec );
@@ -382,7 +403,7 @@ namespace Antioch
     for( unsigned int s = 0; s < _mixture.transport_mixture().n_species(); s++ )
       {
         StateType phi_s = this->compute_phi( mu_mu_sqrt, chi, s );
-
+        // To calculate the mixture_averaged_conductivity, we need to calculate the pure species conductivity.
         if( ConductivityTraits<TherCond>::requires_diffusion )
           {
             k[s] = _conductivity.conductivity_with_diffusion( s,
@@ -399,6 +420,9 @@ namespace Antioch
                                                                   T,
                                                                   mu[s] );
           }
+
+        /// To calculate the mixture averaged thermal conductivity and viscosity, we use the model described in:
+        /// Kee, Coltrin, and Glarborg's "Chemically Reacting Flow:Theory and Practice", John Wiley & Sons, 2003.
 
         k_sum1 += k[s]*chi[s];
 	k_sum2 += chi[s]/k[s];
@@ -582,23 +606,14 @@ namespace Antioch
         }
       case(MASS_FLUX_MASS_FRACTION):
         {
-         
-VectorStateType molar_fractions = zero_clone(mass_fractions);
-	  mixture.X(mixture.M(mass_fractions),mass_fractions,molar_fractions);
 
-          //Clipping unrealistic values, and calculating MW_Mixture through the new mole fractions 
-	  typename value_type<VectorStateType>::type MW_Mixture = zero_clone(mass_fractions[0]);
-	  for(unsigned int s=0; s < D_vec.size(); s++)
-	    {
-	      if(molar_fractions[s] > 1)
-		molar_fractions[s] = 1;
-	      if(molar_fractions[s] < 1e-16)
-		molar_fractions[s] = 1e-16;
-	      MW_Mixture += molar_fractions[s]*mixture.M(s);
-	    }
-	        
+          VectorStateType molar_fractions = zero_clone(mass_fractions);
+          typename value_type<VectorStateType>::type MW_Mixture = zero_clone(mass_fractions[0]);
+          MW_Mixture = mixture.M(mass_fractions);
+	  mixture.X(MW_Mixture,mass_fractions,molar_fractions);
+
           typename value_type<VectorStateType>::type one = constant_clone(mass_fractions[0],1);
-	
+
           //               term1               term2
           // 1/D_s = (sum_{j\ne s} X_j/D_{s,j}) + X_s/(1-Y_s)\sum_{j\ne s} Y_j/D_{s,j}
           for(unsigned int s = 0; s < D_vec.size(); s++)
@@ -629,6 +644,41 @@ VectorStateType molar_fractions = zero_clone(mass_fractions);
         }
       } // switch(diff_type)
   }
+
+  template<class Diff, class Visc, class TherCond, class CoeffType>
+  template <typename VectorStateType>
+  void MixtureAveragedTransportEvaluator<Diff,Visc,TherCond,CoeffType>::perturbed_molar_fractions( const ChemicalMixture<CoeffType> & mixture,
+                                                                                                   const VectorStateType & mass_fractions,
+                                                                                                   VectorStateType & perturbed_mass_fractions) const
+    {
+      // convenient
+      typedef typename value_type<VectorStateType>::type StateType;
+      VectorStateType perturbed_molar_fractions = zero_clone(mass_fractions);
+
+      mixture.X(mixture.M(mass_fractions),mass_fractions,perturbed_molar_fractions);
+
+      // EGlib uses eps = 1e-16
+      typename raw_value_type<StateType>::type eps(std::numeric_limits<StateType>::epsilon() * 10);
+      StateType mol_frac_sum = zero_clone(mass_fractions[0]);
+
+      // (i) evaluate the mixture molecular weight over the total number of species
+      for(unsigned int s = 0; s < perturbed_molar_fractions.size(); s++)
+        mol_frac_sum += perturbed_molar_fractions[s];
+      mol_frac_sum /= mixture.n_species();
+
+      // (ii) evaluate the perturbed mole fractions
+      // (iii) evaluate the perturbed mean molecular weight
+      StateType M_perturbed = zero_clone(perturbed_mass_fractions[0]);
+      for(unsigned int s =0; s < perturbed_molar_fractions.size(); s++)
+        {
+          perturbed_molar_fractions[s] += eps * (mol_frac_sum - perturbed_molar_fractions[s]);
+          M_perturbed += perturbed_molar_fractions[s] * mixture.M(s);
+        }
+
+      // (iv) Calculate the perturbed mass_fractions
+      for(unsigned int s=0; s < perturbed_molar_fractions.size(); s++)
+        perturbed_mass_fractions[s] = perturbed_molar_fractions[s]*mixture.M(s)/M_perturbed;
+    }
 
 } // end namespace Antioch
 
