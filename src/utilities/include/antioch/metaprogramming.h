@@ -74,7 +74,8 @@ T custom_clone(const T& /*example*/, const VectorScalar& values, unsigned int in
 
 template <typename T, typename VectorScalar>
 inline
-T custom_clone(const T& /*example*/, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes)
+typename enable_if_c<has_size<T>::value, T>::type
+custom_clone(const T& /*example*/, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes)
 {
   T returnval(indexes.size()); //bof bof - metaphysicl has size within type, this suppose that size_type<indexes>::type can be changed in value_type<T>::type
 
