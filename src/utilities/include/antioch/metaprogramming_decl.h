@@ -184,7 +184,8 @@ namespace Antioch
   // custom constants stored in vector
   template <typename T, typename VectorScalar>
   inline
-  T custom_clone(const T& example, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes);
+  typename enable_if_c<has_size<T>::value, T>::type
+  custom_clone(const T& example, const VectorScalar& values, const typename Antioch::rebind<T,unsigned int>::type & indexes);
 
   // A function for filling already-initialized vectorized numeric
   // types with a constant.
