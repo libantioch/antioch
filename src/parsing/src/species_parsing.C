@@ -63,17 +63,18 @@ namespace Antioch
       }
     if(fail)
       {
-        std::cerr << "Molecule(s) is(are) missing.  Please update the information."
-                  << "  Currently using file " << parser->file() << ".\n"
-                  << "Missing molecule(s) is(are):" << std::endl;
+        std::stringstream ss;
+        ss << "Molecule(s) is(are) missing.  Please update the information."
+           << "  Currently using file " << parser->file() << ".\n"
+           << "Missing molecule(s) is(are):" << std::endl;
         for(unsigned int i = 0; i < chem_mixture.species_list().size(); i++)
           {
             if(!chem_mixture.chemical_species()[i])
               {
-                std::cerr << chem_mixture.species_inverse_name_map().at(i) << std::endl;
+                ss << chem_mixture.species_inverse_name_map().at(i) << std::endl;
               }
           }
-        antioch_error();
+        antioch_error_msg(ss.str());
       }
   }
 
@@ -91,10 +92,14 @@ namespace Antioch
       }
     if(!missing.empty())
       {
-        std::cout << "WARNING:\nVibrational levels are missing.  Please update the information."
-                  << "  Currently using file " << parser->file() << ".\n"
-                  << "Missing molecule(s) is(are):" << std::endl;
-        for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
+        std::stringstream ss;
+        ss << "WARNING:\nVibrational levels are missing.  Please update the information."
+           << "  Currently using file " << parser->file() << ".\n"
+           << "Missing molecule(s) is(are):" << std::endl;
+        for(unsigned int m = 0; m < missing.size(); m++)
+          ss << missing[m] << std::endl;
+
+        antioch_warning(ss.str());
       }
   }
 
@@ -114,10 +119,14 @@ namespace Antioch
       }
     if(!missing.empty())
       {
-        std::cerr << "WARNING:\nElectronic levels are missing.  Please update the information."
-                  << "  Currently using file " << parser->file() << ".\n"
-                  << "Missing molecule(s) is(are):" << std::endl;
-        for(unsigned int m = 0; m < missing.size(); m++)std::cerr << missing[m] << std::endl;
+        std::stringstream ss;
+        ss << "WARNING:\nElectronic levels are missing.  Please update the information."
+           << "  Currently using file " << parser->file() << ".\n"
+           << "Missing molecule(s) is(are):" << std::endl;
+        for(unsigned int m = 0; m < missing.size(); m++)
+          ss << missing[m] << std::endl;
+
+        antioch_warning(ss.str());
       }
   }
 
