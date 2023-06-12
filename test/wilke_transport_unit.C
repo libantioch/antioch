@@ -276,7 +276,7 @@ int tester()
 */
 
   const Scalar mu_kt_long_double   = 4.49877527305932602332e-05L;
-  const Scalar k_kt_long_double    = 8.22050332419571328635e-02L;
+  const Scalar k_kt_long_double    = 8.27884568936580333168e-02L;
 
   std::vector<Scalar> D_kt_long_double(5,0);
   D_kt_long_double[0] = 1.95418749838889089562e-04L;
